@@ -289,7 +289,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
     let s:vertsplit    = '181a1f'
     let s:special_grey = '3b4048'
     let s:visual_grey  = '3e4452'
-    let s:pmenu        = '333333'
+    let s:pmenu        = '4a4a4a'
   else
     let s:mono_1 = '494b53'
     let s:mono_2 = '696c77'

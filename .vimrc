@@ -11,29 +11,47 @@ let g:airline_theme='onedark'
 let mapleader=';'
 nnoremap 0 ^
 nnoremap - $
-nnoremap <F2> gT
-nnoremap <F3> gt
-nnoremap <F4> *
-nnoremap <C-l> :noh<CR>
 imap <F1> <C-o><F1>
 nnoremap <F1> :w!<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
+nnoremap <F2> gT
+nnoremap <F3> gt
+nnoremap <F4> *
+imap <F5> <Esc><F5>
+nnoremap <F5> :wincmd w<CR>
 imap <F12> <C-o><F12>
 nnoremap <F12> :set paste! <bar> set number!<CR>
+nnoremap <C-l> :noh<CR>
+nnoremap <C-n> :NERDTreeToggle<CR>
 imap <C-S-f> <C-o><C-S-f>
 nnoremap <C-S-f> :Autoformat<CR>
-nnoremap <C-n> :NERDTreeToggle<CR>
+
+" fold code
+set foldmethod=indent
+set foldlevel=99
+let g:FoldMethod = 0
+map <F6> :call ToggleFold()<cr>
+function! ToggleFold()
+    if g:FoldMethod == 0
+        exe "normal! zM"
+        let g:FoldMethod = 1
+    else
+        exe "normal! zR"
+        let g:FoldMethod = 0
+    endif
+endfun
 
 " disable auto comment, run code
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-imap <F10> <Esc><F10>
+" imap <F10> <Esc><F10>
+" autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
+" autocmd FileType c nnoremap <buffer> <F10> :update<bar>!clear && gcc % -g && ./a.out<CR>
+" autocmd FileType java nnoremap <buffer> <F10> :update<bar>!clear && javac % && java %<<CR>
 imap <F11> <Esc><F11>
-autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
-autocmd FileType c nnoremap <buffer> <F10> :update<bar>!clear && gcc % -g && ./a.out<CR>
-autocmd FileType java nnoremap <buffer> <F11> :update<bar>!clear && javac % && java %<<CR>
 autocmd FileType python nnoremap <buffer> <F11> :update<bar>call RunShellCommand('python %')<CR>
 autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -g && ./a.out')<CR>
+autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('javac % && java %<')<CR>
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
 function! RunShellCommand(cmdline)
     let expanded_cmdline = a:cmdline
@@ -48,6 +66,7 @@ function! RunShellCommand(cmdline)
     nnoremap <buffer> <Space> :q<CR>
     call setline(1, 'Run: ' .expanded_cmdline)
     call setline(2, substitute(getline(1),'.','=','g'))
+    execute "resize " . (winheight(0) * 4/5)
     execute '$read !'. expanded_cmdline
     setlocal nomodifiable
     1
@@ -59,8 +78,11 @@ endfunction
 " neocomplcache for autocomplete, snippets
 set omnifunc=syntaxcomplete#Complete
 set completeopt=menuone,menu,longest,preview
+set previewheight=2
 let g:neocomplcache_enable_at_startup = 1
-let g:neocomplcache_enable_smart_case = 1
+" let g:neocomplcache_enable_smart_case = 1
+let g:neocomplcache_enable_ignore_case = 1
+let g:neocomplcache_enable_fuzzy_completion = 1
 let g:neocomplcache_enable_camel_case_completion = 1
 let g:neocomplcache_enable_quick_match = 1
 inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>" . "\<C-u>"
@@ -82,7 +104,7 @@ smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expan
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-let NERDTreeWinSize=18
+let NERDTreeWinSize=23
 " let NERDTreeShowHidden=1
 
 " ===================== basic configurations ========================
