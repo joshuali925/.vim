@@ -26,7 +26,7 @@ nnoremap <C-l> :noh<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
 imap <C-S-f> <C-o><C-S-f>
 nnoremap <C-S-f> :Autoformat<CR>
-nnoremap <leader><Leader> :w!<CR>
+nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>wq :wq<CR>
 nnoremap <leader>com o=======================================================<Esc>:Commentary<CR>
