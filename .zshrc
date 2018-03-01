@@ -59,7 +59,7 @@ COMPLETION_WAITING_DOTS="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git
+git
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -73,7 +73,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
+export EDITOR='vim'
 # else
 #   export EDITOR='mvim'
 # fi
@@ -97,6 +97,9 @@ alias ll='ls -alF'
 alias la='ls -aF'
 alias l='ls -CF'
 alias b='cd -'
+
+alias -s py='vim'
+alias -s c='vim'
 
 function search { find . -iname *$@*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }

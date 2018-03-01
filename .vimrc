@@ -13,9 +13,9 @@ nnoremap 0 ^
 nnoremap - $
 imap <F1> <C-o><F1>
 nnoremap <F1> :w!<CR>
-imap <F2> <Esc><F2> 
+imap <F2> <Esc><F2>
 nnoremap <F2> gT
-imap <F3> <Esc><F3> 
+imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *
 imap <F5> <Esc><F5>
@@ -28,7 +28,6 @@ imap <C-S-f> <C-o><C-S-f>
 nnoremap <C-S-f> :Autoformat<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
-nnoremap <leader>wq :wq<CR>
 nnoremap <leader>com o=======================================================<Esc>:Commentary<CR>
 
 " ====================== fold code ======================
@@ -54,17 +53,20 @@ autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 " autocmd FileType java nnoremap <buffer> <F10> :update<bar>!clear && javac % && java %<<CR>
 imap <F11> <Esc><F11>
 autocmd FileType python nnoremap <buffer> <F11> :update<bar>call RunShellCommand('python %')<CR>
-autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -g && ./a.out')<CR>
+autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -g -o %< && ./%<')<CR>
 autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('javac % && java %<')<CR>
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
 function! RunShellCommand(cmdline)
     let expanded_cmdline = a:cmdline
-    for part in split(a:cmdline, ' ')
-        if part[0] =~ '\v[%#<]'
-            let expanded_part = fnameescape(expand(part))
-            let expanded_cmdline = substitute(expanded_cmdline, part, expanded_part, '')
-        endif
-    endfor
+    " for part in split(a:cmdline, ' ')
+    "     if part[0] =~ '\v[%#<]'
+    "         let expanded_part = fnameescape(expand(part))
+    "         let expanded_cmdline = substitute(expanded_cmdline, part, expanded_part, '')
+    "     endif
+    " endfor
+    let expanded_cmdline = substitute(expanded_cmdline, './%<', './'. fnameescape(expand('%<')), '')
+    let expanded_cmdline = substitute(expanded_cmdline, '%<', fnameescape(expand('%<')), '')
+    let expanded_cmdline = substitute(expanded_cmdline, '%', fnameescape(expand('%')), '')
     botright new
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile wrap
     nnoremap <buffer> <Space> :q<CR>
@@ -75,9 +77,6 @@ function! RunShellCommand(cmdline)
     setlocal nomodifiable
     1
 endfunction
-
-
-
 
 " ====== neocomplcache for autocomplete, snippets =======
 set omnifunc=syntaxcomplete#Complete
@@ -107,7 +106,7 @@ smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expan
 " =NERDTree open if empty file, close if is the only tab=
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let NERDTreeWinSize=23
 " let NERDTreeShowHidden=1
 
@@ -117,6 +116,7 @@ filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
+autocmd BufEnter * silent! lcd %:p:h
 set number
 set numberwidth=4
 set wrap
