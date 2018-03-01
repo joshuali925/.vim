@@ -13,9 +13,9 @@ nnoremap 0 ^
 nnoremap - $
 imap <F1> <C-o><F1>
 nnoremap <F1> :w!<CR>
-nnoremap <leader>w :w!<CR>
-nnoremap <leader>q :q<CR>
+imap <F2> <Esc><F2> 
 nnoremap <F2> gT
+imap <F3> <Esc><F3> 
 nnoremap <F3> gt
 nnoremap <F4> *
 imap <F5> <Esc><F5>
@@ -26,12 +26,16 @@ nnoremap <C-l> :noh<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
 imap <C-S-f> <C-o><C-S-f>
 nnoremap <C-S-f> :Autoformat<CR>
+nnoremap <leader><Leader> :w!<CR>
+nnoremap <leader>q :q<CR>
+nnoremap <leader>wq :wq<CR>
+nnoremap <leader>com o=======================================================<Esc>:Commentary<CR>
 
-" fold code
+" ====================== fold code ======================
 set foldmethod=indent
 set foldlevel=99
 let g:FoldMethod = 0
-map <F6> :call ToggleFold()<cr>
+nnoremap <F6> :call ToggleFold()<cr>
 function! ToggleFold()
     if g:FoldMethod == 0
         exe "normal! zM"
@@ -42,7 +46,7 @@ function! ToggleFold()
     endif
 endfun
 
-" disable auto comment, run code
+" ========== disable auto comment, run code =============
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 " imap <F10> <Esc><F10>
 " autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
@@ -75,7 +79,7 @@ endfunction
 
 
 
-" neocomplcache for autocomplete, snippets
+" ====== neocomplcache for autocomplete, snippets =======
 set omnifunc=syntaxcomplete#Complete
 set completeopt=menuone,menu,longest,preview
 set previewheight=2
@@ -100,14 +104,14 @@ imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ?
 smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 
 
-"NERDTree open if empty file, close if is the only tab
+" =NERDTree open if empty file, close if is the only tab=
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let NERDTreeWinSize=23
 " let NERDTreeShowHidden=1
 
-" ===================== basic configurations ========================
+" ======================= basics ========================
 filetype on
 filetype indent on
 filetype plugin on
@@ -127,6 +131,7 @@ set splitbelow
 set splitright
 set scrolloff=2
 set mouse=nv
+set backspace=eol,start,indent
 set autoread
 set history=500
 set lazyredraw
