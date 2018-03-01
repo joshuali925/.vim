@@ -1,4 +1,5 @@
 # .bashrc
+[ -t 1 ] && exec zsh
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
@@ -13,8 +14,8 @@ shopt -s autocd
 shopt -s cdspell
 
 alias ll='ls -alF'
-alias l='ls -F'
 alias la='ls -aF'
+alias l='ls -CF'
 alias b='cd -'
 alias ..='cd ..'
 alias ...='cd ../..'
