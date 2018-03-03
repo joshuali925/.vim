@@ -39,7 +39,7 @@ ZSH_THEME="robbyrussell"
 ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
-COMPLETION_WAITING_DOTS="true"
+# COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
 # under VCS as dirty. This makes repository status check for large repositories
@@ -73,7 +73,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
-export EDITOR='vim'
+#   export EDITOR='vim'
 # else
 #   export EDITOR='mvim'
 # fi
@@ -97,10 +97,11 @@ alias ll='ls -alF'
 alias la='ls -aF'
 alias l='ls -CF'
 alias b='cd -'
+alias astyle='~/.vim/astyle'
 
 alias -s py='vim'
 alias -s c='vim'
+alias -s java='vim'
 
 function search { find . -iname *$@*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
-function cd { builtin cd $@ && ls -F; }

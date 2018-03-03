@@ -30,6 +30,11 @@ nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>com o=======================================================<Esc>:Commentary<CR>
 
+" ======================= format ========================
+autocmd FileType c,java nnoremap <buffer> <leader>f :update<bar>silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null"<bar>:edit!<bar>:redraw!<CR>
+" autocmd FileType python nnoremap <buffer> <leader>f :update<bar>silent exec "!python ~/.vim/autopep8.py % --in-place"<bar>:edit!<bar>:redraw!<CR>
+
+
 " ====================== fold code ======================
 set foldmethod=indent
 set foldlevel=99
@@ -47,13 +52,13 @@ endfun
 
 " ========== disable auto comment, run code =============
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-" imap <F10> <Esc><F10>
-" autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
-" autocmd FileType c nnoremap <buffer> <F10> :update<bar>!clear && gcc % -g && ./a.out<CR>
-" autocmd FileType java nnoremap <buffer> <F10> :update<bar>!clear && javac % && java %<<CR>
+imap <F10> <Esc><F10>
+autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
+autocmd FileType c nnoremap <buffer> <F10> :update<bar>!clear && gcc % -o %< -g && ./%<<CR>
+autocmd FileType java nnoremap <buffer> <F10> :update<bar>!clear && javac % && java %<<CR>
 imap <F11> <Esc><F11>
 autocmd FileType python nnoremap <buffer> <F11> :update<bar>call RunShellCommand('python %')<CR>
-autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -g -o %< && ./%<')<CR>
+autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -o %< -g && ./%<')<CR>
 autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('javac % && java %<')<CR>
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
 function! RunShellCommand(cmdline)
@@ -108,7 +113,7 @@ autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let NERDTreeWinSize=23
-" let NERDTreeShowHidden=1
+let NERDTreeShowHidden=1
 
 " ======================= basics ========================
 filetype on
