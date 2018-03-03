@@ -1,4 +1,17 @@
-execute pathogen#infect()
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'scrooloose/nerdtree'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'tpope/vim-commentary'
+Plugin 'chiel92/vim-autoformat'
+Plugin 'chun-yang/auto-pairs'
+Plugin 'shougo/neocomplcache.vim'
+Plugin 'shougo/neosnippet.vim'
+Plugin 'honza/vim-snippets'
+call vundle#end()
+
 set t_Co=256
 let g:airline#extensions#tabline#enabled=1
 set laststatus=2
