@@ -1,20 +1,18 @@
 " ===================== Plugins =========================
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'scrooloose/nerdtree'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
-Plugin 'tpope/vim-commentary'
-Plugin 'chiel92/vim-autoformat'
-Plugin 'chun-yang/auto-pairs'
-Plugin 'tpope/vim-surround'
-Plugin 'lfilho/cosco.vim'
-Plugin 'shougo/neocomplcache.vim'
-Plugin 'shougo/neosnippet.vim'
-Plugin 'honza/vim-snippets'
-call vundle#end()
+call plug#begin('~/.vim/plugged')
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'tpope/vim-commentary'
+Plug 'chiel92/vim-autoformat'
+Plug 'chun-yang/auto-pairs'
+Plug 'tpope/vim-surround'
+Plug 'lfilho/cosco.vim'
+Plug 'shougo/neocomplcache.vim'
+Plug 'shougo/neosnippet.vim'
+Plug 'honza/vim-snippets'
+call plug#end()
 
 " ===================== Themes ==========================
 set t_Co=256
@@ -126,8 +124,6 @@ smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expan
 
 
 " ================== NERDTree, ctrlp ====================
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let NERDTreeWinSize=23
 let NERDTreeShowHidden=1
