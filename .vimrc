@@ -37,11 +37,15 @@ imap <F5> <Esc><F5>
 nnoremap <F5> :wincmd w<CR>
 imap <F12> <C-o><F12>
 nnoremap <F12> :set paste! <bar> set number! <bar> set relativenumber!<CR>
-nnoremap <C-l> :nohlsearch<CR>
+inoremap <C-l> <C-o>:stopinsert<CR>
+nnoremap <C-l> :let @/=""<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
 imap <C-S-f> <C-o><C-S-f>
 nnoremap <C-S-f> :Autoformat<CR>
 inoremap ;; <Esc>:CommaOrSemiColon<CR>$
+inoremap <C-b> <C-o>b
+inoremap <C-w> <C-o>w
+inoremap <C-e> <C-o>e
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>com o=======================================================<Esc>:Commentary<CR>
@@ -80,12 +84,6 @@ autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
 function! RunShellCommand(cmdline)
     let expanded_cmdline = a:cmdline
-    " for part in split(a:cmdline, ' ')
-    "     if part[0] =~ '\v[%#<]'
-    "         let expanded_part = fnameescape(expand(part))
-    "         let expanded_cmdline = substitute(expanded_cmdline, part, expanded_part, '')
-    "     endif
-    " endfor
     let expanded_cmdline = substitute(expanded_cmdline, './%<', './'. fnameescape(expand('%<')), '')
     let expanded_cmdline = substitute(expanded_cmdline, '%<', fnameescape(expand('%<')), '')
     let expanded_cmdline = substitute(expanded_cmdline, '%', fnameescape(expand('%')), '')
@@ -97,6 +95,7 @@ function! RunShellCommand(cmdline)
     execute "resize " . (winheight(0) * 4/5)
     execute '$read !'. expanded_cmdline
     setlocal nomodifiable
+    setlocal norelativenumber
     1
 endfunction
 
@@ -115,7 +114,7 @@ inoremap <expr><C-x>  pumvisible() ? neocomplcache#cancel_popup() : "\<C-x>"
 inoremap <expr><CR> pumvisible() ? neocomplcache#smart_close_popup() : "\<CR>"
 let g:neosnippet#disable_runtime_snippets = { '_' : 1 }
 let g:neosnippet#enable_snipmate_compatibility = 1
-let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+let g:neosnippet#snippets_directory='~/.vim/plugged/vim-snippets/snippets'
 imap <C-k> <Plug>(neosnippet_expand_or_jump)
 smap <C-k> <Plug>(neosnippet_expand_or_jump)
 xmap <C-k> <Plug>(neosnippet_expand_target)

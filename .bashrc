@@ -20,6 +20,6 @@ exec zsh
 # alias ..='cd ..'
 # alias ...='cd ../..'
 # alias ....='cd ../../..'
-# function search { find . -iname *$@*; }
+# function f { find . -iname *$@*; }
 # function cc { gcc $1.c -o $1 -g && ./$@; }
 # function cd { builtin cd $@ && ls -F; }
