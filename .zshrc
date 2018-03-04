@@ -96,12 +96,11 @@ alias vi='vim'
 alias ll='ls -alF'
 alias la='ls -aF'
 alias l='ls -CF'
-alias b='cd -'
 alias astyle='~/.vim/astyle'
 
 alias -s py='vim'
 alias -s c='vim'
 alias -s java='vim'
 
-function search { find . -iname *$@*; }
+function search { find . -iname \*$1\*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
