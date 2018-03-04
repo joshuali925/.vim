@@ -102,5 +102,5 @@ alias -s py='vim'
 alias -s c='vim'
 alias -s java='vim'
 
-function search { find . -iname \*$1\*; }
+function f { find . -iname \*$1\*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
