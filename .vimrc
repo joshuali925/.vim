@@ -1,26 +1,30 @@
+" ===================== Plugins =========================
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'scrooloose/nerdtree'
+Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'tpope/vim-commentary'
 Plugin 'chiel92/vim-autoformat'
 Plugin 'chun-yang/auto-pairs'
+Plugin 'tpope/vim-surround'
+Plugin 'lfilho/cosco.vim'
 Plugin 'shougo/neocomplcache.vim'
 Plugin 'shougo/neosnippet.vim'
 Plugin 'honza/vim-snippets'
 call vundle#end()
 
+" ===================== Themes ==========================
 set t_Co=256
-let g:airline#extensions#tabline#enabled=1
 set laststatus=2
-
-colorscheme one
 set background=dark
+colorscheme one
+let g:airline#extensions#tabline#enabled=1
 let g:airline_theme='onedark'
 
-" ======================== shortcuts ======================
+" ====================== Shortcuts ======================
 let mapleader=';'
 nnoremap 0 ^
 nnoremap - $
@@ -34,21 +38,24 @@ nnoremap <F4> *
 imap <F5> <Esc><F5>
 nnoremap <F5> :wincmd w<CR>
 imap <F12> <C-o><F12>
-nnoremap <F12> :set paste! <bar> set number!<CR>
-nnoremap <C-l> :noh<CR>
+nnoremap <F12> :set paste! <bar> set number! <bar> set relativenumber!<CR>
+nnoremap <C-l> :nohlsearch<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
 imap <C-S-f> <C-o><C-S-f>
 nnoremap <C-S-f> :Autoformat<CR>
+inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>com o=======================================================<Esc>:Commentary<CR>
+vnoremap < <gv
+vnoremap > >gv
 
-" ======================= format ========================
+" ======================= Format ========================
 autocmd FileType c,java nnoremap <buffer> <leader>f :update<bar>silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null"<bar>:edit!<bar>:redraw!<CR>
 " autocmd FileType python nnoremap <buffer> <leader>f :update<bar>silent exec "!python ~/.vim/autopep8.py % --in-place"<bar>:edit!<bar>:redraw!<CR>
 
 
-" ====================== fold code ======================
+" ====================== Fold code ======================
 set foldmethod=indent
 set foldlevel=99
 let g:FoldMethod = 0
@@ -63,8 +70,7 @@ function! ToggleFold()
     endif
 endfun
 
-" ========== disable auto comment, run code =============
-autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+" ==================== Execute code =====================
 imap <F10> <Esc><F10>
 autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
 autocmd FileType c nnoremap <buffer> <F10> :update<bar>!clear && gcc % -o %< -g && ./%<<CR>
@@ -96,12 +102,11 @@ function! RunShellCommand(cmdline)
     1
 endfunction
 
-" ====== neocomplcache for autocomplete, snippets =======
+" =================== Neocomplcache =====================
 set omnifunc=syntaxcomplete#Complete
 set completeopt=menuone,menu,longest,preview
 set previewheight=2
 let g:neocomplcache_enable_at_startup = 1
-" let g:neocomplcache_enable_smart_case = 1
 let g:neocomplcache_enable_ignore_case = 1
 let g:neocomplcache_enable_fuzzy_completion = 1
 let g:neocomplcache_enable_camel_case_completion = 1
@@ -110,7 +115,6 @@ inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>" . "\<C-u>"
 inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
 inoremap <expr><C-x>  pumvisible() ? neocomplcache#cancel_popup() : "\<C-x>"
 inoremap <expr><CR> pumvisible() ? neocomplcache#smart_close_popup() : "\<CR>"
-" neosnippet
 let g:neosnippet#disable_runtime_snippets = { '_' : 1 }
 let g:neosnippet#enable_snipmate_compatibility = 1
 let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
@@ -121,21 +125,29 @@ imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ?
 smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 
 
-" =NERDTree open if empty file, close if is the only tab=
+" ================== NERDTree, ctrlp ====================
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let NERDTreeWinSize=23
 let NERDTreeShowHidden=1
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
+let g:ctrlp_custom_ignore = 'tmp$\|\.git$\|\.hg$\|\.svn$\|.rvm$|.bundle$\|vendor'
+let g:ctrlp_cache_dir = '~/.cache/ctrlp'
+let g:ctrlp_clear_cache_on_exit=0
+let g:ctrlp_show_hidden = 1
 
-" ======================= basics ========================
+" ======================= Basics ========================
 filetype on
 filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
+" set working directory
 autocmd BufEnter * silent! lcd %:p:h
-set number
+set number relativenumber
+autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
 set numberwidth=4
 set wrap
 set linebreak
@@ -147,7 +159,7 @@ set ruler
 set wildmenu
 set splitbelow
 set splitright
-set scrolloff=2
+set scrolloff=5
 set mouse=nv
 set backspace=eol,start,indent
 set autoread
@@ -164,6 +176,7 @@ set expandtab
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 set hlsearch
 set incsearch
