@@ -7,7 +7,9 @@ export ZSH=/ilab/users/jl2052/.oh-my-zsh
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="robbyrussell"
+# ZSH_THEME="random"
+# ZSH_THEME="robbyrussell"
+ZSH_THEME="ys"
 
 # Set list of themes to load
 # Setting this variable when ZSH_THEME=random
@@ -60,6 +62,7 @@ ENABLE_CORRECTION="true"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
 git
+zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -92,6 +95,7 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
 alias vi='vim'
 alias ll='ls -alF'
 alias la='ls -aF'
@@ -104,3 +108,7 @@ alias -s java='vim'
 
 function f { find . -iname \*$1\*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
+function chpwd() { emulate -L zsh; ls -CF; }
+
+bindkey '^ ' autosuggest-accept
+bindkey '^x' autosuggest-clear
