@@ -16,7 +16,6 @@ call plug#end()
 
 " ===================== Themes ==========================
 set t_Co=256
-set laststatus=2
 set background=dark
 colorscheme one
 let g:airline#extensions#tabline#enabled=1
@@ -24,21 +23,31 @@ let g:airline_theme='onedark'
 
 " ====================== Shortcuts ======================
 let mapleader=';'
+nmap <leader>1 <F1>
+nmap <leader>2 <F2>
+nmap <leader>3 <F3>
+nmap <leader>4 <F4>
+nmap <leader>5 <F5>
+nmap <leader>6 <F6>
+nmap <leader>7 <F7>
+nmap <leader>8 <F8>
+nmap <leader>9 <F9>
+nmap <leader>0 <F10>
+nmap <leader>- <F11>
+nmap <leader>= <F12>
 nnoremap 0 ^
 nnoremap - $
-imap <F1> <C-o><F1>
-nnoremap <F1> :w!<CR>
+imap <F1> <Esc><F1>
+nnoremap <F1> :wincmd w<CR>
 imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *
-imap <F5> <Esc><F5>
-nnoremap <F5> :wincmd w<CR>
 imap <F12> <C-o><F12>
 nnoremap <F12> :set paste! <bar> set number! <bar> set relativenumber!<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
-nnoremap <C-l> :let @/=""<CR>
+nnoremap <C-l> :noh <bar> let @/=""<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
 imap <C-S-f> <C-o><C-S-f>
 nnoremap <C-S-f> :Autoformat<CR>
@@ -56,7 +65,6 @@ vnoremap > >gv
 autocmd FileType c,java nnoremap <buffer> <leader>f :update<bar>silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null"<bar>:edit!<bar>:redraw!<CR>
 " autocmd FileType python nnoremap <buffer> <leader>f :update<bar>silent exec "!python ~/.vim/autopep8.py % --in-place"<bar>:edit!<bar>:redraw!<CR>
 
-
 " ====================== Fold code ======================
 set foldmethod=indent
 set foldlevel=99
@@ -70,17 +78,18 @@ function! ToggleFold()
         exe "normal! zR"
         let g:FoldMethod = 0
     endif
-endfun
+endfunction
 
 " ==================== Execute code =====================
-imap <F10> <Esc><F10>
-autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
-autocmd FileType c nnoremap <buffer> <F10> :update<bar>!clear && gcc % -o %< -g && ./%<<CR>
-autocmd FileType java nnoremap <buffer> <F10> :update<bar>!clear && javac % && java %<<CR>
-imap <F11> <Esc><F11>
-autocmd FileType python nnoremap <buffer> <F11> :update<bar>call RunShellCommand('python %')<CR>
-autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -o %< -g && ./%<')<CR>
-autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('javac % && java %<')<CR>
+let b:args = ''
+command! -nargs=* SetArgs call SetArgs(<q-args>)
+function! SetArgs(cmdline)
+    if a:cmdline == ''
+        let b:args = ''
+    else
+        let b:args = ' '. a:cmdline
+    endif
+endfunction
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
 function! RunShellCommand(cmdline)
     let expanded_cmdline = a:cmdline
@@ -88,16 +97,25 @@ function! RunShellCommand(cmdline)
     let expanded_cmdline = substitute(expanded_cmdline, '%<', fnameescape(expand('%<')), '')
     let expanded_cmdline = substitute(expanded_cmdline, '%', fnameescape(expand('%')), '')
     botright new
-    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile wrap
+    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap
     nnoremap <buffer> <Space> :q<CR>
-    call setline(1, 'Run: ' .expanded_cmdline)
-    call setline(2, substitute(getline(1),'.','=','g'))
-    execute "resize " . (winheight(0) * 4/5)
+    call setline(1, 'Run: '. expanded_cmdline)
+    call setline(2, substitute(getline(1), '.', '=', 'g'))
+    execute "resize ". (winheight(0) * 4/5)
     execute '$read !'. expanded_cmdline
     setlocal nomodifiable
-    setlocal norelativenumber
-    1
 endfunction
+imap <F10> <Esc><F10>
+imap <F11> <Esc><F11>
+augroup run_code
+    autocmd!
+    autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
+    autocmd FileType c nnoremap <buffer> <F10> :update<bar>!clear && gcc % -o %< -g && ./%<<CR>
+    autocmd FileType java nnoremap <buffer> <F10> :update<bar>!clear && javac % && java %<<CR>
+    autocmd FileType python nnoremap <buffer> <F11> :update<bar>call RunShellCommand('python %'. b:args)<CR>
+    autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
+    autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('javac % && java %<'. b:args)<CR>
+augroup END
 
 " =================== Neocomplcache =====================
 set omnifunc=syntaxcomplete#Complete
@@ -138,12 +156,15 @@ filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
-" set working directory
-autocmd BufEnter * silent! lcd %:p:h
-set number relativenumber
-autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
 set numberwidth=4
+set number relativenumber
+augroup linenum_currdir_comment
+    autocmd!
+    autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+    autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
+    autocmd BufEnter * silent! lcd %:p:h
+    autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+augroup END
 set wrap
 set linebreak
 set showcmd
@@ -152,8 +173,9 @@ set showmode
 set title
 set ruler
 set wildmenu
-set splitbelow
+set laststatus=2
 set splitright
+set splitbelow
 set scrolloff=5
 set mouse=nv
 set backspace=eol,start,indent
@@ -171,12 +193,14 @@ set expandtab
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
-autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 set hlsearch
 set incsearch
 set ignorecase
 set smartcase
 
-map <leader>vim :tabe ~/.vimrc<CR>
-autocmd bufwritepost .vimrc source $MYVIMRC
+map <leader>vim :tabe $MYVIMRC<CR>
+augroup auto_source
+    autocmd!
+    autocmd bufwritepost $MYVIMRC source $MYVIMRC
+augroup END
