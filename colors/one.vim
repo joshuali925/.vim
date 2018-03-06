@@ -286,7 +286,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
 
     let s:syntax_accent = '56b6c2'
 
-    let s:vertsplit    = '181a1f'
+    let s:vertsplit    = '333333'
     let s:special_grey = '3b4048'
     let s:visual_grey  = '3e4452'
     let s:pmenu        = '4a4a4a'
@@ -330,10 +330,10 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   call <sid>X('bold',         '',              '',               'bold')
   call <sid>X('ColorColumn',  '',              s:syntax_cursor,  '')
   call <sid>X('Conceal',      s:mono_4,        s:syntax_bg,      '')
-  call <sid>X('Cursor',       '',              s:syntax_accent,  '')
+  call <sid>X('Cursor',       s:dark,          s:syntax_bg,      '')
   call <sid>X('CursorIM',     '',              '',               '')
-  call <sid>X('CursorColumn', '',              s:syntax_cursor,  '')
-  call <sid>X('CursorLine',   '',              s:syntax_cursor,  'none')
+  call <sid>X('CursorColumn', '',              s:vertsplit,      '')
+  call <sid>X('CursorLine',   '',              s:vertsplit,      'none')
   call <sid>X('Directory',    s:hue_2,         '',               '')
   call <sid>X('ErrorMsg',     s:hue_5,         s:syntax_bg,      'none')
   call <sid>X('VertSplit',    s:vertsplit,     '',               'none')
@@ -341,7 +341,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   call <sid>X('FoldColumn',   s:mono_3,        s:syntax_cursor,  '')
   call <sid>X('IncSearch',    s:hue_6,         '',               '')
   call <sid>X('LineNr',       s:mono_4,        '',               '')
-  call <sid>X('CursorLineNr', s:syntax_fg,     s:syntax_cursor,  'none')
+  call <sid>X('CursorLineNr', 'eeeeff',        s:vertsplit,      'none')
   call <sid>X('MatchParen',   s:hue_5,         s:syntax_cursor,  'underline,bold')
   call <sid>X('Italic',       '',              '',               'italic')
   call <sid>X('ModeMsg',      s:syntax_fg,     '',               '')

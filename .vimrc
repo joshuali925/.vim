@@ -5,10 +5,10 @@ Plug 'ctrlpvim/ctrlp.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'tpope/vim-commentary'
-Plug 'chiel92/vim-autoformat'
+Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'chun-yang/auto-pairs'
 Plug 'tpope/vim-surround'
-Plug 'lfilho/cosco.vim'
+Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'shougo/neocomplcache.vim'
 Plug 'shougo/neosnippet.vim'
 Plug 'honza/vim-snippets'
@@ -46,11 +46,14 @@ nnoremap <F3> gt
 nnoremap <F4> *
 imap <F12> <C-o><F12>
 nnoremap <F12> :set paste! <bar> set number! <bar> set relativenumber!<CR>
+inoremap <C-c> <C-o>:stopinsert<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
 nnoremap <C-l> :noh <bar> let @/=""<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
-imap <C-S-f> <C-o><C-S-f>
-nnoremap <C-S-f> :Autoformat<CR>
+imap <C-f> <C-o><C-f>
+nnoremap <C-f> :Autoformat<CR>
+imap <C-g> <C-o><C-g>
+nnoremap <C-g> :%s/\(\n\n\)\n\+/\1/<CR>
 inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 inoremap <C-b> <C-o>b
 inoremap <C-w> <C-o>w
@@ -82,7 +85,7 @@ endfunction
 
 " ==================== Execute code =====================
 let b:args = ''
-command! -nargs=* SetArgs call SetArgs(<q-args>)
+command! -complete=file -nargs=* SetArgs call SetArgs(<q-args>)
 function! SetArgs(cmdline)
     if a:cmdline == ''
         let b:args = ''
@@ -109,9 +112,9 @@ imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
 augroup run_code
     autocmd!
-    autocmd FileType python nnoremap <buffer> <F10> :update<bar>!clear && python %<CR>
-    autocmd FileType c nnoremap <buffer> <F10> :update<bar>!clear && gcc % -o %< -g && ./%<<CR>
-    autocmd FileType java nnoremap <buffer> <F10> :update<bar>!clear && javac % && java %<<CR>
+    autocmd FileType python nnoremap <buffer> <F10> :update<bar>exec '!clear && python %'. b:args<CR>
+    autocmd FileType c nnoremap <buffer> <F10> :update<bar>exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType java nnoremap <buffer> <F10> :update<bar>exec '!clear && javac % && java %<'. b:args<CR>
     autocmd FileType python nnoremap <buffer> <F11> :update<bar>call RunShellCommand('python %'. b:args)<CR>
     autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
     autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('javac % && java %<'. b:args)<CR>
@@ -138,7 +141,6 @@ smap <C-k> <Plug>(neosnippet_expand_or_jump)
 xmap <C-k> <Plug>(neosnippet_expand_target)
 imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-
 
 " ================== NERDTree, ctrlp ====================
 autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
@@ -178,6 +180,7 @@ set splitright
 set splitbelow
 set scrolloff=5
 set mouse=nv
+set cursorline
 set backspace=eol,start,indent
 set autoread
 set history=500
