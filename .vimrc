@@ -4,6 +4,8 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'tpope/vim-fugitive'
+Plug 'easymotion/vim-easymotion'
 Plug 'tpope/vim-commentary'
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'chun-yang/auto-pairs'
@@ -35,8 +37,6 @@ nmap <leader>9 <F9>
 nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
-nnoremap 0 ^
-nnoremap - $
 imap <F1> <Esc><F1>
 nnoremap <F1> :wincmd w<CR>
 imap <F2> <Esc><F2>
@@ -46,6 +46,7 @@ nnoremap <F3> gt
 nnoremap <F4> *
 imap <F12> <C-o><F12>
 nnoremap <F12> :set paste! <bar> set number! <bar> set relativenumber!<CR>
+inoremap <Esc> <C-o>:stopinsert<CR>
 inoremap <C-c> <C-o>:stopinsert<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
 nnoremap <C-l> :noh <bar> let @/=""<CR>
@@ -55,18 +56,74 @@ nnoremap <C-f> :Autoformat<CR>
 imap <C-g> <C-o><C-g>
 nnoremap <C-g> :%s/\(\n\n\)\n\+/\1/<CR>
 inoremap ;; <Esc>:CommaOrSemiColon<CR>$
+nnoremap 0 ^
+nnoremap - $
+vnoremap < <gv
+vnoremap > >gv
+inoremap <C-j> <C-o>A
 inoremap <C-b> <C-o>b
 inoremap <C-w> <C-o>w
 inoremap <C-e> <C-o>e
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>com o=======================================================<Esc>:Commentary<CR>
-vnoremap < <gv
-vnoremap > >gv
 
-" ======================= Format ========================
-autocmd FileType c,java nnoremap <buffer> <leader>f :update<bar>silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null"<bar>:edit!<bar>:redraw!<CR>
-" autocmd FileType python nnoremap <buffer> <leader>f :update<bar>silent exec "!python ~/.vim/autopep8.py % --in-place"<bar>:edit!<bar>:redraw!<CR>
+" ======================= Basics ========================
+filetype on
+filetype indent on
+filetype plugin on
+filetype plugin indent on
+syntax enable
+set numberwidth=4
+set number relativenumber
+set mouse=nv
+set cursorline
+set backspace=eol,start,indent
+augroup linenum_currdir_comment
+    autocmd!
+    autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+    autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
+    autocmd BufEnter * silent! lcd %:p:h
+    autocmd FileType * setlocal formatoptions-=cro
+augroup END
+set wrap
+set linebreak
+set showcmd
+set showmatch
+set showmode
+set title
+set ruler
+set laststatus=2
+set wildmenu
+set splitright
+set splitbelow
+set scrolloff=5
+set autoread
+set history=500
+set lazyredraw
+set noswapfile
+set nowb
+set nobackup
+let g:netrw_dirhistmax=0
+
+set autoindent
+set smartindent
+set smarttab
+set expandtab
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+
+nnoremap <leader>vim :tabe $MYVIMRC<CR>
+augroup auto_source
+    autocmd!
+    autocmd bufwritepost $MYVIMRC source $MYVIMRC
+augroup END
 
 " ====================== Fold code ======================
 set foldmethod=indent
@@ -82,6 +139,10 @@ function! ToggleFold()
         let g:FoldMethod = 0
     endif
 endfunction
+
+" ======================= Format ========================
+autocmd FileType c,java nnoremap <buffer> <leader>f :update<bar>silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null"<bar>:edit!<bar>:redraw!<CR>
+" autocmd FileType python nnoremap <buffer> <leader>f :update<bar>silent exec "!python ~/.vim/autopep8.py % --in-place"<bar>:edit!<bar>:redraw!<CR>
 
 " ==================== Execute code =====================
 let b:args = ''
@@ -102,9 +163,10 @@ function! RunShellCommand(cmdline)
     botright new
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap
     nnoremap <buffer> <Space> :q<CR>
+    nnoremap <buffer> t :wincmd T<CR>
     call setline(1, 'Run: '. expanded_cmdline)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
-    execute "resize ". (winheight(0) * 4/5)
+    execute 'resize '. (winheight(0) * 4/5)
     execute '$read !'. expanded_cmdline
     setlocal nomodifiable
 endfunction
@@ -122,8 +184,9 @@ augroup END
 
 " =================== Neocomplcache =====================
 set omnifunc=syntaxcomplete#Complete
-set completeopt=menuone,menu,longest,preview
-set previewheight=2
+set completeopt=menuone,menu,longest
+" set completeopt=menuone,menu,longest,preview
+" set previewheight=2
 let g:neocomplcache_enable_at_startup = 1
 let g:neocomplcache_enable_ignore_case = 1
 let g:neocomplcache_enable_fuzzy_completion = 1
@@ -151,59 +214,3 @@ let g:ctrlp_custom_ignore = 'tmp$\|\.git$\|\.hg$\|\.svn$\|.rvm$|.bundle$\|vendor
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_clear_cache_on_exit=0
 let g:ctrlp_show_hidden = 1
-
-" ======================= Basics ========================
-filetype on
-filetype indent on
-filetype plugin on
-filetype plugin indent on
-syntax enable
-set numberwidth=4
-set number relativenumber
-augroup linenum_currdir_comment
-    autocmd!
-    autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-    autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
-    autocmd BufEnter * silent! lcd %:p:h
-    autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-augroup END
-set wrap
-set linebreak
-set showcmd
-set showmatch
-set showmode
-set title
-set ruler
-set wildmenu
-set laststatus=2
-set splitright
-set splitbelow
-set scrolloff=5
-set mouse=nv
-set cursorline
-set backspace=eol,start,indent
-set autoread
-set history=500
-set lazyredraw
-set noswapfile
-set nowb
-set nobackup
-
-set autoindent
-set smartindent
-set smarttab
-set expandtab
-set tabstop=4
-set softtabstop=4
-set shiftwidth=4
-
-set hlsearch
-set incsearch
-set ignorecase
-set smartcase
-
-map <leader>vim :tabe $MYVIMRC<CR>
-augroup auto_source
-    autocmd!
-    autocmd bufwritepost $MYVIMRC source $MYVIMRC
-augroup END

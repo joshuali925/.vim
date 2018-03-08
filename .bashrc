@@ -13,14 +13,15 @@ fi
 shopt -s autocd
 shopt -s cdspell
 
-alias ll='ls -AlF'
+alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
 alias b='cd -'
+alias astyle='~/.vim/astyle'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
 function f { find . -iname *$@*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
-function cd { builtin cd $@ && ls -CF; }
+function cd { builtin cd $@ && ls -ACF; }
