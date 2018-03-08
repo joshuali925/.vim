@@ -5,11 +5,12 @@ Plug 'ctrlpvim/ctrlp.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'tpope/vim-fugitive'
-Plug 'easymotion/vim-easymotion'
+Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-surround'
+Plug 'easymotion/vim-easymotion'
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'chun-yang/auto-pairs'
-Plug 'tpope/vim-surround'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'shougo/neocomplcache.vim'
 Plug 'shougo/neosnippet.vim'
@@ -46,7 +47,6 @@ nnoremap <F3> gt
 nnoremap <F4> *
 imap <F12> <C-o><F12>
 nnoremap <F12> :set paste! <bar> set number! <bar> set relativenumber!<CR>
-inoremap <Esc> <C-o>:stopinsert<CR>
 inoremap <C-c> <C-o>:stopinsert<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
 nnoremap <C-l> :noh <bar> let @/=""<CR>
@@ -64,9 +64,10 @@ inoremap <C-j> <C-o>A
 inoremap <C-b> <C-o>b
 inoremap <C-w> <C-o>w
 inoremap <C-e> <C-o>e
+nnoremap <leader>u :earlier 10s<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
-nnoremap <leader>com o=======================================================<Esc>:Commentary<CR>
+nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
 
 " ======================= Basics ========================
 filetype on
@@ -78,12 +79,13 @@ set numberwidth=4
 set number relativenumber
 set mouse=nv
 set cursorline
+set cursorcolumn
 set backspace=eol,start,indent
 augroup linenum_currdir_comment
     autocmd!
     autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
     autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
-    autocmd BufEnter * silent! lcd %:p:h
+    autocmd BufEnter * lcd %:p:h
     autocmd FileType * setlocal formatoptions-=cro
 augroup END
 set wrap
@@ -97,7 +99,8 @@ set laststatus=2
 set wildmenu
 set splitright
 set splitbelow
-set scrolloff=5
+" set scrolloff=7
+set scrolloff=50
 set autoread
 set history=500
 set lazyredraw
@@ -132,17 +135,16 @@ let g:FoldMethod = 0
 nnoremap <F6> :call ToggleFold()<cr>
 function! ToggleFold()
     if g:FoldMethod == 0
-        exe "normal! zM"
-        let g:FoldMethod = 1
+        exec "normal! zM"
     else
-        exe "normal! zR"
-        let g:FoldMethod = 0
+        exec "normal! zR"
     endif
+    let g:FoldMethod = 1 - g:FoldMethod
 endfunction
 
 " ======================= Format ========================
-autocmd FileType c,java nnoremap <buffer> <leader>f :update<bar>silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null"<bar>:edit!<bar>:redraw!<CR>
-" autocmd FileType python nnoremap <buffer> <leader>f :update<bar>silent exec "!python ~/.vim/autopep8.py % --in-place"<bar>:edit!<bar>:redraw!<CR>
+autocmd FileType c,java nnoremap <buffer> <leader>f :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
+" autocmd FileType python nnoremap <buffer> <leader>f :update <bar> silent exec "!python ~/.vim/autopep8.py % --in-place" <bar> :edit! <bar> :redraw!<CR>
 
 " ==================== Execute code =====================
 let b:args = ''
