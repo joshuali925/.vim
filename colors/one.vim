@@ -282,7 +282,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
 
     let s:syntax_bg     = '111111'
     let s:syntax_gutter = '636d83'
-    let s:syntax_cursor = '333333'
+    let s:syntax_cursor = '3a3a3a'
 
     let s:syntax_accent = '56b6c2'
 
@@ -352,7 +352,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   call <sid>X('PMenuSbar',    '',              s:syntax_bg,      '')
   call <sid>X('PMenuThumb',   '',              s:mono_1,         '')
   call <sid>X('Question',     s:hue_2,         '',               '')
-  call <sid>X('Search',       s:vertsplit,     s:pmenu,          '')
+  call <sid>X('Search',       s:vertsplit,     s:mono_2,         '')
   call <sid>X('SpecialKey',   s:special_grey,  '',               'none')
   call <sid>X('Whitespace',   s:special_grey,  '',               'none')
   call <sid>X('StatusLine',   s:syntax_fg,     s:syntax_cursor,  'none')

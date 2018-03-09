@@ -2,7 +2,8 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH=/ilab/users/jl2052/.oh-my-zsh
+export ZSH=$HOME/.oh-my-zsh
+export PATH=$PATH:$HOME/.local/bin
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -103,7 +104,6 @@ alias vi='vim'
 alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
-alias astyle='~/.vim/astyle'
 
 alias -s py='vim'
 alias -s c='vim'

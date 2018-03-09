@@ -4,6 +4,7 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'terryma/vim-multiple-cursors'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary'
@@ -12,6 +13,7 @@ Plug 'easymotion/vim-easymotion'
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'chun-yang/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
+Plug 'scrooloose/syntastic'
 Plug 'shougo/neocomplcache.vim'
 Plug 'shougo/neosnippet.vim'
 Plug 'honza/vim-snippets'
@@ -26,6 +28,10 @@ let g:airline_theme='onedark'
 
 " ====================== Shortcuts ======================
 let mapleader=';'
+nnoremap 0 ^
+nnoremap - $
+vnoremap < <gv
+vnoremap > >gv
 nmap <leader>1 <F1>
 nmap <leader>2 <F2>
 nmap <leader>3 <F3>
@@ -49,21 +55,19 @@ imap <F12> <C-o><F12>
 nnoremap <F12> :set paste! <bar> set number! <bar> set relativenumber!<CR>
 inoremap <C-c> <C-o>:stopinsert<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
-nnoremap <C-l> :noh <bar> let @/=""<CR>
-nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <C-l> :nohlsearch <bar> let @/="QwQ"<CR>
+nnoremap <C-b> :NERDTreeToggle<CR>
 imap <C-f> <C-o><C-f>
 nnoremap <C-f> :Autoformat<CR>
 imap <C-g> <C-o><C-g>
 nnoremap <C-g> :%s/\(\n\n\)\n\+/\1/<CR>
 inoremap ;; <Esc>:CommaOrSemiColon<CR>$
-nnoremap 0 ^
-nnoremap - $
-vnoremap < <gv
-vnoremap > >gv
 inoremap <C-j> <C-o>A
 inoremap <C-b> <C-o>b
 inoremap <C-w> <C-o>w
 inoremap <C-e> <C-o>e
+nmap f <Plug>(easymotion-bd-w)
+nmap F <Plug>(easymotion-bd-f)
 nnoremap <leader>u :earlier 10s<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
@@ -143,11 +147,11 @@ function! ToggleFold()
 endfunction
 
 " ======================= Format ========================
-autocmd FileType c,java nnoremap <buffer> <leader>f :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
-" autocmd FileType python nnoremap <buffer> <leader>f :update <bar> silent exec "!python ~/.vim/autopep8.py % --in-place" <bar> :edit! <bar> :redraw!<CR>
+autocmd FileType c,java nnoremap <buffer> <C-f> :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
+" autocmd FileType python nnoremap <buffer> <C-f> :update <bar> silent exec "!python ~/.vim/yapf --in-place %" <bar> :edit! <bar> :redraw!<CR>
 
 " ==================== Execute code =====================
-let b:args = ''
+autocmd FileType * let b:args = ''
 command! -complete=file -nargs=* SetArgs call SetArgs(<q-args>)
 function! SetArgs(cmdline)
     if a:cmdline == ''
@@ -207,12 +211,22 @@ xmap <C-k> <Plug>(neosnippet_expand_target)
 imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 
-" ================== NERDTree, ctrlp ====================
+" ==================== Syntastic ========================
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+" let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+" ============== NERDTree, ctrlp, motion ================
 autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let NERDTreeWinSize=23
 let NERDTreeShowHidden=1
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
-let g:ctrlp_custom_ignore = 'tmp$\|\.git$\|\.hg$\|\.svn$\|.rvm$|.bundle$\|vendor'
+let g:ctrlp_custom_ignore = 'tmp$\|\.git$\|\.hg$\|\.svn$\|.rvm$|.bundle$\|.cache$\|.oh_my_zsh$\|.local$\|vendor'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
-let g:ctrlp_clear_cache_on_exit=0
+" let g:ctrlp_clear_cache_on_exit=0
 let g:ctrlp_show_hidden = 1
+let g:EasyMotion_smartcase = 1
