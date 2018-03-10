@@ -1,5 +1,5 @@
 " ===================== Plugins =========================
-call plug#begin('~/.vim/plugged')
+call plug#begin('~/.config/nvim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'vim-airline/vim-airline'
@@ -14,8 +14,8 @@ Plug 'chun-yang/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
 Plug 'scrooloose/syntastic'
-Plug 'shougo/neocomplcache.vim'
-Plug 'shougo/neosnippet.vim'
+Plug 'valloric/youcompleteme'
+Plug 'sirver/ultisnips'
 Plug 'honza/vim-snippets'
 call plug#end()
 
@@ -79,17 +79,17 @@ filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
-set numberwidth=4
-set number relativenumber
 set mouse=nv
 set cursorline
 set cursorcolumn
 set backspace=eol,start,indent
+set numberwidth=4
+set number relativenumber
 augroup linenum_currdir_comment
     autocmd!
-    autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-    autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
-    autocmd BufEnter * lcd %:p:h
+    autocmd FocusGained,InsertLeave * if &buftype != 'terminal' | set relativenumber | endif
+    autocmd FocusLost,InsertEnter * if &buftype != 'terminal' | set norelativenumber | endif
+    autocmd BufEnter * if &buftype != 'terminal' | lcd %:p:h | endif
     autocmd FileType * setlocal formatoptions-=cro
 augroup END
 set wrap
@@ -180,36 +180,13 @@ imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
 augroup run_code
     autocmd!
-    autocmd FileType python nnoremap <buffer> <F10> :update<bar>exec '!clear && python %'. b:args<CR>
-    autocmd FileType c nnoremap <buffer> <F10> :update<bar>exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType java nnoremap <buffer> <F10> :update<bar>exec '!clear && javac % && java %<'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F10> :update<bar>exec '!python %'. b:args<CR>
+    autocmd FileType c nnoremap <buffer> <F10> :update<bar>exec '!gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType java nnoremap <buffer> <F10> :update<bar>exec '!javac % && java %<'. b:args<CR>
     autocmd FileType python nnoremap <buffer> <F11> :update<bar>call RunShellCommand('python %'. b:args)<CR>
     autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
     autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
-
-" =================== Neocomplcache =====================
-set omnifunc=syntaxcomplete#Complete
-set completeopt=menuone,menu,longest
-" set completeopt=menuone,menu,longest,preview
-" set previewheight=2
-let g:neocomplcache_enable_at_startup = 1
-let g:neocomplcache_enable_ignore_case = 1
-let g:neocomplcache_enable_fuzzy_completion = 1
-let g:neocomplcache_enable_camel_case_completion = 1
-let g:neocomplcache_enable_quick_match = 1
-inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>" . "\<C-u>"
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
-inoremap <expr><C-x>  pumvisible() ? neocomplcache#cancel_popup() : "\<C-x>"
-inoremap <expr><CR> pumvisible() ? neocomplcache#smart_close_popup() : "\<CR>"
-let g:neosnippet#disable_runtime_snippets = { '_' : 1 }
-let g:neosnippet#enable_snipmate_compatibility = 1
-let g:neosnippet#snippets_directory='~/.vim/plugged/vim-snippets/snippets'
-imap <C-k> <Plug>(neosnippet_expand_or_jump)
-smap <C-k> <Plug>(neosnippet_expand_or_jump)
-xmap <C-k> <Plug>(neosnippet_expand_target)
-imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 
 " ==================== Syntastic ========================
 let g:syntastic_always_populate_loc_list = 1
@@ -225,3 +202,26 @@ let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|vim|local|cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
+
+" ================== YouCompleteMe ======================
+set completeopt=menuone,menu,longest
+nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
+nnoremap <leader>f :YcmCompleter FixIt<CR>
+let g:ycm_global_ycm_extra_conf='~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+let g:ycm_python_binary_path = '/usr/bin/python3'
+let g:ycm_key_list_stop_completion = ['<C-x>']
+let g:UltiSnipsExpandTrigger="<C-k>"
+let g:UltiSnipsJumpForwardTrigger="<Tab>"
+let g:UltiSnipsJumpBackwardTrigger="<C-b>"
+
+" =================== Terminal ==========================
+tnoremap <C-k> <C-\><C-n>:wincmd k<CR>
+tnoremap <Esc> <C-\><C-n><CR>
+nnoremap <C-k> :call ToggleTerm()<CR>
+function! ToggleTerm()
+    if bufwinnr('zsh') > 0
+        exec 'wincmd j | startinsert'
+    else
+        exec 'split | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 3/10). ' | terminal'
+    endif
+endfunction
