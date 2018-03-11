@@ -8,6 +8,7 @@ fi
 
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=
+export PATH=$PATH:$HOME/.local/bin
 
 # User specific aliases and functions
 shopt -s autocd
@@ -17,7 +18,7 @@ alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
 alias b='cd -'
-alias astyle='~/.vim/astyle'
+
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
