@@ -79,12 +79,12 @@ filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
-set numberwidth=4
-set number relativenumber
 set mouse=nv
 set cursorline
 set cursorcolumn
 set backspace=eol,start,indent
+set numberwidth=4
+set number relativenumber
 augroup linenum_currdir_comment
     autocmd!
     autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
@@ -126,17 +126,29 @@ set incsearch
 set ignorecase
 set smartcase
 
-nnoremap <leader>vim :tabe $MYVIMRC<CR>
+nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 augroup auto_source
     autocmd!
     autocmd bufwritepost $MYVIMRC source $MYVIMRC
 augroup END
 
+" =================== Compare ===========================
+let g:DiffOn = 0
+nnoremap <F6> :call ToggleDiff()<CR>
+function! ToggleDiff()
+    if g:DiffOn == 0
+        exec 'windo diffthis'
+    else
+        exec 'windo diffoff'
+    endif
+    let g:DiffOn = 1 - g:DiffOn
+endfunction
+
 " ====================== Fold code ======================
 set foldmethod=indent
 set foldlevel=99
 let g:FoldMethod = 0
-nnoremap <F6> :call ToggleFold()<cr>
+nnoremap <F5> :call ToggleFold()<CR>
 function! ToggleFold()
     if g:FoldMethod == 0
         exec "normal! zM"
@@ -148,7 +160,6 @@ endfunction
 
 " ======================= Format ========================
 autocmd FileType c,java nnoremap <buffer> <C-f> :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
-" autocmd FileType python nnoremap <buffer> <C-f> :update <bar> silent exec "!python ~/.vim/yapf --in-place %" <bar> :edit! <bar> :redraw!<CR>
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -166,27 +177,47 @@ function! RunShellCommand(cmdline)
     let expanded_cmdline = substitute(expanded_cmdline, './%<', './'. fnameescape(expand('%<')), '')
     let expanded_cmdline = substitute(expanded_cmdline, '%<', fnameescape(expand('%<')), '')
     let expanded_cmdline = substitute(expanded_cmdline, '%', fnameescape(expand('%')), '')
+    if bufexists('[Output]') > 0
+        exec 'wincmd j | wincmd c'
+    endif
     botright new
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
+    silent exec '0f | file [Output] | resize '. (winheight(0) * 4/5)
     nnoremap <buffer> <Space> :q<CR>
     nnoremap <buffer> t :wincmd T<CR>
+    nnoremap <buffer> w :set wrap!<CR>
     call setline(1, 'Run: '. expanded_cmdline)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
-    execute 'resize '. (winheight(0) * 4/5)
-    execute '$read !'. expanded_cmdline
+    exec '$read !'. expanded_cmdline
     setlocal nomodifiable
+    exec 'wincmd k | wincmd j | wincmd k'
 endfunction
 imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
 augroup run_code
     autocmd!
-    autocmd FileType python nnoremap <buffer> <F10> :update<bar>exec '!clear && python %'. b:args<CR>
-    autocmd FileType c nnoremap <buffer> <F10> :update<bar>exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType java nnoremap <buffer> <F10> :update<bar>exec '!clear && javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F11> :update<bar>call RunShellCommand('python %'. b:args)<CR>
-    autocmd FileType c nnoremap <buffer> <F11> :update<bar>call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
-    autocmd FileType java nnoremap <buffer> <F11> :update<bar>call RunShellCommand('javac % && java %<'. b:args)<CR>
+    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && python %'. b:args<CR>
+    autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F11> :update <bar> call RunShellCommand('python %'. b:args)<CR>
+    autocmd FileType c nnoremap <buffer> <F11> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
+    autocmd FileType java nnoremap <buffer> <F11> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
+
+" ==================== Syntastic ========================
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+" ============== NERDTree, ctrlp, motion ================
+autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+let NERDTreeWinSize=23
+let NERDTreeShowHidden=1
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
+let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|vim|config|local|cache)$'
+let g:ctrlp_cache_dir = '~/.cache/ctrlp'
+let g:ctrlp_show_hidden = 1
+let g:EasyMotion_smartcase = 1
 
 " =================== Neocomplcache =====================
 set omnifunc=syntaxcomplete#Complete
@@ -210,18 +241,3 @@ smap <C-k> <Plug>(neosnippet_expand_or_jump)
 xmap <C-k> <Plug>(neosnippet_expand_target)
 imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-
-" ==================== Syntastic ========================
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-
-" ============== NERDTree, ctrlp, motion ================
-autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-let NERDTreeWinSize=23
-let NERDTreeShowHidden=1
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
-let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|vim|local|cache)$'
-let g:ctrlp_cache_dir = '~/.cache/ctrlp'
-let g:ctrlp_show_hidden = 1
-let g:EasyMotion_smartcase = 1
