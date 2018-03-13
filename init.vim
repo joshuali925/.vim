@@ -13,6 +13,7 @@ Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'chun-yang/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
+Plug 'skywind3000/asyncrun.vim'
 Plug 'w0rp/ale', { 'for': 'python' }
 Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
 Plug 'sirver/ultisnips'
@@ -197,14 +198,18 @@ function! RunShellCommand(cmdline)
 endfunction
 imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
+let g:asyncrun_open = 8
 augroup run_code
     autocmd!
-    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!python %'. b:args<CR>
-    autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!gcc % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F11> :update <bar> call RunShellCommand('python %'. b:args)<CR>
-    autocmd FileType c nnoremap <buffer> <F11> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
-    autocmd FileType java nnoremap <buffer> <F11> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
+    " autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!python %'. b:args<CR>
+    " autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!gcc % -o %< -g && ./%<'. b:args<CR>
+    " autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!javac % && java %<'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun python %'. b:args<CR>
+    autocmd FileType c nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType java nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun javac % && java %<'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F10> :update <bar> call RunShellCommand('python %'. b:args)<CR>
+    autocmd FileType c nnoremap <buffer> <F10> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
+    autocmd FileType java nnoremap <buffer> <F10> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
 
 " ============== NERDTree, ctrlp, motion ================
