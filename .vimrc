@@ -85,13 +85,15 @@ set cursorcolumn
 set backspace=eol,start,indent
 set numberwidth=4
 set number relativenumber
-augroup linenum_currdir_comment
+augroup linenum_currdir_comment_restorePos
     autocmd!
     autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
     autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
-    autocmd BufEnter * lcd %:p:h
+    " autocmd BufEnter * lcd %:p:h
     autocmd FileType * setlocal formatoptions-=cro
+    " autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 augroup END
+set autochdir
 set wrap
 set linebreak
 set showcmd
@@ -160,6 +162,7 @@ endfunction
 
 " ======================= Format ========================
 autocmd FileType c,java nnoremap <buffer> <C-f> :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
+let g:formatters_python = ['yapf']
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -205,16 +208,16 @@ augroup run_code
 augroup END
 
 " ==================== Syntastic ========================
-let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
+let g:syntastic_check_on_wq = 1
 
 " ============== NERDTree, ctrlp, motion ================
-autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-let NERDTreeWinSize=23
-let NERDTreeShowHidden=1
+let NERDTreeWinSize = 23
+let NERDTreeShowHidden = 1
+let g:NERDTreeDirArrowExpandable = '+'
+let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
-let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|vim|config|local|cache)$'
+let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|plugged|config|local|cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
