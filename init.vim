@@ -13,8 +13,8 @@ Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'chun-yang/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
-Plug 'scrooloose/syntastic'
-Plug 'valloric/youcompleteme'
+Plug 'w0rp/ale', { 'for': 'python' }
+Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
 Plug 'sirver/ultisnips'
 Plug 'honza/vim-snippets'
 call plug#end()
@@ -85,13 +85,15 @@ set cursorcolumn
 set backspace=eol,start,indent
 set numberwidth=4
 set number relativenumber
-augroup linenum_currdir_comment
+augroup linenum_currdir_comment_restorePos
     autocmd!
     autocmd FocusGained,InsertLeave * if &buftype != 'terminal' | set relativenumber | endif
     autocmd FocusLost,InsertEnter * if &buftype != 'terminal' | set norelativenumber | endif
-    autocmd BufEnter * if &buftype != 'terminal' | lcd %:p:h | endif
+    " autocmd BufEnter * if &buftype != 'terminal' | lcd %:p:h | endif
     autocmd FileType * setlocal formatoptions-=cro
+    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 augroup END
+set autochdir
 set wrap
 set linebreak
 set showcmd
@@ -160,6 +162,7 @@ endfunction
 
 " ======================= Format ========================
 autocmd FileType c,java nnoremap <buffer> <C-f> :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
+let g:formatters_python = ['yapf']
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -204,17 +207,13 @@ augroup run_code
     autocmd FileType java nnoremap <buffer> <F11> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
 
-" ==================== Syntastic ========================
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-
 " ============== NERDTree, ctrlp, motion ================
-autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-let NERDTreeWinSize=23
-let NERDTreeShowHidden=1
+let NERDTreeWinSize = 23
+let NERDTreeShowHidden = 1
+let g:NERDTreeDirArrowExpandable = '+'
+let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
-let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|vim|config|local|cache)$'
+let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|plugged|config|local|cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
@@ -224,6 +223,9 @@ set completeopt=menuone,menu,longest
 nnoremap <leader>g :YcmCompleter GoToDefinitionElseDeclaration<CR>
 nnoremap <leader>f :YcmCompleter FixIt<CR>
 let g:ycm_global_ycm_extra_conf='~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+" also add to .ycm_extra_conf.py:
+" '-isystem',
+" '/usr/include',
 let g:ycm_python_binary_path = '/usr/bin/python3'
 let g:ycm_key_list_stop_completion = ['<C-x>']
 let g:UltiSnipsExpandTrigger="<C-k>"
