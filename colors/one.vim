@@ -330,7 +330,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   call <sid>X('bold',         '',              '',               'bold')
   call <sid>X('ColorColumn',  '',              s:syntax_cursor,  '')
   call <sid>X('Conceal',      s:mono_4,        s:syntax_bg,      '')
-  call <sid>X('Cursor',       s:dark,          s:syntax_bg,      '')
+  call <sid>X('Cursor',       '',              s:syntax_accent,  '')
   call <sid>X('CursorIM',     '',              '',               '')
   call <sid>X('CursorColumn', '',              s:syntax_cursor,  '')
   call <sid>X('CursorLine',   '',              s:syntax_cursor,  'none')
@@ -842,4 +842,3 @@ if s:dark
 endif
 
 " vim: set fdl=0 fdm=marker:
-
