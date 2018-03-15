@@ -3,7 +3,6 @@
 
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
-export PATH=$PATH:$HOME/.local/bin
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -100,14 +99,18 @@ source $ZSH/oh-my-zsh.sh
 # key bindings
 # key bindings
 
-alias vi='vim'
+export PATH=$PATH:$HOME/.local/bin
+
 alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
 
-alias -s py='vim'
-alias -s c='vim'
-alias -s java='vim'
+alias vi='vim'
+
+alias -s py='nvim'
+alias -s c='nvim'
+alias -s cpp='nvim'
+alias -s java='nvim'
 
 function f { find . -iname \*$1\*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
