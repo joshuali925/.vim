@@ -68,7 +68,9 @@ inoremap <C-w> <C-o>w
 inoremap <C-e> <C-o>e
 nmap f <Plug>(easymotion-bd-w)
 nmap F <Plug>(easymotion-bd-f)
+nmap <leader>r <F11>
 nnoremap <leader>u :earlier 10s<CR>
+inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
@@ -161,7 +163,7 @@ function! ToggleFold()
 endfunction
 
 " ======================= Format ========================
-autocmd FileType c,java nnoremap <buffer> <C-f> :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
+autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
 let g:formatters_python = ['yapf']
 
 " ==================== Execute code =====================
@@ -201,15 +203,17 @@ augroup run_code
     autocmd!
     autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && python %'. b:args<CR>
     autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
     autocmd FileType python nnoremap <buffer> <F11> :update <bar> call RunShellCommand('python %'. b:args)<CR>
     autocmd FileType c nnoremap <buffer> <F11> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
+    autocmd FileType cpp nnoremap <buffer> <F11> :update <bar> call RunShellCommand('g++ % -o %< -g && ./%<'. b:args)<CR>
     autocmd FileType java nnoremap <buffer> <F11> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
 
 " ==================== Syntastic ========================
 let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 1
+let g:syntastic_check_on_wq = 0
 
 " ============== NERDTree, ctrlp, motion ================
 let NERDTreeWinSize = 23
