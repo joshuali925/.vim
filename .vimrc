@@ -51,10 +51,16 @@ nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *
+nnoremap <F5> :call ToggleFold()<CR>
+nnoremap <F6> :call ToggleDiff()<CR>
 imap <F12> <C-o><F12>
-nnoremap <F12> :set paste! <bar> set number! <bar> set relativenumber!<CR>
+nnoremap <F12> :call TogglePaste()<CR>
+nnoremap J gj
+nnoremap K gk
+nnoremap <C-j> J
 inoremap <C-c> <C-o>:stopinsert<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
+vnoremap <C-l> <Esc>
 nnoremap <C-l> :nohlsearch <bar> let @/="QwQ"<CR><C-l>
 nnoremap <C-b> :NERDTreeToggle<CR>
 imap <C-f> <C-o><C-f>
@@ -64,15 +70,18 @@ nnoremap <C-g> :%s/\(\n\n\)\n\+/\1/<CR>
 inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 inoremap <C-j> <C-o>A
 inoremap <C-b> <C-o>b
-inoremap <C-w> <C-o>w
 inoremap <C-e> <C-o>e
 nmap f <Plug>(easymotion-bd-w)
 nmap F <Plug>(easymotion-bd-f)
+imap <leader>r <F11>
 nmap <leader>r <F11>
-nnoremap <leader>u :earlier 10s<CR>
+inoremap <leader>( <C-o>:stopinsert<CR>xEp
+inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>q :q<CR>
+vnoremap <leader>q <Esc>:q<CR>
+nnoremap <leader>u :earlier 10s<CR>
 nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
 
 " ======================= Basics ========================
@@ -82,11 +91,12 @@ filetype plugin on
 filetype plugin indent on
 syntax enable
 set mouse=nv
+set backspace=eol,start,indent
 set cursorline
 set cursorcolumn
-set backspace=eol,start,indent
+set number
+set relativenumber
 set numberwidth=4
-set number relativenumber
 augroup linenum_currdir_comment_restorePos
     autocmd!
     autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
@@ -138,7 +148,6 @@ augroup END
 
 " =================== Compare ===========================
 let g:DiffOn = 0
-nnoremap <F6> :call ToggleDiff()<CR>
 function! ToggleDiff()
     if g:DiffOn == 0
         exec 'windo diffthis'
@@ -152,7 +161,6 @@ endfunction
 set foldmethod=indent
 set foldlevel=99
 let g:FoldMethod = 0
-nnoremap <F5> :call ToggleFold()<CR>
 function! ToggleFold()
     if g:FoldMethod == 0
         exec "normal! zM"
@@ -162,9 +170,20 @@ function! ToggleFold()
     let g:FoldMethod = 1 - g:FoldMethod
 endfunction
 
+" ======================= Paste =========================
+function! TogglePaste()
+    if &paste
+        set nopaste number relativenumber
+    else
+        set paste nonumber norelativenumber
+    endif
+    exec 'SyntasticToggleMode'
+endfunction
+
 " ======================= Format ========================
 autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
 let g:formatters_python = ['yapf']
+" autocmd FileType python set omnifunc=python3complete#Complete
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -223,13 +242,14 @@ let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
 let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|plugged|config|local|cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
+let g:ctrlp_cmd = 'CtrlPMRUFiles'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
 " =================== Neocomplcache =====================
 set omnifunc=syntaxcomplete#Complete
-set completeopt=menuone,menu,longest
-" set completeopt=menuone,menu,longest,preview
+set completeopt=menuone
+" set completeopt=menuone,preview
 " set previewheight=2
 let g:neocomplcache_enable_at_startup = 1
 let g:neocomplcache_enable_ignore_case = 1
