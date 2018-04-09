@@ -107,6 +107,7 @@ alias l='ls -CF'
 
 alias vi='vim'
 
+alias -s txt='nvim'
 alias -s py='nvim'
 alias -s c='nvim'
 alias -s cpp='nvim'
