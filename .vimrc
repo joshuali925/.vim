@@ -28,10 +28,6 @@ let g:airline_theme='onedark'
 
 " ====================== Shortcuts ======================
 let mapleader=';'
-nnoremap 0 ^
-nnoremap - $
-vnoremap < <gv
-vnoremap > >gv
 nmap <leader>1 <F1>
 nmap <leader>2 <F2>
 nmap <leader>3 <F3>
@@ -55,55 +51,79 @@ nnoremap <F5> :call ToggleFold()<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
 imap <F12> <C-o><F12>
 nnoremap <F12> :call TogglePaste()<CR>
+nnoremap 0 ^
+nnoremap - $
+vnoremap < <gv
+vnoremap > >gv
+vnoremap J gj
+vnoremap K gk
 nnoremap J gj
 nnoremap K gk
+nnoremap Y y$
+nnoremap , ;
+nnoremap ;, ,
+nmap <leader>f <Plug>(easymotion-bd-w)
+nmap <leader>F <Plug>(easymotion-bd-f)
+inoremap ;; <Esc>:CommaOrSemiColon<CR>$
+nnoremap o o<Space><BS>
+nnoremap O O<Space><BS>
+inoremap <CR> <CR><Space><BS>
 nnoremap <C-j> J
 inoremap <C-c> <C-o>:stopinsert<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
-nnoremap <C-l> :nohlsearch <bar> let @/="QwQ"<CR><C-l>
+nnoremap <C-l> :nohlsearch <bar> let @/='QwQ'<CR><C-l>
 nnoremap <C-b> :NERDTreeToggle<CR>
-imap <C-f> <C-o><C-f>
+imap <C-f> <Esc><C-f>
 nnoremap <C-f> :Autoformat<CR>
-imap <C-g> <C-o><C-g>
+imap <C-g> <Esc><C-g>
 nnoremap <C-g> :%s/\(\n\n\)\n\+/\1/<CR>
-inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 inoremap <C-j> <C-o>A
 inoremap <C-b> <C-o>b
 inoremap <C-e> <C-o>e
-nmap f <Plug>(easymotion-bd-w)
-nmap F <Plug>(easymotion-bd-f)
+inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
 inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
 nnoremap <leader>w :w!<CR>
+nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
+nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :q<CR>
 vnoremap <leader>q <Esc>:q<CR>
 nnoremap <leader>u :earlier 10s<CR>
+nnoremap <leader>p "0p
+nnoremap <leader>P "0P
 nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
+nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 
 " ======================= Basics ========================
+let g:EfficientMode = 0
 filetype on
 filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
-set mouse=nv
 set backspace=eol,start,indent
-set cursorline
-set cursorcolumn
+set mouse=nv
+set numberwidth=2
 set number
-set relativenumber
-set numberwidth=4
-augroup linenum_currdir_comment_restorePos
+if g:EfficientMode == 0
+    set relativenumber
+    set cursorline
+    " set cursorcolumn
+endif
+augroup LineNum_NoAutoComment_RestorePos_AutoSource
     autocmd!
-    autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-    autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
-    " autocmd BufEnter * lcd %:p:h
+    if g:EfficientMode == 0
+        autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+        autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
+    endif
     autocmd FileType * setlocal formatoptions-=cro
+	autocmd FileType python inoremap <buffer> # X<C-h>#<Space>
     " autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC
 augroup END
 set autochdir
 set wrap
@@ -118,15 +138,10 @@ set wildmenu
 set splitright
 set splitbelow
 set scrolloff=3
-" set scrolloff=50
-set autoread
-set history=500
-set lazyredraw
-set noswapfile
-set nowb
-set nobackup
-let g:netrw_dirhistmax=0
-
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
 set autoindent
 set smartindent
 set smarttab
@@ -134,17 +149,18 @@ set expandtab
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
-
-set hlsearch
-set incsearch
-set ignorecase
-set smartcase
-
-nnoremap <leader>vim :tabedit $MYVIMRC<CR>
-augroup auto_source
-    autocmd!
-    autocmd bufwritepost $MYVIMRC source $MYVIMRC
-augroup END
+set autoread
+set history=500
+set sessionoptions-=buffer
+set undofile
+set undodir=$HOME/.cache/vim/undo
+set undolevels=1000
+set undoreload=10000
+set lazyredraw
+set noswapfile
+set nowritebackup
+set nobackup
+let g:netrw_dirhistmax=0
 
 " =================== Compare ===========================
 let g:DiffOn = 0
@@ -163,9 +179,9 @@ set foldlevel=99
 let g:FoldMethod = 0
 function! ToggleFold()
     if g:FoldMethod == 0
-        exec "normal! zM"
+        exec 'normal! zM'
     else
-        exec "normal! zR"
+        exec 'normal! zR'
     endif
     let g:FoldMethod = 1 - g:FoldMethod
 endfunction
@@ -174,15 +190,21 @@ endfunction
 function! TogglePaste()
     if &paste
         set nopaste number relativenumber
+        set mouse=nv
     else
         set paste nonumber norelativenumber
+        set mouse=
     endif
-    exec 'SyntasticToggleMode'
+    silent exec '!SyntasticToggleMode'
 endfunction
 
 " ======================= Format ========================
-autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec "!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null" <bar> :edit! <bar> :redraw!<CR>
+augroup Format
+    autocmd!
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+augroup END
 let g:formatters_python = ['yapf']
+set omnifunc=syntaxcomplete#Complete
 " autocmd FileType python set omnifunc=python3complete#Complete
 
 " ==================== Execute code =====================
@@ -202,14 +224,17 @@ function! RunShellCommand(cmdline)
     let expanded_cmdline = substitute(expanded_cmdline, '%<', fnameescape(expand('%<')), '')
     let expanded_cmdline = substitute(expanded_cmdline, '%', fnameescape(expand('%')), '')
     if bufexists('[Output]') > 0
-        exec 'wincmd j | wincmd c'
+        exec 'wincmd j'
+        setlocal modifiable
+        exec '%d'
+    else
+        botright new
+        setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
+        silent exec '0f | file [Output] | resize '. (winheight(0) * 4/5)
+        nnoremap <buffer> <Space> :q<CR>
+        nnoremap <buffer> t :wincmd T<CR>
+        nnoremap <buffer> w :set wrap!<CR>
     endif
-    botright new
-    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
-    silent exec '0f | file [Output] | resize '. (winheight(0) * 4/5)
-    nnoremap <buffer> <Space> :q<CR>
-    nnoremap <buffer> t :wincmd T<CR>
-    nnoremap <buffer> w :set wrap!<CR>
     call setline(1, 'Run: '. expanded_cmdline)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
     exec '$read !'. expanded_cmdline
@@ -218,7 +243,7 @@ function! RunShellCommand(cmdline)
 endfunction
 imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
-augroup run_code
+augroup RunCode
     autocmd!
     autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && python %'. b:args<CR>
     autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
@@ -247,15 +272,14 @@ let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
 " =================== Neocomplcache =====================
-set omnifunc=syntaxcomplete#Complete
 set completeopt=menuone
 " set completeopt=menuone,preview
 " set previewheight=2
 let g:neocomplcache_enable_at_startup = 1
 let g:neocomplcache_enable_ignore_case = 1
 let g:neocomplcache_enable_fuzzy_completion = 1
-let g:neocomplcache_enable_camel_case_completion = 1
-let g:neocomplcache_enable_quick_match = 1
+" let g:neocomplcache_enable_camel_case_completion = 1
+" let g:neocomplcache_enable_underbar_completion = 1
 inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>" . "\<C-u>"
 inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
 inoremap <expr><C-x>  pumvisible() ? neocomplcache#cancel_popup() : "\<C-x>"
