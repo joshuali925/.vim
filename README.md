@@ -1,6 +1,6 @@
 # vim-configuration
 ## Set up vim
-```console
+```bash
 cd ~
 git clone https://github.com/joshuali925/vim-configuration.git
 mv vim-configuration .vim
@@ -10,7 +10,7 @@ vim -c "PlugInstall" -c "qa"
 ```
 
 ## Set up nvim
-```console
+```bash
 mkdir -p ~/.config/nvim
 ln -s ~/.vim/init.vim ~/.config/nvim/init.vim
 ln -s ~/.vim/autoload ~/.config/nvim/autoload
@@ -23,14 +23,14 @@ nvim -c "PlugInstall" -c "qa"
 ```
 
 ## Set up zsh
-```console
+```bash
 ln -s .vim/.zshrc ~/.zshrc
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
 ```
 
 ## Set up python
-```console
+```bash
 pip install --user flake8
 pip install --user yapf
 ```
