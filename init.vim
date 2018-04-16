@@ -47,7 +47,7 @@ imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
-nnoremap <F4> *
+nnoremap <F4> *N
 nnoremap <F5> :call ToggleFold()<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
 imap <F12> <C-o><F12>
