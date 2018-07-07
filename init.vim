@@ -13,6 +13,7 @@ Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'chun-yang/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
+Plug 'majutsushi/tagbar'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'w0rp/ale', { 'for': 'python' }
 Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
@@ -47,9 +48,10 @@ imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
-nnoremap <F4> *N
-nnoremap <F5> :call ToggleFold()<CR>
+nnoremap <F4> :let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'<CR>
+nnoremap <F5> :TagbarToggle<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
+nnoremap <F7> :call ToggleFold()<CR>
 imap <F12> <C-o><F12>
 nnoremap <F12> :call TogglePaste()<CR>
 nnoremap 0 ^
@@ -123,7 +125,7 @@ augroup LineNum_NoAutoComment_RestorePos_AutoSource
         autocmd FocusLost,InsertEnter * if &buftype != 'terminal' | set norelativenumber | endif
     endif
     autocmd FileType * setlocal formatoptions-=cro
-	autocmd FileType python inoremap <buffer> # X<C-h>#<Space>
+    autocmd FileType python inoremap <buffer> # X<C-h>#<Space>
     autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
 augroup END
@@ -203,11 +205,14 @@ endfunction
 " ======================= Format ========================
 augroup Format
     autocmd!
-    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
 augroup END
 let g:formatters_python = ['yapf']
 set omnifunc=syntaxcomplete#Complete
 " autocmd FileType python set omnifunc=python3complete#Complete
+let g:ale_python_flake8_args = '--ignore=E501'
+let g:ale_python_flake8_executable = 'flake8'
+let g:ale_python_flake8_options = '--ignore=E501'
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -270,7 +275,7 @@ let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
 let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|plugged|config|local|cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
-let g:ctrlp_cmd = 'CtrlPMRUFiles'
+let g:ctrlp_cmd = 'CtrlP'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
@@ -291,6 +296,7 @@ let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
 " =================== Terminal ==========================
 tnoremap <C-k> <C-\><C-n>:wincmd k<CR>
 tnoremap <Esc> <C-\><C-n>
+tmap <F1> <C-\><C-n><F1>
 tmap <F2> <C-\><C-n><F2>
 tmap <F3> <C-\><C-n><F3>
 nnoremap <silent> <F9> :tabedit <bar> set nonumber norelativenumber nocursorline nocursorcolumn <bar> terminal<CR>
