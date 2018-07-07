@@ -13,6 +13,7 @@ Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'chun-yang/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
+Plug 'majutsushi/tagbar'
 Plug 'scrooloose/syntastic'
 Plug 'shougo/neocomplcache.vim'
 Plug 'shougo/neosnippet.vim'
@@ -47,8 +48,9 @@ nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *N
-nnoremap <F5> :call ToggleFold()<CR>
+nnoremap <F5> :TagbarToggle<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
+nnoremap <F7> :call ToggleFold()<CR>
 imap <F12> <C-o><F12>
 nnoremap <F12> :call TogglePaste()<CR>
 nnoremap 0 ^
@@ -201,11 +203,12 @@ endfunction
 " ======================= Format ========================
 augroup Format
     autocmd!
-    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -T4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
 augroup END
 let g:formatters_python = ['yapf']
 set omnifunc=syntaxcomplete#Complete
 " autocmd FileType python set omnifunc=python3complete#Complete
+
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
