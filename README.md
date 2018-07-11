@@ -23,11 +23,11 @@ mv nvim.appimage ~/.local/bin/nvim
 nvim -c "PlugInstall" -c "qa"
 ```
 
-## Set up zsh
+## Set up oh-my-zsh
 ```bash
-ln -s .vim/.zshrc ~/.zshrc
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+ln -s ~/.vim/.zshrc ~/.zshrc
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/zsh-autosuggestions
 ```
 
 ## Set up python
