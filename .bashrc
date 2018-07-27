@@ -1,5 +1,5 @@
 # .bashrc
-[ -t 1 ] && exec zsh
+# [ -t 1 ] && exec zsh
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
@@ -16,16 +16,20 @@ export PATH=$PATH:$HOME/.local/bin
 shopt -s autocd
 shopt -s cdspell
 
+bind 'set show-all-if-ambiguous on'
+bind 'set completion-ignore-case on'
+bind 'TAB:menu-complete'
+
 alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
 
 alias vi='vim'
 
+alias ~='cd ~'
 alias b='cd -'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias ....='cd ../../..'
 
 function f { find . -iname *$@*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }

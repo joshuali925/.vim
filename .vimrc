@@ -10,7 +10,7 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
 Plug 'easymotion/vim-easymotion'
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
-Plug 'chun-yang/auto-pairs'
+Plug 'jiangmiao/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
 Plug 'majutsushi/tagbar'
@@ -55,12 +55,12 @@ imap <F12> <C-o><F12>
 nnoremap <F12> :call TogglePaste()<CR>
 nnoremap 0 ^
 nnoremap - $
+nnoremap H :wincmd h<CR>
+nnoremap J :wincmd j<CR>
+nnoremap K :wincmd k<CR>
+nnoremap L :wincmd l<CR>
 vnoremap < <gv
 vnoremap > >gv
-vnoremap J gj
-vnoremap K gk
-nnoremap J gj
-nnoremap K gk
 nnoremap Y y$
 nnoremap , ;
 nnoremap ;, ,
@@ -86,6 +86,10 @@ inoremap <C-e> <C-o>e
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
+vnoremap <leader>j gj
+vnoremap <leader>k gk
+nnoremap <leader>j gj
+nnoremap <leader>k gk
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
 inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
