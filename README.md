@@ -6,7 +6,7 @@ git clone https://github.com/joshuali925/vim-configuration.git
 mv vim-configuration .vim
 rm .vim/plugged -r
 ln -s .vim/.vimrc ~/.vimrc
-mkdir -p .cache/vim
+mkdir -p .cache/vim/undo
 vim -c "PlugInstall" -c "qa"
 ```
 
