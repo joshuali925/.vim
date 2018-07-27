@@ -119,3 +119,5 @@ function chpwd() { emulate -L zsh; ls -ACF; }
 
 bindkey '^ ' autosuggest-accept
 bindkey '^x' autosuggest-clear
+
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=cyan"
