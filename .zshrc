@@ -106,6 +106,7 @@ alias la='ls -AF'
 alias l='ls -CF'
 
 alias vi='vim'
+alias tmux='tmux -2'
 
 alias -s txt='nvim'
 alias -s py='nvim'

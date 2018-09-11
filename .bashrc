@@ -25,6 +25,7 @@ alias la='ls -AF'
 alias l='ls -CF'
 
 alias vi='vim'
+alias tmux='tmux -2'
 
 alias ~='cd ~'
 alias b='cd -'
