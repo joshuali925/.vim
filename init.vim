@@ -23,10 +23,15 @@ call plug#end()
 
 " ===================== Themes ==========================
 set t_Co=256
-set background=dark
-colorscheme one
+" set background=dark
+" colorscheme on
+" let g:airline_theme='onedark'
 let g:airline#extensions#tabline#enabled=1
-let g:airline_theme='onedark'
+set background=light
+colorscheme solarized
+let g:airline_theme='solarized'
+let g:solarized_termcolors=256
+
 
 " ====================== Shortcuts ======================
 let mapleader=';'
@@ -71,7 +76,8 @@ inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 inoremap <CR> <CR><Space><BS>
-nnoremap <C-j> J
+nnoremap <C-j> gj
+vnoremap <C-j> gj
 inoremap <C-c> <C-o>:stopinsert<CR>
 nnoremap <C-c> :AsyncStop!<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
@@ -88,9 +94,7 @@ inoremap <C-e> <C-o>e
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
-vnoremap <leader>j gj
-vnoremap <leader>k gk
-nnoremap <leader>j gj
+nnoremap <leader>j J
 nnoremap <leader>k gk
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
 inoremap <leader>) <C-o>:stopinsert<CR>x$p
@@ -204,6 +208,7 @@ function! TogglePaste()
         set mouse=
     endif
     silent exec '!ALEToggleBuffer'
+    silent exec 'redraw!'
 endfunction
 
 " ======================= Format ========================
