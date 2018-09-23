@@ -20,6 +20,7 @@ bind 'set show-all-if-ambiguous on'
 bind 'set completion-ignore-case on'
 bind 'TAB:menu-complete'
 
+alias mkdir='mkdir -p'
 alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'

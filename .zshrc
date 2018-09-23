@@ -101,6 +101,7 @@ source $ZSH/oh-my-zsh.sh
 
 export PATH=$PATH:$HOME/.local/bin
 
+alias mkdir='mkdir -p'
 alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
