@@ -21,17 +21,28 @@ Plug 'sirver/ultisnips'
 Plug 'honza/vim-snippets'
 call plug#end()
 
+" ==================== Settings =========================
+let g:EfficientMode = 0
+let g:LightTheme = 1
+let g:UsePython3 = 0
+
 " ===================== Themes ==========================
 set t_Co=256
-" set background=dark
-" colorscheme on
-" let g:airline_theme='onedark'
 let g:airline#extensions#tabline#enabled=1
-set background=light
-colorscheme solarized
-let g:airline_theme='solarized'
-let g:solarized_termcolors=256
-
+if g:LightTheme == 0
+    set background=dark
+    let g:airline_theme='onedark'
+    colorscheme one
+else
+    set background=light
+    let g:airline_theme='solarized'
+    let g:solarized_termcolors=256
+    colorscheme solarized
+    highlight link EasyMotionTarget Search
+    highlight link EasyMotionShade Comment
+    highlight link EasyMotionTarget2First Search
+    highlight link EasyMotionTarget2Second Search
+endif
 
 " ====================== Shortcuts ======================
 let mapleader=';'
@@ -111,7 +122,6 @@ nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 
 " ======================= Basics ========================
-let g:EfficientMode = 0
 filetype on
 filetype indent on
 filetype plugin on
@@ -212,13 +222,15 @@ function! TogglePaste()
 endfunction
 
 " ======================= Format ========================
+set omnifunc=syntaxcomplete#Complete
+let g:formatters_python = ['yapf']
 augroup Format
     autocmd!
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    if g:UsePython3 == 1
+        autocmd FileType python set omnifunc=python3complete#Complete
+    endif
 augroup END
-let g:formatters_python = ['yapf']
-set omnifunc=syntaxcomplete#Complete
-" autocmd FileType python set omnifunc=python3complete#Complete
 let g:ale_python_flake8_args = '--ignore=E501'
 let g:ale_python_flake8_executable = 'flake8'
 let g:ale_python_flake8_options = '--ignore=E501'
@@ -284,7 +296,7 @@ let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
 let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|plugged|config|local|cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
-let g:ctrlp_cmd = 'CtrlP'
+let g:ctrlp_cmd = 'CtrlPMRUFiles'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
