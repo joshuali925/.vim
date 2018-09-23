@@ -20,17 +20,29 @@ Plug 'shougo/neosnippet.vim'
 Plug 'honza/vim-snippets'
 call plug#end()
 
+" ==================== Settings =========================
+let g:EfficientMode = 0
+let g:LightTheme = 1
+let g:UsePython3 = 0
+let g:EnablePreview = 0
+
 " ===================== Themes ==========================
 set t_Co=256
-" set background=dark
-" colorscheme on
-" let g:airline_theme='onedark'
 let g:airline#extensions#tabline#enabled=1
-set background=light
-colorscheme solarized
-let g:airline_theme='solarized'
-let g:solarized_termcolors=256
-
+if g:LightTheme == 0
+    set background=dark
+    let g:airline_theme='onedark'
+    colorscheme one
+else
+    set background=light
+    let g:airline_theme='solarized'
+    let g:solarized_termcolors=256
+    colorscheme solarized
+    highlight link EasyMotionTarget Search
+    highlight link EasyMotionShade Comment
+    highlight link EasyMotionTarget2First Search
+    highlight link EasyMotionTarget2Second Search
+endif
 
 " ====================== Shortcuts ======================
 let mapleader=';'
@@ -109,7 +121,6 @@ nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 
 " ======================= Basics ========================
-let g:EfficientMode = 0
 filetype on
 filetype indent on
 filetype plugin on
@@ -210,14 +221,17 @@ function! TogglePaste()
 endfunction
 
 " ======================= Format ========================
+set omnifunc=syntaxcomplete#Complete
+let g:formatters_python = ['yapf']
 augroup Format
     autocmd!
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    if g:UsePython3 == 1
+        autocmd FileType python set omnifunc=python3complete#Complete
+    endif
 augroup END
-let g:formatters_python = ['yapf']
-set omnifunc=syntaxcomplete#Complete
-" autocmd FileType python set omnifunc=python3complete#Complete
-
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -267,10 +281,6 @@ augroup RunCode
     autocmd FileType java nnoremap <buffer> <F11> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
 
-" ==================== Syntastic ========================
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-
 " ============== NERDTree, ctrlp, motion ================
 let NERDTreeWinSize = 23
 let NERDTreeShowHidden = 1
@@ -285,8 +295,10 @@ let g:EasyMotion_smartcase = 1
 
 " =================== Neocomplcache =====================
 set completeopt=menuone
-" set completeopt=menuone,preview
-" set previewheight=2
+if g:EnablePreview == 1
+    set completeopt+=preview
+    set previewheight=2
+endif
 let g:neocomplcache_enable_at_startup = 1
 let g:neocomplcache_enable_ignore_case = 1
 let g:neocomplcache_enable_fuzzy_completion = 1
