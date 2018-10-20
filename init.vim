@@ -8,6 +8,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
+Plug 'godlygeek/tabular'
 Plug 'easymotion/vim-easymotion'
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'jiangmiao/auto-pairs'
@@ -105,6 +106,9 @@ inoremap <C-e> <C-o>e
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
+nnoremap <Leader>= :Tabularize /=<CR>
+nnoremap <Leader>\ :Tabularize /\|<CR>
+nnoremap <Leader>, :Tabularize /,\zs<CR>
 nnoremap <leader>j J
 nnoremap <leader>k gk
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
@@ -231,9 +235,9 @@ augroup Format
         autocmd FileType python set omnifunc=python3complete#Complete
     endif
 augroup END
-let g:ale_python_flake8_args = '--ignore=E501'
 let g:ale_python_flake8_executable = 'flake8'
-let g:ale_python_flake8_options = '--ignore=E501'
+let g:ale_python_flake8_args = '--ignore=W291,W293,E261,E302,E305,E501'
+let g:ale_python_flake8_options = '--ignore=W291,W293,E261,E302,E305,E501'
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
