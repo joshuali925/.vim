@@ -82,11 +82,10 @@ vnoremap > >gv
 nnoremap Y y$
 nnoremap , ;
 nnoremap ;, ,
-nmap <leader>f <Plug>(easymotion-bd-w)
-nmap <leader>F <Plug>(easymotion-bd-f)
 inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
+nnoremap gcc :Commentary<CR>
 inoremap <CR> <CR><Space><BS>
 nnoremap <C-j> gj
 vnoremap <C-j> gj
@@ -105,6 +104,8 @@ inoremap <C-e> <C-o>e
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
+nmap <leader>f <Plug>(easymotion-bd-w)
+nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <Leader>= :Tabularize /=<CR>
 nnoremap <Leader>\ :Tabularize /\|<CR>
 nnoremap <Leader>, :Tabularize /,\zs<CR>
