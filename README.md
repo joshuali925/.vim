@@ -32,6 +32,5 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/
 
 ## Set up python
 ```bash
-pip install --user flake8
-pip install --user yapf
+pip install --user flake8 yapf rope
 ```
