@@ -82,11 +82,10 @@ vnoremap > >gv
 nnoremap Y y$
 nnoremap , ;
 nnoremap ;, ,
-nmap <leader>f <Plug>(easymotion-bd-w)
-nmap <leader>F <Plug>(easymotion-bd-f)
 inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
+nnoremap gcc :Commentary<CR>
 inoremap <CR> <CR><Space><BS>
 nnoremap <C-j> gj
 vnoremap <C-j> gj
@@ -106,6 +105,8 @@ inoremap <C-e> <C-o>e
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
+nmap <leader>f <Plug>(easymotion-bd-w)
+nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <Leader>= :Tabularize /=<CR>
 nnoremap <Leader>\ :Tabularize /\|<CR>
 nnoremap <Leader>, :Tabularize /,\zs<CR>
@@ -236,8 +237,7 @@ augroup Format
     endif
 augroup END
 let g:ale_python_flake8_executable = 'flake8'
-let g:ale_python_flake8_args = '--ignore=W291,W293,E261,E302,E305,E501'
-let g:ale_python_flake8_options = '--ignore=W291,W293,E261,E302,E305,E501'
+let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -298,7 +298,7 @@ let NERDTreeShowHidden = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
-let g:ctrlp_custom_ignore = '\v[\/]\.(tmp|git|oh-my-zsh|plugged|config|local|cache)$'
+let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_cmd = 'CtrlP'
 let g:ctrlp_show_hidden = 1
