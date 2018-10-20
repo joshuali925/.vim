@@ -8,6 +8,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
+Plug 'godlygeek/tabular'
 Plug 'easymotion/vim-easymotion'
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'jiangmiao/auto-pairs'
@@ -104,6 +105,9 @@ inoremap <C-e> <C-o>e
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
+nnoremap <Leader>= :Tabularize /=<CR>
+nnoremap <Leader>\ :Tabularize /\|<CR>
+nnoremap <Leader>, :Tabularize /,\zs<CR>
 nnoremap <leader>j J
 nnoremap <leader>k gk
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
