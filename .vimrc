@@ -1,31 +1,37 @@
+" ==================== Settings =========================
+let g:EfficientMode = 0
+let g:AllExtensions = 1
+let g:LightTheme = 1
+let g:UsePython3 = 0
+let g:EnablePreview = 0
+
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
-Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary', { 'on': 'Commentary' }
-Plug 'tpope/vim-surround'
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
-Plug 'easymotion/vim-easymotion'
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'jiangmiao/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
-Plug 'scrooloose/syntastic'
-Plug 'shougo/neocomplcache.vim'
-Plug 'shougo/neosnippet.vim'
-Plug 'honza/vim-snippets'
+if g:AllExtensions == 1
+    Plug 'ctrlpvim/ctrlp.vim'
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
+    Plug 'tpope/vim-repeat'
+    Plug 'tpope/vim-surround'
+    Plug 'easymotion/vim-easymotion'
+    Plug 'scrooloose/syntastic'
+    Plug 'shougo/neocomplcache.vim'
+    Plug 'shougo/neosnippet.vim'
+    Plug 'honza/vim-snippets'
+else
+    Plug 'ervandew/supertab'
+    set statusline=%<%f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
+endif
 call plug#end()
-
-" ==================== Settings =========================
-let g:EfficientMode = 0
-let g:LightTheme = 1
-let g:UsePython3 = 0
-let g:EnablePreview = 0
 
 " ===================== Themes ==========================
 set t_Co=256
@@ -73,10 +79,10 @@ imap <F12> <C-o><F12>
 nnoremap <F12> :call TogglePaste()<CR>
 nnoremap 0 ^
 nnoremap - $
-nnoremap H :wincmd h<CR>
-nnoremap J :wincmd j<CR>
-nnoremap K :wincmd k<CR>
-nnoremap L :wincmd l<CR>
+nnoremap J gj
+vnoremap J gj
+nnoremap K gk
+vnoremap K gk
 vnoremap < <gv
 vnoremap > >gv
 nnoremap Y y$
@@ -87,8 +93,6 @@ nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap gcc :Commentary<CR>
 inoremap <CR> <CR><Space><BS>
-nnoremap <C-j> gj
-vnoremap <C-j> gj
 inoremap <C-c> <C-o>:stopinsert<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
@@ -106,11 +110,11 @@ imap <leader>r <F11>
 nmap <leader>r <F11>
 nmap <leader>f <Plug>(easymotion-bd-w)
 nmap <leader>F <Plug>(easymotion-bd-f)
+nnoremap <leader>j J
+nnoremap <leader>k K
 nnoremap <Leader>= :Tabularize /=<CR>
 nnoremap <Leader>\ :Tabularize /\|<CR>
 nnoremap <Leader>, :Tabularize /,\zs<CR>
-nnoremap <leader>j J
-nnoremap <leader>k gk
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
 inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
@@ -299,25 +303,27 @@ let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
 " =================== Neocomplcache =====================
-set completeopt=menuone
-if g:EnablePreview == 1
-    set completeopt+=preview
-    set previewheight=2
+if g:AllExtensions == 1
+    set completeopt=menuone
+    if g:EnablePreview == 1
+        set completeopt+=preview
+        set previewheight=2
+    endif
+    let g:neocomplcache_enable_at_startup = 1
+    let g:neocomplcache_enable_ignore_case = 1
+    let g:neocomplcache_enable_fuzzy_completion = 1
+    " let g:neocomplcache_enable_camel_case_completion = 1
+    " let g:neocomplcache_enable_underbar_completion = 1
+    inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>" . "\<C-u>"
+    inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
+    inoremap <expr><C-x>  pumvisible() ? neocomplcache#cancel_popup() : "\<C-x>"
+    inoremap <expr><CR> pumvisible() ? neocomplcache#smart_close_popup() : "\<CR>"
+    let g:neosnippet#disable_runtime_snippets = { '_' : 1 }
+    let g:neosnippet#enable_snipmate_compatibility = 1
+    let g:neosnippet#snippets_directory='~/.vim/plugged/vim-snippets/snippets'
+    imap <C-k> <Plug>(neosnippet_expand_or_jump)
+    smap <C-k> <Plug>(neosnippet_expand_or_jump)
+    xmap <C-k> <Plug>(neosnippet_expand_target)
+    imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+    smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 endif
-let g:neocomplcache_enable_at_startup = 1
-let g:neocomplcache_enable_ignore_case = 1
-let g:neocomplcache_enable_fuzzy_completion = 1
-" let g:neocomplcache_enable_camel_case_completion = 1
-" let g:neocomplcache_enable_underbar_completion = 1
-inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>" . "\<C-u>"
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
-inoremap <expr><C-x>  pumvisible() ? neocomplcache#cancel_popup() : "\<C-x>"
-inoremap <expr><CR> pumvisible() ? neocomplcache#smart_close_popup() : "\<CR>"
-let g:neosnippet#disable_runtime_snippets = { '_' : 1 }
-let g:neosnippet#enable_snipmate_compatibility = 1
-let g:neosnippet#snippets_directory='~/.vim/plugged/vim-snippets/snippets'
-imap <C-k> <Plug>(neosnippet_expand_or_jump)
-smap <C-k> <Plug>(neosnippet_expand_or_jump)
-xmap <C-k> <Plug>(neosnippet_expand_target)
-imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
