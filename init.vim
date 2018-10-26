@@ -1,31 +1,37 @@
+" ==================== Settings =========================
+let g:EfficientMode = 0
+let g:AllExtensions = 1
+let g:LightTheme = 1
+let g:UsePython3 = 0
+
 " ===================== Plugins =========================
 call plug#begin('~/.config/nvim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
-Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary', { 'on': 'Commentary' }
-Plug 'tpope/vim-surround'
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
-Plug 'easymotion/vim-easymotion'
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'jiangmiao/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
-Plug 'w0rp/ale', { 'for': 'python' }
-Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
-Plug 'sirver/ultisnips'
-Plug 'honza/vim-snippets'
+if g:AllExtensions == 1
+    Plug 'ctrlpvim/ctrlp.vim'
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
+    Plug 'tpope/vim-repeat'
+    Plug 'tpope/vim-surround'
+    Plug 'easymotion/vim-easymotion'
+    Plug 'w0rp/ale', { 'for': 'python' }
+    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
+    Plug 'sirver/ultisnips'
+    Plug 'honza/vim-snippets'
+else
+    Plug 'ervandew/supertab'
+    set statusline=%<%f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
+endif
 call plug#end()
-
-" ==================== Settings =========================
-let g:EfficientMode = 0
-let g:LightTheme = 1
-let g:UsePython3 = 0
 
 " ===================== Themes ==========================
 set t_Co=256
@@ -73,10 +79,10 @@ imap <F12> <C-o><F12>
 nnoremap <F12> :call TogglePaste()<CR>
 nnoremap 0 ^
 nnoremap - $
-nnoremap H :wincmd h<CR>
-nnoremap J :wincmd j<CR>
-nnoremap K :wincmd k<CR>
-nnoremap L :wincmd l<CR>
+nnoremap J gj
+vnoremap J gj
+nnoremap K gk
+vnoremap K gk
 vnoremap < <gv
 vnoremap > >gv
 nnoremap Y y$
@@ -87,8 +93,6 @@ nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap gcc :Commentary<CR>
 inoremap <CR> <CR><Space><BS>
-nnoremap <C-j> gj
-vnoremap <C-j> gj
 inoremap <C-c> <C-o>:stopinsert<CR>
 nnoremap <C-c> :AsyncStop!<CR>
 inoremap <C-l> <C-o>:stopinsert<CR>
@@ -107,11 +111,11 @@ imap <leader>r <F11>
 nmap <leader>r <F11>
 nmap <leader>f <Plug>(easymotion-bd-w)
 nmap <leader>F <Plug>(easymotion-bd-f)
+nnoremap <leader>j J
+nnoremap <leader>k K
 nnoremap <Leader>= :Tabularize /=<CR>
 nnoremap <Leader>\ :Tabularize /\|<CR>
 nnoremap <Leader>, :Tabularize /,\zs<CR>
-nnoremap <leader>j J
-nnoremap <leader>k gk
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
 inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
