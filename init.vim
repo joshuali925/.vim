@@ -3,12 +3,15 @@ let g:EfficientMode = 0
 let g:AllExtensions = 1
 let g:LightTheme = 1
 let g:UsePython3 = 0
+let g:EnablePreview = 0
 
 " ===================== Plugins =========================
 call plug#begin('~/.config/nvim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'ctrlpvim/ctrlp.vim', { 'on': 'CtrlP' }
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
 Plug 'tpope/vim-commentary', { 'on': 'Commentary' }
+Plug 'tpope/vim-repeat'
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
 Plug 'jiangmiao/auto-pairs'
@@ -16,11 +19,10 @@ Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
+Plug 'dahu/vim-fanfingtastic'
 if g:AllExtensions == 1
-    Plug 'ctrlpvim/ctrlp.vim'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
-    Plug 'tpope/vim-repeat'
     Plug 'tpope/vim-surround'
     Plug 'easymotion/vim-easymotion'
     Plug 'w0rp/ale', { 'for': 'python' }
@@ -28,7 +30,6 @@ if g:AllExtensions == 1
     Plug 'sirver/ultisnips'
     Plug 'honza/vim-snippets'
 else
-    Plug 'ervandew/supertab'
     set statusline=%<%f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
 call plug#end()
@@ -77,24 +78,29 @@ nnoremap <F6> :call ToggleDiff()<CR>
 nnoremap <F7> :call ToggleFold()<CR>
 imap <F12> <C-o><F12>
 nnoremap <F12> :call TogglePaste()<CR>
+nmap , <Plug>fanfingtastic_;
+nmap m <Plug>fanfingtastic_,
 nnoremap 0 ^
 nnoremap - $
 nnoremap J gj
 vnoremap J gj
 nnoremap K gk
 vnoremap K gk
+nnoremap < <<
 vnoremap < <gv
+nnoremap > >>
 vnoremap > >gv
 nnoremap Y y$
-nnoremap , ;
-nnoremap ;, ,
 inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
+nnoremap Q @q
 nnoremap gcc :Commentary<CR>
+vnoremap gcc :Commentary<CR>
 inoremap <CR> <CR><Space><BS>
 inoremap <C-c> <C-o>:stopinsert<CR>
 nnoremap <C-c> :AsyncStop!<CR>
+vnoremap <C-c> <Esc>
 inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
 nnoremap <C-l> :nohlsearch <bar> let @/='QwQ'<CR><C-l>
@@ -103,9 +109,7 @@ imap <C-f> <Esc><C-f>
 nnoremap <C-f> :Autoformat<CR>
 imap <C-g> <Esc><C-g>
 nnoremap <C-g> :%s/\(\n\n\)\n\+/\1/<CR>
-inoremap <C-j> <C-o>A
-inoremap <C-b> <C-o>b
-inoremap <C-e> <C-o>e
+nnoremap <C-P> :CtrlP<CR>
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
@@ -113,9 +117,8 @@ nmap <leader>f <Plug>(easymotion-bd-w)
 nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <leader>j J
 nnoremap <leader>k K
-nnoremap <Leader>= :Tabularize /=<CR>
-nnoremap <Leader>\ :Tabularize /\|<CR>
-nnoremap <Leader>, :Tabularize /,\zs<CR>
+nnoremap <leader>= :Tabularize /=<CR>
+nnoremap <leader>\ :Tabularize /\|<CR>
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
 inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
@@ -304,23 +307,34 @@ let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
 let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
-let g:ctrlp_cmd = 'CtrlP'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
 " ================== YouCompleteMe ======================
 set completeopt=menuone
-nnoremap <leader>g :YcmCompleter GoToDefinitionElseDeclaration<CR>
-nnoremap <leader>a :YcmCompleter FixIt<CR>
-let g:ycm_global_ycm_extra_conf='~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
-" also add to .ycm_extra_conf.py:
-" '-isystem',
-" '/usr/include',
-let g:ycm_python_binary_path = '/usr/bin/python3'
-let g:ycm_key_list_stop_completion = ['<C-x>']
-let g:UltiSnipsExpandTrigger='<C-k>'
-let g:UltiSnipsJumpForwardTrigger='<TAB>'
-let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
+if g:EnablePreview == 1
+    set completeopt+=preview
+    set previewheight=2
+endif
+if g:AllExtensions == 1
+    nnoremap <leader>g :YcmCompleter GoToDefinitionElseDeclaration<CR>
+    nnoremap <leader>a :YcmCompleter FixIt<CR>
+    let g:ycm_global_ycm_extra_conf='~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+    " also add to .ycm_extra_conf.py:
+    " '-isystem',
+    " '/usr/include',
+    let g:ycm_python_binary_path = '/usr/bin/python3'
+    let g:ycm_key_list_stop_completion = ['<C-x>']
+    let g:UltiSnipsExpandTrigger='<C-k>'
+    let g:UltiSnipsJumpForwardTrigger='<TAB>'
+    let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
+else
+    inoremap <expr><TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-n>" : pumvisible() ? "\<C-n>" : "\<TAB>"
+    inoremap <expr><S-TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-p>" : pumvisible() ? "\<C-p>" : "\<C-d>"
+    inoremap <expr><C-@> pumvisible() ? "\<C-n>" : "\<C-x>". "\<C-o>". "\<C-p>"
+    inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
+    inoremap <expr><C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+endif
 
 " =================== Terminal ==========================
 tnoremap <C-k> <C-\><C-n>:wincmd k<CR>
