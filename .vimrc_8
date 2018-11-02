@@ -282,15 +282,16 @@ function! RunShellCommand(cmdline)
     setlocal nomodifiable
     exec 'wincmd k | wincmd j | wincmd k'
 endfunction
+imap <F9> <Esc><F9>
 imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
 let g:asyncrun_open = 12
 augroup RunCode
     autocmd!
-    " autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && python %'. b:args<CR>
-    " autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
-    " autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
-    " autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F9> :update <bar> exec '!clear && python %'. b:args<CR>
+    autocmd FileType c nnoremap <buffer> <F9> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType cpp nnoremap <buffer> <F9> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType java nnoremap <buffer> <F9> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
     autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec 'AsyncRun -raw python %'. b:args<CR>
     autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec 'AsyncRun gcc % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> exec 'AsyncRun g++ % -o %< -g && ./%<'. b:args<CR>
