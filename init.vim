@@ -1,7 +1,7 @@
 " ==================== Settings =========================
 let g:EfficientMode = 0
 let g:AllExtensions = 1
-let g:LightTheme = 1
+let g:LightTheme = 0
 let g:UsePython3 = 0
 let g:EnablePreview = 0
 
@@ -72,7 +72,7 @@ imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
-nnoremap <F4> :let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'<CR>
+nnoremap <F4> *N
 nnoremap <F5> :TagbarToggle<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
 nnoremap <F7> :call ToggleFold()<CR>
@@ -95,11 +95,12 @@ inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap Q @q
+nnoremap gf <C-w>gf
 nnoremap gcc :Commentary<CR>
 vnoremap gcc :Commentary<CR>
 inoremap <CR> <CR><Space><BS>
-inoremap <C-c> <C-o>:stopinsert<CR>
 nnoremap <C-c> :AsyncStop!<CR>
+inoremap <C-c> <C-o>:stopinsert<CR>
 vnoremap <C-c> <Esc>
 inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
@@ -119,6 +120,7 @@ nnoremap <leader>j J
 nnoremap <leader>k K
 nnoremap <leader>= :Tabularize /=<CR>
 nnoremap <leader>\ :Tabularize /\|<CR>
+nnoremap <Leader>, :Tabularize /,\zs<CR>
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
 inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
@@ -315,6 +317,7 @@ set completeopt=menuone
 if g:EnablePreview == 1
     set completeopt+=preview
     set previewheight=2
+    autocmd CompleteDone *
 endif
 if g:AllExtensions == 1
     nnoremap <leader>g :YcmCompleter GoToDefinitionElseDeclaration<CR>
@@ -334,6 +337,7 @@ else
     inoremap <expr><C-@> pumvisible() ? "\<C-n>" : "\<C-x>". "\<C-o>". "\<C-p>"
     inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
     inoremap <expr><C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    imap <expr><C-c> pumvisible() ? "\<C-e>" . "\<C-c>" : "\<C-c>"
 endif
 
 " =================== Terminal ==========================
