@@ -94,6 +94,7 @@ inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap Q @q
+nnoremap gf <C-w>gf
 nnoremap gcc :Commentary<CR>
 vnoremap gcc :Commentary<CR>
 inoremap <CR> <CR><Space><BS>
@@ -117,6 +118,7 @@ nnoremap <leader>j J
 nnoremap <leader>k K
 nnoremap <leader>= :Tabularize /=<CR>
 nnoremap <leader>\ :Tabularize /\|<CR>
+nnoremap <Leader>, :Tabularize /,\zs<CR>
 inoremap <leader>( <C-o>:stopinsert<CR>xEp
 inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
@@ -308,6 +310,7 @@ set completeopt=menuone
 if g:EnablePreview == 1
     set completeopt+=preview
     set previewheight=2
+    autocmd CompleteDone *
 endif
 if g:AllExtensions == 1
     let g:neocomplcache_enable_at_startup = 1
@@ -333,4 +336,5 @@ else
     inoremap <expr><C-@> pumvisible() ? "\<C-n>" : "\<C-x>". "\<C-o>". "\<C-p>"
     inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
     inoremap <expr><C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    imap <expr><C-c> pumvisible() ? "\<C-e>" . "\<C-c>" : "\<C-c>"
 endif
