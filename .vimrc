@@ -97,8 +97,11 @@ nnoremap Q @q
 nnoremap gf <C-w>gf
 nnoremap gcc :Commentary<CR>
 vnoremap gcc :Commentary<CR>
+vnoremap " c"<C-r><C-p>""<Esc>
+vnoremap ' c'<C-r><C-p>"'<Esc>
+vnoremap ( c(<C-r><C-p>")<Esc>
 inoremap <CR> <CR><Space><BS>
-inoremap <C-c> <C-o>:stopinsert<CR>
+inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
