@@ -29,7 +29,7 @@ if g:AllExtensions == 1
     Plug 'shougo/neosnippet.vim'
     Plug 'honza/vim-snippets'
 else
-    set statusline=%<%f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
+    set statusline=%<(%{mode()})\ %f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
 call plug#end()
 
@@ -122,8 +122,6 @@ nnoremap <leader>k K
 nnoremap <leader>= :Tabularize /=<CR>
 nnoremap <leader>\ :Tabularize /\|<CR>
 nnoremap <Leader>, :Tabularize /,\zs<CR>
-inoremap <leader>( <C-o>:stopinsert<CR>xEp
-inoremap <leader>) <C-o>:stopinsert<CR>x$p
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
@@ -146,14 +144,12 @@ set backspace=eol,start,indent
 set mouse=nv
 set numberwidth=2
 set number
-if g:EfficientMode == 0
-    set relativenumber
-    set cursorline
-    " set cursorcolumn
-endif
 augroup LineNum_NoAutoComment_RestorePos_AutoSource
     autocmd!
     if g:EfficientMode == 0
+        set relativenumber
+        set cursorline
+        " set cursorcolumn
         autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
         autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
     endif
@@ -190,7 +186,7 @@ set autoread
 set history=500
 set sessionoptions-=buffer
 set undofile
-set undodir=$HOME/.cache/vim/undo
+set undodir=~/.cache/vim/undo
 set undolevels=1000
 set undoreload=10000
 set lazyredraw
@@ -198,6 +194,10 @@ set noswapfile
 set nowritebackup
 set nobackup
 let g:netrw_dirhistmax=0
+let g:netrw_banner=0
+let g:netrw_browse_split=2
+let g:netrw_winsize=23
+let g:netrw_liststyle=3
 
 " =================== Compare ===========================
 let g:DiffOn = 0
@@ -226,7 +226,10 @@ endfunction
 " ======================= Paste =========================
 function! TogglePaste()
     if &paste
-        set nopaste number relativenumber
+        if g:EfficientMode == 0:
+            set relativenumber
+        endif
+        set nopaste number
         set mouse=nv
     else
         set paste nonumber norelativenumber
@@ -322,7 +325,7 @@ if g:AllExtensions == 1
     let g:neocomplcache_enable_fuzzy_completion = 1
     " let g:neocomplcache_enable_camel_case_completion = 1
     " let g:neocomplcache_enable_underbar_completion = 1
-    inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>" . "\<C-u>"
+    inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>". "\<C-u>"
     inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
     inoremap <expr><C-x>  pumvisible() ? neocomplcache#cancel_popup() : "\<C-x>"
     inoremap <expr><CR> pumvisible() ? neocomplcache#smart_close_popup() : "\<CR>"
@@ -340,5 +343,5 @@ else
     inoremap <expr><C-@> pumvisible() ? "\<C-n>" : "\<C-x>". "\<C-o>". "\<C-p>"
     inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
     inoremap <expr><C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    imap <expr><C-c> pumvisible() ? "\<C-e>" . "\<C-c>" : "\<C-c>"
+    imap <expr><C-c> pumvisible() ? "\<C-y>" . "\<C-c>" : "\<C-c>"
 endif
