@@ -18,6 +18,7 @@ export PS1='\[\e[96m\]\W \[\e[93m\]$ \[\e[0m\]'
 export PATH=$PATH:$HOME/.local/bin
 LS_COLORS=$LS_COLORS:'di=0;36'
 
+stty -ixon
 shopt -s autocd
 shopt -s cdspell
 
