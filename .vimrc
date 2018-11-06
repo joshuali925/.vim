@@ -109,8 +109,9 @@ nnoremap <C-l> :nohlsearch <bar> let @/='QwQ'<CR><C-l>
 nnoremap <C-b> :NERDTreeToggle<CR>
 imap <C-f> <Esc><C-f>
 nnoremap <C-f> :Autoformat<CR>
+vnoremap <C-f> :'<,'>Autoformat<CR>$
 imap <C-g> <Esc><C-g>
-nnoremap <C-g> :%s/\(\n\n\)\n\+/\1/<CR>
+nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nnoremap <C-P> :CtrlP<CR>
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
@@ -124,6 +125,7 @@ nnoremap <leader>\ :Tabularize /\|<CR>
 nnoremap <Leader>, :Tabularize /,\zs<CR>
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
 nnoremap <leader>w :w!<CR>
+nnoremap <leader>W :w !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :q<CR>
@@ -240,15 +242,11 @@ function! TogglePaste()
 endfunction
 
 " ======================= Format ========================
-set omnifunc=syntaxcomplete#Complete
-let g:formatters_python = ['yapf']
 augroup Format
     autocmd!
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    if g:UsePython3 == 1
-        autocmd FileType python set omnifunc=python3complete#Complete
-    endif
 augroup END
+let g:formatters_python = ['yapf']
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 
@@ -306,18 +304,21 @@ let NERDTreeWinSize = 23
 let NERDTreeShowHidden = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
 let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
-" =================== Neocomplcache =====================
+" ==================== AutoComplete =====================
 set completeopt=menuone
 if g:EnablePreview == 1
     set completeopt+=preview
     set previewheight=2
-    autocmd CompleteDone *
+endif
+set omnifunc=syntaxcomplete#Complete
+if g:UsePython3 == 1
+    autocmd FileType python set omnifunc=python3complete#Complete
 endif
 if g:AllExtensions == 1
     let g:neocomplcache_enable_at_startup = 1
@@ -340,8 +341,8 @@ if g:AllExtensions == 1
 else
     inoremap <expr><TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-n>" : pumvisible() ? "\<C-n>" : "\<TAB>"
     inoremap <expr><S-TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-p>" : pumvisible() ? "\<C-p>" : "\<C-d>"
-    inoremap <expr><C-@> pumvisible() ? "\<C-n>" : "\<C-x>". "\<C-o>". "\<C-p>"
+    inoremap <expr><C-@> pumvisible() ? "\<C-e>". "\<C-x>". "\<C-o>". "\<C-p>" : "\<C-x>". "\<C-o>". "\<C-p>"
     inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
     inoremap <expr><C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    imap <expr><C-c> pumvisible() ? "\<C-y>" . "\<C-c>" : "\<C-c>"
+    imap <expr><C-c> pumvisible() ? "\<C-y>". "\<C-c>" : "\<C-c>"
 endif
