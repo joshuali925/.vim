@@ -3,6 +3,7 @@ let g:EfficientMode = 0
 let g:AllExtensions = 1
 let g:LightTheme = 0
 let g:UsePython3 = 0
+let g:YouCompleteMe = 1
 let g:EnablePreview = 0
 
 " ===================== Plugins =========================
@@ -26,11 +27,13 @@ if g:AllExtensions == 1
     Plug 'tpope/vim-surround'
     Plug 'easymotion/vim-easymotion'
     Plug 'w0rp/ale', { 'for': 'python' }
+else
+    set statusline=%<(%{mode()})\ %f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
+endif
+if g:YouCompleteMe == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
     Plug 'sirver/ultisnips'
     Plug 'honza/vim-snippets'
-else
-    set statusline=%<(%{mode()})\ %f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
 call plug#end()
 
@@ -111,8 +114,9 @@ nnoremap <C-l> :nohlsearch <bar> let @/='QwQ'<CR><C-l>
 nnoremap <C-b> :NERDTreeToggle<CR>
 imap <C-f> <Esc><C-f>
 nnoremap <C-f> :Autoformat<CR>
+vnoremap <C-f> :'<,'>Autoformat<CR>$
 imap <C-g> <Esc><C-g>
-nnoremap <C-g> :%s/\(\n\n\)\n\+/\1/<CR>
+nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nnoremap <C-P> :CtrlP<CR>
 inoremap <M-o> <Esc>o
 imap <leader>r <F11>
@@ -127,6 +131,7 @@ nnoremap <leader>\ :Tabularize /\|<CR>
 nnoremap <Leader>, :Tabularize /,\zs<CR>
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
 nnoremap <leader>w :w!<CR>
+nnoremap <leader>W :w !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :q<CR>
@@ -243,15 +248,11 @@ function! TogglePaste()
 endfunction
 
 " ======================= Format ========================
-set omnifunc=syntaxcomplete#Complete
-let g:formatters_python = ['yapf']
 augroup Format
     autocmd!
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    if g:UsePython3 == 1
-        autocmd FileType python set omnifunc=python3complete#Complete
-    endif
 augroup END
+let g:formatters_python = ['yapf']
 let g:ale_python_flake8_executable = 'flake8'
 let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
 
@@ -299,14 +300,14 @@ augroup RunCode
     autocmd FileType c nnoremap <buffer> <F9> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType cpp nnoremap <buffer> <F9> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType java nnoremap <buffer> <F9> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec 'AsyncRun -raw python %'. b:args<CR>
-    autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec 'AsyncRun gcc % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> exec 'AsyncRun g++ % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec 'AsyncRun javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F11> :update <bar> call RunShellCommand('python %'. b:args)<CR>
-    autocmd FileType c nnoremap <buffer> <F11> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
-    autocmd FileType cpp nnoremap <buffer> <F11> :update <bar> call RunShellCommand('g++ % -o %< -g && ./%<'. b:args)<CR>
-    autocmd FileType java nnoremap <buffer> <F11> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
+    autocmd FileType python nnoremap <buffer> <F10> :update <bar> call RunShellCommand('python %'. b:args)<CR>
+    autocmd FileType c nnoremap <buffer> <F10> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
+    autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> call RunShellCommand('g++ % -o %< -g && ./%<'. b:args)<CR>
+    autocmd FileType java nnoremap <buffer> <F10> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
+    autocmd FileType python nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun -raw python %'. b:args<CR>
+    autocmd FileType c nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType cpp nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun g++ % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType java nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun javac % && java %<'. b:args<CR>
 augroup END
 
 " ============== NERDTree, ctrlp, motion ================
@@ -314,21 +315,20 @@ let NERDTreeWinSize = 23
 let NERDTreeShowHidden = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
 let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
-" ================== YouCompleteMe ======================
+" ==================== AutoComplete =====================
 set completeopt=menuone
 if g:EnablePreview == 1
     set completeopt+=preview
     set previewheight=2
-    autocmd CompleteDone *
 endif
-if g:AllExtensions == 1
-    nnoremap <leader>g :YcmCompleter GoToDefinitionElseDeclaration<CR>
+if g:YouCompleteMe == 1
+    nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     let g:ycm_global_ycm_extra_conf='~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
     " also add to .ycm_extra_conf.py:
@@ -340,16 +340,20 @@ if g:AllExtensions == 1
     let g:UltiSnipsJumpForwardTrigger='<TAB>'
     let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
 else
+    set omnifunc=syntaxcomplete#Complete
+    if g:UsePython3 == 1
+        autocmd FileType python set omnifunc=python3complete#Complete
+    endif
     inoremap <expr><TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-n>" : pumvisible() ? "\<C-n>" : "\<TAB>"
     inoremap <expr><S-TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-p>" : pumvisible() ? "\<C-p>" : "\<C-d>"
-    inoremap <expr><C-@> pumvisible() ? "\<C-n>" : "\<C-x>". "\<C-o>". "\<C-p>"
+    inoremap <expr><C-@> pumvisible() ? "\<C-e>". "\<C-x>". "\<C-o>". "\<C-p>" : "\<C-x>". "\<C-o>". "\<C-p>"
     inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
     inoremap <expr><C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    imap <expr><C-c> pumvisible() ? "\<C-y>" . "\<C-c>" : "\<C-c>"
+    imap <expr><C-c> pumvisible() ? "\<C-y>". "\<C-c>" : "\<C-c>"
 endif
 
 " =================== Terminal ==========================
-tnoremap <C-k> <C-\><C-n>:wincmd k<CR>
+tnoremap <C-k> <C-\><C-n><C-w>5k
 tnoremap <Esc> <C-\><C-n>
 tmap <F1> <C-\><C-n><F1>
 tmap <F2> <C-\><C-n><F2>
