@@ -75,8 +75,10 @@ nnoremap <F4> *N
 nnoremap <F5> :TagbarToggle<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
 nnoremap <F7> :call ToggleFold()<CR>
-imap <F12> <C-o><F12>
-nnoremap <F12> :call TogglePaste()<CR>
+imap <F8> <C-o><F8>
+nnoremap <F8> :call TogglePreview()<CR>
+imap <F9> <C-o><F9>
+nnoremap <F9> :call TogglePaste()<CR>
 nmap , <Plug>fanfingtastic_;
 nmap m <Plug>fanfingtastic_,
 nnoremap 0 ^
@@ -142,6 +144,9 @@ filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
+let &t_SI.="\e[6 q"
+let &t_SR.="\e[4 q"
+let &t_EI.="\e[2 q"
 set backspace=eol,start,indent
 set mouse=nv
 set numberwidth=2
@@ -284,15 +289,16 @@ function! RunShellCommand(cmdline)
     setlocal nomodifiable
     exec 'wincmd k | wincmd j | wincmd k'
 endfunction
-imap <F9> <Esc><F9>
 imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
+imap <F12> <Esc><F12>
+let g:asyncrun_open = 12
 augroup RunCode
     autocmd!
-    autocmd FileType python nnoremap <buffer> <F9> :update <bar> exec '!clear && python %'. b:args<CR>
-    autocmd FileType c nnoremap <buffer> <F9> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType cpp nnoremap <buffer> <F9> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType java nnoremap <buffer> <F9> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && python %'. b:args<CR>
+    autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
     autocmd FileType python nnoremap <buffer> <F11> :update <bar> call RunShellCommand('python %'. b:args)<CR>
     autocmd FileType c nnoremap <buffer> <F11> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
     autocmd FileType cpp nnoremap <buffer> <F11> :update <bar> call RunShellCommand('g++ % -o %< -g && ./%<'. b:args)<CR>
@@ -312,10 +318,19 @@ let g:EasyMotion_smartcase = 1
 
 " ==================== AutoComplete =====================
 set completeopt=menuone
-if g:EnablePreview == 1
-    set completeopt+=preview
-    set previewheight=2
-endif
+set previewheight=2
+
+function! TogglePreview()
+    if g:EnablePreview == 0
+        set completeopt+=preview
+        echo 'Preview on'
+    else
+        set completeopt-=preview
+        exec 'pclose'
+        echo 'Preview off'
+    endif
+    let g:EnablePreview = 1 - g:EnablePreview
+endfunction
 set omnifunc=syntaxcomplete#Complete
 if g:UsePython3 == 1
     autocmd FileType python set omnifunc=python3complete#Complete
