@@ -249,7 +249,7 @@ endfunction
 " ======================= Paste =========================
 function! TogglePaste()
     if &paste
-        if g:EfficientMode == 0:
+        if g:EfficientMode == 0
             set relativenumber
         endif
         set nopaste number
@@ -425,7 +425,7 @@ tnoremap <Esc> <C-\><C-n>
 tmap <F1> <C-\><C-n><F1>
 tmap <F2> <C-\><C-n><F2>
 tmap <F3> <C-\><C-n><F3>
-nnoremap <silent> <F9> :tabedit <bar> set nonumber norelativenumber nocursorline nocursorcolumn <bar> terminal<CR>
+" nnoremap <silent> <F9> :tabedit <bar> set nonumber norelativenumber nocursorline nocursorcolumn <bar> terminal<CR>
 autocmd BufWinEnter,WinEnter term://* startinsert
 autocmd BufLeave term://* stopinsert
 nnoremap <C-k> :call ToggleTerm()<CR>
