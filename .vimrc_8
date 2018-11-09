@@ -2,8 +2,8 @@
 let g:EfficientMode = 1
 let g:AllExtensions = 0
 let g:LightTheme = 1
-let g:UsePython3 = 0
-let g:YouCompleteMe = 1
+" Completion: 0 = default, 1 = YouCompleteMe, 2 = deoplete
+let g:Completion = 0
 let g:EnablePreview = 0
 
 " ===================== Plugins =========================
@@ -28,10 +28,23 @@ if g:AllExtensions == 1
     Plug 'easymotion/vim-easymotion'
     Plug 'w0rp/ale'
 else
-    set statusline=%<(%{mode()})\ %f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
+    set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
-if g:YouCompleteMe == 1
+if g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
+    Plug 'sirver/ultisnips'
+    Plug 'honza/vim-snippets'
+elseif g:Completion == 2
+    if has('nvim')
+        Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    else
+        Plug 'Shougo/deoplete.nvim'
+        Plug 'roxma/nvim-yarp'
+        Plug 'roxma/vim-hug-neovim-rpc'
+    endif
+    Plug 'Shougo/neco-vim'
+    Plug 'Shougo/neco-syntax'
+    Plug 'zchee/deoplete-jedi'
     Plug 'sirver/ultisnips'
     Plug 'honza/vim-snippets'
 endif
@@ -79,7 +92,7 @@ nnoremap <F4> *N
 nnoremap <F5> :TagbarToggle<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
 nnoremap <F7> :call ToggleFold()<CR>
-imap <F8> <C-o><F8>
+imap <F8> <ESC><F8>a
 nnoremap <F8> :call TogglePreview()<CR>
 imap <F9> <C-o><F9>
 nnoremap <F9> :call TogglePaste()<CR>
@@ -114,10 +127,9 @@ inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
 nnoremap <C-l> :nohlsearch <bar> let @/='QwQ'<CR><C-l>
 nnoremap <C-b> :NERDTreeToggle<CR>
-imap <C-f> <Esc><C-f>
+imap <C-f> <Esc>V<C-f>a
 nnoremap <C-f> :Autoformat<CR>
 vnoremap <C-f> :'<,'>Autoformat<CR>$
-imap <C-g> <Esc><C-g>
 nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nnoremap <C-P> :CtrlP<CR>
 inoremap <M-o> <Esc>o
@@ -127,10 +139,8 @@ nmap <leader>f <Plug>(easymotion-bd-w)
 nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <leader>j J
 nnoremap <leader>k K
+nnoremap <leader>T :Tabularize /
 nnoremap <leader>b :Lexplore<CR>
-nnoremap <leader>= :Tabularize /=<CR>
-nnoremap <leader>\ :Tabularize /\|<CR>
-nnoremap <Leader>, :Tabularize /,\zs<CR>
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
@@ -167,7 +177,7 @@ augroup LineNum_NoAutoComment_RestorePos_AutoSource
         autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
     endif
     autocmd FileType * setlocal formatoptions-=cro
-    autocmd FileType python inoremap <buffer> # X<C-h>#<Space>
+    autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
     autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
 augroup END
@@ -252,12 +262,22 @@ function! TogglePaste()
     silent exec 'redraw!'
 endfunction
 
+function! GetPasteStatus()
+    if &paste
+        return "[paste]"
+    else
+        return ""
+    endif
+endfunction
+
 " ======================= Format ========================
 augroup Format
     autocmd!
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
 augroup END
 let g:formatters_python = ['yapf']
+let g:ale_sign_column_always = 1
+let g:ale_lint_on_text_changed = 'normal'
 let g:ale_python_flake8_executable = 'flake8'
 let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
 
@@ -327,9 +347,6 @@ let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
 " ==================== AutoComplete =====================
-set completeopt=menuone
-set previewheight=2
-
 function! TogglePreview()
     if g:EnablePreview == 0
         set completeopt+=preview
@@ -342,30 +359,64 @@ function! TogglePreview()
     let g:EnablePreview = 1 - g:EnablePreview
 endfunction
 
-if g:YouCompleteMe == 1
-    inoremap <expr><CR> pumvisible() ? "\<ESC>a" : "\<CR>"
-    inoremap <expr><C-x> pumvisible() ? "\<C-e>". "\<ESC>a" : "\<C-x>"
+function! SimpleComplete()
+    if pumvisible()
+        return "\<C-n>"
+    endif
+    let column = col('.')
+    let line = getline('.')
+    if !(column>1 && strpart(line, column-2, 3)=~'^\w') && line[column-2] != '.'
+        return "\<TAB>"
+    endif
+    let substr = matchstr(strpart(line, -1, column+1), "[^ \t]*$")
+    echom substr
+    let has_period = match(substr, '\.') != -1
+    let has_slash = match(substr, '\/') != -1
+    if (!has_period && !has_slash)
+        return "\<C-n>"
+    elseif (has_slash)
+        return "\<C-x>\<C-f>"
+    else
+        return "\<C-x>\<C-o>"
+    endif
+endfunction
+
+set completeopt=menuone
+set previewheight=2
+let g:ycm_python_binary_path='/usr/bin/python'
+let g:ycm_path_to_python_interpreter='/usr/bin/python'
+let g:deoplete#sources#jedi#python_path='/usr/bin/python'
+
+if g:Completion == 0
+    set omnifunc=syntaxcomplete#Complete
+    inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : SimpleComplete()
+    inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
+    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
+elseif g:Completion == 1
+    inoremap <expr> <CR> pumvisible() ? "\<ESC>a" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<ESC>a" : "\<C-x>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     let g:ycm_global_ycm_extra_conf='~/.vim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
     " also add to .ycm_extra_conf.py:
     " '-isystem',
     " '/usr/include',
-    let g:ycm_python_binary_path = '/usr/bin/python3'
     let g:UltiSnipsExpandTrigger='<C-k>'
     let g:UltiSnipsJumpForwardTrigger='<TAB>'
     let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
-else
-    set omnifunc=syntaxcomplete#Complete
-    if g:UsePython3 == 1
-        autocmd FileType python set omnifunc=python3complete#Complete
-    endif
-    inoremap <expr><TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-n>" : pumvisible() ? "\<C-n>" : "\<TAB>"
-    inoremap <expr><S-TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-p>" : pumvisible() ? "\<C-p>" : "\<C-d>"
-    inoremap <expr><C-@> pumvisible() ? "\<C-e>". "\<C-x>". "\<C-o>". "\<C-p>" : "\<C-x>". "\<C-o>". "\<C-p>"
-    inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
-    inoremap <expr><C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    imap <expr><C-c> pumvisible() ? "\<C-y>". "\<C-c>" : "\<C-c>"
+elseif g:Completion == 2
+    inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+    inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
+    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    let g:deoplete#enable_at_startup=1
+    let g:UltiSnipsExpandTrigger='<C-k>'
+    let g:UltiSnipsJumpForwardTrigger='<TAB>'
+    let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
 endif
 
 " =================== Terminal ==========================

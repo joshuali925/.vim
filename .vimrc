@@ -2,8 +2,7 @@
 let g:EfficientMode = 0
 let g:AllExtensions = 1
 let g:LightTheme = 1
-let g:UsePython3 = 0
-let g:EnablePreview = 0
+let g:EnablePreview = 1
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
@@ -29,7 +28,7 @@ if g:AllExtensions == 1
     Plug 'shougo/neosnippet.vim'
     Plug 'honza/vim-snippets'
 else
-    set statusline=%<(%{mode()})\ %f\ %h%m%r%=%-14.(%c%V%)%l/%L\ %P
+    set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
 call plug#end()
 
@@ -75,7 +74,7 @@ nnoremap <F4> *N
 nnoremap <F5> :TagbarToggle<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
 nnoremap <F7> :call ToggleFold()<CR>
-imap <F8> <C-o><F8>
+imap <F8> <ESC><F8>a
 nnoremap <F8> :call TogglePreview()<CR>
 imap <F9> <C-o><F9>
 nnoremap <F9> :call TogglePaste()<CR>
@@ -109,10 +108,9 @@ inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
 nnoremap <C-l> :nohlsearch <bar> let @/='QwQ'<CR><C-l>
 nnoremap <C-b> :NERDTreeToggle<CR>
-imap <C-f> <Esc><C-f>
+imap <C-f> <Esc>V<C-f>a
 nnoremap <C-f> :Autoformat<CR>
 vnoremap <C-f> :'<,'>Autoformat<CR>$
-imap <C-g> <Esc><C-g>
 nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nnoremap <C-P> :CtrlP<CR>
 inoremap <M-o> <Esc>o
@@ -122,9 +120,7 @@ nmap <leader>f <Plug>(easymotion-bd-w)
 nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <leader>j J
 nnoremap <leader>k K
-nnoremap <leader>= :Tabularize /=<CR>
-nnoremap <leader>\ :Tabularize /\|<CR>
-nnoremap <Leader>, :Tabularize /,\zs<CR>
+nnoremap <leader>T :Tabularize /
 inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
 nnoremap <leader>w :w!<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
@@ -144,9 +140,9 @@ filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
-let &t_SI.="\e[6 q"
-let &t_SR.="\e[4 q"
-let &t_EI.="\e[2 q"
+" let &t_SI.="\e[6 q"
+" let &t_SR.="\e[4 q"
+" let &t_EI.="\e[2 q"
 set backspace=eol,start,indent
 set mouse=nv
 set numberwidth=2
@@ -161,7 +157,7 @@ augroup LineNum_NoAutoComment_RestorePos_AutoSource
         autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
     endif
     autocmd FileType * setlocal formatoptions-=cro
-	autocmd FileType python inoremap <buffer> # X<C-h>#<Space>
+	autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
     " autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
 augroup END
@@ -246,6 +242,14 @@ function! TogglePaste()
     silent exec 'redraw!'
 endfunction
 
+function! GetPasteStatus()
+    if &paste
+        return "[paste]"
+    else
+        return ""
+    endif
+endfunction
+
 " ======================= Format ========================
 augroup Format
     autocmd!
@@ -317,9 +321,6 @@ let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
 
 " ==================== AutoComplete =====================
-set completeopt=menuone
-set previewheight=2
-
 function! TogglePreview()
     if g:EnablePreview == 0
         set completeopt+=preview
@@ -331,11 +332,41 @@ function! TogglePreview()
     endif
     let g:EnablePreview = 1 - g:EnablePreview
 endfunction
+
+function! SimpleComplete()
+    if pumvisible()
+        return "\<C-n>"
+    endif
+    let column = col('.')
+    let line = getline('.')
+    if !(column>1 && strpart(line, column-2, 3)=~'^\w') && line[column-2] != '.'
+        return "\<TAB>"
+    endif
+    let substr = matchstr(strpart(line, -1, column+1), "[^ \t]*$")
+    echom substr
+    let has_period = match(substr, '\.') != -1
+    let has_slash = match(substr, '\/') != -1
+    if (!has_period && !has_slash)
+        return "\<C-n>"
+    elseif (has_slash)
+        return "\<C-x>\<C-f>"
+    else
+        return "\<C-x>\<C-o>"
+    endif
+endfunction
+
+set completeopt=menuone
+set previewheight=2
 set omnifunc=syntaxcomplete#Complete
-if g:UsePython3 == 1
-    autocmd FileType python set omnifunc=python3complete#Complete
-endif
-if g:AllExtensions == 1
+
+if g:AllExtensions == 0
+    inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : SimpleComplete()
+    inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
+    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
+else
     let g:neocomplcache_enable_at_startup = 1
     let g:neocomplcache_enable_ignore_case = 1
     let g:neocomplcache_enable_fuzzy_completion = 1
@@ -353,11 +384,4 @@ if g:AllExtensions == 1
     xmap <C-k> <Plug>(neosnippet_expand_target)
     imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
     smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-else
-    inoremap <expr><TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-n>" : pumvisible() ? "\<C-n>" : "\<TAB>"
-    inoremap <expr><S-TAB> col('.')>1 && strpart(getline('.'),col('.')-2,3)=~'^\w' ? "\<C-p>" : pumvisible() ? "\<C-p>" : "\<C-d>"
-    inoremap <expr><C-@> pumvisible() ? "\<C-e>". "\<C-x>". "\<C-o>". "\<C-p>" : "\<C-x>". "\<C-o>". "\<C-p>"
-    inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
-    inoremap <expr><C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    imap <expr><C-c> pumvisible() ? "\<C-y>". "\<C-c>" : "\<C-c>"
 endif
