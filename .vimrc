@@ -229,7 +229,7 @@ endfunction
 " ======================= Paste =========================
 function! TogglePaste()
     if &paste
-        if g:EfficientMode == 0:
+        if g:EfficientMode == 0
             set relativenumber
         endif
         set nopaste number
