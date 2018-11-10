@@ -2,7 +2,6 @@
 let g:EfficientMode = 0
 let g:AllExtensions = 1
 let g:LightTheme = 1
-let g:EnablePreview = 1
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
@@ -74,10 +73,10 @@ nnoremap <F4> *N
 nnoremap <F5> :TagbarToggle<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
 nnoremap <F7> :call ToggleFold()<CR>
-imap <F8> <ESC><F8>a
-nnoremap <F8> :call TogglePreview()<CR>
-imap <F9> <C-o><F9>
-nnoremap <F9> :call TogglePaste()<CR>
+imap <F8> <C-o><F8>
+nnoremap <F8> :call TogglePaste()<CR>
+imap <F9> <ESC><F9>a
+nnoremap <F9> :call TogglePreview()<CR>
 nmap , <Plug>fanfingtastic_;
 nmap m <Plug>fanfingtastic_,
 nnoremap 0 ^
@@ -202,7 +201,7 @@ let g:netrw_browse_split=2
 let g:netrw_winsize=23
 let g:netrw_liststyle=3
 
-" =================== Compare ===========================
+" ======================== Diff =========================
 let g:DiffOn = 0
 function! ToggleDiff()
     if g:DiffOn == 0
@@ -216,27 +215,26 @@ endfunction
 " ====================== Fold code ======================
 set foldmethod=indent
 set foldlevel=99
-let g:FoldMethod = 0
+let g:FoldOn = 0
 function! ToggleFold()
-    if g:FoldMethod == 0
+    if g:FoldOn == 0
         exec 'normal! zM'
     else
         exec 'normal! zR'
     endif
-    let g:FoldMethod = 1 - g:FoldMethod
+    let g:FoldOn = 1 - g:FoldOn
 endfunction
 
 " ======================= Paste =========================
+" Shift + alt to select and copy
 function! TogglePaste()
     if &paste
         if g:EfficientMode == 0
             set relativenumber
         endif
-        set nopaste number
-        set mouse=nv
+        set nopaste number mouse=nv
     else
-        set paste nonumber norelativenumber
-        set mouse=
+        set paste nonumber norelativenumber mouse=
     endif
     silent exec '!SyntasticToggleMode'
     silent exec 'redraw!'
@@ -250,6 +248,21 @@ function! GetPasteStatus()
     endif
 endfunction
 
+" ======================= Preview =======================
+set previewheight=7
+let g:PreviewOn = 0
+function! TogglePreview()
+    if g:PreviewOn == 0
+        set completeopt+=preview
+        echo 'Preview on'
+    else
+        set completeopt-=preview
+        exec 'pclose'
+        echo 'Preview off'
+    endif
+    let g:PreviewOn = 1 - g:PreviewOn
+endfunction
+
 " ======================= Format ========================
 augroup Format
     autocmd!
@@ -258,6 +271,17 @@ augroup END
 let g:formatters_python = ['yapf']
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
+
+" ============== NERDTree, ctrlp, motion ================
+let NERDTreeWinSize = 23
+let NERDTreeShowHidden = 1
+let g:NERDTreeDirArrowExpandable = '+'
+let g:NERDTreeDirArrowCollapsible = '-'
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
+let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
+let g:ctrlp_cache_dir = '~/.cache/ctrlp'
+let g:ctrlp_show_hidden = 1
+let g:EasyMotion_smartcase = 1
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -309,54 +333,33 @@ augroup RunCode
     autocmd FileType java nnoremap <buffer> <F11> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
 
-" ============== NERDTree, ctrlp, motion ================
-let NERDTreeWinSize = 23
-let NERDTreeShowHidden = 1
-let g:NERDTreeDirArrowExpandable = '+'
-let g:NERDTreeDirArrowCollapsible = '-'
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
-let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
-let g:ctrlp_cache_dir = '~/.cache/ctrlp'
-let g:ctrlp_show_hidden = 1
-let g:EasyMotion_smartcase = 1
-
 " ==================== AutoComplete =====================
-function! TogglePreview()
-    if g:EnablePreview == 0
-        set completeopt+=preview
-        echo 'Preview on'
-    else
-        set completeopt-=preview
-        exec 'pclose'
-        echo 'Preview off'
-    endif
-    let g:EnablePreview = 1 - g:EnablePreview
-endfunction
-
+set completeopt=menuone
 function! SimpleComplete()
     if pumvisible()
         return "\<C-n>"
     endif
     let column = col('.')
     let line = getline('.')
-    if !(column>1 && strpart(line, column-2, 3)=~'^\w') && line[column-2] != '.'
-        return "\<TAB>"
+    if !(column>1 && strpart(line, column-2, 3)=~'^\w')
+        let lastchar = line[column-2]
+        if lastchar == '.'
+            return "\<C-x>\<C-o>\<C-p>"
+        elseif lastchar == '/'
+            return "\<C-x>\<C-f>\<C-p>"
+        else
+            return "\<TAB>"
+        endif
     endif
     let substr = matchstr(strpart(line, -1, column+1), "[^ \t]*$")
-    echom substr
-    let has_period = match(substr, '\.') != -1
     let has_slash = match(substr, '\/') != -1
-    if (!has_period && !has_slash)
-        return "\<C-n>"
-    elseif (has_slash)
+    if has_slash
         return "\<C-x>\<C-f>"
     else
-        return "\<C-x>\<C-o>"
+        return "\<C-n>"
     endif
 endfunction
 
-set completeopt=menuone
-set previewheight=2
 set omnifunc=syntaxcomplete#Complete
 
 if g:AllExtensions == 0
