@@ -288,7 +288,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
 
     let s:vertsplit    = 'eeeeff'
     let s:special_grey = '3b4048'
-    let s:visual_grey  = '475faf'
+    let s:visual_grey  = '383838'
     let s:pmenu        = '4a4a4a'
   else
     let s:mono_1 = '494b53'
@@ -357,10 +357,10 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
   call <sid>X('Whitespace',   s:special_grey,  '',               'none')
   call <sid>X('StatusLine',   s:syntax_fg,     s:syntax_cursor,  'none')
   call <sid>X('StatusLineNC', s:mono_3,        '',               '')
-  call <sid>X('TabLine',      s:mono_1,        s:syntax_bg,      '')
+  call <sid>X('TabLine',      s:mono_1,        s:visual_grey,    '')
   call <sid>X('TabLineFill',  s:mono_3,        s:visual_grey,    'none')
-  call <sid>X('TabLineSel',   s:syntax_bg,     s:hue_2,          '')
-  call <sid>X('Title',        s:syntax_fg,     '',               'bold')
+  call <sid>X('TabLineSel',   s:syntax_bg,     s:hue_4,          '')
+  call <sid>X('Title',        s:hue_6,         '',               '')
   call <sid>X('Visual',       '',              s:visual_grey,    '')
   call <sid>X('VisualNOS',    '',              s:visual_grey,    '')
   call <sid>X('WarningMsg',   s:hue_5,         '',               '')
