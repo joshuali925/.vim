@@ -14,7 +14,7 @@ fi
 [[ -s ~/.autojump/etc/profile.d/autojump.sh  ]] && source ~/.autojump/etc/profile.d/autojump.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
-export PS1='\[\e[96m\]\W \[\e[93m\]$ \[\e[0m\]'
+export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
 export PATH=$PATH:$HOME/.local/bin
 LS_COLORS=$LS_COLORS:'di=0;36'
 

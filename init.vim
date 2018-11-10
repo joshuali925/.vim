@@ -4,7 +4,6 @@ let g:AllExtensions = 1
 let g:LightTheme = 0
 " Completion: 0 = default, 1 = YouCompleteMe, 2 = deoplete
 let g:Completion = 1
-let g:EnablePreview = 0
 
 " ===================== Plugins =========================
 call plug#begin('~/.config/nvim/plugged')
@@ -28,6 +27,7 @@ if g:AllExtensions == 1
     Plug 'easymotion/vim-easymotion'
     Plug 'w0rp/ale'
 else
+    set showtabline=2
     set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
 if g:Completion == 1
@@ -92,10 +92,10 @@ nnoremap <F4> *N
 nnoremap <F5> :TagbarToggle<CR>
 nnoremap <F6> :call ToggleDiff()<CR>
 nnoremap <F7> :call ToggleFold()<CR>
-imap <F8> <ESC><F8>a
-nnoremap <F8> :call TogglePreview()<CR>
-imap <F9> <C-o><F9>
-nnoremap <F9> :call TogglePaste()<CR>
+imap <F8> <C-o><F8>
+nnoremap <F8> :call TogglePaste()<CR>
+imap <F9> <ESC><F9>a
+nnoremap <F9> :call TogglePreview()<CR>
 nmap , <Plug>fanfingtastic_;
 nmap m <Plug>fanfingtastic_,
 nnoremap 0 ^
@@ -120,7 +120,7 @@ vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
 inoremap <CR> <CR><Space><BS>
-nnoremap <C-c> :AsyncStop!<CR>
+nnoremap <C-c> :silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 inoremap <C-l> <C-o>:stopinsert<CR>
@@ -222,7 +222,7 @@ let g:netrw_browse_split=2
 let g:netrw_winsize=23
 let g:netrw_liststyle=3
 
-" =================== Compare ===========================
+" ======================== Diff =========================
 let g:DiffOn = 0
 function! ToggleDiff()
     if g:DiffOn == 0
@@ -236,30 +236,27 @@ endfunction
 " ====================== Fold code ======================
 set foldmethod=indent
 set foldlevel=99
-let g:FoldMethod = 0
+let g:FoldOn = 0
 function! ToggleFold()
-    if g:FoldMethod == 0
+    if g:FoldOn == 0
         exec 'normal! zM'
     else
         exec 'normal! zR'
     endif
-    let g:FoldMethod = 1 - g:FoldMethod
+    let g:FoldOn = 1 - g:FoldOn
 endfunction
 
 " ======================= Paste =========================
+" Shift + alt to select and copy
 function! TogglePaste()
     if &paste
         if g:EfficientMode == 0
             set relativenumber
         endif
-        set nopaste number
-        set mouse=nv
+        set nopaste number mouse=nv signcolumn=auto
     else
-        set paste nonumber norelativenumber
-        set mouse=
+        set paste nonumber norelativenumber mouse= signcolumn=no
     endif
-    silent exec '!ALEToggleBuffer'
-    silent exec 'redraw!'
 endfunction
 
 function! GetPasteStatus()
@@ -268,6 +265,21 @@ function! GetPasteStatus()
     else
         return ""
     endif
+endfunction
+
+" ======================= Preview =======================
+set previewheight=7
+let g:PreviewOn = 0
+function! TogglePreview()
+    if g:PreviewOn == 0
+        set completeopt+=preview
+        echo 'Preview on'
+    else
+        set completeopt-=preview
+        exec 'pclose'
+        echo 'Preview off'
+    endif
+    let g:PreviewOn = 1 - g:PreviewOn
 endfunction
 
 " ======================= Format ========================
@@ -280,6 +292,17 @@ let g:ale_sign_column_always = 1
 let g:ale_lint_on_text_changed = 'normal'
 let g:ale_python_flake8_executable = 'flake8'
 let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
+
+" ============== NERDTree, ctrlp, motion ================
+let NERDTreeWinSize = 23
+let NERDTreeShowHidden = 1
+let g:NERDTreeDirArrowExpandable = '+'
+let g:NERDTreeDirArrowCollapsible = '-'
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
+let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
+let g:ctrlp_cache_dir = '~/.cache/ctrlp'
+let g:ctrlp_show_hidden = 1
+let g:EasyMotion_smartcase = 1
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -335,63 +358,43 @@ augroup RunCode
     autocmd FileType java nnoremap <buffer> <F12> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
 
-" ============== NERDTree, ctrlp, motion ================
-let NERDTreeWinSize = 23
-let NERDTreeShowHidden = 1
-let g:NERDTreeDirArrowExpandable = '+'
-let g:NERDTreeDirArrowCollapsible = '-'
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
-let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
-let g:ctrlp_cache_dir = '~/.cache/ctrlp'
-let g:ctrlp_show_hidden = 1
-let g:EasyMotion_smartcase = 1
-
 " ==================== AutoComplete =====================
-function! TogglePreview()
-    if g:EnablePreview == 0
-        set completeopt+=preview
-        echo 'Preview on'
-    else
-        set completeopt-=preview
-        exec 'pclose'
-        echo 'Preview off'
-    endif
-    let g:EnablePreview = 1 - g:EnablePreview
-endfunction
-
+set completeopt=menuone
 function! SimpleComplete()
     if pumvisible()
         return "\<C-n>"
     endif
     let column = col('.')
     let line = getline('.')
-    if !(column>1 && strpart(line, column-2, 3)=~'^\w') && line[column-2] != '.'
-        return "\<TAB>"
+    if !(column>1 && strpart(line, column-2, 3)=~'^\w')
+        let lastchar = line[column-2]
+        if lastchar == '.'
+            return "\<C-x>\<C-o>\<C-p>"
+        elseif lastchar == '/'
+            return "\<C-x>\<C-f>\<C-p>"
+        else
+            return "\<TAB>"
+        endif
     endif
     let substr = matchstr(strpart(line, -1, column+1), "[^ \t]*$")
-    echom substr
-    let has_period = match(substr, '\.') != -1
     let has_slash = match(substr, '\/') != -1
-    if (!has_period && !has_slash)
-        return "\<C-n>"
-    elseif (has_slash)
+    if has_slash
         return "\<C-x>\<C-f>"
     else
-        return "\<C-x>\<C-o>"
+        return "\<C-n>"
     endif
 endfunction
 
-set completeopt=menuone
-set previewheight=2
 let g:ycm_python_binary_path='/usr/bin/python'
 let g:ycm_path_to_python_interpreter='/usr/bin/python'
 let g:deoplete#sources#jedi#python_path='/usr/bin/python'
 
+" Ctrl space: <C-@> in vim, <C-Space> in nvim
 if g:Completion == 0
     set omnifunc=syntaxcomplete#Complete
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : SimpleComplete()
     inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
-    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
@@ -400,6 +403,8 @@ elseif g:Completion == 1
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<ESC>a" : "\<C-x>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
+    let g:ycm_complete_in_comments = 1
+    let g:ycm_complete_in_strings = 1
     let g:ycm_global_ycm_extra_conf='~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
     " also add to .ycm_extra_conf.py:
     " '-isystem',
@@ -410,7 +415,7 @@ elseif g:Completion == 1
 elseif g:Completion == 2
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
     inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
-    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     let g:deoplete#enable_at_startup=1
@@ -420,15 +425,15 @@ elseif g:Completion == 2
 endif
 
 " =================== Terminal ==========================
-tnoremap <C-k> <C-\><C-n><C-w>5k
-tnoremap <Esc> <C-\><C-n>
 tmap <F1> <C-\><C-n><F1>
 tmap <F2> <C-\><C-n><F2>
 tmap <F3> <C-\><C-n><F3>
+tnoremap <Esc> <C-\><C-n>
+tnoremap <C-k> <C-\><C-n><C-w>5k
+nnoremap <C-k> :call ToggleTerm()<CR>
 " nnoremap <silent> <F9> :tabedit <bar> set nonumber norelativenumber nocursorline nocursorcolumn <bar> terminal<CR>
 autocmd BufWinEnter,WinEnter term://* startinsert
 autocmd BufLeave term://* stopinsert
-nnoremap <C-k> :call ToggleTerm()<CR>
 function! ToggleTerm()
     if bufwinnr('term://*') > 0
         exec 'wincmd j | startinsert'
