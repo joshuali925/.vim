@@ -1,3 +1,4 @@
+" Give up on vim 7
 " ==================== Settings =========================
 let g:EfficientMode = 0
 let g:AllExtensions = 1
