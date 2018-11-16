@@ -1,13 +1,14 @@
-" Give up on vim 7
 " ==================== Settings =========================
-let g:EfficientMode = 0
+let g:Theme = 1
+let g:TrueColors = 1
 let g:AllExtensions = 1
-let g:LightTheme = 1
+" Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete
+let g:Completion = 1
+let g:PythonPath = '/usr/bin/python'
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-Plug 'ctrlpvim/ctrlp.vim', { 'on': 'CtrlP' }
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
 Plug 'tpope/vim-commentary', { 'on': 'Commentary' }
 Plug 'tpope/vim-repeat'
@@ -17,37 +18,85 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'terryma/vim-multiple-cursors'
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
+Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'dahu/vim-fanfingtastic'
+Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
+    Plug 'ctrlpvim/ctrlp.vim'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'tpope/vim-surround'
     Plug 'easymotion/vim-easymotion'
-    Plug 'scrooloose/syntastic'
-    Plug 'shougo/neocomplcache.vim'
-    Plug 'shougo/neosnippet.vim'
-    Plug 'honza/vim-snippets'
+    Plug 'w0rp/ale'
 else
+    Plug 'ctrlpvim/ctrlp.vim', { 'on': 'CtrlP' }
+    set showtabline=2
     set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
+    " Plug 'liuchengxu/eleline.vim'
+endif
+if g:Completion == 1
+    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
+    Plug 'sirver/ultisnips'
+    Plug 'honza/vim-snippets'
+elseif g:Completion == 2
+    if has('nvim')
+        Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    else
+        Plug 'Shougo/deoplete.nvim'
+        Plug 'roxma/nvim-yarp'
+        Plug 'roxma/vim-hug-neovim-rpc'
+    endif
+    Plug 'Shougo/neco-vim'
+    Plug 'Shougo/neco-syntax'
+    Plug 'zchee/deoplete-jedi'
+    Plug 'sirver/ultisnips'
+    Plug 'honza/vim-snippets'
 endif
 call plug#end()
 
 " ===================== Themes ==========================
-set t_Co=256
-let g:airline#extensions#tabline#enabled=1
-if g:LightTheme == 0
-    set background=dark
-    let g:airline_theme='onedark'
-    colorscheme one
+if g:TrueColors == 1
+	let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+	let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+    set termguicolors
 else
-    set background=light
-    let g:airline_theme='solarized'
-    let g:solarized_termcolors=256
-    colorscheme solarized
+    set t_Co=256
+    let g:solarized_termcolors = 256
     highlight link EasyMotionTarget Search
     highlight link EasyMotionShade Comment
     highlight link EasyMotionTarget2First Search
     highlight link EasyMotionTarget2Second Search
+endif
+let g:airline#extensions#tabline#enabled = 1
+" 256-colors support g:Theme = -1, 3
+if g:Theme == -1
+    set background=light
+    let g:airline_theme = 'solarized'
+    colorscheme solarized
+elseif g:Theme == 0
+    set background=light
+    let g:airline_theme = 'solarized'
+    colorscheme solarized8
+elseif g:Theme == 1
+    set background=light
+    let g:airline_theme = 'solarized'
+    colorscheme solarized8_flat
+elseif g:Theme == 2
+    set background=dark
+    let g:airline_theme = 'onedark'
+    colorscheme one8
+elseif g:Theme == 3
+    set background=dark
+    let g:airline_theme = 'onedark'
+    colorscheme one
+elseif g:Theme == 4
+    set background=dark
+    let g:airline_theme = 'solarized'
+    colorscheme solarized8_flat
+elseif g:Theme == 5
+    set background=dark
+    let g:airline_theme = 'solarized'
+    colorscheme molokai
 endif
 
 " ====================== Shortcuts ======================
@@ -79,7 +128,7 @@ nnoremap <F8> :call TogglePaste()<CR>
 imap <F9> <ESC><F9>a
 nnoremap <F9> :call TogglePreview()<CR>
 nmap , <Plug>fanfingtastic_;
-nmap m <Plug>fanfingtastic_,
+nmap ;, <Plug>fanfingtastic_,
 nnoremap 0 ^
 nnoremap - $
 nnoremap J gj
@@ -96,12 +145,19 @@ nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap Q @q
 nnoremap gf <C-w>gf
+nnoremap gn *
+nnoremap gN *NN
 nnoremap gcc :Commentary<CR>
 vnoremap gcc :Commentary<CR>
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
+vnoremap [ c[<C-r><C-p>"]<Esc>
+vnoremap { c[<C-r><C-p>"}<Esc>
 inoremap <CR> <CR><Space><BS>
+inoremap <M-o> <Esc>o
+inoremap <C-d> <C-o>dd
+nnoremap <C-c> :silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 inoremap <C-l> <C-o>:stopinsert<CR>
@@ -113,7 +169,6 @@ nnoremap <C-f> :Autoformat<CR>
 vnoremap <C-f> :'<,'>Autoformat<CR>$
 nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nnoremap <C-P> :CtrlP<CR>
-inoremap <M-o> <Esc>o
 imap <leader>r <F11>
 nmap <leader>r <F11>
 nmap <leader>f <Plug>(easymotion-bd-w)
@@ -121,8 +176,9 @@ nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <leader>j J
 nnoremap <leader>k K
 nnoremap <leader>T :Tabularize /
-inoremap <leader>w <C-o>:stopinsert <bar> w!<CR>
-nnoremap <leader>w :w!<CR>
+nnoremap <leader>b :Lexplore<CR>
+inoremap <leader>w <ESC>:update<CR>
+nnoremap <leader>w :update<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
@@ -140,25 +196,18 @@ filetype indent on
 filetype plugin on
 filetype plugin indent on
 syntax enable
-" let &t_SI.="\e[6 q"
-" let &t_SR.="\e[4 q"
-" let &t_EI.="\e[2 q"
+let &t_SI.="\e[6 q"
+let &t_SR.="\e[4 q"
+let &t_EI.="\e[2 q"
+" set cursorline
+" set cursorcolumn
 set backspace=eol,start,indent
 set mouse=nv
 set numberwidth=2
 set number
-augroup LineNum_NoAutoComment_RestorePos_AutoSource
+augroup RestorePosition_AutoSource
     autocmd!
-    if g:EfficientMode == 0
-        set relativenumber
-        set cursorline
-        " set cursorcolumn
-        autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-        autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
-    endif
-    autocmd FileType * setlocal formatoptions-=cro
-	autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
-    " autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
 augroup END
 set autochdir
@@ -230,15 +279,10 @@ endfunction
 " Shift + alt to select and copy
 function! TogglePaste()
     if &paste
-        if g:EfficientMode == 0
-            set relativenumber
-        endif
-        set nopaste number mouse=nv
+        set nopaste number mouse=nv signcolumn=auto
     else
-        set paste nonumber norelativenumber mouse=
+        set paste nonumber norelativenumber mouse= signcolumn=no
     endif
-    silent exec '!SyntasticToggleMode'
-    silent exec 'redraw!'
 endfunction
 
 function! GetPasteStatus()
@@ -265,15 +309,19 @@ function! TogglePreview()
 endfunction
 
 " ======================= Format ========================
-augroup Format
+augroup Format_PythonComment
     autocmd!
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    autocmd FileType * setlocal formatoptions-=cro
+    autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
 augroup END
 let g:formatters_python = ['yapf']
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
+let g:ale_sign_column_always = 1
+let g:ale_lint_on_text_changed = 'normal'
+let g:ale_python_flake8_executable = 'flake8'
+let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
 
-" ============== NERDTree, ctrlp, motion ================
+" =================== Other plugins =====================
 let NERDTreeWinSize = 23
 let NERDTreeShowHidden = 1
 let g:NERDTreeDirArrowExpandable = '+'
@@ -283,6 +331,9 @@ let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.co
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_show_hidden = 1
 let g:EasyMotion_smartcase = 1
+let g:tagbar_compact = 1
+let g:tagbar_width = 25
+let g:tagbar_singleclick = 1
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -324,14 +375,18 @@ imap <F12> <Esc><F12>
 let g:asyncrun_open = 12
 augroup RunCode
     autocmd!
-    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && python %'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && '. g:PythonPath. ' %'. b:args<CR>
     autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F11> :update <bar> call RunShellCommand('python %'. b:args)<CR>
-    autocmd FileType c nnoremap <buffer> <F11> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
-    autocmd FileType cpp nnoremap <buffer> <F11> :update <bar> call RunShellCommand('g++ % -o %< -g && ./%<'. b:args)<CR>
-    autocmd FileType java nnoremap <buffer> <F11> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
+    autocmd FileType python nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun -raw '. g:PythonPath. ' %'. b:args<CR>
+    autocmd FileType c nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun gcc % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType cpp nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun g++ % -o %< -g && ./%<'. b:args<CR>
+    autocmd FileType java nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun javac % && java %<'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F12> :update <bar> call RunShellCommand(g:PythonPath. ' %'. b:args)<CR>
+    autocmd FileType c nnoremap <buffer> <F12> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
+    autocmd FileType cpp nnoremap <buffer> <F12> :update <bar> call RunShellCommand('g++ % -o %< -g && ./%<'. b:args)<CR>
+    autocmd FileType java nnoremap <buffer> <F12> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
 augroup END
 
 " ==================== AutoComplete =====================
@@ -361,31 +416,84 @@ function! SimpleComplete()
     endif
 endfunction
 
-set omnifunc=syntaxcomplete#Complete
+" let g:ycm_path_to_python_interpreter='' " for ycmd, don't change
+let g:ycm_python_binary_path=g:PythonPath " for JediHTTP
+let g:deoplete#sources#jedi#python_path=g:PythonPath
 
-if g:AllExtensions == 0
+" Ctrl space: <C-@> in vim, <C-Space> in nvim
+if g:Completion == 0
+    set omnifunc=syntaxcomplete#Complete
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : SimpleComplete()
     inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
     inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
-else
-    let g:neocomplcache_enable_at_startup = 1
-    let g:neocomplcache_enable_ignore_case = 1
-    let g:neocomplcache_enable_fuzzy_completion = 1
-    " let g:neocomplcache_enable_camel_case_completion = 1
-    " let g:neocomplcache_enable_underbar_completion = 1
-    inoremap <expr><C-@>  pumvisible() ? "\<C-n>" : "\<C-x>". "\<C-u>"
-    inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
-    inoremap <expr><C-x>  pumvisible() ? neocomplcache#cancel_popup() : "\<C-x>"
-    inoremap <expr><CR> pumvisible() ? neocomplcache#smart_close_popup() : "\<CR>"
-    let g:neosnippet#disable_runtime_snippets = { '_' : 1 }
-    let g:neosnippet#enable_snipmate_compatibility = 1
-    let g:neosnippet#snippets_directory='~/.vim/plugged/vim-snippets/snippets'
-    imap <C-k> <Plug>(neosnippet_expand_or_jump)
-    smap <C-k> <Plug>(neosnippet_expand_or_jump)
-    xmap <C-k> <Plug>(neosnippet_expand_target)
-    imap <expr><TAB> pumvisible() ? "\<C-n>" : neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-    smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+elseif g:Completion == 1
+    inoremap <expr> <CR> pumvisible() ? "\<ESC>a" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<ESC>a" : "\<C-x>"
+    nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
+    nnoremap <leader>a :YcmCompleter FixIt<CR>
+    let g:ycm_complete_in_comments = 1
+    let g:ycm_complete_in_strings = 1
+    let g:ycm_global_ycm_extra_conf='~/.vim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+    " also add to .ycm_extra_conf.py:
+    " '-isystem',
+    " '/usr/include',
+    let g:UltiSnipsExpandTrigger='<C-k>'
+    let g:UltiSnipsJumpForwardTrigger='<TAB>'
+    let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
+elseif g:Completion == 2
+    inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+    inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
+    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    let g:deoplete#enable_at_startup=1
+    let g:UltiSnipsExpandTrigger='<C-k>'
+    let g:UltiSnipsJumpForwardTrigger='<TAB>'
+    let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
 endif
+
+" =================== Terminal ==========================
+" do not tmap <ESC> in vim 8
+tmap <F1> <C-w><C-w>
+tmap <F2> <C-\><C-n><F2>
+tmap <F3> <C-\><C-n><F3>
+tmap <C-u> <C-\><C-n>
+tnoremap <C-d> <C-d><C-\><C-n>:q!<CR>
+tnoremap <C-k> <C-w>5k
+nnoremap <C-k> :call ToggleTerm()<CR>
+nnoremap <leader>t V:call SendToTerminal()<CR>$
+vnoremap <leader>t <ESC>:call SendToTerminal()<CR>
+
+function! ToggleTerm()
+    let term_win_nr = bufwinnr('!/bin/*')
+    if term_win_nr > 0
+        exec term_win_nr. 'wincmd w'
+        if term_getstatus(bufnr('%')) == 'running,normal'
+            exec 'normal a'
+        endif
+    else
+        exec 'split | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | term ++curwin'
+    endif
+endfunction
+
+function! SendToTerminal()
+    let buff_n = term_list()
+    if len(buff_n) > 0
+        let buff_n = buff_n[0]
+        let line_start = getpos("'<")[1]
+        let line_end = getpos("'>")[1]
+        let lines = getline(line_start, line_end)
+        for l in lines
+            if l != ''
+                call term_sendkeys(buff_n, l. "\<CR>")
+                sleep 5m
+            endif
+        endfor
+        if len(lines) == 1 && lines[0] == ''
+            call term_sendkeys(buff_n, "\<CR>")
+        endif
+    endif
+endfunction
