@@ -59,7 +59,8 @@ if !get(g:, 'solarized_use16', &t_Co < 256)
       hi Cursor ctermfg=230 ctermbg=32 guifg=#fdf6e3 guibg=#268bd2 guisp=NONE cterm=NONE gui=NONE
     endif
     hi CursorColumn ctermfg=NONE ctermbg=236 guifg=NONE guibg=#073642 guisp=NONE cterm=NONE gui=NONE
-    hi CursorLine ctermfg=NONE ctermbg=235 guifg=NONE guibg=#002b36 guisp=#586e75 cterm=NONE,underline gui=NONE,underline
+    hi CursorLine ctermfg=NONE ctermbg=236 guifg=NONE guibg=#073642 guisp=NONE cterm=NONE gui=NONE
+    " hi CursorLine ctermfg=NONE ctermbg=235 guifg=NONE guibg=#002b36 guisp=#586e75 cterm=NONE,underline gui=NONE,underline
     if get(g:, "solarized_visibility", "") == "high"
       hi CursorLineNr ctermfg=166 ctermbg=NONE guifg=#cb4b16 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
       hi NonText ctermfg=166 ctermbg=NONE guifg=#cb4b16 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
@@ -454,7 +455,8 @@ if !get(g:, 'solarized_use16', &t_Co < 256)
   hi ColorColumn ctermfg=NONE ctermbg=254 guifg=NONE guibg=#eee8d5 guisp=NONE cterm=NONE gui=NONE
   hi Conceal ctermfg=32 ctermbg=NONE guifg=#268bd2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
   hi CursorColumn ctermfg=NONE ctermbg=254 guifg=NONE guibg=#eee8d5 guisp=NONE cterm=NONE gui=NONE
-  hi CursorLine ctermfg=NONE ctermbg=230 guifg=NONE guibg=#fdf6e3 guisp=#93a1a1 cterm=NONE,underline gui=NONE,underline
+  hi CursorLine ctermfg=NONE ctermbg=254 guifg=NONE guibg=#eee8d5 guisp=NONE cterm=NONE gui=NONE
+  " hi CursorLine ctermfg=NONE ctermbg=230 guifg=NONE guibg=#fdf6e3 guisp=#93a1a1 cterm=NONE,underline gui=NONE,underline
   if get(g:, "solarized_diffmode", "") == "high"
     hi DiffAdd ctermfg=106 ctermbg=NONE guifg=#859900 guibg=NONE guisp=NONE cterm=NONE,reverse gui=NONE,reverse
     hi DiffChange ctermfg=136 ctermbg=NONE guifg=#b58900 guibg=NONE guisp=NONE cterm=NONE,reverse gui=NONE,reverse
@@ -781,7 +783,8 @@ if &background ==# 'dark'
     hi Cursor ctermfg=15 ctermbg=4 guifg=#fdf6e3 guibg=#268bd2 guisp=NONE cterm=NONE gui=NONE
   endif
   hi CursorColumn ctermfg=NONE ctermbg=0 guifg=NONE guibg=#073642 guisp=NONE cterm=NONE gui=NONE
-  hi CursorLine ctermfg=NONE ctermbg=8 guifg=NONE guibg=#002b36 guisp=#586e75 cterm=NONE,underline gui=NONE,underline
+  hi CursorLine ctermfg=NONE ctermbg=0 guifg=NONE guibg=#073642 guisp=NONE cterm=NONE gui=NONE
+  " hi CursorLine ctermfg=NONE ctermbg=8 guifg=NONE guibg=#002b36 guisp=#586e75 cterm=NONE,underline gui=NONE,underline
   if get(g:, "solarized_visibility", "") == "high"
     hi CursorLineNr ctermfg=9 ctermbg=NONE guifg=#cb4b16 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
     hi NonText ctermfg=9 ctermbg=NONE guifg=#cb4b16 guibg=NONE guisp=NONE cterm=NONE,bold gui=NONE,bold
@@ -1176,7 +1179,8 @@ endif
 hi ColorColumn ctermfg=NONE ctermbg=7 guifg=NONE guibg=#eee8d5 guisp=NONE cterm=NONE gui=NONE
 hi Conceal ctermfg=4 ctermbg=NONE guifg=#268bd2 guibg=NONE guisp=NONE cterm=NONE gui=NONE
 hi CursorColumn ctermfg=NONE ctermbg=7 guifg=NONE guibg=#eee8d5 guisp=NONE cterm=NONE gui=NONE
-hi CursorLine ctermfg=NONE ctermbg=15 guifg=NONE guibg=#fdf6e3 guisp=#93a1a1 cterm=NONE,underline gui=NONE,underline
+hi CursorLine ctermfg=NONE ctermbg=7 guifg=NONE guibg=#eee8d5 guisp=NONE cterm=NONE gui=NONE
+" hi CursorLine ctermfg=NONE ctermbg=15 guifg=NONE guibg=#fdf6e3 guisp=#93a1a1 cterm=NONE,underline gui=NONE,underline
 if get(g:, "solarized_diffmode", "") == "high"
   hi DiffAdd ctermfg=2 ctermbg=NONE guifg=#859900 guibg=NONE guisp=NONE cterm=NONE,reverse gui=NONE,reverse
   hi DiffChange ctermfg=3 ctermbg=NONE guifg=#b58900 guibg=NONE guisp=NONE cterm=NONE,reverse gui=NONE,reverse
