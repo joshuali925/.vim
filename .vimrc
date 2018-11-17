@@ -28,11 +28,11 @@ if g:AllExtensions == 1
     Plug 'tpope/vim-surround'
     Plug 'easymotion/vim-easymotion'
     Plug 'w0rp/ale'
+    set cursorline
 else
     Plug 'ctrlpvim/ctrlp.vim', { 'on': 'CtrlP' }
-    set showtabline=2
-    set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
     " Plug 'liuchengxu/eleline.vim'
+    set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
 if g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
@@ -68,11 +68,15 @@ else
     highlight link EasyMotionTarget2Second Search
 endif
 let g:airline#extensions#tabline#enabled = 1
-" 256-colors support g:Theme = -1, 3
-if g:Theme == -1
+" 256-colors support g:Theme < 0
+if g:Theme == -2
     set background=light
     let g:airline_theme = 'solarized'
     colorscheme solarized
+elseif g:Theme == -1
+    set background=dark
+    let g:airline_theme = 'onedark'
+    colorscheme one
 elseif g:Theme == 0
     set background=light
     let g:airline_theme = 'solarized'
@@ -87,13 +91,9 @@ elseif g:Theme == 2
     colorscheme one8
 elseif g:Theme == 3
     set background=dark
-    let g:airline_theme = 'onedark'
-    colorscheme one
-elseif g:Theme == 4
-    set background=dark
     let g:airline_theme = 'solarized'
-    colorscheme solarized8_flat
-elseif g:Theme == 5
+    colorscheme solarized8
+elseif g:Theme == 4
     set background=dark
     let g:airline_theme = 'solarized'
     colorscheme molokai
@@ -162,21 +162,19 @@ inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
-nnoremap <C-l> :nohlsearch <bar> let @/='QwQ'<CR><C-l>
+nnoremap <C-l> :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <C-b> :NERDTreeToggle<CR>
 imap <C-f> <Esc>V<C-f>a
 nnoremap <C-f> :Autoformat<CR>
 vnoremap <C-f> :'<,'>Autoformat<CR>$
 nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
-nnoremap <C-P> :CtrlP<CR>
-imap <leader>r <F11>
-nmap <leader>r <F11>
+nnoremap <C-p> :CtrlP<CR>
+nnoremap <C-j> :call ToggleFileSplit()<CR>
 nmap <leader>f <Plug>(easymotion-bd-w)
 nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <leader>j J
 nnoremap <leader>k K
 nnoremap <leader>T :Tabularize /
-nnoremap <leader>b :Lexplore<CR>
 inoremap <leader>w <ESC>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
@@ -191,25 +189,16 @@ nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 
 " ======================= Basics ========================
-filetype on
-filetype indent on
-filetype plugin on
 filetype plugin indent on
 syntax enable
 let &t_SI.="\e[6 q"
 let &t_SR.="\e[4 q"
 let &t_EI.="\e[2 q"
-" set cursorline
-" set cursorcolumn
+set nocompatible
 set backspace=eol,start,indent
 set mouse=nv
 set numberwidth=2
 set number
-augroup RestorePosition_AutoSource
-    autocmd!
-    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-    autocmd BufWritePost $MYVIMRC source $MYVIMRC
-augroup END
 set autochdir
 set wrap
 set linebreak
@@ -218,6 +207,7 @@ set showmatch
 set showmode
 set title
 set ruler
+set showtabline=2
 set laststatus=2
 set wildmenu
 set splitright
@@ -245,11 +235,22 @@ set lazyredraw
 set noswapfile
 set nowritebackup
 set nobackup
+" built in :Lexplore<CR> settings
 let g:netrw_dirhistmax=0
 let g:netrw_banner=0
 let g:netrw_browse_split=2
-let g:netrw_winsize=23
+let g:netrw_winsize=20
 let g:netrw_liststyle=3
+
+" ====================== Autocmd ========================
+augroup RestoreCursor_AutoSource_Format_PythonComment
+    autocmd!
+    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    autocmd FileType * setlocal formatoptions-=cro
+    autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
+augroup END
 
 " ======================== Diff =========================
 let g:DiffOn = 0
@@ -276,7 +277,7 @@ function! ToggleFold()
 endfunction
 
 " ======================= Paste =========================
-" Shift + alt to select and copy
+" shift alt drag to select and copy
 function! TogglePaste()
     if &paste
         set nopaste number mouse=nv signcolumn=auto
@@ -284,7 +285,6 @@ function! TogglePaste()
         set paste nonumber norelativenumber mouse= signcolumn=no
     endif
 endfunction
-
 function! GetPasteStatus()
     if &paste
         return "[paste]"
@@ -308,32 +308,38 @@ function! TogglePreview()
     let g:PreviewOn = 1 - g:PreviewOn
 endfunction
 
-" ======================= Format ========================
-augroup Format_PythonComment
-    autocmd!
-    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType * setlocal formatoptions-=cro
-    autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
-augroup END
-let g:formatters_python = ['yapf']
+" =================== Toggle split ======================
+function! ToggleFileSplit()
+    exec 'wincmd w'
+    let b_name = bufname('%')
+    while b_name=~'NERD_tree' || b_name=~'NetrwTreeListing' || b_name=~'__Tagbar__' || b_name=~'!/bin/'
+        exec 'wincmd w'
+        let b_name = bufname('%')
+    endwhile
+endfunction
+
+" =================== Other plugins =====================
 let g:ale_sign_column_always = 1
 let g:ale_lint_on_text_changed = 'normal'
 let g:ale_python_flake8_executable = 'flake8'
 let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
-
-" =================== Other plugins =====================
+let g:asyncrun_open = 12
+let g:EasyMotion_smartcase = 1
+let g:formatters_python = ['yapf']
 let NERDTreeWinSize = 23
 let NERDTreeShowHidden = 1
+let NERDTreeMinimalUI = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
 let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
 let g:ctrlp_cache_dir = '~/.cache/ctrlp'
 let g:ctrlp_show_hidden = 1
-let g:EasyMotion_smartcase = 1
 let g:tagbar_compact = 1
+let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
+let g:tagbar_iconchars = [ '+', '-' ]
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -345,52 +351,61 @@ function! SetArgs(cmdline)
         let b:args = ' '. a:cmdline
     endif
 endfunction
+let g:OutputCount = 1
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
 function! RunShellCommand(cmdline)
-    let expanded_cmdline = a:cmdline
-    let expanded_cmdline = substitute(expanded_cmdline, './%<', './'. fnameescape(expand('%<')), '')
+    let expanded_cmdline = substitute(a:cmdline, './%<', './'. fnameescape(expand('%<')), '')
     let expanded_cmdline = substitute(expanded_cmdline, '%<', fnameescape(expand('%<')), '')
     let expanded_cmdline = substitute(expanded_cmdline, '%', fnameescape(expand('%')), '')
-    if bufexists('[Output]') > 0
-        exec 'wincmd j'
+    let curr_bufnr = bufwinnr('%')
+    let win_left = winnr('$')
+    while win_left>1 && bufname('%')!~'[Output_'
+        exec 'wincmd w'
+        let win_left = win_left - 1
+    endwhile
+    if bufname('%') =~ '[Output_'
         setlocal modifiable
         exec '%d'
     else
         botright new
         setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
-        silent exec '0f | file [Output] | resize '. (winheight(0) * 4/5)
-        nnoremap <buffer> <Space> :q<CR>
-        nnoremap <buffer> t :wincmd T<CR>
+        silent exec '0f | file [Output_'. g:OutputCount. '] | resize '. (winheight(0) * 4/5)
+        let g:OutputCount = g:OutputCount + 1
+        nnoremap <buffer> q :q<CR>
         nnoremap <buffer> w :set wrap!<CR>
     endif
     call setline(1, 'Run: '. expanded_cmdline)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
     exec '$read !'. expanded_cmdline
     setlocal nomodifiable
-    exec 'wincmd k | wincmd j | wincmd k'
+    exec curr_bufnr. 'wincmd w'
 endfunction
 imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
 imap <F12> <Esc><F12>
-let g:asyncrun_open = 12
+imap <leader>r <F11>
+nmap <leader>r <F11>
 augroup RunCode
     autocmd!
-    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && '. g:PythonPath. ' %'. b:args<CR>
     autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun -raw '. g:PythonPath. ' %'. b:args<CR>
+    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && '. g:PythonPath. ' %'. b:args<CR>
     autocmd FileType c nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun gcc % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType cpp nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun g++ % -o %< -g && ./%<'. b:args<CR>
     autocmd FileType java nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F12> :update <bar> call RunShellCommand(g:PythonPath. ' %'. b:args)<CR>
+    autocmd FileType python nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun -raw '. g:PythonPath. ' %'. b:args<CR>
     autocmd FileType c nnoremap <buffer> <F12> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
     autocmd FileType cpp nnoremap <buffer> <F12> :update <bar> call RunShellCommand('g++ % -o %< -g && ./%<'. b:args)<CR>
     autocmd FileType java nnoremap <buffer> <F12> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
+    autocmd FileType python nnoremap <buffer> <F12> :update <bar> call RunShellCommand(g:PythonPath. ' %'. b:args)<CR>
 augroup END
 
 " ==================== AutoComplete =====================
 set completeopt=menuone
+" let g:ycm_path_to_python_interpreter='' " for ycmd, don't change
+let g:ycm_python_binary_path=g:PythonPath " for JediHTTP
+let g:deoplete#sources#jedi#python_path=g:PythonPath
 function! SimpleComplete()
     if pumvisible()
         return "\<C-n>"
@@ -398,10 +413,10 @@ function! SimpleComplete()
     let column = col('.')
     let line = getline('.')
     if !(column>1 && strpart(line, column-2, 3)=~'^\w')
-        let lastchar = line[column-2]
-        if lastchar == '.'
+        let pre = line[column-2]
+        if pre == '.'
             return "\<C-x>\<C-o>\<C-p>"
-        elseif lastchar == '/'
+        elseif pre == '/'
             return "\<C-x>\<C-f>\<C-p>"
         else
             return "\<TAB>"
@@ -415,12 +430,7 @@ function! SimpleComplete()
         return "\<C-n>"
     endif
 endfunction
-
-" let g:ycm_path_to_python_interpreter='' " for ycmd, don't change
-let g:ycm_python_binary_path=g:PythonPath " for JediHTTP
-let g:deoplete#sources#jedi#python_path=g:PythonPath
-
-" Ctrl space: <C-@> in vim, <C-Space> in nvim
+" use <C-@> in vim, <C-Space> in nvim for ctrl space
 if g:Completion == 0
     set omnifunc=syntaxcomplete#Complete
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : SimpleComplete()
@@ -439,7 +449,7 @@ elseif g:Completion == 1
     let g:ycm_global_ycm_extra_conf='~/.vim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
     " also add to .ycm_extra_conf.py:
     " '-isystem',
-    " '/usr/include',
+    " '/usr/include'
     let g:UltiSnipsExpandTrigger='<C-k>'
     let g:UltiSnipsJumpForwardTrigger='<TAB>'
     let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
@@ -457,20 +467,19 @@ endif
 
 " =================== Terminal ==========================
 " do not tmap <ESC> in vim 8
-tmap <F1> <C-w><C-w>
-tmap <F2> <C-\><C-n><F2>
-tmap <F3> <C-\><C-n><F3>
-tmap <C-u> <C-\><C-n>
+tnoremap <F1> <C-w><C-w>
+tnoremap <F2> <C-\><C-n>gT
+tnoremap <F3> <C-\><C-n>gt
+tnoremap <C-u> <C-\><C-n>
 tnoremap <C-d> <C-d><C-\><C-n>:q!<CR>
 tnoremap <C-k> <C-w>5k
 nnoremap <C-k> :call ToggleTerm()<CR>
 nnoremap <leader>t V:call SendToTerminal()<CR>$
 vnoremap <leader>t <ESC>:call SendToTerminal()<CR>
-
 function! ToggleTerm()
-    let term_win_nr = bufwinnr('!/bin/*')
-    if term_win_nr > 0
-        exec term_win_nr. 'wincmd w'
+    let term_winnr = bufwinnr('!/bin/*')
+    if term_winnr > 0
+        exec term_winnr. 'wincmd w'
         if term_getstatus(bufnr('%')) == 'running,normal'
             exec 'normal a'
         endif
@@ -478,22 +487,16 @@ function! ToggleTerm()
         exec 'split | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | term ++curwin'
     endif
 endfunction
-
 function! SendToTerminal()
     let buff_n = term_list()
     if len(buff_n) > 0
         let buff_n = buff_n[0]
-        let line_start = getpos("'<")[1]
-        let line_end = getpos("'>")[1]
-        let lines = getline(line_start, line_end)
+        let lines = getline(getpos("'<")[1], getpos("'>")[1])
         for l in lines
-            if l != ''
+            if l!='' || len(lines)==1
                 call term_sendkeys(buff_n, l. "\<CR>")
-                sleep 5m
+                sleep 10m
             endif
         endfor
-        if len(lines) == 1 && lines[0] == ''
-            call term_sendkeys(buff_n, "\<CR>")
-        endif
     endif
 endfunction
