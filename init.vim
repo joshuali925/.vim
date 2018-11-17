@@ -247,7 +247,7 @@ augroup RestoreCursor_AutoSource_Format_PythonComment
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
-    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions-=cro
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
 augroup END
@@ -446,23 +446,24 @@ elseif g:Completion == 1
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     let g:ycm_complete_in_comments = 1
     let g:ycm_complete_in_strings = 1
-    let g:ycm_global_ycm_extra_conf='~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
-    " also add to .ycm_extra_conf.py:
+    let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }
+    " copy ~/.vim/others/.ycm_extra_conf.py over, also add
     " '-isystem',
-    " '/usr/include'
-    let g:UltiSnipsExpandTrigger='<C-k>'
-    let g:UltiSnipsJumpForwardTrigger='<TAB>'
-    let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
+    " '/path/to/include'
+    let g:ycm_global_ycm_extra_conf = '~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+    let g:UltiSnipsExpandTrigger = '<C-k>'
+    let g:UltiSnipsJumpForwardTrigger = '<TAB>'
+    let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
 elseif g:Completion == 2
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
     inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    let g:deoplete#enable_at_startup=1
-    let g:UltiSnipsExpandTrigger='<C-k>'
-    let g:UltiSnipsJumpForwardTrigger='<TAB>'
-    let g:UltiSnipsJumpBackwardTrigger='<S-TAB>'
+    let g:deoplete#enable_at_startup = 1
+    let g:UltiSnipsExpandTrigger = '<C-k>'
+    let g:UltiSnipsJumpForwardTrigger = '<TAB>'
+    let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
 endif
 
 " =================== Terminal ==========================
