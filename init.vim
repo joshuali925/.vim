@@ -9,6 +9,7 @@ let g:PythonPath = '/usr/bin/python'
 " ===================== Plugins =========================
 call plug#begin('~/.config/nvim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'Yggdroot/LeaderF', { 'do': './install.sh', 'on': 'LeaderfFile' }
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
 Plug 'tpope/vim-commentary', { 'on': 'Commentary' }
 Plug 'tpope/vim-repeat'
@@ -20,18 +21,17 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'dahu/vim-fanfingtastic'
-Plug 'sheerun/vim-polyglot'
+" Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
-    Plug 'ctrlpvim/ctrlp.vim'
+    Plug 'ludovicchabant/vim-gutentags'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'tpope/vim-surround'
     Plug 'easymotion/vim-easymotion'
     Plug 'w0rp/ale'
     set cursorline
+    let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }
 else
-    Plug 'ctrlpvim/ctrlp.vim', { 'on': 'CtrlP' }
-    " Plug 'liuchengxu/eleline.vim'
     set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
 if g:Completion == 1
@@ -56,8 +56,8 @@ call plug#end()
 
 " ===================== Themes ==========================
 if g:TrueColors == 1
-	let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-	let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+    let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
     set termguicolors
 else
     set t_Co=256
@@ -168,8 +168,9 @@ imap <C-f> <Esc>V<C-f>a
 nnoremap <C-f> :Autoformat<CR>
 vnoremap <C-f> :'<,'>Autoformat<CR>$
 nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
-nnoremap <C-p> :CtrlP<CR>
+nnoremap <C-p> :LeaderfFile<CR>
 nnoremap <C-j> :call ToggleFileSplit()<CR>
+nnoremap <C-]> <C-w>}
 nmap <leader>f <Plug>(easymotion-bd-w)
 nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <leader>j J
@@ -228,9 +229,10 @@ set autoread
 set history=500
 set sessionoptions-=buffer
 set undofile
-set undodir=~/.cache/vim/undo
 set undolevels=1000
 set undoreload=10000
+set undodir=~/.cache/vim/undo
+set tags=./.tags;,.tags
 set lazyredraw
 set noswapfile
 set nowritebackup
@@ -332,14 +334,28 @@ let NERDTreeMinimalUI = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
-let g:ctrlp_custom_ignore = '\v[\/](tmp|.git|.oh-my-zsh|plugged|node_modules|.config|.local|.cache)$'
-let g:ctrlp_cache_dir = '~/.cache/ctrlp'
-let g:ctrlp_show_hidden = 1
+let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','.autojump','plugged','node_modules','.local','*cache*'],'file':[] }
+let g:Lf_ShortcutF = '<C-p>'
+let g:Lf_HideHelp = 1
+let g:Lf_ShowHidden = 1
+let g:Lf_ReverseOrder = 1
+" <C-p>: 2<C-p>=mru, 2<C-f>=function, 4<C-p>=grep, type keyword and enter, 4<C-f>=grep current keyword
+let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
+let g:Lf_NormalMap = { "File": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfMru<CR>'],["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFunctionAll<CR>']], "Mru": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R  .<Left><Left>'],["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>']], "Function": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>'],["<C-f>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R <cword> .<CR>']] }
+let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
+let g:Lf_CacheDirectory = expand('~/.cache/')
 let g:tagbar_compact = 1
 let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
 let g:tagbar_iconchars = [ '+', '-' ]
+let s:vim_tags = expand('~/.cache/vim')
+let g:gutentags_project_root = ['.project', '.root', '.svn', '.git']
+let g:gutentags_ctags_tagfile = '.tags'
+let g:gutentags_cache_dir = s:vim_tags
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+px']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -446,11 +462,10 @@ elseif g:Completion == 1
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     let g:ycm_complete_in_comments = 1
     let g:ycm_complete_in_strings = 1
-    let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }
-    " copy ~/.vim/others/.ycm_extra_conf.py over, also add
+    " for c include files
     " '-isystem',
     " '/path/to/include'
-    let g:ycm_global_ycm_extra_conf = '~/.config/nvim/plugged/youcompleteme/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+    let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'
     let g:UltiSnipsExpandTrigger = '<C-k>'
     let g:UltiSnipsJumpForwardTrigger = '<TAB>'
     let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
@@ -481,5 +496,6 @@ function! ToggleTerm()
         exec 'wincmd j | startinsert'
     else
         exec 'split | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | terminal'
+        exec 'startinsert'
     endif
 endfunction
