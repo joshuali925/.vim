@@ -35,14 +35,15 @@ alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
 
-alias vi='vim'
-alias vimm='vim ~/.vim/.vimrc'
-alias tmux='tmux -2'
-
 alias ~='cd ~'
 alias b='cd -'
 alias ..='cd ..'
 alias ...='cd ../..'
+
+alias vi='vim'
+alias vimm='vim ~/.vim/.vimrc'
+alias vims='vim -c "source ~/.cache/vim/session.vim"'
+alias tmux='tmux -2'
 
 function f { find . -iname *$@*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
