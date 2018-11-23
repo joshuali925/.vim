@@ -1,33 +1,32 @@
 " ==================== Settings =========================
-let g:Theme = 1
+let g:Theme = 2
 let g:TrueColors = 1
 let g:AllExtensions = 1
-" Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete
-let g:Completion = 1
+let g:Completion = 1  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete
 let g:PythonPath = '/usr/bin/python'
+let g:ExecCommand = 'python main.py'
 
 " ===================== Plugins =========================
 call plug#begin('~/.config/nvim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh', 'on': 'LeaderfFile' }
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
-Plug 'tpope/vim-commentary', { 'on': 'Commentary' }
-Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-commentary', { 'on': '<Plug>Commentary' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
-Plug 'lfilho/cosco.vim', { 'on': 'CommaOrSemiColon' }
-Plug 'jiangmiao/auto-pairs'
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
-Plug 'terryma/vim-multiple-cursors'
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
-Plug 'dahu/vim-fanfingtastic'
+Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
+Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
+Plug 'tpope/vim-repeat'
+Plug 'jiangmiao/auto-pairs'
+Plug 'terryma/vim-multiple-cursors'
 " Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
     Plug 'ludovicchabant/vim-gutentags'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'tpope/vim-surround'
-    Plug 'easymotion/vim-easymotion'
     Plug 'w0rp/ale'
     set cursorline
     let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }
@@ -113,22 +112,14 @@ nmap <leader>9 <F9>
 nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
-imap <F1> <Esc><F1>
-nnoremap <F1> :wincmd w<CR>
-imap <F2> <Esc><F2>
-nnoremap <F2> gT
-imap <F3> <Esc><F3>
-nnoremap <F3> gt
-nnoremap <F4> *N
-nnoremap <F5> :TagbarToggle<CR>
-nnoremap <F6> :call ToggleDiff()<CR>
-nnoremap <F7> :call ToggleFold()<CR>
-imap <F8> <C-o><F8>
-nnoremap <F8> :call TogglePaste()<CR>
-imap <F9> <ESC><F9>a
-nnoremap <F9> :call TogglePreview()<CR>
-nmap , <Plug>fanfingtastic_;
-nmap ;, <Plug>fanfingtastic_,
+map f <Plug>fanfingtastic_f
+map t <Plug>fanfingtastic_t
+map F <Plug>fanfingtastic_F
+map T <Plug>fanfingtastic_T
+map , <Plug>fanfingtastic_;
+map ;, <Plug>fanfingtastic_,
+map  gc <Plug>Commentary
+nmap gcc <Plug>CommentaryLine
 nnoremap 0 ^
 nnoremap - $
 nnoremap J gj
@@ -140,24 +131,34 @@ vnoremap < <gv
 nnoremap > >>
 vnoremap > >gv
 nnoremap Y y$
-inoremap ;; <Esc>:CommaOrSemiColon<CR>$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap Q @q
 nnoremap gf <C-w>gf
 nnoremap gn *
 nnoremap gN *NN
-nnoremap gcc :Commentary<CR>
-vnoremap gcc :Commentary<CR>
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
 vnoremap [ c[<C-r><C-p>"]<Esc>
 vnoremap { c[<C-r><C-p>"}<Esc>
 inoremap <CR> <CR><Space><BS>
-inoremap <M-o> <Esc>o
+imap <F1> <Esc><F1>
+nnoremap <F1> :wincmd w<CR>
+imap <F2> <Esc><F2>
+nnoremap <F2> gT
+imap <F3> <Esc><F3>
+nnoremap <F3> gt
+nnoremap <F4> *N
+nnoremap <F5> :TagbarToggle<CR>
+nnoremap <F6> :call ToggleDiff()<CR>
+nnoremap <F7> :call ToggleFold()<CR>
+imap <F8> <Esc><F8>
+nnoremap <F8> :call TogglePaste()<CR>
+imap <F9> <Esc><F9>a
+nnoremap <F9> :call TogglePreview()<CR>
 inoremap <C-d> <C-o>dd
-nnoremap <C-c> :silent! AsyncStop!<CR>
+nnoremap <C-c> :AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 inoremap <C-l> <C-o>:stopinsert<CR>
@@ -176,7 +177,7 @@ nmap <leader>F <Plug>(easymotion-bd-f)
 nnoremap <leader>j J
 nnoremap <leader>k K
 nnoremap <leader>T :Tabularize /
-inoremap <leader>w <ESC>:update<CR>
+inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
@@ -200,7 +201,6 @@ set backspace=eol,start,indent
 set mouse=nv
 set numberwidth=2
 set number
-set autochdir
 set wrap
 set linebreak
 set showcmd
@@ -213,7 +213,6 @@ set laststatus=2
 set wildmenu
 set splitright
 set splitbelow
-set scrolloff=3
 set hlsearch
 set incsearch
 set ignorecase
@@ -226,6 +225,12 @@ set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set autoread
+set autochdir
+set completeopt=menuone
+set scrolloff=3
+set previewheight=7
+set foldmethod=indent
+set foldlevel=99
 set history=500
 set sessionoptions-=buffer
 set undofile
@@ -250,8 +255,10 @@ augroup RestoreCursor_AutoSource_Format_PythonComment
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType * setlocal formatoptions-=cro
+    autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
+    autocmd FileType c,cpp,java inoremap ;; <C-o>$;
+    autocmd FileType python inoremap ;; <C-o>$:
 augroup END
 
 " ======================== Diff =========================
@@ -266,8 +273,6 @@ function! ToggleDiff()
 endfunction
 
 " ====================== Fold code ======================
-set foldmethod=indent
-set foldlevel=99
 let g:FoldOn = 0
 function! ToggleFold()
     if g:FoldOn == 0
@@ -296,7 +301,6 @@ function! GetPasteStatus()
 endfunction
 
 " ======================= Preview =======================
-set previewheight=7
 let g:PreviewOn = 0
 function! TogglePreview()
     if g:PreviewOn == 0
@@ -314,7 +318,7 @@ endfunction
 function! ToggleFileSplit()
     exec 'wincmd w'
     let b_name = bufname('%')
-    while b_name=~'NERD_tree' || b_name=~'NetrwTreeListing' || b_name=~'__Tagbar__' || b_name=~'!/bin/'
+    while (b_name=~'NERD_tree' || b_name=~'NetrwTreeListing' || b_name=~'__Tagbar__' || b_name=~'!/bin/' || b_name=~'LeaderF' || getwinvar(0,'&syntax')=='qf' || &pvw)
         exec 'wincmd w'
         let b_name = bufname('%')
     endwhile
@@ -323,6 +327,7 @@ endfunction
 " =================== Other plugins =====================
 let g:ale_sign_column_always = 1
 let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_insert_leave = 1
 let g:ale_python_flake8_executable = 'flake8'
 let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
 let g:asyncrun_open = 12
@@ -341,7 +346,12 @@ let g:Lf_ShowHidden = 1
 let g:Lf_ReverseOrder = 1
 " <C-p>: 2<C-p>=mru, 2<C-f>=function, 4<C-p>=grep, type keyword and enter, 4<C-f>=grep current keyword
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
-let g:Lf_NormalMap = { "File": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfMru<CR>'],["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFunctionAll<CR>']], "Mru": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R  .<Left><Left>'],["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>']], "Function": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>'],["<C-f>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R <cword> .<CR>']] }
+let g:Lf_NormalMap = { "File": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfMru<CR>'],
+            \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFunctionAll<CR>']],
+            \       "Mru": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R  .<Left><Left>'],
+            \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>']],
+            \  "Function": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>'],
+            \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R <cword> .<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_CacheDirectory = expand('~/.cache/')
 let g:tagbar_compact = 1
@@ -399,8 +409,8 @@ endfunction
 imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
 imap <F12> <Esc><F12>
-imap <leader>r <F11>
-nmap <leader>r <F11>
+imap <leader>r <Esc><leader>r
+nmap <leader>r :wall <bar> exec 'AsyncRun '. g:ExecCommand<CR>
 augroup RunCode
     autocmd!
     autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
@@ -418,7 +428,6 @@ augroup RunCode
 augroup END
 
 " ==================== AutoComplete =====================
-set completeopt=menuone
 " let g:ycm_path_to_python_interpreter='' " for ycmd, don't change
 let g:ycm_python_binary_path=g:PythonPath " for JediHTTP
 let g:deoplete#sources#jedi#python_path=g:PythonPath
@@ -429,10 +438,10 @@ function! SimpleComplete()
     let column = col('.')
     let line = getline('.')
     if !(column>1 && strpart(line, column-2, 3)=~'^\w')
-        let pre = line[column-2]
-        if pre == '.'
+        let pre_char = line[column-2]
+        if pre_char == '.'
             return "\<C-x>\<C-o>\<C-p>"
-        elseif pre == '/'
+        elseif pre_char == '/'
             return "\<C-x>\<C-f>\<C-p>"
         else
             return "\<TAB>"
@@ -456,13 +465,14 @@ if g:Completion == 0
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
 elseif g:Completion == 1
-    inoremap <expr> <CR> pumvisible() ? "\<ESC>a" : "\<CR>\<Space>\<BS>"
-    inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<ESC>a" : "\<C-x>"
+    inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
+    let g:ycm_collect_identifiers_from_comments_and_strings = 1
     let g:ycm_complete_in_comments = 1
     let g:ycm_complete_in_strings = 1
-    " for c include files
+    " for c include files, add to .ycm_extra_conf.py
     " '-isystem',
     " '/path/to/include'
     let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'

@@ -61,9 +61,9 @@ ENABLE_CORRECTION="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-git
-zsh-autosuggestions
-# wd
+    git
+    zsh-autosuggestions
+    # wd
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -99,6 +99,9 @@ source $ZSH/oh-my-zsh.sh
 # key bindings
 # key bindings
 
+[[ -s ~/.autojump/etc/profile.d/autojump.sh ]] && source ~/.autojump/etc/profile.d/autojump.sh
+autoload -U compinit && compinit -u
+
 export PATH=$PATH:$HOME/.local/bin
 
 alias mkdir='mkdir -p'
@@ -106,15 +109,17 @@ alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
 
+alias b='cd -'
+
 alias vi='vim'
 alias vimm='vim ~/.vim/.vimrc'
+alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias tmux='tmux -2'
 
-alias -s txt='nvim'
-alias -s py='nvim'
-alias -s c='nvim'
-alias -s cpp='nvim'
-alias -s java='nvim'
+alias -s c='vim'
+alias -s cpp='vim'
+alias -s txt='vim'
+alias -s java='vim'
 
 function f { find . -iname \*$1\*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
