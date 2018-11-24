@@ -16,11 +16,11 @@ Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
+Plug 'terryma/vim-multiple-cursors', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
 Plug 'tpope/vim-repeat'
 Plug 'jiangmiao/auto-pairs'
-Plug 'terryma/vim-multiple-cursors'
 " Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
     Plug 'ludovicchabant/vim-gutentags'
@@ -35,8 +35,8 @@ else
 endif
 if g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
-    Plug 'sirver/ultisnips'
-    Plug 'honza/vim-snippets'
+    Plug 'sirver/ultisnips', { 'for': ['c', 'cpp', 'java', 'python'] }
+    Plug 'honza/vim-snippets', { 'for': ['c', 'cpp', 'java', 'python'] }
 elseif g:Completion == 2
     if has('nvim')
         Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -47,9 +47,9 @@ elseif g:Completion == 2
     endif
     Plug 'Shougo/neco-vim'
     Plug 'Shougo/neco-syntax'
-    Plug 'zchee/deoplete-jedi'
-    Plug 'sirver/ultisnips'
-    Plug 'honza/vim-snippets'
+    Plug 'zchee/deoplete-jedi', { 'for': 'python' }
+    Plug 'sirver/ultisnips', { 'for': ['c', 'cpp', 'java', 'python'] }
+    Plug 'honza/vim-snippets', { 'for': ['c', 'cpp', 'java', 'python'] }
 endif
 call plug#end()
 
@@ -112,37 +112,6 @@ nmap <leader>9 <F9>
 nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
-map f <Plug>fanfingtastic_f
-map t <Plug>fanfingtastic_t
-map F <Plug>fanfingtastic_F
-map T <Plug>fanfingtastic_T
-map , <Plug>fanfingtastic_;
-map ;, <Plug>fanfingtastic_,
-map  gc <Plug>Commentary
-nmap gcc <Plug>CommentaryLine
-nnoremap 0 ^
-nnoremap - $
-nnoremap J gj
-vnoremap J gj
-nnoremap K gk
-vnoremap K gk
-nnoremap < <<
-vnoremap < <gv
-nnoremap > >>
-vnoremap > >gv
-nnoremap Y y$
-nnoremap o o<Space><BS>
-nnoremap O O<Space><BS>
-nnoremap Q @q
-nnoremap gf <C-w>gf
-nnoremap gn *
-nnoremap gN *NN
-vnoremap " c"<C-r><C-p>""<Esc>
-vnoremap ' c'<C-r><C-p>"'<Esc>
-vnoremap ( c(<C-r><C-p>")<Esc>
-vnoremap [ c[<C-r><C-p>"]<Esc>
-vnoremap { c[<C-r><C-p>"}<Esc>
-inoremap <CR> <CR><Space><BS>
 imap <F1> <Esc><F1>
 nnoremap <F1> :wincmd w<CR>
 imap <F2> <Esc><F2>
@@ -157,6 +126,39 @@ imap <F8> <Esc><F8>
 nnoremap <F8> :call TogglePaste()<CR>
 imap <F9> <Esc><F9>a
 nnoremap <F9> :call TogglePreview()<CR>
+map f <Plug>fanfingtastic_f
+map t <Plug>fanfingtastic_t
+map F <Plug>fanfingtastic_F
+map T <Plug>fanfingtastic_T
+map , <Plug>fanfingtastic_;
+map ;, <Plug>fanfingtastic_,
+map  gc <Plug>Commentary
+nmap gcc <Plug>CommentaryLine
+map S <Plug>(easymotion-bd-w)
+map <leader>f <Plug>(easymotion-bd-f)
+nnoremap 0 ^
+nnoremap - $
+nnoremap J gj
+vnoremap J gj
+nnoremap K gk
+vnoremap K gk
+nnoremap < <<
+vnoremap < <gv
+nnoremap > >>
+vnoremap > >gv
+nnoremap Y y$
+nnoremap o o<Space><BS>
+nnoremap O O<Space><BS>
+inoremap <CR> <CR><Space><BS>
+nnoremap Q @q
+nnoremap gf <C-w>gf
+nnoremap gn *
+nnoremap gN *NN
+vnoremap " c"<C-r><C-p>""<Esc>
+vnoremap ' c'<C-r><C-p>"'<Esc>
+vnoremap ( c(<C-r><C-p>")<Esc>
+vnoremap [ c[<C-r><C-p>"]<Esc>
+vnoremap { c[<C-r><C-p>"}<Esc>
 inoremap <C-d> <C-o>dd
 nnoremap <C-c> :AsyncStop!<CR>
 inoremap <C-c> <Esc>
@@ -172,8 +174,7 @@ nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nnoremap <C-p> :LeaderfFile<CR>
 nnoremap <C-j> :call ToggleFileSplit()<CR>
 nnoremap <C-]> <C-w>}
-nmap <leader>f <Plug>(easymotion-bd-w)
-nmap <leader>F <Plug>(easymotion-bd-f)
+nmap <C-n> :call plug#load('vim-multiple-cursors')<CR><C-n>
 nnoremap <leader>j J
 nnoremap <leader>k K
 nnoremap <leader>T :Tabularize /
@@ -251,9 +252,9 @@ let g:netrw_winsize=20
 let g:netrw_liststyle=3
 
 " ====================== Autocmd ========================
-augroup RestoreCursor_AutoSource_Format_PythonComment
+augroup RestoreCursor_AutoSource_Format_PyComment_Semicolon
     autocmd!
-    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions=jql
