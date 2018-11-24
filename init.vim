@@ -21,9 +21,10 @@ Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(ea
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
 Plug 'tpope/vim-repeat'
 Plug 'jiangmiao/auto-pairs'
+Plug 'shougo/echodoc.vim'
 " Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
-    Plug 'ludovicchabant/vim-gutentags'
+    " Plug 'ludovicchabant/vim-gutentags'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'tpope/vim-surround'
@@ -33,10 +34,12 @@ if g:AllExtensions == 1
 else
     set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
-if g:Completion == 1
-    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
+if g:Completion > 0
     Plug 'sirver/ultisnips', { 'for': ['c', 'cpp', 'java', 'python'] }
     Plug 'honza/vim-snippets', { 'for': ['c', 'cpp', 'java', 'python'] }
+endif
+if g:Completion == 1
+    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
 elseif g:Completion == 2
     if has('nvim')
         Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -48,8 +51,6 @@ elseif g:Completion == 2
     Plug 'Shougo/neco-vim'
     Plug 'Shougo/neco-syntax'
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-    Plug 'sirver/ultisnips', { 'for': ['c', 'cpp', 'java', 'python'] }
-    Plug 'honza/vim-snippets', { 'for': ['c', 'cpp', 'java', 'python'] }
 endif
 call plug#end()
 
@@ -206,7 +207,7 @@ set wrap
 set linebreak
 set showcmd
 set showmatch
-set showmode
+set noshowmode
 set title
 set ruler
 set showtabline=2
@@ -360,13 +361,11 @@ let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
 let g:tagbar_iconchars = [ '+', '-' ]
-let s:vim_tags = expand('~/.cache/vim')
 let g:gutentags_project_root = ['.project', '.root', '.svn', '.git']
 let g:gutentags_ctags_tagfile = '.tags'
-let g:gutentags_cache_dir = s:vim_tags
-let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
-let g:gutentags_ctags_extra_args += ['--c++-kinds=+px']
-let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+let g:gutentags_cache_dir = expand('~/.cache/vim')
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q', '--c++-kinds=+px', '--c-kinds=+px']
+let g:echodoc_enable_at_startup = 1
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -432,6 +431,9 @@ augroup END
 " let g:ycm_path_to_python_interpreter='' " for ycmd, don't change
 let g:ycm_python_binary_path=g:PythonPath " for JediHTTP
 let g:deoplete#sources#jedi#python_path=g:PythonPath
+let g:UltiSnipsExpandTrigger = '<C-k>'
+let g:UltiSnipsJumpForwardTrigger = '<TAB>'
+let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
 function! SimpleComplete()
     if pumvisible()
         return "\<C-n>"
@@ -470,6 +472,7 @@ elseif g:Completion == 1
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
+    let g:ycm_show_diagnostics_ui = 0
     let g:ycm_collect_identifiers_from_comments_and_strings = 1
     let g:ycm_complete_in_comments = 1
     let g:ycm_complete_in_strings = 1
@@ -477,9 +480,7 @@ elseif g:Completion == 1
     " '-isystem',
     " '/path/to/include'
     let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'
-    let g:UltiSnipsExpandTrigger = '<C-k>'
-    let g:UltiSnipsJumpForwardTrigger = '<TAB>'
-    let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
+    let g:echodoc#enable_force_overwrite = 1
 elseif g:Completion == 2
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
     inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
@@ -487,9 +488,6 @@ elseif g:Completion == 2
     inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     let g:deoplete#enable_at_startup = 1
-    let g:UltiSnipsExpandTrigger = '<C-k>'
-    let g:UltiSnipsJumpForwardTrigger = '<TAB>'
-    let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
 endif
 
 " =================== Terminal ==========================
