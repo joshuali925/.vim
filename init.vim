@@ -13,9 +13,9 @@ Plug 'Yggdroot/LeaderF', { 'do': './install.sh', 'on': 'LeaderfFile' }
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
 Plug 'tpope/vim-commentary', { 'on': '<Plug>Commentary' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
-Plug 'chiel92/vim-autoformat', { 'on': 'Autoformat' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
+Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'terryma/vim-multiple-cursors', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
@@ -48,8 +48,8 @@ elseif g:Completion == 2
         Plug 'roxma/nvim-yarp'
         Plug 'roxma/vim-hug-neovim-rpc'
     endif
-    Plug 'Shougo/neco-vim'
     Plug 'Shougo/neco-syntax'
+    Plug 'Shougo/neco-vim', { 'for': 'vim' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
 endif
 call plug#end()
@@ -137,12 +137,11 @@ map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
 map S <Plug>(easymotion-bd-w)
 map <leader>f <Plug>(easymotion-bd-f)
-nnoremap 0 ^
-nnoremap - $
-nnoremap J gj
-vnoremap J gj
-nnoremap K gk
-vnoremap K gk
+noremap 0 ^
+noremap - $
+noremap J gj
+noremap K gk
+noremap x "_x
 nnoremap < <<
 vnoremap < <gv
 nnoremap > >>
@@ -160,22 +159,27 @@ vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
 vnoremap [ c[<C-r><C-p>"]<Esc>
 vnoremap { c[<C-r><C-p>"}<Esc>
+nnoremap <C-]> <C-w>}
 inoremap <C-d> <C-o>dd
 nnoremap <C-c> :AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
+nnoremap <C-l> :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 inoremap <C-l> <C-o>:stopinsert<CR>
 vnoremap <C-l> <Esc>
-nnoremap <C-l> :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <C-b> :NERDTreeToggle<CR>
-imap <C-f> <Esc>V<C-f>a
-nnoremap <C-f> :Autoformat<CR>
-vnoremap <C-f> :'<,'>Autoformat<CR>$
-nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nnoremap <C-p> :LeaderfFile<CR>
 nnoremap <C-j> :call ToggleFileSplit()<CR>
-nnoremap <C-]> <C-w>}
-nmap <C-n> :call plug#load('vim-multiple-cursors')<CR><C-n>
+nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
+nmap <C-f> :call LoadAutoformat()<CR><C-f>
+imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
+vmap <C-f> :call LoadAutoformat()<CR>gv<C-f>
+nmap <C-n> :call LoadMultipleCursors()<CR><C-n>
+xmap <C-n> :call LoadMultipleCursors()<CR>gv<C-n>
+nmap <leader><C-n> :call LoadMultipleCursors()<CR><leader><C-n>
+xmap <leader><C-n> :call LoadMultipleCursors()<CR>gv<leader><C-n>
+noremap <leader>p "0p
+noremap <leader>P "0P
 nnoremap <leader>j J
 nnoremap <leader>k K
 nnoremap <leader>T :Tabularize /
@@ -187,8 +191,6 @@ nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :q<CR>
 vnoremap <leader>q <Esc>:q<CR>
 nnoremap <leader>u :earlier 10s<CR>
-nnoremap <leader>p "0p
-nnoremap <leader>P "0P
 nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 
@@ -200,7 +202,7 @@ let &t_SR.="\e[4 q"
 let &t_EI.="\e[2 q"
 set nocompatible
 set backspace=eol,start,indent
-set mouse=nv
+set mouse=a
 set numberwidth=2
 set number
 set wrap
@@ -240,6 +242,8 @@ set undolevels=1000
 set undoreload=10000
 set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
+set timeoutlen=1500
+set ttimeoutlen=10
 set lazyredraw
 set noswapfile
 set nowritebackup
@@ -252,16 +256,28 @@ let g:netrw_winsize=20
 let g:netrw_liststyle=3
 
 " ====================== Autocmd ========================
-augroup RestoreCursor_AutoSource_Format_PyComment_Semicolon
+augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
-    autocmd FileType c,cpp,java inoremap ;; <C-o>$;
-    autocmd FileType python inoremap ;; <C-o>$:
+    autocmd FileType c,cpp,java inoremap <buffer> ;; <C-o>$;
+    autocmd FileType python inoremap <buffer> ;; <C-o>$:
 augroup END
+
+" ====================== LazyLoad =======================
+function! LoadAutoformat()
+    call plug#load('vim-autoformat')
+    nnoremap <C-f> :Autoformat<CR>
+    inoremap <C-f> <Esc>V:'<,'>Autoformat<CR>A
+    vnoremap <C-f> :'<,'>Autoformat<CR>$
+endfunction
+function! LoadMultipleCursors()
+    unmap <C-n>
+    call plug#load('vim-multiple-cursors')
+endfunction
 
 " ======================== Diff =========================
 let g:DiffOn = 0
@@ -340,6 +356,7 @@ let NERDTreeShowHidden = 1
 let NERDTreeMinimalUI = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
+let g:multi_cursor_select_all_word_key = '<leader><C-n>'
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','.autojump','plugged','node_modules','.local','*cache*'],'file':[] }
 let g:Lf_ShortcutF = '<C-p>'
@@ -349,7 +366,7 @@ let g:Lf_ReverseOrder = 1
 " <C-p>: 2<C-p>=mru, 2<C-f>=function, 4<C-p>=grep, type keyword and enter, 4<C-f>=grep current keyword
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
 let g:Lf_NormalMap = { "File": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfMru<CR>'],
-            \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFunctionAll<CR>']],
+            \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFunction<CR>']],
             \       "Mru": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R  .<Left><Left>'],
             \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>']],
             \  "Function": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>'],
@@ -361,7 +378,8 @@ let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
 let g:tagbar_iconchars = [ '+', '-' ]
-let g:gutentags_project_root = ['.project', '.root', '.svn', '.git']
+" let g:gutentags_project_root = ['.project', '.root', '.svn', '.git', '.tags']
+let g:gutentags_project_root = ['.tags']  " create .tags in dir to enable gutentags
 let g:gutentags_ctags_tagfile = '.tags'
 let g:gutentags_cache_dir = expand('~/.cache/vim')
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q', '--c++-kinds=+px', '--c-kinds=+px']
