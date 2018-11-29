@@ -112,7 +112,7 @@ alias l='ls -CF'
 alias b='cd -'
 
 alias vi='vim'
-alias vimm='vim ~/.vim/.vimrc'
+alias vimm='vim ~/.vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias tmux='tmux -2'
 
