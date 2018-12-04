@@ -11,7 +11,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh', 'on': 'LeaderfFile' }
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
-Plug 'tpope/vim-commentary', { 'on': '<Plug>Commentary' }
+Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
@@ -142,6 +142,8 @@ noremap - $
 noremap J gj
 noremap K gk
 noremap x "_x
+xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+nnoremap Q @q
 nnoremap < <<
 vnoremap < <gv
 nnoremap > >>
@@ -150,15 +152,13 @@ nnoremap Y y$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 inoremap <CR> <CR><Space><BS>
-nnoremap Q @q
 nnoremap gf <C-w>gf
-nnoremap gn *
-nnoremap gN *NN
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
 vnoremap [ c[<C-r><C-p>"]<Esc>
-vnoremap { c[<C-r><C-p>"}<Esc>
+vnoremap { c{<C-r><C-p>"}<Esc>
+nnoremap cr :call EditRegister()<CR>
 nnoremap <C-]> <C-w>}
 inoremap <C-d> <C-o>dd
 nnoremap <C-c> :AsyncStop!<CR>
@@ -270,14 +270,27 @@ augroup END
 
 " ====================== LazyLoad =======================
 function! LoadAutoformat()
-    call plug#load('vim-autoformat')
     nnoremap <C-f> :Autoformat<CR>
     inoremap <C-f> <Esc>V:'<,'>Autoformat<CR>A
     vnoremap <C-f> :'<,'>Autoformat<CR>$
+    call plug#load('vim-autoformat')
 endfunction
 function! LoadMultipleCursors()
-    unmap <C-n>
+    nnoremap <C-n> :call multiple_cursors#new("n", 1)<CR>
+    xnoremap <C-n> :<C-u>call multiple_cursors#new("v", 0)<CR>
+    nnoremap <leader><C-n> :call multiple_cursors#select_all("n", 1)<CR>
+    xnoremap <leader><C-n> :<C-u>call multiple_cursors#select_all("v", 0)<CR>
     call plug#load('vim-multiple-cursors')
+endfunction
+
+" ======================== Macro ========================
+function! ExecuteMacroOverVisualRange()
+    echo '@'.getcmdline()
+    exec ":'<,'>normal @".nr2char(getchar())
+endfunction
+function! EditRegister() abort
+    let r = nr2char(getchar())
+    call feedkeys("q:ilet @". r. " = \<c-r>\<c-r>=string(@". r. ")\<cr>\<esc>0f'", 'n')
 endfunction
 
 " ======================== Diff =========================
@@ -313,9 +326,9 @@ function! TogglePaste()
 endfunction
 function! GetPasteStatus()
     if &paste
-        return "[paste]"
+        return '[paste]'
     else
-        return ""
+        return ''
     endif
 endfunction
 
@@ -366,12 +379,12 @@ let g:Lf_ShowHidden = 1
 let g:Lf_ReverseOrder = 1
 " <C-p>: 2<C-p>=mru, 2<C-f>=function, 4<C-p>=grep, type keyword and enter, 4<C-f>=grep current keyword
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
-let g:Lf_NormalMap = { "File": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfMru<CR>'],
-            \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFunction<CR>']],
-            \       "Mru": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R  .<Left><Left>'],
-            \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>']],
-            \  "Function": [["<C-p>", ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>'],
-            \               ["<C-f>", ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R <cword> .<CR>']] }
+let g:Lf_NormalMap = { 'File': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfMru<CR>'],
+            \               ['<C-f>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFunction<CR>']],
+            \       'Mru': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R  .<Left><Left>'],
+            \               ['<C-f>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>']],
+            \  'Function': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>'],
+            \               ['<C-f>', ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R <cword> .<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_CacheDirectory = expand('~/.cache/')
 let g:tagbar_compact = 1
@@ -491,7 +504,7 @@ elseif g:Completion == 1
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
-    let g:ycm_show_diagnostics_ui = 0
+    " let g:ycm_show_diagnostics_ui = 0
     let g:ycm_collect_identifiers_from_comments_and_strings = 1
     let g:ycm_complete_in_comments = 1
     let g:ycm_complete_in_strings = 1
@@ -515,7 +528,7 @@ tnoremap <F1> <C-w><C-w>
 tnoremap <F2> <C-\><C-n>gT
 tnoremap <F3> <C-\><C-n>gt
 tnoremap <C-u> <C-\><C-n>
-tnoremap <C-d> <C-d><C-\><C-n>:q!<CR>
+" tnoremap <C-d> <C-d><C-\><C-n>:q!<CR>
 tnoremap <C-k> <C-w>5k
 nnoremap <C-k> :call ToggleTerm()<CR>
 nnoremap <leader>t V:call SendToTerminal()<CR>$
@@ -528,7 +541,7 @@ function! ToggleTerm()
             exec 'normal a'
         endif
     else
-        exec 'split | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | term ++curwin'
+        exec 'botright new | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | term ++curwin'
     endif
 endfunction
 function! SendToTerminal()
@@ -537,10 +550,8 @@ function! SendToTerminal()
         let buff_n = buff_n[0]
         let lines = getline(getpos("'<")[1], getpos("'>")[1])
         for l in lines
-            " if l!='' || len(lines)==1  " don't send blank lines
             call term_sendkeys(buff_n, l. "\<CR>")
             sleep 10m
-            " endif
         endfor
     endif
 endfunction
