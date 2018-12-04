@@ -2,7 +2,7 @@
 let g:Theme = 1
 let g:TrueColors = 1
 let g:AllExtensions = 1
-let g:Completion = 1  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete
+let g:Completion = 3  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete
 let g:PythonPath = '/usr/bin/python'
 let g:ExecCommand = 'python main.py'
 
@@ -51,6 +51,9 @@ elseif g:Completion == 2
     Plug 'Shougo/neco-syntax'
     Plug 'Shougo/neco-vim', { 'for': 'vim' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
+elseif g:Completion == 3
+    Plug 'lifepillar/vim-mucomplete'
+    Plug 'davidhalter/jedi-vim'
 endif
 call plug#end()
 
@@ -520,6 +523,16 @@ elseif g:Completion == 2
     inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     let g:deoplete#enable_at_startup = 1
+elseif g:Completion == 3
+    set completeopt+=noselect
+    set shortmess+=c
+    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    let g:mucomplete#enable_auto_at_startup = 1
+    let g:mucomplete#chains = {}
+    let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
+    let g:jedi#rename_command = '<leader>R'
 endif
 
 " =================== Terminal ==========================
