@@ -1,8 +1,8 @@
 " ==================== Settings =========================
-let g:Theme = 1
+let g:Theme = 2
 let g:TrueColors = 1
 let g:AllExtensions = 1
-let g:Completion = 3  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete
+let g:Completion = 1  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete
 let g:PythonPath = '/usr/bin/python'
 let g:ExecCommand = 'python main.py'
 
@@ -10,8 +10,6 @@ let g:ExecCommand = 'python main.py'
 call plug#begin('~/.vim/plugged')
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh', 'on': 'LeaderfFile' }
-Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
-Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
@@ -19,12 +17,16 @@ Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'terryma/vim-multiple-cursors', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
+Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
+Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
+Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'tpope/vim-repeat'
+Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
 " Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
-    " Plug 'ludovicchabant/vim-gutentags'
+    Plug 'ludovicchabant/vim-gutentags'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'tpope/vim-surround'
@@ -53,7 +55,7 @@ elseif g:Completion == 2
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
 elseif g:Completion == 3
     Plug 'lifepillar/vim-mucomplete'
-    Plug 'davidhalter/jedi-vim'
+    Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 endif
 call plug#end()
 
@@ -140,18 +142,26 @@ map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
 map S <Plug>(easymotion-bd-w)
 map <leader>f <Plug>(easymotion-bd-f)
+nmap ds <Plug>Dsurround
+nmap cs <Plug>Csurround
+nmap cS <Plug>CSurround
+nmap ys <Plug>Ysurround
+nmap yS <Plug>YSurround
+nmap yss <Plug>Yssurround
+nmap ySs <Plug>YSsurround
+nmap ySS <Plug>YSsurround
+xmap S <Plug>VSurround
+xmap gS <Plug>VgSurround
 noremap 0 ^
 noremap - $
 noremap J gj
 noremap K gk
-noremap x "_x
 xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
 nnoremap Q @q
 nnoremap < <<
 vnoremap < <gv
 nnoremap > >>
 vnoremap > >gv
-nnoremap Y y$
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 inoremap <CR> <CR><Space><BS>
@@ -181,10 +191,12 @@ nmap <C-n> :call LoadMultipleCursors()<CR><C-n>
 xmap <C-n> :call LoadMultipleCursors()<CR>gv<C-n>
 nmap <leader><C-n> :call LoadMultipleCursors()<CR><leader><C-n>
 xmap <leader><C-n> :call LoadMultipleCursors()<CR>gv<leader><C-n>
-noremap <leader>p "0p
-noremap <leader>P "0P
+nmap <leader>p <Plug>yankstack_substitute_older_paste
+nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nnoremap <leader>j J
 nnoremap <leader>k K
+nnoremap <leader>o o<Esc>
+nnoremap <leader>O O<Esc>
 nnoremap <leader>T :Tabularize /
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
@@ -265,7 +277,7 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType * setlocal formatoptions=jql
+    autocmd FileType * setlocal formatoptions=jql | nmap Y y$
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
     autocmd FileType c,cpp,java inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
@@ -395,8 +407,7 @@ let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
 let g:tagbar_iconchars = [ '+', '-' ]
-" let g:gutentags_project_root = ['.project', '.root', '.svn', '.git', '.tags']
-let g:gutentags_project_root = ['.tags']  " create .tags in dir to enable gutentags
+let g:gutentags_project_root = ['.project', '.root']
 let g:gutentags_ctags_tagfile = '.tags'
 let g:gutentags_cache_dir = expand('~/.cache/vim')
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q', '--c++-kinds=+px', '--c-kinds=+px']
@@ -541,7 +552,6 @@ tnoremap <F1> <C-w><C-w>
 tnoremap <F2> <C-\><C-n>gT
 tnoremap <F3> <C-\><C-n>gt
 tnoremap <C-u> <C-\><C-n>
-" tnoremap <C-d> <C-d><C-\><C-n>:q!<CR>
 tnoremap <C-k> <C-w>5k
 nnoremap <C-k> :call ToggleTerm()<CR>
 nnoremap <leader>t V:call SendToTerminal()<CR>$
@@ -554,7 +564,7 @@ function! ToggleTerm()
             exec 'normal a'
         endif
     else
-        exec 'botright new | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | term ++curwin'
+        exec 'botright new | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | term ++curwin ++close'
     endif
 endfunction
 function! SendToTerminal()
