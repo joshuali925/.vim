@@ -8,8 +8,9 @@ let g:ExecCommand = 'python main.py'
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
-Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh', 'on': 'LeaderfFile' }
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
@@ -58,6 +59,7 @@ elseif g:Completion == 3
     Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 endif
 call plug#end()
+call yankstack#setup()
 
 " ===================== Themes ==========================
 if g:TrueColors == 1
@@ -140,7 +142,7 @@ map , <Plug>fanfingtastic_;
 map ;, <Plug>fanfingtastic_,
 map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
-map S <Plug>(easymotion-bd-w)
+nmap S <Plug>(easymotion-bd-w)
 map <leader>f <Plug>(easymotion-bd-f)
 nmap ds <Plug>Dsurround
 nmap cs <Plug>Csurround
@@ -152,6 +154,7 @@ nmap ySs <Plug>YSsurround
 nmap ySS <Plug>YSsurround
 xmap S <Plug>VSurround
 xmap gS <Plug>VgSurround
+nmap Y y$
 noremap 0 ^
 noremap - $
 noremap J gj
@@ -166,6 +169,7 @@ nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 inoremap <CR> <CR><Space><BS>
 nnoremap gf <C-w>gf
+nnoremap gp `[v`]
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
@@ -174,7 +178,7 @@ vnoremap { c{<C-r><C-p>"}<Esc>
 nnoremap cr :call EditRegister()<CR>
 nnoremap <C-]> <C-w>}
 inoremap <C-d> <C-o>dd
-nnoremap <C-c> :AsyncStop!<CR>
+nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 nnoremap <C-l> :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
@@ -193,10 +197,10 @@ nmap <leader><C-n> :call LoadMultipleCursors()<CR><leader><C-n>
 xmap <leader><C-n> :call LoadMultipleCursors()<CR>gv<leader><C-n>
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
+nmap <leader>o o<Esc>
+nmap <leader>O O<Esc>
 nnoremap <leader>j J
 nnoremap <leader>k K
-nnoremap <leader>o o<Esc>
-nnoremap <leader>O O<Esc>
 nnoremap <leader>T :Tabularize /
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
@@ -204,8 +208,9 @@ nnoremap <leader>W :w !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :q<CR>
+nnoremap q<leader> :q<CR>
 vnoremap <leader>q <Esc>:q<CR>
-nnoremap <leader>u :earlier 10s<CR>
+nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 
@@ -215,7 +220,7 @@ syntax enable
 let &t_SI.="\e[6 q"
 let &t_SR.="\e[4 q"
 let &t_EI.="\e[2 q"
-set nocompatible
+if &compatible | set nocompatible | endif
 set backspace=eol,start,indent
 set mouse=a
 set numberwidth=2
@@ -243,6 +248,7 @@ set expandtab
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
+set textwidth=0
 set autoread
 set autochdir
 set completeopt=menuone
@@ -277,7 +283,7 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType * setlocal formatoptions=jql | nmap Y y$
+    autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
     autocmd FileType c,cpp,java inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
@@ -557,14 +563,19 @@ nnoremap <C-k> :call ToggleTerm()<CR>
 nnoremap <leader>t V:call SendToTerminal()<CR>$
 vnoremap <leader>t <Esc>:call SendToTerminal()<CR>
 function! ToggleTerm()
-    let term_winnr = bufwinnr('!/bin/*')
-    if term_winnr > 0
-        exec term_winnr. 'wincmd w'
-        if term_getstatus(bufnr('%')) == 'running,normal'
+    let term_winnr = bufwinnr('!/bin/bash')
+    if term_winnr < 1
+        exec 'botright new | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | terminal ++curwin ++close'
+    else
+        exec '5wincmd j'
+        let status = term_getstatus(bufnr('%'))
+        if status == ''
+            exec term_winnr. 'wincmd w'
+            let status = term_getstatus(bufnr('%'))
+        endif
+        if status == 'running,normal'
             exec 'normal a'
         endif
-    else
-        exec 'botright new | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | term ++curwin ++close'
     endif
 endfunction
 function! SendToTerminal()
