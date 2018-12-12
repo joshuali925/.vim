@@ -101,6 +101,7 @@ source $ZSH/oh-my-zsh.sh
 
 [[ -s ~/.autojump/etc/profile.d/autojump.sh ]] && source ~/.autojump/etc/profile.d/autojump.sh
 autoload -U compinit && compinit -u
+unsetopt BG_NICE  # fix wsl bug
 
 export PATH=$PATH:$HOME/.local/bin
 
