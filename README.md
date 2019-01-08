@@ -19,6 +19,7 @@ curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimag
 chmod u+x nvim.appimage
 mkdir -p ~/.local/bin
 mv nvim.appimage ~/.local/bin/nvim
+pip install --user flake8 yapf rope neovim
 nvim -c "PlugInstall" -c "qa"
 ```
 
@@ -32,9 +33,4 @@ ln -s .vim/.bashrc ~/.bashrc
 git clone git://github.com/wting/autojump.git
 cd autojump && ./install.py
 cd .. && rm autojump -rf
-```
-
-## Set up python
-```bash
-pip install --user flake8 yapf rope
 ```
