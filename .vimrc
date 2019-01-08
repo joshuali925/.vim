@@ -27,7 +27,7 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
 " Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
-    Plug 'ludovicchabant/vim-gutentags'
+    " Plug 'ludovicchabant/vim-gutentags'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'tpope/vim-surround'
@@ -59,7 +59,7 @@ elseif g:Completion == 3
     Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 endif
 call plug#end()
-call yankstack#setup()
+if &runtimepath=~'yankstack' | call yankstack#setup() | endif
 
 " ===================== Themes ==========================
 if g:TrueColors == 1
@@ -181,12 +181,17 @@ inoremap <C-d> <C-o>dd
 nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
-nnoremap <C-l> :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-inoremap <C-l> <C-o>:stopinsert<CR>
-vnoremap <C-l> <Esc>
 nnoremap <C-b> :NERDTreeToggle<CR>
 nnoremap <C-p> :LeaderfFile<CR>
-nnoremap <C-j> :call ToggleFileSplit()<CR>
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+nnoremap <C-w><C-c> <Esc>
+nmap <C-w>< <C-w><<C-w>
+nmap <C-w>> <C-w>><C-w>
+nmap <C-w>+ <C-w>+<C-w>
+nmap <C-w>- <C-w>-<C-w>
 nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nmap <C-f> :call LoadAutoformat()<CR><C-f>
 imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
@@ -199,8 +204,10 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
+nnoremap <leader>h :call ToggleFileSplit()<CR>
 nnoremap <leader>j J
 nnoremap <leader>k K
+nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>T :Tabularize /
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
@@ -208,7 +215,6 @@ nnoremap <leader>W :w !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :q<CR>
-nnoremap q<leader> :q<CR>
 vnoremap <leader>q <Esc>:q<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
@@ -265,7 +271,7 @@ set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
 set viminfo+=n~/.cache/vim/viminfo
 set timeoutlen=1500
-set ttimeoutlen=10
+set ttimeoutlen=40
 set lazyredraw
 set noswapfile
 set nowritebackup
@@ -558,12 +564,22 @@ tnoremap <F1> <C-w><C-w>
 tnoremap <F2> <C-\><C-n>gT
 tnoremap <F3> <C-\><C-n>gt
 tnoremap <C-u> <C-\><C-n>
-tnoremap <C-k> <C-w>5k
-nnoremap <C-k> :call ToggleTerm()<CR>
+tnoremap <C-h> <C-w>h
+tnoremap <C-j> <C-w>j
+tnoremap <C-k> <C-w>k
+tnoremap <C-l> <C-w>l
+tnoremap <leader>k <C-w>5k
+nnoremap <leader>k :call ToggleTerm()<CR>
 nnoremap <leader>t V:call SendToTerminal()<CR>$
 vnoremap <leader>t <Esc>:call SendToTerminal()<CR>
 function! ToggleTerm()
     let term_winnr = bufwinnr('!/bin/bash')
+    if term_winnr < 1
+        let term_winnr = bufwinnr('!/bin/zsh')
+    endif
+    if term_winnr < 1
+        let term_winnr = bufwinnr('!zsh')
+    endif
     if term_winnr < 1
         exec 'botright new | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | terminal ++curwin ++close'
     else
