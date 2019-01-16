@@ -4,7 +4,7 @@ let g:TrueColors = 1
 let g:AllExtensions = 1
 let g:Completion = 1  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete
 let g:PythonPath = '/usr/bin/python'
-let g:ExecCommand = 'python main.py'
+let g:ExecCommand = 'python %'
 
 " ===================== Plugins =========================
 call plug#begin('~/.config/nvim/plugged')
@@ -175,6 +175,7 @@ vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
 vnoremap [ c[<C-r><C-p>"]<Esc>
 vnoremap { c{<C-r><C-p>"}<Esc>
+vnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
 nnoremap cr :call EditRegister()<CR>
 nnoremap <C-]> <C-w>}
 inoremap <C-d> <C-o>dd
@@ -217,8 +218,9 @@ nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :q<CR>
 vnoremap <leader>q <Esc>:q<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
-nnoremap <leader>com o<Esc>55i=<Esc>:Commentary<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
+nnoremap <leader>vcom o<Esc>55i=<Esc>:Commentary<CR>
+nnoremap <leader>vtime :put=strftime('%x %X')<CR>
 
 " ======================= Basics ========================
 filetype plugin indent on
@@ -241,6 +243,7 @@ set ruler
 set showtabline=2
 set laststatus=2
 set wildmenu
+set diffopt+=vertical
 set splitright
 set splitbelow
 set hlsearch
@@ -270,7 +273,7 @@ set undoreload=10000
 set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
 set timeoutlen=1500
-set ttimeoutlen=10
+set ttimeoutlen=40
 set lazyredraw
 set noswapfile
 set nowritebackup
