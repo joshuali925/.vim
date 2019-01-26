@@ -99,7 +99,7 @@ source $ZSH/oh-my-zsh.sh
 # key bindings
 # key bindings
 
-[[ -s ~/.autojump/etc/profile.d/autojump.sh ]] && source ~/.autojump/etc/profile.d/autojump.sh
+source ~/.vim/others/z.sh
 autoload -U compinit && compinit -u
 unsetopt BG_NICE  # fix wsl bug
 

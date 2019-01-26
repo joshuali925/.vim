@@ -4,7 +4,7 @@ let g:TrueColors = 1
 let g:AllExtensions = 1
 let g:Completion = 1  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete
 let g:PythonPath = '/usr/bin/python'
-let g:ExecCommand = 'python %'
+let g:ExecCommand = 'python3 %'
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
@@ -12,6 +12,7 @@ Plug 'Yggdroot/LeaderF', { 'do': './install.sh', 'on': 'LeaderfFile' }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
+Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
@@ -25,7 +26,7 @@ Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
-" Plug 'sheerun/vim-polyglot'
+Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
     " Plug 'ludovicchabant/vim-gutentags'
     Plug 'vim-airline/vim-airline'
@@ -193,7 +194,6 @@ nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
 nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
-nmap <C-g> :%s/\(\n\n\)\n\+/\1/<CR><C-l>
 nmap <C-f> :call LoadAutoformat()<CR><C-f>
 imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
 vmap <C-f> :call LoadAutoformat()<CR>gv<C-f>
@@ -209,7 +209,9 @@ nnoremap <leader>h :call ToggleFileSplit()<CR>
 nnoremap <leader>j J
 nnoremap <leader>k K
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>T :Tabularize /
+nnoremap <leader>tm :TableModeToggle<CR>
+nnoremap <leader>ta :Tabularize /
+nnoremap <leader>tc :exec getline('.')<CR>
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
@@ -427,6 +429,10 @@ let g:gutentags_ctags_tagfile = '.tags'
 let g:gutentags_cache_dir = expand('~/.cache/vim')
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q', '--c++-kinds=+px', '--c-kinds=+px']
 let g:echodoc_enable_at_startup = 1
+let g:table_mode_motion_left_map = '<leader>th'
+let g:table_mode_motion_up_map = '<leader>tk'
+let g:table_mode_motion_down_map = '<leader>tj'
+let g:table_mode_motion_right_map = '<leader>tl'
 
 " ==================== Execute code =====================
 autocmd FileType * let b:args = ''
@@ -571,10 +577,10 @@ tnoremap <C-h> <C-w>h
 tnoremap <C-j> <C-w>j
 tnoremap <C-k> <C-w>k
 tnoremap <C-l> <C-w>l
-tnoremap <C-m> <C-w>5k
-nnoremap <C-m> :call ToggleTerm()<CR>
-nnoremap <leader>t V:call SendToTerminal()<CR>$
-vnoremap <leader>t <Esc>:call SendToTerminal()<CR>
+tnoremap <C-g> <C-w>5k
+nnoremap <C-g> :call ToggleTerm()<CR>
+nnoremap <leader>te V:call SendToTerminal()<CR>$
+vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
 function! ToggleTerm()
     let term_winnr = bufwinnr('!/bin/bash')
     if term_winnr < 1
