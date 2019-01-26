@@ -11,7 +11,7 @@ fi
 
 # User specific aliases and functions
 
-[[ -s ~/.autojump/etc/profile.d/autojump.sh ]] && source ~/.autojump/etc/profile.d/autojump.sh
+source ~/.vim/others/z.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
 export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
