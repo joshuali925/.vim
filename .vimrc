@@ -26,7 +26,6 @@ Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
-Plug 'sheerun/vim-polyglot'
 if g:AllExtensions == 1
     " Plug 'ludovicchabant/vim-gutentags'
     Plug 'vim-airline/vim-airline'
@@ -211,7 +210,7 @@ nnoremap <leader>k K
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>ta :Tabularize /
-nnoremap <leader>tc :exec getline('.')<CR>
+nnoremap <leader>tc :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
@@ -267,6 +266,7 @@ set scrolloff=3
 set previewheight=7
 set foldmethod=indent
 set foldlevel=99
+set belloff=all
 set history=500
 set sessionoptions-=buffer
 set undofile
@@ -289,7 +289,7 @@ let g:netrw_winsize=20
 let g:netrw_liststyle=3
 
 " ====================== Autocmd ========================
-augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon
+augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
@@ -298,6 +298,7 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
     autocmd FileType c,cpp,java inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
+    autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
 augroup END
 
 " ====================== LazyLoad =======================
@@ -577,8 +578,8 @@ tnoremap <C-h> <C-w>h
 tnoremap <C-j> <C-w>j
 tnoremap <C-k> <C-w>k
 tnoremap <C-l> <C-w>l
-tnoremap <C-g> <C-w>5k
-nnoremap <C-g> :call ToggleTerm()<CR>
+tnoremap <leader>to <C-w>5k
+nnoremap <leader>to :call ToggleTerm()<CR>
 nnoremap <leader>te V:call SendToTerminal()<CR>$
 vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
 function! ToggleTerm()
