@@ -102,6 +102,7 @@ source $ZSH/oh-my-zsh.sh
 source ~/.vim/others/z.sh
 autoload -U compinit && compinit -u
 unsetopt BG_NICE  # fix wsl bug
+export PYTHONSTARTUP=~/.vim/others/.pythonrc
 
 export PATH=$PATH:$HOME/.local/bin
 
@@ -116,6 +117,9 @@ alias vi='vim'
 alias vimm='vim ~/.vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias tmux='tmux -2'
+alias apt='sudo apt'
+alias service='sudo service'
+alias activate='source venv/bin/activate'
 
 alias -s c='vim'
 alias -s cpp='vim'

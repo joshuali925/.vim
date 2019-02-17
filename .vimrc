@@ -3,8 +3,11 @@ let g:Theme = 2
 let g:TrueColors = 1
 let g:AllExtensions = 1
 let g:Completion = 1  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete
+let g:ExecCommand = 'python %'
 let g:PythonPath = '/usr/bin/python'
-let g:ExecCommand = 'python3 %'
+if filereadable('./venv/bin/activate')
+    let g:PythonPath = './venv/bin/python'
+endif
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
@@ -156,7 +159,8 @@ xmap S <Plug>VSurround
 xmap gS <Plug>VgSurround
 nmap Y y$
 noremap 0 ^
-noremap - $
+nnoremap - $
+vnoremap - $h
 noremap J gj
 noremap K gk
 xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
