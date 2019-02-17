@@ -12,6 +12,7 @@ fi
 # User specific aliases and functions
 
 source ~/.vim/others/z.sh
+export PYTHONSTARTUP=~/.vim/others/.pythonrc
 
 # Set bash prompt (\w for whole path, \W for current directory)
 export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
@@ -42,6 +43,7 @@ alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias tmux='tmux -2'
 alias apt='sudo apt'
 alias service='sudo service'
+alias activate='source venv/bin/activate'
 
 alias ~='cd ~'
 alias b='cd -'
