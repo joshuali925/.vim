@@ -13,12 +13,11 @@ fi
 
 source ~/.vim/others/z.sh
 export PYTHONSTARTUP=~/.vim/others/.pythonrc
+export PATH=$PATH:$HOME/.local/bin
 
 # Set bash prompt (\w for whole path, \W for current directory)
 export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
-export PATH=$PATH:$HOME/.local/bin
 LS_COLORS=$LS_COLORS:'di=0;36'
-
 stty -ixon
 shopt -s autocd
 shopt -s cdspell
@@ -36,14 +35,14 @@ alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
 alias size='du -h --max-depth=1 | sort -hr'
-
 alias vi='vim'
 alias vimm='vim ~/.vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias tmux='tmux -2'
+alias bpython='bpython -i'
+alias venv='source venv/bin/activate'
 alias apt='sudo apt'
 alias service='sudo service'
-alias activate='source venv/bin/activate'
 
 alias ~='cd ~'
 alias b='cd -'

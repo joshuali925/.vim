@@ -121,18 +121,13 @@ source ~/.vim/.bashrc
 
 alias db='mycli -ukite -p123 -hlocalhost -P3306 project'
 alias you-get='you-get -o /mnt/z/'
+alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
 
-winpy () {
-    if [[ -z $1 ]] ; then
-        /mnt/c/Users/Josh/AppData/Local/conda/conda/envs/ai/python.exe -i
-    else
-        /mnt/c/Users/Josh/AppData/Local/conda/conda/envs/ai/python.exe "$@"
-    fi
-}
-winpy3 () {
-    if [[ -z $1 ]] ; then
-        /mnt/c/ProgramData/Miniconda2/envs/336/python.exe -i
-    else
-        /mnt/c/ProgramData/Miniconda2/envs/336/python.exe "$@"
-    fi
-}
+
+# winpy () {
+#     if [[ -z $1 ]] ; then
+#         /mnt/c/path/to/python.exe -i
+#     else
+#         /mnt/c/path/to/python.exe "$@"
+#     fi
+# }

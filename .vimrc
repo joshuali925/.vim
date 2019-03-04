@@ -3,11 +3,11 @@ let g:Theme = 2
 let g:TrueColors = 1
 let g:AllExtensions = 1
 let g:Completion = 1  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete
-let g:ExecCommand = 'python %'
 let g:PythonPath = '/usr/bin/python'
 if filereadable('./venv/bin/activate')
     let g:PythonPath = './venv/bin/python'
 endif
+let g:ExecCommand = g:PythonPath. ' %'
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
@@ -214,7 +214,7 @@ nnoremap <leader>k K
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>ta :Tabularize /
-nnoremap <leader>tc :exec getline('.')<CR>``
+nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
@@ -584,6 +584,7 @@ tnoremap <C-k> <C-w>k
 tnoremap <C-l> <C-w>l
 tnoremap <leader>to <C-w>5k
 nnoremap <leader>to :call ToggleTerm()<CR>
+nnoremap <leader>tO :term ++curwin<CR>
 nnoremap <leader>te V:call SendToTerminal()<CR>$
 vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
 function! ToggleTerm()
