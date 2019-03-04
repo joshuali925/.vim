@@ -100,31 +100,27 @@ source $ZSH/oh-my-zsh.sh
 # key bindings
 
 source ~/.vim/others/z.sh
-autoload -U compinit && compinit -u
-unsetopt BG_NICE  # fix wsl bug
 export PYTHONSTARTUP=~/.vim/others/.pythonrc
-
 export PATH=$PATH:$HOME/.local/bin
+
+autoload -U compinit && compinit -u  # for autocomplete
+unsetopt BG_NICE  # fix wsl bug
 
 alias mkdir='mkdir -p'
 alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
-
-alias b='cd -'
-
+alias size='du -h --max-depth=1 | sort -hr'
 alias vi='vim'
 alias vimm='vim ~/.vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias tmux='tmux -2'
+alias bpython='bpython -i'
+alias venv='source venv/bin/activate'
 alias apt='sudo apt'
 alias service='sudo service'
-alias activate='source venv/bin/activate'
 
-alias -s c='vim'
-alias -s cpp='vim'
-alias -s txt='vim'
-alias -s java='vim'
+alias b='cd -'
 
 function f { find . -iname \*$1\*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
