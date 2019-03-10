@@ -40,9 +40,10 @@ alias vimm='vim ~/.vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias tmux='tmux -2'
 alias bpython='bpython -i'
-alias venv='source venv/bin/activate'
 alias apt='sudo apt'
 alias service='sudo service'
+alias venv='source venv/bin/activate'
+alias gacp='git add -A && git commit -m "update" && git push origin master'
 
 alias ~='cd ~'
 alias b='cd -'
@@ -54,4 +55,19 @@ alias ...='cd ../..'
 
 function f { find . -iname *$@*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
-function cd { builtin cd $@ && ls -ACF; }
+# function cd { builtin cd $@ && ls -CF; }
+
+function cd() {
+    builtin cd $@
+    ls -CF
+    if [[ -z "$VIRTUAL_ENV" ]] ; then
+        if [[ -f ./venv/bin/activate ]] ; then
+            source ./venv/bin/activate
+        fi
+    else
+        parentdir="$(dirname "$VIRTUAL_ENV")"
+        if [[ "$PWD"/ != "$parentdir"/* ]] ; then
+            deactivate
+        fi
+    fi
+}
