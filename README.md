@@ -1,11 +1,16 @@
 # vim-configuration
+## Download
+```bash
+mv ~/.vim ~/vim_backup
+git clone https://github.com/joshuali925/vim-configuration.git ~/.vim
+pip install --user flake8 yapf rope neovim pynvim jedi
+```
+
 ## Set up vim
 ```bash
 cd ~
-git clone https://github.com/joshuali925/vim-configuration.git
-mv vim-configuration .vim
-ln -s .vim/.vimrc ~/.vimrc
 mkdir -p .cache/vim/undo
+ln -s .vim/.vimrc ~/.vimrc
 vim -c "PlugInstall" -c "qa"
 ```
 
@@ -19,7 +24,6 @@ curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimag
 chmod u+x nvim.appimage
 mkdir -p ~/.local/bin
 mv nvim.appimage ~/.local/bin/nvim
-pip install --user flake8 yapf rope neovim
 nvim -c "PlugInstall" -c "qa"
 ```
 

@@ -2,7 +2,7 @@
 let g:Theme = 2
 let g:TrueColors = 1
 let g:AllExtensions = 0
-let g:Completion = 4  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete, 4 = ncm2
+let g:Completion = 0  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
 let g:PythonPath = 'python'
 if filereadable('./venv/bin/activate')
     let g:PythonPath = './venv/bin/python'
@@ -11,7 +11,7 @@ let g:ExecCommand = g:PythonPath. ' %'
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
-Plug 'Yggdroot/LeaderF', { 'on': 'LeaderfFile' }
+Plug 'Yggdroot/LeaderF'  "load on startup to record MRU
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
@@ -56,23 +56,22 @@ elseif g:Completion == 2
     Plug 'Shougo/neco-vim', { 'for': 'vim' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
 elseif g:Completion == 3
-    Plug 'lifepillar/vim-mucomplete'
-    Plug 'davidhalter/jedi-vim', { 'for': 'python' }
-elseif g:Completion == 4
-    " need pynvim, neovim
     " lazy load doesn't seem to work
     Plug 'ncm2/ncm2'
     Plug 'roxma/nvim-yarp'
     Plug 'roxma/vim-hug-neovim-rpc'
     Plug 'ncm2/ncm2-bufword'
     Plug 'ncm2/ncm2-path'
+    Plug 'Shougo/neco-syntax'
+    Plug 'ncm2/ncm2-syntax'
     Plug 'ncm2/ncm2-ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
     Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
+elseif g:Completion == 4
+    Plug 'lifepillar/vim-mucomplete'
+    Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 endif
 call plug#end()
-if &runtimepath=~'yankstack'
-    silent call yankstack#setup()
-endif
+silent! call yankstack#setup()
 
 " ===================== Themes ==========================
 if g:TrueColors == 1
@@ -523,7 +522,7 @@ function! SimpleComplete()
     endif
 endfunction
 " use <C-@> in vim, <C-Space> in nvim for ctrl space
-if g:Completion == 0
+if g:Completion == 0  " default
     set omnifunc=syntaxcomplete#Complete
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : SimpleComplete()
     inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
@@ -532,7 +531,7 @@ if g:Completion == 0
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
-elseif g:Completion == 1
+elseif g:Completion == 1  " YouCompleteMe
     inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
@@ -546,14 +545,27 @@ elseif g:Completion == 1
     " '/path/to/include'
     let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'
     let g:echodoc#enable_force_overwrite = 1
-elseif g:Completion == 2
+elseif g:Completion == 2  " deoplete
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
     inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
     inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     let g:deoplete#enable_at_startup = 1
-elseif g:Completion == 3
+elseif g:Completion == 3  " ncm2
+    set completeopt+=noinsert,noselect
+    augroup ncm2
+        autocmd!
+        autocmd BufEnter * call ncm2#enable_for_buffer()
+    augroup end
+    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+elseif g:Completion == 4  " mucomplete
     set completeopt+=noselect
     set shortmess+=c
     inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
@@ -564,16 +576,6 @@ elseif g:Completion == 3
     let g:mucomplete#chains = {}
     let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
     let g:jedi#rename_command = '<leader>R'
-elseif g:Completion == 4
-    set completeopt+=noinsert,noselect
-    augroup ncm2
-        autocmd!
-        autocmd BufEnter * call ncm2#enable_for_buffer()
-    augroup end
-    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
-    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
 endif
 
 " =================== Terminal ==========================
@@ -629,13 +631,13 @@ endfunction
 " first manually create %UserProfile%/.cache/vim/undo directory
 " plugins are installed to %UserProfile%/.vim
 if has('win32')
-    call plug#load('LeaderF')
     vnoremap <C-c> "+y<Esc>
     noremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
     if has('gui_running')
+        nnoremap <leader>L :silent exec '!venv & gvim "%:p"'<CR>:q<CR>
         set guifont=Consolas:h11:cANSI
         set guioptions=grt
         set guicursor+=a:blinkon0
