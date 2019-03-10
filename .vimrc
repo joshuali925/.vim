@@ -1,9 +1,9 @@
 " ==================== Settings =========================
 let g:Theme = 2
 let g:TrueColors = 1
-let g:AllExtensions = 1
-let g:Completion = 1  " Completion 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete
-let g:PythonPath = '/usr/bin/python'
+let g:AllExtensions = 0
+let g:Completion = 4  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = mucomplete, 4 = ncm2
+let g:PythonPath = 'python'
 if filereadable('./venv/bin/activate')
     let g:PythonPath = './venv/bin/python'
 endif
@@ -11,7 +11,7 @@ let g:ExecCommand = g:PythonPath. ' %'
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
-Plug 'Yggdroot/LeaderF', { 'do': './install.sh', 'on': 'LeaderfFile' }
+Plug 'Yggdroot/LeaderF', { 'on': 'LeaderfFile' }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
@@ -30,10 +30,8 @@ Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
 if g:AllExtensions == 1
-    " Plug 'ludovicchabant/vim-gutentags'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
-    Plug 'tpope/vim-surround'
     Plug 'w0rp/ale'
     set cursorline
     let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }
@@ -41,8 +39,8 @@ else
     set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
 endif
 if g:Completion > 0
-    Plug 'sirver/ultisnips', { 'for': ['c', 'cpp', 'java', 'python'] }
-    Plug 'honza/vim-snippets', { 'for': ['c', 'cpp', 'java', 'python'] }
+    Plug 'sirver/ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
+    Plug 'honza/vim-snippets', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
 endif
 if g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
@@ -60,9 +58,21 @@ elseif g:Completion == 2
 elseif g:Completion == 3
     Plug 'lifepillar/vim-mucomplete'
     Plug 'davidhalter/jedi-vim', { 'for': 'python' }
+elseif g:Completion == 4
+    " need pynvim, neovim
+    " lazy load doesn't seem to work
+    Plug 'ncm2/ncm2'
+    Plug 'roxma/nvim-yarp'
+    Plug 'roxma/vim-hug-neovim-rpc'
+    Plug 'ncm2/ncm2-bufword'
+    Plug 'ncm2/ncm2-path'
+    Plug 'ncm2/ncm2-ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
+    Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
 endif
 call plug#end()
-if &runtimepath=~'yankstack' | call yankstack#setup() | endif
+if &runtimepath=~'yankstack'
+    silent call yankstack#setup()
+endif
 
 " ===================== Themes ==========================
 if g:TrueColors == 1
@@ -98,7 +108,11 @@ elseif g:Theme == 1
 elseif g:Theme == 2
     set background=dark
     let g:airline_theme = 'onedark'
-    colorscheme one8
+    if has('win32')
+        colorscheme onedark
+    else
+        colorscheme one8
+    endif
 elseif g:Theme == 3
     set background=dark
     let g:airline_theme = 'solarized'
@@ -161,8 +175,8 @@ nmap Y y$
 noremap 0 ^
 nnoremap - $
 vnoremap - $h
-noremap J gj
-noremap K gk
+noremap <Down> gj
+noremap <Up> gk
 xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
 nnoremap Q @q
 nnoremap < <<
@@ -208,9 +222,6 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
-nnoremap <leader>h :call ToggleFileSplit()<CR>
-nnoremap <leader>j J
-nnoremap <leader>k K
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>ta :Tabularize /
@@ -279,18 +290,13 @@ set undoreload=10000
 set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
 set viminfo+=n~/.cache/vim/viminfo
+set encoding=utf-8
 set timeoutlen=1500
 set ttimeoutlen=40
 set lazyredraw
 set noswapfile
 set nowritebackup
 set nobackup
-" built in :Lexplore<CR> settings
-let g:netrw_dirhistmax=0
-let g:netrw_banner=0
-let g:netrw_browse_split=2
-let g:netrw_winsize=20
-let g:netrw_liststyle=3
 
 " ====================== Autocmd ========================
 augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
@@ -383,16 +389,6 @@ function! TogglePreview()
     let g:PreviewOn = 1 - g:PreviewOn
 endfunction
 
-" =================== Toggle split ======================
-function! ToggleFileSplit()
-    exec 'wincmd w'
-    let b_name = bufname('%')
-    while (b_name=~'NERD_tree' || b_name=~'NetrwTreeListing' || b_name=~'__Tagbar__' || b_name=~'!/bin/' || b_name=~'LeaderF' || getwinvar(0,'&syntax')=='qf' || &pvw)
-        exec 'wincmd w'
-        let b_name = bufname('%')
-    endwhile
-endfunction
-
 " =================== Other plugins =====================
 let g:ale_sign_column_always = 1
 let g:ale_lint_on_text_changed = 'normal'
@@ -408,8 +404,8 @@ let NERDTreeMinimalUI = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
 let g:multi_cursor_select_all_word_key = '<leader><C-n>'
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*
-let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','.autojump','plugged','node_modules','.local','*cache*'],'file':[] }
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*
+let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','*cache*'],'file':[] }
 let g:Lf_ShortcutF = '<C-p>'
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
@@ -429,10 +425,6 @@ let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
 let g:tagbar_iconchars = [ '+', '-' ]
-let g:gutentags_project_root = ['.project', '.root']
-let g:gutentags_ctags_tagfile = '.tags'
-let g:gutentags_cache_dir = expand('~/.cache/vim')
-let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q', '--c++-kinds=+px', '--c-kinds=+px']
 let g:echodoc_enable_at_startup = 1
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
@@ -536,6 +528,7 @@ if g:Completion == 0
     inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : SimpleComplete()
     inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
     inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
@@ -563,6 +556,7 @@ elseif g:Completion == 2
 elseif g:Completion == 3
     set completeopt+=noselect
     set shortmess+=c
+    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
@@ -570,6 +564,16 @@ elseif g:Completion == 3
     let g:mucomplete#chains = {}
     let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
     let g:jedi#rename_command = '<leader>R'
+elseif g:Completion == 4
+    set completeopt+=noinsert,noselect
+    augroup ncm2
+        autocmd!
+        autocmd BufEnter * call ncm2#enable_for_buffer()
+    augroup end
+    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
 endif
 
 " =================== Terminal ==========================
@@ -620,3 +624,22 @@ function! SendToTerminal()
         endfor
     endif
 endfunction
+
+" ================== Windows settings ===================
+" first manually create %UserProfile%/.cache/vim/undo directory
+" plugins are installed to %UserProfile%/.vim
+if has('win32')
+    call plug#load('LeaderF')
+    vnoremap <C-c> "+y<Esc>
+    noremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
+    let &t_SI=""
+    let &t_SR=""
+    let &t_EI=""
+    if has('gui_running')
+        set guifont=Consolas:h11:cANSI
+        set guioptions=grt
+        set guicursor+=a:blinkon0
+        set lines=25
+        set columns=85
+    endif
+endif
