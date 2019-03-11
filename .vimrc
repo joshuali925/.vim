@@ -2,7 +2,7 @@
 let g:Theme = 2
 let g:TrueColors = 1
 let g:AllExtensions = 0
-let g:Completion = 0  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
+let g:Completion = 4  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
 let g:PythonPath = 'python'
 if filereadable('./venv/bin/activate')
     let g:PythonPath = './venv/bin/python'
@@ -11,7 +11,7 @@ let g:ExecCommand = g:PythonPath. ' %'
 
 " ===================== Plugins =========================
 call plug#begin('~/.vim/plugged')
-Plug 'Yggdroot/LeaderF'  "load on startup to record MRU
+Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
@@ -25,6 +25,10 @@ Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingt
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
+Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
+Plug 'sillybun/vim-autodoc', { 'on': ['RecordParameter', 'RecordCurrentFunction'] }
+Plug 'Yggdroot/LeaderF'  "load on startup to record MRU
+Plug 'mhinz/vim-startify'
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
@@ -68,12 +72,12 @@ elseif g:Completion == 3
     Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
 elseif g:Completion == 4
     Plug 'lifepillar/vim-mucomplete'
-    Plug 'davidhalter/jedi-vim', { 'for': 'python' }
+    " Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 endif
 call plug#end()
 silent! call yankstack#setup()
 
-" ===================== Themes ==========================
+" ===================== Themes ========================== {{{
 if g:TrueColors == 1
     let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
     let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
@@ -95,7 +99,7 @@ if g:Theme == -2
 elseif g:Theme == -1
     set background=dark
     let g:airline_theme = 'onedark'
-    colorscheme one
+    colorscheme one_modified
 elseif g:Theme == 0
     set background=light
     let g:airline_theme = 'solarized'
@@ -107,11 +111,7 @@ elseif g:Theme == 1
 elseif g:Theme == 2
     set background=dark
     let g:airline_theme = 'onedark'
-    if has('win32')
-        colorscheme onedark
-    else
-        colorscheme one8
-    endif
+    colorscheme onedark
 elseif g:Theme == 3
     set background=dark
     let g:airline_theme = 'solarized'
@@ -121,8 +121,9 @@ elseif g:Theme == 4
     let g:airline_theme = 'solarized'
     colorscheme molokai
 endif
+" }}}
 
-" ====================== Shortcuts ======================
+" ====================== Shortcuts ====================== {{{
 let mapleader=';'
 nmap <leader>1 <F1>
 nmap <leader>2 <F2>
@@ -143,11 +144,7 @@ nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *N
-nnoremap <F5> :TagbarToggle<CR>
-nnoremap <F6> :call ToggleDiff()<CR>
-nnoremap <F7> :call ToggleFold()<CR>
 imap <F8> <Esc><F8>
-nnoremap <F8> :call TogglePaste()<CR>
 imap <F9> <Esc><F9>a
 nnoremap <F9> :call TogglePreview()<CR>
 map f <Plug>fanfingtastic_f
@@ -221,8 +218,9 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
+nnoremap <leader><leader> :WhichKey ';'<CR>
+nnoremap <leader>m :call LoadQuickmenu()<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>ta :Tabularize /
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -235,9 +233,9 @@ vnoremap <leader>q <Esc>:q<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 nnoremap <leader>vcom o<Esc>55i=<Esc>:Commentary<CR>
-nnoremap <leader>vtime :put=strftime('%x %X')<CR>
+" }}}
 
-" ======================= Basics ========================
+" ======================= Basics ======================== {{{
 filetype plugin indent on
 syntax enable
 let &t_SI.="\e[6 q"
@@ -296,12 +294,14 @@ set lazyredraw
 set noswapfile
 set nowritebackup
 set nobackup
+" }}}
 
-" ====================== Autocmd ========================
+" ====================== Autocmd ======================== {{{
 augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
+    autocmd FileType vim setlocal foldmethod=marker
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
@@ -309,8 +309,9 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
 augroup END
+" }}}
 
-" ====================== LazyLoad =======================
+" ====================== LazyLoad ======================= {{{
 function! LoadAutoformat()
     nnoremap <C-f> :Autoformat<CR>
     inoremap <C-f> <Esc>V:'<,'>Autoformat<CR>A
@@ -324,8 +325,36 @@ function! LoadMultipleCursors()
     xnoremap <leader><C-n> :<C-u>call multiple_cursors#select_all("v", 0)<CR>
     call plug#load('vim-multiple-cursors')
 endfunction
+function! LoadQuickmenu()
+    nnoremap <leader>m :call quickmenu#toggle(0)<CR>
+    call plug#load('quickmenu.vim')
+    let g:quickmenu_options = "HL"
+    call g:quickmenu#reset()
+    call g:quickmenu#append('# Toggle', '')
+    call g:quickmenu#append('Undo Tree', 'UndotreeToggle', '')
+    call g:quickmenu#append('Tagbar', 'TagbarToggle', '')
+    call g:quickmenu#append('Table Mode', 'TableModeToggle', '')
+    call g:quickmenu#append('Fold %{g:FoldOn==1? "[x]" :"[ ]"}', 'call ToggleFold()', '')
+    call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', '')
+    call g:quickmenu#append('Diff %{g:DiffOn==1? "[x]" :"[ ]"}', 'call ToggleDiff()', '<F6>')
+    call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()', '<F9>')
+    call g:quickmenu#append('# Actions', '')
+    call g:quickmenu#append('Record Python Parameter', 'RecordParameter', '', 'python')
+    call g:quickmenu#append('Insert Comment Line', 'call InsertCommentLine()')
+    call g:quickmenu#append('Insert current time', "put=strftime('%x %X')")
+    call quickmenu#toggle(0)
+endfunction
+" }}}
 
-" ======================== Macro ========================
+" ================= Insert Comment Line ================= {{{
+function! InsertCommentLine()
+    exec 'normal! o'
+    exec 'normal! 55i='
+    exec 'Commentary'
+endfunction
+" }}}
+
+" ======================== Macro ======================== {{{
 function! ExecuteMacroOverVisualRange()
     echo '@'.getcmdline()
     exec ":'<,'>normal @".nr2char(getchar())
@@ -334,8 +363,9 @@ function! EditRegister() abort
     let r = nr2char(getchar())
     call feedkeys("q:ilet @". r. " = \<c-r>\<c-r>=string(@". r. ")\<cr>\<esc>0f'", 'n')
 endfunction
+" }}}
 
-" ======================== Diff =========================
+" ======================== Diff ========================= {{{
 let g:DiffOn = 0
 function! ToggleDiff()
     if g:DiffOn == 0
@@ -345,8 +375,9 @@ function! ToggleDiff()
     endif
     let g:DiffOn = 1 - g:DiffOn
 endfunction
+" }}}
 
-" ====================== Fold code ======================
+" ====================== Fold code ====================== {{{
 let g:FoldOn = 0
 function! ToggleFold()
     if g:FoldOn == 0
@@ -356,8 +387,9 @@ function! ToggleFold()
     endif
     let g:FoldOn = 1 - g:FoldOn
 endfunction
+" }}}
 
-" ======================= Paste =========================
+" ======================= Paste ========================= {{{
 " shift alt drag to select and copy
 function! TogglePaste()
     if &paste
@@ -373,8 +405,9 @@ function! GetPasteStatus()
         return ''
     endif
 endfunction
+" }}}
 
-" ======================= Preview =======================
+" ======================= Preview ======================= {{{
 let g:PreviewOn = 0
 function! TogglePreview()
     if g:PreviewOn == 0
@@ -387,8 +420,9 @@ function! TogglePreview()
     endif
     let g:PreviewOn = 1 - g:PreviewOn
 endfunction
+" }}}
 
-" =================== Other plugins =====================
+" =================== Other plugins ===================== {{{
 let g:ale_sign_column_always = 1
 let g:ale_lint_on_text_changed = 'normal'
 let g:ale_lint_on_insert_leave = 1
@@ -429,8 +463,9 @@ let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
+" }}}
 
-" ==================== Execute code =====================
+" ==================== Execute code ===================== {{{
 autocmd FileType * let b:args = ''
 command! -complete=file -nargs=* SetArgs call SetArgs(<q-args>)
 function! SetArgs(cmdline)
@@ -489,8 +524,9 @@ augroup RunCode
     autocmd FileType java nnoremap <buffer> <F12> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
     autocmd FileType python nnoremap <buffer> <F12> :update <bar> call RunShellCommand(g:PythonPath. ' %'. b:args)<CR>
 augroup END
+" }}}
 
-" ==================== AutoComplete =====================
+" ==================== AutoComplete ===================== {{{
 " let g:ycm_path_to_python_interpreter='' " for ycmd, don't change
 let g:ycm_python_binary_path=g:PythonPath " for JediHTTP
 let g:deoplete#sources#jedi#python_path=g:PythonPath
@@ -577,8 +613,9 @@ elseif g:Completion == 4  " mucomplete
     let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
     let g:jedi#rename_command = '<leader>R'
 endif
+" }}}
 
-" =================== Terminal ==========================
+" =================== Terminal ========================== {{{
 " do not tmap <Esc> in vim 8
 tnoremap <F1> <C-w><C-w>
 tnoremap <F2> <C-\><C-n>gT
@@ -626,8 +663,9 @@ function! SendToTerminal()
         endfor
     endif
 endfunction
+" }}}
 
-" ================== Windows settings ===================
+" ================== Windows settings =================== {{{
 " first manually create %UserProfile%/.cache/vim/undo directory
 " plugins are installed to %UserProfile%/.vim
 if has('win32')
@@ -641,7 +679,10 @@ if has('win32')
         set guifont=Consolas:h11:cANSI
         set guioptions=grt
         set guicursor+=a:blinkon0
-        set lines=25
-        set columns=85
+        if &columns < 85
+            set lines=25
+            set columns=85
+        endif
     endif
 endif
+" }}}
