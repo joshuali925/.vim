@@ -1,6 +1,6 @@
 non true color: 
     one (dark)
-        one.vim
+        one_modified.vim
         one-dark.vim
     
     solarized (light)
