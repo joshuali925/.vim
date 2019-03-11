@@ -22,7 +22,7 @@ syntax reset
 if exists('g:colors_name')
   unlet g:colors_name
 endif
-let g:colors_name = 'one'
+let g:colors_name = 'one_modified'
 
 if !exists('g:one_allow_italics')
   let g:one_allow_italics = 0
@@ -832,7 +832,7 @@ if has('gui_running') || &t_Co == 88 || &t_Co == 256
 endif
 "}}}
 " Public API --------------------------------------------------------------{{{
-function! one#highlight(group, fg, bg, attr)
+function! one_modified#highlight(group, fg, bg, attr)
   call <sid>X(a:group, a:fg, a:bg, a:attr)
 endfunction
 "}}}
