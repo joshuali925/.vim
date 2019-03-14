@@ -1,15 +1,13 @@
-" ==================== Settings =========================
+" ==================== Settings ========================= {{{
 let g:Theme = 2
 let g:TrueColors = 1
 let g:AllExtensions = 0
-let g:Completion = 4  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
+let g:Completion = 1  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
 let g:PythonPath = 'python'
-if filereadable('./venv/bin/activate')
-    let g:PythonPath = './venv/bin/python'
-endif
 let g:ExecCommand = g:PythonPath. ' %'
+" }}}
 
-" ===================== Plugins =========================
+" ===================== Plugins ========================= {{{
 call plug#begin('~/.vim/plugged')
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
@@ -26,7 +24,7 @@ Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
-Plug 'sillybun/vim-autodoc', { 'on': ['RecordParameter', 'RecordCurrentFunction'] }
+Plug 'sillybun/vim-autodoc', { 'on': [] }  "for lazy load
 Plug 'Yggdroot/LeaderF'  "load on startup to record MRU
 Plug 'mhinz/vim-startify'
 Plug 'tpope/vim-repeat'
@@ -45,6 +43,7 @@ endif
 if g:Completion > 0
     Plug 'sirver/ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
     Plug 'honza/vim-snippets', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
+    Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 endif
 if g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
@@ -72,10 +71,10 @@ elseif g:Completion == 3
     Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
 elseif g:Completion == 4
     Plug 'lifepillar/vim-mucomplete'
-    " Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 endif
 call plug#end()
 silent! call yankstack#setup()
+" }}}
 
 " ===================== Themes ========================== {{{
 if g:TrueColors == 1
@@ -192,7 +191,6 @@ vnoremap { c{<C-r><C-p>"}<Esc>
 vnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
 nnoremap cr :call EditRegister()<CR>
 nnoremap <C-]> <C-w>}
-inoremap <C-d> <C-o>dd
 nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
@@ -218,9 +216,9 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
-nnoremap <leader><leader> :WhichKey ';'<CR>
-nnoremap <leader>m :call LoadQuickmenu()<CR>
+nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
+nnoremap <leader>m :call LoadQuickmenu()<CR>
 nnoremap <leader>ta :Tabularize /
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -276,7 +274,7 @@ set autochdir
 set completeopt=menuone
 set scrolloff=3
 set previewheight=7
-set foldmethod=indent
+set foldmethod=marker
 set foldlevel=99
 set belloff=all
 set history=500
@@ -301,7 +299,6 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
-    autocmd FileType vim setlocal foldmethod=marker
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
@@ -325,24 +322,31 @@ function! LoadMultipleCursors()
     xnoremap <leader><C-n> :<C-u>call multiple_cursors#select_all("v", 0)<CR>
     call plug#load('vim-multiple-cursors')
 endfunction
+function! LoadRecordParameter()
+    call plug#load('vim-autodoc')
+    RecordParameter
+endfunction
 function! LoadQuickmenu()
     nnoremap <leader>m :call quickmenu#toggle(0)<CR>
     call plug#load('quickmenu.vim')
     let g:quickmenu_options = "HL"
     call g:quickmenu#reset()
+    call g:quickmenu#header('QwQ')
     call g:quickmenu#append('# Toggle', '')
-    call g:quickmenu#append('Undo Tree', 'UndotreeToggle', '')
-    call g:quickmenu#append('Tagbar', 'TagbarToggle', '')
-    call g:quickmenu#append('Table Mode', 'TableModeToggle', '')
-    call g:quickmenu#append('Fold %{g:FoldOn==1? "[x]" :"[ ]"}', 'call ToggleFold()', '')
-    call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', '')
-    call g:quickmenu#append('Diff %{g:DiffOn==1? "[x]" :"[ ]"}', 'call ToggleDiff()', '<F6>')
-    call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()', '<F9>')
+    call g:quickmenu#append('Undo Tree', 'UndotreeToggle')
+    call g:quickmenu#append('Tagbar', 'TagbarToggle')
+    call g:quickmenu#append('Table Mode', 'TableModeToggle')
+    call g:quickmenu#append('Diff %{g:DiffOn==1? "[x]" :"[ ]"}', 'call ToggleDiff()')
+    call g:quickmenu#append('Fold %{g:FoldOn==1? "[x]" :"[ ]"}', 'call ToggleFold()')
+    call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()')
+    call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()')
     call g:quickmenu#append('# Actions', '')
-    call g:quickmenu#append('Record Python Parameter', 'RecordParameter', '', 'python')
     call g:quickmenu#append('Insert Comment Line', 'call InsertCommentLine()')
-    call g:quickmenu#append('Insert current time', "put=strftime('%x %X')")
-    call quickmenu#toggle(0)
+    call g:quickmenu#append('Insert Time', "put=strftime('%x %X')")
+    call g:quickmenu#append('Git Diff', 'Gdiff', 'use fugitive Gdiff on current document')
+    call g:quickmenu#append('Git Status', 'Gstatus', 'use fugitive Gstatus on current document')
+    call g:quickmenu#append('Record Python Parameter', 'call LoadRecordParameter()', '', 'python')
+    call g:quickmenu#toggle(0)
 endfunction
 " }}}
 
@@ -612,6 +616,8 @@ elseif g:Completion == 4  " mucomplete
     let g:mucomplete#chains = {}
     let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
     let g:jedi#rename_command = '<leader>R'
+    let g:jedi#goto_command = '<leader>d'
+    let g:jedi#usages_command = '<leader>a'
 endif
 " }}}
 
