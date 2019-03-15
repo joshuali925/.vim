@@ -1,7 +1,6 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 2
+let g:Theme = 1
 let g:TrueColors = 1
-let g:AllExtensions = 0
 let g:Completion = 1  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
 let g:PythonPath = 'python'
 let g:ExecCommand = g:PythonPath. ' %'
@@ -31,19 +30,12 @@ Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
-if g:AllExtensions == 1
-    Plug 'vim-airline/vim-airline'
-    Plug 'vim-airline/vim-airline-themes'
-    Plug 'w0rp/ale'
-    set cursorline
-    let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }
-else
-    set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
-endif
+Plug 'davidhalter/jedi-vim', { 'on': [] }
+" Plug 'sheerun/vim-polyglot'
+" Plug 'w0rp/ale'
 if g:Completion > 0
     Plug 'sirver/ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
     Plug 'honza/vim-snippets', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
-    Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 endif
 if g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
@@ -89,35 +81,27 @@ else
     highlight link EasyMotionTarget2First Search
     highlight link EasyMotionTarget2Second Search
 endif
-let g:airline#extensions#tabline#enabled = 1
 " 256-colors support g:Theme < 0
 if g:Theme == -2
     set background=light
-    let g:airline_theme = 'solarized'
     colorscheme solarized
 elseif g:Theme == -1
     set background=dark
-    let g:airline_theme = 'onedark'
     colorscheme one_modified
 elseif g:Theme == 0
     set background=light
-    let g:airline_theme = 'solarized'
     colorscheme solarized8
 elseif g:Theme == 1
     set background=light
-    let g:airline_theme = 'solarized'
     colorscheme solarized8_flat
 elseif g:Theme == 2
     set background=dark
-    let g:airline_theme = 'onedark'
     colorscheme onedark
 elseif g:Theme == 3
     set background=dark
-    let g:airline_theme = 'solarized'
     colorscheme solarized8
 elseif g:Theme == 4
     set background=dark
-    let g:airline_theme = 'solarized'
     colorscheme molokai
 endif
 " }}}
@@ -292,6 +276,7 @@ set lazyredraw
 set noswapfile
 set nowritebackup
 set nobackup
+set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
 " }}}
 
 " ====================== Autocmd ======================== {{{
@@ -322,6 +307,16 @@ function! LoadMultipleCursors()
     xnoremap <leader><C-n> :<C-u>call multiple_cursors#select_all("v", 0)<CR>
     call plug#load('vim-multiple-cursors')
 endfunction
+function! LoadJedi()
+    let g:jedi#auto_initialization = 1
+    let g:jedi#auto_vim_configuration = 0
+    let g:jedi#completions_enabled = 0
+    let g:jedi#documentation_command = 'K'
+    let g:jedi#rename_command = '<leader>R'
+    let g:jedi#goto_command = '<leader>d'
+    let g:jedi#usages_command = '<leader>a'
+    call plug#load('jedi-vim')
+endfunction
 function! LoadRecordParameter()
     call plug#load('vim-autodoc')
     RecordParameter
@@ -331,8 +326,16 @@ function! LoadQuickmenu()
     call plug#load('quickmenu.vim')
     let g:quickmenu_options = "HL"
     call g:quickmenu#reset()
-    call g:quickmenu#header('QwQ')
+    call g:quickmenu#header('QvQ')
+    call g:quickmenu#append('# Actions', '')
+    call g:quickmenu#append('Insert Comment Line', 'call InsertCommentLine()')
+    call g:quickmenu#append('Insert Time', "put=strftime('%x %X')")
+    call g:quickmenu#append('Git Diff', 'Gdiff', 'use fugitive Gdiff on current document')
+    call g:quickmenu#append('Git Status', 'Gstatus', 'use fugitive Gstatus on current document')
+    call g:quickmenu#append('Record Python Parameter', 'call LoadRecordParameter()', '', 'python')
+    call g:quickmenu#append('Load Jedi', 'call LoadJedi()', '', 'python')
     call g:quickmenu#append('# Toggle', '')
+    call g:quickmenu#append('NERDTree', 'NERDTreeToggle')
     call g:quickmenu#append('Undo Tree', 'UndotreeToggle')
     call g:quickmenu#append('Tagbar', 'TagbarToggle')
     call g:quickmenu#append('Table Mode', 'TableModeToggle')
@@ -340,12 +343,6 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Fold %{g:FoldOn==1? "[x]" :"[ ]"}', 'call ToggleFold()')
     call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()')
     call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()')
-    call g:quickmenu#append('# Actions', '')
-    call g:quickmenu#append('Insert Comment Line', 'call InsertCommentLine()')
-    call g:quickmenu#append('Insert Time', "put=strftime('%x %X')")
-    call g:quickmenu#append('Git Diff', 'Gdiff', 'use fugitive Gdiff on current document')
-    call g:quickmenu#append('Git Status', 'Gstatus', 'use fugitive Gstatus on current document')
-    call g:quickmenu#append('Record Python Parameter', 'call LoadRecordParameter()', '', 'python')
     call g:quickmenu#toggle(0)
 endfunction
 " }}}
@@ -358,7 +355,7 @@ function! InsertCommentLine()
 endfunction
 " }}}
 
-" ======================== Macro ======================== {{{
+" ======================= Macro ========================= {{{
 function! ExecuteMacroOverVisualRange()
     echo '@'.getcmdline()
     exec ":'<,'>normal @".nr2char(getchar())
@@ -381,7 +378,7 @@ function! ToggleDiff()
 endfunction
 " }}}
 
-" ====================== Fold code ====================== {{{
+" ===================== Fold code ======================= {{{
 let g:FoldOn = 0
 function! ToggleFold()
     if g:FoldOn == 0
@@ -577,6 +574,7 @@ elseif g:Completion == 1  " YouCompleteMe
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     " let g:ycm_show_diagnostics_ui = 0
+    " let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }  "auto semantic complete
     let g:ycm_collect_identifiers_from_comments_and_strings = 1
     let g:ycm_complete_in_comments = 1
     let g:ycm_complete_in_strings = 1
@@ -615,13 +613,10 @@ elseif g:Completion == 4  " mucomplete
     let g:mucomplete#enable_auto_at_startup = 1
     let g:mucomplete#chains = {}
     let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
-    let g:jedi#rename_command = '<leader>R'
-    let g:jedi#goto_command = '<leader>d'
-    let g:jedi#usages_command = '<leader>a'
 endif
 " }}}
 
-" =================== Terminal ========================== {{{
+" ====================== Terminal ======================= {{{
 " do not tmap <Esc> in vim 8
 tnoremap <F1> <C-w><C-w>
 tnoremap <F2> <C-\><C-n>gT
@@ -683,7 +678,7 @@ if has('win32')
     if has('gui_running')
         nnoremap <leader>L :silent exec '!venv & gvim "%:p"'<CR>:q<CR>
         set guifont=Consolas:h11:cANSI
-        set guioptions=grt
+        set guioptions=grt!
         set guicursor+=a:blinkon0
         if &columns < 85
             set lines=25
