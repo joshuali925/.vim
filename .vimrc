@@ -1,6 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 1
-let g:TrueColors = 1
+let g:Theme = 2
 let g:Completion = 1  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
 let g:PythonPath = 'python'
 let g:ExecCommand = g:PythonPath. ' %'
@@ -28,7 +27,7 @@ Plug 'Yggdroot/LeaderF'  "load on startup to record MRU
 Plug 'mhinz/vim-startify'
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
-Plug 'jiangmiao/auto-pairs'
+Plug 'Raimondi/delimitMate'
 Plug 'shougo/echodoc.vim'
 Plug 'davidhalter/jedi-vim', { 'on': [] }
 " Plug 'sheerun/vim-polyglot'
@@ -69,7 +68,7 @@ silent! call yankstack#setup()
 " }}}
 
 " ===================== Themes ========================== {{{
-if g:TrueColors == 1
+if g:Theme >= 0 " True color
     let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
     let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
     set termguicolors
@@ -90,17 +89,20 @@ elseif g:Theme == -1
     colorscheme one_modified
 elseif g:Theme == 0
     set background=light
-    colorscheme solarized8
+    colorscheme solarized8_flat
 elseif g:Theme == 1
     set background=light
-    colorscheme solarized8_flat
+    colorscheme PaperColor
 elseif g:Theme == 2
-    set background=dark
-    colorscheme onedark
+    set background=light
+    colorscheme snow
 elseif g:Theme == 3
     set background=dark
-    colorscheme solarized8
+    colorscheme onedark
 elseif g:Theme == 4
+    set background=dark
+    colorscheme forest-night
+elseif g:Theme == 5
     set background=dark
     colorscheme molokai
 endif
