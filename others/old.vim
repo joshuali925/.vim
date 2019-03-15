@@ -27,4 +27,7 @@ Plug 'vim-airline/vim-airline-themes'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_theme = 'solarized'
 
+let g:ExecCommand = g:PythonPath. ' %'
+nmap <leader>r :wall <bar> exec 'AsyncRun '. g:ExecCommand<CR>
+
 
