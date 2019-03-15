@@ -1,8 +1,7 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 2
+let g:Theme = 1
 let g:Completion = 1  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
 let g:PythonPath = 'python'
-let g:ExecCommand = g:PythonPath. ' %'
 " }}}
 
 " ===================== Plugins ========================= {{{
@@ -27,7 +26,7 @@ Plug 'Yggdroot/LeaderF'  "load on startup to record MRU
 Plug 'mhinz/vim-startify'
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
-Plug 'Raimondi/delimitMate'
+Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
 Plug 'davidhalter/jedi-vim', { 'on': [] }
 " Plug 'sheerun/vim-polyglot'
@@ -80,7 +79,7 @@ else
     highlight link EasyMotionTarget2First Search
     highlight link EasyMotionTarget2Second Search
 endif
-" 256-colors support g:Theme < 0
+" Non true colors g:Theme < 0
 if g:Theme == -2
     set background=light
     colorscheme solarized
@@ -122,16 +121,12 @@ nmap <leader>9 <F9>
 nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
-imap <F1> <Esc><F1>
-nnoremap <F1> :wincmd w<CR>
+nnoremap <F1> :call LoadQuickmenu()<CR>
 imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *N
-imap <F8> <Esc><F8>
-imap <F9> <Esc><F9>a
-nnoremap <F9> :call TogglePreview()<CR>
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
 map F <Plug>fanfingtastic_F
@@ -204,7 +199,6 @@ nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>m :call LoadQuickmenu()<CR>
 nnoremap <leader>ta :Tabularize /
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -289,6 +283,7 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
+    autocmd FileType python nmap K :call LoadJedi()<CR>K
     autocmd FileType c,cpp,java inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
@@ -310,6 +305,7 @@ function! LoadMultipleCursors()
     call plug#load('vim-multiple-cursors')
 endfunction
 function! LoadJedi()
+    nnoremap K :call jedi#show_documentation()<CR>
     let g:jedi#auto_initialization = 1
     let g:jedi#auto_vim_configuration = 0
     let g:jedi#completions_enabled = 0
@@ -335,7 +331,6 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Git Diff', 'Gdiff', 'use fugitive Gdiff on current document')
     call g:quickmenu#append('Git Status', 'Gstatus', 'use fugitive Gstatus on current document')
     call g:quickmenu#append('Record Python Parameter', 'call LoadRecordParameter()', '', 'python')
-    call g:quickmenu#append('Load Jedi', 'call LoadJedi()', '', 'python')
     call g:quickmenu#append('# Toggle', '')
     call g:quickmenu#append('NERDTree', 'NERDTreeToggle')
     call g:quickmenu#append('Undo Tree', 'UndotreeToggle')
@@ -432,6 +427,8 @@ let g:ale_lint_on_insert_leave = 1
 let g:ale_python_flake8_executable = 'flake8'
 let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
 let g:asyncrun_open = 12
+let g:AutoPairsShortcutFastWrap = '<C-l>'
+let g:AutoPairsShortcutBackInsert = '<C-b>'
 let g:EasyMotion_smartcase = 1
 let g:formatters_python = ['yapf']
 let NERDTreeWinSize = 23
@@ -511,7 +508,7 @@ imap <F10> <Esc><F10>
 imap <F11> <Esc><F11>
 imap <F12> <Esc><F12>
 imap <leader>r <Esc><leader>r
-nmap <leader>r :wall <bar> exec 'AsyncRun '. g:ExecCommand<CR>
+nmap <leader>r <F11>
 augroup RunCode
     autocmd!
     autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
@@ -620,7 +617,6 @@ endif
 
 " ====================== Terminal ======================= {{{
 " do not tmap <Esc> in vim 8
-tnoremap <F1> <C-w><C-w>
 tnoremap <F2> <C-\><C-n>gT
 tnoremap <F3> <C-\><C-n>gt
 tnoremap <C-u> <C-\><C-n>
@@ -680,7 +676,7 @@ if has('win32')
     if has('gui_running')
         nnoremap <leader>L :silent exec '!venv & gvim "%:p"'<CR>:q<CR>
         set guifont=Consolas:h11:cANSI
-        set guioptions=grt!
+        set guioptions=grt
         set guicursor+=a:blinkon0
         if &columns < 85
             set lines=25
