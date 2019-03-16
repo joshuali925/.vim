@@ -1,7 +1,8 @@
 " ==================== Settings ========================= {{{
 let g:Theme = 1
-let g:Completion = 4  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
+let g:Completion = 1  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
 let g:PythonPath = 'python'
+let g:ExecCommand = ''
 " }}}
 
 " ===================== Plugins ========================= {{{
@@ -31,11 +32,13 @@ Plug 'shougo/echodoc.vim'
 Plug 'davidhalter/jedi-vim', { 'on': [] }
 " Plug 'sheerun/vim-polyglot'
 " Plug 'w0rp/ale'
-if g:Completion > 0
+if g:Completion >= 0
     Plug 'sirver/ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
     Plug 'honza/vim-snippets', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
 endif
-if g:Completion == 1
+if g:Completion == 0
+    Plug 'lifepillar/vim-mucomplete'
+elseif g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
 elseif g:Completion == 2
     Plug 'Shougo/deoplete.nvim'
@@ -55,8 +58,6 @@ elseif g:Completion == 3
     Plug 'ncm2/ncm2-syntax'
     Plug 'ncm2/ncm2-ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
     Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
-elseif g:Completion == 4
-    Plug 'lifepillar/vim-mucomplete'
 endif
 call plug#end()
 silent! call yankstack#setup()
@@ -124,11 +125,11 @@ imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *N
 imap <F10> <Esc><F10>
-nnoremap <F10> :update <bar> exec '!clear && '. GetRunCommand()<CR>
+nnoremap <F10> :wall <bar> exec '!clear && '. GetRunCommand()<CR>
 imap <F11> <Esc><F11>
-nnoremap <F11> :update <bar> exec 'AsyncRun '. GetRunCommand()<CR>
+nnoremap <F11> :wall <bar> exec 'AsyncRun '. GetRunCommand()<CR>
 imap <F12> <Esc><F12>
-nnoremap <F12> :update <bar> call RunShellCommand(''. GetRunCommand())<CR>
+nnoremap <F12> :wall <bar> call RunShellCommand(''. GetRunCommand())<CR>
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
 map F <Plug>fanfingtastic_F
@@ -166,13 +167,13 @@ nnoremap O O<Space><BS>
 inoremap <CR> <CR><Space><BS>
 nnoremap gf <C-w>gf
 nnoremap gp `[v`]
+nnoremap cr :call EditRegister()<CR>
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
 vnoremap [ c[<C-r><C-p>"]<Esc>
 vnoremap { c{<C-r><C-p>"}<Esc>
 vnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
-nnoremap cr :call EditRegister()<CR>
 nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
@@ -198,8 +199,8 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
-imap <leader>r <Esc><leader>r
-nmap <leader>r <F11>
+nnoremap <leader>m :LeaderfMru<CR>
+nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>ta :Tabularize /
@@ -211,7 +212,6 @@ nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :q<CR>
 vnoremap <leader>q <Esc>:q<CR>
-nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 " }}}
 
@@ -257,7 +257,7 @@ set completeopt=menuone
 set scrolloff=3
 set previewheight=7
 set foldmethod=marker
-set foldlevel=99
+set foldlevel=1
 set belloff=all
 set history=500
 set sessionoptions-=buffer
@@ -285,7 +285,7 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
-    autocmd FileType python nmap K :call LoadJedi()<CR>K
+    autocmd FileType python nmap <buffer> K :call LoadJedi()<CR>K
     autocmd FileType c,cpp,java inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
@@ -519,6 +519,12 @@ function! GetRunCommand()
     endif
     return ''
 endfunction
+imap <leader>r <Esc><leader>r
+if g:ExecCommand == ''
+    nmap <leader>r <F11>
+else
+    nmap <leader>r :wall <bar> exec 'AsyncRun '. g:ExecCommand<CR>
+endif
 " }}}
 
 " ==================== AutoComplete ===================== {{{
@@ -580,47 +586,30 @@ endif
 
 " ====================== Terminal ======================= {{{
 " do not tmap <Esc> in vim 8
-tnoremap <F2> <C-\><C-n>gT
-tnoremap <F3> <C-\><C-n>gt
+tnoremap <F2> <C-w>gT
+tnoremap <F3> <C-w>gt
 tnoremap <C-u> <C-\><C-n>
 tnoremap <C-h> <C-w>h
 tnoremap <C-j> <C-w>j
 tnoremap <C-k> <C-w>k
 tnoremap <C-l> <C-w>l
-tnoremap <leader>to <C-w>5k
-nnoremap <leader>to :call ToggleTerm()<CR>
-nnoremap <leader>tO :term ++curwin<CR>
+nnoremap <leader>to :exec 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
+nnoremap <leader>tO :terminal ++curwin ++close<CR>
 nnoremap <leader>te V:call SendToTerminal()<CR>$
 vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
-function! ToggleTerm()
-    let term_winnr = bufwinnr('!/bin/bash')
-    if term_winnr < 1
-        let term_winnr = bufwinnr('!/bin/zsh')
-    endif
-    if term_winnr < 1
-        let term_winnr = bufwinnr('!zsh')
-    endif
-    if term_winnr < 1
-        exec 'botright new | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | terminal ++curwin ++close'
-    else
-        exec '5wincmd j'
-        let status = term_getstatus(bufnr('%'))
-        if status == ''
-            exec term_winnr. 'wincmd w'
-            let status = term_getstatus(bufnr('%'))
-        endif
-        if status == 'running,normal'
-            exec 'normal a'
-        endif
-    endif
-endfunction
 function! SendToTerminal()
     let buff_n = term_list()
     if len(buff_n) > 0
-        let buff_n = buff_n[0]
+        let buff_n = buff_n[0] " sends to most recently opened terminal
         let lines = getline(getpos("'<")[1], getpos("'>")[1])
+        let indent = match(lines[0], '[^ \t]') " check for removing unnecessary indent
         for l in lines
-            call term_sendkeys(buff_n, l. "\<CR>")
+            let new_indent = match(l, '[^ \t]')
+            if new_indent == 0
+                call term_sendkeys(buff_n, l. "\<CR>")
+            else
+                call term_sendkeys(buff_n, l[indent:]. "\<CR>")
+            endif
             sleep 10m
         endfor
     endif
@@ -632,16 +621,16 @@ endfunction
 " plugins are installed to %UserProfile%/.vim
 if has('win32')
     vnoremap <C-c> "+y<Esc>
-    noremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
     if has('gui_running')
+        nnoremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
         nnoremap <leader>L :silent exec '!venv & gvim "%:p"'<CR>:q<CR>
         set guifont=Consolas:h11:cANSI
         set guioptions=grt
         set guicursor+=a:blinkon0
-        if &columns < 85
+        if &columns < 85 && &lines < 30
             set lines=25
             set columns=85
         endif

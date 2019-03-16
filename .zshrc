@@ -116,9 +116,10 @@ alias vimm='vim ~/.vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias tmux='tmux -2'
 alias bpython='bpython -i'
-alias venv='source venv/bin/activate'
 alias apt='sudo apt'
 alias service='sudo service'
+alias venv='source venv/bin/activate'
+alias gacp='git add -A && git commit -m "update" && git push origin master'
 
 alias b='cd -'
 

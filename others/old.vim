@@ -81,3 +81,28 @@ if g:Completion == 0  " default
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
 
+" =======================================================
+" change to open term only
+function! ToggleTerm()
+    let term_winnr = bufwinnr('!/bin/bash')
+    if term_winnr < 1
+        let term_winnr = bufwinnr('!/bin/zsh')
+    endif
+    if term_winnr < 1
+        let term_winnr = bufwinnr('!zsh')
+    endif
+    if term_winnr < 1
+        exec 'botright new | set nonumber norelativenumber nocursorline nocursorcolumn | resize'. (winheight(0) * 2/5). ' | terminal ++curwin ++close'
+    else
+        exec '5wincmd j'
+        let status = term_getstatus(bufnr('%'))
+        if status == ''
+            exec term_winnr. 'wincmd w'
+            let status = term_getstatus(bufnr('%'))
+        endif
+        if status == 'running,normal'
+            exec 'normal a'
+        endif
+    endif
+endfunction
+
