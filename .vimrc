@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
 let g:Theme = 1
-let g:Completion = 1  " 0 = default, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2, 4 = mucomplete
+let g:Completion = 4  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
 let g:PythonPath = 'python'
 " }}}
 
@@ -38,13 +38,9 @@ endif
 if g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
 elseif g:Completion == 2
-    if has('nvim')
-        Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-    else
-        Plug 'Shougo/deoplete.nvim'
-        Plug 'roxma/nvim-yarp'
-        Plug 'roxma/vim-hug-neovim-rpc'
-    endif
+    Plug 'Shougo/deoplete.nvim'
+    Plug 'roxma/nvim-yarp'
+    Plug 'roxma/vim-hug-neovim-rpc'
     Plug 'Shougo/neco-syntax'
     Plug 'Shougo/neco-vim', { 'for': 'vim' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
@@ -127,6 +123,12 @@ nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *N
+imap <F10> <Esc><F10>
+nnoremap <F10> :update <bar> exec '!clear && '. GetRunCommand()<CR>
+imap <F11> <Esc><F11>
+nnoremap <F11> :update <bar> exec 'AsyncRun '. GetRunCommand()<CR>
+imap <F12> <Esc><F12>
+nnoremap <F12> :update <bar> call RunShellCommand(''. GetRunCommand())<CR>
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
 map F <Plug>fanfingtastic_F
@@ -171,7 +173,6 @@ vnoremap [ c[<C-r><C-p>"]<Esc>
 vnoremap { c{<C-r><C-p>"}<Esc>
 vnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
 nnoremap cr :call EditRegister()<CR>
-nnoremap <C-]> <C-w>}
 nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
@@ -197,6 +198,8 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
+imap <leader>r <Esc><leader>r
+nmap <leader>r <F11>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>ta :Tabularize /
@@ -210,7 +213,6 @@ nnoremap <leader>q :q<CR>
 vnoremap <leader>q <Esc>:q<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
-nnoremap <leader>vcom o<Esc>55i=<Esc>:Commentary<CR>
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -304,20 +306,21 @@ function! LoadMultipleCursors()
     xnoremap <leader><C-n> :<C-u>call multiple_cursors#select_all("v", 0)<CR>
     call plug#load('vim-multiple-cursors')
 endfunction
+function! LoadRecordParameter()
+    call plug#load('vim-autodoc')
+    RecordParameter
+endfunction
 function! LoadJedi()
     nnoremap K :call jedi#show_documentation()<CR>
     let g:jedi#auto_initialization = 1
     let g:jedi#auto_vim_configuration = 0
     let g:jedi#completions_enabled = 0
+    let g:jedi#show_call_signatures = "2"
     let g:jedi#documentation_command = 'K'
     let g:jedi#rename_command = '<leader>R'
     let g:jedi#goto_command = '<leader>d'
     let g:jedi#usages_command = '<leader>a'
     call plug#load('jedi-vim')
-endfunction
-function! LoadRecordParameter()
-    call plug#load('vim-autodoc')
-    RecordParameter
 endfunction
 function! LoadQuickmenu()
     nnoremap <leader>m :call quickmenu#toggle(0)<CR>
@@ -359,7 +362,7 @@ function! ExecuteMacroOverVisualRange()
 endfunction
 function! EditRegister() abort
     let r = nr2char(getchar())
-    call feedkeys("q:ilet @". r. " = \<c-r>\<c-r>=string(@". r. ")\<cr>\<esc>0f'", 'n')
+    call feedkeys("q:ilet @". r. " = \<C-r>\<C-r>=string(@". r. ")\<CR>\<Esc>0f'", 'n')
 endfunction
 " }}}
 
@@ -504,26 +507,18 @@ function! RunShellCommand(cmdline)
     setlocal nomodifiable
     exec curr_bufnr. 'wincmd w'
 endfunction
-imap <F10> <Esc><F10>
-imap <F11> <Esc><F11>
-imap <F12> <Esc><F12>
-imap <leader>r <Esc><leader>r
-nmap <leader>r <F11>
-augroup RunCode
-    autocmd!
-    autocmd FileType c nnoremap <buffer> <F10> :update <bar> exec '!clear && gcc % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType cpp nnoremap <buffer> <F10> :update <bar> exec '!clear && g++ % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType java nnoremap <buffer> <F10> :update <bar> exec '!clear && javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F10> :update <bar> exec '!clear && '. g:PythonPath. ' %'. b:args<CR>
-    autocmd FileType c nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun gcc % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType cpp nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun g++ % -o %< -g && ./%<'. b:args<CR>
-    autocmd FileType java nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun javac % && java %<'. b:args<CR>
-    autocmd FileType python nnoremap <buffer> <F11> :update <bar> exec 'AsyncRun -raw '. g:PythonPath. ' %'. b:args<CR>
-    autocmd FileType c nnoremap <buffer> <F12> :update <bar> call RunShellCommand('gcc % -o %< -g && ./%<'. b:args)<CR>
-    autocmd FileType cpp nnoremap <buffer> <F12> :update <bar> call RunShellCommand('g++ % -o %< -g && ./%<'. b:args)<CR>
-    autocmd FileType java nnoremap <buffer> <F12> :update <bar> call RunShellCommand('javac % && java %<'. b:args)<CR>
-    autocmd FileType python nnoremap <buffer> <F12> :update <bar> call RunShellCommand(g:PythonPath. ' %'. b:args)<CR>
-augroup END
+function! GetRunCommand()
+    if &filetype == 'python'
+        return g:PythonPath. ' %'. b:args
+    elseif &filetype == 'c'
+        return gcc % -o %< -g && ./%<'. b:args
+    elseif &filetype == 'cpp'
+        return g++ % -o %< -g && ./%<'. b:args
+    elseif &filetype == 'java'
+        return javac % && java %<'. b:args
+    endif
+    return ''
+endfunction
 " }}}
 
 " ==================== AutoComplete ===================== {{{
@@ -533,40 +528,18 @@ let g:deoplete#sources#jedi#python_path=g:PythonPath
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
-function! SimpleComplete()
-    if pumvisible()
-        return "\<C-n>"
-    endif
-    let column = col('.')
-    let line = getline('.')
-    if !(column>1 && strpart(line, column-2, 3)=~'^\w')
-        let pre_char = line[column-2]
-        if pre_char == '.'
-            return "\<C-x>\<C-o>\<C-p>"
-        elseif pre_char == '/'
-            return "\<C-x>\<C-f>\<C-p>"
-        else
-            return "\<TAB>"
-        endif
-    endif
-    let substr = matchstr(strpart(line, -1, column+1), "[^ \t]*$")
-    let has_slash = match(substr, '\/') != -1
-    if has_slash
-        return "\<C-x>\<C-f>"
-    else
-        return "\<C-n>"
-    endif
-endfunction
 " use <C-@> in vim, <C-Space> in nvim for ctrl space
-if g:Completion == 0  " default
+if g:Completion == 0  " mucomplete
     set omnifunc=syntaxcomplete#Complete
-    inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : SimpleComplete()
-    inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
+    set completeopt+=noselect
+    set shortmess+=c
     inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    imap <expr> <C-c> pumvisible() ? "\<C-y>\<C-c>" : "\<C-c>"
+    let g:mucomplete#enable_auto_at_startup = 1
+    let g:mucomplete#chains = {}
+    let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
 elseif g:Completion == 1  " YouCompleteMe
     inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
@@ -602,16 +575,6 @@ elseif g:Completion == 3  " ncm2
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-elseif g:Completion == 4  " mucomplete
-    set completeopt+=noselect
-    set shortmess+=c
-    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
-    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
-    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
-    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    let g:mucomplete#enable_auto_at_startup = 1
-    let g:mucomplete#chains = {}
-    let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
 endif
 " }}}
 
