@@ -106,3 +106,19 @@ function! ToggleTerm()
     endif
 endfunction
 
+" =======================================================
+" switch to vim-visual-multi
+Plug 'terryma/vim-multiple-cursors', { 'on': [] }
+nmap <C-n> :call LoadMultipleCursors()<CR><C-n>
+xmap <C-n> :call LoadMultipleCursors()<CR>gv<C-n>
+nmap <leader><C-n> :call LoadMultipleCursors()<CR><leader><C-n>
+xmap <leader><C-n> :call LoadMultipleCursors()<CR>gv<leader><C-n>
+function! LoadMultipleCursors()
+    nnoremap <C-n> :call multiple_cursors#new("n", 1)<CR>
+    xnoremap <C-n> :<C-u>call multiple_cursors#new("v", 0)<CR>
+    nnoremap <leader><C-n> :call multiple_cursors#select_all("n", 1)<CR>
+    xnoremap <leader><C-n> :<C-u>call multiple_cursors#select_all("v", 0)<CR>
+    call plug#load('vim-multiple-cursors')
+endfunction
+let g:multi_cursor_select_all_word_key = '<leader><C-n>'
+

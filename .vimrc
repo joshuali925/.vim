@@ -15,7 +15,7 @@ Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
-Plug 'terryma/vim-multiple-cursors', { 'on': [] }
+Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
@@ -191,10 +191,8 @@ nmap <C-w>- <C-w>-<C-w>
 nmap <C-f> :call LoadAutoformat()<CR><C-f>
 imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
 vmap <C-f> :call LoadAutoformat()<CR>gv<C-f>
-nmap <C-n> :call LoadMultipleCursors()<CR><C-n>
-xmap <C-n> :call LoadMultipleCursors()<CR>gv<C-n>
-nmap <leader><C-n> :call LoadMultipleCursors()<CR><leader><C-n>
-xmap <leader><C-n> :call LoadMultipleCursors()<CR>gv<leader><C-n>
+nmap <C-n> :call LoadVisualMulti()<CR><C-n>
+xmap <C-n> :call LoadVisualMulti()<CR>gv<C-n>
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
@@ -299,12 +297,10 @@ function! LoadAutoformat()
     vnoremap <C-f> :'<,'>Autoformat<CR>$
     call plug#load('vim-autoformat')
 endfunction
-function! LoadMultipleCursors()
-    nnoremap <C-n> :call multiple_cursors#new("n", 1)<CR>
-    xnoremap <C-n> :<C-u>call multiple_cursors#new("v", 0)<CR>
-    nnoremap <leader><C-n> :call multiple_cursors#select_all("n", 1)<CR>
-    xnoremap <leader><C-n> :<C-u>call multiple_cursors#select_all("v", 0)<CR>
-    call plug#load('vim-multiple-cursors')
+function! LoadVisualMulti()
+    nmap <C-n> <Plug>(VM-Find-Under)
+    xmap <C-n> <Plug>(VM-Find-Subword-Under)
+    call plug#load('vim-visual-multi')
 endfunction
 function! LoadRecordParameter()
     call plug#load('vim-autodoc')
@@ -323,7 +319,7 @@ function! LoadJedi()
     call plug#load('jedi-vim')
 endfunction
 function! LoadQuickmenu()
-    nnoremap <leader>m :call quickmenu#toggle(0)<CR>
+    nnoremap <F1> :call quickmenu#toggle(0)<CR>
     call plug#load('quickmenu.vim')
     let g:quickmenu_options = "HL"
     call g:quickmenu#reset()
@@ -439,7 +435,16 @@ let NERDTreeShowHidden = 1
 let NERDTreeMinimalUI = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
-let g:multi_cursor_select_all_word_key = '<leader><C-n>'
+let g:VM_default_mappings = 0
+let g:VM_exit_on_1_cursor_left = 1
+let g:VM_maps = {}
+let g:VM_maps['Select All'] = '<leader><C-n>'
+let g:VM_maps['Find Under'] = '<C-n>'
+let g:VM_maps['Find Subword Under'] = '<C-n>'
+let g:VM_maps['Remove Last Region'] = '<C-p>'
+let g:VM_maps['Skip Region'] = '<C-x>'
+let g:VM_maps['Switch Mode'] = '<C-c>'
+let g:VM_maps['Case Setting'] = ''
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','*cache*'],'file':[] }
 let g:Lf_ShortcutF = '<C-p>'
