@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 4
+let g:Theme = 0
 let g:Completion = 1  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -164,6 +164,7 @@ nnoremap > >>
 vnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
+nnoremap K :call LoadJediForDoc()<CR>
 inoremap <CR> <CR><Space><BS>
 nnoremap gf <C-w>gf
 nnoremap gp `[v`]
@@ -179,6 +180,7 @@ inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 nnoremap <C-b> :NERDTreeToggle<CR>
 nnoremap <C-p> :LeaderfFile<CR>
+nnoremap <C-g> :LeaderfFunctionAll<CR>
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
@@ -193,6 +195,7 @@ imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
 vmap <C-f> :call LoadAutoformat()<CR>gv<C-f>
 nmap <C-n> :call LoadVisualMulti()<CR><C-n>
 xmap <C-n> :call LoadVisualMulti()<CR>gv<C-n>
+nmap <leader><C-n> :call LoadVisualMulti()<CR><leader><C-n>
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
@@ -280,11 +283,10 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
-    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/others/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    autocmd FileType c,cpp,java,js nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
-    autocmd FileType python nmap <buffer> K :call LoadJedi()<CR>K
-    autocmd FileType c,cpp,java inoremap <buffer> ;; <C-o>$;
+    autocmd FileType c,cpp,java,js inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
 augroup END
@@ -306,17 +308,23 @@ function! LoadRecordParameter()
     call plug#load('vim-autodoc')
     RecordParameter
 endfunction
-function! LoadJedi()
-    nnoremap K :call jedi#show_documentation()<CR>
-    let g:jedi#auto_initialization = 1
-    let g:jedi#auto_vim_configuration = 0
-    let g:jedi#completions_enabled = 0
-    let g:jedi#show_call_signatures = "2"
-    let g:jedi#documentation_command = 'K'
-    let g:jedi#rename_command = '<leader>R'
-    let g:jedi#goto_command = '<leader>d'
-    let g:jedi#usages_command = '<leader>a'
-    call plug#load('jedi-vim')
+function! LoadJediForDoc()
+    if &filetype == 'python'
+        let g:jedi#auto_initialization = 1
+        let g:jedi#auto_vim_configuration = 0
+        let g:jedi#completions_enabled = 0
+        let g:jedi#show_call_signatures = "2"
+        let g:jedi#documentation_command = 'K'
+        let g:jedi#rename_command = '<leader>R'
+        let g:jedi#goto_command = '<leader>d'
+        let g:jedi#usages_command = '<leader>a'
+        call plug#load('jedi-vim')
+        call jedi#show_documentation()
+    else
+        unmap K
+        normal K
+        nnoremap K :call LoadJediForDoc()<CR>
+    endif
 endfunction
 function! LoadQuickmenu()
     nnoremap <F1> :call quickmenu#toggle(0)<CR>
@@ -446,19 +454,16 @@ let g:VM_maps['Skip Region'] = '<C-x>'
 let g:VM_maps['Switch Mode'] = '<C-c>'
 let g:VM_maps['Case Setting'] = ''
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*
-let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','*cache*'],'file':[] }
-let g:Lf_ShortcutF = '<C-p>'
+let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_ReverseOrder = 1
-" <C-p>: 2<C-p>=mru, 2<C-f>=function, 4<C-p>=grep, type keyword and enter, 4<C-f>=grep current keyword
+let g:Lf_ShortcutF = '<C-p>'
+" <C-p>: File; <leader>m: MRU, [2<C-p>: Rip Grep | 2<C-f>: Functions]
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
-let g:Lf_NormalMap = { 'File': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfMru<CR>'],
-            \               ['<C-f>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFunction<CR>']],
-            \       'Mru': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R  .<Left><Left>'],
-            \               ['<C-f>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>']],
-            \  'Function': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>'],
-            \               ['<C-f>', ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R <cword> .<CR>']] }
+let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']],
+            \        'Mru': [['<C-p>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfRgInteractive<CR>'],
+            \               ['<C-f>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfFunctionAll<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_CacheDirectory = expand('~/.cache/')
 let g:tagbar_compact = 1
@@ -625,13 +630,28 @@ endfunction
 " first manually create %UserProfile%/.cache/vim/undo directory
 " plugins are installed to %UserProfile%/.vim
 if has('win32')
+    " !!!!!! works for conda only, do NOT use Activate for venv
+    " Fatal Python error: initfsencoding: unable to load the file system codec ModuleNotFoundError: No module named 'encodings'
+    " PYTHONHOME fixed it, but needs to reset for every virtual env activate
+    if $PYTHONHOME == ''
+        let $PYTHONHOME = 'C:\Users\Josh\Anaconda3'
+    endif
+    command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
+    function! ActivatePyEnv(environment)
+        if a:environment == ''
+            silent exec '!venv & gvim '. expand('%:p')
+        else
+            " silent exec '!activate '. a:environment. ' & gvim '. expand('%:p')
+            silent exec '!activate '. a:environment. ' & gvim '. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
+        endif
+    endfunction
     vnoremap <C-c> "+y<Esc>
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
     if has('gui_running')
         nnoremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
-        nnoremap <leader>L :silent exec '!venv & gvim "%:p"'<CR>:q<CR>
+        nnoremap <leader>R :silent exec '!gvim "%:p"' <bar> quit<CR>
         set guifont=Consolas:h11:cANSI
         set guioptions=grt
         set guicursor+=a:blinkon0
