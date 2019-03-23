@@ -102,6 +102,7 @@ source $ZSH/oh-my-zsh.sh
 source ~/.vim/others/z.sh
 export PYTHONSTARTUP=~/.vim/others/.pythonrc
 export PATH=$PATH:$HOME/.local/bin
+export PATH=$PATH:$HOME/.vim/bin
 
 autoload -U compinit && compinit -u  # for autocomplete
 unsetopt BG_NICE  # fix wsl bug
