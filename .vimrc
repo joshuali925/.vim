@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 1
+let g:Theme = 4
 let g:Completion = 1  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -516,11 +516,11 @@ function! GetRunCommand()
     if &filetype == 'python'
         return g:PythonPath. ' %'. b:args
     elseif &filetype == 'c'
-        return gcc % -o %< -g && ./%<'. b:args
+        return 'gcc % -o %< -g && ./%<'. b:args
     elseif &filetype == 'cpp'
-        return g++ % -o %< -g && ./%<'. b:args
+        return 'g++ % -o %< -g && ./%<'. b:args
     elseif &filetype == 'java'
-        return javac % && java %<'. b:args
+        return 'javac % && java %<'. b:args
     endif
     return ''
 endfunction
