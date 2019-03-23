@@ -14,6 +14,7 @@ fi
 source ~/.vim/others/z.sh
 export PYTHONSTARTUP=~/.vim/others/.pythonrc
 export PATH=$PATH:$HOME/.local/bin
+export PATH=$PATH:$HOME/.vim/bin
 
 # Set bash prompt (\w for whole path, \W for current directory)
 export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
