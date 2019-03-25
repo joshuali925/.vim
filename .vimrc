@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 0
+let g:Theme = 1
 let g:Completion = 1  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -41,17 +41,17 @@ if g:Completion == 0
 elseif g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
 elseif g:Completion == 2
-    Plug 'Shougo/deoplete.nvim'
     Plug 'roxma/nvim-yarp'
     Plug 'roxma/vim-hug-neovim-rpc'
+    Plug 'Shougo/deoplete.nvim'
     Plug 'Shougo/neco-syntax'
     Plug 'Shougo/neco-vim', { 'for': 'vim' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
 elseif g:Completion == 3
     " lazy load doesn't seem to work
-    Plug 'ncm2/ncm2'
     Plug 'roxma/nvim-yarp'
     Plug 'roxma/vim-hug-neovim-rpc'
+    Plug 'ncm2/ncm2'
     Plug 'ncm2/ncm2-bufword'
     Plug 'ncm2/ncm2-path'
     Plug 'Shougo/neco-syntax'
@@ -225,6 +225,7 @@ let &t_EI.="\e[2 q"
 if &compatible | set nocompatible | endif
 set backspace=eol,start,indent
 set mouse=a
+" set cursorline
 set numberwidth=2
 set number
 set wrap
@@ -275,7 +276,7 @@ set lazyredraw
 set noswapfile
 set nowritebackup
 set nobackup
-set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c%V%)%l/%L\ %P
+set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)%l/%L\ %P
 " }}}
 
 " ====================== Autocmd ======================== {{{
@@ -321,9 +322,7 @@ function! LoadJediForDoc()
         call plug#load('jedi-vim')
         call jedi#show_documentation()
     else
-        unmap K
-        normal K
-        nnoremap K :call LoadJediForDoc()<CR>
+        normal! K
     endif
 endfunction
 function! LoadQuickmenu()
@@ -362,7 +361,7 @@ endfunction
 " ======================= Macro ========================= {{{
 function! ExecuteMacroOverVisualRange()
     echo '@'.getcmdline()
-    exec ":'<,'>normal @".nr2char(getchar())
+    exec ":'<,'>normal! @".nr2char(getchar())
 endfunction
 function! EditRegister() abort
     let r = nr2char(getchar())
@@ -605,6 +604,8 @@ tnoremap <C-k> <C-w>k
 tnoremap <C-l> <C-w>l
 nnoremap <leader>to :exec 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
 nnoremap <leader>tO :terminal ++curwin ++close<CR>
+nnoremap <leader>tv :vertical terminal ++close<CR>
+nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
 nnoremap <leader>te V:call SendToTerminal()<CR>$
 vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
 function! SendToTerminal()
@@ -612,7 +613,7 @@ function! SendToTerminal()
     if len(buff_n) > 0
         let buff_n = buff_n[0] " sends to most recently opened terminal
         let lines = getline(getpos("'<")[1], getpos("'>")[1])
-        let indent = match(lines[0], '[^ \t]') " check for removing unnecessary indent
+        let indent = match(lines[0], '[^ \t]') " for removing unnecessary indent
         for l in lines
             let new_indent = match(l, '[^ \t]')
             if new_indent == 0
@@ -636,6 +637,7 @@ if has('win32')
     if $PYTHONHOME == ''
         let $PYTHONHOME = 'C:\Users\Josh\Anaconda3'
     endif
+    let g:python3_host_prog = 'C:\Users\Josh\Anaconda3\python.exe'  " for ncm2, doesn't work with any virtual env
     command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
     function! ActivatePyEnv(environment)
         if a:environment == ''
