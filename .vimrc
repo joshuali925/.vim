@@ -1,12 +1,15 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 1
+let g:Theme = 4
 let g:Completion = 1  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
 let g:PythonPath = 'python'
-let g:ExecCommand = ''
+let g:ExecCommand = 'term ++close ipython -i %'
 " }}}
 
 " ===================== Plugins ========================= {{{
 call plug#begin('~/.vim/plugged')
+" Plug 'mhinz/vim-startify'
+" Plug 'w0rp/ale'
+" Plug 'sheerun/vim-polyglot'
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
@@ -24,14 +27,11 @@ Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'sillybun/vim-autodoc', { 'on': [] }  "for lazy load
 Plug 'Yggdroot/LeaderF'  "load on startup to record MRU
-Plug 'mhinz/vim-startify'
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
 Plug 'davidhalter/jedi-vim', { 'on': [] }
-" Plug 'sheerun/vim-polyglot'
-" Plug 'w0rp/ale'
 if g:Completion >= 0
     Plug 'sirver/ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
     Plug 'honza/vim-snippets', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
@@ -532,7 +532,8 @@ imap <leader>r <Esc><leader>r
 if g:ExecCommand == ''
     nmap <leader>r <F11>
 else
-    nmap <leader>r :wall <bar> exec 'AsyncRun '. g:ExecCommand<CR>
+    " nmap <leader>r :wall <bar> exec 'AsyncRun '. g:ExecCommand<CR>
+    nmap <leader>r :wall <bar> exec g:ExecCommand<CR>
 endif
 " }}}
 
@@ -604,6 +605,7 @@ tnoremap <C-k> <C-w>k
 tnoremap <C-l> <C-w>l
 nnoremap <leader>to :exec 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
 nnoremap <leader>tO :terminal ++curwin ++close<CR>
+nnoremap <leader>th :terminal ++close<CR>
 nnoremap <leader>tv :vertical terminal ++close<CR>
 nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
 nnoremap <leader>te V:call SendToTerminal()<CR>$
@@ -631,14 +633,16 @@ endfunction
 " first manually create %UserProfile%/.cache/vim/undo directory
 " plugins are installed to %UserProfile%/.vim
 if has('win32')
-    " !!!!!! works for conda only, do NOT use Activate for venv
-    " Fatal Python error: initfsencoding: unable to load the file system codec ModuleNotFoundError: No module named 'encodings'
-    " PYTHONHOME fixed it, but needs to reset for every virtual env activate
+    " for ncm2, doesn't work with any virtual env
+    let g:python3_host_prog = 'C:\Users\Josh\Anaconda3\python.exe'
+    " set PYTHONHOME for vim (windows python bug)
+    " also needs to set when entering virtual environments
+    " works for conda only, do NOT use Activate for virtualenv
     if $PYTHONHOME == ''
         let $PYTHONHOME = 'C:\Users\Josh\Anaconda3'
     endif
-    let g:python3_host_prog = 'C:\Users\Josh\Anaconda3\python.exe'  " for ncm2, doesn't work with any virtual env
-    command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
+    " clear PYTHONHOME after vim is loaded
+    autocmd BufNew * let $PYTHONHOME=''
     function! ActivatePyEnv(environment)
         if a:environment == ''
             silent exec '!venv & gvim '. expand('%:p')
@@ -647,10 +651,11 @@ if has('win32')
             silent exec '!activate '. a:environment. ' & gvim '. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
         endif
     endfunction
-    vnoremap <C-c> "+y<Esc>
+    command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
+    vnoremap <C-c> "+y<Esc>
     if has('gui_running')
         nnoremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
         nnoremap <leader>R :silent exec '!gvim "%:p"' <bar> quit<CR>
