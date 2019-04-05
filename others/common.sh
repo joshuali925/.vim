@@ -12,19 +12,18 @@ alias size='du -h --max-depth=1 | sort -hr'
 alias vi='vim'
 alias vimm='vim ~/.vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
-alias tmux='tmux -2'
 alias bpython='bpython -i'
-alias apt='sudo apt'
-alias service='sudo service'
-alias venv='source venv/bin/activate'
 alias gacp='git add -A && git commit -m "update" && git push origin master'
+alias venv='source venv/bin/activate'
+alias service='sudo service'
+alias apt='sudo apt'
 
 # alias f='a(){ find . -iname *$@*; }; a'
 # alias cc='a(){ gcc $1.c -o $1 -g && ./$@; }; a'
 function f { find . -iname \*$1\*; }
 function cc { gcc $1.c -o $1 -g && ./$@; }
 
-function colortest {
+function printcolor {
     awk -v term_cols="${width:-$(tput cols || echo 80)}" 'BEGIN{
     s="/\\";
     for (colnum = 0; colnum<term_cols; colnum++) {
