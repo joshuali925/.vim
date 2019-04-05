@@ -132,3 +132,13 @@ let g:Lf_NormalMap = { 'File': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()
             \  'Function': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()" <bar> LeaderfFile<CR>'],
             \               ['<C-f>', ':exec g:Lf_py "fileExplManager.quit()"<CR>:AsyncRun! grep -n -R <cword> .<CR>']] }
 
+
+" =======================================================
+" non true colors
+    set t_Co=256
+    let g:solarized_termcolors = 256
+    highlight link EasyMotionTarget Search
+    highlight link EasyMotionShade Comment
+    highlight link EasyMotionTarget2First Search
+    highlight link EasyMotionTarget2Second Search
+

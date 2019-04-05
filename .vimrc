@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 4
+let g:Theme = 1
 let g:Completion = 1  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
 let g:PythonPath = 'python'
 let g:ExecCommand = 'term ++close ipython -i %'
@@ -47,8 +47,7 @@ elseif g:Completion == 2
     Plug 'Shougo/neco-syntax'
     Plug 'Shougo/neco-vim', { 'for': 'vim' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-elseif g:Completion == 3
-    " lazy load doesn't seem to work
+elseif g:Completion == 3  " lazy load doesn't seem to work
     Plug 'roxma/nvim-yarp'
     Plug 'roxma/vim-hug-neovim-rpc'
     Plug 'ncm2/ncm2'
@@ -64,42 +63,24 @@ silent! call yankstack#setup()
 " }}}
 
 " ===================== Themes ========================== {{{
-if g:Theme >= 0 " True color
-    let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-    let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
-    set termguicolors
-else
-    set t_Co=256
-    let g:solarized_termcolors = 256
-    highlight link EasyMotionTarget Search
-    highlight link EasyMotionShade Comment
-    highlight link EasyMotionTarget2First Search
-    highlight link EasyMotionTarget2Second Search
-endif
-" Non true colors g:Theme < 0
-if g:Theme == -2
-    set background=light
-    colorscheme solarized
-elseif g:Theme == -1
+let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+set termguicolors
+set background=light
+if g:Theme < 0
     set background=dark
-    colorscheme one_modified
-elseif g:Theme == 0
-    set background=light
+endif
+if g:Theme == 0
     colorscheme solarized8_flat
 elseif g:Theme == 1
-    set background=light
     colorscheme PaperColor
 elseif g:Theme == 2
-    set background=light
     colorscheme snow
-elseif g:Theme == 3
-    set background=dark
+elseif g:Theme == -1
     colorscheme onedark
-elseif g:Theme == 4
-    set background=dark
+elseif g:Theme == -2
     colorscheme forest-night
-elseif g:Theme == 5
-    set background=dark
+elseif g:Theme == -3
     colorscheme molokai
 endif
 " }}}
@@ -385,8 +366,10 @@ endfunction
 let g:FoldOn = 0
 function! ToggleFold()
     if g:FoldOn == 0
+        set foldmethod=indent
         exec 'normal! zM'
     else
+        set foldmethod=marker
         exec 'normal! zR'
     endif
     let g:FoldOn = 1 - g:FoldOn
