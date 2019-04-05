@@ -25,8 +25,8 @@ Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
-Plug 'sillybun/vim-autodoc', { 'on': [] }  "for lazy load
-Plug 'Yggdroot/LeaderF'  "load on startup to record MRU
+Plug 'sillybun/vim-autodoc', { 'on': [] }
+Plug 'Yggdroot/LeaderF'  " load on startup to record MRU
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
@@ -117,10 +117,10 @@ map F <Plug>fanfingtastic_F
 map T <Plug>fanfingtastic_T
 map , <Plug>fanfingtastic_;
 map ;, <Plug>fanfingtastic_,
+nmap ? <Plug>(easymotion-bd-w)
+map <leader>f <Plug>(easymotion-bd-f)
 map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
-nmap S <Plug>(easymotion-bd-w)
-map <leader>f <Plug>(easymotion-bd-f)
 nmap ds <Plug>Dsurround
 nmap cs <Plug>Csurround
 nmap cS <Plug>CSurround
@@ -161,7 +161,7 @@ inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 nnoremap <C-b> :NERDTreeToggle<CR>
 nnoremap <C-p> :LeaderfFile<CR>
-nnoremap <C-g> :LeaderfFunctionAll<CR>
+nnoremap <C-g> :LeaderfRgInteractive<CR>
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
@@ -205,6 +205,7 @@ let &t_SR.="\e[4 q"
 let &t_EI.="\e[2 q"
 if &compatible | set nocompatible | endif
 set backspace=eol,start,indent
+set whichwrap+=<,>,[,]
 set mouse=a
 " set cursorline
 set numberwidth=2
@@ -297,7 +298,7 @@ function! LoadJediForDoc()
         let g:jedi#completions_enabled = 0
         let g:jedi#show_call_signatures = "2"
         let g:jedi#documentation_command = 'K'
-        let g:jedi#rename_command = '<leader>R'
+        let g:jedi#rename_command = '<leader><C-r>'
         let g:jedi#goto_command = '<leader>d'
         let g:jedi#usages_command = '<leader>a'
         call plug#load('jedi-vim')
@@ -521,8 +522,8 @@ endif
 " }}}
 
 " ==================== AutoComplete ===================== {{{
-" let g:ycm_path_to_python_interpreter='' " for ycmd, don't change
-let g:ycm_python_binary_path=g:PythonPath " for JediHTTP
+" let g:ycm_path_to_python_interpreter=''  " for ycmd, don't change
+let g:ycm_python_binary_path=g:PythonPath  " for JediHTTP
 let g:deoplete#sources#jedi#python_path=g:PythonPath
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
@@ -545,7 +546,7 @@ elseif g:Completion == 1  " YouCompleteMe
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     " let g:ycm_show_diagnostics_ui = 0
-    " let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }  "auto semantic complete
+    " let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }  " auto semantic complete
     let g:ycm_collect_identifiers_from_comments_and_strings = 1
     let g:ycm_complete_in_comments = 1
     let g:ycm_complete_in_strings = 1
@@ -625,7 +626,7 @@ if has('win32')
         let $PYTHONHOME = 'C:\Users\Josh\Anaconda3'
     endif
     " clear PYTHONHOME after vim is loaded
-    autocmd BufNew * let $PYTHONHOME=''
+    " autocmd BufNew * let $PYTHONHOME=''
     function! ActivatePyEnv(environment)
         if a:environment == ''
             silent exec '!venv & gvim '. expand('%:p')
