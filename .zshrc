@@ -100,6 +100,7 @@ source $ZSH/oh-my-zsh.sh
 
 source ~/.vim/others/common.sh
 
+ZSH_DISABLE_COMPFIX='true'
 autoload -U compinit && compinit -u  # for autocomplete
 unsetopt BG_NICE  # fix wsl bug
 
