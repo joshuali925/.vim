@@ -11,6 +11,7 @@ fi
 
 # User specific aliases and functions
 
+source ~/.vim/others/bashrc_wsl.sh
 source ~/.vim/others/common.sh
 source ~/.vim/others/git.sh
 
@@ -48,3 +49,11 @@ function cd() {
         fi
     fi
 }
+
+# create .bashrc in home directory, and put
+
+# source ~/.vim/.bashrc
+# alias db='mycli -ukite -p123 -hlocalhost -P3306'
+# alias you-get='you-get -o /mnt/z/'
+# alias code='code . &'
+# alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
