@@ -39,7 +39,7 @@ endif
 if g:Completion == 0
     Plug 'lifepillar/vim-mucomplete'
 elseif g:Completion == 1
-    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer' }
+    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
 elseif g:Completion == 2
     Plug 'roxma/nvim-yarp'
     Plug 'roxma/vim-hug-neovim-rpc'
