@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
 let g:Theme = 1
-let g:Completion = 1  " 0 = mucomplete, 1 = YouCompleteMe, 2 = deoplete, 3 = ncm2
+let g:Completion = 4  " 0: mucomplete, 1: YouCompleteMe, 2: deoplete, 3: ncm2, 4: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = 'term ++close ipython -i %'
 " }}}
@@ -57,6 +57,8 @@ elseif g:Completion == 3  " lazy load doesn't seem to work
     Plug 'ncm2/ncm2-syntax'
     Plug 'ncm2/ncm2-ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
     Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
+elseif g:Completion == 4
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
 endif
 call plug#end()
 silent! call yankstack#setup()
@@ -438,7 +440,7 @@ let g:VM_maps['Remove Last Region'] = '<C-p>'
 let g:VM_maps['Skip Region'] = '<C-x>'
 let g:VM_maps['Switch Mode'] = '<C-c>'
 let g:VM_maps['Case Setting'] = ''
-set wildignore+=*/tmp/*,*/\.git/*,*/\.oh-my-zsh/*,*/node_modules/*,*/venv/*,*/\.env/*
+set wildignore+=*/tmp/*,*/\.git/*,*/\.oh-my-zsh/*,*/node_modules/*,*/venv/*,*/\.env/*  " do NOT wildignore plugged
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
@@ -577,6 +579,34 @@ elseif g:Completion == 3  " ncm2
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+elseif g:Completion == 4
+    set shortmess+=c
+    set signcolumn=yes
+    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+    inoremap <silent><expr> <C-@> coc#refresh()
+    inoremap <silent><expr> <C-Space> coc#refresh()
+    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    xmap <C-f> <Plug>(coc-format-selected)
+    nnoremap <C-f> :call CocAction('format')<CR>
+    nmap <leader>a <Plug>(coc-fix-current)
+    nmap <leader>R <Plug>(coc-rename)
+    nmap <silent> <leader>d <Plug>(coc-definition)
+    nmap <silent> gy <Plug>(coc-type-definition)
+    nmap <silent> gi <Plug>(coc-implementation)
+    nmap <silent> gr <Plug>(coc-references)
+    imap <C-k> <Plug>(coc-snippets-expand)
+    let g:coc_snippet_next = '<Tab>'
+    let g:coc_snippet_prev = '<S-Tab>'
+    nnoremap <silent> K :call <SID>show_documentation()<CR>
+    function! s:show_documentation()
+        if (index(['vim','help'], &filetype) >= 0)
+            execute 'h '.expand('<cword>')
+        else
+            call CocAction('doHover')
+        endif
+    endfunction
 endif
 " }}}
 
