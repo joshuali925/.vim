@@ -185,6 +185,7 @@ nnoremap <leader>m :LeaderfMru<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
+nnoremap <leader>F :vertical sfind *
 nnoremap <leader>ta :Tabularize /
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -251,6 +252,7 @@ set undoreload=10000
 set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
 set viminfo+=n~/.cache/vim/viminfo
+set path=$PWD/**
 set encoding=utf-8
 set timeoutlen=1500
 set ttimeoutlen=40
@@ -266,10 +268,10 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
-    autocmd FileType c,cpp,java,js nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
-    autocmd FileType c,cpp,java,js inoremap <buffer> ;; <C-o>$;
+    autocmd FileType c,cpp,java,javascript inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
 augroup END
@@ -436,7 +438,7 @@ let g:VM_maps['Remove Last Region'] = '<C-p>'
 let g:VM_maps['Skip Region'] = '<C-x>'
 let g:VM_maps['Switch Mode'] = '<C-c>'
 let g:VM_maps['Case Setting'] = ''
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/vendor/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*
+set wildignore+=*/tmp/*,*/\.git/*,*/\.oh-my-zsh/*,*/node_modules/*,*/venv/*,*/\.env/*
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
