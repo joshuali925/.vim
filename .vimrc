@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
 let g:Theme = 1
-let g:Completion = 4  " 0: mucomplete, 1: YouCompleteMe, 2: deoplete, 3: ncm2, 4: coc
+let g:Completion = 4  " 0: mucomplete, 1: YCM, 2: deoplete, 3: ncm2, 4: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = 'term ++close ipython -i %'
 " }}}
@@ -147,7 +147,7 @@ nnoremap > >>
 vnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
-nnoremap K :call LoadJediForDoc()<CR>
+nnoremap K :call ShowDocs()<CR>
 inoremap <CR> <CR><Space><BS>
 nnoremap gf <C-w>gf
 nnoremap gp `[v`]
@@ -295,7 +295,7 @@ function! LoadRecordParameter()
     call plug#load('vim-autodoc')
     RecordParameter
 endfunction
-function! LoadJediForDoc()
+function! ShowDocs()
     if &filetype == 'python'
         let g:jedi#auto_initialization = 1
         let g:jedi#auto_vim_configuration = 0
@@ -544,7 +544,7 @@ if g:Completion == 0  " mucomplete
     let g:mucomplete#enable_auto_at_startup = 1
     let g:mucomplete#chains = {}
     let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
-elseif g:Completion == 1  " YouCompleteMe
+elseif g:Completion == 1  " YCM
     inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
@@ -579,30 +579,31 @@ elseif g:Completion == 3  " ncm2
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-elseif g:Completion == 4
+elseif g:Completion == 4  " coc
+    set updatetime=300
     set shortmess+=c
     set signcolumn=yes
     inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
     inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-    inoremap <silent><expr> <C-@> coc#refresh()
-    inoremap <silent><expr> <C-Space> coc#refresh()
+    inoremap <expr> <C-@> coc#refresh()
+    inoremap <expr> <C-Space> coc#refresh()
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     xmap <C-f> <Plug>(coc-format-selected)
     nnoremap <C-f> :call CocAction('format')<CR>
+    nnoremap K :call <SID>show_documentation()<CR>
     nmap <leader>a <Plug>(coc-fix-current)
     nmap <leader>R <Plug>(coc-rename)
-    nmap <silent> <leader>d <Plug>(coc-definition)
-    nmap <silent> gy <Plug>(coc-type-definition)
-    nmap <silent> gi <Plug>(coc-implementation)
-    nmap <silent> gr <Plug>(coc-references)
+    nmap <leader>d <Plug>(coc-definition)
+    nmap gy <Plug>(coc-type-definition)
+    nmap gi <Plug>(coc-implementation)
+    nmap gr <Plug>(coc-references)
     imap <C-k> <Plug>(coc-snippets-expand)
     let g:coc_snippet_next = '<Tab>'
     let g:coc_snippet_prev = '<S-Tab>'
-    nnoremap <silent> K :call <SID>show_documentation()<CR>
     function! s:show_documentation()
         if (index(['vim','help'], &filetype) >= 0)
-            execute 'h '.expand('<cword>')
+            exec 'h '.expand('<cword>')
         else
             call CocAction('doHover')
         endif

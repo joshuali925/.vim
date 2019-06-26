@@ -30,6 +30,7 @@ bind '"\e[B": history-search-forward'
 bind '"\eOA": history-search-backward'
 bind '"\eOB": history-search-forward'
 
+alias -- -='cd -'
 alias ~='cd ~'
 alias ..='cd ..'
 alias ...='cd ../..'
