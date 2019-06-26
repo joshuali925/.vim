@@ -33,8 +33,8 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'shougo/echodoc.vim'
 Plug 'davidhalter/jedi-vim', { 'on': [] }
 if g:Completion >= 0
-    Plug 'sirver/ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
-    Plug 'honza/vim-snippets', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
+    Plug 'sirver/ultisnips'
+    Plug 'honza/vim-snippets'
 endif
 if g:Completion == 0
     Plug 'lifepillar/vim-mucomplete'
