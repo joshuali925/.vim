@@ -1154,7 +1154,8 @@ fun! s:apply_syntax_highlightings()
   exec 'hi MoreMsg' . s:fg_olive
   exec 'hi Question' . s:fg_olive
   exec 'hi WarningMsg' . s:fg_pink
-  exec 'hi MatchParen' . s:fg_matchparen_bg . s:bg_matchparen_fg
+  " exec 'hi MatchParen' . s:fg_matchparen_fg . s:bg_matchparen_bg
+  exec 'hi MatchParen' . s:fg_matchparen_bg . s:fg_matchparen_fg
   exec 'hi Folded' . s:fg_folded_fg . s:bg_folded_bg
   exec 'hi WildMenu' . s:fg_wildmenu_fg . s:bg_wildmenu_bg . s:ft_bold
 
