@@ -63,6 +63,8 @@ ENABLE_CORRECTION="true"
 plugins=(
     git
     zsh-autosuggestions
+    zsh-history-substring-search
+    zsh-syntax-highlighting
     # wd
 )
 
