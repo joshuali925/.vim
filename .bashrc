@@ -17,7 +17,9 @@ source ~/.vim/others/git.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
 export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
+# better ls directory color
 LS_COLORS=$LS_COLORS:'di=0;36'
+# disable Ctrl-S freeze
 stty -ixon
 shopt -s autocd
 shopt -s cdspell
@@ -51,10 +53,8 @@ function cd() {
     fi
 }
 
-# create .bashrc in home directory, and put
-
-# source ~/.vim/.bashrc
-# alias db='mycli -ukite -p123 -hlocalhost -P3306'
-# alias you-get='you-get -o /mnt/z/'
-# alias code='code . &'
-# alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
+# WSL specific
+alias db='mycli -ukite -p123 -hlocalhost -P3306'
+alias you-get='you-get -o /mnt/z/'
+alias code='code . &'
+alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
