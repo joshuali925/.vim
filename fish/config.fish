@@ -17,3 +17,14 @@ alias apt='sudo apt'
 alias which='type -a'
 
 function echo_dir --on-variable PWD; ls -CF; end;
+
+set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
+set PYTHONSTARTUP $HOME/.vim/others/.pythonrc
+
+
+# fix color
+for color_variable in (set -n | grep -e pure_color_)
+    set --erase $color_variable
+end
+set --global pure_color_primary (set_color cyan)
+source ~/.vim/fish/conf.d/pure.fish
