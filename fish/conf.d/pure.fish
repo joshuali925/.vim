@@ -1,7 +1,7 @@
 set --universal pure_version 2.1.8 # used for bug report
 
 # Base colors
-_pure_set_default pure_color_primary (set_color cyan)
+_pure_set_default pure_color_primary (set_color blue)
 _pure_set_default pure_color_info (set_color cyan)
 _pure_set_default pure_color_mute (set_color brblack)
 _pure_set_default pure_color_success (set_color magenta)
