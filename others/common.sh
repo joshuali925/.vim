@@ -16,6 +16,7 @@ alias gacp='git add -A && git commit -m "update" && git push origin master'
 alias venv='source venv/bin/activate'
 alias service='sudo service'
 alias apt='sudo apt'
+alias which='type -a'  # zsh's which also works
 
 # alias f='a(){ find . -iname *$@*; }; a'
 # alias cc='a(){ gcc $1.c -o $1 -g && ./$@; }; a'

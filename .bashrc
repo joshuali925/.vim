@@ -34,7 +34,6 @@ alias ~='cd ~'
 alias -- -='cd -'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias which='type -a'
 
 # function cd { builtin cd $@ && ls -CF; }
 function cd() {
