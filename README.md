@@ -36,4 +36,5 @@ git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
 ln -s .vim/.zshrc ~/.zshrc
 ln -s .vim/.bashrc ~/.bashrc
+ln -s ~/.vim/fish ~/.config/fish
 ```
