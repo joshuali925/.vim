@@ -1,14 +1,19 @@
 # To install extensions, run
 # fisher add jethrokuan/z rafaelrinaldi/pure
 
+# RUN ONCE AT SETUP
+# set -Ux PYTHONSTARTUP $HOME/.vim/others/.pythonrc
+# set Z_DATA $HOME/.local/share/z/data
+# set Z_DATA_DIR $HOME/.local/share/z
+# set Z_EXCLUDE $HOME
+
 # cd triggers ls
 function echo_dir --on-variable PWD; ls -CF; end;
 
 # add path
 set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 
-# run once is enough (adds to fish_variables)
-# set -Ux PYTHONSTARTUP $HOME/.vim/others/.pythonrc
+# already added to fish_variables
 # abbr -a mkdir 'mkdir -p'
 # abbr -a ll 'ls -AlhF'
 # abbr -a la 'ls -AF'

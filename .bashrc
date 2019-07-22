@@ -1,5 +1,6 @@
 # .bashrc
 # [ -t 1 ] && exec zsh
+# [ -t 1 ] && exec fish
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
