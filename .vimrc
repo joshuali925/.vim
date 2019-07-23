@@ -191,6 +191,7 @@ nnoremap <leader>F :vertical sfind *
 nnoremap <leader>ta :Tabularize /
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
+inoremap <leader><leader>w <leader><Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :w !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
@@ -463,6 +464,12 @@ let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
+" built in :Lexplore<CR> settings, use NERDTree instead
+let g:netrw_dirhistmax=0
+let g:netrw_banner=0
+let g:netrw_browse_split=2
+let g:netrw_winsize=20
+let g:netrw_liststyle=3
 " }}}
 
 " ==================== Execute code ===================== {{{
