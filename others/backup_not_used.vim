@@ -7,15 +7,6 @@ let g:gutentags_cache_dir = expand('~/.cache/vim')
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q', '--c++-kinds=+px', '--c-kinds=+px']
 
 " =======================================================
-" use NERD_tree instead
-" built in :Lexplore<CR> settings
-let g:netrw_dirhistmax=0
-let g:netrw_banner=0
-let g:netrw_browse_split=2
-let g:netrw_winsize=20
-let g:netrw_liststyle=3
-
-" =======================================================
 " use <C-hjkl> instead
 nnoremap <leader>h :call ToggleFileSplit()<CR>
 " =================== Toggle split ======================
