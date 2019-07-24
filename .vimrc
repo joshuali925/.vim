@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 1
+let g:Theme = -1
 let g:Completion = 4  " 0: mucomplete, 1: YCM, 2: deoplete, 3: ncm2, 4: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = 'term ++close ipython -i %'
@@ -475,19 +475,19 @@ let g:netrw_liststyle=3
 " ==================== Execute code ===================== {{{
 autocmd FileType * let b:args = ''
 command! -complete=file -nargs=* SetArgs call SetArgs(<q-args>)
-function! SetArgs(cmdline)
-    if a:cmdline == ''
+function! SetArgs(command)
+    if a:command == ''
         let b:args = ''
     else
-        let b:args = ' '. a:cmdline
+        let b:args = ' '. a:command
     endif
 endfunction
 let g:OutputCount = 1
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
-function! RunShellCommand(cmdline)
-    let expanded_cmdline = substitute(a:cmdline, './%<', './'. fnameescape(expand('%<')), '')
-    let expanded_cmdline = substitute(expanded_cmdline, '%<', fnameescape(expand('%<')), '')
-    let expanded_cmdline = substitute(expanded_cmdline, '%', fnameescape(expand('%')), '')
+function! RunShellCommand(command)
+    let expanded_command = substitute(a:command, './%<', './'. fnameescape(expand('%<')), '')
+    let expanded_command = substitute(expanded_command, '%<', fnameescape(expand('%<')), '')
+    let expanded_command = substitute(expanded_command, '%', fnameescape(expand('%')), '')
     let curr_bufnr = bufwinnr('%')
     let win_left = winnr('$')
     while win_left>1 && bufname('%')!~'[Output_'
@@ -505,9 +505,9 @@ function! RunShellCommand(cmdline)
         nnoremap <buffer> q :q<CR>
         nnoremap <buffer> w :set wrap!<CR>
     endif
-    call setline(1, 'Run: '. expanded_cmdline)
+    call setline(1, 'Run: '. expanded_command)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
-    exec '$read !'. expanded_cmdline
+    exec '$read !'. expanded_command
     setlocal nomodifiable
     exec curr_bufnr. 'wincmd w'
 endfunction
@@ -634,6 +634,17 @@ nnoremap <leader>tv :vertical terminal ++close<CR>
 nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
 nnoremap <leader>te V:call SendToTerminal()<CR>$
 vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
+nnoremap <leader>ll :call SendCommendToTerminal('leetcode list')<CR>
+nnoremap <leader>lg :call SendCommendToTerminal('leetcode show -g -l python3 -x 0')<CR>
+nnoremap <leader>lt :call SendCommendToTerminal('leetcode test '. expand('%:t'))<CR>
+nnoremap <leader>ls :call SendCommendToTerminal('leetcode submit '. expand('%:t'))<CR>
+function! SendCommendToTerminal(command)
+    let buff_n = term_list()
+    if len(buff_n) > 0
+        let buff_n = buff_n[0] " sends to most recently opened terminal
+        call term_sendkeys(buff_n, a:command. "\<CR>")
+    endif
+endfunction
 function! SendToTerminal()
     let buff_n = term_list()
     if len(buff_n) > 0

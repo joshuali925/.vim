@@ -17,6 +17,7 @@ SETUVAR __fish_init_3_x:\x1d
 SETUVAR _fish_abbr__2E_2E_2E_:cd\x20\x2e\x2e/\x2e\x2e
 SETUVAR _fish_abbr_apt:sudo\x20apt
 SETUVAR _fish_abbr_bpython:bpython\x20\x2di
+SETUVAR _fish_abbr_condabase:source\x20/home/kite/miniconda3/etc/fish/conf\x2ed/conda\x2efish
 SETUVAR _fish_abbr_g:git
 SETUVAR _fish_abbr_ga:git\x20add
 SETUVAR _fish_abbr_gaa:git\x20add\x20\x2d\x2dall
