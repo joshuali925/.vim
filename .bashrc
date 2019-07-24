@@ -1,6 +1,5 @@
 # .bashrc
 # [ -t 1 ] && exec zsh
-# [ -t 1 ] && exec fish
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
@@ -18,10 +17,8 @@ source ~/.vim/others/git.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
 export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
-# better ls directory color
-LS_COLORS=$LS_COLORS:'di=0;36'
-# disable Ctrl-S freeze
-stty -ixon
+LS_COLORS=$LS_COLORS:'di=0;36'  # better ls directory color
+stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
 

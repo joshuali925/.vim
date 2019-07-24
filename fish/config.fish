@@ -1,11 +1,11 @@
-# To install extensions, run
-# fisher add jethrokuan/z rafaelrinaldi/pure
-
 # RUN ONCE AT SETUP
 # set -Ux PYTHONSTARTUP $HOME/.vim/others/.pythonrc
 # set Z_DATA $HOME/.local/share/z/data
 # set Z_DATA_DIR $HOME/.local/share/z
 # set Z_EXCLUDE $HOME
+
+# install extensions, should be installed already
+# fisher add jethrokuan/z rafaelrinaldi/pure
 
 # cd triggers ls
 function echo_dir --on-variable PWD; ls -CF; end;
