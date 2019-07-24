@@ -11,7 +11,8 @@
 function echo_dir --on-variable PWD; ls -CF; end;
 
 # add path
-set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
+set -gx PATH $HOME/.local/bin $HOME/.vim/bin $HOME/miniconda3/bin $PATH
+# abbr -a condabase 'source /home/kite/miniconda3/etc/fish/conf.d/conda.fish'
 
 # already added to fish_variables
 # abbr -a mkdir 'mkdir -p'
