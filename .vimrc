@@ -464,7 +464,7 @@ let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
-" built in :Lexplore<CR> settings, use NERDTree instead
+" built in :Lexplore<CR> settings, replaced by NERDTree
 let g:netrw_dirhistmax=0
 let g:netrw_banner=0
 let g:netrw_browse_split=2
