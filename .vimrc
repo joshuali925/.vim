@@ -634,17 +634,6 @@ nnoremap <leader>tv :vertical terminal ++close<CR>
 nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
 nnoremap <leader>te V:call SendToTerminal()<CR>$
 vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
-nnoremap <leader>ll :call SendCommendToTerminal('leetcode list')<CR>
-nnoremap <leader>lg :call SendCommendToTerminal('leetcode show -g -l python3 -x 0')<CR>
-nnoremap <leader>lt :call SendCommendToTerminal('leetcode test '. expand('%:t'))<CR>
-nnoremap <leader>ls :call SendCommendToTerminal('leetcode submit '. expand('%:t'))<CR>
-function! SendCommendToTerminal(command)
-    let buff_n = term_list()
-    if len(buff_n) > 0
-        let buff_n = buff_n[0] " sends to most recently opened terminal
-        call term_sendkeys(buff_n, a:command. "\<CR>")
-    endif
-endfunction
 function! SendToTerminal()
     let buff_n = term_list()
     if len(buff_n) > 0
