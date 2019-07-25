@@ -1,4 +1,13 @@
 " =======================================================
+" sends commend to terminal
+function! SendCommendToTerminal(command)
+    let buff_n = term_list()
+    if len(buff_n) > 0
+        let buff_n = buff_n[0] " sends to most recently opened terminal
+        call term_sendkeys(buff_n, a:command. "\<CR>")
+    endif
+endfunction
+" =======================================================
 " glutentags - too slow, tagfile too large
 Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_project_root = ['.project', '.root']
