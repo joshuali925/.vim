@@ -14,6 +14,7 @@ SETUVAR Z_EXCLUDE:/home/kite
 SETUVAR __fish_init_2_39_8:\x1d
 SETUVAR __fish_init_2_3_0:\x1d
 SETUVAR __fish_init_3_x:\x1d
+SETUVAR _fish_abbr__2D_:cd\x20\x2d
 SETUVAR _fish_abbr__2E_2E_2E_:cd\x20\x2e\x2e/\x2e\x2e
 SETUVAR _fish_abbr_apt:sudo\x20apt
 SETUVAR _fish_abbr_bpython:bpython\x20\x2di

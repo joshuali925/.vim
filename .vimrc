@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -1
+let g:Theme = 0
 let g:Completion = 4  " 0: mucomplete, 1: YCM, 2: deoplete, 3: ncm2, 4: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = 'term ++close ipython -i %'
@@ -11,7 +11,8 @@ call plug#begin('~/.vim/plugged')
 " Plug 'w0rp/ale'
 " Plug 'sheerun/vim-polyglot'
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
-Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
+Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
@@ -161,7 +162,7 @@ vnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
 nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
-nnoremap <C-b> :NERDTreeToggle<CR>
+nnoremap <C-b> :NERDTreeTabsToggle<CR>
 nnoremap <C-p> :LeaderfFile<CR>
 nnoremap <C-g> :LeaderfRgInteractive<CR>
 nnoremap <C-h> <C-w>h
