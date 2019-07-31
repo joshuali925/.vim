@@ -30,6 +30,7 @@ source /home/kite/miniconda3/etc/fish/conf.d/conda.fish
 # abbr -a service 'sudo service'
 # abbr -a apt 'sudo apt'
 # abbr -a which 'type -a'
+# abbr -a - 'cd -'
 # abbr -a ... 'cd ../..'
 
 # abbr -a g 'git'
