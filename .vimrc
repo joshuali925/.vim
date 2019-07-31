@@ -60,6 +60,8 @@ elseif g:Completion == 3  " lazy load doesn't seem to work
     Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
 elseif g:Completion == 4
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    " :CocInstall coc-git coc-snippets coc-highlight coc-tsserver coc-html coc-css coc-emmet
+    " if doesn't work, use cd ~/.config/coc/extensions && yarn add coc...
 endif
 call plug#end()
 silent! call yankstack#setup()
