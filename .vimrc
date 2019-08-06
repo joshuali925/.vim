@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 0
+let g:Theme = -1
 let g:Completion = 4  " 0: mucomplete, 1: YCM, 2: deoplete, 3: ncm2, 4: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = 'term ++close ipython -i %'
@@ -10,6 +10,7 @@ call plug#begin('~/.vim/plugged')
 " Plug 'mhinz/vim-startify'
 " Plug 'w0rp/ale'
 " Plug 'sheerun/vim-polyglot'
+Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList'] }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
@@ -473,6 +474,8 @@ let g:netrw_banner=0
 let g:netrw_browse_split=2
 let g:netrw_winsize=20
 let g:netrw_liststyle=3
+let g:leetcode_solution_filetype='python3'
+let g:leetcode_username='joshuali925'
 " }}}
 
 " ==================== Execute code ===================== {{{
