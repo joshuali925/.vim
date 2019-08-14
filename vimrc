@@ -1,8 +1,8 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -1
+let g:Theme = 0
 let g:Completion = 4  " 0: mucomplete, 1: YCM, 2: deoplete, 3: ncm2, 4: coc
 let g:PythonPath = 'python'
-let g:ExecCommand = 'term ++close ipython -i %'
+let g:ExecCommand = ''
 " }}}
 
 " ===================== Plugins ========================= {{{
@@ -475,7 +475,7 @@ let g:netrw_browse_split=2
 let g:netrw_winsize=20
 let g:netrw_liststyle=3
 let g:leetcode_solution_filetype='python3'
-let g:leetcode_username='joshuali925'
+let g:leetcode_username='joshuali925'  " keyring password = 1
 " }}}
 
 " ==================== Execute code ===================== {{{
@@ -526,6 +526,8 @@ function! GetRunCommand()
         return 'g++ % -o %< -g && ./%<'. b:args
     elseif &filetype == 'java'
         return 'javac % && java %<'. b:args
+    elseif &filetype == 'javascript'
+        return 'node %'. b:args
     endif
     return ''
 endfunction
