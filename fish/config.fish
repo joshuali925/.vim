@@ -22,7 +22,7 @@ source /home/kite/miniconda3/etc/fish/conf.d/conda.fish
 # abbr -a l 'ls -CF'
 # abbr -a size 'du -h --max-depth=1 | sort -hr'
 # abbr -a vi 'vim'
-# abbr -a vimm 'vim ~/.vimrc'
+# abbr -a vimm 'vim ~/.vim/vimrc'
 # abbr -a vims 'vim -c "source ~/.cache/vim/session.vim"'
 # abbr -a bpython 'bpython -i'
 # abbr -a gacp 'git add -A && git commit -m "update" && git push origin master'

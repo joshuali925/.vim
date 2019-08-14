@@ -10,7 +10,6 @@ pip install --user flake8 yapf rope neovim pynvim jedi
 ```bash
 cd ~
 mkdir -p .cache/vim/undo
-ln -s .vim/.vimrc ~/.vimrc
 vim -c "PlugInstall" -c "qa"
 ```
 
