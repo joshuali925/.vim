@@ -150,3 +150,9 @@ function! LoadRecordParameter()
     RecordParameter
 endfunction
     call g:quickmenu#append('Record Python Parameter', 'call LoadRecordParameter()', '', 'python')
+
+" =======================================================
+" leaderf
+let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] 
+            \        'Mru': [['<C-p>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfRgInteractive<CR>'],
+            \               ['<C-f>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfFunctionAll<CR>']] }

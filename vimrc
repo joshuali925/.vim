@@ -59,9 +59,9 @@ elseif g:Completion == 3  " lazy load doesn't seem to work
     Plug 'ncm2/ncm2-ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
     Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
 elseif g:Completion == 4
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
     " :CocInstall coc-git coc-snippets coc-highlight coc-tsserver coc-html coc-css coc-emmet
     " if doesn't work, use cd ~/.config/coc/extensions && yarn add coc-...
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
 endif
 call plug#end()
 silent! call yankstack#setup()
@@ -137,7 +137,7 @@ map T <Plug>fanfingtastic_T
 map , <Plug>fanfingtastic_;
 map ;, <Plug>fanfingtastic_,
 nmap ? <Plug>(easymotion-bd-w)
-map <leader>f <Plug>(easymotion-bd-f)
+map S <Plug>(easymotion-bd-f)
 map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
 nmap ds <Plug>Dsurround
@@ -180,7 +180,6 @@ inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 nnoremap <C-b> :NERDTreeTabsToggle<CR>
 nnoremap <C-p> :LeaderfFile<CR>
-nnoremap <C-g> :LeaderfRgInteractive<CR>
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
@@ -200,7 +199,13 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
-nnoremap <leader>m :LeaderfMru<CR>
+nnoremap <leader>ff :LeaderfFile<CR>
+nnoremap <leader>fm :LeaderfMru<CR>
+nnoremap <leader>fb :LeaderfBufferAll<CR>
+nnoremap <leader>fu :LeaderfFunctionAll<CR>
+nnoremap <leader>fg :LeaderfRgInteractive<CR>
+nnoremap <leader>fl :LeaderfLineAll<CR>
+nnoremap <leader>fa :LeaderfSelf<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
@@ -326,7 +331,7 @@ function! ShowDocs()
     endif
 endfunction
 function! LoadQuickmenu()
-    nnoremap <F1> :call quickmenu#toggle(0)<CR>
+    nnoremap <F1> :call quickmenu#toggle(0) <bar> set showcmd<CR>
     call plug#load('quickmenu.vim')
     let g:quickmenu_options = "HL"
     call g:quickmenu#reset()
@@ -346,7 +351,6 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()')
     call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()')
     call g:quickmenu#toggle(0)
-    set showcmd
 endfunction
 " }}}
 
@@ -460,11 +464,8 @@ let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_ReverseOrder = 1
 let g:Lf_ShortcutF = '<C-p>'
-" <C-p>: File; <leader>m: MRU, [2<C-p>: Rip Grep | 2<C-f>: Functions]
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
-let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']],
-            \        'Mru': [['<C-p>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfRgInteractive<CR>'],
-            \               ['<C-f>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfFunctionAll<CR>']] }
+let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_CacheDirectory = expand('~/.cache/')
 let g:tagbar_compact = 1
