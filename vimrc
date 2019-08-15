@@ -346,6 +346,7 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()')
     call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()')
     call g:quickmenu#toggle(0)
+    set showcmd
 endfunction
 " }}}
 
