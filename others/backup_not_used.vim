@@ -142,3 +142,11 @@ let g:Lf_NormalMap = { 'File': [['<C-p>', ':exec g:Lf_py "fileExplManager.quit()
     highlight link EasyMotionTarget2First Search
     highlight link EasyMotionTarget2Second Search
 
+" =======================================================
+" autodoc
+Plug 'sillybun/vim-autodoc', { 'on': [] }
+function! LoadRecordParameter()
+    call plug#load('vim-autodoc')
+    RecordParameter
+endfunction
+    call g:quickmenu#append('Record Python Parameter', 'call LoadRecordParameter()', '', 'python')

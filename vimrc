@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 0
+let g:Theme = -3
 let g:Completion = 4  " 0: mucomplete, 1: YCM, 2: deoplete, 3: ncm2, 4: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -27,7 +27,6 @@ Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
-Plug 'sillybun/vim-autodoc', { 'on': [] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
@@ -62,15 +61,15 @@ elseif g:Completion == 3  " lazy load doesn't seem to work
 elseif g:Completion == 4
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
     " :CocInstall coc-git coc-snippets coc-highlight coc-tsserver coc-html coc-css coc-emmet
-    " if doesn't work, use cd ~/.config/coc/extensions && yarn add coc...
+    " if doesn't work, use cd ~/.config/coc/extensions && yarn add coc-...
 endif
 call plug#end()
 silent! call yankstack#setup()
 " }}}
 
 " ===================== Themes ========================== {{{
-let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+let &t_8f="\<ESC>[38;2;%lu;%lu;%lum"
+let &t_8b="\<ESC>[48;2;%lu;%lu;%lum"
 set termguicolors
 set background=light
 if g:Theme < 0
@@ -81,13 +80,27 @@ if g:Theme == 0
 elseif g:Theme == 1
     colorscheme PaperColor
 elseif g:Theme == 2
-    colorscheme snow
+    colorscheme two-firewatch
+elseif g:Theme == 3
+    colorscheme one
+elseif g:Theme == 4
+    let ayucolor="light"
+    colorscheme ayu
 elseif g:Theme == -1
     colorscheme onedark
 elseif g:Theme == -2
     colorscheme forest-night
 elseif g:Theme == -3
+    let ayucolor="mirage"
+    colorscheme ayu
+elseif g:Theme == -4
+    colorscheme two-firewatch
+elseif g:Theme == -5
+    colorscheme solarized8_flat
+elseif g:Theme == -6
     colorscheme molokai
+elseif g:Theme == -7
+    colorscheme one
 endif
 " }}}
 
@@ -143,7 +156,7 @@ nnoremap - $
 vnoremap - $h
 noremap <Down> gj
 noremap <Up> gk
-xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
 nnoremap Q @q
 nnoremap < <<
 vnoremap < <gv
@@ -296,10 +309,6 @@ function! LoadVisualMulti()
     xmap <C-n> <Plug>(VM-Find-Subword-Under)
     call plug#load('vim-visual-multi')
 endfunction
-function! LoadRecordParameter()
-    call plug#load('vim-autodoc')
-    RecordParameter
-endfunction
 function! ShowDocs()
     if &filetype == 'python'
         let g:jedi#auto_initialization = 1
@@ -327,7 +336,6 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Insert Time', "put=strftime('%x %X')")
     call g:quickmenu#append('Git Diff', 'Gdiff', 'use fugitive Gdiff on current document')
     call g:quickmenu#append('Git Status', 'Gstatus', 'use fugitive Gstatus on current document')
-    call g:quickmenu#append('Record Python Parameter', 'call LoadRecordParameter()', '', 'python')
     call g:quickmenu#append('# Toggle', '')
     call g:quickmenu#append('NERDTree', 'NERDTreeToggle')
     call g:quickmenu#append('Undo Tree', 'UndotreeToggle')
