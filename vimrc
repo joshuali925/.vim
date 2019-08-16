@@ -31,11 +31,14 @@ Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record M
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
+Plug 'kana/vim-textobj-user'
+Plug 'rhysd/vim-textobj-anyblock'
+Plug 'sgur/vim-textobj-parameter'
 Plug 'shougo/echodoc.vim'
-Plug 'davidhalter/jedi-vim', { 'on': [] }
 if g:Completion >= 0
     Plug 'sirver/ultisnips'
     Plug 'honza/vim-snippets'
+    Plug 'davidhalter/jedi-vim', { 'on': [] }
 endif
 if g:Completion == 0
     Plug 'lifepillar/vim-mucomplete'
