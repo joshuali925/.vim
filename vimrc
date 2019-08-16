@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
 let g:Theme = -3
-let g:Completion = 4  " 0: mucomplete, 1: YCM, 2: deoplete, 3: ncm2, 4: coc
+let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
 " }}}
@@ -42,23 +42,6 @@ if g:Completion == 0
 elseif g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
 elseif g:Completion == 2
-    Plug 'roxma/nvim-yarp'
-    Plug 'roxma/vim-hug-neovim-rpc'
-    Plug 'Shougo/deoplete.nvim'
-    Plug 'Shougo/neco-syntax'
-    Plug 'Shougo/neco-vim', { 'for': 'vim' }
-    Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-elseif g:Completion == 3  " lazy load doesn't seem to work
-    Plug 'roxma/nvim-yarp'
-    Plug 'roxma/vim-hug-neovim-rpc'
-    Plug 'ncm2/ncm2'
-    Plug 'ncm2/ncm2-bufword'
-    Plug 'ncm2/ncm2-path'
-    Plug 'Shougo/neco-syntax'
-    Plug 'ncm2/ncm2-syntax'
-    Plug 'ncm2/ncm2-ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
-    Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
-elseif g:Completion == 4
     " :CocInstall coc-git coc-snippets coc-highlight coc-tsserver coc-html coc-css coc-emmet
     " if doesn't work, use cd ~/.config/coc/extensions && yarn add coc-...
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -71,37 +54,27 @@ silent! call yankstack#setup()
 let &t_8f="\<ESC>[38;2;%lu;%lu;%lum"
 let &t_8b="\<ESC>[48;2;%lu;%lu;%lum"
 set termguicolors
+let g:ayucolor='light'
 set background=light
 if g:Theme < 0
+    let g:ayucolor='mirage'
     set background=dark
 endif
-if g:Theme == 0
-    colorscheme solarized8_flat
-elseif g:Theme == 1
-    colorscheme PaperColor
-elseif g:Theme == 2
-    colorscheme two-firewatch
-elseif g:Theme == 3
-    colorscheme one
-elseif g:Theme == 4
-    let ayucolor="light"
-    colorscheme ayu
-elseif g:Theme == -1
-    colorscheme onedark
-elseif g:Theme == -2
-    colorscheme forest-night
-elseif g:Theme == -3
-    let ayucolor="mirage"
-    colorscheme ayu
-elseif g:Theme == -4
-    colorscheme two-firewatch
-elseif g:Theme == -5
-    colorscheme solarized8_flat
-elseif g:Theme == -6
-    colorscheme molokai
-elseif g:Theme == -7
-    colorscheme one
-endif
+function! SetTheme()
+    let l:Theme_list = {}
+    let l:Theme_list[0] = 'solarized8_flat'
+    let l:Theme_list[1] = 'PaperColor'
+    let l:Theme_list[2] = 'two-firewatch'
+    let l:Theme_list[3] = 'one'
+    let l:Theme_list[4] = 'ayu'
+    let l:Theme_list[-1] = 'onedark'
+    let l:Theme_list[-2] = 'forest-night'
+    let l:Theme_list[-3] = 'ayu'
+    let l:Theme_list[-4] = 'two-firewatch'
+    let l:Theme_list[-5] = 'molokai'
+    exec 'colorscheme '. get(l:Theme_list, g:Theme, 'desert')
+endfunction
+call SetTheme()
 " }}}
 
 " ====================== Shortcuts ====================== {{{
@@ -179,7 +152,6 @@ nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 vnoremap <C-c> <Esc>
 nnoremap <C-b> :NERDTreeTabsToggle<CR>
-nnoremap <C-p> :LeaderfFile<CR>
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
@@ -289,7 +261,7 @@ set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c/%{len(getl
 " }}}
 
 " ====================== Autocmd ======================== {{{
-augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
+augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf_ResetArgs
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
@@ -299,6 +271,7 @@ augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf
     autocmd FileType c,cpp,java,javascript inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
+    autocmd FileType * let b:args = ''
 augroup END
 " }}}
 
@@ -365,11 +338,11 @@ endfunction
 " ======================= Macro ========================= {{{
 function! ExecuteMacroOverVisualRange()
     echo '@'.getcmdline()
-    exec ":'<,'>normal! @".nr2char(getchar())
+    exec ":'<,'>normal! @". nr2char(getchar())
 endfunction
 function! EditRegister() abort
-    let r = nr2char(getchar())
-    call feedkeys("q:ilet @". r. " = \<C-r>\<C-r>=string(@". r. ")\<CR>\<Esc>0f'", 'n')
+    let l:r = nr2char(getchar())
+    call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
 endfunction
 " }}}
 
@@ -473,13 +446,11 @@ let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
 let g:tagbar_iconchars = [ '+', '-' ]
-let g:echodoc_enable_at_startup = 1
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
-" built in :Lexplore<CR> settings, replaced by NERDTree
-let g:netrw_dirhistmax=0
+let g:netrw_dirhistmax=0  " built in :Lexplore<CR> settings, replaced by NERDTree
 let g:netrw_banner=0
 let g:netrw_browse_split=2
 let g:netrw_winsize=20
@@ -489,9 +460,8 @@ let g:leetcode_username='joshuali925'  " keyring password = 1
 " }}}
 
 " ==================== Execute code ===================== {{{
-autocmd FileType * let b:args = ''
 command! -complete=file -nargs=* SetArgs call SetArgs(<q-args>)
-function! SetArgs(command)
+function! SetArgs(command)  " :SetArgs <args...><CR>, all execution will use args
     if a:command == ''
         let b:args = ''
     else
@@ -501,14 +471,14 @@ endfunction
 let g:OutputCount = 1
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
 function! RunShellCommand(command)
-    let expanded_command = substitute(a:command, './%<', './'. fnameescape(expand('%<')), '')
-    let expanded_command = substitute(expanded_command, '%<', fnameescape(expand('%<')), '')
-    let expanded_command = substitute(expanded_command, '%', fnameescape(expand('%')), '')
-    let curr_bufnr = bufwinnr('%')
-    let win_left = winnr('$')
-    while win_left>1 && bufname('%')!~'[Output_'
+    let l:expanded_command = substitute(a:command, './%<', './'. fnameescape(expand('%<')), '')
+    let l:expanded_command = substitute(l:expanded_command, '%<', fnameescape(expand('%<')), '')
+    let l:expanded_command = substitute(l:expanded_command, '%', fnameescape(expand('%')), '')
+    let l:curr_bufnr = bufwinnr('%')
+    let l:win_left = winnr('$')
+    while l:win_left>1 && bufname('%')!~'[Output_'
         exec 'wincmd w'
-        let win_left = win_left - 1
+        let l:win_left = l:win_left - 1
     endwhile
     if bufname('%') =~ '[Output_'
         setlocal modifiable
@@ -521,39 +491,33 @@ function! RunShellCommand(command)
         nnoremap <buffer> q :q<CR>
         nnoremap <buffer> w :set wrap!<CR>
     endif
-    call setline(1, 'Run: '. expanded_command)
+    call setline(1, 'Run: '. l:expanded_command)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
-    exec '$read !'. expanded_command
+    exec '$read !'. l:expanded_command
     setlocal nomodifiable
-    exec curr_bufnr. 'wincmd w'
+    exec l:curr_bufnr. 'wincmd w'
 endfunction
 function! GetRunCommand()
-    if &filetype == 'python'
-        return g:PythonPath. ' %'. b:args
-    elseif &filetype == 'c'
-        return 'gcc % -o %< -g && ./%<'. b:args
-    elseif &filetype == 'cpp'
-        return 'g++ % -o %< -g && ./%<'. b:args
-    elseif &filetype == 'java'
-        return 'javac % && java %<'. b:args
-    elseif &filetype == 'javascript'
-        return 'node %'. b:args
-    endif
-    return ''
+    let l:run_command = {}
+    let l:run_command['python'] = g:PythonPath. ' %'
+    let l:run_command['c'] = 'gcc % -o %< -g && ./%<'
+    let l:run_command['cpp'] = 'g++ % -o %< -g && ./%<'
+    let l:run_command['java'] = 'javac % && java %<'
+    let l:run_command['javascript'] = 'node %'
+    return get(l:run_command, &filetype, ''). b:args
 endfunction
 imap <leader>r <Esc><leader>r
 if g:ExecCommand == ''
     nmap <leader>r <F11>
 else
-    " nmap <leader>r :wall <bar> exec 'AsyncRun '. g:ExecCommand<CR>
-    nmap <leader>r :wall <bar> exec g:ExecCommand<CR>
+    nnoremap <leader>r :wall <bar> exec g:ExecCommand<CR>
 endif
 " }}}
 
 " ==================== AutoComplete ===================== {{{
 " let g:ycm_path_to_python_interpreter=''  " for ycmd, don't change
 let g:ycm_python_binary_path=g:PythonPath  " for JediHTTP
-let g:deoplete#sources#jedi#python_path=g:PythonPath
+let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
@@ -584,27 +548,7 @@ elseif g:Completion == 1  " YCM
     " '/path/to/include'
     let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'
     let g:echodoc#enable_force_overwrite = 1
-elseif g:Completion == 2  " deoplete
-    inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-    inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
-    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
-    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
-    inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
-    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-    let g:deoplete#enable_at_startup = 1
-elseif g:Completion == 3  " ncm2
-    set completeopt+=noinsert,noselect
-    augroup ncm2
-        autocmd!
-        autocmd BufEnter * call ncm2#enable_for_buffer()
-    augroup end
-    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
-    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
-    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
-    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
-elseif g:Completion == 4  " coc
+elseif g:Completion == 2  " coc
     set updatetime=300
     set shortmess+=c
     set signcolumn=yes
@@ -628,7 +572,7 @@ elseif g:Completion == 4  " coc
     let g:coc_snippet_prev = '<S-Tab>'
     function! s:show_documentation()
         if (index(['vim','help'], &filetype) >= 0)
-            exec 'h '.expand('<cword>')
+            exec 'help '.expand('<cword>')
         else
             call CocAction('doHover')
         endif
@@ -653,17 +597,17 @@ nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
 nnoremap <leader>te V:call SendToTerminal()<CR>$
 vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
 function! SendToTerminal()
-    let buff_n = term_list()
-    if len(buff_n) > 0
-        let buff_n = buff_n[0] " sends to most recently opened terminal
-        let lines = getline(getpos("'<")[1], getpos("'>")[1])
-        let indent = match(lines[0], '[^ \t]') " for removing unnecessary indent
-        for l in lines
-            let new_indent = match(l, '[^ \t]')
-            if new_indent == 0
-                call term_sendkeys(buff_n, l. "\<CR>")
+    let l:buff_n = term_list()
+    if len(l:buff_n) > 0
+        let l:buff_n = l:buff_n[0] " sends to most recently opened terminal
+        let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
+        let l:indent = match(l:lines[0], '[^ \t]') " for removing unnecessary indent
+        for l in l:lines
+            let l:new_indent = match(l, '[^ \t]')
+            if l:new_indent == 0
+                call term_sendkeys(l:buff_n, l. "\<CR>")
             else
-                call term_sendkeys(buff_n, l[indent:]. "\<CR>")
+                call term_sendkeys(l:buff_n, l[l:indent:]. "\<CR>")
             endif
             sleep 10m
         endfor
@@ -675,16 +619,12 @@ endfunction
 " first manually create %UserProfile%/.cache/vim/undo directory
 " plugins are installed to %UserProfile%/.vim
 if has('win32')
-    " for ncm2, doesn't work with any virtual env
-    let g:python3_host_prog = 'C:\Users\Josh\Anaconda3\python.exe'
     " set PYTHONHOME for vim (windows python bug)
-    " also needs to set when entering virtual environments
-    " works for conda only, do NOT use Activate for virtualenv
+    " also needs to reset when entering virtual environments
+    " Activate works for conda only, do NOT use for virtualenv
     if $PYTHONHOME == ''
         let $PYTHONHOME = 'C:\Users\Josh\Anaconda3'
     endif
-    " clear PYTHONHOME after vim is loaded
-    " autocmd BufNew * let $PYTHONHOME=''
     function! ActivatePyEnv(environment)
         if a:environment == ''
             silent exec '!venv & gvim '. expand('%:p')
