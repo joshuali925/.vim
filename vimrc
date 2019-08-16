@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -3
-let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
+let g:Theme = 1
+let g:Completion = 0  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
 " }}}
@@ -645,7 +645,7 @@ if has('win32')
         nnoremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
         nnoremap <leader>R :silent exec '!gvim "%:p"' <bar> quit<CR>
         set guifont=Consolas:h11:cANSI
-        set guioptions=grt
+        set guioptions=Mgrt
         set guicursor+=a:blinkon0
         if &columns < 85 && &lines < 30
             set lines=25
