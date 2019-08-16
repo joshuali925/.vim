@@ -216,3 +216,51 @@ augroup END
 function! GetRunCommand()
     return g:DefaultCommand. b:args
 endfunction
+
+" =======================================================
+" vim plug seems faster even with less lazy load
+set runtimepath+=~/.vim/dein/repos/github.com/Shougo/dein.vim
+call dein#begin('~/.vim/dein')
+call dein#add('Shougo/dein.vim')
+call dein#add('wsdjeg/dein-ui.vim', { 'on_cmd': 'DeinUpdate' })
+call dein#add('ianding1/leetcode.vim', { 'on_cmd': 'LeetCodeList' })
+call dein#add('skywind3000/quickmenu.vim')
+call dein#add('scrooloose/nerdtree', { 'on_cmd': 'NERDTreeTabsToggle' })
+call dein#add('jistr/vim-nerdtree-tabs', { 'on_cmd': 'NERDTreeTabsToggle' })
+call dein#add('mbbill/undotree', { 'on_cmd': 'UndotreeToggle' })
+call dein#add('godlygeek/tabular', { 'on_cmd': 'Tabularize' })
+call dein#add('dhruvasagar/vim-table-mode', { 'on_cmd': 'TableModeToggle' })
+call dein#add('majutsushi/tagbar', { 'on_cmd': 'TagbarToggle' })
+call dein#add('skywind3000/asyncrun.vim', { 'on_cmd': 'AsyncRun' })
+call dein#add('chiel92/vim-autoformat')
+call dein#add('mg979/vim-visual-multi', { 'on_cmd': [] })
+call dein#add('easymotion/vim-easymotion', { 'on_cmd': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] })
+call dein#add('dahu/vim-fanfingtastic', { 'on_cmd': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] })
+call dein#add('tpope/vim-fugitive', { 'on_cmd': ['Gstatus', 'Gdiff'] })
+call dein#add('tpope/vim-commentary', { 'on_cmd': ['<Plug>Commentary', 'Commentary'] })
+call dein#add('tpope/vim-surround', { 'on_cmd': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] })
+call dein#add('liuchengxu/vim-which-key', { 'on_cmd;': ['WhichKey', 'WhichKey!'] })
+call dein#add('Yggdroot/LeaderF')
+call dein#add('tpope/vim-repeat')
+call dein#add('maxbrunsfeld/vim-yankstack')
+call dein#add('jiangmiao/auto-pairs')
+call dein#add('kana/vim-textobj-user')
+call dein#add('rhysd/vim-textobj-anyblock')
+call dein#add('sgur/vim-textobj-parameter')
+call dein#add('shougo/echodoc.vim')
+if g:Completion >= 0
+    call dein#add( 'sirver/ultisnips')
+    call dein#add( 'honza/vim-snippets')
+    call dein#add( 'davidhalter/jedi-vim')
+endif
+if g:Completion == 0
+    call dein#add('lifepillar/vim-mucomplete')
+elseif g:Completion == 1
+    call dein#add('valloric/youcompleteme')
+elseif g:Completion == 2
+    " :CocInstall coc-git coc-snippets coc-highlight coc-tsserver coc-html coc-css coc-emmet
+    " if doesn't work, use cd ~/.config/coc/extensions && yarn add coc-...
+    call dein#add('neoclide/coc.nvim', { 'rev': 'release' })
+endif
+call dein#end()
+call dein#save_state()
