@@ -109,8 +109,8 @@ map F <Plug>fanfingtastic_F
 map T <Plug>fanfingtastic_T
 map , <Plug>fanfingtastic_;
 map ;, <Plug>fanfingtastic_,
-nmap ? <Plug>(easymotion-bd-w)
-map S <Plug>(easymotion-bd-f)
+map ? <Plug>(easymotion-bd-f)
+nmap S <Plug>(easymotion-bd-w)
 map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
 nmap ds <Plug>Dsurround
@@ -171,6 +171,8 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
+imap <leader>r <Esc><leader>r
+nmap <leader>r <F11>
 nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :LeaderfBufferAll<CR>
@@ -178,20 +180,21 @@ nnoremap <leader>fu :LeaderfFunctionAll<CR>
 nnoremap <leader>fg :LeaderfRgInteractive<CR>
 nnoremap <leader>fl :LeaderfLineAll<CR>
 nnoremap <leader>fa :LeaderfSelf<CR>
+nnoremap <leader>fs :vertical sfind *
+nnoremap <leader>ft :tabfind *
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>F :vertical sfind *
 nnoremap <leader>ta :Tabularize /
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 inoremap <leader><leader>w <leader><Esc>:update<CR>
 nnoremap <leader>w :update<CR>
-nnoremap <leader>W :w !sudo tee %<CR>
-nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqa!<CR>
+nnoremap <leader>W :write !sudo tee %<CR>
+nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
-nnoremap <leader>q :q<CR>
-vnoremap <leader>q <Esc>:q<CR>
+nnoremap <leader>q :quit<CR>
+vnoremap <leader>q <Esc>:quit<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 " }}}
 
@@ -205,7 +208,7 @@ if &compatible | set nocompatible | endif
 set backspace=eol,start,indent
 set whichwrap+=<,>,[,]
 set mouse=a
-" set cursorline
+set cursorline
 set numberwidth=2
 set number
 set wrap
@@ -283,6 +286,16 @@ function! LoadAutoformat()
     call plug#load('vim-autoformat')
 endfunction
 function! LoadVisualMulti()
+    let g:VM_default_mappings = 0
+    let g:VM_exit_on_1_cursor_left = 1
+    let g:VM_maps = {}
+    let g:VM_maps['Select All'] = '<leader><C-n>'
+    let g:VM_maps['Find Under'] = '<C-n>'
+    let g:VM_maps['Find Subword Under'] = '<C-n>'
+    let g:VM_maps['Remove Last Region'] = '<C-p>'
+    let g:VM_maps['Skip Region'] = '<C-x>'
+    let g:VM_maps['Switch Mode'] = '<C-c>'
+    let g:VM_maps['Case Setting'] = ''
     nmap <C-n> <Plug>(VM-Find-Under)
     xmap <C-n> <Plug>(VM-Find-Subword-Under)
     call plug#load('vim-visual-multi')
@@ -292,7 +305,7 @@ function! ShowDocs()
         let g:jedi#auto_initialization = 1
         let g:jedi#auto_vim_configuration = 0
         let g:jedi#completions_enabled = 0
-        let g:jedi#show_call_signatures = "2"
+        let g:jedi#show_call_signatures = '2'
         let g:jedi#documentation_command = 'K'
         let g:jedi#rename_command = '<leader><C-r>'
         let g:jedi#goto_command = '<leader>d'
@@ -306,7 +319,7 @@ endfunction
 function! LoadQuickmenu()
     nnoremap <F1> :call quickmenu#toggle(0) <bar> set showcmd<CR>
     call plug#load('quickmenu.vim')
-    let g:quickmenu_options = "HL"
+    let g:quickmenu_options = 'HL'
     call g:quickmenu#reset()
     call g:quickmenu#header('QvQ')
     call g:quickmenu#append('# Actions', '')
@@ -406,31 +419,21 @@ endfunction
 " }}}
 
 " =================== Other plugins ===================== {{{
-let g:ale_sign_column_always = 1
-let g:ale_lint_on_text_changed = 'normal'
-let g:ale_lint_on_insert_leave = 1
-let g:ale_python_flake8_executable = 'flake8'
-let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
+" let g:ale_sign_column_always = 1
+" let g:ale_lint_on_text_changed = 'normal'
+" let g:ale_lint_on_insert_leave = 1
+" let g:ale_python_flake8_executable = 'flake8'
+" let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
 let g:asyncrun_open = 12
 let g:AutoPairsShortcutFastWrap = '<C-l>'
 let g:AutoPairsShortcutBackInsert = '<C-b>'
 let g:EasyMotion_smartcase = 1
 let g:formatters_python = ['yapf']
-let NERDTreeWinSize = 23
-let NERDTreeShowHidden = 1
-let NERDTreeMinimalUI = 1
+let g:NERDTreeWinSize = 23
+let g:NERDTreeShowHidden = 1
+let g:NERDTreeMinimalUI = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
-let g:VM_default_mappings = 0
-let g:VM_exit_on_1_cursor_left = 1
-let g:VM_maps = {}
-let g:VM_maps['Select All'] = '<leader><C-n>'
-let g:VM_maps['Find Under'] = '<C-n>'
-let g:VM_maps['Find Subword Under'] = '<C-n>'
-let g:VM_maps['Remove Last Region'] = '<C-p>'
-let g:VM_maps['Skip Region'] = '<C-x>'
-let g:VM_maps['Switch Mode'] = '<C-c>'
-let g:VM_maps['Case Setting'] = ''
 set wildignore+=*/tmp/*,*/\.git/*,*/\.oh-my-zsh/*,*/node_modules/*,*/venv/*,*/\.env/*  " do NOT wildignore plugged
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
 let g:Lf_HideHelp = 1
@@ -506,10 +509,7 @@ function! GetRunCommand()
     let l:run_command['javascript'] = 'node %'
     return get(l:run_command, &filetype, ''). b:args
 endfunction
-imap <leader>r <Esc><leader>r
-if g:ExecCommand == ''
-    nmap <leader>r <F11>
-else
+if g:ExecCommand != ''
     nnoremap <leader>r :wall <bar> exec g:ExecCommand<CR>
 endif
 " }}}
