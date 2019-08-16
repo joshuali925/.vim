@@ -156,3 +156,63 @@ endfunction
 let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] 
             \        'Mru': [['<C-p>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfRgInteractive<CR>'],
             \               ['<C-f>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfFunctionAll<CR>']] }
+
+" =======================================================
+" ncm2 and deoplete
+elseif g:Completion == 2
+    Plug 'roxma/nvim-yarp'
+    Plug 'roxma/vim-hug-neovim-rpc'
+    Plug 'Shougo/deoplete.nvim'
+    Plug 'Shougo/neco-syntax'
+    Plug 'Shougo/neco-vim', { 'for': 'vim' }
+    Plug 'zchee/deoplete-jedi', { 'for': 'python' }
+elseif g:Completion == 3  " lazy load doesn't seem to work
+    Plug 'roxma/nvim-yarp'
+    Plug 'roxma/vim-hug-neovim-rpc'
+    Plug 'ncm2/ncm2'
+    Plug 'ncm2/ncm2-bufword'
+    Plug 'ncm2/ncm2-path'
+    Plug 'Shougo/neco-syntax'
+    Plug 'ncm2/ncm2-syntax'
+    Plug 'ncm2/ncm2-ultisnips', { 'for': ['vim', 'c', 'cpp', 'java', 'python'] }
+    Plug 'ncm2/ncm2-jedi', { 'for': 'python' }
+let g:deoplete#sources#jedi#python_path=g:PythonPath
+elseif g:Completion == 2  " deoplete
+    inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+    inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-d>"
+    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <CR> pumvisible() ? deoplete#close_popup() : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+    let g:deoplete#enable_at_startup = 1
+elseif g:Completion == 3  " ncm2
+    set completeopt+=noinsert,noselect
+    augroup ncm2
+        autocmd!
+        autocmd BufEnter * call ncm2#enable_for_buffer()
+    augroup end
+    inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+    inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+    inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
+    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
+    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
+if has('win32')
+    " for ncm2, doesn't work with any virtual env
+    let g:python3_host_prog = 'C:\Users\Josh\Anaconda3\python.exe'
+
+" =======================================================
+" for execute code, use dictionary maybe faster
+let g:DefaultCommand = ''
+augroup Execute_Code
+    autocmd!
+    autocmd FileType * let b:args = ''
+    autocmd FileType c let g:DefaultCommand = 'gcc % -o %< -g && ./%<'
+    autocmd FileType cpp let g:DefaultCommand = 'g++ % -o %< -g && ./%<'
+    autocmd FileType java let g:DefaultCommand = 'javac % && java %<'
+    autocmd FileType python let g:DefaultCommand = g:PythonPath. ' %'
+    autocmd FileType javascript let g:DefaultCommand = 'node %'
+augroup END
+function! GetRunCommand()
+    return g:DefaultCommand. b:args
+endfunction
