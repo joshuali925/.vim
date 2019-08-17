@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 1
-let g:Completion = 0  " 0: mucomplete, 1: YCM, 2: coc
+let g:Theme = -3
+let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
 " }}}
@@ -80,127 +80,6 @@ endfunction
 call SetTheme()
 " }}}
 
-" ====================== Shortcuts ====================== {{{
-let mapleader=';'
-nmap <leader>1 <F1>
-nmap <leader>2 <F2>
-nmap <leader>3 <F3>
-nmap <leader>4 <F4>
-nmap <leader>5 <F5>
-nmap <leader>6 <F6>
-nmap <leader>7 <F7>
-nmap <leader>8 <F8>
-nmap <leader>9 <F9>
-nmap <leader>0 <F10>
-nmap <leader>- <F11>
-nmap <leader>= <F12>
-nnoremap <F1> :call LoadQuickmenu()<CR>
-imap <F2> <Esc><F2>
-nnoremap <F2> gT
-imap <F3> <Esc><F3>
-nnoremap <F3> gt
-nnoremap <F4> *N
-imap <F10> <Esc><F10>
-nnoremap <F10> :wall <bar> exec '!clear && '. GetRunCommand()<CR>
-imap <F11> <Esc><F11>
-nnoremap <F11> :wall <bar> exec 'AsyncRun '. GetRunCommand()<CR>
-imap <F12> <Esc><F12>
-nnoremap <F12> :wall <bar> call RunShellCommand(''. GetRunCommand())<CR>
-map f <Plug>fanfingtastic_f
-map t <Plug>fanfingtastic_t
-map F <Plug>fanfingtastic_F
-map T <Plug>fanfingtastic_T
-map , <Plug>fanfingtastic_;
-map ;, <Plug>fanfingtastic_,
-map ? <Plug>(easymotion-bd-f)
-nmap S <Plug>(easymotion-bd-w)
-map  gc <Plug>Commentary
-nmap gcc <Plug>CommentaryLine
-nmap ds <Plug>Dsurround
-nmap cs <Plug>Csurround
-nmap cS <Plug>CSurround
-nmap ys <Plug>Ysurround
-nmap yS <Plug>YSurround
-nmap yss <Plug>Yssurround
-nmap ySs <Plug>YSsurround
-nmap ySS <Plug>YSsurround
-xmap S <Plug>VSurround
-xmap gS <Plug>VgSurround
-nmap Y y$
-noremap 0 ^
-nnoremap - $
-vnoremap - $h
-noremap <Down> gj
-noremap <Up> gk
-xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
-nnoremap Q @q
-nnoremap < <<
-vnoremap < <gv
-nnoremap > >>
-vnoremap > >gv
-nnoremap o o<Space><BS>
-nnoremap O O<Space><BS>
-nnoremap K :call ShowDocs()<CR>
-inoremap <CR> <CR><Space><BS>
-nnoremap gf <C-w>gf
-nnoremap gp `[v`]
-nnoremap cr :call EditRegister()<CR>
-vnoremap " c"<C-r><C-p>""<Esc>
-vnoremap ' c'<C-r><C-p>"'<Esc>
-vnoremap ( c(<C-r><C-p>")<Esc>
-vnoremap [ c[<C-r><C-p>"]<Esc>
-vnoremap { c{<C-r><C-p>"}<Esc>
-vnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
-nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
-inoremap <C-c> <Esc>
-vnoremap <C-c> <Esc>
-nnoremap <C-b> :NERDTreeTabsToggle<CR>
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
-nnoremap <C-w><C-c> <Esc>
-nmap <C-w>< <C-w><<C-w>
-nmap <C-w>> <C-w>><C-w>
-nmap <C-w>+ <C-w>+<C-w>
-nmap <C-w>- <C-w>-<C-w>
-nmap <C-f> :call LoadAutoformat()<CR><C-f>
-imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
-vmap <C-f> :call LoadAutoformat()<CR>gv<C-f>
-nmap <C-n> :call LoadVisualMulti()<CR><C-n>
-xmap <C-n> :call LoadVisualMulti()<CR>gv<C-n>
-nmap <leader><C-n> :call LoadVisualMulti()<CR><leader><C-n>
-nmap <leader>p <Plug>yankstack_substitute_older_paste
-nmap <leader>P <Plug>yankstack_substitute_newer_paste
-nmap <leader>o o<Esc>
-nmap <leader>O O<Esc>
-imap <leader>r <Esc><leader>r
-nmap <leader>r <F11>
-nnoremap <leader>ff :LeaderfFile<CR>
-nnoremap <leader>fm :LeaderfMru<CR>
-nnoremap <leader>fb :LeaderfBufferAll<CR>
-nnoremap <leader>fu :LeaderfFunctionAll<CR>
-nnoremap <leader>fg :LeaderfRgInteractive<CR>
-nnoremap <leader>fl :LeaderfLineAll<CR>
-nnoremap <leader>fa :LeaderfSelf<CR>
-nnoremap <leader>fs :vertical sfind *
-nnoremap <leader>ft :tabfind *
-nnoremap <leader>u :UndotreeToggle<CR>
-nnoremap <leader>h :WhichKey ';'<CR>
-nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>ta :Tabularize /
-nnoremap <leader>tE :exec getline('.')<CR>``
-inoremap <leader>w <Esc>:update<CR>
-inoremap <leader><leader>w <leader><Esc>:update<CR>
-nnoremap <leader>w :update<CR>
-nnoremap <leader>W :write !sudo tee %<CR>
-nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
-nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
-nnoremap <leader>q :quit<CR>
-vnoremap <leader>q <Esc>:quit<CR>
-nnoremap <leader>vim :tabedit $MYVIMRC<CR>
-" }}}
-
 " ======================= Basics ======================== {{{
 filetype plugin indent on
 syntax enable
@@ -266,18 +145,139 @@ set nobackup
 set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)%l/%L\ %P
 " }}}
 
+" ====================== Shortcuts ====================== {{{
+let mapleader=';'
+nmap <leader>1 <F1>
+nmap <leader>2 <F2>
+nmap <leader>3 <F3>
+nmap <leader>4 <F4>
+nmap <leader>5 <F5>
+nmap <leader>6 <F6>
+nmap <leader>7 <F7>
+nmap <leader>8 <F8>
+nmap <leader>9 <F9>
+nmap <leader>0 <F10>
+nmap <leader>- <F11>
+nmap <leader>= <F12>
+nnoremap <F1> :call LoadQuickmenu()<CR>
+imap <F2> <Esc><F2>
+nnoremap <F2> gT
+imap <F3> <Esc><F3>
+nnoremap <F3> gt
+nnoremap <F4> *N
+imap <F10> <Esc><F10>
+nnoremap <F10> :wall <bar> exec '!clear && '. GetRunCommand()<CR>
+imap <F11> <Esc><F11>
+nnoremap <F11> :wall <bar> exec 'AsyncRun '. GetRunCommand()<CR>
+imap <F12> <Esc><F12>
+nnoremap <F12> :wall <bar> call RunShellCommand(''. GetRunCommand())<CR>
+map f <Plug>fanfingtastic_f
+map t <Plug>fanfingtastic_t
+map F <Plug>fanfingtastic_F
+map T <Plug>fanfingtastic_T
+map , <Plug>fanfingtastic_;
+map ;, <Plug>fanfingtastic_,
+map ? <Plug>(easymotion-bd-f)
+nmap S <Plug>(easymotion-bd-w)
+map  gc <Plug>Commentary
+nmap gcc <Plug>CommentaryLine
+nmap ds <Plug>Dsurround
+nmap cs <Plug>Csurround
+nmap cS <Plug>CSurround
+nmap ys <Plug>Ysurround
+nmap yS <Plug>YSurround
+nmap yss <Plug>Yssurround
+nmap ySs <Plug>YSsurround
+nmap ySS <Plug>YSsurround
+xmap S <Plug>VSurround
+xmap gS <Plug>VgSurround
+nmap Y y$
+noremap 0 ^
+nnoremap - $
+vnoremap - $h
+noremap <Down> gj
+noremap <Up> gk
+xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
+nnoremap Q @q
+nnoremap < <<
+vnoremap < <gv
+nnoremap > >>
+vnoremap > >gv
+nnoremap o o<Space><BS>
+nnoremap O O<Space><BS>
+nnoremap K :call ShowDocs()<CR>
+inoremap <CR> <CR><Space><BS>
+nnoremap gf <C-w>gf
+nnoremap gp `[v`]
+nnoremap yp "0p
+nnoremap cr :call EditRegister()<CR>
+vnoremap " c"<C-r><C-p>""<Esc>
+vnoremap ' c'<C-r><C-p>"'<Esc>
+vnoremap ( c(<C-r><C-p>")<Esc>
+vnoremap [ c[<C-r><C-p>"]<Esc>
+vnoremap { c{<C-r><C-p>"}<Esc>
+vnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
+nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
+inoremap <C-c> <Esc>
+vnoremap <C-c> <Esc>
+nnoremap <C-b> :NERDTreeTabsToggle<CR>
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+nnoremap <C-w><C-c> <Esc>
+nmap <C-w>< <C-w><<C-w>
+nmap <C-w>> <C-w>><C-w>
+nmap <C-w>+ <C-w>+<C-w>
+nmap <C-w>- <C-w>-<C-w>
+nmap <C-f> :call LoadAutoformat()<CR><C-f>
+imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
+vmap <C-f> :call LoadAutoformat()<CR>gv<C-f>
+nmap <C-n> :call LoadVisualMulti()<CR><C-n>
+xmap <C-n> :call LoadVisualMulti()<CR>gv<C-n>
+nmap <leader><C-n> :call LoadVisualMulti()<CR><leader><C-n>
+nmap <leader>p <Plug>yankstack_substitute_older_paste
+nmap <leader>P <Plug>yankstack_substitute_newer_paste
+nmap <leader>o o<Esc>
+nmap <leader>O O<Esc>
+imap <leader>r <Esc><leader>r
+nmap <leader>r <F11>
+nnoremap <leader>ff :LeaderfFile<CR>
+nnoremap <leader>fm :LeaderfMru<CR>
+nnoremap <leader>fb :LeaderfBufferAll<CR>
+nnoremap <leader>fu :LeaderfFunctionAll<CR>
+nnoremap <leader>fg :LeaderfRgInteractive<CR>
+nnoremap <leader>fl :LeaderfLineAll<CR>
+nnoremap <leader>fa :LeaderfSelf<CR>
+nnoremap <leader>fs :vertical sfind *
+nnoremap <leader>ft :tabfind *
+nnoremap <leader>u :UndotreeToggle<CR>
+nnoremap <leader>h :WhichKey ';'<CR>
+nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
+nnoremap <leader>ta :Tabularize /
+nnoremap <leader>tE :exec getline('.')<CR>``
+inoremap <leader>w <Esc>:update<CR>
+inoremap <leader><leader>w <leader><Esc>:update<CR>
+nnoremap <leader>w :update<CR>
+nnoremap <leader>W :write !sudo tee %<CR>
+nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
+nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
+nnoremap <leader>q :quit<CR>
+vnoremap <leader>q <Esc>:quit<CR>
+nnoremap <leader>vim :tabedit $MYVIMRC<CR>
+" }}}
+
 " ====================== Autocmd ======================== {{{
-augroup RestoreCursor_AutoSource_Format_PyComment_InsertColon_HighlightSelf_ResetArgs
+augroup RestoreCursor_AutoSource_PyComment_InsertColon_HighlightSelf_Format_ResetArgs
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType * setlocal formatoptions=jql
     autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
     autocmd FileType c,cpp,java,javascript inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
-    autocmd FileType * let b:args = ''
+    autocmd FileType * setlocal formatoptions=jql | let b:args = ''
 augroup END
 " }}}
 
