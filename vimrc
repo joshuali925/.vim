@@ -157,6 +157,7 @@ nmap <leader>9 <F9>
 nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
+imap <F1> <Esc><F1>
 nnoremap <F1> :call LoadQuickmenu()<CR>
 imap <F2> <Esc><F2>
 nnoremap <F2> gT
@@ -191,6 +192,7 @@ xmap S <Plug>VSurround
 xmap gS <Plug>VgSurround
 nmap Y y$
 noremap 0 ^
+noremap ^ 0
 nnoremap - $
 vnoremap - $h
 noremap <Down> gj
@@ -240,6 +242,8 @@ nmap <leader>o o<Esc>
 nmap <leader>O O<Esc>
 imap <leader>r <Esc><leader>r
 nmap <leader>r <F11>
+nnoremap <leader><F2> :-tabmove<CR>
+nnoremap <leader><F3> :+tabmove<CR>
 nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :LeaderfBufferAll<CR>
@@ -252,7 +256,7 @@ nnoremap <leader>ft :tabfind *
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>ta :Tabularize /
+nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 inoremap <leader><leader>w <leader><Esc>:update<CR>
@@ -266,12 +270,12 @@ nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 " }}}
 
 " ====================== Autocmd ======================== {{{
-augroup RestoreCursor_AutoSource_PyComment_InsertColon_HighlightSelf_Format_ResetArgs
+augroup AutoCommands
     autocmd!
-    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif
-    autocmd BufWritePost $MYVIMRC source $MYVIMRC
+    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif  " restore last edit position
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType python inoremap <buffer> # <Space><C-h>#<Space>
+    autocmd FileType python set nosmartindent
     autocmd FileType c,cpp,java,javascript inoremap <buffer> ;; <C-o>$;
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
@@ -326,20 +330,22 @@ function! LoadQuickmenu()
     call g:quickmenu#reset()
     call g:quickmenu#header('QvQ')
     call g:quickmenu#append('# Actions', '')
-    call g:quickmenu#append('Insert Comment Line', 'call InsertCommentLine()')
-    call g:quickmenu#append('Insert Time', "put=strftime('%x %X')")
-    call g:quickmenu#append('Git Diff', 'Gdiff', 'use fugitive Gdiff on current document')
-    call g:quickmenu#append('Git Status', 'Gstatus', 'use fugitive Gstatus on current document')
+    call g:quickmenu#append('Insert Comment Line', 'call InsertCommentLine()', 'Insert a dividing line')
+    call g:quickmenu#append('Insert Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt')
+    call g:quickmenu#append('Git Diff', 'Gdiff', 'Fugitive git diff')
+    call g:quickmenu#append('Git Status', 'Gstatus', 'Fugitive git status')
     call g:quickmenu#append('# Toggle', '')
-    call g:quickmenu#append('NERDTree', 'NERDTreeToggle')
-    call g:quickmenu#append('Undo Tree', 'UndotreeToggle')
-    call g:quickmenu#append('Tagbar', 'TagbarToggle')
-    call g:quickmenu#append('Table Mode', 'TableModeToggle')
-    call g:quickmenu#append('Diff %{g:DiffOn==1? "[x]" :"[ ]"}', 'call ToggleDiff()')
-    call g:quickmenu#append('Fold %{g:FoldOn==1? "[x]" :"[ ]"}', 'call ToggleFold()')
-    call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()')
-    call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()')
+    call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
+    call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
+    call g:quickmenu#append('Undo Tree', 'UndotreeToggle', 'Toggle Undotree')
+    call g:quickmenu#append('Tagbar', 'TagbarToggle', 'Toggle Tagbar')
+    call g:quickmenu#append('Table Mode', 'TableModeToggle', 'Toggle TableMode')
+    call g:quickmenu#append('Diff %{g:DiffOn==1? "[x]" :"[ ]"}', 'call ToggleDiff()', 'Toggle diff in current window')
+    call g:quickmenu#append('Fold %{g:FoldOn==1? "[x]" :"[ ]"}', 'call ToggleFold()', 'Toggle fold by indent')
+    call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', 'Toggle paste mode')
+    call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()', 'Toggle function preview')
     call g:quickmenu#toggle(0)
+    set showcmd
 endfunction
 " }}}
 
@@ -456,6 +462,7 @@ let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
 let g:tagbar_iconchars = [ '+', '-' ]
+let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
@@ -493,7 +500,7 @@ function! RunShellCommand(command)
         setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
         silent exec '0f | file [Output_'. g:OutputCount. '] | resize '. (winheight(0) * 4/5)
         let g:OutputCount = g:OutputCount + 1
-        nnoremap <buffer> q :q<CR>
+        nnoremap <buffer> q :quit<CR>
         nnoremap <buffer> w :set wrap!<CR>
     endif
     call setline(1, 'Run: '. l:expanded_command)
@@ -541,7 +548,7 @@ elseif g:Completion == 1  " YCM
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     " let g:ycm_show_diagnostics_ui = 0
-    " let g:ycm_semantic_triggers = { 'c,cpp,python,java': ['re!\w{2}'] }  " auto semantic complete
+    " let g:ycm_semantic_triggers = { 'c,cpp,python,java,javscript': ['re!\w{2}'] }  " auto semantic complete, can be slow
     let g:ycm_collect_identifiers_from_comments_and_strings = 1
     let g:ycm_complete_in_comments = 1
     let g:ycm_complete_in_strings = 1
