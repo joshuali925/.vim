@@ -283,6 +283,7 @@ augroup END
 
 " ====================== LazyLoad ======================= {{{
 function! LoadAutoformat()
+    let g:formatters_python = ['yapf']
     nnoremap <C-f> :Autoformat<CR>
     inoremap <C-f> <Esc>V:'<,'>Autoformat<CR>A
     vnoremap <C-f> :'<,'>Autoformat<CR>$
@@ -431,12 +432,16 @@ let g:asyncrun_open = 12
 let g:AutoPairsShortcutFastWrap = '<C-l>'
 let g:AutoPairsShortcutBackInsert = '<C-b>'
 let g:EasyMotion_smartcase = 1
-let g:formatters_python = ['yapf']
 let g:NERDTreeWinSize = 23
 let g:NERDTreeShowHidden = 1
 let g:NERDTreeMinimalUI = 1
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '-'
+let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings, replaced by NERDTree
+let g:netrw_banner = 0
+let g:netrw_browse_split = 2
+let g:netrw_winsize = 20
+let g:netrw_liststyle = 3
 set wildignore+=*/tmp/*,*/\.git/*,*/\.oh-my-zsh/*,*/node_modules/*,*/venv/*,*/\.env/*  " do NOT wildignore plugged
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
 let g:Lf_HideHelp = 1
@@ -456,13 +461,8 @@ let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
-let g:netrw_dirhistmax=0  " built in :Lexplore<CR> settings, replaced by NERDTree
-let g:netrw_banner=0
-let g:netrw_browse_split=2
-let g:netrw_winsize=20
-let g:netrw_liststyle=3
-let g:leetcode_solution_filetype='python3'
-let g:leetcode_username='joshuali925'  " keyring password = 1
+let g:leetcode_solution_filetype = 'python3'
+let g:leetcode_username = 'joshuali925'  " keyring password = 1
 " }}}
 
 " ==================== Execute code ===================== {{{
