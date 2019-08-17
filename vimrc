@@ -31,9 +31,7 @@ Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record M
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'jiangmiao/auto-pairs'
-Plug 'kana/vim-textobj-user'
-Plug 'rhysd/vim-textobj-anyblock'
-Plug 'sgur/vim-textobj-parameter'
+Plug 'wellle/targets.vim'
 Plug 'shougo/echodoc.vim'
 if g:Completion >= 0
     Plug 'sirver/ultisnips'
@@ -278,6 +276,7 @@ augroup RestoreCursor_AutoSource_PyComment_InsertColon_HighlightSelf_Format_Rese
     autocmd FileType python inoremap <buffer> ;; <C-o>$:
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
     autocmd FileType * setlocal formatoptions=jql | let b:args = ''
+    autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
 augroup END
 " }}}
 
