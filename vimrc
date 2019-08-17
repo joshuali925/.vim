@@ -52,8 +52,8 @@ silent! call yankstack#setup()
 " }}}
 
 " ===================== Themes ========================== {{{
-let &t_8f="\<ESC>[38;2;%lu;%lu;%lum"
-let &t_8b="\<ESC>[48;2;%lu;%lu;%lum"
+let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 set termguicolors
 let g:ayucolor='light'
 set background=light
@@ -158,7 +158,8 @@ nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
 imap <F1> <Esc><F1>
-nnoremap <F1> :call LoadQuickmenu()<CR>
+vmap <F1> :<C-u>call LoadQuickmenu()<CR>gv<F1>
+nmap <F1> :call LoadQuickmenu()<CR><F1>
 imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
@@ -232,9 +233,9 @@ nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
 nmap <C-f> :call LoadAutoformat()<CR><C-f>
 imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
-vmap <C-f> :call LoadAutoformat()<CR>gv<C-f>
+vmap <C-f> :<C-u>call LoadAutoformat()<CR>gv<C-f>
 nmap <C-n> :call LoadVisualMulti()<CR><C-n>
-xmap <C-n> :call LoadVisualMulti()<CR>gv<C-n>
+xmap <C-n> :<C-u>call LoadVisualMulti()<CR>gv<C-n>
 nmap <leader><C-n> :call LoadVisualMulti()<CR><leader><C-n>
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
@@ -325,15 +326,18 @@ function! ShowDocs()
 endfunction
 function! LoadQuickmenu()
     nnoremap <F1> :call quickmenu#toggle(0) <bar> set showcmd<CR>
+    vnoremap <F1> :call quickmenu#toggle(2) <bar> set showcmd<CR>
     call plug#load('quickmenu.vim')
     let g:quickmenu_options = 'HL'
     call g:quickmenu#reset()
+    call g:quickmenu#current(0)
     call g:quickmenu#header('QvQ')
     call g:quickmenu#append('# Actions', '')
     call g:quickmenu#append('Insert Comment Line', 'call InsertCommentLine()', 'Insert a dividing line')
     call g:quickmenu#append('Insert Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt')
     call g:quickmenu#append('Git Diff', 'Gdiff', 'Fugitive git diff')
     call g:quickmenu#append('Git Status', 'Gstatus', 'Fugitive git status')
+    call g:quickmenu#append('Tabular', 'call g:quickmenu#toggle(1)', 'Use Tabular to align selected text')
     call g:quickmenu#append('# Toggle', '')
     call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
     call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
@@ -343,21 +347,49 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Diff %{g:DiffOn==1? "[x]" :"[ ]"}', 'call ToggleDiff()', 'Toggle diff in current window')
     call g:quickmenu#append('Fold %{g:FoldOn==1? "[x]" :"[ ]"}', 'call ToggleFold()', 'Toggle fold by indent')
     call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', 'Toggle paste mode')
+    call g:quickmenu#append('Spell checker %{&spell? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker')
     call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()', 'Toggle function preview')
-    call g:quickmenu#toggle(0)
-    set showcmd
+    call g:quickmenu#current(1)
+    call g:quickmenu#header('Tabular Normal Mode')
+    call g:quickmenu#append('# Center delimiter', '')
+    call g:quickmenu#append('Align using =', "Tabularize /=")
+    call g:quickmenu#append('Align using ,', "Tabularize /,")
+    call g:quickmenu#append('Align using |', "Tabularize /|")
+    call g:quickmenu#append('Align using :', "Tabularize /:")
+    call g:quickmenu#append('Align using +', "Tabularize /+")
+    call g:quickmenu#append('Align using -', "Tabularize /-")
+    call g:quickmenu#append('# Fix delimiter position', '')
+    call g:quickmenu#append('Align using =', "Tabularize /=\\zs")
+    call g:quickmenu#append('Align using ,', "Tabularize /,\\zs")
+    call g:quickmenu#append('Align using |', "Tabularize /|\\zs")
+    call g:quickmenu#append('Align using :', "Tabularize /:\\zs")
+    call g:quickmenu#append('Align using +', "Tabularize /+\\zs")
+    call g:quickmenu#append('Align using -', "Tabularize /-\\zs")
+    call g:quickmenu#current(2)
+    call g:quickmenu#header('Tabular Visual Mode')
+    call g:quickmenu#append('# Center delimiter', '')
+    call g:quickmenu#append('Align using =', "'<,'>Tabularize /=")
+    call g:quickmenu#append('Align using ,', "'<,'>Tabularize /,")
+    call g:quickmenu#append('Align using |', "'<,'>Tabularize /|")
+    call g:quickmenu#append('Align using :', "'<,'>Tabularize /:")
+    call g:quickmenu#append('Align using +', "'<,'>Tabularize /+")
+    call g:quickmenu#append('Align using -', "'<,'>Tabularize /-")
+    call g:quickmenu#append('# Fix delimiter position', '')
+    call g:quickmenu#append('Align using =', "'<,'>Tabularize /=\\zs")
+    call g:quickmenu#append('Align using ,', "'<,'>Tabularize /,\\zs")
+    call g:quickmenu#append('Align using |', "'<,'>Tabularize /|\\zs")
+    call g:quickmenu#append('Align using :', "'<,'>Tabularize /:\\zs")
+    call g:quickmenu#append('Align using +', "'<,'>Tabularize /+\\zs")
+    call g:quickmenu#append('Align using -', "'<,'>Tabularize /-\\zs")
 endfunction
 " }}}
 
-" ================= Insert Comment Line ================= {{{
+" ====================== Functions ====================== {{{
 function! InsertCommentLine()
     exec 'normal! o'
     exec 'normal! 55i='
     exec 'Commentary'
 endfunction
-" }}}
-
-" ======================= Macro ========================= {{{
 function! ExecuteMacroOverVisualRange()
     echo '@'.getcmdline()
     exec ":'<,'>normal! @". nr2char(getchar())
@@ -366,9 +398,6 @@ function! EditRegister() abort
     let l:r = nr2char(getchar())
     call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
 endfunction
-" }}}
-
-" ======================== Diff ========================= {{{
 let g:DiffOn = 0
 function! ToggleDiff()
     if g:DiffOn == 0
@@ -378,9 +407,6 @@ function! ToggleDiff()
     endif
     let g:DiffOn = 1 - g:DiffOn
 endfunction
-" }}}
-
-" ===================== Fold code ======================= {{{
 let g:FoldOn = 0
 function! ToggleFold()
     if g:FoldOn == 0
@@ -392,9 +418,6 @@ function! ToggleFold()
     endif
     let g:FoldOn = 1 - g:FoldOn
 endfunction
-" }}}
-
-" ======================= Paste ========================= {{{
 " shift alt drag to select and copy
 function! TogglePaste()
     if &paste
@@ -410,9 +433,6 @@ function! GetPasteStatus()
         return ''
     endif
 endfunction
-" }}}
-
-" ======================= Preview ======================= {{{
 let g:PreviewOn = 0
 function! TogglePreview()
     if g:PreviewOn == 0
