@@ -66,13 +66,15 @@ function! SetTheme()
     let l:Theme_list[0] = 'solarized8_flat'
     let l:Theme_list[1] = 'PaperColor'
     let l:Theme_list[2] = 'github'
-    let l:Theme_list[3] = 'two-firewatch'
-    let l:Theme_list[4] = 'ayu'
+    let l:Theme_list[3] = 'gruvbox'
+    let l:Theme_list[4] = 'two-firewatch'
+    let l:Theme_list[5] = 'ayu'
     let l:Theme_list[-1] = 'onedark'
     let l:Theme_list[-2] = 'ayu'
     let l:Theme_list[-3] = 'forest-night'
-    let l:Theme_list[-4] = 'two-firewatch'
-    let l:Theme_list[-5] = 'molokai'
+    let l:Theme_list[-4] = 'gruvbox'
+    let l:Theme_list[-5] = 'two-firewatch'
+    let l:Theme_list[-6] = 'molokai'
     exec 'colorscheme '. get(l:Theme_list, g:Theme, 'solarized8_flat')
 endfunction
 call SetTheme()
