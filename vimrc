@@ -7,10 +7,11 @@ let g:ExecCommand = ''
 
 " ===================== Plugins ========================= {{{
 call plug#begin('~/.vim/plugged')
+Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 " Plug 'mhinz/vim-startify'
 " Plug 'w0rp/ale'
 " Plug 'sheerun/vim-polyglot'
-Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList'] }
+Plug 'ianding1/leetcode.vim', { 'on': 'LeetCodeList' }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
@@ -27,15 +28,15 @@ Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiffsplit'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
+Plug 'shougo/echodoc.vim', { 'on': [] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
+Plug 'jiangmiao/auto-pairs'  " lazy load wouldn't work
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
-Plug 'jiangmiao/auto-pairs'
 Plug 'wellle/targets.vim'
-Plug 'shougo/echodoc.vim'
 if g:Completion >= 0
-    Plug 'sirver/ultisnips'
-    Plug 'honza/vim-snippets'
+    Plug 'sirver/ultisnips', { 'on': [] }
+    Plug 'honza/vim-snippets', { 'on': [] }
     Plug 'davidhalter/jedi-vim', { 'on': [] }
 endif
 if g:Completion == 0
@@ -285,6 +286,10 @@ augroup AutoCommands
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
     autocmd FileType * setlocal formatoptions=jql | let b:args = ''
     autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
+augroup END
+augroup InsertLazyLoad
+  autocmd!
+  autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! InsertLazyLoad
 augroup END
 " }}}
 
