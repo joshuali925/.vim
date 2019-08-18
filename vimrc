@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -3
+let g:Theme = -2
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -23,7 +23,7 @@ Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
-Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiff'] }
+Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiffsplit'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
@@ -65,15 +65,15 @@ function! SetTheme()
     let l:Theme_list = {}
     let l:Theme_list[0] = 'solarized8_flat'
     let l:Theme_list[1] = 'PaperColor'
-    let l:Theme_list[2] = 'two-firewatch'
-    let l:Theme_list[3] = 'one'
+    let l:Theme_list[2] = 'github'
+    let l:Theme_list[3] = 'two-firewatch'
     let l:Theme_list[4] = 'ayu'
     let l:Theme_list[-1] = 'onedark'
-    let l:Theme_list[-2] = 'forest-night'
-    let l:Theme_list[-3] = 'ayu'
+    let l:Theme_list[-2] = 'ayu'
+    let l:Theme_list[-3] = 'forest-night'
     let l:Theme_list[-4] = 'two-firewatch'
     let l:Theme_list[-5] = 'molokai'
-    exec 'colorscheme '. get(l:Theme_list, g:Theme, 'desert')
+    exec 'colorscheme '. get(l:Theme_list, g:Theme, 'solarized8_flat')
 endfunction
 call SetTheme()
 " }}}
@@ -207,6 +207,7 @@ vnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap K :call ShowDocs()<CR>
+nnoremap U :earlier<CR>
 inoremap <CR> <CR><Space><BS>
 nnoremap gf <C-w>gf
 nnoremap gp `[v`]
@@ -335,7 +336,7 @@ function! LoadQuickmenu()
     call g:quickmenu#append('# Actions', '')
     call g:quickmenu#append('Insert Comment Line', 'call InsertCommentLine()', 'Insert a dividing line')
     call g:quickmenu#append('Insert Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt')
-    call g:quickmenu#append('Git Diff', 'Gdiff', 'Fugitive git diff')
+    call g:quickmenu#append('Git Diff', 'Gdiffsplit', 'Fugitive git diff')
     call g:quickmenu#append('Git Status', 'Gstatus', 'Fugitive git status')
     call g:quickmenu#append('Tabular', 'call g:quickmenu#toggle(1)', 'Use Tabular to align selected text')
     call g:quickmenu#append('# Toggle', '')
