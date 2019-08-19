@@ -9,7 +9,6 @@ let g:ExecCommand = ''
 call plug#begin('~/.vim/plugged')
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 " Plug 'mhinz/vim-startify'
-" Plug 'w0rp/ale'
 " Plug 'sheerun/vim-polyglot'
 Plug 'ianding1/leetcode.vim', { 'on': 'LeetCodeList' }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
@@ -44,7 +43,7 @@ if g:Completion == 0
 elseif g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
 elseif g:Completion == 2
-    " :CocInstall coc-git coc-snippets coc-highlight coc-tsserver coc-html coc-css coc-emmet
+    " :CocInstall coc-git coc-snippets coc-highlight coc-tsserver coc-html coc-css coc-emmet coc-python
     " if doesn't work, use cd ~/.config/coc/extensions && yarn add coc-...
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
 endif
@@ -122,7 +121,9 @@ set shiftround
 set textwidth=0
 set autoread
 set autochdir
+set complete-=i
 set completeopt=menuone
+set nrformats-=octal
 set scrolloff=3
 set previewheight=7
 set foldmethod=marker
@@ -135,11 +136,12 @@ set undolevels=1000
 set undoreload=10000
 set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
-set viminfo+=n~/.cache/vim/viminfo
 set path=**
 set encoding=utf-8
 set timeoutlen=1500
 set ttimeoutlen=40
+set display=lastline
+set synmaxcol=500
 set lazyredraw
 set noswapfile
 set nowritebackup
@@ -455,11 +457,6 @@ endfunction
 " }}}
 
 " =================== Other plugins ===================== {{{
-" let g:ale_sign_column_always = 1
-" let g:ale_lint_on_text_changed = 'normal'
-" let g:ale_lint_on_insert_leave = 1
-" let g:ale_python_flake8_executable = 'flake8'
-" let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
 let g:asyncrun_open = 12
 let g:AutoPairsShortcutFastWrap = '<C-l>'
 let g:AutoPairsShortcutBackInsert = '<C-b>'
@@ -557,7 +554,6 @@ let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
-" use <C-@> in vim, <C-Space> in nvim for ctrl space
 if g:Completion == 0  " mucomplete
     set omnifunc=syntaxcomplete#Complete
     set completeopt+=noselect
@@ -617,38 +613,92 @@ endif
 " }}}
 
 " ====================== Terminal ======================= {{{
-" do not tmap <Esc> in vim 8
-tnoremap <F2> <C-w>gT
-tnoremap <F3> <C-w>gt
-tnoremap <C-u> <C-\><C-n>
-tnoremap <C-h> <C-w>h
-tnoremap <C-j> <C-w>j
-tnoremap <C-k> <C-w>k
-tnoremap <C-l> <C-w>l
-nnoremap <leader>to :exec 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
-nnoremap <leader>tO :terminal ++curwin ++close<CR>
-nnoremap <leader>th :terminal ++close<CR>
-nnoremap <leader>tv :vertical terminal ++close<CR>
-nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
-nnoremap <leader>te V:call SendToTerminal()<CR>$
-vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
-function! SendToTerminal()
-    let l:buff_n = term_list()
-    if len(l:buff_n) > 0
-        let l:buff_n = l:buff_n[0] " sends to most recently opened terminal
-        let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
-        let l:indent = match(l:lines[0], '[^ \t]') " for removing unnecessary indent
-        for l in l:lines
-            let l:new_indent = match(l, '[^ \t]')
-            if l:new_indent == 0
-                call term_sendkeys(l:buff_n, l. "\<CR>")
-            else
-                call term_sendkeys(l:buff_n, l[l:indent:]. "\<CR>")
+if has('nvim')
+    tnoremap <F2> <C-\><C-n>gT
+    tnoremap <F3> <C-\><C-n>gt
+    tnoremap <C-u> <C-\><C-n>
+    tnoremap <Esc> <C-\><C-n>
+    tnoremap <C-h> <C-\><C-n><C-w>h
+    tnoremap <C-j> <C-\><C-n><C-w>j
+    tnoremap <C-k> <C-\><C-n><C-w>k
+    tnoremap <C-l> <C-\><C-n><C-w>l
+    nnoremap <leader>to :call OpenNvimTerminal(0)<CR>
+    nnoremap <leader>tO :call OpenNvimTerminal(1)<CR>
+    nnoremap <leader>th :call OpenNvimTerminal(2)<CR>
+    nnoremap <leader>tv :call OpenNvimTerminal(3)<CR>
+    nnoremap <leader>tt :call OpenNvimTerminal(4)<CR>
+    nnoremap <leader>te V:call SendToNvimTerminal()<CR>$
+    vnoremap <leader>te <Esc>:call SendToNvimTerminal()<CR>
+    augroup NvimTerminal
+        autocmd!
+        autocmd TermOpen,BufEnter term://* startinsert
+        autocmd TermClose * quit
+    augroup END
+    function! OpenNvimTerminal(mode)
+        let l:prefix = {}
+        let l:prefix[0] = 'split | resize'. (winheight(0) * 2/5)
+        let l:prefix[1] = ''
+        let l:prefix[2] = 'split'
+        let l:prefix[3] = 'vsplit'
+        let l:prefix[4] = 'tabedit'
+        exec l:prefix[a:mode]. ' | set nonumber norelativenumber signcolumn=no | terminal'
+    endfunction
+    function! SendToNvimTerminal()
+        let l:job_id = -1
+        for l:buff_n in tabpagebuflist()
+            if nvim_buf_get_name(l:buff_n) =~ 'term://'
+                let l:job_id = nvim_buf_get_var(l:buff_n, 'terminal_job_id')  " sends to last opened terminal in current tab
+                break
             endif
-            sleep 10m
         endfor
-    endif
-endfunction
+        if l:job_id > 0
+            let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
+            let l:indent = match(l:lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
+            for l in l:lines
+                let l:new_indent = match(l, '[^ \t]')
+                if l:new_indent == 0
+                    call jobsend(l:job_id, l. "\n")
+                else
+                    call jobsend(l:job_id, l[l:indent:]. "\n")
+                endif
+            endfor
+        endif
+    endfunction
+else
+    set viminfo+=n~/.cache/vim/viminfo
+    " do not tmap <Esc> in vim 8
+    tnoremap <F2> <C-w>gT
+    tnoremap <F3> <C-w>gt
+    tnoremap <C-u> <C-\><C-n>
+    tnoremap <C-h> <C-w>h
+    tnoremap <C-j> <C-w>j
+    tnoremap <C-k> <C-w>k
+    tnoremap <C-l> <C-w>l
+    nnoremap <leader>to :exec 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
+    nnoremap <leader>tO :terminal ++curwin ++close<CR>
+    nnoremap <leader>th :terminal ++close<CR>
+    nnoremap <leader>tv :vertical terminal ++close<CR>
+    nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
+    nnoremap <leader>te V:call SendToTerminal()<CR>$
+    vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
+    function! SendToTerminal()
+        let l:buff_n = term_list()
+        if len(l:buff_n) > 0
+            let l:buff_n = l:buff_n[0]  " sends to most recently opened terminal
+            let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
+            let l:indent = match(l:lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
+            for l in l:lines
+                let l:new_indent = match(l, '[^ \t]')
+                if l:new_indent == 0
+                    call term_sendkeys(l:buff_n, l. "\<CR>")
+                else
+                    call term_sendkeys(l:buff_n, l[l:indent:]. "\<CR>")
+                endif
+                sleep 10m
+            endfor
+        endif
+    endfunction
+endif
 " }}}
 
 " ================== Windows settings =================== {{{
