@@ -264,3 +264,10 @@ elseif g:Completion == 2
 endif
 call dein#end()
 call dein#save_state()
+
+" =======================================================
+" lazy load on insert
+augroup InsertLazyLoad
+  autocmd!
+  autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! InsertLazyLoad
+augroup END

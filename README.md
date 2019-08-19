@@ -16,13 +16,15 @@ vim -c "PlugInstall" -c "qa"
 ## Set up nvim
 ```bash
 mkdir -p ~/.config/nvim
+mkdir -p ~/.local/bin
 ln -s ~/.vim/init.vim ~/.config/nvim/init.vim
 ln -s ~/.vim/autoload ~/.config/nvim/autoload
 ln -s ~/.vim/colors ~/.config/nvim/colors
 curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage 
 chmod u+x nvim.appimage
-mkdir -p ~/.local/bin
-mv nvim.appimage ~/.local/bin/nvim
+./nvim.appimage --appimage-extract
+mv squashfs-root ~/.local/nvim
+ln -s ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
 nvim -c "PlugInstall" -c "qa"
 ```
 
