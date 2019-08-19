@@ -219,6 +219,8 @@ endfunction
 
 " =======================================================
 " vim plug seems faster even with less lazy load
+" curl https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh > installer.sh
+" sh ./installer.sh ~/.vim/dein
 set runtimepath+=~/.vim/dein/repos/github.com/Shougo/dein.vim
 call dein#begin('~/.vim/dein')
 call dein#add('Shougo/dein.vim')
@@ -271,3 +273,12 @@ augroup InsertLazyLoad
   autocmd!
   autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! InsertLazyLoad
 augroup END
+
+" =======================================================
+" ale, replaced by coc
+Plug 'w0rp/ale'
+let g:ale_sign_column_always = 1
+let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_insert_leave = 1
+let g:ale_python_flake8_executable = 'flake8'
+let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
