@@ -676,7 +676,7 @@ if has('win32')
     vnoremap <C-c> "+y<Esc>
     if has('gui_running')
         nnoremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
-        nnoremap <leader>R :silent exec '!gvim "%:p"' <bar> quit<CR>
+        nnoremap <leader><C-r> :silent exec '!gvim "%:p"' <bar> quit<CR>
         set guifont=Consolas:h11:cANSI
         set guioptions=Mgrt
         set guicursor+=a:blinkon0
