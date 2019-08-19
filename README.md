@@ -20,11 +20,13 @@ mkdir -p ~/.local/bin
 ln -s ~/.vim/init.vim ~/.config/nvim/init.vim
 ln -s ~/.vim/autoload ~/.config/nvim/autoload
 ln -s ~/.vim/colors ~/.config/nvim/colors
+ln -s ~/.vim/coc-settings.json ~/.config/nvim/coc-settings.json
 curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage 
 chmod u+x nvim.appimage
 ./nvim.appimage --appimage-extract
 mv squashfs-root ~/.local/nvim
 ln -s ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
+rm nvim.appimage
 nvim -c "PlugInstall" -c "qa"
 ```
 
@@ -38,4 +40,5 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/
 ln -s .vim/.zshrc ~/.zshrc
 ln -s .vim/.bashrc ~/.bashrc
 ln -s ~/.vim/fish ~/.config/fish
+ln -s .vim/.tmux.conf ~/.tmux.conf
 ```
