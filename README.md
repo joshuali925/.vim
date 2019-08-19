@@ -17,7 +17,7 @@ vim -c "PlugInstall" -c "qa"
 ```bash
 mkdir -p ~/.config/nvim
 mkdir -p ~/.local/bin
-ln -s ~/.vim/init.vim ~/.config/nvim/init.vim
+ln -s ~/.vim/vimrc ~/.config/nvim/init.vim
 ln -s ~/.vim/autoload ~/.config/nvim/autoload
 ln -s ~/.vim/colors ~/.config/nvim/colors
 ln -s ~/.vim/coc-settings.json ~/.config/nvim/coc-settings.json
