@@ -28,16 +28,16 @@ Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiffsplit'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
+Plug 'shougo/echodoc.vim', { 'on': [] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'jiangmiao/auto-pairs'  " lazy load wouldn't work
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
-Plug 'shougo/echodoc.vim'
 Plug 'wellle/targets.vim'
 if g:Completion >= 0
-    Plug 'sirver/ultisnips'
-    Plug 'honza/vim-snippets'
-    Plug 'davidhalter/jedi-vim'
+    Plug 'sirver/ultisnips', { 'on': [] }
+    Plug 'honza/vim-snippets', { 'on': [] }
+    Plug 'davidhalter/jedi-vim', { 'on': [] }
 endif
 if g:Completion == 0
     Plug 'lifepillar/vim-mucomplete'
@@ -286,6 +286,10 @@ augroup AutoCommands
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
     autocmd FileType * setlocal formatoptions=jql | let b:args = ''
     autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
+augroup END
+augroup InsertLazyLoad
+  autocmd!
+  autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! InsertLazyLoad
 augroup END
 " }}}
 
@@ -612,79 +616,53 @@ endif
 " }}}
 
 " ====================== Terminal ======================= {{{
+tnoremap <F2> <C-\><C-n>gT
+tnoremap <F3> <C-\><C-n>gt
 tnoremap <C-u> <C-\><C-n>
-if has('nvim')
-    tnoremap <F2> <C-\><C-n>gT
-    tnoremap <F3> <C-\><C-n>gt
-    tnoremap <Esc> <C-\><C-n>
-    tnoremap <C-h> <C-\><C-n><C-w>h
-    tnoremap <C-j> <C-\><C-n><C-w>j
-    tnoremap <C-k> <C-\><C-n><C-w>k
-    tnoremap <C-l> <C-\><C-n><C-w>l
-    " nnoremap <leader>to :exec 'split | resize'. (winheight(0) * 2/5)<CR>
-    " nnoremap <leader>tO :terminal<CR>
-    " nnoremap <leader>th :split | terminal<CR>
-    " nnoremap <leader>tv :vsplit | terminal<CR>
-    " nnoremap <leader>tt :tabedit | terminal<CR>
-    " nnoremap <leader>te V:call SendToNvimTerminal()<CR>$
-    vnoremap <leader>te <Esc>:call SendToNvimTerminal()<CR>
-    autocmd TermOpen,BufEnter term://* startinsert
-    autocmd TermClose * quit
-    function! SendToNvimTerminal()
-        let l:job_id = -1
-        for l:buff_n in tabpagebuflist()
-            if nvim_buf_get_name(l:buff_n) =~ 'term://'
-                let l:job_id = nvim_buf_get_var(l:buff_n, 'terminal_job_id')
-                break
+tnoremap <Esc> <C-\><C-n>
+tnoremap <C-h> <C-\><C-n><C-w>h
+tnoremap <C-j> <C-\><C-n><C-w>j
+tnoremap <C-k> <C-\><C-n><C-w>k
+tnoremap <C-l> <C-\><C-n><C-w>l
+nnoremap <leader>to :call OpenNvimTerminal(0)<CR>
+nnoremap <leader>tO :call OpenNvimTerminal(1)<CR>
+nnoremap <leader>th :call OpenNvimTerminal(2)<CR>
+nnoremap <leader>tv :call OpenNvimTerminal(3)<CR>
+nnoremap <leader>tt :call OpenNvimTerminal(4)<CR>
+nnoremap <leader>te V:call SendToNvimTerminal()<CR>$
+vnoremap <leader>te <Esc>:call SendToNvimTerminal()<CR>
+autocmd TermOpen,BufEnter term://* startinsert
+autocmd TermClose term://* quit
+function! OpenNvimTerminal(mode)
+    let l:prefix = {}
+    let l:prefix[0] = 'split | resize'. (winheight(0) * 2/5)
+    let l:prefix[1] = ''
+    let l:prefix[2] = 'split'
+    let l:prefix[3] = 'vsplit'
+    let l:prefix[4] = 'tabedit'
+    exec l:prefix[a:mode]. ' | set nonumber norelativenumber signcolumn=no | terminal'
+endfunction
+function! SendToNvimTerminal()
+    let l:job_id = -1
+    for l:buff_n in tabpagebuflist()
+        if nvim_buf_get_name(l:buff_n) =~ 'term://'
+            let l:job_id = nvim_buf_get_var(l:buff_n, 'terminal_job_id')
+            break
+        endif
+    endfor
+    if l:job_id > 0
+        let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
+        let l:indent = match(l:lines[0], '[^ \t]') " for removing unnecessary indent
+        for l in l:lines
+            let l:new_indent = match(l, '[^ \t]')
+            if l:new_indent == 0
+                call jobsend(l:job_id, l. "\n")
+            else
+                call jobsend(l:job_id, l[l:indent:]. "\n")
             endif
         endfor
-        if l:job_id > 0
-            let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
-            let l:indent = match(l:lines[0], '[^ \t]') " for removing unnecessary indent
-            for l in l:lines
-                let l:new_indent = match(l, '[^ \t]')
-                if l:new_indent == 0
-                    call jobsend(l:job_id, l. "\n")
-                else
-                    call jobsend(l:job_id, l[l:indent:]. "\n")
-                endif
-            endfor
-        endif
-    endfunction
-else
-    set viminfo+=n~/.cache/vim/viminfo
-    " do not tmap <Esc> in vim 8
-    tnoremap <F2> <C-w>gT
-    tnoremap <F3> <C-w>gt
-    tnoremap <C-h> <C-w>h
-    tnoremap <C-j> <C-w>j
-    tnoremap <C-k> <C-w>k
-    tnoremap <C-l> <C-w>l
-    nnoremap <leader>to :exec 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
-    nnoremap <leader>tO :terminal ++curwin ++close<CR>
-    nnoremap <leader>th :terminal ++close<CR>
-    nnoremap <leader>tv :vertical terminal ++close<CR>
-    nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
-    nnoremap <leader>te V:call SendToTerminal()<CR>$
-    vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
-    function! SendToTerminal()
-        let l:buff_n = term_list()
-        if len(l:buff_n) > 0
-            let l:buff_n = l:buff_n[0] " sends to most recently opened terminal
-            let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
-            let l:indent = match(l:lines[0], '[^ \t]') " for removing unnecessary indent
-            for l in l:lines
-                let l:new_indent = match(l, '[^ \t]')
-                if l:new_indent == 0
-                    call term_sendkeys(l:buff_n, l. "\<CR>")
-                else
-                    call term_sendkeys(l:buff_n, l[l:indent:]. "\<CR>")
-                endif
-                sleep 10m
-            endfor
-        endif
-    endfunction
-endif
+    endif
+endfunction
 " }}}
 
 " ================== Windows settings =================== {{{
