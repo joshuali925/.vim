@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -2
+let g:Theme = 2
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -10,7 +10,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 " Plug 'mhinz/vim-startify'
 " Plug 'sheerun/vim-polyglot'
-Plug 'ianding1/leetcode.vim', { 'on': 'LeetCodeList' }
+Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList', 'LeetCodeTest', 'LeetCodeSubmit'] }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
@@ -125,6 +125,8 @@ set complete-=i
 set completeopt=menuone
 set nrformats-=octal
 set scrolloff=3
+set nostartofline
+set display=lastline
 set previewheight=7
 set foldmethod=marker
 set foldlevel=1
@@ -140,7 +142,6 @@ set path=**
 set encoding=utf-8
 set timeoutlen=1500
 set ttimeoutlen=40
-set display=lastline
 set synmaxcol=500
 set lazyredraw
 set noswapfile
@@ -614,6 +615,11 @@ endif
 
 " ====================== Terminal ======================= {{{
 if has('nvim')
+    " let loaded_matchit = 1
+    let g:python_host_prog = '/usr/bin/python2.7'
+    let g:python3_host_prog = '/usr/bin/python3.6'
+    " let g:loaded_python_provider = 1
+    " let g:loaded_python3_provider = 1
     tnoremap <F2> <C-\><C-n>gT
     tnoremap <F3> <C-\><C-n>gt
     tnoremap <C-u> <C-\><C-n>
@@ -622,27 +628,19 @@ if has('nvim')
     tnoremap <C-j> <C-\><C-n><C-w>j
     tnoremap <C-k> <C-\><C-n><C-w>k
     tnoremap <C-l> <C-\><C-n><C-w>l
-    nnoremap <leader>to :call OpenNvimTerminal(0)<CR>
-    nnoremap <leader>tO :call OpenNvimTerminal(1)<CR>
-    nnoremap <leader>th :call OpenNvimTerminal(2)<CR>
-    nnoremap <leader>tv :call OpenNvimTerminal(3)<CR>
-    nnoremap <leader>tt :call OpenNvimTerminal(4)<CR>
+    nnoremap <leader>to :exec 'split <bar> resize'. (winheight(0) * 2/5). ' <bar> terminal'<CR>
+    nnoremap <leader>tO :terminal<CR>
+    nnoremap <leader>th :split <bar> terminal<CR>
+    nnoremap <leader>tv :vsplit <bar> terminal<CR>
+    nnoremap <leader>tt :tabedit <bar> terminal<CR>
     nnoremap <leader>te V:call SendToNvimTerminal()<CR>$
     vnoremap <leader>te <Esc>:call SendToNvimTerminal()<CR>
     augroup NvimTerminal
         autocmd!
-        autocmd TermOpen,BufEnter term://* startinsert
+        autocmd TermOpen * set nonumber norelativenumber signcolumn=no | startinsert
         autocmd TermClose * quit
+        autocmd BufEnter term://* startinsert
     augroup END
-    function! OpenNvimTerminal(mode)
-        let l:prefix = {}
-        let l:prefix[0] = 'split | resize'. (winheight(0) * 2/5)
-        let l:prefix[1] = ''
-        let l:prefix[2] = 'split'
-        let l:prefix[3] = 'vsplit'
-        let l:prefix[4] = 'tabedit'
-        exec l:prefix[a:mode]. ' | set nonumber norelativenumber signcolumn=no | terminal'
-    endfunction
     function! SendToNvimTerminal()
         let l:job_id = -1
         for l:buff_n in tabpagebuflist()
