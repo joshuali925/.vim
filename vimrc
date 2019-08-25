@@ -1,23 +1,20 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -1
+let g:Theme = -2
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
-let g:NerdFont = 1
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
 " }}}
 
 " ===================== Plugins ========================= {{{
 call plug#begin('~/.vim/plugged')
-if g:NerdFont == 1
-    Plug 'mhinz/vim-startify'
-    Plug 'ryanoasis/vim-devicons'
-endif
+" Plug 'mhinz/vim-startify'
 " Plug 'sheerun/vim-polyglot'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList', 'LeetCodeTest', 'LeetCodeSubmit'] }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
+Plug 'ryanoasis/vim-devicons', { 'on': 'NERDTreeTabsToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
@@ -56,16 +53,22 @@ silent! call yankstack#setup()
 " }}}
 
 " ===================== Themes ========================== {{{
-let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+filetype plugin indent on
+syntax enable
+let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"  " truecolor and cursor shape
 let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+let &t_SI.="\e[6 q"
+let &t_SR.="\e[4 q"
+let &t_EI.="\e[2 q"
 set termguicolors
-let g:ayucolor='light'
-set background=light
-if g:Theme < 0
-    let g:ayucolor='mirage'
-    set background=dark
-endif
 function! SetTheme()
+    if g:Theme < 0
+        let g:ayucolor='mirage'
+        set background=dark
+    else
+        let g:ayucolor='light'
+        set background=light
+    endif
     let l:Theme_list = {}
     let l:Theme_list[0] = 'solarized8_flat'
     let l:Theme_list[1] = 'PaperColor'
@@ -85,11 +88,6 @@ call SetTheme()
 " }}}
 
 " ======================= Basics ======================== {{{
-filetype plugin indent on
-syntax enable
-let &t_SI.="\e[6 q"
-let &t_SR.="\e[4 q"
-let &t_EI.="\e[2 q"
 if &compatible | set nocompatible | endif
 set backspace=eol,start,indent
 set whichwrap+=<,>,[,]
@@ -732,11 +730,7 @@ if has('win32')
         nnoremap <leader><C-r> :silent exec '!gvim "%:p"' <bar> quit<CR>
         set guioptions=Mgrt
         set guicursor+=a:blinkon0
-        if g:NerdFont == 0
-            set guifont=Consolas:h11:cANSI
-        else
-            set guifont=Consolas_NF:h11:cANSI
-        endif
+        set guifont=Consolas_NF:h11:cANSI
         if &columns < 85 && &lines < 30
             set lines=25
             set columns=90
