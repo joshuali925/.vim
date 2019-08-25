@@ -1,15 +1,19 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 2
+let g:Theme = -1
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
+let g:NerdFont = 0
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
 " }}}
 
 " ===================== Plugins ========================= {{{
 call plug#begin('~/.vim/plugged')
-Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
-" Plug 'mhinz/vim-startify'
+if g:NerdFont == 1
+    Plug 'mhinz/vim-startify'
+    Plug 'ryanoasis/vim-devicons'
+endif
 " Plug 'sheerun/vim-polyglot'
+Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList', 'LeetCodeTest', 'LeetCodeSubmit'] }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
@@ -150,7 +154,7 @@ set nobackup
 set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)%l/%L\ %P
 " }}}
 
-" ====================== Shortcuts ====================== {{{
+" ====================== Mappings ======================= {{{
 let mapleader=';'
 nmap <leader>1 <F1>
 nmap <leader>2 <F2>
@@ -261,7 +265,7 @@ nnoremap <leader>fg :LeaderfRgInteractive<CR>
 nnoremap <leader>fl :LeaderfLineAll<CR>
 nnoremap <leader>fa :LeaderfSelf<CR>
 nnoremap <leader>fs :vertical sfind *
-nnoremap <leader>ft :tabfind *
+nnoremap <leader>ft :TagbarToggle<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
@@ -478,6 +482,7 @@ let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_ReverseOrder = 1
 let g:Lf_ShortcutF = '<C-p>'
+let g:Lf_PreviewResult = { 'Colorscheme': 1 }
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
 let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
@@ -725,12 +730,20 @@ if has('win32')
     if has('gui_running')
         nnoremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
         nnoremap <leader><C-r> :silent exec '!gvim "%:p"' <bar> quit<CR>
-        set guifont=Consolas:h11:cANSI
         set guioptions=Mgrt
         set guicursor+=a:blinkon0
-        if &columns < 85 && &lines < 30
-            set lines=25
-            set columns=85
+        if g:NerdFont == 0
+            set guifont=Consolas:h11:cANSI
+            if &columns < 85 && &lines < 30
+                set lines=25
+                set columns=85
+            endif
+        else
+            set guifont=FiraMono_NF:h11:cANSI:qDRAFT
+            if &columns < 85 && &lines < 30
+                set lines=25
+                set columns=90
+            endif
         endif
     endif
 endif
