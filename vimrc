@@ -1,7 +1,7 @@
 " ==================== Settings ========================= {{{
 let g:Theme = -1
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
-let g:NerdFont = 0
+let g:NerdFont = 1
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
 " }}}
@@ -734,16 +734,12 @@ if has('win32')
         set guicursor+=a:blinkon0
         if g:NerdFont == 0
             set guifont=Consolas:h11:cANSI
-            if &columns < 85 && &lines < 30
-                set lines=25
-                set columns=85
-            endif
         else
-            set guifont=FiraMono_NF:h11:cANSI:qDRAFT
-            if &columns < 85 && &lines < 30
-                set lines=25
-                set columns=90
-            endif
+            set guifont=Consolas_NF:h11:cANSI
+        endif
+        if &columns < 85 && &lines < 30
+            set lines=25
+            set columns=90
         endif
     endif
 endif
