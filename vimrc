@@ -6,7 +6,7 @@ let g:ExecCommand = ''
 " }}}
 
 " ===================== Plugins ========================= {{{
-call plug#begin('~/.vim/plugged')
+call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged
 " Plug 'mhinz/vim-startify'
 " Plug 'sheerun/vim-polyglot'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
@@ -28,16 +28,20 @@ Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiffsplit'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
-Plug 'shougo/echodoc.vim', { 'on': [] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'jiangmiao/auto-pairs'  " lazy load wouldn't work
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'wellle/targets.vim'
 if g:Completion >= 0
+    Plug 'shougo/echodoc.vim', { 'on': [] }
     Plug 'sirver/ultisnips', { 'on': [] }
     Plug 'honza/vim-snippets', { 'on': [] }
     Plug 'davidhalter/jedi-vim', { 'on': [] }
+    augroup LazyLoad
+        autocmd!
+        autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! LazyLoad
+    augroup END
 endif
 if g:Completion == 0
     Plug 'lifepillar/vim-mucomplete'
@@ -53,15 +57,16 @@ silent! call yankstack#setup()
 " }}}
 
 " ===================== Themes ========================== {{{
+set guioptions=Mgrt  " set before filetype and syntax
 filetype plugin indent on
 syntax enable
-let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"  " truecolor and cursor shape
+set termguicolors
+let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"  " truecolor
 let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
-let &t_SI.="\e[6 q"
+let &t_SI.="\e[6 q"  " cursor shape
 let &t_SR.="\e[4 q"
 let &t_EI.="\e[2 q"
-set termguicolors
-function! SetTheme()
+function! LoadColorscheme()
     if g:Theme < 0
         let g:ayucolor='mirage'
         set background=dark
@@ -69,22 +74,22 @@ function! SetTheme()
         let g:ayucolor='light'
         set background=light
     endif
-    let l:Theme_list = {}
-    let l:Theme_list[0] = 'solarized8_flat'
-    let l:Theme_list[1] = 'PaperColor'
-    let l:Theme_list[2] = 'github'
-    let l:Theme_list[3] = 'gruvbox'
-    let l:Theme_list[4] = 'two-firewatch'
-    let l:Theme_list[5] = 'ayu'
-    let l:Theme_list[-1] = 'onedark'
-    let l:Theme_list[-2] = 'ayu'
-    let l:Theme_list[-3] = 'forest-night'
-    let l:Theme_list[-4] = 'gruvbox'
-    let l:Theme_list[-5] = 'two-firewatch'
-    let l:Theme_list[-6] = 'molokai'
-    exec 'colorscheme '. get(l:Theme_list, g:Theme, 'solarized8_flat')
+    let l:theme_list = {}
+    let l:theme_list[0] = 'solarized8_flat'
+    let l:theme_list[1] = 'PaperColor'
+    let l:theme_list[2] = 'github'
+    let l:theme_list[3] = 'gruvbox'
+    let l:theme_list[4] = 'two-firewatch'
+    let l:theme_list[5] = 'ayu'
+    let l:theme_list[-1] = 'onedark'
+    let l:theme_list[-2] = 'ayu'
+    let l:theme_list[-3] = 'forest-night'
+    let l:theme_list[-4] = 'gruvbox'
+    let l:theme_list[-5] = 'two-firewatch'
+    let l:theme_list[-6] = 'molokai'
+    exec 'colorscheme '. get(l:theme_list, g:Theme, 'solarized8_flat')
 endfunction
-call SetTheme()
+call LoadColorscheme()  " load after filetype and syntax
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -149,7 +154,7 @@ set lazyredraw
 set noswapfile
 set nowritebackup
 set nobackup
-set statusline=%<[%{mode()}]\ %f\ %{GetPasteStatus()}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)%l/%L\ %P
+set statusline=%<[%{mode()}]\ %F\ %{GetPasteStatus()}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
 " }}}
 
 " ====================== Mappings ======================= {{{
@@ -209,9 +214,7 @@ noremap <Down> gj
 noremap <Up> gk
 xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
 nnoremap Q @q
-nnoremap < <<
 vnoremap < <gv
-nnoremap > >>
 vnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
@@ -285,6 +288,7 @@ augroup AutoCommands
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif  " restore last edit position
     autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
+    autocmd FileType markdown let g:table_mode_corner = '|'
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType python set nosmartindent
     autocmd FileType c,cpp,java,javascript inoremap <buffer> ;; <C-o>$;
@@ -292,10 +296,6 @@ augroup AutoCommands
     autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
     autocmd FileType * setlocal formatoptions=jql | let b:args = ''
     autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
-augroup END
-augroup InsertLazyLoad
-  autocmd!
-  autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! InsertLazyLoad
 augroup END
 " }}}
 
@@ -480,7 +480,6 @@ let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_ReverseOrder = 1
 let g:Lf_ShortcutF = '<C-p>'
-let g:Lf_PreviewResult = { 'Colorscheme': 1 }
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
 let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
@@ -708,16 +707,17 @@ endif
 if has('win32')
     " set PYTHONHOME for vim (windows python bug)
     " also needs to reset when entering virtual environments
+    " 8/27/19 - seems to work without setting PYTHONHOME now
+    " if $PYTHONHOME == ''
+    "     let $PYTHONHOME = $LOCALAPPDATA. '/Programs/Python/Python37'
+    " endif
     " Activate works for conda only, do NOT use for virtualenv
-    if $PYTHONHOME == ''
-        let $PYTHONHOME = 'C:\Users\Josh\Anaconda3'
-    endif
     function! ActivatePyEnv(environment)
         if a:environment == ''
             silent exec '!venv & gvim '. expand('%:p')
         else
-            " silent exec '!activate '. a:environment. ' & gvim '. expand('%:p')
-            silent exec '!activate '. a:environment. ' & gvim '. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
+            silent exec '!activate '. a:environment. ' & gvim '. expand('%:p')
+            " silent exec '!activate '. a:environment. ' & gvim '. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
         endif
     endfunction
     command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
@@ -728,7 +728,6 @@ if has('win32')
     if has('gui_running')
         nnoremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
         nnoremap <leader><C-r> :silent exec '!gvim "%:p"' <bar> quit<CR>
-        set guioptions=Mgrt
         set guicursor+=a:blinkon0
         set guifont=Consolas_NF:h11:cANSI
         if &columns < 85 && &lines < 30
