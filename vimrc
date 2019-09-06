@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -2
+let g:Theme = -3
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -135,8 +135,8 @@ set scrolloff=3
 set nostartofline
 set display=lastline
 set previewheight=7
-set foldmethod=marker
-set foldlevel=1
+set foldmethod=indent
+set nofoldenable
 set belloff=all
 set history=500
 set sessionoptions-=buffer
@@ -227,6 +227,7 @@ nnoremap yp "0p
 nnoremap cr :call EditRegister()<CR>
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
+vnoremap ` c`<C-r><C-p>"`<Esc>
 vnoremap ( c(<C-r><C-p>")<Esc>
 vnoremap [ c[<C-r><C-p>"]<Esc>
 vnoremap { c{<C-r><C-p>"}<Esc>
@@ -273,7 +274,6 @@ nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
-inoremap <leader><leader>w <leader><Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :write !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
@@ -288,13 +288,11 @@ augroup AutoCommands
     autocmd!
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif  " restore last edit position
     autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
-    autocmd FileType markdown let g:table_mode_corner = '|'
+    autocmd FileType vim setlocal foldmethod=marker  " use triple curly brackets for fold instead of indentation
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType python set nosmartindent
-    autocmd FileType c,cpp,java,javascript inoremap <buffer> ;; <C-o>$;
-    autocmd FileType python inoremap <buffer> ;; <C-o>$:
-    autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
-    autocmd FileType * setlocal formatoptions=jql | let b:args = ''
+    autocmd FileType python set nosmartindent  " fix python comment indentation
+    autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special  " highlight python keyword self
+    autocmd FileType * setlocal formatoptions=jql | let b:args = ''  " b:args for :SetArgs
     autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
 augroup END
 " }}}
@@ -422,10 +420,8 @@ endfunction
 let g:FoldOn = 0
 function! ToggleFold()
     if g:FoldOn == 0
-        set foldmethod=indent
         exec 'normal! zM'
     else
-        set foldmethod=marker
         exec 'normal! zR'
     endif
     let g:FoldOn = 1 - g:FoldOn
@@ -494,6 +490,7 @@ let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
+let g:table_mode_corner = '|'  " markdown compatible tablemode
 let g:leetcode_solution_filetype = 'python3'
 let g:leetcode_username = 'joshuali925'  " keyring password = 1
 " }}}

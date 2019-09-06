@@ -10,6 +10,13 @@
 # cd triggers ls
 function echo_dir --on-variable PWD; ls -CF; end;
 
+function f
+    find . -iname \*$argv[1]\*
+end
+function cc
+    gcc $argv[1].c -o $argv[1] -g && ./$argv
+end
+
 # add path
 set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 # set -gx PATH $HOME/.local/bin $HOME/.vim/bin $HOME/miniconda3/bin $PATH
