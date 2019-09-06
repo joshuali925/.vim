@@ -479,6 +479,7 @@ let g:Lf_ShortcutF = '<C-p>'
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
 let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
+let g:Lf_WorkingDirectoryMode = 'Ac'
 let g:Lf_CacheDirectory = expand('~/.cache/')
 let g:tagbar_compact = 1
 let g:tagbar_sort = 0
