@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -3
+let g:Theme = 1
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -213,7 +213,6 @@ vnoremap - $h
 noremap <Down> gj
 noremap <Up> gk
 xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
-nnoremap Q @q
 vnoremap < <gv
 vnoremap > >gv
 nnoremap o o<Space><BS>
@@ -224,6 +223,7 @@ inoremap <CR> <CR><Space><BS>
 nnoremap gf <C-w>gf
 nnoremap gp `[v`]
 nnoremap yp "0p
+nnoremap yP "0P
 nnoremap cr :call EditRegister()<CR>
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
@@ -270,7 +270,7 @@ nnoremap <leader>fs :vertical sfind *
 nnoremap <leader>ft :TagbarToggle<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
-nnoremap <leader>l :nohlsearch <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
+nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -286,7 +286,7 @@ nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 " ====================== Autocmd ======================== {{{
 augroup AutoCommands
     autocmd!
-    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"zz" | endif  " restore last edit position
+    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"" | endif  " restore last edit position
     autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
     autocmd FileType vim setlocal foldmethod=marker  " use triple curly brackets for fold instead of indentation
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
@@ -492,6 +492,7 @@ let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
 let g:table_mode_corner = '|'  " markdown compatible tablemode
+let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c']  " should work without plugins
 let g:leetcode_solution_filetype = 'python3'
 let g:leetcode_username = 'joshuali925'  " keyring password = 1
 " }}}
