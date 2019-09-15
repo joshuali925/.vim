@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 1
+let g:Theme = -2
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python'
 let g:ExecCommand = ''
@@ -66,30 +66,27 @@ let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 let &t_SI.="\e[6 q"  " cursor shape
 let &t_SR.="\e[4 q"
 let &t_EI.="\e[2 q"
-function! LoadColorscheme()
-    if g:Theme < 0
-        let g:ayucolor='mirage'
-        set background=dark
-    else
-        let g:ayucolor='light'
-        set background=light
-    endif
-    let l:theme_list = {}
-    let l:theme_list[0] = 'solarized8_flat'
-    let l:theme_list[1] = 'PaperColor'
-    let l:theme_list[2] = 'github'
-    let l:theme_list[3] = 'gruvbox'
-    let l:theme_list[4] = 'two-firewatch'
-    let l:theme_list[5] = 'ayu'
-    let l:theme_list[-1] = 'onedark'
-    let l:theme_list[-2] = 'ayu'
-    let l:theme_list[-3] = 'forest-night'
-    let l:theme_list[-4] = 'gruvbox'
-    let l:theme_list[-5] = 'two-firewatch'
-    let l:theme_list[-6] = 'molokai'
-    exec 'colorscheme '. get(l:theme_list, g:Theme, 'solarized8_flat')
-endfunction
-call LoadColorscheme()  " load after filetype and syntax
+if g:Theme < 0  " load theme after filetype and syntax
+    let g:ayucolor='mirage'
+    set background=dark
+else
+    let g:ayucolor='light'
+    set background=light
+endif
+let s:theme_list = {}
+let s:theme_list[0] = 'solarized8_flat'
+let s:theme_list[1] = 'PaperColor'
+let s:theme_list[2] = 'github'
+let s:theme_list[3] = 'gruvbox'
+let s:theme_list[4] = 'two-firewatch'
+let s:theme_list[5] = 'ayu'
+let s:theme_list[-1] = 'onedark'
+let s:theme_list[-2] = 'ayu'
+let s:theme_list[-3] = 'forest-night'
+let s:theme_list[-4] = 'gruvbox'
+let s:theme_list[-5] = 'two-firewatch'
+let s:theme_list[-6] = 'molokai'
+exec 'colorscheme '. get(s:theme_list, g:Theme, 'solarized8_flat')
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -213,6 +210,7 @@ vnoremap - $h
 noremap <Down> gj
 noremap <Up> gk
 xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
+nnoremap Q @q
 vnoremap < <gv
 vnoremap > >gv
 nnoremap o o<Space><BS>
@@ -271,8 +269,8 @@ nnoremap <leader>ft :TagbarToggle<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>s :call PrintVarUnderCursor()<CR>
-nnoremap <leader>S :call PrintVarOnCurrLine()<CR>
+nnoremap <leader>s :call PrintVarsOnCurrLine()<CR>
+nnoremap <leader>S :call PrintVarUnderCursor()<CR>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -457,21 +455,31 @@ function! TogglePreview()
 endfunction
 function! PrintVarUnderCursor()
     let l:var = expand('<cword>')
-    if &filetype == 'python'
-        call append(line('.'), "print('". l:var. ": {}'.format(". l:var. '))')
-    elseif &filetype == 'javascript'
-        call append(line('.'), 'console.log(`'. l:var. ': ${'. l:var. '}`)')
-    else
-        return
+    let l:prints = {}
+    let l:prints['python'] = "print('". l:var. ": {}'.format(". l:var. '))'
+    let l:prints['javascript'] = 'console.log(`'. l:var. ': ${'. l:var. '}`)'
+    if has_key(l:prints, &filetype)
+        exec "normal! o\<Space>\<BS>"
+        call append(line('.'), l:prints[&filetype])
+        normal! J
     endif
-    normal! j==k
 endfunction
-function! PrintVarOnCurrLine()
-    let l:vars = substitute(getline('.'), ' ', '', 'ge')
-    let l:vars = substitute(l:vars, ',', ', ', 'ge')
-    let l:string = substitute(l:vars, ', ', ': {} | ', 'ge'). ': {}'
-    call setline(line('.'), "print('". l:string. "'.format(". l:vars. "))")
-    normal! j==k
+function! PrintVarsOnCurrLine()
+    let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
+    let l:prints = {}
+    let l:prints['python'] = "print(f'"
+    let l:prints['javascript'] = 'console.log(`'
+    for l:var in l:vars[:-2]
+        let l:prints['python'] = l:prints['python']. l:var. ': {'. l:var. '} | '
+        let l:prints['javascript'] = l:prints['javascript']. l:var. ': ${'. l:var. '} | '
+    endfor
+    let l:prints['python'] = l:prints['python']. l:vars[-1]. ': {'. l:vars[-1]. "}')"
+    let l:prints['javascript'] = l:prints['javascript']. l:vars[-1]. ': ${'. l:vars[-1]. '}`)'
+    if has_key(l:prints, &filetype)
+        exec "normal! cc\<Space>\<BS>"
+        call append(line('.'), l:prints[&filetype])
+        normal! J
+    endif
 endfunction
 " }}}
 
