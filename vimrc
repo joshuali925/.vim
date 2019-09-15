@@ -271,6 +271,8 @@ nnoremap <leader>ft :TagbarToggle<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
+nnoremap <leader>s :call PrintVarUnderCursor()<CR>
+nnoremap <leader>S :call PrintVarOnCurrLine()<CR>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -452,6 +454,24 @@ function! TogglePreview()
         echo 'Preview off'
     endif
     let g:PreviewOn = 1 - g:PreviewOn
+endfunction
+function! PrintVarUnderCursor()
+    let l:var = expand('<cword>')
+    if &filetype == 'python'
+        call append(line('.'), "print('". l:var. ": {}'.format(". l:var. '))')
+    elseif &filetype == 'javascript'
+        call append(line('.'), 'console.log(`'. l:var. ': ${'. l:var. '}`)')
+    else
+        return
+    endif
+    normal! j==k
+endfunction
+function! PrintVarOnCurrLine()
+    let l:vars = substitute(getline('.'), ' ', '', 'ge')
+    let l:vars = substitute(l:vars, ',', ', ', 'ge')
+    let l:string = substitute(l:vars, ', ', ': {} | ', 'ge'). ': {}'
+    call setline(line('.'), "print('". l:string. "'.format(". l:vars. "))")
+    normal! j==k
 endfunction
 " }}}
 
