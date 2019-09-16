@@ -133,7 +133,7 @@ set nostartofline
 set display=lastline
 set previewheight=7
 set foldmethod=indent
-set nofoldenable
+set foldlevelstart=99
 set belloff=all
 set history=500
 set sessionoptions-=buffer
@@ -151,7 +151,7 @@ set lazyredraw
 set noswapfile
 set nowritebackup
 set nobackup
-set statusline=%<[%{mode()}]\ %F\ %{GetPasteStatus()}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
+set statusline=%<[%{mode()}]\ %F\ %{&paste==1?'[paste]':''}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
 " }}}
 
 " ====================== Mappings ======================= {{{
@@ -269,8 +269,7 @@ nnoremap <leader>ft :TagbarToggle<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>s :call PrintVarsOnCurrLine()<CR>
-nnoremap <leader>S :call PrintVarUnderCursor()<CR>
+nnoremap <leader>s :call PrintCurrVars()<CR>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -357,11 +356,11 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Undo Tree', 'UndotreeToggle', 'Toggle Undotree')
     call g:quickmenu#append('Tagbar', 'TagbarToggle', 'Toggle Tagbar')
     call g:quickmenu#append('Table Mode', 'TableModeToggle', 'Toggle TableMode')
-    call g:quickmenu#append('Diff %{g:DiffOn==1? "[x]" :"[ ]"}', 'call ToggleDiff()', 'Toggle diff in current window')
-    call g:quickmenu#append('Fold %{g:FoldOn==1? "[x]" :"[ ]"}', 'call ToggleFold()', 'Toggle fold by indent')
+    call g:quickmenu#append('Diff %{&diff? "[x]" :"[ ]"}', 'exec &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
+    call g:quickmenu#append('Fold %{&foldlevel? "[ ]" :"[x]"}', 'exec &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
     call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', 'Toggle paste mode')
     call g:quickmenu#append('Spelling %{&spell? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker')
-    call g:quickmenu#append('Preview %{g:PreviewOn==1? "[x]" :"[ ]"}', 'call TogglePreview()', 'Toggle function preview')
+    call g:quickmenu#append('Preview %{&completeopt=~"preview"? "[x]" :"[ ]"}', 'call TogglePreview()', 'Toggle function preview')
     call g:quickmenu#current(1)
     call g:quickmenu#header('Tabular Normal Mode')
     call g:quickmenu#append('# Center Delimiter', '')
@@ -396,88 +395,48 @@ endfunction
 
 " ====================== Functions ====================== {{{
 function! InsertCommentLine()
-    exec 'normal! o'
-    exec 'normal! 55i='
+    exec "normal! o\<Space>\<BS>\<Esc>55i="
     exec 'Commentary'
 endfunction
 function! ExecuteMacroOverVisualRange()
-    echo '@'.getcmdline()
+    echo '@'. getcmdline()
     exec ":'<,'>normal! @". nr2char(getchar())
 endfunction
 function! EditRegister() abort
     let l:r = nr2char(getchar())
     call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
 endfunction
-let g:DiffOn = 0
-function! ToggleDiff()
-    if g:DiffOn == 0
-        exec 'windo diffthis'
-    else
-        exec 'windo diffoff'
-    endif
-    let g:DiffOn = 1 - g:DiffOn
-endfunction
-let g:FoldOn = 0
-function! ToggleFold()
-    if g:FoldOn == 0
-        exec 'normal! zM'
-    else
-        exec 'normal! zR'
-    endif
-    let g:FoldOn = 1 - g:FoldOn
-endfunction
-" shift alt drag to select and copy
-function! TogglePaste()
+function! TogglePaste()  " tip: shift alt drag to select and copy
     if &paste
         set nopaste number mouse=nv signcolumn=auto
     else
         set paste nonumber norelativenumber mouse= signcolumn=no
     endif
 endfunction
-function! GetPasteStatus()
-    if &paste
-        return '[paste]'
-    else
-        return ''
-    endif
-endfunction
-let g:PreviewOn = 0
 function! TogglePreview()
-    if g:PreviewOn == 0
-        set completeopt+=preview
-        echo 'Preview on'
-    else
+    if &completeopt =~ 'preview'
         set completeopt-=preview
         exec 'pclose'
         echo 'Preview off'
-    endif
-    let g:PreviewOn = 1 - g:PreviewOn
-endfunction
-function! PrintVarUnderCursor()
-    let l:var = expand('<cword>')
-    let l:prints = {}
-    let l:prints['python'] = "print('". l:var. ": {}'.format(". l:var. '))'
-    let l:prints['javascript'] = 'console.log(`'. l:var. ': ${'. l:var. '}`)'
-    if has_key(l:prints, &filetype)
-        exec "normal! o\<Space>\<BS>"
-        call append(line('.'), l:prints[&filetype])
-        normal! J
+    else
+        set completeopt+=preview
+        echo 'Preview on'
     endif
 endfunction
-function! PrintVarsOnCurrLine()
-    let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
-    let l:prints = {}
-    let l:prints['python'] = "print(f'"
-    let l:prints['javascript'] = 'console.log(`'
-    for l:var in l:vars[:-2]
-        let l:prints['python'] = l:prints['python']. l:var. ': {'. l:var. '} | '
-        let l:prints['javascript'] = l:prints['javascript']. l:var. ': ${'. l:var. '} | '
-    endfor
-    let l:prints['python'] = l:prints['python']. l:vars[-1]. ': {'. l:vars[-1]. "}')"
-    let l:prints['javascript'] = l:prints['javascript']. l:vars[-1]. ': ${'. l:vars[-1]. '}`)'
-    if has_key(l:prints, &filetype)
-        exec "normal! cc\<Space>\<BS>"
-        call append(line('.'), l:prints[&filetype])
+function! PrintCurrVars()
+    if getline('.') =~ '[^a-zA-Z0-9_, ]'  " print variable under cursor if line has punctuations besides commas
+        let l:vars = [expand('<cword>')]
+        let l:new_line = "normal! o\<Space>\<BS>"
+    else  " print variables on current line separated by commas
+        let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
+        let l:new_line = "normal! cc\<Space>\<BS>"
+    endif
+    let l:print = {}
+    let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
+    let l:print['javascript'] = 'console.log(`'. join(map(copy(l:vars), "v:val. ': ${'. v:val. '}'"), ' | '). '`)'
+    if has_key(l:print, &filetype)
+        exec l:new_line
+        call append(line('.'), l:print[&filetype])
         normal! J
     endif
 endfunction
@@ -526,23 +485,16 @@ let g:leetcode_username = 'joshuali925'  " keyring password = 1
 " }}}
 
 " ==================== Execute code ===================== {{{
-command! -complete=file -nargs=* SetArgs call SetArgs(<q-args>)
-function! SetArgs(command)  " :SetArgs <args...><CR>, all execution will use args
-    if a:command == ''
-        let b:args = ''
-    else
-        let b:args = ' '. a:command
-    endif
-endfunction
-let g:OutputCount = 1
+command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
+let g:OutputCount = 1
 function! RunShellCommand(command)
     let l:expanded_command = substitute(a:command, './%<', './'. fnameescape(expand('%<')), '')
     let l:expanded_command = substitute(l:expanded_command, '%<', fnameescape(expand('%<')), '')
     let l:expanded_command = substitute(l:expanded_command, '%', fnameescape(expand('%')), '')
     let l:curr_bufnr = bufwinnr('%')
     let l:win_left = winnr('$')
-    while l:win_left>1 && bufname('%')!~'[Output_'
+    while l:win_left > 1 && bufname('%') !~ '[Output_'
         exec 'wincmd w'
         let l:win_left = l:win_left - 1
     endwhile
@@ -578,7 +530,7 @@ endif
 " }}}
 
 " ==================== AutoComplete ===================== {{{
-" let g:ycm_path_to_python_interpreter=''  " for ycmd, don't change
+" let g:ycm_path_to_python_interpreter=''  " for ycmd, don't modify
 let g:ycm_python_binary_path=g:PythonPath  " for JediHTTP
 let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
@@ -633,7 +585,7 @@ elseif g:Completion == 2  " coc
     let g:coc_snippet_next = '<Tab>'
     let g:coc_snippet_prev = '<S-Tab>'
     function! s:show_documentation()
-        if (index(['vim','help'], &filetype) >= 0)
+        if index(['vim','help'], &filetype) >= 0
             exec 'help '.expand('<cword>')
         else
             call CocAction('doHover')
@@ -681,13 +633,8 @@ if has('nvim')
         if l:job_id > 0
             let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
             let l:indent = match(l:lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
-            for l in l:lines
-                let l:new_indent = match(l, '[^ \t]')
-                if l:new_indent == 0
-                    call jobsend(l:job_id, l. "\n")
-                else
-                    call jobsend(l:job_id, l[l:indent:]. "\n")
-                endif
+            for l:line in l:lines
+                call jobsend(l:job_id, (match(l:line, '[^ \t]') ? l:line[l:indent:] : l:line). "\n")
             endfor
         endif
     endfunction
@@ -714,13 +661,8 @@ else
             let l:buff_n = l:buff_n[0]  " sends to most recently opened terminal
             let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
             let l:indent = match(l:lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
-            for l in l:lines
-                let l:new_indent = match(l, '[^ \t]')
-                if l:new_indent == 0
-                    call term_sendkeys(l:buff_n, l. "\<CR>")
-                else
-                    call term_sendkeys(l:buff_n, l[l:indent:]. "\<CR>")
-                endif
+            for l:line in l:lines
+                call term_sendkeys(l:buff_n, (match(l:line, '[^ \t]') ? l:line[l:indent:] : l:line). "\<CR>")
                 sleep 10m
             endfor
         endif
