@@ -1,7 +1,7 @@
 " ==================== Settings ========================= {{{
 let g:Theme = -2
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
-let g:PythonPath = 'python'
+let g:PythonPath = 'python3'
 let g:ExecCommand = ''
 " }}}
 
@@ -516,7 +516,7 @@ function! GetRunCommand()
     let l:run_command['cpp'] = 'g++ % -o %< -g && ./%<'
     let l:run_command['java'] = 'javac % && java %<'
     let l:run_command['javascript'] = 'node %'
-    return get(l:run_command, &filetype, ''). exists('b:args') ? b:args : ''
+    return get(l:run_command, &filetype, ''). (exists('b:args') ? b:args : '')
 endfunction
 if g:ExecCommand != ''
     nnoremap <leader>r :wall <bar> exec g:ExecCommand<CR>
