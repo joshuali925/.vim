@@ -66,14 +66,7 @@ let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 let &t_SI.="\e[6 q"  " cursor shape
 let &t_SR.="\e[4 q"
 let &t_EI.="\e[2 q"
-if g:Theme < 0  " load theme after filetype and syntax
-    let g:ayucolor='mirage'
-    set background=dark
-else
-    let g:ayucolor='light'
-    set background=light
-endif
-let s:theme_list = {}
+let s:theme_list = {}  " load theme after filetype and syntax, g:Theme < 0 for dark themes
 let s:theme_list[0] = 'solarized8_flat'
 let s:theme_list[1] = 'PaperColor'
 let s:theme_list[2] = 'github'
@@ -86,6 +79,8 @@ let s:theme_list[-3] = 'forest-night'
 let s:theme_list[-4] = 'gruvbox'
 let s:theme_list[-5] = 'two-firewatch'
 let s:theme_list[-6] = 'molokai'
+let g:ayucolor = g:Theme < 0 ? 'mirage' : 'light'
+exec 'set background='. (g:Theme < 0 ? 'dark' : 'light')
 exec 'colorscheme '. get(s:theme_list, g:Theme, 'solarized8_flat')
 " }}}
 
@@ -151,7 +146,7 @@ set lazyredraw
 set noswapfile
 set nowritebackup
 set nobackup
-set statusline=%<[%{mode()}]\ %F\ %{&paste==1?'[paste]':''}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
+set statusline=%<[%{mode()}]\ %F\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
 " }}}
 
 " ====================== Mappings ======================= {{{
@@ -289,9 +284,8 @@ augroup AutoCommands
     autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
     autocmd FileType vim setlocal foldmethod=marker  " use triple curly brackets for fold instead of indentation
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType python set nosmartindent  " fix python comment indentation
-    autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special  " highlight python keyword self
-    autocmd FileType * setlocal formatoptions=jql | let b:args = ''  " b:args for :SetArgs
+    autocmd FileType python set nosmartindent | syntax keyword pythonSelf self | highlight def link pythonSelf Special  " fix python comment indentation, highlight keyword self
+    autocmd FileType * setlocal formatoptions=jql
     autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
 augroup END
 " }}}
@@ -522,14 +516,14 @@ function! GetRunCommand()
     let l:run_command['cpp'] = 'g++ % -o %< -g && ./%<'
     let l:run_command['java'] = 'javac % && java %<'
     let l:run_command['javascript'] = 'node %'
-    return get(l:run_command, &filetype, ''). b:args
+    return get(l:run_command, &filetype, ''). exists('b:args') ? b:args : ''
 endfunction
 if g:ExecCommand != ''
     nnoremap <leader>r :wall <bar> exec g:ExecCommand<CR>
 endif
 " }}}
 
-" ==================== AutoComplete ===================== {{{
+" ==================== Auto complete ==================== {{{
 " let g:ycm_path_to_python_interpreter=''  " for ycmd, don't modify
 let g:ycm_python_binary_path=g:PythonPath  " for JediHTTP
 let g:echodoc_enable_at_startup = 1
