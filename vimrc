@@ -210,6 +210,7 @@ vnoremap < <gv
 vnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
+nnoremap cc cc<Space><BS>
 nnoremap K :call ShowDocs()<CR>
 nnoremap U :earlier<CR>
 inoremap <CR> <CR><Space><BS>
@@ -264,7 +265,8 @@ nnoremap <leader>ft :TagbarToggle<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>s :call PrintCurrVars()<CR>
+nnoremap <leader>s :call PrintCurrVars(0)<CR>
+vnoremap <leader>s :call PrintCurrVars(1)<CR>$
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :exec getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -320,9 +322,10 @@ function! ShowDocs()
         let g:jedi#completions_enabled = 0
         let g:jedi#show_call_signatures = '2'
         let g:jedi#documentation_command = 'K'
-        let g:jedi#rename_command = '<leader><C-r>'
+        let g:jedi#rename_command = '<leader>R'
         let g:jedi#goto_command = '<leader>d'
         let g:jedi#usages_command = '<leader>a'
+        let g:jedi#goto_stubs_command = ''
         call plug#load('jedi-vim')
         call jedi#show_documentation()
     else
@@ -417,10 +420,12 @@ function! TogglePreview()
         echo 'Preview on'
     endif
 endfunction
-function! PrintCurrVars()
-    if getline('.') =~ '[^a-zA-Z0-9_, ]'  " print variable under cursor if line has punctuations besides commas
+function! PrintCurrVars(visual)
+    let l:new_line = "normal! o\<Space>\<BS>"
+    if a:visual  " print selection
+        let l:vars = [getline('.')[getpos("'<")[2] - 1:getpos("'>")[2] - 1]]
+    elseif getline('.') =~ '[^a-zA-Z0-9_,\[\]. ]\|[a-zA-Z0-9_\]]\s\+\w'  " print variable under cursor if not in comma separated form
         let l:vars = [expand('<cword>')]
-        let l:new_line = "normal! o\<Space>\<BS>"
     else  " print variables on current line separated by commas
         let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
         let l:new_line = "normal! cc\<Space>\<BS>"
