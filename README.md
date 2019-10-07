@@ -8,8 +8,7 @@ pip install --user flake8 yapf rope neovim pynvim jedi
 
 ## Set up vim
 ```bash
-cd ~
-mkdir -p .cache/vim/undo
+mkdir -p ~/.cache/vim/undo
 vim -c "PlugInstall" -c "qa"
 ```
 
@@ -20,6 +19,7 @@ mkdir -p ~/.local/bin
 ln -s ~/.vim/vimrc ~/.config/nvim/init.vim
 ln -s ~/.vim/autoload ~/.config/nvim/autoload
 ln -s ~/.vim/colors ~/.config/nvim/colors
+ln -s ~/.vim/plugged ~/.config/nvim/plugged
 ln -s ~/.vim/coc-settings.json ~/.config/nvim/coc-settings.json
 curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage 
 chmod u+x nvim.appimage
