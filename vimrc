@@ -6,9 +6,8 @@ let g:ExecCommand = ''
 " }}}
 
 " ===================== Plugins ========================= {{{
-call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged
-" Plug 'mhinz/vim-startify'
-" Plug 'sheerun/vim-polyglot'
+call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
+Plug 'mhinz/vim-startify'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList', 'LeetCodeTest', 'LeetCodeSubmit'] }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
@@ -200,8 +199,10 @@ xmap gS <Plug>VgSurround
 nmap Y y$
 noremap 0 ^
 noremap ^ 0
-nnoremap - $
+noremap - $
 vnoremap - $h
+noremap <Home> g^
+noremap <End> g$
 noremap <Down> gj
 noremap <Up> gk
 xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
@@ -595,10 +596,10 @@ endif
 
 " ====================== Terminal ======================= {{{
 if has('nvim')
-    " let loaded_matchit = 1
-    let g:python_host_prog = '/usr/bin/python2.7'
+    let loaded_matchit = 1  " disable matchit
+    " let g:python_host_prog = '/usr/bin/python2.7'
     let g:python3_host_prog = '/usr/bin/python3.6'
-    " let g:loaded_python_provider = 1
+    let g:loaded_python_provider = 1
     " let g:loaded_python3_provider = 1
     tnoremap <F2> <C-\><C-n>gT
     tnoremap <F3> <C-\><C-n>gt
