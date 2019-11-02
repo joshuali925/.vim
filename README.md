@@ -12,6 +12,14 @@ mkdir -p ~/.cache/vim/undo
 vim -c "PlugInstall" -c "qa"
 ```
 
+## Set up vim on Windows
+```bash
+# download 64-bit gvim from https://github.com/vim/vim-win32-installer/releases/latest
+mkdir %USERPROFILE%\.cache\vim\undo
+git clone https://github.com/joshuali925/vim-configuration.git %USERPROFILE%\vimfiles
+vim -c "PlugInstall" -c "qa"
+```
+
 ## Set up nvim
 ```bash
 mkdir -p ~/.config/nvim
