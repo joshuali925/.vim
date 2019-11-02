@@ -13,6 +13,7 @@ Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList', 'LeetCodeTest', 'LeetCode
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeTabsToggle' }
 Plug 'ryanoasis/vim-devicons', { 'on': 'NERDTreeTabsToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
@@ -47,8 +48,6 @@ if g:Completion == 0
 elseif g:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
 elseif g:Completion == 2
-    " :CocInstall coc-git coc-snippets coc-highlight coc-tsserver coc-html coc-css coc-emmet coc-python
-    " if doesn't work, use cd ~/.config/coc/extensions && yarn add coc-...
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
 endif
 call plug#end()
@@ -121,6 +120,7 @@ set autoread
 set autochdir
 set complete-=i
 set completeopt=menuone
+set shortmess+=c
 set nrformats-=octal
 set scrolloff=3
 set nostartofline
@@ -196,6 +196,7 @@ nmap ySs <Plug>YSsurround
 nmap ySS <Plug>YSsurround
 xmap S <Plug>VSurround
 xmap gS <Plug>VgSurround
+" for yankstack, do NOT use nnoremap for Y y$
 nmap Y y$
 noremap 0 ^
 noremap ^ 0
@@ -206,20 +207,19 @@ noremap <End> g$
 noremap <Down> gj
 noremap <Up> gk
 xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
-nnoremap Q @q
+nnoremap Q gq
 vnoremap < <gv
 vnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap cc cc<Space><BS>
-nnoremap K :call ShowDocs()<CR>
-nnoremap U :earlier<CR>
 inoremap <CR> <CR><Space><BS>
 nnoremap gf <C-w>gf
 nnoremap gp `[v`]
 nnoremap yp "0p
 nnoremap yP "0P
 nnoremap cr :call EditRegister()<CR>
+nnoremap K :call ShowDocs()<CR>
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ` c`<C-r><C-p>"`<Esc>
@@ -256,7 +256,7 @@ nnoremap <leader><F2> :-tabmove<CR>
 nnoremap <leader><F3> :+tabmove<CR>
 nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
-nnoremap <leader>fb :LeaderfBufferAll<CR>
+nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunctionAll<CR>
 nnoremap <leader>fg :LeaderfRgInteractive<CR>
 nnoremap <leader>fl :LeaderfLineAll<CR>
@@ -481,7 +481,7 @@ let g:table_mode_motion_right_map = '<leader>tl'
 let g:table_mode_corner = '|'  " markdown compatible tablemode
 let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c']  " should work without plugins
 let g:leetcode_solution_filetype = 'python3'
-let g:leetcode_username = 'joshuali925'  " keyring password = 1
+let g:leetcode_username = 'joshuali925'  " keyring password is 1
 " }}}
 
 " ==================== Execute code ===================== {{{
@@ -539,14 +539,12 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
 if g:Completion == 0  " mucomplete
     set omnifunc=syntaxcomplete#Complete
     set completeopt+=noselect
-    set shortmess+=c
     inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     let g:mucomplete#enable_auto_at_startup = 1
-    let g:mucomplete#chains = {}
-    let g:mucomplete#chains.default = ['path', 'ulti', 'keyn', 'omni', 'file']
+    let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'file']}
 elseif g:Completion == 1  " YCM
     inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<CR>\<Space>\<BS>"
     inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
@@ -563,8 +561,10 @@ elseif g:Completion == 1  " YCM
     let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'
     let g:echodoc#enable_force_overwrite = 1
 elseif g:Completion == 2  " coc
+    let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python']
+    " to manually install extensions, run :CocInstall coc-git coc-...
+    " or run cd ~/.config/coc/extensions && yarn add coc-..., yarn cannot be cmdtest
     set updatetime=300
-    set shortmess+=c
     set signcolumn=yes
     inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
     inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
@@ -671,11 +671,8 @@ endif
 " }}}
 
 " ================== Windows settings =================== {{{
-" first manually create %UserProfile%/.cache/vim/undo directory
-" plugins are installed to %UserProfile%/.vim
 if has('win32')
-    " set PYTHONHOME for vim (windows python bug)
-    " also needs to reset when entering virtual environments
+    " this sets PYTHONHOME for vim (windows python bug), also needs to reset when entering virtual environments
     " 8/27/19 - seems to work without setting PYTHONHOME now
     " if $PYTHONHOME == ''
     "     let $PYTHONHOME = $LOCALAPPDATA. '/Programs/Python/Python37'
