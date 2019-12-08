@@ -206,7 +206,8 @@ noremap <Home> g^
 noremap <End> g$
 noremap <Down> gj
 noremap <Up> gk
-xnoremap @ :call ExecuteMacroOverVisualRange()<CR>
+xnoremap @q :normal @q<CR>
+xnoremap @@ :normal @@<CR>
 nnoremap Q gq
 vnoremap < <gv
 vnoremap > >gv
@@ -396,10 +397,6 @@ function! InsertCommentLine()
     exec "normal! o\<Space>\<BS>\<Esc>55i="
     exec 'Commentary'
 endfunction
-function! ExecuteMacroOverVisualRange()
-    echo '@'. getcmdline()
-    exec ":'<,'>normal! @". nr2char(getchar())
-endfunction
 function! EditRegister() abort
     let l:r = nr2char(getchar())
     call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
@@ -461,6 +458,7 @@ set wildignore+=*/tmp/*,*/\.git/*,*/\.oh-my-zsh/*,*/node_modules/*,*/venv/*,*/\.
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
+let g:Lf_UseCache = 0
 let g:Lf_ReverseOrder = 1
 let g:Lf_ShortcutF = '<C-p>'
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
