@@ -11,7 +11,6 @@ fi
 
 # User specific aliases and functions
 
-source ~/.vim/others/bashrc_wsl.sh
 source ~/.vim/others/common.sh
 source ~/.vim/others/git.sh
 
