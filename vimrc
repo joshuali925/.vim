@@ -21,6 +21,7 @@ Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
+Plug 'Raimondi/delimitMate', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
@@ -29,7 +30,6 @@ Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
-Plug 'jiangmiao/auto-pairs'  " lazy load wouldn't work
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'wellle/targets.vim'
@@ -38,9 +38,9 @@ if g:Completion >= 0
     Plug 'sirver/ultisnips', { 'on': [] }
     Plug 'honza/vim-snippets', { 'on': [] }
     Plug 'davidhalter/jedi-vim', { 'on': [] }
-    augroup LazyLoad
+    augroup LazyLoadCompletion
         autocmd!
-        autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! LazyLoad
+        autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! LazyLoadCompletion
     augroup END
 endif
 if g:Completion == 0
@@ -52,6 +52,10 @@ elseif g:Completion == 2
 endif
 call plug#end()
 silent! call yankstack#setup()
+augroup LazyLoad
+    autocmd!
+    autocmd InsertEnter * call plug#load('delimitMate') | autocmd! LazyLoad
+augroup END
 " }}}
 
 " ===================== Themes ========================== {{{
@@ -208,13 +212,12 @@ noremap <Down> gj
 noremap <Up> gk
 xnoremap @q :normal @q<CR>
 xnoremap @@ :normal @@<CR>
-nnoremap Q gq
+nnoremap Q q:
 vnoremap < <gv
 vnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap cc cc<Space><BS>
-inoremap <CR> <CR><Space><BS>
 nnoremap gf <C-w>gf
 nnoremap gp `[v`]
 nnoremap yp "0p
@@ -441,8 +444,9 @@ endfunction
 
 " =================== Other plugins ===================== {{{
 let g:asyncrun_open = 12
-let g:AutoPairsShortcutFastWrap = '<C-l>'
-let g:AutoPairsShortcutBackInsert = '<C-b>'
+let g:delimitMate_expand_space = 1
+let g:delimitMate_balance_matchpairs = 1
+let g:delimitMate_nesting_quotes = ['"', '`', "'"]
 let g:EasyMotion_smartcase = 1
 let g:NERDTreeWinSize = 23
 let g:NERDTreeShowHidden = 1
@@ -534,18 +538,16 @@ let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
+inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : delimitMate#WithinEmptyPair() ? "\<CR>\<Esc>O\<Space>\<BS>" : "\<CR>\<Space>\<BS>"
 if g:Completion == 0  " mucomplete
     set omnifunc=syntaxcomplete#Complete
     set completeopt+=noselect
     inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
-    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
-    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     let g:mucomplete#enable_auto_at_startup = 1
     let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'file']}
 elseif g:Completion == 1  " YCM
-    inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<CR>\<Space>\<BS>"
-    inoremap <expr> <C-x> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
+    inoremap <expr> <C-e> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     " let g:ycm_show_diagnostics_ui = 0
@@ -558,6 +560,10 @@ elseif g:Completion == 1  " YCM
     " '/path/to/include'
     let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'
     let g:echodoc#enable_force_overwrite = 1
+    imap <silent> <BS> <C-r>=YcmOnDeleteChar()<CR><Plug>delimitMateBS
+    function! YcmOnDeleteChar()
+        return pumvisible() ? "\<C-y>" : ""
+    endfunction
 elseif g:Completion == 2  " coc
     let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python']
     " to manually install extensions, run :CocInstall coc-git coc-...
@@ -568,8 +574,6 @@ elseif g:Completion == 2  " coc
     inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
     inoremap <expr> <C-@> coc#refresh()
     inoremap <expr> <C-Space> coc#refresh()
-    inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>\<Space>\<BS>"
-    inoremap <expr> <C-x> pumvisible() ? "\<C-e>" : "\<C-x>"
     xmap <C-f> <Plug>(coc-format-selected)
     nnoremap <C-f> :call CocAction('format')<CR>
     nnoremap K :call <SID>show_documentation()<CR>
@@ -678,20 +682,21 @@ if has('win32')
     " Activate works for conda only, do NOT use for virtualenv
     function! ActivatePyEnv(environment)
         if a:environment == ''
-            silent exec '!venv & gvim '. expand('%:p')
+            silent exec '!venv & '. g:gVimPath. expand('%:p')
         else
-            silent exec '!activate '. a:environment. ' & gvim '. expand('%:p')
-            " silent exec '!activate '. a:environment. ' & gvim '. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
+            silent exec '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
+            " silent exec '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
         endif
     endfunction
     command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
+    let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
     vnoremap <C-c> "+y<Esc>
     if has('gui_running')
-        nnoremap <leader>W :silent exec '!sudo /c gvim "%:p"'<CR>
-        nnoremap <leader><C-r> :silent exec '!gvim "%:p"' <bar> quit<CR>
+        nnoremap <leader>W :silent exec '!sudo /c '. g:gVimPath. '"%:p"'<CR>
+        nnoremap <leader><C-r> :silent exec '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
         set guicursor+=a:blinkon0
         set guifont=Consolas_NF:h11:cANSI
         if &columns < 85 && &lines < 30
