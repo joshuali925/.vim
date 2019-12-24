@@ -296,3 +296,43 @@ let g:ale_lint_on_text_changed = 'normal'
 let g:ale_lint_on_insert_leave = 1
 let g:ale_python_flake8_executable = 'flake8'
 let g:ale_python_flake8_options = '--ignore=W291,W293,W391,E261,E302,E305,E501'
+
+" =======================================================
+" leetcode, password incorrect error
+Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList', 'LeetCodeTest', 'LeetCodeSubmit'] }
+let g:leetcode_solution_filetype = 'python3'
+let g:leetcode_username = 'joshuali925'  " keyring password is 1
+
+" =======================================================
+" replaced by vim-sandwich
+Plug 'wellle/targets.vim'
+    autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
+Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
+nmap ds <Plug>Dsurround
+nmap cs <Plug>Csurround
+nmap cS <Plug>CSurround
+nmap ys <Plug>Ysurround
+nmap yS <Plug>YSurround
+nmap yss <Plug>Yssurround
+nmap ySs <Plug>YSsurround
+nmap ySS <Plug>YSsurround
+xmap S <Plug>VSurround
+xmap gS <Plug>VgSurround
+
+" =======================================================
+" replaced by pear-tree
+Plug 'Raimondi/delimitMate', { 'on': [] }
+augroup LazyLoad
+    autocmd!
+    autocmd InsertEnter * call plug#load('delimitMate') | autocmd! LazyLoad
+augroup END
+let g:delimitMate_expand_space = 1
+let g:delimitMate_balance_matchpairs = 1
+let g:delimitMate_nesting_quotes = ['"', '`', "'"]
+inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : delimitMate#WithinEmptyPair() ? "\<CR>\<Esc>O\<Space>\<BS>" : "\<CR>\<Space>\<BS>"
+" on YCM
+    imap <silent> <BS> <C-r>=YcmOnDeleteChar()<CR><Plug>delimitMateBS
+
+" ======================================================= 
+" markdown preview toggle
+    call g:quickmenu#append('Markdown Preview',  'exec "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')

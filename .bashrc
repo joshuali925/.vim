@@ -6,6 +6,9 @@ if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
+[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && \
+    . /usr/share/bash-completion/bash_completion
+
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=
 
