@@ -9,7 +9,6 @@ let g:ExecCommand = ''
 call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
-Plug 'ianding1/leetcode.vim', { 'on': ['LeetCodeList', 'LeetCodeTest', 'LeetCodeSubmit'] }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
@@ -21,18 +20,19 @@ Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
 Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
-Plug 'Raimondi/delimitMate', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
 Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiffsplit'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
-Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
-Plug 'tpope/vim-repeat'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 'markdown' }  " load on insert doesn't work
+Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
+Plug 'machakann/vim-sandwich'
+Plug 'chaoren/vim-wordmotion'
+Plug 'markonm/traces.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
-Plug 'wellle/targets.vim'
 if g:Completion >= 0
     Plug 'shougo/echodoc.vim', { 'on': [] }
     Plug 'sirver/ultisnips', { 'on': [] }
@@ -52,10 +52,6 @@ elseif g:Completion == 2
 endif
 call plug#end()
 silent! call yankstack#setup()
-augroup LazyLoad
-    autocmd!
-    autocmd InsertEnter * call plug#load('delimitMate') | autocmd! LazyLoad
-augroup END
 " }}}
 
 " ===================== Themes ========================== {{{
@@ -180,6 +176,7 @@ imap <F11> <Esc><F11>
 nnoremap <F11> :wall <bar> exec 'AsyncRun '. GetRunCommand()<CR>
 imap <F12> <Esc><F12>
 nnoremap <F12> :wall <bar> call RunShellCommand(''. GetRunCommand())<CR>
+imap <Space> <Plug>(PearTreeSpace)
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
 map F <Plug>fanfingtastic_F
@@ -190,16 +187,10 @@ map ? <Plug>(easymotion-bd-f)
 nmap S <Plug>(easymotion-bd-w)
 map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
-nmap ds <Plug>Dsurround
-nmap cs <Plug>Csurround
-nmap cS <Plug>CSurround
-nmap ys <Plug>Ysurround
-nmap yS <Plug>YSurround
-nmap yss <Plug>Yssurround
-nmap ySs <Plug>YSsurround
-nmap ySS <Plug>YSsurround
-xmap S <Plug>VSurround
-xmap gS <Plug>VgSurround
+" for vim-sandwich text-objects
+omap ia is,
+omap i, is,
+omap i\| is\|
 " for yankstack, do NOT use nnoremap for Y y$
 nmap Y y$
 noremap 0 ^
@@ -293,7 +284,6 @@ augroup AutoCommands
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType python set nosmartindent | syntax keyword pythonSelf self | highlight def link pythonSelf Special  " fix python comment indentation, highlight keyword self
     autocmd FileType * setlocal formatoptions=jql
-    autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
 augroup END
 " }}}
 
@@ -358,6 +348,7 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Undo Tree', 'UndotreeToggle', 'Toggle Undotree')
     call g:quickmenu#append('Tagbar', 'TagbarToggle', 'Toggle Tagbar')
     call g:quickmenu#append('Table Mode', 'TableModeToggle', 'Toggle TableMode')
+    call g:quickmenu#append('Markdown Preview', 'exec "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
     call g:quickmenu#append('Diff %{&diff? "[x]" :"[ ]"}', 'exec &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
     call g:quickmenu#append('Fold %{&foldlevel? "[ ]" :"[x]"}', 'exec &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
     call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', 'Toggle paste mode')
@@ -365,33 +356,33 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Preview %{&completeopt=~"preview"? "[x]" :"[ ]"}', 'call TogglePreview()', 'Toggle function preview')
     call g:quickmenu#current(1)
     call g:quickmenu#header('Tabular Normal Mode')
-    call g:quickmenu#append('# Center Delimiter', '')
-    call g:quickmenu#append('Align Using =', 'Tabularize /=')
-    call g:quickmenu#append('Align Using ,', 'Tabularize /,')
-    call g:quickmenu#append('Align Using |', 'Tabularize /|')
-    call g:quickmenu#append('Align Using :', 'Tabularize /:')
     call g:quickmenu#append('# Fixed Delimiter', '')
-    call g:quickmenu#append('Align Using =', 'Tabularize /=\zs')
-    call g:quickmenu#append('Align Using ,', 'Tabularize /,\zs')
-    call g:quickmenu#append('Align Using |', 'Tabularize /|\zs')
-    call g:quickmenu#append('Align Using :', 'Tabularize /:\zs')
+    call g:quickmenu#append('Align Using =', 'Tabularize /=\zs', 'Tabularize /=\zs')
+    call g:quickmenu#append('Align Using ,', 'Tabularize /,\zs', 'Tabularize /,\zs')
+    call g:quickmenu#append('Align Using |', 'Tabularize /|\zs', 'Tabularize /|\zs')
+    call g:quickmenu#append('Align Using :', 'Tabularize /:\zs', 'Tabularize /:\zs')
+    call g:quickmenu#append('# Center Delimiter', '')
+    call g:quickmenu#append('Align Using =', 'Tabularize /=', 'Tabularize /=')
+    call g:quickmenu#append('Align Using ,', 'Tabularize /,', 'Tabularize /,')
+    call g:quickmenu#append('Align Using |', 'Tabularize /|', 'Tabularize /|')
+    call g:quickmenu#append('Align Using :', 'Tabularize /:', 'Tabularize /:')
     call g:quickmenu#current(2)
     call g:quickmenu#header('Tabular Visual Mode')
-    call g:quickmenu#append('# Center Delimiter', '')
-    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=")
-    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,")
-    call g:quickmenu#append('Align Using |', "'<,'>Tabularize /|")
-    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:")
     call g:quickmenu#append('# Fixed Delimiter', '')
-    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=\\zs")
-    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,\\zs")
-    call g:quickmenu#append('Align Using |', "'<,'>Tabularize /|\\zs")
-    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:\\zs")
+    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs")
+    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs")
+    call g:quickmenu#append('Align Using |', "'<,'>Tabularize /|\\zs", "'<,'>Tabularize /|\\zs")
+    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:\\zs", "'<,'>Tabularize /:\\zs")
+    call g:quickmenu#append('# Center Delimiter', '')
+    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=", "'<,'>Tabularize /=")
+    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,", "'<,'>Tabularize /,")
+    call g:quickmenu#append('Align Using |', "'<,'>Tabularize /|", "'<,'>Tabularize /|")
+    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:", "'<,'>Tabularize /:")
     call g:quickmenu#append('# Sort', '')
-    call g:quickmenu#append('Sort Asc', "'<,'>sort", 'Sort in ascending order')
-    call g:quickmenu#append('Sort Desc', "'<,'>sort!", 'Sort in descending order')
-    call g:quickmenu#append('Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order')
-    call g:quickmenu#append('Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order')
+    call g:quickmenu#append('Sort Asc', "'<,'>sort", 'Sort in ascending order (sort)')
+    call g:quickmenu#append('Sort Desc', "'<,'>sort!", 'Sort in descending order (sort!)')
+    call g:quickmenu#append('Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)')
+    call g:quickmenu#append('Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)')
 endfunction
 " }}}
 
@@ -444,9 +435,6 @@ endfunction
 
 " =================== Other plugins ===================== {{{
 let g:asyncrun_open = 12
-let g:delimitMate_expand_space = 1
-let g:delimitMate_balance_matchpairs = 1
-let g:delimitMate_nesting_quotes = ['"', '`', "'"]
 let g:EasyMotion_smartcase = 1
 let g:NERDTreeWinSize = 23
 let g:NERDTreeShowHidden = 1
@@ -482,8 +470,6 @@ let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
 let g:table_mode_corner = '|'  " markdown compatible tablemode
 let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c']  " should work without plugins
-let g:leetcode_solution_filetype = 'python3'
-let g:leetcode_username = 'joshuali925'  " keyring password is 1
 " }}}
 
 " ==================== Execute code ===================== {{{
@@ -538,7 +524,7 @@ let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
-inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : delimitMate#WithinEmptyPair() ? "\<CR>\<Esc>O\<Space>\<BS>" : "\<CR>\<Space>\<BS>"
+imap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<Plug>(PearTreeExpand)\<Space>\<BS>"
 if g:Completion == 0  " mucomplete
     set omnifunc=syntaxcomplete#Complete
     set completeopt+=noselect
@@ -560,7 +546,6 @@ elseif g:Completion == 1  " YCM
     " '/path/to/include'
     let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'
     let g:echodoc#enable_force_overwrite = 1
-    imap <silent> <BS> <C-r>=YcmOnDeleteChar()<CR><Plug>delimitMateBS
     function! YcmOnDeleteChar()
         return pumvisible() ? "\<C-y>" : ""
     endfunction
