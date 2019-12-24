@@ -30,6 +30,7 @@ Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record M
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 'markdown' }  " load on insert doesn't work
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
 Plug 'machakann/vim-sandwich'
+Plug 'machakann/vim-swap'
 Plug 'chaoren/vim-wordmotion'
 Plug 'markonm/traces.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
@@ -187,10 +188,10 @@ map ? <Plug>(easymotion-bd-f)
 nmap S <Plug>(easymotion-bd-w)
 map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
-" for vim-sandwich text-objects
-omap ia is,
-omap i, is,
-omap i\| is\|
+omap ia <Plug>(swap-textobject-i)
+xmap ia <Plug>(swap-textobject-i)
+omap aa <Plug>(swap-textobject-a)
+xmap aa <Plug>(swap-textobject-a)
 " for yankstack, do NOT use nnoremap for Y y$
 nmap Y y$
 noremap 0 ^
