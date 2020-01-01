@@ -144,8 +144,8 @@ set ttimeoutlen=40
 set synmaxcol=500
 set lazyredraw
 set noswapfile
-set nowritebackup
 set nobackup
+set nowritebackup
 set statusline=%<[%{mode()}]\ %F\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
 " }}}
 
@@ -257,7 +257,7 @@ nnoremap <leader>fu :LeaderfFunctionAll<CR>
 nnoremap <leader>fg :LeaderfRgInteractive<CR>
 nnoremap <leader>fl :LeaderfLineAll<CR>
 nnoremap <leader>fa :LeaderfSelf<CR>
-nnoremap <leader>fs :vertical sfind *
+nnoremap <leader>fs :vertical sfind \c*
 nnoremap <leader>ft :TagbarToggle<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
@@ -342,6 +342,7 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Git Diff', 'Gdiffsplit', 'Fugitive git diff')
     call g:quickmenu#append('Git Status', 'Gstatus', 'Fugitive git status')
     call g:quickmenu#append('Word Count', 'call feedkeys("g\<C-g>")', 'Show document details')
+    call g:quickmenu#append('Trim Spaces', 'call TrimSpaces()', 'Remove trailing spaces')
     call g:quickmenu#append('Tabular Menu', 'call g:quickmenu#toggle(1)', 'Use Tabular to align selected text')
     call g:quickmenu#append('# Toggle', '')
     call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
@@ -412,6 +413,11 @@ function! TogglePreview()
         set completeopt+=preview
         echo 'Preview on'
     endif
+endfunction
+function! TrimSpaces()
+    let l:curr_view = winsaveview()
+    keeppatterns %s/\s\+$//e
+    call winrestview(l:curr_view)
 endfunction
 function! PrintCurrVars(visual)
     let l:new_line = "normal! o\<Space>\<BS>"
@@ -525,7 +531,7 @@ let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
-imap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<Plug>(PearTreeExpand)\<Space>\<BS>"
+imap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<C-g>u\<Plug>(PearTreeExpand)\<Space>\<BS>"
 if g:Completion == 0  " mucomplete
     set omnifunc=syntaxcomplete#Complete
     set completeopt+=noselect
