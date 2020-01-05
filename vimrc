@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -2
+let g:Theme = -4
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
@@ -75,12 +75,13 @@ let s:theme_list[5] = 'ayu'
 let s:theme_list[-1] = 'onedark'
 let s:theme_list[-2] = 'ayu'
 let s:theme_list[-3] = 'forest-night'
-let s:theme_list[-4] = 'gruvbox'
-let s:theme_list[-5] = 'two-firewatch'
-let s:theme_list[-6] = 'molokai'
+let s:theme_list[-4] = 'dracula'
+let s:theme_list[-5] = 'gruvbox'
+let s:theme_list[-6] = 'two-firewatch'
+let s:theme_list[-7] = 'molokai'
 let g:ayucolor = g:Theme < 0 ? 'mirage' : 'light'
-exec 'set background='. (g:Theme < 0 ? 'dark' : 'light')
-exec 'colorscheme '. get(s:theme_list, g:Theme, 'solarized8_flat')
+execute 'set background='. (g:Theme < 0 ? 'dark' : 'light')
+execute 'colorscheme '. get(s:theme_list, g:Theme, 'solarized8_flat')
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -172,9 +173,9 @@ imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *N
 imap <F10> <Esc><F10>
-nnoremap <F10> :wall <bar> exec '!clear && '. GetRunCommand()<CR>
+nnoremap <F10> :wall <bar> execute '!clear && '. GetRunCommand()<CR>
 imap <F11> <Esc><F11>
-nnoremap <F11> :wall <bar> exec 'AsyncRun '. GetRunCommand()<CR>
+nnoremap <F11> :wall <bar> execute 'AsyncRun '. GetRunCommand()<CR>
 imap <F12> <Esc><F12>
 nnoremap <F12> :wall <bar> call RunShellCommand(''. GetRunCommand())<CR>
 imap <Space> <Plug>(PearTreeSpace)
@@ -265,7 +266,7 @@ nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar
 nnoremap <leader>s :call PrintCurrVars(0)<CR>
 vnoremap <leader>s :call PrintCurrVars(1)<CR>$
 nnoremap <leader>tm :TableModeToggle<CR>
-nnoremap <leader>tE :exec getline('.')<CR>``
+nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :write !sudo tee %<CR>
@@ -274,15 +275,16 @@ nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :quit<CR>
 vnoremap <leader>q <Esc>:quit<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
+cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
 " }}}
 
 " ====================== Autocmd ======================== {{{
 augroup AutoCommands
     autocmd!
-    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exec "normal! g'\"" | endif  " restore last edit position
+    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g'\"" | endif  " restore last edit position
     autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
     autocmd FileType vim setlocal foldmethod=marker  " use triple curly brackets for fold instead of indentation
-    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent exec '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
     autocmd FileType python set nosmartindent | syntax keyword pythonSelf self | highlight def link pythonSelf Special  " fix python comment indentation, highlight keyword self
     autocmd FileType * setlocal formatoptions=jql
 augroup END
@@ -350,9 +352,9 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Undo Tree', 'UndotreeToggle', 'Toggle Undotree')
     call g:quickmenu#append('Tagbar', 'TagbarToggle', 'Toggle Tagbar')
     call g:quickmenu#append('Table Mode', 'TableModeToggle', 'Toggle TableMode')
-    call g:quickmenu#append('Markdown Preview', 'exec "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
-    call g:quickmenu#append('Diff %{&diff? "[x]" :"[ ]"}', 'exec &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
-    call g:quickmenu#append('Fold %{&foldlevel? "[ ]" :"[x]"}', 'exec &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
+    call g:quickmenu#append('Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
+    call g:quickmenu#append('Diff %{&diff? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
+    call g:quickmenu#append('Fold %{&foldlevel? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
     call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', 'Toggle paste mode')
     call g:quickmenu#append('Spelling %{&spell? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker')
     call g:quickmenu#append('Preview %{&completeopt=~"preview"? "[x]" :"[ ]"}', 'call TogglePreview()', 'Toggle function preview')
@@ -390,8 +392,8 @@ endfunction
 
 " ====================== Functions ====================== {{{
 function! InsertCommentLine()
-    exec "normal! o\<Space>\<BS>\<Esc>55i="
-    exec 'Commentary'
+    execute "normal! o\<Space>\<BS>\<Esc>55i="
+    execute 'Commentary'
 endfunction
 function! EditRegister() abort
     let l:r = nr2char(getchar())
@@ -407,7 +409,7 @@ endfunction
 function! TogglePreview()
     if &completeopt =~ 'preview'
         set completeopt-=preview
-        exec 'pclose'
+        execute 'pclose'
         echo 'Preview off'
     else
         set completeopt+=preview
@@ -433,7 +435,7 @@ function! PrintCurrVars(visual)
     let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
     let l:print['javascript'] = 'console.log(`'. join(map(copy(l:vars), "v:val. ': ${'. v:val. '}'"), ' | '). '`)'
     if has_key(l:print, &filetype)
-        exec l:new_line
+        execute l:new_line
         call append(line('.'), l:print[&filetype])
         normal! J
     endif
@@ -490,25 +492,25 @@ function! RunShellCommand(command)
     let l:curr_bufnr = bufwinnr('%')
     let l:win_left = winnr('$')
     while l:win_left > 1 && bufname('%') !~ '[Output_'
-        exec 'wincmd w'
+        execute 'wincmd w'
         let l:win_left = l:win_left - 1
     endwhile
     if bufname('%') =~ '[Output_'
         setlocal modifiable
-        exec '%d'
+        execute '%d'
     else
         botright new
         setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
-        silent exec '0f | file [Output_'. g:OutputCount. '] | resize '. (winheight(0) * 4/5)
+        silent execute '0f | file [Output_'. g:OutputCount. '] | resize '. (winheight(0) * 4/5)
         let g:OutputCount = g:OutputCount + 1
         nnoremap <buffer> q :quit<CR>
         nnoremap <buffer> w :set wrap!<CR>
     endif
     call setline(1, 'Run: '. l:expanded_command)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
-    exec '$read !'. l:expanded_command
+    execute '$read !'. l:expanded_command
     setlocal nomodifiable
-    exec l:curr_bufnr. 'wincmd w'
+    execute l:curr_bufnr. 'wincmd w'
 endfunction
 function! GetRunCommand()
     let l:run_command = {}
@@ -520,7 +522,7 @@ function! GetRunCommand()
     return get(l:run_command, &filetype, ''). (exists('b:args') ? b:args : '')
 endfunction
 if g:ExecCommand != ''
-    nnoremap <leader>r :wall <bar> exec g:ExecCommand<CR>
+    nnoremap <leader>r :wall <bar> execute g:ExecCommand<CR>
 endif
 " }}}
 
@@ -580,7 +582,7 @@ elseif g:Completion == 2  " coc
     let g:coc_snippet_prev = '<S-Tab>'
     function! s:show_documentation()
         if index(['vim','help'], &filetype) >= 0
-            exec 'help '.expand('<cword>')
+            execute 'help '.expand('<cword>')
         else
             call CocAction('doHover')
         endif
@@ -603,7 +605,7 @@ if has('nvim')
     tnoremap <C-j> <C-\><C-n><C-w>j
     tnoremap <C-k> <C-\><C-n><C-w>k
     tnoremap <C-l> <C-\><C-n><C-w>l
-    nnoremap <leader>to :exec 'split <bar> resize'. (winheight(0) * 2/5). ' <bar> terminal'<CR>
+    nnoremap <leader>to :execute 'split <bar> resize'. (winheight(0) * 2/5). ' <bar> terminal'<CR>
     nnoremap <leader>tO :terminal<CR>
     nnoremap <leader>th :split <bar> terminal<CR>
     nnoremap <leader>tv :vsplit <bar> terminal<CR>
@@ -642,7 +644,7 @@ else
     tnoremap <C-j> <C-w>j
     tnoremap <C-k> <C-w>k
     tnoremap <C-l> <C-w>l
-    nnoremap <leader>to :exec 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
+    nnoremap <leader>to :execute 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
     nnoremap <leader>tO :terminal ++curwin ++close<CR>
     nnoremap <leader>th :terminal ++close<CR>
     nnoremap <leader>tv :vertical terminal ++close<CR>
@@ -674,10 +676,10 @@ if has('win32')
     " Activate works for conda only, do NOT use for virtualenv
     function! ActivatePyEnv(environment)
         if a:environment == ''
-            silent exec '!venv & '. g:gVimPath. expand('%:p')
+            silent execute '!venv & '. g:gVimPath. expand('%:p')
         else
-            silent exec '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
-            " silent exec '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
+            silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
+            " silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
         endif
     endfunction
     command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
@@ -687,8 +689,8 @@ if has('win32')
     let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
     vnoremap <C-c> "+y<Esc>
     if has('gui_running')
-        nnoremap <leader>W :silent exec '!sudo /c '. g:gVimPath. '"%:p"'<CR>
-        nnoremap <leader><C-r> :silent exec '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
+        nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
+        nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
         set guicursor+=a:blinkon0
         set guifont=Consolas_NF:h11:cANSI
         if &columns < 85 && &lines < 30
