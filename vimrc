@@ -56,15 +56,15 @@ silent! call yankstack#setup()
 " }}}
 
 " ===================== Themes ========================== {{{
-set guioptions=Mgrt  " set before filetype and syntax
+set guioptions=Mgt  " set before filetype and syntax
 filetype plugin indent on
 syntax enable
 set termguicolors
 let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"  " truecolor
 let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
-let &t_SI.="\e[6 q"  " cursor shape
-let &t_SR.="\e[4 q"
-let &t_EI.="\e[2 q"
+let &t_SI.="\<Esc>[6 q"  " cursor shape
+let &t_SR.="\<Esc>[4 q"
+let &t_EI.="\<Esc>[2 q"
 let s:theme_list = {}  " load theme after filetype and syntax, g:Theme < 0 for dark themes
 let s:theme_list[0] = 'solarized8_flat'
 let s:theme_list[1] = 'PaperColor'
@@ -124,7 +124,7 @@ set complete-=i
 set completeopt=menuone
 set shortmess+=c
 set nrformats-=octal
-set scrolloff=3
+set scrolloff=2
 set nostartofline
 set display=lastline
 set previewheight=7
