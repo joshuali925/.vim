@@ -333,6 +333,22 @@ inoremap <expr> <CR> pumvisible() ? "\<Esc>a" : delimitMate#WithinEmptyPair() ? 
 " on YCM
     imap <silent> <BS> <C-r>=YcmOnDeleteChar()<CR><Plug>delimitMateBS
 
-" ======================================================= 
-" markdown preview toggle
-    call g:quickmenu#append('Markdown Preview',  'exec "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
+" =======================================================
+" Windows python path bug
+if has('win32')
+    " this sets PYTHONHOME for vim (windows python bug), also needs to reset when entering virtual environments
+    " 8/27/19 - seems to work without setting PYTHONHOME now
+    " if $PYTHONHOME == ''
+    "     let $PYTHONHOME = $LOCALAPPDATA. '/Programs/Python/Python37'
+    " endif
+    " Activate works for conda only, do NOT use for virtualenv
+    function! ActivatePyEnv(environment)
+        if a:environment == ''
+            silent execute '!venv & '. g:gVimPath. expand('%:p')
+        else
+            " silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
+            silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
+        endif
+    endfunction
+    command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
+endif

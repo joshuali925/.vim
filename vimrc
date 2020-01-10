@@ -5,6 +5,30 @@ let g:PythonPath = 'python3'
 let g:ExecCommand = ''
 " }}}
 
+" =================== Theme list ======================== {{{
+let s:theme_list = {}  " g:Theme < 0 for dark themes
+let s:theme_list[0] = 'solarized8_flat'
+let s:theme_list[1] = 'PaperColor'
+let s:theme_list[2] = 'github'
+let s:theme_list[3] = 'one'
+let s:theme_list[4] = 'two-firewatch'
+let s:theme_list[5] = 'ayu'
+let s:theme_list[6] = 'material'
+let s:theme_list[7] = 'gruvbox'
+let s:theme_list[-1] = 'onedark'
+let s:theme_list[-2] = 'material'
+let s:theme_list[-3] = 'ayu'
+let s:theme_list[-4] = 'dracula'
+let s:theme_list[-5] = 'nord'
+let s:theme_list[-6] = 'forest-night'
+let s:theme_list[-7] = 'gruvbox'
+let s:theme_list[-8] = 'two-firewatch'
+let s:theme_list[-9] = 'molokai'
+let g:ayucolor = g:Theme < 0 ? 'mirage' : 'light'
+let g:material_terminal_italics = 1
+let g:material_theme_style = g:Theme < 0 ? 'palenight' : 'lighter'
+" }}}
+
 " ===================== Plugins ========================= {{{
 call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
@@ -43,48 +67,30 @@ if g:Completion >= 0
         autocmd!
         autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! LazyLoadCompletion
     augroup END
-endif
-if g:Completion == 0
-    Plug 'lifepillar/vim-mucomplete'
-elseif g:Completion == 1
-    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
-elseif g:Completion == 2
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    if g:Completion == 0
+        Plug 'lifepillar/vim-mucomplete'
+    elseif g:Completion == 1
+        Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
+    elseif g:Completion == 2
+        Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    endif
 endif
 call plug#end()
 silent! call yankstack#setup()
 " }}}
 
-" ===================== Themes ========================== {{{
+" ======================= Basics ======================== {{{
 set guioptions=Mgt  " set before filetype and syntax
 filetype plugin indent on
 syntax enable
-set termguicolors
+set termguicolors  " load theme after filetype and syntax
 let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"  " truecolor
 let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 let &t_SI.="\<Esc>[6 q"  " cursor shape
 let &t_SR.="\<Esc>[4 q"
 let &t_EI.="\<Esc>[2 q"
-let s:theme_list = {}  " load theme after filetype and syntax, g:Theme < 0 for dark themes
-let s:theme_list[0] = 'solarized8_flat'
-let s:theme_list[1] = 'PaperColor'
-let s:theme_list[2] = 'github'
-let s:theme_list[3] = 'gruvbox'
-let s:theme_list[4] = 'two-firewatch'
-let s:theme_list[5] = 'ayu'
-let s:theme_list[-1] = 'onedark'
-let s:theme_list[-2] = 'ayu'
-let s:theme_list[-3] = 'forest-night'
-let s:theme_list[-4] = 'dracula'
-let s:theme_list[-5] = 'gruvbox'
-let s:theme_list[-6] = 'two-firewatch'
-let s:theme_list[-7] = 'molokai'
-let g:ayucolor = g:Theme < 0 ? 'mirage' : 'light'
 execute 'set background='. (g:Theme < 0 ? 'dark' : 'light')
-execute 'colorscheme '. get(s:theme_list, g:Theme, 'solarized8_flat')
-" }}}
-
-" ======================= Basics ======================== {{{
+execute 'colorscheme '. get(s:theme_list, g:Theme, 'desert')
 if &compatible | set nocompatible | endif
 set backspace=eol,start,indent
 set whichwrap+=<,>,[,]
@@ -290,7 +296,7 @@ augroup AutoCommands
 augroup END
 " }}}
 
-" ====================== LazyLoad ======================= {{{
+" ===================== Lazy load ======================= {{{
 function! LoadAutoformat()
     let g:formatters_python = ['yapf']
     nnoremap <C-f> :Autoformat<CR>
@@ -358,6 +364,7 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', 'Toggle paste mode')
     call g:quickmenu#append('Spelling %{&spell? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker')
     call g:quickmenu#append('Preview %{&completeopt=~"preview"? "[x]" :"[ ]"}', 'call TogglePreview()', 'Toggle function preview')
+    call g:quickmenu#append('Dark Background %{&background=~"dark"? "[x]" :"[ ]"}', 'let &background = &background=="dark"? "light" : "dark"', 'Toggle background color')
     call g:quickmenu#current(1)
     call g:quickmenu#header('Tabular Normal Mode')
     call g:quickmenu#append('# Fixed Delimiter', '')
@@ -528,7 +535,7 @@ endif
 
 " ==================== Auto complete ==================== {{{
 " let g:ycm_path_to_python_interpreter=''  " for ycmd, don't modify
-let g:ycm_python_binary_path=g:PythonPath  " for JediHTTP
+let g:ycm_python_binary_path=g:PythonPath  " for JediHTTP, comment out if venv doesn't work
 let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
@@ -668,27 +675,20 @@ endif
 
 " ================== Windows settings =================== {{{
 if has('win32')
-    " this sets PYTHONHOME for vim (windows python bug), also needs to reset when entering virtual environments
-    " 8/27/19 - seems to work without setting PYTHONHOME now
-    " if $PYTHONHOME == ''
-    "     let $PYTHONHOME = $LOCALAPPDATA. '/Programs/Python/Python37'
-    " endif
-    " Activate works for conda only, do NOT use for virtualenv
-    function! ActivatePyEnv(environment)
-        if a:environment == ''
-            silent execute '!venv & '. g:gVimPath. expand('%:p')
-        else
-            silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
-            " silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p'). ' -c "let $PYTHONHOME='''. $USERPROFILE. '/Anaconda3/envs/'. a:environment. '''"'
-        endif
-    endfunction
-    command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
-    let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
     vnoremap <C-c> "+y<Esc>
     if has('gui_running')
+        let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
+        function! ActivatePyEnv(environment)
+            if a:environment == ''
+                silent execute '!venv & '. g:gVimPath. expand('%:p')
+            else
+                silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
+            endif
+        endfunction
+        command! -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
         nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
         nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
         set guicursor+=a:blinkon0
