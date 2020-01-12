@@ -5,30 +5,6 @@ let g:PythonPath = 'python3'
 let g:ExecCommand = ''
 " }}}
 
-" =================== Theme list ======================== {{{
-let s:theme_list = {}  " g:Theme < 0 for dark themes
-let s:theme_list[0] = 'solarized8_flat'
-let s:theme_list[1] = 'PaperColor'
-let s:theme_list[2] = 'github'
-let s:theme_list[3] = 'one'
-let s:theme_list[4] = 'two-firewatch'
-let s:theme_list[5] = 'ayu'
-let s:theme_list[6] = 'material'
-let s:theme_list[7] = 'gruvbox'
-let s:theme_list[-1] = 'onedark'
-let s:theme_list[-2] = 'material'
-let s:theme_list[-3] = 'ayu'
-let s:theme_list[-4] = 'dracula'
-let s:theme_list[-5] = 'nord'
-let s:theme_list[-6] = 'forest-night'
-let s:theme_list[-7] = 'gruvbox'
-let s:theme_list[-8] = 'two-firewatch'
-let s:theme_list[-9] = 'molokai'
-let g:ayucolor = g:Theme < 0 ? 'mirage' : 'light'
-let g:material_terminal_italics = 1
-let g:material_theme_style = g:Theme < 0 ? 'palenight' : 'lighter'
-" }}}
-
 " ===================== Plugins ========================= {{{
 call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
@@ -79,7 +55,7 @@ call plug#end()
 silent! call yankstack#setup()
 " }}}
 
-" ======================= Basics ======================== {{{
+" ====================== Themes ========================= {{{
 set guioptions=Mgt  " set before filetype and syntax
 filetype plugin indent on
 syntax enable
@@ -89,8 +65,30 @@ let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 let &t_SI.="\<Esc>[6 q"  " cursor shape
 let &t_SR.="\<Esc>[4 q"
 let &t_EI.="\<Esc>[2 q"
-execute 'set background='. (g:Theme < 0 ? 'dark' : 'light')
-execute 'colorscheme '. get(s:theme_list, g:Theme, 'desert')
+let s:theme_list = {}  " g:Theme < 0 for dark themes, will load when calling LoadColorscheme(g:Theme)
+let s:theme_list[0] = 'solarized8_flat'
+let s:theme_list[1] = 'PaperColor'
+let s:theme_list[2] = 'github'
+let s:theme_list[3] = 'one'
+let s:theme_list[4] = 'two-firewatch'
+let s:theme_list[5] = 'ayu'
+let s:theme_list[6] = 'material'
+let s:theme_list[7] = 'gruvbox'
+let s:theme_list[-1] = 'onedark'
+let s:theme_list[-2] = 'material'
+let s:theme_list[-3] = 'ayu'
+let s:theme_list[-4] = 'dracula'
+let s:theme_list[-5] = 'nord'
+let s:theme_list[-6] = 'forest-night'
+let s:theme_list[-7] = 'gruvbox'
+let s:theme_list[-8] = 'two-firewatch'
+let s:theme_list[-9] = 'molokai'
+let g:material_terminal_italics = 1
+let g:material_theme_style = g:Theme < 0 ? 'palenight' : 'lighter'
+let g:ayucolor = g:Theme < 0 ? 'mirage' : 'light'
+" }}}
+
+" ======================= Basics ======================== {{{
 if &compatible | set nocompatible | endif
 set backspace=eol,start,indent
 set whichwrap+=<,>,[,]
@@ -108,6 +106,7 @@ set ruler
 set showtabline=2
 set laststatus=2
 set wildmenu
+set wildmode=longest:full,full
 set diffopt+=vertical
 set splitright
 set splitbelow
@@ -262,7 +261,9 @@ nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunctionAll<CR>
 nnoremap <leader>fg :LeaderfRgInteractive<CR>
+nnoremap <leader>fG :LeaderfRgRecall<CR>
 nnoremap <leader>fl :LeaderfLineAll<CR>
+nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfSelf<CR>
 nnoremap <leader>fs :vertical sfind \c*
 nnoremap <leader>ft :TagbarToggle<CR>
@@ -345,13 +346,14 @@ function! LoadQuickmenu()
     call g:quickmenu#current(0)
     call g:quickmenu#header('QvQ')
     call g:quickmenu#append('# Actions', '')
-    call g:quickmenu#append('Insert Line', 'call InsertCommentLine()', 'Insert a dividing line')
+    call g:quickmenu#append('Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line')
     call g:quickmenu#append('Insert Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt')
     call g:quickmenu#append('Git Diff', 'Gdiffsplit', 'Fugitive git diff')
     call g:quickmenu#append('Git Status', 'Gstatus', 'Fugitive git status')
     call g:quickmenu#append('Word Count', 'call feedkeys("g\<C-g>")', 'Show document details')
-    call g:quickmenu#append('Trim Spaces', 'call TrimSpaces()', 'Remove trailing spaces')
+    call g:quickmenu#append('Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces')
     call g:quickmenu#append('Tabular Menu', 'call g:quickmenu#toggle(1)', 'Use Tabular to align selected text')
+    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(3)', 'Change vim colorscheme (let g:Theme = <idx> must be the second line of $MYVIMRC)')
     call g:quickmenu#append('# Toggle', '')
     call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
     call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
@@ -359,12 +361,13 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Tagbar', 'TagbarToggle', 'Toggle Tagbar')
     call g:quickmenu#append('Table Mode', 'TableModeToggle', 'Toggle TableMode')
     call g:quickmenu#append('Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
-    call g:quickmenu#append('Diff %{&diff? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
-    call g:quickmenu#append('Fold %{&foldlevel? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
-    call g:quickmenu#append('Paste %{&paste? "[x]" :"[ ]"}', 'call TogglePaste()', 'Toggle paste mode')
-    call g:quickmenu#append('Spelling %{&spell? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker')
-    call g:quickmenu#append('Preview %{&completeopt=~"preview"? "[x]" :"[ ]"}', 'call TogglePreview()', 'Toggle function preview')
-    call g:quickmenu#append('Dark Background %{&background=~"dark"? "[x]" :"[ ]"}', 'let &background = &background=="dark"? "light" : "dark"', 'Toggle background color')
+    call g:quickmenu#append('Diff %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
+    call g:quickmenu#append('Fold %{&foldlevel ? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
+    call g:quickmenu#append('Wrap %{&wrap? "[x]" :"[ ]"}', 'set wrap!', 'Toggle wrap lines')
+    call g:quickmenu#append('Paste %{&paste ? "[x]" :"[ ]"}', 'execute &paste ? "set nopaste number mouse=nv signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)')
+    call g:quickmenu#append('Spelling %{&spell ? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)')
+    call g:quickmenu#append('Preview %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview')
+    call g:quickmenu#append('Dark Theme %{&background=~"dark" ? "[x]" :"[ ]"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color')
     call g:quickmenu#current(1)
     call g:quickmenu#header('Tabular Normal Mode')
     call g:quickmenu#append('# Fixed Delimiter', '')
@@ -394,39 +397,27 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Sort Desc', "'<,'>sort!", 'Sort in descending order (sort!)')
     call g:quickmenu#append('Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)')
     call g:quickmenu#append('Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)')
+    call g:quickmenu#current(3)
+    call g:quickmenu#header('Themes')
+    call g:quickmenu#append('# Dark', '')
+    for idx in sort(keys(s:theme_list))
+        if idx == 0
+            call g:quickmenu#append('# Light', '')
+        endif
+        call g:quickmenu#append(s:theme_list[idx], "execute 'silent! !sed -i \"2 s/let g:Theme = .*/let g:Theme = ". idx. "/\" ". $MYVIMRC. "' | call LoadColorscheme(". idx. ')')
+    endfor
 endfunction
 " }}}
 
 " ====================== Functions ====================== {{{
-function! InsertCommentLine()
-    execute "normal! o\<Space>\<BS>\<Esc>55i="
-    execute 'Commentary'
+function! LoadColorscheme(idx)
+    execute 'set background='. (a:idx < 0 ? 'dark' : 'light')
+    execute 'colorscheme '. get(s:theme_list, a:idx, 'desert')
 endfunction
+call LoadColorscheme(g:Theme)
 function! EditRegister() abort
     let l:r = nr2char(getchar())
     call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
-endfunction
-function! TogglePaste()  " tip: shift alt drag to select and copy
-    if &paste
-        set nopaste number mouse=nv signcolumn=auto
-    else
-        set paste nonumber norelativenumber mouse= signcolumn=no
-    endif
-endfunction
-function! TogglePreview()
-    if &completeopt =~ 'preview'
-        set completeopt-=preview
-        execute 'pclose'
-        echo 'Preview off'
-    else
-        set completeopt+=preview
-        echo 'Preview on'
-    endif
-endfunction
-function! TrimSpaces()
-    let l:curr_view = winsaveview()
-    keeppatterns %s/\s\+$//e
-    call winrestview(l:curr_view)
 endfunction
 function! PrintCurrVars(visual)
     let l:new_line = "normal! o\<Space>\<BS>"
@@ -510,8 +501,6 @@ function! RunShellCommand(command)
         setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
         silent execute '0f | file [Output_'. g:OutputCount. '] | resize '. (winheight(0) * 4/5)
         let g:OutputCount = g:OutputCount + 1
-        nnoremap <buffer> q :quit<CR>
-        nnoremap <buffer> w :set wrap!<CR>
     endif
     call setline(1, 'Run: '. l:expanded_command)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
