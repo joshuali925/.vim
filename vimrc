@@ -65,7 +65,7 @@ let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 let &t_SI.="\<Esc>[6 q"  " cursor shape
 let &t_SR.="\<Esc>[4 q"
 let &t_EI.="\<Esc>[2 q"
-let s:theme_list = {}  " g:Theme < 0 for dark themes, will load when calling LoadColorscheme(g:Theme)
+let s:theme_list = {}  " g:Theme < 0 for dark themes
 let s:theme_list[0] = 'solarized8_flat'
 let s:theme_list[1] = 'PaperColor'
 let s:theme_list[2] = 'github'
@@ -84,8 +84,13 @@ let s:theme_list[-7] = 'gruvbox'
 let s:theme_list[-8] = 'two-firewatch'
 let s:theme_list[-9] = 'molokai'
 let g:material_terminal_italics = 1
-let g:material_theme_style = g:Theme < 0 ? 'palenight' : 'lighter'
-let g:ayucolor = g:Theme < 0 ? 'mirage' : 'light'
+function! LoadColorscheme(index)
+    let g:material_theme_style = a:index < 0 ? 'palenight' : 'lighter'
+    let g:ayucolor = a:index < 0 ? 'mirage' : 'light'
+    execute 'set background='. (a:index < 0 ? 'dark' : 'light')
+    execute 'colorscheme '. get(s:theme_list, a:index, 'desert')
+endfunction
+call LoadColorscheme(g:Theme)
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -353,7 +358,7 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Word Count', 'call feedkeys("g\<C-g>")', 'Show document details')
     call g:quickmenu#append('Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces')
     call g:quickmenu#append('Tabular Menu', 'call g:quickmenu#toggle(1)', 'Use Tabular to align selected text')
-    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(3)', 'Change vim colorscheme (let g:Theme = <idx> must be the second line of $MYVIMRC)')
+    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(3)', 'Change vim colorscheme (let g:Theme = <index> must be the second line in $MYVIMRC)')
     call g:quickmenu#append('# Toggle', '')
     call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
     call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
@@ -363,7 +368,7 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
     call g:quickmenu#append('Diff %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
     call g:quickmenu#append('Fold %{&foldlevel ? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
-    call g:quickmenu#append('Wrap %{&wrap? "[x]" :"[ ]"}', 'set wrap!', 'Toggle wrap lines')
+    call g:quickmenu#append('Wrap %{&wrap ? "[x]" :"[ ]"}', 'set wrap!', 'Toggle wrap lines')
     call g:quickmenu#append('Paste %{&paste ? "[x]" :"[ ]"}', 'execute &paste ? "set nopaste number mouse=nv signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)')
     call g:quickmenu#append('Spelling %{&spell ? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)')
     call g:quickmenu#append('Preview %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview')
@@ -400,21 +405,16 @@ function! LoadQuickmenu()
     call g:quickmenu#current(3)
     call g:quickmenu#header('Themes')
     call g:quickmenu#append('# Dark', '')
-    for idx in sort(keys(s:theme_list))
-        if idx == 0
+    for index in sort(keys(s:theme_list))
+        if index == 0
             call g:quickmenu#append('# Light', '')
         endif
-        call g:quickmenu#append(s:theme_list[idx], "execute 'silent! !sed -i \"2 s/let g:Theme = .*/let g:Theme = ". idx. "/\" ". $MYVIMRC. "' | call LoadColorscheme(". idx. ')')
+        call g:quickmenu#append(s:theme_list[index], "execute 'silent! !sed -i \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')')
     endfor
 endfunction
 " }}}
 
 " ====================== Functions ====================== {{{
-function! LoadColorscheme(idx)
-    execute 'set background='. (a:idx < 0 ? 'dark' : 'light')
-    execute 'colorscheme '. get(s:theme_list, a:idx, 'desert')
-endfunction
-call LoadColorscheme(g:Theme)
 function! EditRegister() abort
     let l:r = nr2char(getchar())
     call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
