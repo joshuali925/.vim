@@ -351,6 +351,7 @@ function! LoadQuickmenu()
     call g:quickmenu#current(0)
     call g:quickmenu#header('QvQ')
     call g:quickmenu#append('# Actions', '')
+    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(3)', 'Change vim colorscheme (let g:Theme = <index> must be the second line in $MYVIMRC)')
     call g:quickmenu#append('Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line')
     call g:quickmenu#append('Insert Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt')
     call g:quickmenu#append('Git Diff', 'Gdiffsplit', 'Fugitive git diff')
@@ -358,7 +359,6 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Word Count', 'call feedkeys("g\<C-g>")', 'Show document details')
     call g:quickmenu#append('Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces')
     call g:quickmenu#append('Tabular Menu', 'call g:quickmenu#toggle(1)', 'Use Tabular to align selected text')
-    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(3)', 'Change vim colorscheme (let g:Theme = <index> must be the second line in $MYVIMRC)')
     call g:quickmenu#append('# Toggle', '')
     call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
     call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
@@ -409,7 +409,7 @@ function! LoadQuickmenu()
         if index == 0
             call g:quickmenu#append('# Light', '')
         endif
-        call g:quickmenu#append(s:theme_list[index], "execute 'silent! !sed -i \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')')
+        call g:quickmenu#append(s:theme_list[index], "execute 'silent !sed -i \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')')
     endfor
 endfunction
 " }}}
