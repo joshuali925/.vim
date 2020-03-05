@@ -1,0 +1,6 @@
+set hidden
+set info size
+set dircounts
+set color256
+
+map x :delete
