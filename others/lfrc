@@ -3,4 +3,16 @@ set info size
 set dircounts
 set color256
 
-map x :delete
+cmd mkdir %mkdir -p $@
+cmd touch %touch $@
+
+map x delete
+map D delete
+map zc set color256!
+map m
+map ms mark-save
+map mm push :mkdir<Space>
+map mt push :touch<Space>
+map <c-c> push cu
+map i $bat --color=always --style='numbers,changes' --paging=always $f
+map zd !du -h --max-depth=1 | sort -hr

@@ -31,13 +31,15 @@ set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 # abbr -a size 'du -h --max-depth=1 | sort -hr'
 # abbr -a vi 'vim'
 # abbr -a vimm 'vim ~/.vim/vimrc'
+# abbr -a vimf 'vim (fd | fzf --height 40%)'
 # abbr -a vims 'vim -c "source ~/.cache/vim/session.vim"'
-# abbr -a bpython 'bpython -i'
 # abbr -a gacp 'git add -A && git commit -m "update" && git push origin master'
 # abbr -a venv 'source venv/bin/activate.fish'
 # abbr -a service 'sudo service'
 # abbr -a apt 'sudo apt'
 # abbr -a which 'type -a'
+# abbr -a cdf 'cd (fd --type="directory" | fzf --height 40%) && pwd'
+# abbr -a zf 'cd (z --list | awk "{print \$2}" | fzf --height 40%) && pwd'
 # abbr -a - 'cd -'
 # abbr -a ... 'cd ../..'
 
@@ -150,6 +152,20 @@ set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 # abbr -a gwch 'git whatchanged -p --abbrev-commit --pretty = medium'
 # abbr -a gwip 'git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
 
+# lfcd
+function fl
+    set tmp (mktemp)
+    lf -last-dir-path=$tmp $argv
+    if test -f "$tmp"
+        set dir (cat $tmp)
+        rm -f $tmp
+        if test -d "$dir"
+            if test "$dir" != (pwd)
+                cd $dir
+            end
+        end
+    end
+end
 
 # fix color
 for color_variable in (set -n | grep -e pure_color_)

@@ -54,6 +54,4 @@ function cd() {
 }
 
 # WSL specific
-alias db='mycli -ukite -p123 -hlocalhost -P3306'
-alias you-get='you-get -o /mnt/z/'
 alias cmd='/mnt/c/Windows/System32/cmd.exe /k'

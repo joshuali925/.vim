@@ -9,14 +9,16 @@ alias la='ls -AF'
 alias l='ls -CF'
 alias size='du -h --max-depth=1 | sort -hr'
 alias vi='vim'
+alias vimf='vim $(fd | fzf --height 40%)'
 alias vimm='vim ~/.vim/vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
-alias bpython='bpython -i'
 alias gacp='git add -A && git commit -m "update" && git push origin master'
 alias venv='source venv/bin/activate'
 alias service='sudo service'
 alias apt='sudo apt'
 alias which='type -a'  # zsh's which also works
+alias cdf='cd $(fd --type="directory" | fzf --height 40%) && pwd'
+alias zf='cd $(z --list | awk "{print \$2}" | fzf --height 40%) && pwd'
 
 # alias f='a(){ find . -iname *$@*; }; a'
 # alias cc='a(){ gcc $1.c -o $1 -g && ./$@; }; a'
@@ -37,4 +39,18 @@ function printcolor {
     }
     printf "\n";
     }'
+}
+
+function fl () {
+    tmp="$(mktemp)"
+    lf -last-dir-path="$tmp" "$@"
+    if [ -f "$tmp" ]; then
+        dir="$(cat "$tmp")"
+        rm -f "$tmp"
+        if [ -d "$dir" ]; then
+            if [ "$dir" != "$(pwd)" ]; then
+                cd "$dir"
+            fi
+        fi
+    fi
 }
