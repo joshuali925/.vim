@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -4
+let g:Theme = 2
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
@@ -213,6 +213,10 @@ noremap <Home> g^
 noremap <End> g$
 noremap <Down> gj
 noremap <Up> gk
+inoremap <Home> <C-o>g^
+inoremap <End> <C-o>g$
+inoremap <Down> <C-o>gj
+inoremap <Up> <C-o>gk
 xnoremap @q :normal @q<CR>
 xnoremap @@ :normal @@<CR>
 nnoremap Q q:

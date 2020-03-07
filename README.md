@@ -48,6 +48,7 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/
 ln -s .vim/.zshrc ~/.zshrc
 ln -s .vim/.bashrc ~/.bashrc
 ln -s ~/.vim/fish ~/.config/fish
+# use fisher to manage fish plugins
 ```
 
 ## Others
