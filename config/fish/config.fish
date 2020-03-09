@@ -1,5 +1,5 @@
 # RUN ONCE AT SETUP
-# set -Ux PYTHONSTARTUP $HOME/.vim/others/.pythonrc
+# set -Ux PYTHONSTARTUP $HOME/.vim/config/.pythonrc
 # set Z_DATA $HOME/.local/share/z/data
 # set Z_DATA_DIR $HOME/.local/share/z
 # set Z_EXCLUDE $HOME
@@ -29,9 +29,10 @@ set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 # abbr -a la 'ls -AF'
 # abbr -a l 'ls -CF'
 # abbr -a size 'du -h --max-depth=1 | sort -hr'
+# abbr -a v 'vim'
 # abbr -a vi 'vim'
+# abbr -a vf 'vim (fd | fzf --height 40%)'
 # abbr -a vimm 'vim ~/.vim/vimrc'
-# abbr -a vimf 'vim (fd | fzf --height 40%)'
 # abbr -a vims 'vim -c "source ~/.cache/vim/session.vim"'
 # abbr -a gacp 'git add -A && git commit -m "update" && git push origin master'
 # abbr -a venv 'source venv/bin/activate.fish'

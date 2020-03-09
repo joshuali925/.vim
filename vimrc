@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 2
-let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
+let g:Theme = 3
+let g:Completion = 1  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
 " }}}
@@ -8,6 +8,7 @@ let g:ExecCommand = ''
 " ===================== Plugins ========================= {{{
 call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
+Plug 'christoomey/vim-tmux-navigator'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
@@ -347,22 +348,22 @@ function! ShowDocs()
     endif
 endfunction
 function! LoadQuickmenu()
-    nnoremap <F1> :call quickmenu#toggle(0) <bar> set showcmd<CR>
-    vnoremap <F1> :<C-u>call quickmenu#toggle(2) <bar> set showcmd<CR>
+    nnoremap <F1> :call g:quickmenu#toggle(0) <bar> set showcmd<CR>
+    vnoremap <F1> :<C-u>call g:quickmenu#toggle(3) <bar> set showcmd<CR>
     call plug#load('quickmenu.vim')
     let g:quickmenu_options = 'HL'
     call g:quickmenu#reset()
     call g:quickmenu#current(0)
     call g:quickmenu#header('QvQ')
     call g:quickmenu#append('# Actions', '')
-    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(3)', 'Change vim colorscheme (let g:Theme = <index> must be the second line in $MYVIMRC)')
+    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(1)', 'Change vim colorscheme (let g:Theme = <index> must be the second line in $MYVIMRC)')
     call g:quickmenu#append('Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line')
     call g:quickmenu#append('Insert Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt')
     call g:quickmenu#append('Git Diff', 'Gdiffsplit', 'Fugitive git diff')
     call g:quickmenu#append('Git Status', 'Gstatus', 'Fugitive git status')
     call g:quickmenu#append('Word Count', 'call feedkeys("g\<C-g>")', 'Show document details')
     call g:quickmenu#append('Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces')
-    call g:quickmenu#append('Tabular Menu', 'call g:quickmenu#toggle(1)', 'Use Tabular to align selected text')
+    call g:quickmenu#append('Tabular Menu', 'call g:quickmenu#toggle(2)', 'Use Tabular to align selected text')
     call g:quickmenu#append('# Toggle', '')
     call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
     call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
@@ -378,43 +379,43 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Preview %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview')
     call g:quickmenu#append('Dark Theme %{&background=~"dark" ? "[x]" :"[ ]"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color')
     call g:quickmenu#current(1)
-    call g:quickmenu#header('Tabular Normal Mode')
-    call g:quickmenu#append('# Fixed Delimiter', '')
-    call g:quickmenu#append('Align Using =', 'Tabularize /=\zs', 'Tabularize /=\zs')
-    call g:quickmenu#append('Align Using ,', 'Tabularize /,\zs', 'Tabularize /,\zs')
-    call g:quickmenu#append('Align Using |', 'Tabularize /|\zs', 'Tabularize /|\zs')
-    call g:quickmenu#append('Align Using :', 'Tabularize /:\zs', 'Tabularize /:\zs')
-    call g:quickmenu#append('# Center Delimiter', '')
-    call g:quickmenu#append('Align Using =', 'Tabularize /=', 'Tabularize /=')
-    call g:quickmenu#append('Align Using ,', 'Tabularize /,', 'Tabularize /,')
-    call g:quickmenu#append('Align Using |', 'Tabularize /|', 'Tabularize /|')
-    call g:quickmenu#append('Align Using :', 'Tabularize /:', 'Tabularize /:')
-    call g:quickmenu#current(2)
-    call g:quickmenu#header('Tabular Visual Mode')
-    call g:quickmenu#append('# Fixed Delimiter', '')
-    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs")
-    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs")
-    call g:quickmenu#append('Align Using |', "'<,'>Tabularize /|\\zs", "'<,'>Tabularize /|\\zs")
-    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:\\zs", "'<,'>Tabularize /:\\zs")
-    call g:quickmenu#append('# Center Delimiter', '')
-    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=", "'<,'>Tabularize /=")
-    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,", "'<,'>Tabularize /,")
-    call g:quickmenu#append('Align Using |', "'<,'>Tabularize /|", "'<,'>Tabularize /|")
-    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:", "'<,'>Tabularize /:")
-    call g:quickmenu#append('# Sort', '')
-    call g:quickmenu#append('Sort Asc', "'<,'>sort", 'Sort in ascending order (sort)')
-    call g:quickmenu#append('Sort Desc', "'<,'>sort!", 'Sort in descending order (sort!)')
-    call g:quickmenu#append('Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)')
-    call g:quickmenu#append('Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)')
-    call g:quickmenu#current(3)
     call g:quickmenu#header('Themes')
     call g:quickmenu#append('# Dark', '')
     for index in sort(keys(s:theme_list))
         if index == 0
             call g:quickmenu#append('# Light', '')
         endif
-        call g:quickmenu#append(s:theme_list[index], "execute 'silent !sed -i \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')')
+        call g:quickmenu#append(s:theme_list[index], "execute 'silent !sed --in-place --follow-symlinks \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')')
     endfor
+    call g:quickmenu#current(2)
+    call g:quickmenu#header('Tabular Normal Mode')
+    call g:quickmenu#append('# Fixed Delimiter', '')
+    call g:quickmenu#append('Align Using =', 'Tabularize /=\zs', 'Tabularize /=\zs')
+    call g:quickmenu#append('Align Using ,', 'Tabularize /,\zs', 'Tabularize /,\zs')
+    call g:quickmenu#append('Align Using #', 'Tabularize /#\zs', 'Tabularize /#\zs')
+    call g:quickmenu#append('Align Using :', 'Tabularize /:\zs', 'Tabularize /:\zs')
+    call g:quickmenu#append('# Center Delimiter', '')
+    call g:quickmenu#append('Align Using =', 'Tabularize /=', 'Tabularize /=')
+    call g:quickmenu#append('Align Using ,', 'Tabularize /,', 'Tabularize /,')
+    call g:quickmenu#append('Align Using #', 'Tabularize /#', 'Tabularize /#')
+    call g:quickmenu#append('Align Using :', 'Tabularize /:', 'Tabularize /:')
+    call g:quickmenu#current(3)
+    call g:quickmenu#header('Tabular Visual Mode')
+    call g:quickmenu#append('# Fixed Delimiter', '')
+    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs")
+    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs")
+    call g:quickmenu#append('Align Using #', "'<,'>Tabularize /#\\zs", "'<,'>Tabularize /#\\zs")
+    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:\\zs", "'<,'>Tabularize /:\\zs")
+    call g:quickmenu#append('# Center Delimiter', '')
+    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=", "'<,'>Tabularize /=")
+    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,", "'<,'>Tabularize /,")
+    call g:quickmenu#append('Align Using #', "'<,'>Tabularize /#", "'<,'>Tabularize /#")
+    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:", "'<,'>Tabularize /:")
+    call g:quickmenu#append('# Sort', '')
+    call g:quickmenu#append('Sort Asc', "'<,'>sort", 'Sort in ascending order (sort)')
+    call g:quickmenu#append('Sort Desc', "'<,'>sort!", 'Sort in descending order (sort!)')
+    call g:quickmenu#append('Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)')
+    call g:quickmenu#append('Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)')
 endfunction
 " }}}
 
@@ -480,7 +481,7 @@ let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
 let g:table_mode_corner = '|'  " markdown compatible tablemode
-let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c']  " should work without plugins
+let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c', 'bash=sh']  " should work without plugins
 " }}}
 
 " ==================== Execute code ===================== {{{
@@ -542,7 +543,7 @@ if g:Completion == 0  " mucomplete
     let g:mucomplete#enable_auto_at_startup = 1
     let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'file']}
 elseif g:Completion == 1  " YCM
-    inoremap <expr> <C-e> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-x>"
+    inoremap <expr> <C-e> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-e>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
     " let g:ycm_show_diagnostics_ui = 0
@@ -553,11 +554,8 @@ elseif g:Completion == 1  " YCM
     " for c include files, add to .ycm_extra_conf.py
     " '-isystem',
     " '/path/to/include'
-    let g:ycm_global_ycm_extra_conf = '~/.vim/others/.ycm_extra_conf.py'
+    let g:ycm_global_ycm_extra_conf = '~/.vim/config/.ycm_extra_conf.py'
     let g:echodoc#enable_force_overwrite = 1
-    function! YcmOnDeleteChar()
-        return pumvisible() ? "\<C-y>" : ""
-    endfunction
 elseif g:Completion == 2  " coc
     let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python']
     " to manually install extensions, run :CocInstall coc-git coc-...
