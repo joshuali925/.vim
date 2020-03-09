@@ -1,6 +1,10 @@
 # vim-configuration
 ## Download
 ```bash
+cd ~
+mkdir -p ~/.cache/vim/undo
+mkdir -p ~/.local/bin
+mkdir -p ~/.config
 mv ~/.vim ~/vim_backup
 git clone https://github.com/joshuali925/vim-configuration.git ~/.vim
 pip install --user flake8 yapf rope neovim pynvim jedi
@@ -8,7 +12,6 @@ pip install --user flake8 yapf rope neovim pynvim jedi
 
 ## Set up vim
 ```bash
-mkdir -p ~/.cache/vim/undo
 vim -c "PlugInstall" -c "qa"
 ```
 
@@ -22,13 +25,7 @@ vim -c "PlugInstall" -c "qa"
 
 ## Set up nvim
 ```bash
-mkdir -p ~/.config/nvim
-mkdir -p ~/.local/bin
-ln -s ~/.vim/vimrc ~/.config/nvim/init.vim
-ln -s ~/.vim/autoload ~/.config/nvim/autoload
-ln -s ~/.vim/colors ~/.config/nvim/colors
-ln -s ~/.vim/plugged ~/.config/nvim/plugged
-ln -s ~/.vim/coc-settings.json ~/.config/nvim/coc-settings.json
+ln -s ~/.vim/config/nvim ~/.config/nvim
 curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage 
 chmod u+x nvim.appimage
 ./nvim.appimage --appimage-extract
@@ -38,21 +35,27 @@ rm nvim.appimage
 nvim -c "PlugInstall" -c "qa"
 ```
 
-## Set up shell
+## Set up bash
 ```bash
-cd ~
+ln -s .vim/config/.bashrc ~/.bashrc
+```
+
+## Set up fish
+```bash
+ln -s ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
+```
+
+## Set up zsh
+```bash
+ln -s .vim/config/.zshrc ~/.zshrc
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/plugins/zsh-history-substring-search
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
-ln -s .vim/.zshrc ~/.zshrc
-ln -s .vim/.bashrc ~/.bashrc
-ln -s ~/.vim/fish ~/.config/fish
-# use fisher to manage fish plugins
 ```
 
 ## Others
 ```bash
-cd ~
-ln -s ~/.vim/others/lfrc ~/.config/lf/lfrc
+ln -s ~/.vim/config/lfrc ~/.config/lf/lfrc
+ln -s .vim/config/.tmux.conf ~/.tmux.conf
 ```

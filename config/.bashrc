@@ -14,8 +14,8 @@ fi
 
 # User specific aliases and functions
 
-source ~/.vim/others/common.sh
-source ~/.vim/others/git.sh
+source ~/.vim/config/common.sh
+source ~/.vim/config/git.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
 export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'

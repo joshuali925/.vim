@@ -100,7 +100,7 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 # key bindings
 
-source ~/.vim/others/common.sh
+source ~/.vim/config/common.sh
 
 ZSH_DISABLE_COMPFIX='true'
 autoload -U compinit && compinit -u  # for autocomplete
