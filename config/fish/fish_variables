@@ -1,6 +1,6 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
-SETUVAR --export PYTHONSTARTUP:/home/kite/\x2evim/others/\x2epythonrc
+SETUVAR --export PYTHONSTARTUP:/home/kite/\x2evim/config/\x2epythonrc
 SETUVAR ZO_CMD:zo
 SETUVAR Z_CMD:z
 SETUVAR Z_DATA:/home/kite/\x2elocal/share/z/data
@@ -130,9 +130,10 @@ SETUVAR _fish_abbr_ll:ls\x20\x2dAlhF
 SETUVAR _fish_abbr_mkdir:mkdir\x20\x2dp
 SETUVAR _fish_abbr_service:sudo\x20service
 SETUVAR _fish_abbr_size:du\x20\x2dh\x20\x2d\x2dmax\x2ddepth\x3d1\x20\x7c\x20sort\x20\x2dhr
+SETUVAR _fish_abbr_v:vim
 SETUVAR _fish_abbr_venv:source\x20venv/bin/activate\x2efish
+SETUVAR _fish_abbr_vf:vim\x20\x28fd\x20\x7c\x20fzf\x20\x2d\x2dheight\x2040\x25\x29
 SETUVAR _fish_abbr_vi:vim
-SETUVAR _fish_abbr_vimf:vim\x20\x28fd\x20\x7c\x20fzf\x20\x2d\x2dheight\x2040\x25\x29
 SETUVAR _fish_abbr_vimm:vim\x20\x7e/\x2evim/vimrc
 SETUVAR _fish_abbr_vims:vim\x20\x2dc\x20\x22source\x20\x7e/\x2ecache/vim/session\x2evim\x22
 SETUVAR _fish_abbr_which:type\x20\x2da

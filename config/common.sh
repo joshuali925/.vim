@@ -1,5 +1,5 @@
-source ~/.vim/others/z.sh
-export PYTHONSTARTUP=~/.vim/others/.pythonrc
+source ~/.vim/config/z.sh
+export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:$HOME/.vim/bin
 
@@ -8,8 +8,9 @@ alias ll='ls -AlhF'
 alias la='ls -AF'
 alias l='ls -CF'
 alias size='du -h --max-depth=1 | sort -hr'
+alias v='vim'
 alias vi='vim'
-alias vimf='vim $(fd | fzf --height 40%)'
+alias vf='vim $(fd | fzf --height 40%)'
 alias vimm='vim ~/.vim/vimrc'
 alias vims='vim -c "source ~/.cache/vim/session.vim"'
 alias gacp='git add -A && git commit -m "update" && git push origin master'
