@@ -47,11 +47,11 @@ ln -s ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
 
 ## Set up zsh
 ```bash
-ln -s .vim/config/.zshrc ~/.zshrc
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/plugins/zsh-history-substring-search
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
+ln -s .vim/config/.zshrc ~/.zshrc
 ```
 
 ## Others
