@@ -2,11 +2,13 @@ source ~/.vim/config/z.sh
 export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:$HOME/.vim/bin
+export LS_COLORS=$(cat ~/.vim/config/.dircolors)
 
 alias mkdir='mkdir -p'
-alias ll='ls -AlhF'
-alias la='ls -AF'
-alias l='ls -CF'
+alias ll='ls -AlhF --color=auto'
+alias la='ls -AF --color=auto'
+alias ls='ls -CF --color=auto'
+alias l='ls -CF --color=auto'
 alias size='du -h --max-depth=1 | sort -hr'
 alias v='vim'
 alias vi='vim'
