@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
 let g:Theme = 3
-let g:Completion = 1  " 0: mucomplete, 1: YCM, 2: coc
+let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
 " }}}
@@ -95,7 +95,6 @@ call LoadColorscheme(g:Theme)
 " }}}
 
 " ======================= Basics ======================== {{{
-if &compatible | set nocompatible | endif
 set backspace=eol,start,indent
 set whichwrap+=<,>,[,]
 set mouse=a
@@ -451,8 +450,8 @@ let g:EasyMotion_smartcase = 1
 let g:NERDTreeWinSize = 23
 let g:NERDTreeShowHidden = 1
 let g:NERDTreeMinimalUI = 1
-let g:NERDTreeDirArrowExpandable = '+'
-let g:NERDTreeDirArrowCollapsible = '-'
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
 let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings, replaced by NERDTree
 let g:netrw_banner = 0
 let g:netrw_browse_split = 2
@@ -474,7 +473,7 @@ let g:tagbar_compact = 1
 let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
-let g:tagbar_iconchars = [ '+', '-' ]
+let g:tagbar_iconchars = [ '▸', '▾' ]
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'

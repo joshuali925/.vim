@@ -1,3 +1,7 @@
+ZSH_DISABLE_COMPFIX='true' # for autocomplete, skip the verification of insecure directories
+autoload -U compinit && compinit -u  # for autocomplete
+unsetopt BG_NICE  # fix wsl bug
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -101,10 +105,6 @@ source $ZSH/oh-my-zsh.sh
 # key bindings
 
 source ~/.vim/config/common.sh
-
-ZSH_DISABLE_COMPFIX='true'
-autoload -U compinit && compinit -u  # for autocomplete
-unsetopt BG_NICE  # fix wsl bug
 
 function chpwd() { emulate -L zsh; ls -ACF; }
 
