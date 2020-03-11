@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 3
+let g:Theme = -4
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
@@ -8,7 +8,6 @@ let g:ExecCommand = ''
 " ===================== Plugins ========================= {{{
 call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
-Plug 'christoomey/vim-tmux-navigator'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'skywind3000/quickmenu.vim', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
@@ -18,7 +17,7 @@ Plug 'ryanoasis/vim-devicons', { 'on': 'NERDTreeTabsToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
-Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
+Plug 'liuchengxu/vista.vim', { 'on': 'Vista' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
@@ -30,6 +29,7 @@ Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 'markdown' }  " load on insert doesn't work
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
+Plug 'christoomey/vim-tmux-navigator'
 Plug 'machakann/vim-sandwich'
 Plug 'machakann/vim-swap'
 Plug 'chaoren/vim-wordmotion'
@@ -182,6 +182,7 @@ nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *N
+vnoremap <F4> y/<C-r>"<CR>N
 imap <F10> <Esc><F10>
 nnoremap <F10> :wall <bar> execute '!clear && '. GetRunCommand()<CR>
 imap <F11> <Esc><F11>
@@ -231,6 +232,16 @@ nnoremap yp "0p
 nnoremap yP "0P
 nnoremap cr :call EditRegister()<CR>
 nnoremap K :call ShowDocs()<CR>
+nnoremap [b :bprevious<CR>
+nnoremap ]b :bnext<CR>
+nnoremap [e :m .-2<CR>==
+nnoremap ]e :m .+1<CR>==
+vnoremap [e :m '<-2<CR>gv=gv
+vnoremap ]e :m '>+1<CR>gv=gv
+nnoremap [p o<Esc>p
+nnoremap ]p O<Esc>p
+nmap [<Space> o<Esc>
+nmap ]<Space> O<Esc>
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ` c`<C-r><C-p>"`<Esc>
@@ -259,8 +270,6 @@ xmap <C-n> :<C-u>call LoadVisualMulti()<CR>gv<C-n>
 nmap <leader><C-n> :call LoadVisualMulti()<CR><leader><C-n>
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
-nmap <leader>o o<Esc>
-nmap <leader>O O<Esc>
 imap <leader>r <Esc><leader>r
 nmap <leader>r <F11>
 nnoremap <leader><F2> :-tabmove<CR>
@@ -275,7 +284,7 @@ nnoremap <leader>fl :LeaderfLineAll<CR>
 nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfSelf<CR>
 nnoremap <leader>fs :vertical sfind \c*
-nnoremap <leader>ft :TagbarToggle<CR>
+nnoremap <leader>ft :Vista!!<CR>
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
@@ -367,7 +376,7 @@ function! LoadQuickmenu()
     call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
     call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
     call g:quickmenu#append('Undo Tree', 'UndotreeToggle', 'Toggle Undotree')
-    call g:quickmenu#append('Tagbar', 'TagbarToggle', 'Toggle Tagbar')
+    call g:quickmenu#append('Vista', 'Vista!!', 'Toggle Vista')
     call g:quickmenu#append('Table Mode', 'TableModeToggle', 'Toggle TableMode')
     call g:quickmenu#append('Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
     call g:quickmenu#append('Diff %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
@@ -447,11 +456,12 @@ endfunction
 " =================== Other plugins ===================== {{{
 let g:asyncrun_open = 12
 let g:EasyMotion_smartcase = 1
+let g:undotree_WindowLayout = 2
 let g:NERDTreeWinSize = 23
 let g:NERDTreeShowHidden = 1
 let g:NERDTreeMinimalUI = 1
-let g:NERDTreeDirArrowExpandable = '▸'
-let g:NERDTreeDirArrowCollapsible = '▾'
+let g:NERDTreeDirArrowExpandable  = "▷"
+let g:NERDTreeDirArrowCollapsible = "◢"
 let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings, replaced by NERDTree
 let g:netrw_banner = 0
 let g:netrw_browse_split = 2
@@ -469,11 +479,6 @@ let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_WorkingDirectoryMode = 'Ac'
 let g:Lf_CacheDirectory = expand('~/.cache/')
-let g:tagbar_compact = 1
-let g:tagbar_sort = 0
-let g:tagbar_width = 25
-let g:tagbar_singleclick = 1
-let g:tagbar_iconchars = [ '▸', '▾' ]
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'

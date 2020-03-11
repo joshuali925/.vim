@@ -352,3 +352,16 @@ if has('win32')
     endfunction
     command! -complete=shellcmd -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
 endif
+
+" =======================================================
+" TagBar replaced by vista
+" note vista doesn't work with exuberant ctags
+" use tagbar instead if only has universal ctags
+Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle' }
+nnoremap <leader>ft :TagbarToggle<CR>
+    call g:quickmenu#append('Tagbar', 'TagbarToggle', 'Toggle Tagbar')
+let g:tagbar_compact = 1
+let g:tagbar_sort = 0
+let g:tagbar_width = 25
+let g:tagbar_singleclick = 1
+let g:tagbar_iconchars = [ '▸', '▾' ]

@@ -1,4 +1,4 @@
-# vim-configuration
+# Dot Files
 ## Download
 ```bash
 cd ~
@@ -6,7 +6,7 @@ mkdir -p ~/.cache/vim/undo
 mkdir -p ~/.local/bin
 mkdir -p ~/.config
 mv ~/.vim ~/vim_backup
-git clone https://github.com/joshuali925/vim-configuration.git ~/.vim
+git clone https://github.com/joshuali925/.vim.git ~/.vim
 pip install --user flake8 yapf rope neovim pynvim jedi
 ```
 
@@ -19,7 +19,7 @@ vim -c "PlugInstall" -c "qa"
 ```bash
 # download 64-bit gvim from https://github.com/vim/vim-win32-installer/releases/latest
 mkdir %USERPROFILE%\.cache\vim\undo
-git clone https://github.com/joshuali925/vim-configuration.git %USERPROFILE%\vimfiles
+git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\vimfiles
 vim -c "PlugInstall" -c "qa"
 ```
 
