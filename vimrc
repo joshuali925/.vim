@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -4
+let g:Theme = 3
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
@@ -23,7 +23,7 @@ Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
-Plug 'tpope/vim-fugitive', { 'on': ['Gstatus', 'Gdiffsplit'] }
+Plug 'tpope/vim-fugitive', { 'on': ['Git', 'Gdiffsplit', 'Gclog'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
@@ -54,6 +54,7 @@ if g:Completion >= 0
 endif
 call plug#end()
 silent! call yankstack#setup()
+runtime macros/sandwich/keymap/surround.vim
 " }}}
 
 " ====================== Themes ========================= {{{
@@ -130,6 +131,7 @@ set shiftround
 set textwidth=0
 set autoread
 set autochdir
+set hidden
 set complete-=i
 set completeopt=menuone
 set shortmess+=c
@@ -200,6 +202,18 @@ map ? <Plug>(easymotion-bd-f)
 nmap S <Plug>(easymotion-bd-w)
 map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
+xmap i <Plug>(textobj-sandwich-query-i)
+xmap a <Plug>(textobj-sandwich-query-a)
+omap i <Plug>(textobj-sandwich-query-i)
+omap a <Plug>(textobj-sandwich-query-a)
+xmap ib <Plug>(textobj-sandwich-auto-i)
+xmap ab <Plug>(textobj-sandwich-auto-a)
+omap ib <Plug>(textobj-sandwich-auto-i)
+omap ab <Plug>(textobj-sandwich-auto-a)
+xmap is <Plug>(textobj-sandwich-literal-query-i)
+xmap as <Plug>(textobj-sandwich-literal-query-a)
+omap is <Plug>(textobj-sandwich-literal-query-i)
+omap as <Plug>(textobj-sandwich-literal-query-a)
 omap ia <Plug>(swap-textobject-i)
 xmap ia <Plug>(swap-textobject-i)
 omap aa <Plug>(swap-textobject-a)
@@ -232,16 +246,22 @@ nnoremap yp "0p
 nnoremap yP "0P
 nnoremap cr :call EditRegister()<CR>
 nnoremap K :call ShowDocs()<CR>
+nnoremap [a :previous<CR>
+nnoremap ]a :next<CR>
 nnoremap [b :bprevious<CR>
 nnoremap ]b :bnext<CR>
+nnoremap [l :lprevious<CR>
+nnoremap ]l :lnext<CR>
+nnoremap [q :cprevious<CR>
+nnoremap ]q :cnext<CR>
+nnoremap [t :tprevious<CR>
+nnoremap ]t :tnext<CR>
 nnoremap [e :m .-2<CR>==
 nnoremap ]e :m .+1<CR>==
 vnoremap [e :m '<-2<CR>gv=gv
 vnoremap ]e :m '>+1<CR>gv=gv
-nnoremap [p o<Esc>p
-nnoremap ]p O<Esc>p
-nmap [<Space> o<Esc>
-nmap ]<Space> O<Esc>
+nmap [<Space> O<Esc>
+nmap ]<Space> o<Esc>
 vnoremap " c"<C-r><C-p>""<Esc>
 vnoremap ' c'<C-r><C-p>"'<Esc>
 vnoremap ` c`<C-r><C-p>"`<Esc>
@@ -385,6 +405,8 @@ function! LoadQuickmenu()
     call g:quickmenu#append('Paste %{&paste ? "[x]" :"[ ]"}', 'execute &paste ? "set nopaste number mouse=nv signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)')
     call g:quickmenu#append('Spelling %{&spell ? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)')
     call g:quickmenu#append('Preview %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview')
+    call g:quickmenu#append('Cursorline %{&cursorline ? "[x]" :"[ ]"}', 'set cursorline!', 'Toggle cursorline')
+    call g:quickmenu#append('Cursorcolumn %{&cursorcolumn ? "[x]" :"[ ]"}', 'set cursorcolumn!', 'Toggle cursorcolumn')
     call g:quickmenu#append('Dark Theme %{&background=~"dark" ? "[x]" :"[ ]"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color')
     call g:quickmenu#current(1)
     call g:quickmenu#header('Themes')
