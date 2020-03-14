@@ -14,5 +14,5 @@ map ms mark-save
 map mm push :mkdir<Space>
 map mt push :touch<Space>
 map <c-c> push cu
-map i $bat --color=always --style='numbers,changes' --paging=always $f
+map i $bat --color=always --style='numbers,changes' --paging=always "$f"
 map zd !du -h --max-depth=1 | sort -hr
