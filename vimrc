@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 3
+let g:Theme = -4
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
@@ -86,13 +86,16 @@ let s:theme_list[-7] = 'gruvbox'
 let s:theme_list[-8] = 'two-firewatch'
 let s:theme_list[-9] = 'molokai'
 let g:material_terminal_italics = 1
-function! LoadColorscheme(index)
+function! LoadColorscheme(index, loaded_quickui)
     let g:material_theme_style = a:index < 0 ? 'palenight' : 'lighter'
     let g:ayucolor = a:index < 0 ? 'mirage' : 'light'
     execute 'set background='. (a:index < 0 ? 'dark' : 'light')
     execute 'colorscheme '. get(s:theme_list, a:index, 'desert')
+    if a:loaded_quickui == 1
+        call QuickThemeChange(a:index < 0 ? 'papercol' : 'solarized')
+    endif
 endfunction
-call LoadColorscheme(g:Theme)
+call LoadColorscheme(g:Theme, 0)
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -363,10 +366,10 @@ function! LoadQuickUI(open_menu)
     nnoremap <F1> :call quickui#menu#open('normal')<CR>
     vnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
     nnoremap K :call OpenQuickUIContextMenu()<CR>
-    let g:quickui_color_scheme = 'papercol dark'
     let g:quickui_show_tip = 1
     let g:quickui_border_style = 2
     call plug#load('vim-quickui')
+    call LoadColorscheme(g:Theme, 1)
     call quickui#menu#switch('normal')
     call quickui#menu#reset()
     call quickui#menu#install("&Actions", [
@@ -382,8 +385,6 @@ function! LoadQuickUI(open_menu)
                 \ ['--', ''],
                 \ ['&Buffers', 'call quickui#tools#list_buffer("vsplit")'],
                 \ ['&Functions', 'call quickui#tools#list_function()'],
-                \ ['--', ''],
-                \ ['&Refresh Menu Colors', 'call QuickThemeChange("'. g:quickui_color_scheme. '")', 'Refresh colors after changing colorscheme'],
                 \ ])
     call quickui#menu#install("To&ggle", [
                 \ ['&Netrw', 'Lexplore', 'Toggle Vim Netrw'],
@@ -419,7 +420,7 @@ function! LoadQuickUI(open_menu)
             call add(l:quickui_theme_list, ['--', ''])
             let l:background_color = '(Light) &'
         endif
-        call add(l:quickui_theme_list, [l:background_color. s:theme_list[index], "execute 'silent !sed --in-place --follow-symlinks \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')'])
+        call add(l:quickui_theme_list, [l:background_color. s:theme_list[index], "execute 'silent !sed --in-place --follow-symlinks \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ', 1)'])
     endfor
     call quickui#menu#install("&Theme", l:quickui_theme_list)
     call quickui#menu#switch('visual')
@@ -447,18 +448,18 @@ endfunction
 function! OpenQuickUIContextMenu()
     let l:quickui_content = []
     if &filetype == 'python'
-        call add(l:quickui_content, ['Jedi Documentation', 'call jedi#show_documentation()', 'Jedi Documentation'])
-        call add(l:quickui_content, ['Jedi Goto', 'call jedi#goto()', 'Jedi Goto'])
+        call add(l:quickui_content, ['Jedi Do&cumentation', 'call jedi#show_documentation()', 'Jedi Documentation'])
+        call add(l:quickui_content, ['Jedi &Goto', 'call jedi#goto()', 'Jedi Goto'])
         call add(l:quickui_content, ['Jedi Definition', 'call jedi#goto_definitions()', 'Jedi Definition'])
         call add(l:quickui_content, ['Jedi Assignments', 'call jedi#goto_assignments()', 'Jedi Assignments'])
         call add(l:quickui_content, ['Jedi Stubs', 'call jedi#goto_stubs()', 'Jedi Stubs'])
-        call add(l:quickui_content, ['Jedi References', 'call jedi#usages()', 'Jedi References'])
-        call add(l:quickui_content, ['Jedi Rename', 'call jedi#rename()', 'Jedi Rename'])
+        call add(l:quickui_content, ['Jedi Re&ferences', 'call jedi#usages()', 'Jedi References'])
+        call add(l:quickui_content, ['Jedi Rena&me', 'call jedi#rename()', 'Jedi Rename'])
         call add(l:quickui_content, ['--', ''])
     endif
     if g:Completion == 1
         call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe Documentation'])
-        call add(l:quickui_content, ['De&finition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe Definition'])
+        call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe Definition'])
         call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe Type Definition'])
         call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe References'])
         call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe Implementation'])
@@ -467,7 +468,7 @@ function! OpenQuickUIContextMenu()
         call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe Organize Imports'])
     elseif g:Completion == 2
         call add(l:quickui_content, ['&Documentation', 'call CocAction("doHover")', 'Coc Documentation'])
-        call add(l:quickui_content, ['De&finition', 'execute "normal \<Plug>(coc-definition)"', 'Coc Definition'])
+        call add(l:quickui_content, ['D&efinition', 'execute "normal \<Plug>(coc-definition)"', 'Coc Definition'])
         call add(l:quickui_content, ['&Type Definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc Type Definition'])
         call add(l:quickui_content, ['&References', 'execute "normal \<Plug>(coc-references)"', 'Coc References'])
         call add(l:quickui_content, ['&Implementation', 'execute "normal \<Plug>(coc-implementation)"', 'Coc Implementation'])
@@ -726,7 +727,7 @@ if has('win32')
     let &t_EI=""
     vnoremap <C-c> "+y<Esc>
     if has('gui_running')
-        set pythonthreedll=python37.dll  " if python3.8, set to python38
+        set pythonthreedll=python37.dll  " if using python3.8, set to python38.dll
         let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
         function! ActivatePyEnv(environment)
             if a:environment == ''
