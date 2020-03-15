@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -4
+let g:Theme = 6
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
@@ -16,7 +16,7 @@ Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeTabsToggle' }
 Plug 'ryanoasis/vim-devicons', { 'on': 'NERDTreeTabsToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
-Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
+Plug 'dhruvasagar/vim-table-mode', { 'on': ['TableModeToggle', 'TableModeRealign', 'Tableize', 'TableAddFormula', 'TableEvalFormulaLine'] }
 Plug 'liuchengxu/vista.vim', { 'on': 'Vista' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
@@ -27,9 +27,9 @@ Plug 'tpope/vim-fugitive', { 'on': ['Git', 'Gdiffsplit', 'Gclog', 'Gread'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
+Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 'markdown' }  " load on insert doesn't work
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
-Plug 'christoomey/vim-tmux-navigator'
 Plug 'machakann/vim-sandwich'
 Plug 'machakann/vim-swap'
 Plug 'chaoren/vim-wordmotion'
@@ -180,20 +180,20 @@ nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
 imap <F1> <Esc><F1>
-vmap <F1> :<C-u>call LoadQuickUI(0)<CR>gv<F1>
+xmap <F1> :<C-u>call LoadQuickUI(0)<CR>gv<F1>
 nmap <F1> :call LoadQuickUI(0)<CR><F1>
 imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
 nnoremap <F3> gt
 nnoremap <F4> *N
-vnoremap <F4> y/<C-r>"<CR>N
+xnoremap <F4> y/\V<C-r>"<CR>N
 imap <F10> <Esc><F10>
 nnoremap <F10> :wall <bar> execute '!clear && '. GetRunCommand()<CR>
 imap <F11> <Esc><F11>
 nnoremap <F11> :wall <bar> execute 'AsyncRun '. GetRunCommand()<CR>
 imap <F12> <Esc><F12>
-nnoremap <F12> :wall <bar> call RunShellCommand(''. GetRunCommand())<CR>
+nnoremap <F12> :wall <bar> call RunShellCommand(GetRunCommand())<CR>
 imap <Space> <Plug>(PearTreeSpace)
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
@@ -226,7 +226,7 @@ nmap Y y$
 noremap 0 ^
 noremap ^ 0
 noremap - $
-vnoremap - $h
+xnoremap - $h
 noremap <Home> g^
 noremap <End> g$
 noremap <Down> gj
@@ -238,8 +238,8 @@ inoremap <Up> <C-o>gk
 xnoremap @q :normal @q<CR>
 xnoremap @@ :normal @@<CR>
 nnoremap Q q:
-vnoremap < <gv
-vnoremap > >gv
+xnoremap < <gv
+xnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap cc cc<Space><BS>
@@ -261,25 +261,26 @@ nnoremap [t :tprevious<CR>
 nnoremap ]t :tnext<CR>
 nnoremap [e :m .-2<CR>==
 nnoremap ]e :m .+1<CR>==
-vnoremap [e :m '<-2<CR>gv=gv
-vnoremap ]e :m '>+1<CR>gv=gv
+xnoremap [e :m '<-2<CR>gv=gv
+xnoremap ]e :m '>+1<CR>gv=gv
 nmap [<Space> O<Esc>
 nmap ]<Space> o<Esc>
-vnoremap " c"<C-r><C-p>""<Esc>
-vnoremap ' c'<C-r><C-p>"'<Esc>
-vnoremap ` c`<C-r><C-p>"`<Esc>
-vnoremap ( c(<C-r><C-p>")<Esc>
-vnoremap [ c[<C-r><C-p>"]<Esc>
-vnoremap { c{<C-r><C-p>"}<Esc>
-vnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
-nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
+xnoremap " c"<C-r><C-p>""<Esc>
+xnoremap ' c'<C-r><C-p>"'<Esc>
+xnoremap ` c`<C-r><C-p>"`<Esc>
+xnoremap ( c(<C-r><C-p>")<Esc>
+xnoremap [ c[<C-r><C-p>"]<Esc>
+xnoremap { c{<C-r><C-p>"}<Esc>
+xnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
+nnoremap <silent> <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
-vnoremap <C-c> <Esc>
+xnoremap <C-c> <Esc>
 nnoremap <C-b> :NERDTreeTabsToggle<CR>
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
+nnoremap <silent> <C-h> :TmuxNavigateLeft<CR>
+nnoremap <silent> <C-j> :TmuxNavigateDown<CR>
+nnoremap <silent> <C-k> :TmuxNavigateUp<CR>
+nnoremap <silent> <C-l> :TmuxNavigateRight<CR>
+nnoremap <silent> <C-\> :TmuxNavigatePrevious<CR>
 nnoremap <C-w><C-c> <Esc>
 nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
@@ -287,7 +288,7 @@ nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
 nmap <C-f> :call LoadAutoformat()<CR><C-f>
 imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
-vmap <C-f> :<C-u>call LoadAutoformat()<CR>gv<C-f>
+xmap <C-f> :<C-u>call LoadAutoformat()<CR>gv<C-f>
 nmap <C-n> :call LoadVisualMulti()<CR><C-n>
 xmap <C-n> :<C-u>call LoadVisualMulti()<CR>gv<C-n>
 nmap <leader><C-n> :call LoadVisualMulti()<CR><leader><C-n>
@@ -313,7 +314,7 @@ nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>s :call PrintCurrVars(0)<CR>
-vnoremap <leader>s :call PrintCurrVars(1)<CR>$
+xnoremap <leader>s :call PrintCurrVars(1)<CR>$
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -322,7 +323,7 @@ nnoremap <leader>W :write !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :quit<CR>
-vnoremap <leader>q <Esc>:quit<CR>
+xnoremap <leader>q <Esc>:quit<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
 " }}}
@@ -344,7 +345,7 @@ function! LoadAutoformat()
     let g:formatters_python = ['yapf']
     nnoremap <C-f> :Autoformat<CR>
     inoremap <C-f> <Esc>V:'<,'>Autoformat<CR>A
-    vnoremap <C-f> :'<,'>Autoformat<CR>$
+    xnoremap <C-f> :'<,'>Autoformat<CR>$
     call plug#load('vim-autoformat')
 endfunction
 function! LoadVisualMulti()
@@ -364,7 +365,7 @@ function! LoadVisualMulti()
 endfunction
 function! LoadQuickUI(open_menu)
     nnoremap <F1> :call quickui#menu#open('normal')<CR>
-    vnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
+    xnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
     nnoremap K :call OpenQuickUIContextMenu()<CR>
     let g:quickui_show_tip = 1
     let g:quickui_border_style = 2
@@ -385,12 +386,13 @@ function! LoadQuickUI(open_menu)
                 \ ['--', ''],
                 \ ['&Buffers', 'call quickui#tools#list_buffer("vsplit")'],
                 \ ['&Functions', 'call quickui#tools#list_function()'],
+                \ ['--', ''],
+                \ ['Edit &Vimrc', 'tabedit $MYVIMRC'],
                 \ ])
     call quickui#menu#install("To&ggle", [
                 \ ['&Netrw', 'Lexplore', 'Toggle Vim Netrw'],
                 \ ['&Undo Tree', 'UndotreeToggle', 'Toggle Undotree'],
                 \ ['&Vista', 'Vista!!', 'Toggle Vista'],
-                \ ['&Table Mode', 'TableModeToggle', 'Toggle TableMode'],
                 \ ['&Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
                 \ ['Set &Diff %{&diff ? "Off" :"On"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
                 \ ['Set &Fold %{&foldlevel ? "On" :"Off"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
@@ -413,6 +415,17 @@ function! LoadQuickUI(open_menu)
                 \ ['Align Using # (delimiter centered)', 'Tabularize /#', 'Tabularize /#'],
                 \ ['Align Using : (delimiter centered)', 'Tabularize /:', 'Tabularize /:'],
                 \ ])
+    call quickui#menu#install("Table &Mode", [
+                \ ['Table &Mode', 'TableModeToggle', 'Toggle TableMode'],
+                \ ['&Reformat Table', 'TableModeRealign', 'Reformat table'],
+                \ ['&Format to Table', 'Tableize', 'Format to table, use <leader>T to set delimiter'],
+                \ ['Delete Row', 'execute "normal \<Plug>(table-mode-delete-row)"', 'Delete row'],
+                \ ['&Delete Column', 'execute "normal \<Plug>(table-mode-delete-column)"', 'Delete column'],
+                \ ['Show Cell &Position', 'execute "normal \<Plug>(table-mode-echo-cell)"', 'Show cell index number'],
+                \ ['--', ''],
+                \ ['&Add Formula', 'TableAddFormula', 'Add formula to current cell, i.e. Sum(r1,c1:r2,c2)'],
+                \ ['&Evaluate Formula', 'TableEvalFormulaLine', 'Evaluate formula'],
+                \ ])
     let l:quickui_theme_list = []
     let l:background_color = '(Dark) &'
     for index in sort(keys(s:theme_list))
@@ -420,7 +433,7 @@ function! LoadQuickUI(open_menu)
             call add(l:quickui_theme_list, ['--', ''])
             let l:background_color = '(Light) &'
         endif
-        call add(l:quickui_theme_list, [l:background_color. s:theme_list[index], "execute 'silent !sed --in-place --follow-symlinks \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ', 1)'])
+        call add(l:quickui_theme_list, [l:background_color. s:theme_list[index], "execute 'silent !sed --in-place \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ', 1)'])  " add sed --follow-symlinks for neovim redirect vimrc
     endfor
     call quickui#menu#install("&Theme", l:quickui_theme_list)
     call quickui#menu#switch('visual')
@@ -441,6 +454,10 @@ function! LoadQuickUI(open_menu)
                 \ ['Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)'],
                 \ ['Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)'],
                 \ ])
+    call quickui#menu#install("Table &Mode", [
+                \ ['Reformat Table', "'<,'>TableModeRealign", 'Reformat table'],
+                \ ['Format to Table', "'<,'>Tableize", 'Format to table, use <leader>T to set delimiter'],
+                \ ])
     if a:open_menu == 1
         call OpenQuickUIContextMenu()
     endif
@@ -448,33 +465,33 @@ endfunction
 function! OpenQuickUIContextMenu()
     let l:quickui_content = []
     if &filetype == 'python'
-        call add(l:quickui_content, ['Jedi Do&cumentation', 'call jedi#show_documentation()', 'Jedi Documentation'])
-        call add(l:quickui_content, ['Jedi &Goto', 'call jedi#goto()', 'Jedi Goto'])
-        call add(l:quickui_content, ['Jedi Definition', 'call jedi#goto_definitions()', 'Jedi Definition'])
-        call add(l:quickui_content, ['Jedi Assignments', 'call jedi#goto_assignments()', 'Jedi Assignments'])
-        call add(l:quickui_content, ['Jedi Stubs', 'call jedi#goto_stubs()', 'Jedi Stubs'])
-        call add(l:quickui_content, ['Jedi Re&ferences', 'call jedi#usages()', 'Jedi References'])
-        call add(l:quickui_content, ['Jedi Rena&me', 'call jedi#rename()', 'Jedi Rename'])
+        call add(l:quickui_content, ['Jedi Do&cumentation', 'call jedi#show_documentation()', 'Jedi documentation'])
+        call add(l:quickui_content, ['Jedi &Goto', 'call jedi#goto()', 'Jedi goto'])
+        call add(l:quickui_content, ['Jedi Definition', 'call jedi#goto_definitions()', 'Jedi definition'])
+        call add(l:quickui_content, ['Jedi Assignments', 'call jedi#goto_assignments()', 'Jedi assignments'])
+        call add(l:quickui_content, ['Jedi Stubs', 'call jedi#goto_stubs()', 'Jedi stubs'])
+        call add(l:quickui_content, ['Jedi Re&ferences', 'call jedi#usages()', 'Jedi references'])
+        call add(l:quickui_content, ['Jedi Rena&me', 'call jedi#rename()', 'Jedi rename'])
         call add(l:quickui_content, ['--', ''])
     endif
     if g:Completion == 1
-        call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe Documentation'])
-        call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe Definition'])
-        call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe Type Definition'])
-        call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe References'])
-        call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe Implementation'])
+        call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
+        call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe definition'])
+        call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
+        call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe references'])
+        call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe implementation'])
         call add(l:quickui_content, ['--', ''])
-        call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe Fix'])
-        call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe Organize Imports'])
+        call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe fix'])
+        call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
     elseif g:Completion == 2
-        call add(l:quickui_content, ['&Documentation', 'call CocAction("doHover")', 'Coc Documentation'])
-        call add(l:quickui_content, ['D&efinition', 'execute "normal \<Plug>(coc-definition)"', 'Coc Definition'])
-        call add(l:quickui_content, ['&Type Definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc Type Definition'])
-        call add(l:quickui_content, ['&References', 'execute "normal \<Plug>(coc-references)"', 'Coc References'])
-        call add(l:quickui_content, ['&Implementation', 'execute "normal \<Plug>(coc-implementation)"', 'Coc Implementation'])
+        call add(l:quickui_content, ['&Documentation', 'call CocAction("doHover")', 'Coc documentation'])
+        call add(l:quickui_content, ['D&efinition', 'execute "normal \<Plug>(coc-definition)"', 'Coc definition'])
+        call add(l:quickui_content, ['&Type Definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc type definition'])
+        call add(l:quickui_content, ['&References', 'execute "normal \<Plug>(coc-references)"', 'Coc references'])
+        call add(l:quickui_content, ['&Implementation', 'execute "normal \<Plug>(coc-implementation)"', 'Coc implementation'])
         call add(l:quickui_content, ['--', ''])
-        call add(l:quickui_content, ['Re&name', 'execute "normal \<Plug>(coc-rename)"', 'Coc Rename'])
-        call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc Fix'])
+        call add(l:quickui_content, ['Re&name', 'execute "normal \<Plug>(coc-rename)"', 'Coc rename'])
+        call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc fix'])
     endif
     call add(l:quickui_content, ['--', ''])
     call add(l:quickui_content, ['Built-in Docs', 'execute "normal! K"', 'Use normal! K for help'])
@@ -655,17 +672,17 @@ if has('nvim')
     tnoremap <F3> <C-\><C-n>gt
     tnoremap <C-u> <C-\><C-n>
     tnoremap <Esc> <C-\><C-n>
-    tnoremap <C-h> <C-\><C-n><C-w>h
-    tnoremap <C-j> <C-\><C-n><C-w>j
-    tnoremap <C-k> <C-\><C-n><C-w>k
-    tnoremap <C-l> <C-\><C-n><C-w>l
+    tnoremap <silent> <C-h> <C-\><C-n>:TmuxNavigateLeft<CR>
+    tnoremap <silent> <C-j> <C-\><C-n>:TmuxNavigateDown<CR>
+    tnoremap <silent> <C-k> <C-\><C-n>:TmuxNavigateUp<CR>
+    tnoremap <silent> <C-l> <C-\><C-n>:TmuxNavigateRight<CR>
     nnoremap <leader>to :execute 'split <bar> resize'. (winheight(0) * 2/5). ' <bar> terminal'<CR>
     nnoremap <leader>tO :terminal<CR>
     nnoremap <leader>th :split <bar> terminal<CR>
     nnoremap <leader>tv :vsplit <bar> terminal<CR>
     nnoremap <leader>tt :tabedit <bar> terminal<CR>
     nnoremap <leader>te V:call SendToNvimTerminal()<CR>$
-    vnoremap <leader>te <Esc>:call SendToNvimTerminal()<CR>
+    xnoremap <leader>te <Esc>:call SendToNvimTerminal()<CR>
     augroup NvimTerminal
         autocmd!
         autocmd TermOpen * set nonumber norelativenumber signcolumn=no | startinsert
@@ -694,17 +711,17 @@ else
     tnoremap <F2> <C-w>gT
     tnoremap <F3> <C-w>gt
     tnoremap <C-u> <C-\><C-n>
-    tnoremap <C-h> <C-w>h
-    tnoremap <C-j> <C-w>j
-    tnoremap <C-k> <C-w>k
-    tnoremap <C-l> <C-w>l
+    tnoremap <silent> <C-h> <C-w>:TmuxNavigateLeft<CR>
+    tnoremap <silent> <C-j> <C-w>:TmuxNavigateDown<CR>
+    tnoremap <silent> <C-k> <C-w>:TmuxNavigateUp<CR>
+    tnoremap <silent> <C-l> <C-w>:TmuxNavigateRight<CR>
     nnoremap <leader>to :execute 'terminal ++close ++rows='. winheight(0) * 2/5<CR>
     nnoremap <leader>tO :terminal ++curwin ++close<CR>
     nnoremap <leader>th :terminal ++close<CR>
     nnoremap <leader>tv :vertical terminal ++close<CR>
     nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
     nnoremap <leader>te V:call SendToTerminal()<CR>$
-    vnoremap <leader>te <Esc>:call SendToTerminal()<CR>
+    xnoremap <leader>te <Esc>:call SendToTerminal()<CR>
     function! SendToTerminal()
         let l:buff_n = term_list()
         if len(l:buff_n) > 0
@@ -725,7 +742,7 @@ if has('win32')
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
-    vnoremap <C-c> "+y<Esc>
+    xnoremap <C-c> "+y<Esc>
     if has('gui_running')
         set pythonthreedll=python37.dll  " if using python3.8, set to python38.dll
         let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
