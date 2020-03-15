@@ -9,7 +9,7 @@ let g:ExecCommand = ''
 call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
-Plug 'skywind3000/quickmenu.vim', { 'on': [] }
+Plug 'skywind3000/vim-quickui', { 'on': [] }
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
 Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeTabsToggle' }
@@ -23,7 +23,7 @@ Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
-Plug 'tpope/vim-fugitive', { 'on': ['Git', 'Gdiffsplit', 'Gclog'] }
+Plug 'tpope/vim-fugitive', { 'on': ['Git', 'Gdiffsplit', 'Gclog', 'Gread'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
@@ -39,7 +39,7 @@ if g:Completion >= 0
     Plug 'shougo/echodoc.vim', { 'on': [] }
     Plug 'sirver/ultisnips', { 'on': [] }
     Plug 'honza/vim-snippets', { 'on': [] }
-    Plug 'davidhalter/jedi-vim', { 'on': [] }
+    Plug 'davidhalter/jedi-vim', { 'for': 'python' }
     augroup LazyLoadCompletion
         autocmd!
         autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! LazyLoadCompletion
@@ -177,8 +177,8 @@ nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
 imap <F1> <Esc><F1>
-vmap <F1> :<C-u>call LoadQuickmenu()<CR>gv<F1>
-nmap <F1> :call LoadQuickmenu()<CR><F1>
+vmap <F1> :<C-u>call LoadQuickUI(0)<CR>gv<F1>
+nmap <F1> :call LoadQuickUI(0)<CR><F1>
 imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
@@ -245,7 +245,7 @@ nnoremap gp `[v`]
 nnoremap yp "0p
 nnoremap yP "0P
 nnoremap cr :call EditRegister()<CR>
-nnoremap K :call ShowDocs()<CR>
+nnoremap K :call LoadQuickUI(1)<CR>
 nnoremap [a :previous<CR>
 nnoremap ]a :next<CR>
 nnoremap [b :bprevious<CR>
@@ -305,6 +305,7 @@ nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfSelf<CR>
 nnoremap <leader>fs :vertical sfind \c*
 nnoremap <leader>ft :Vista!!<CR>
+nnoremap <leader>k K
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
@@ -358,94 +359,125 @@ function! LoadVisualMulti()
     xmap <C-n> <Plug>(VM-Find-Subword-Under)
     call plug#load('vim-visual-multi')
 endfunction
-function! ShowDocs()
-    if &filetype == 'python'
-        let g:jedi#auto_initialization = 1
-        let g:jedi#auto_vim_configuration = 0
-        let g:jedi#completions_enabled = 0
-        let g:jedi#show_call_signatures = '2'
-        let g:jedi#documentation_command = 'K'
-        let g:jedi#rename_command = '<leader>R'
-        let g:jedi#goto_command = '<leader>d'
-        let g:jedi#usages_command = '<leader>a'
-        let g:jedi#goto_stubs_command = ''
-        call plug#load('jedi-vim')
-        call jedi#show_documentation()
-    else
-        normal! K
-    endif
-endfunction
-function! LoadQuickmenu()
-    nnoremap <F1> :call g:quickmenu#toggle(0) <bar> set showcmd<CR>
-    vnoremap <F1> :<C-u>call g:quickmenu#toggle(3) <bar> set showcmd<CR>
-    call plug#load('quickmenu.vim')
-    let g:quickmenu_options = 'HL'
-    call g:quickmenu#reset()
-    call g:quickmenu#current(0)
-    call g:quickmenu#header('QvQ')
-    call g:quickmenu#append('# Actions', '')
-    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(1)', 'Change vim colorscheme (let g:Theme = <index> must be the second line in $MYVIMRC)')
-    call g:quickmenu#append('Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line')
-    call g:quickmenu#append('Insert Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt')
-    call g:quickmenu#append('Git Diff', 'Gdiffsplit', 'Fugitive git diff')
-    call g:quickmenu#append('Git Status', 'Gstatus', 'Fugitive git status')
-    call g:quickmenu#append('Word Count', 'call feedkeys("g\<C-g>")', 'Show document details')
-    call g:quickmenu#append('Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces')
-    call g:quickmenu#append('Tabular Menu', 'call g:quickmenu#toggle(2)', 'Use Tabular to align selected text')
-    call g:quickmenu#append('# Toggle', '')
-    call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
-    call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
-    call g:quickmenu#append('Undo Tree', 'UndotreeToggle', 'Toggle Undotree')
-    call g:quickmenu#append('Vista', 'Vista!!', 'Toggle Vista')
-    call g:quickmenu#append('Table Mode', 'TableModeToggle', 'Toggle TableMode')
-    call g:quickmenu#append('Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
-    call g:quickmenu#append('Diff %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
-    call g:quickmenu#append('Fold %{&foldlevel ? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
-    call g:quickmenu#append('Wrap %{&wrap ? "[x]" :"[ ]"}', 'set wrap!', 'Toggle wrap lines')
-    call g:quickmenu#append('Paste %{&paste ? "[x]" :"[ ]"}', 'execute &paste ? "set nopaste number mouse=nv signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)')
-    call g:quickmenu#append('Spelling %{&spell ? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)')
-    call g:quickmenu#append('Preview %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview')
-    call g:quickmenu#append('Cursorline %{&cursorline ? "[x]" :"[ ]"}', 'set cursorline!', 'Toggle cursorline')
-    call g:quickmenu#append('Cursorcolumn %{&cursorcolumn ? "[x]" :"[ ]"}', 'set cursorcolumn!', 'Toggle cursorcolumn')
-    call g:quickmenu#append('Dark Theme %{&background=~"dark" ? "[x]" :"[ ]"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color')
-    call g:quickmenu#current(1)
-    call g:quickmenu#header('Themes')
-    call g:quickmenu#append('# Dark', '')
+function! LoadQuickUI(open_menu)
+    nnoremap <F1> :call quickui#menu#open('normal')<CR>
+    vnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
+    nnoremap K :call OpenQuickUIContextMenu()<CR>
+    let g:quickui_color_scheme = 'papercol dark'
+    let g:quickui_show_tip = 1
+    let g:quickui_border_style = 2
+    call plug#load('vim-quickui')
+    call quickui#menu#switch('normal')
+    call quickui#menu#reset()
+    call quickui#menu#install("&Actions", [
+                \ ['Insert &Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line'],
+                \ ['Insert &Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
+                \ ['--', ''],
+                \ ['Git &Status', 'Git', 'Git status'],
+                \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last committed version'],
+                \ ['Git File &History', '0Gclog', 'Browse previously committed version of current file'],
+                \ ['--', ''],
+                \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
+                \ ['&Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
+                \ ['--', ''],
+                \ ['&Buffers', 'call quickui#tools#list_buffer("vsplit")'],
+                \ ['&Functions', 'call quickui#tools#list_function()'],
+                \ ['--', ''],
+                \ ['&Refresh Menu Colors', 'call QuickThemeChange("'. g:quickui_color_scheme. '")', 'Refresh colors after changing colorscheme'],
+                \ ])
+    call quickui#menu#install("To&ggle", [
+                \ ['&Netrw', 'Lexplore', 'Toggle Vim Netrw'],
+                \ ['&Undo Tree', 'UndotreeToggle', 'Toggle Undotree'],
+                \ ['&Vista', 'Vista!!', 'Toggle Vista'],
+                \ ['&Table Mode', 'TableModeToggle', 'Toggle TableMode'],
+                \ ['&Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
+                \ ['Set &Diff %{&diff ? "Off" :"On"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
+                \ ['Set &Fold %{&foldlevel ? "On" :"Off"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
+                \ ['Set &Wrap %{&wrap ? "Off" :"On"}', 'set wrap!', 'Toggle wrap lines'],
+                \ ['Set &Paste %{&paste ? "Off" :"On"}', 'execute &paste ? "set nopaste number mouse=nv signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
+                \ ['Set &Spelling %{&spell ? "Off" :"On"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
+                \ ['Set Pre&view %{&completeopt=~"preview" ? "Off" :"On"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview'],
+                \ ['Set Cursorli&ne %{&cursorline ? "Off" :"On"}', 'set cursorline!', 'Toggle cursorline'],
+                \ ['Set Cursor&column %{&cursorcolumn ? "Off" :"On"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
+                \ ['Set %{&background=~"dark" ? "Light" :"Dark"} The&me', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color'],
+                \ ])
+    call quickui#menu#install("Ta&bular", [
+                \ ['Align Using = (delimiter fixed)', 'Tabularize /=\zs', 'Tabularize /=\zs'],
+                \ ['Align Using , (delimiter fixed)', 'Tabularize /,\zs', 'Tabularize /,\zs'],
+                \ ['Align Using # (delimiter fixed)', 'Tabularize /#\zs', 'Tabularize /#\zs'],
+                \ ['Align Using : (delimiter fixed)', 'Tabularize /:\zs', 'Tabularize /:\zs'],
+                \ ['--', ''],
+                \ ['Align Using = (delimiter centered)', 'Tabularize /=', 'Tabularize /='],
+                \ ['Align Using , (delimiter centered)', 'Tabularize /,', 'Tabularize /,'],
+                \ ['Align Using # (delimiter centered)', 'Tabularize /#', 'Tabularize /#'],
+                \ ['Align Using : (delimiter centered)', 'Tabularize /:', 'Tabularize /:'],
+                \ ])
+    let l:quickui_theme_list = []
+    let l:background_color = '(Dark) &'
     for index in sort(keys(s:theme_list))
         if index == 0
-            call g:quickmenu#append('# Light', '')
+            call add(l:quickui_theme_list, ['--', ''])
+            let l:background_color = '(Light) &'
         endif
-        call g:quickmenu#append(s:theme_list[index], "execute 'silent !sed --in-place --follow-symlinks \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')')
+        call add(l:quickui_theme_list, [l:background_color. s:theme_list[index], "execute 'silent !sed --in-place --follow-symlinks \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')'])
     endfor
-    call g:quickmenu#current(2)
-    call g:quickmenu#header('Tabular Normal Mode')
-    call g:quickmenu#append('# Fixed Delimiter', '')
-    call g:quickmenu#append('Align Using =', 'Tabularize /=\zs', 'Tabularize /=\zs')
-    call g:quickmenu#append('Align Using ,', 'Tabularize /,\zs', 'Tabularize /,\zs')
-    call g:quickmenu#append('Align Using #', 'Tabularize /#\zs', 'Tabularize /#\zs')
-    call g:quickmenu#append('Align Using :', 'Tabularize /:\zs', 'Tabularize /:\zs')
-    call g:quickmenu#append('# Center Delimiter', '')
-    call g:quickmenu#append('Align Using =', 'Tabularize /=', 'Tabularize /=')
-    call g:quickmenu#append('Align Using ,', 'Tabularize /,', 'Tabularize /,')
-    call g:quickmenu#append('Align Using #', 'Tabularize /#', 'Tabularize /#')
-    call g:quickmenu#append('Align Using :', 'Tabularize /:', 'Tabularize /:')
-    call g:quickmenu#current(3)
-    call g:quickmenu#header('Tabular Visual Mode')
-    call g:quickmenu#append('# Fixed Delimiter', '')
-    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs")
-    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs")
-    call g:quickmenu#append('Align Using #', "'<,'>Tabularize /#\\zs", "'<,'>Tabularize /#\\zs")
-    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:\\zs", "'<,'>Tabularize /:\\zs")
-    call g:quickmenu#append('# Center Delimiter', '')
-    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=", "'<,'>Tabularize /=")
-    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,", "'<,'>Tabularize /,")
-    call g:quickmenu#append('Align Using #', "'<,'>Tabularize /#", "'<,'>Tabularize /#")
-    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:", "'<,'>Tabularize /:")
-    call g:quickmenu#append('# Sort', '')
-    call g:quickmenu#append('Sort Asc', "'<,'>sort", 'Sort in ascending order (sort)')
-    call g:quickmenu#append('Sort Desc', "'<,'>sort!", 'Sort in descending order (sort!)')
-    call g:quickmenu#append('Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)')
-    call g:quickmenu#append('Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)')
+    call quickui#menu#install("&Theme", l:quickui_theme_list)
+    call quickui#menu#switch('visual')
+    call quickui#menu#reset()
+    call quickui#menu#install("&Tabular", [
+                \ ['Align Using = (delimiter fixed)', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs"],
+                \ ['Align Using , (delimiter fixed)', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs"],
+                \ ['Align Using # (delimiter fixed)', "'<,'>Tabularize /#\\zs", "'<,'>Tabularize /#\\zs"],
+                \ ['Align Using : (delimiter fixed)', "'<,'>Tabularize /:\\zs", "'<,'>Tabularize /:\\zs"],
+                \ ['--', ''],
+                \ ['Align Using = (delimiter centered)', "'<,'>Tabularize /=", "'<,'>Tabularize /="],
+                \ ['Align Using , (delimiter centered)', "'<,'>Tabularize /,", "'<,'>Tabularize /,"],
+                \ ['Align Using # (delimiter centered)', "'<,'>Tabularize /#", "'<,'>Tabularize /#"],
+                \ ['Align Using : (delimiter centered)', "'<,'>Tabularize /:", "'<,'>Tabularize /:"],
+                \ ['--', ''],
+                \ ['Sort Asc', "'<,'>sort", 'Sort in ascending order (sort)'],
+                \ ['Sort Desc', "'<,'>sort!", 'Sort in descending order (sort!)'],
+                \ ['Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)'],
+                \ ['Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)'],
+                \ ])
+    if a:open_menu == 1
+        call OpenQuickUIContextMenu()
+    endif
+endfunction
+function! OpenQuickUIContextMenu()
+    let l:quickui_content = []
+    if &filetype == 'python'
+        call add(l:quickui_content, ['Jedi Documentation', 'call jedi#show_documentation()', 'Jedi Documentation'])
+        call add(l:quickui_content, ['Jedi Goto', 'call jedi#goto()', 'Jedi Goto'])
+        call add(l:quickui_content, ['Jedi Definition', 'call jedi#goto_definitions()', 'Jedi Definition'])
+        call add(l:quickui_content, ['Jedi Assignments', 'call jedi#goto_assignments()', 'Jedi Assignments'])
+        call add(l:quickui_content, ['Jedi Stubs', 'call jedi#goto_stubs()', 'Jedi Stubs'])
+        call add(l:quickui_content, ['Jedi References', 'call jedi#usages()', 'Jedi References'])
+        call add(l:quickui_content, ['Jedi Rename', 'call jedi#rename()', 'Jedi Rename'])
+        call add(l:quickui_content, ['--', ''])
+    endif
+    if g:Completion == 1
+        call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe Documentation'])
+        call add(l:quickui_content, ['De&finition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe Definition'])
+        call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe Type Definition'])
+        call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe References'])
+        call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe Implementation'])
+        call add(l:quickui_content, ['--', ''])
+        call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe Fix'])
+        call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe Organize Imports'])
+    elseif g:Completion == 2
+        call add(l:quickui_content, ['&Documentation', 'call CocAction("doHover")', 'Coc Documentation'])
+        call add(l:quickui_content, ['De&finition', 'execute "normal \<Plug>(coc-definition)"', 'Coc Definition'])
+        call add(l:quickui_content, ['&Type Definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc Type Definition'])
+        call add(l:quickui_content, ['&References', 'execute "normal \<Plug>(coc-references)"', 'Coc References'])
+        call add(l:quickui_content, ['&Implementation', 'execute "normal \<Plug>(coc-implementation)"', 'Coc Implementation'])
+        call add(l:quickui_content, ['--', ''])
+        call add(l:quickui_content, ['Re&name', 'execute "normal \<Plug>(coc-rename)"', 'Coc Rename'])
+        call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc Fix'])
+    endif
+    call add(l:quickui_content, ['--', ''])
+    call add(l:quickui_content, ['Built-in Docs', 'execute "normal! K"', 'Use normal! K for help'])
+    call quickui#context#open(l:quickui_content, {'index': g:quickui#context#cursor})
 endfunction
 " }}}
 
@@ -560,6 +592,14 @@ let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
+let g:jedi#auto_initialization = 1
+let g:jedi#auto_vim_configuration = 0
+let g:jedi#completions_enabled = 0
+let g:jedi#show_call_signatures = '2'
+let g:jedi#documentation_command = '<leader>k'
+let g:jedi#goto_command = '<leader>d'
+let g:jedi#rename_command = '<leader>R'
+let g:jedi#goto_stubs_command = ''
 imap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<C-g>u\<Plug>(PearTreeExpand)\<Space>\<BS>"
 if g:Completion == 0  " mucomplete
     set omnifunc=syntaxcomplete#Complete
@@ -594,23 +634,12 @@ elseif g:Completion == 2  " coc
     inoremap <expr> <C-Space> coc#refresh()
     xmap <C-f> <Plug>(coc-format-selected)
     nnoremap <C-f> :call CocAction('format')<CR>
-    nnoremap K :call <SID>show_documentation()<CR>
-    nmap <leader>a <Plug>(coc-fix-current)
-    nmap <leader>R <Plug>(coc-rename)
     nmap <leader>d <Plug>(coc-definition)
-    nmap gy <Plug>(coc-type-definition)
-    nmap gi <Plug>(coc-implementation)
-    nmap gr <Plug>(coc-references)
+    nmap <leader>R <Plug>(coc-rename)
+    nmap <leader>a <Plug>(coc-fix-current)
     imap <C-k> <Plug>(coc-snippets-expand)
     let g:coc_snippet_next = '<Tab>'
     let g:coc_snippet_prev = '<S-Tab>'
-    function! s:show_documentation()
-        if index(['vim','help'], &filetype) >= 0
-            execute 'help '.expand('<cword>')
-        else
-            call CocAction('doHover')
-        endif
-    endfunction
 endif
 " }}}
 
@@ -697,6 +726,7 @@ if has('win32')
     let &t_EI=""
     vnoremap <C-c> "+y<Esc>
     if has('gui_running')
+        set pythonthreedll=python37.dll  " if python3.8, set to python38
         let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
         function! ActivatePyEnv(environment)
             if a:environment == ''

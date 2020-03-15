@@ -365,3 +365,81 @@ let g:tagbar_sort = 0
 let g:tagbar_width = 25
 let g:tagbar_singleclick = 1
 let g:tagbar_iconchars = [ '▸', '▾' ]
+
+" =======================================================
+" Quickmenu replaced by quickui, which needs vim >= 8.2
+Plug 'skywind3000/quickmenu.vim', { 'on': [] }
+vmap <F1> :<C-u>call LoadQuickmenu()<CR>gv<F1>
+nmap <F1> :call LoadQuickmenu()<CR><F1>
+function! LoadQuickmenu()
+    nnoremap <F1> :call g:quickmenu#toggle(0) <bar> set showcmd<CR>
+    vnoremap <F1> :<C-u>call g:quickmenu#toggle(3) <bar> set showcmd<CR>
+    call plug#load('quickmenu.vim')
+    let g:quickmenu_options = 'HL'
+    call g:quickmenu#reset()
+    call g:quickmenu#current(0)
+    call g:quickmenu#header('QvQ')
+    call g:quickmenu#append('# Actions', '')
+    call g:quickmenu#append('Themes', 'call g:quickmenu#toggle(1)', 'Change vim colorscheme (let g:Theme = <index> must be the second line in $MYVIMRC)')
+    call g:quickmenu#append('Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line')
+    call g:quickmenu#append('Insert Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt')
+    call g:quickmenu#append('Git Diff', 'Gdiffsplit', 'Fugitive git diff')
+    call g:quickmenu#append('Git Status', 'Gstatus', 'Fugitive git status')
+    call g:quickmenu#append('Word Count', 'call feedkeys("g\<C-g>")', 'Show document details')
+    call g:quickmenu#append('Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces')
+    call g:quickmenu#append('Tabular Menu', 'call g:quickmenu#toggle(2)', 'Use Tabular to align selected text')
+    call g:quickmenu#append('# Toggle', '')
+    call g:quickmenu#append('NERDTree', 'NERDTreeTabsToggle', 'Toggle NERDTree')
+    call g:quickmenu#append('Netrw', 'Lexplore', 'Toggle Vim Netrw')
+    call g:quickmenu#append('Undo Tree', 'UndotreeToggle', 'Toggle Undotree')
+    call g:quickmenu#append('Vista', 'Vista!!', 'Toggle Vista')
+    call g:quickmenu#append('Table Mode', 'TableModeToggle', 'Toggle TableMode')
+    call g:quickmenu#append('Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview')
+    call g:quickmenu#append('Diff %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window')
+    call g:quickmenu#append('Fold %{&foldlevel ? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent')
+    call g:quickmenu#append('Wrap %{&wrap ? "[x]" :"[ ]"}', 'set wrap!', 'Toggle wrap lines')
+    call g:quickmenu#append('Paste %{&paste ? "[x]" :"[ ]"}', 'execute &paste ? "set nopaste number mouse=nv signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)')
+    call g:quickmenu#append('Spelling %{&spell ? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)')
+    call g:quickmenu#append('Preview %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview')
+    call g:quickmenu#append('Cursorline %{&cursorline ? "[x]" :"[ ]"}', 'set cursorline!', 'Toggle cursorline')
+    call g:quickmenu#append('Cursorcolumn %{&cursorcolumn ? "[x]" :"[ ]"}', 'set cursorcolumn!', 'Toggle cursorcolumn')
+    call g:quickmenu#append('Dark Theme %{&background=~"dark" ? "[x]" :"[ ]"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color')
+    call g:quickmenu#current(1)
+    call g:quickmenu#header('Themes')
+    call g:quickmenu#append('# Dark', '')
+    for index in sort(keys(s:theme_list))
+        if index == 0
+            call g:quickmenu#append('# Light', '')
+        endif
+        call g:quickmenu#append(s:theme_list[index], "execute 'silent !sed --in-place --follow-symlinks \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')')
+    endfor
+    call g:quickmenu#current(2)
+    call g:quickmenu#header('Tabular Normal Mode')
+    call g:quickmenu#append('# Fixed Delimiter', '')
+    call g:quickmenu#append('Align Using =', 'Tabularize /=\zs', 'Tabularize /=\zs')
+    call g:quickmenu#append('Align Using ,', 'Tabularize /,\zs', 'Tabularize /,\zs')
+    call g:quickmenu#append('Align Using #', 'Tabularize /#\zs', 'Tabularize /#\zs')
+    call g:quickmenu#append('Align Using :', 'Tabularize /:\zs', 'Tabularize /:\zs')
+    call g:quickmenu#append('# Center Delimiter', '')
+    call g:quickmenu#append('Align Using =', 'Tabularize /=', 'Tabularize /=')
+    call g:quickmenu#append('Align Using ,', 'Tabularize /,', 'Tabularize /,')
+    call g:quickmenu#append('Align Using #', 'Tabularize /#', 'Tabularize /#')
+    call g:quickmenu#append('Align Using :', 'Tabularize /:', 'Tabularize /:')
+    call g:quickmenu#current(3)
+    call g:quickmenu#header('Tabular Visual Mode')
+    call g:quickmenu#append('# Fixed Delimiter', '')
+    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs")
+    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs")
+    call g:quickmenu#append('Align Using #', "'<,'>Tabularize /#\\zs", "'<,'>Tabularize /#\\zs")
+    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:\\zs", "'<,'>Tabularize /:\\zs")
+    call g:quickmenu#append('# Center Delimiter', '')
+    call g:quickmenu#append('Align Using =', "'<,'>Tabularize /=", "'<,'>Tabularize /=")
+    call g:quickmenu#append('Align Using ,', "'<,'>Tabularize /,", "'<,'>Tabularize /,")
+    call g:quickmenu#append('Align Using #', "'<,'>Tabularize /#", "'<,'>Tabularize /#")
+    call g:quickmenu#append('Align Using :', "'<,'>Tabularize /:", "'<,'>Tabularize /:")
+    call g:quickmenu#append('# Sort', '')
+    call g:quickmenu#append('Sort Asc', "'<,'>sort", 'Sort in ascending order (sort)')
+    call g:quickmenu#append('Sort Desc', "'<,'>sort!", 'Sort in descending order (sort!)')
+    call g:quickmenu#append('Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)')
+    call g:quickmenu#append('Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)')
+endfunction
