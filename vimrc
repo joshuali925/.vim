@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let g:Theme = 6
+let g:Theme = -4
 let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let g:PythonPath = 'python3'
 let g:ExecCommand = ''
@@ -86,16 +86,16 @@ let s:theme_list[-7] = 'gruvbox'
 let s:theme_list[-8] = 'two-firewatch'
 let s:theme_list[-9] = 'molokai'
 let g:material_terminal_italics = 1
-function! LoadColorscheme(index, loaded_quickui)
+function! LoadColorscheme(index)
     let g:material_theme_style = a:index < 0 ? 'palenight' : 'lighter'
     let g:ayucolor = a:index < 0 ? 'mirage' : 'light'
     execute 'set background='. (a:index < 0 ? 'dark' : 'light')
     execute 'colorscheme '. get(s:theme_list, a:index, 'desert')
-    if a:loaded_quickui == 1
+    if exists('*QuickThemeChange')  " this is to fix vim-quickui issue #8
         call QuickThemeChange(a:index < 0 ? 'papercol' : 'solarized')
     endif
 endfunction
-call LoadColorscheme(g:Theme, 0)
+call LoadColorscheme(g:Theme)
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -367,10 +367,10 @@ function! LoadQuickUI(open_menu)
     nnoremap <F1> :call quickui#menu#open('normal')<CR>
     xnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
     nnoremap K :call OpenQuickUIContextMenu()<CR>
+    let g:quickui_color_scheme = g:Theme < 0 ? 'papercol' : 'solarized'
     let g:quickui_show_tip = 1
     let g:quickui_border_style = 2
     call plug#load('vim-quickui')
-    call LoadColorscheme(g:Theme, 1)
     call quickui#menu#switch('normal')
     call quickui#menu#reset()
     call quickui#menu#install("&Actions", [
@@ -379,13 +379,13 @@ function! LoadQuickUI(open_menu)
                 \ ['--', ''],
                 \ ['Git &Status', 'Git', 'Git status'],
                 \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last committed version'],
-                \ ['Git File &History', '0Gclog', 'Browse previously committed version of current file'],
+                \ ['&Git File History', '0Gclog', 'Browse previously committed version of current file'],
                 \ ['--', ''],
                 \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
                 \ ['&Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
                 \ ['--', ''],
-                \ ['&Buffers', 'call quickui#tools#list_buffer("vsplit")'],
-                \ ['&Functions', 'call quickui#tools#list_function()'],
+                \ ['Open &Buffers', 'call quickui#tools#list_buffer("vsplit")'],
+                \ ['Open &Functions', 'call quickui#tools#list_function()'],
                 \ ['--', ''],
                 \ ['Edit &Vimrc', 'tabedit $MYVIMRC'],
                 \ ])
@@ -433,7 +433,7 @@ function! LoadQuickUI(open_menu)
             call add(l:quickui_theme_list, ['--', ''])
             let l:background_color = '(Light) &'
         endif
-        call add(l:quickui_theme_list, [l:background_color. s:theme_list[index], "execute 'silent !sed --in-place \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ', 1)'])  " add sed --follow-symlinks for neovim redirect vimrc
+        call add(l:quickui_theme_list, [l:background_color. s:theme_list[index], "execute 'silent !sed --in-place \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')'])  " add sed --follow-symlinks to redirect neovim init.vim symlink to vimrc
     endfor
     call quickui#menu#install("&Theme", l:quickui_theme_list)
     call quickui#menu#switch('visual')
@@ -494,7 +494,7 @@ function! OpenQuickUIContextMenu()
         call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc fix'])
     endif
     call add(l:quickui_content, ['--', ''])
-    call add(l:quickui_content, ['Built-in Docs', 'execute "normal! K"', 'Use normal! K for help'])
+    call add(l:quickui_content, ['&Built-in Docs', 'execute "normal! K"', 'Use normal! K for help'])
     call quickui#context#open(l:quickui_content, {'index': g:quickui#context#cursor})
 endfunction
 " }}}
@@ -549,7 +549,7 @@ let g:Lf_ShortcutF = '<C-p>'
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
 let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
-let g:Lf_WorkingDirectoryMode = 'Ac'
+let g:Lf_WorkingDirectoryMode = 'Aa'
 let g:Lf_CacheDirectory = expand('~/.cache/')
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
