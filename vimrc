@@ -1,8 +1,8 @@
 " ==================== Settings ========================= {{{
-let g:Theme = -4
-let g:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
-let g:PythonPath = 'python3'
-let g:ExecCommand = ''
+let s:Theme = -4
+let s:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
+let s:PythonPath = 'python3'
+let s:ExecCommand = ''
 " }}}
 
 " ===================== Plugins ========================= {{{
@@ -35,7 +35,7 @@ Plug 'machakann/vim-swap'
 Plug 'chaoren/vim-wordmotion'
 Plug 'markonm/traces.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
-if g:Completion >= 0
+if s:Completion >= 0
     Plug 'shougo/echodoc.vim', { 'on': [] }
     Plug 'sirver/ultisnips', { 'on': [] }
     Plug 'honza/vim-snippets', { 'on': [] }
@@ -44,11 +44,11 @@ if g:Completion >= 0
         autocmd!
         autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! LazyLoadCompletion
     augroup END
-    if g:Completion == 0
+    if s:Completion == 0
         Plug 'lifepillar/vim-mucomplete'
-    elseif g:Completion == 1
+    elseif s:Completion == 1
         Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
-    elseif g:Completion == 2
+    elseif s:Completion == 2
         Plug 'neoclide/coc.nvim', {'branch': 'release'}
     endif
 endif
@@ -67,7 +67,7 @@ let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 let &t_SI.="\<Esc>[6 q"  " cursor shape
 let &t_SR.="\<Esc>[4 q"
 let &t_EI.="\<Esc>[2 q"
-let s:theme_list = {}  " g:Theme < 0 for dark themes
+let s:theme_list = {}  " s:Theme < 0 for dark themes
 let s:theme_list[0] = 'solarized8_flat'
 let s:theme_list[1] = 'PaperColor'
 let s:theme_list[2] = 'github'
@@ -81,21 +81,22 @@ let s:theme_list[-2] = 'material'
 let s:theme_list[-3] = 'ayu'
 let s:theme_list[-4] = 'dracula'
 let s:theme_list[-5] = 'nord'
-let s:theme_list[-6] = 'forest-night'
-let s:theme_list[-7] = 'gruvbox'
-let s:theme_list[-8] = 'two-firewatch'
-let s:theme_list[-9] = 'molokai'
+let s:theme_list[-6] = 'solarized8_flat'
+let s:theme_list[-7] = 'forest-night'
+let s:theme_list[-8] = 'gruvbox'
+let s:theme_list[-9] = 'two-firewatch'
+let s:theme_list[-10] = 'molokai'
 let g:material_terminal_italics = 1
 function! LoadColorscheme(index)
     let g:material_theme_style = a:index < 0 ? 'palenight' : 'lighter'
     let g:ayucolor = a:index < 0 ? 'mirage' : 'light'
     execute 'set background='. (a:index < 0 ? 'dark' : 'light')
     execute 'colorscheme '. get(s:theme_list, a:index, 'desert')
-    if exists('*QuickThemeChange')  " this is to fix vim-quickui issue #8
+    if exists('*QuickThemeChange')  " QuickThemeChange fixes vim-quickui issue #8
         call QuickThemeChange(a:index < 0 ? 'papercol' : 'solarized')
     endif
 endfunction
-call LoadColorscheme(g:Theme)
+call LoadColorscheme(s:Theme)
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -367,7 +368,7 @@ function! LoadQuickUI(open_menu)
     nnoremap <F1> :call quickui#menu#open('normal')<CR>
     xnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
     nnoremap K :call OpenQuickUIContextMenu()<CR>
-    let g:quickui_color_scheme = g:Theme < 0 ? 'papercol' : 'solarized'
+    let g:quickui_color_scheme = s:Theme < 0 ? 'papercol' : 'solarized'
     let g:quickui_show_tip = 1
     let g:quickui_border_style = 2
     call plug#load('vim-quickui')
@@ -397,12 +398,12 @@ function! LoadQuickUI(open_menu)
                 \ ['Set &Diff %{&diff ? "Off" :"On"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
                 \ ['Set &Fold %{&foldlevel ? "On" :"Off"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
                 \ ['Set &Wrap %{&wrap ? "Off" :"On"}', 'set wrap!', 'Toggle wrap lines'],
-                \ ['Set &Paste %{&paste ? "Off" :"On"}', 'execute &paste ? "set nopaste number mouse=nv signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
+                \ ['Set &Paste %{&paste ? "Off" :"On"}', 'execute &paste ? "set nopaste number mouse=a signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
                 \ ['Set &Spelling %{&spell ? "Off" :"On"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
                 \ ['Set Pre&view %{&completeopt=~"preview" ? "Off" :"On"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview'],
-                \ ['Set Cursorli&ne %{&cursorline ? "Off" :"On"}', 'set cursorline!', 'Toggle cursorline'],
-                \ ['Set Cursor&column %{&cursorcolumn ? "Off" :"On"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
-                \ ['Set %{&background=~"dark" ? "Light" :"Dark"} The&me', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color'],
+                \ ['Set CursorLi&ne %{&cursorline ? "Off" :"On"}', 'set cursorline!', 'Toggle cursorline'],
+                \ ['Set Cursor&Column %{&cursorcolumn ? "Off" :"On"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
+                \ ['Set &Background %{&background=~"dark" ? "Light" :"Dark"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color'],
                 \ ])
     call quickui#menu#install("Ta&bular", [
                 \ ['Align Using = (delimiter fixed)', 'Tabularize /=\zs', 'Tabularize /=\zs'],
@@ -428,12 +429,13 @@ function! LoadQuickUI(open_menu)
                 \ ])
     let l:quickui_theme_list = []
     let l:background_color = '(Dark) &'
-    for index in sort(keys(s:theme_list))
-        if index == 0
+    for l:index in sort(keys(s:theme_list), 'N')
+        if l:index == 0
+            call reverse(l:quickui_theme_list)
             call add(l:quickui_theme_list, ['--', ''])
             let l:background_color = '(Light) &'
         endif
-        call add(l:quickui_theme_list, [l:background_color. s:theme_list[index], "execute 'silent !sed --in-place \"2 s/let g:Theme = .*/let g:Theme = ". index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". index. ')'])  " add sed --follow-symlinks to redirect neovim init.vim symlink to vimrc
+        call add(l:quickui_theme_list, [l:background_color. s:theme_list[l:index], "execute 'silent !sed --in-place \"2 s/let s:Theme = .*/let s:Theme = ". l:index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". l:index. ')'])  " set sed --follow-symlinks flag to redirect neovim init.vim symlink to vimrc (windows sed doesn't have --follow-symlinks)
     endfor
     call quickui#menu#install("&Theme", l:quickui_theme_list)
     call quickui#menu#switch('visual')
@@ -474,7 +476,7 @@ function! OpenQuickUIContextMenu()
         call add(l:quickui_content, ['Jedi Rena&me', 'call jedi#rename()', 'Jedi rename'])
         call add(l:quickui_content, ['--', ''])
     endif
-    if g:Completion == 1
+    if s:Completion == 1
         call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
         call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe definition'])
         call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
@@ -483,7 +485,7 @@ function! OpenQuickUIContextMenu()
         call add(l:quickui_content, ['--', ''])
         call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe fix'])
         call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
-    elseif g:Completion == 2
+    elseif s:Completion == 2
         call add(l:quickui_content, ['&Documentation', 'call CocAction("doHover")', 'Coc documentation'])
         call add(l:quickui_content, ['D&efinition', 'execute "normal \<Plug>(coc-definition)"', 'Coc definition'])
         call add(l:quickui_content, ['&Type Definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc type definition'])
@@ -563,16 +565,16 @@ let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html',
 " ==================== Execute code ===================== {{{
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
 command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
-let g:OutputCount = 1
+let s:OutputCount = 1
 function! RunShellCommand(command)
     let l:expanded_command = substitute(a:command, './%<', './'. fnameescape(expand('%<')), '')
     let l:expanded_command = substitute(l:expanded_command, '%<', fnameescape(expand('%<')), '')
     let l:expanded_command = substitute(l:expanded_command, '%', fnameescape(expand('%')), '')
     let l:curr_bufnr = bufwinnr('%')
-    let l:win_left = winnr('$')
-    while l:win_left > 1 && bufname('%') !~ '[Output_'
+    let l:win_remain = winnr('$')
+    while l:win_remain > 1 && bufname('%') !~ '[Output_'
         execute 'wincmd w'
-        let l:win_left = l:win_left - 1
+        let l:win_remain = l:win_remain - 1
     endwhile
     if bufname('%') =~ '[Output_'
         setlocal modifiable
@@ -580,8 +582,8 @@ function! RunShellCommand(command)
     else
         botright new
         setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
-        silent execute '0f | file [Output_'. g:OutputCount. '] | resize '. (winheight(0) * 4/5)
-        let g:OutputCount = g:OutputCount + 1
+        silent execute '0f | file [Output_'. s:OutputCount. '] | resize '. (winheight(0) * 4/5)
+        let s:OutputCount = s:OutputCount + 1
     endif
     call setline(1, 'Run: '. l:expanded_command)
     call setline(2, substitute(getline(1), '.', '=', 'g'))
@@ -591,21 +593,21 @@ function! RunShellCommand(command)
 endfunction
 function! GetRunCommand()
     let l:run_command = {}
-    let l:run_command['python'] = g:PythonPath. ' %'
+    let l:run_command['python'] = s:PythonPath. ' %'
     let l:run_command['c'] = 'gcc % -o %< -g && ./%<'
     let l:run_command['cpp'] = 'g++ % -o %< -g && ./%<'
     let l:run_command['java'] = 'javac % && java %<'
     let l:run_command['javascript'] = 'node %'
     return get(l:run_command, &filetype, ''). (exists('b:args') ? b:args : '')
 endfunction
-if g:ExecCommand != ''
-    nnoremap <leader>r :wall <bar> execute g:ExecCommand<CR>
+if s:ExecCommand != ''
+    nnoremap <leader>r :wall <bar> execute s:ExecCommand<CR>
 endif
 " }}}
 
 " ==================== Auto complete ==================== {{{
 " let g:ycm_path_to_python_interpreter=''  " for ycmd, don't modify
-let g:ycm_python_binary_path=g:PythonPath  " for JediHTTP, comment out if venv doesn't work
+let g:ycm_python_binary_path=s:PythonPath  " for JediHTTP, comment out if venv doesn't work
 let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
@@ -619,14 +621,14 @@ let g:jedi#goto_command = '<leader>d'
 let g:jedi#rename_command = '<leader>R'
 let g:jedi#goto_stubs_command = ''
 imap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<C-g>u\<Plug>(PearTreeExpand)\<Space>\<BS>"
-if g:Completion == 0  " mucomplete
+if s:Completion == 0  " mucomplete
     set omnifunc=syntaxcomplete#Complete
     set completeopt+=noselect
     inoremap <expr> <C-@> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
     let g:mucomplete#enable_auto_at_startup = 1
     let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'file']}
-elseif g:Completion == 1  " YCM
+elseif s:Completion == 1  " YCM
     inoremap <expr> <C-e> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-e>"
     nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>a :YcmCompleter FixIt<CR>
@@ -640,7 +642,7 @@ elseif g:Completion == 1  " YCM
     " '/path/to/include'
     let g:ycm_global_ycm_extra_conf = '~/.vim/config/.ycm_extra_conf.py'
     let g:echodoc#enable_force_overwrite = 1
-elseif g:Completion == 2  " coc
+elseif s:Completion == 2  " coc
     let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python']
     " to manually install extensions, run :CocInstall coc-git coc-...
     " or run cd ~/.config/coc/extensions && yarn add coc-..., yarn cannot be cmdtest
