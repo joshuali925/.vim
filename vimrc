@@ -1,19 +1,18 @@
 " ==================== Settings ========================= {{{
-let s:Theme = -4
+source <sfile>:p:h/colors/current_theme.vim  " load g:Theme value
 let s:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let s:PythonPath = 'python3'
 let s:ExecCommand = ''
 " }}}
 
 " ===================== Plugins ========================= {{{
-call plug#begin(fnamemodify(expand('$MYVIMRC'), ':p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
+call plug#begin(expand('<sfile>:p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'skywind3000/vim-quickui', { 'on': [] }
-Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeTabsToggle' }
-Plug 'jistr/vim-nerdtree-tabs', { 'on': 'NERDTreeTabsToggle' }
-Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeTabsToggle' }
-Plug 'ryanoasis/vim-devicons', { 'on': 'NERDTreeTabsToggle' }
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeToggle' }
+Plug 'ryanoasis/vim-devicons', { 'on': 'NERDTreeToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': ['TableModeToggle', 'TableModeRealign', 'Tableize', 'TableAddFormula', 'TableEvalFormulaLine'] }
@@ -23,13 +22,14 @@ Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
-Plug 'tpope/vim-fugitive', { 'on': ['Git', 'Gdiffsplit', 'Gclog', 'Gread'] }
+Plug 'tpope/vim-fugitive', { 'on': ['Git', 'Gdiffsplit', 'Gread'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 'markdown' }  " load on insert doesn't work
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
+Plug 'tpope/vim-repeat'
 Plug 'machakann/vim-sandwich'
 Plug 'machakann/vim-swap'
 Plug 'chaoren/vim-wordmotion'
@@ -67,7 +67,7 @@ let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 let &t_SI.="\<Esc>[6 q"  " cursor shape
 let &t_SR.="\<Esc>[4 q"
 let &t_EI.="\<Esc>[2 q"
-let s:theme_list = {}  " s:Theme < 0 for dark themes
+let s:theme_list = {}  " g:Theme < 0 for dark themes
 let s:theme_list[0] = 'solarized8_flat'
 let s:theme_list[1] = 'PaperColor'
 let s:theme_list[2] = 'github'
@@ -96,7 +96,7 @@ function! LoadColorscheme(index)
         call QuickThemeChange(a:index < 0 ? 'papercol' : 'solarized')
     endif
 endfunction
-call LoadColorscheme(s:Theme)
+call LoadColorscheme(g:Theme)
 " }}}
 
 " ======================= Basics ======================== {{{
@@ -244,7 +244,7 @@ xnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap cc cc<Space><BS>
-nnoremap gf <C-w>gf
+noremap gf <C-w>gf
 nnoremap gp `[v`]
 nnoremap yp "0p
 nnoremap yP "0P
@@ -276,7 +276,7 @@ xnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
 nnoremap <silent> <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
-nnoremap <C-b> :NERDTreeTabsToggle<CR>
+nnoremap <C-b> :NERDTreeToggle<CR>
 nnoremap <silent> <C-h> :TmuxNavigateLeft<CR>
 nnoremap <silent> <C-j> :TmuxNavigateDown<CR>
 nnoremap <silent> <C-k> :TmuxNavigateUp<CR>
@@ -308,8 +308,9 @@ nnoremap <leader>fG :LeaderfRgRecall<CR>
 nnoremap <leader>fl :LeaderfLineAll<CR>
 nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfSelf<CR>
+nnoremap <leader>ft :LeaderfBufTagAll<CR>
 nnoremap <leader>fs :vertical sfind \c*
-nnoremap <leader>ft :Vista!!<CR>
+nnoremap <leader>fv :Vista!!<CR>
 nnoremap <leader>k K
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
@@ -368,7 +369,7 @@ function! LoadQuickUI(open_menu)
     nnoremap <F1> :call quickui#menu#open('normal')<CR>
     xnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
     nnoremap K :call OpenQuickUIContextMenu()<CR>
-    let g:quickui_color_scheme = s:Theme < 0 ? 'papercol' : 'solarized'
+    let g:quickui_color_scheme = g:Theme < 0 ? 'papercol' : 'solarized'
     let g:quickui_show_tip = 1
     let g:quickui_border_style = 2
     call plug#load('vim-quickui')
@@ -380,7 +381,7 @@ function! LoadQuickUI(open_menu)
                 \ ['--', ''],
                 \ ['Git &Status', 'Git', 'Git status'],
                 \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last committed version'],
-                \ ['&Git File History', '0Gclog', 'Browse previously committed version of current file'],
+                \ ['&Git File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed version of current file'],
                 \ ['--', ''],
                 \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
                 \ ['&Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
@@ -428,14 +429,14 @@ function! LoadQuickUI(open_menu)
                 \ ['&Evaluate Formula', 'TableEvalFormulaLine', 'Evaluate formula'],
                 \ ])
     let l:quickui_theme_list = []
-    let l:background_color = '(Dark) &'
+    let l:category = '(Dark) &'
     for l:index in sort(keys(s:theme_list), 'N')
         if l:index == 0
             call reverse(l:quickui_theme_list)
             call add(l:quickui_theme_list, ['--', ''])
-            let l:background_color = '(Light) &'
+            let l:category = '(Light) &'
         endif
-        call add(l:quickui_theme_list, [l:background_color. s:theme_list[l:index], "execute 'silent !sed --in-place \"2 s/let s:Theme = .*/let s:Theme = ". l:index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". l:index. ')'])  " set sed --follow-symlinks flag to redirect neovim init.vim symlink to vimrc (windows sed doesn't have --follow-symlinks)
+        call add(l:quickui_theme_list, [l:category. s:theme_list[l:index], "execute 'call writefile([\"let g:Theme = ". l:index. '"], "'. fnamemodify(expand('$MYVIMRC'), ':p:h'). "/colors/current_theme.vim\")' | call LoadColorscheme(". l:index. ')'])
     endfor
     call quickui#menu#install("&Theme", l:quickui_theme_list)
     call quickui#menu#switch('visual')
@@ -496,7 +497,7 @@ function! OpenQuickUIContextMenu()
         call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc fix'])
     endif
     call add(l:quickui_content, ['--', ''])
-    call add(l:quickui_content, ['&Built-in Docs', 'execute "normal! K"', 'Use normal! K for help'])
+    call add(l:quickui_content, ['&Built-in Docs', 'execute "normal! K"', 'Vim built in help'])
     call quickui#context#open(l:quickui_content, {'index': g:quickui#context#cursor})
 endfunction
 " }}}
@@ -510,7 +511,7 @@ function! PrintCurrVars(visual)
     let l:new_line = "normal! o\<Space>\<BS>"
     if a:visual  " print selection
         let l:vars = [getline('.')[getpos("'<")[2] - 1:getpos("'>")[2] - 1]]
-    elseif getline('.') =~ '[^a-zA-Z0-9_,\[\]. ]\|[a-zA-Z0-9_\]]\s\+\w'  " print variable under cursor if not in comma separated form
+    elseif getline('.') =~ '[^a-zA-Z0-9_,\[\]. ]\|[a-zA-Z0-9_\]]\s\+\w'  " print variable under cursor if line not comma separated
         let l:vars = [expand('<cword>')]
     else  " print variables on current line separated by commas
         let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
@@ -519,6 +520,7 @@ function! PrintCurrVars(visual)
     let l:print = {}
     let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
     let l:print['javascript'] = 'console.log(`'. join(map(copy(l:vars), "v:val. ': ${'. v:val. '}'"), ' | '). '`)'
+    let l:print['java'] = 'System.out.println('. join(map(copy(l:vars), "'\"'. v:val. ': \" + '. v:val"), ' + " | " + '). ')'
     if has_key(l:print, &filetype)
         execute l:new_line
         call append(line('.'), l:print[&filetype])
@@ -534,8 +536,8 @@ let g:undotree_WindowLayout = 2
 let g:NERDTreeWinSize = 23
 let g:NERDTreeShowHidden = 1
 let g:NERDTreeMinimalUI = 1
-let g:NERDTreeDirArrowExpandable  = "▷"
-let g:NERDTreeDirArrowCollapsible = "◢"
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
 let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings, replaced by NERDTree
 let g:netrw_banner = 0
 let g:netrw_browse_split = 2
@@ -546,9 +548,10 @@ let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_UseCache = 0
-let g:Lf_ReverseOrder = 1
 let g:Lf_ShortcutF = '<C-p>'
-let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<DOWN>'],'<C-k>':['<UP>'],'<TAB>':['<TAB>','<C-p>','<C-f>'] }
+let g:Lf_WindowPosition = 'popup'
+let g:Lf_PreviewInPopup = 1
+let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<C-j>','<DOWN>'],'<C-k>':['<C-k>','<UP>'] }
 let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_WorkingDirectoryMode = 'Aa'
