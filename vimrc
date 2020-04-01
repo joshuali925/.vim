@@ -436,7 +436,7 @@ function! LoadQuickUI(open_menu)
             call add(l:quickui_theme_list, ['--', ''])
             let l:category = '(Light) &'
         endif
-        call add(l:quickui_theme_list, [l:category. s:theme_list[l:index], "execute 'call writefile([\"let g:Theme = ". l:index. '"], "'. fnamemodify(expand('$MYVIMRC'), ':p:h'). "/colors/current_theme.vim\")' | call LoadColorscheme(". l:index. ')'])
+        call add(l:quickui_theme_list, [l:category. s:theme_list[l:index], "execute 'call writefile([\"let g:Theme = ". l:index. '"], "'. substitute(fnamemodify(expand('$MYVIMRC'), ':p:h'), '\', '\\\\', 'g'). "/colors/current_theme.vim\")' | call LoadColorscheme(". l:index. ')'])
     endfor
     call quickui#menu#install("&Theme", l:quickui_theme_list)
     call quickui#menu#switch('visual')

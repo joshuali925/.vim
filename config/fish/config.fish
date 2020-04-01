@@ -107,11 +107,11 @@ set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 # abbr -a git-svn-dcommit-push 'git svn dcommit && git push github master:svntrunk'
 # abbr -a gk 'gitk --all --branches'
 # abbr -a gl 'git pull'
-# abbr -a glg 'git log --stat --max-count = 10'
-# abbr -a glgg 'git log --graph --max-count = 10'
+# abbr -a glg 'git log --stat --max-count=10'
+# abbr -a glgg 'git log --graph --max-count=10'
 # abbr -a glgga 'git log --graph --decorate --all'
 # abbr -a glo 'git log --oneline --decorate --color'
-# abbr -a glog 'git log --oneline --decorate --color --graph'
+# abbr -a glog 'git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 # abbr -a glp '_git_log_prettily (git log --pretty=$1)'
 # abbr -a gm 'git merge'
 # abbr -a gma 'git merge --abort'
@@ -150,7 +150,7 @@ set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 # abbr -a gunwip 'git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
 # abbr -a gup 'git pull --rebase'
 # abbr -a gvt 'git verify-tag'
-# abbr -a gwch 'git whatchanged -p --abbrev-commit --pretty = medium'
+# abbr -a gwch 'git whatchanged -p --abbrev-commit --pretty=medium'
 # abbr -a gwip 'git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
 
 # lfcd
