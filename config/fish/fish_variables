@@ -54,7 +54,7 @@ SETUVAR _fish_abbr_gcpa:git\x20cherry\x2dpick\x20\x2d\x2dabort
 SETUVAR _fish_abbr_gcpc:git\x20cherry\x2dpick\x20\x2d\x2dcontinue
 SETUVAR _fish_abbr_gcs:git\x20commit\x20\x2dS
 SETUVAR _fish_abbr_gcsm:git\x20commit\x20\x2ds\x20\x2dm
-SETUVAR _fish_abbr_gd:git\x20diff
+SETUVAR _fish_abbr_gd:git\x20diff\x20\x7c\x20diff\x2dso\x2dfancy\x20\x7c\x20less\x20\x2d\x2dtabs\x3d4\x20\x2dRFX
 SETUVAR _fish_abbr_gdca:git\x20diff\x20\x2d\x2dcached
 SETUVAR _fish_abbr_gdct:git\x20describe\x20\x2d\x2dtags\x20\x60git\x20rev\x2dlist\x20\x2d\x2dtags\x20\x2d\x2dmax\x2dcount\x3d1\x60
 SETUVAR _fish_abbr_gdt:git\x20diff\x2dtree\x20\x2d\x2dno\x2dcommit\x2did\x20\x2d\x2dname\x2donly\x20\x2dr
