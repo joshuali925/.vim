@@ -10,6 +10,23 @@ git clone https://github.com/joshuali925/.vim.git ~/.vim
 pip install --user flake8 yapf rope neovim pynvim jedi
 ```
 
+## Installl
+```bash
+# vim
+sudo add-apt-repository ppa:jonathonf/vim
+sudo apt upgrade vim
+
+# fish
+sudo apt-add-repository ppa:fish-shell/release-3
+sudo apt install fish
+
+# yarn
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt update
+sudo apt install yarn
+```
+
 ## Set up vim
 ```bash
 vim -c "PlugInstall" -c "qa"
@@ -35,14 +52,13 @@ rm nvim.appimage
 nvim -c "PlugInstall" -c "qa"
 ```
 
-## Set up bash
+## Set up shell
 ```bash
 ln -s .vim/config/.bashrc ~/.bashrc
-```
-
-## Set up fish
-```bash
 ln -s ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
+mkdir -p ~/.config/lf
+ln -s ~/.vim/config/lfrc ~/.config/lf/lfrc
+ln -s .vim/config/.tmux.conf ~/.tmux.conf
 ```
 
 ## Set up zsh
@@ -52,10 +68,4 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/
 git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/plugins/zsh-history-substring-search
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
 ln -s .vim/config/.zshrc ~/.zshrc
-```
-
-## Others
-```bash
-ln -s ~/.vim/config/lfrc ~/.config/lf/lfrc
-ln -s .vim/config/.tmux.conf ~/.tmux.conf
 ```

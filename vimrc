@@ -27,7 +27,7 @@ Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 'markdown' }  " load on insert doesn't work
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }  " load on insert doesn't work
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
 Plug 'tpope/vim-repeat'
 Plug 'machakann/vim-sandwich'
@@ -762,7 +762,7 @@ if has('win32')
     let &t_EI=""
     xnoremap <leader>y "+y
     if has('gui_running')
-        set pythonthreedll=python37.dll  " if using python3.8, set to python38.dll
+        set pythonthreedll=python38.dll  " set to python3x.dll for python3.x
         let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
         function! s:ActivatePyEnv(environment)
             if a:environment == ''
