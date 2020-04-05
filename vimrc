@@ -181,8 +181,8 @@ nmap <leader>0 <F10>
 nmap <leader>- <F11>
 nmap <leader>= <F12>
 imap <F1> <Esc><F1>
-xmap <F1> :<C-u>call LoadQuickUI(0)<CR>gv<F1>
-nmap <F1> :call LoadQuickUI(0)<CR><F1>
+xmap <F1> :<C-u>call <SID>LoadQuickUI(0)<CR>gv<F1>
+nmap <F1> :call <SID>LoadQuickUI(0)<CR><F1>
 imap <F2> <Esc><F2>
 nnoremap <F2> gT
 imap <F3> <Esc><F3>
@@ -190,11 +190,11 @@ nnoremap <F3> gt
 nnoremap <F4> *N
 xnoremap <F4> y/\V<C-r>"<CR>N
 imap <F10> <Esc><F10>
-nnoremap <F10> :wall <bar> execute '!clear && '. GetRunCommand()<CR>
+nnoremap <F10> :wall <bar> execute '!clear && '. <SID>GetRunCommand()<CR>
 imap <F11> <Esc><F11>
-nnoremap <F11> :wall <bar> execute 'AsyncRun '. GetRunCommand()<CR>
+nnoremap <F11> :wall <bar> execute 'AsyncRun '. <SID>GetRunCommand()<CR>
 imap <F12> <Esc><F12>
-nnoremap <F12> :wall <bar> call RunShellCommand(GetRunCommand())<CR>
+nnoremap <F12> :wall <bar> call <SID>RunShellCommand(<SID>GetRunCommand())<CR>
 imap <Space> <Plug>(PearTreeSpace)
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
@@ -248,8 +248,8 @@ noremap gf <C-w>gf
 nnoremap gp `[v`]
 nnoremap yp "0p
 nnoremap yP "0P
-nnoremap cr :call EditRegister()<CR>
-nnoremap K :call LoadQuickUI(1)<CR>
+nnoremap cr :call <SID>EditRegister()<CR>
+nnoremap K :call <SID>LoadQuickUI(1)<CR>
 nnoremap [a :previous<CR>
 nnoremap ]a :next<CR>
 nnoremap [b :bprevious<CR>
@@ -264,8 +264,8 @@ nnoremap [e :m .-2<CR>==
 nnoremap ]e :m .+1<CR>==
 xnoremap [e :m '<-2<CR>gv=gv
 xnoremap ]e :m '>+1<CR>gv=gv
-nmap [<Space> O<Esc>
-nmap ]<Space> o<Esc>
+nnoremap [<Space> O<Space><BS><Esc>
+nnoremap ]<Space> o<Space><BS><Esc>
 xnoremap " c"<C-r><C-p>""<Esc>
 xnoremap ' c'<C-r><C-p>"'<Esc>
 xnoremap ` c`<C-r><C-p>"`<Esc>
@@ -273,7 +273,7 @@ xnoremap ( c(<C-r><C-p>")<Esc>
 xnoremap [ c[<C-r><C-p>"]<Esc>
 xnoremap { c{<C-r><C-p>"}<Esc>
 xnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
-nnoremap <silent> <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>
+nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>:echo<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
 nnoremap <C-b> :NERDTreeToggle<CR>
@@ -287,12 +287,12 @@ nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
 nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
-nmap <C-f> :call LoadAutoformat()<CR><C-f>
-imap <C-f> <Esc>:call LoadAutoformat()<CR>V<C-f>A
-xmap <C-f> :<C-u>call LoadAutoformat()<CR>gv<C-f>
-nmap <C-n> :call LoadVisualMulti()<CR><C-n>
-xmap <C-n> :<C-u>call LoadVisualMulti()<CR>gv<C-n>
-nmap <leader><C-n> :call LoadVisualMulti()<CR><leader><C-n>
+nmap <C-f> :call <SID>LoadAutoformat()<CR><C-f>
+imap <C-f> <Esc>:call <SID>LoadAutoformat()<CR>V<C-f>A
+xmap <C-f> :<C-u>call <SID>LoadAutoformat()<CR>gv<C-f>
+nmap <C-n> :call <SID>LoadVisualMulti()<CR><C-n>
+xmap <C-n> :<C-u>call <SID>LoadVisualMulti()<CR>gv<C-n>
+nmap <leader><C-n> :call <SID>LoadVisualMulti()<CR><leader><C-n>
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 imap <leader>r <Esc><leader>r
@@ -304,6 +304,7 @@ nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunctionAll<CR>
 nnoremap <leader>fg :LeaderfRgInteractive<CR>
+xnoremap <leader>fg :<C-u><C-r>=printf('Leaderf! rg -F -e %s', leaderf#Rg#visual())<CR><CR>
 nnoremap <leader>fG :LeaderfRgRecall<CR>
 nnoremap <leader>fl :LeaderfLineAll<CR>
 nnoremap <leader>fL :Leaderf rg -S<CR>
@@ -315,8 +316,8 @@ nnoremap <leader>k K
 nnoremap <leader>u :UndotreeToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>s :call PrintCurrVars(0)<CR>
-xnoremap <leader>s :call PrintCurrVars(1)<CR>$
+nnoremap <leader>s :call <SID>PrintCurrVars(0)<CR>
+xnoremap <leader>s :<C-u>call <SID>PrintCurrVars(1)<CR>$
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -325,8 +326,8 @@ nnoremap <leader>W :write !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :quit<CR>
-xnoremap <leader>q <Esc>:quit<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
+xnoremap <leader>y :<C-u>call system('clip.exe', <SID>GetVisualSelection())<CR>
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
 " }}}
 
@@ -343,14 +344,14 @@ augroup END
 " }}}
 
 " ===================== Lazy load ======================= {{{
-function! LoadAutoformat()
+function! s:LoadAutoformat()
     let g:formatters_python = ['yapf']
     nnoremap <C-f> :Autoformat<CR>
     inoremap <C-f> <Esc>V:'<,'>Autoformat<CR>A
     xnoremap <C-f> :'<,'>Autoformat<CR>$
     call plug#load('vim-autoformat')
 endfunction
-function! LoadVisualMulti()
+function! s:LoadVisualMulti()
     let g:VM_default_mappings = 0
     let g:VM_exit_on_1_cursor_left = 1
     let g:VM_maps = {}
@@ -365,10 +366,10 @@ function! LoadVisualMulti()
     xmap <C-n> <Plug>(VM-Find-Subword-Under)
     call plug#load('vim-visual-multi')
 endfunction
-function! LoadQuickUI(open_menu)
+function! s:LoadQuickUI(open_menu)
     nnoremap <F1> :call quickui#menu#open('normal')<CR>
     xnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
-    nnoremap K :call OpenQuickUIContextMenu()<CR>
+    nnoremap K :call <SID>OpenQuickUIContextMenu()<CR>
     let g:quickui_color_scheme = g:Theme < 0 ? 'papercol' : 'solarized'
     let g:quickui_show_tip = 1
     let g:quickui_border_style = 2
@@ -380,7 +381,8 @@ function! LoadQuickUI(open_menu)
                 \ ['Insert &Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
                 \ ['--', ''],
                 \ ['Git &Status', 'Git', 'Git status'],
-                \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last committed version'],
+                \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last staged version'],
+                \ ['Git &Show Changes', 'Git difftool', 'Load changes into quickfix list (use [q, ]q to navigate)'],
                 \ ['&Git File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed version of current file'],
                 \ ['--', ''],
                 \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
@@ -462,10 +464,10 @@ function! LoadQuickUI(open_menu)
                 \ ['Format to Table', "'<,'>Tableize", 'Format to table, use <leader>T to set delimiter'],
                 \ ])
     if a:open_menu == 1
-        call OpenQuickUIContextMenu()
+        call s:OpenQuickUIContextMenu()
     endif
 endfunction
-function! OpenQuickUIContextMenu()
+function! s:OpenQuickUIContextMenu()
     let l:quickui_content = []
     if &filetype == 'python'
         call add(l:quickui_content, ['Jedi Do&cumentation', 'call jedi#show_documentation()', 'Jedi documentation'])
@@ -503,11 +505,22 @@ endfunction
 " }}}
 
 " ====================== Functions ====================== {{{
-function! EditRegister() abort
+function! s:EditRegister() abort
     let l:r = nr2char(getchar())
     call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
 endfunction
-function! PrintCurrVars(visual)
+function! s:GetVisualSelection()
+    let [l:line_start, l:column_start] = getpos("'<")[1:2]
+    let [l:line_end, l:column_end] = getpos("'>")[1:2]
+    let l:lines = getline(l:line_start, l:line_end)
+    if len(l:lines) == 0
+        return ''
+    endif
+    let l:lines[-1] = l:lines[-1][: l:column_end - (&selection == 'inclusive' ? 1 : 2)]
+    let l:lines[0] = l:lines[0][l:column_start - 1:]
+    return join(l:lines, "\n")
+endfunction
+function! s:PrintCurrVars(visual)
     let l:new_line = "normal! o\<Space>\<BS>"
     if a:visual  " print selection
         let l:vars = [getline('.')[getpos("'<")[2] - 1:getpos("'>")[2] - 1]]
@@ -567,9 +580,9 @@ let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html',
 
 " ==================== Execute code ===================== {{{
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
-command! -complete=shellcmd -nargs=+ Shell call RunShellCommand(<q-args>)
+command! -complete=shellcmd -nargs=+ Shell call s:RunShellCommand(<q-args>)
 let s:OutputCount = 1
-function! RunShellCommand(command)
+function! s:RunShellCommand(command)
     let l:expanded_command = substitute(a:command, './%<', './'. fnameescape(expand('%<')), '')
     let l:expanded_command = substitute(l:expanded_command, '%<', fnameescape(expand('%<')), '')
     let l:expanded_command = substitute(l:expanded_command, '%', fnameescape(expand('%')), '')
@@ -594,7 +607,7 @@ function! RunShellCommand(command)
     setlocal nomodifiable
     execute l:curr_bufnr. 'wincmd w'
 endfunction
-function! GetRunCommand()
+function! s:GetRunCommand()
     let l:run_command = {}
     let l:run_command['python'] = s:PythonPath. ' %'
     let l:run_command['c'] = 'gcc % -o %< -g && ./%<'
@@ -686,15 +699,15 @@ if has('nvim')
     nnoremap <leader>th :split <bar> terminal<CR>
     nnoremap <leader>tv :vsplit <bar> terminal<CR>
     nnoremap <leader>tt :tabedit <bar> terminal<CR>
-    nnoremap <leader>te V:call SendToNvimTerminal()<CR>$
-    xnoremap <leader>te <Esc>:call SendToNvimTerminal()<CR>
+    nnoremap <leader>te V:call <SID>SendToNvimTerminal()<CR>$
+    xnoremap <leader>te <Esc>:call <SID>SendToNvimTerminal()<CR>
     augroup NvimTerminal
         autocmd!
         autocmd TermOpen * set nonumber norelativenumber signcolumn=no | startinsert
         autocmd TermClose * quit
         autocmd BufEnter term://* startinsert
     augroup END
-    function! SendToNvimTerminal()
+    function! s:SendToNvimTerminal()
         let l:job_id = -1
         for l:buff_n in tabpagebuflist()
             if nvim_buf_get_name(l:buff_n) =~ 'term://'
@@ -725,9 +738,9 @@ else
     nnoremap <leader>th :terminal ++close<CR>
     nnoremap <leader>tv :vertical terminal ++close<CR>
     nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
-    nnoremap <leader>te V:call SendToTerminal()<CR>$
-    xnoremap <leader>te <Esc>:call SendToTerminal()<CR>
-    function! SendToTerminal()
+    nnoremap <leader>te V:call <SID>SendToTerminal()<CR>$
+    xnoremap <leader>te <Esc>:call <SID>SendToTerminal()<CR>
+    function! s:SendToTerminal()
         let l:buff_n = term_list()
         if len(l:buff_n) > 0
             let l:buff_n = l:buff_n[0]  " sends to most recently opened terminal
@@ -747,18 +760,18 @@ if has('win32')
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
-    xnoremap <C-c> "+y<Esc>
+    xnoremap <leader>y "+y
     if has('gui_running')
         set pythonthreedll=python37.dll  " if using python3.8, set to python38.dll
         let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
-        function! ActivatePyEnv(environment)
+        function! s:ActivatePyEnv(environment)
             if a:environment == ''
                 silent execute '!venv & '. g:gVimPath. expand('%:p')
             else
                 silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
             endif
         endfunction
-        command! -nargs=* Activate call ActivatePyEnv(<q-args>) <bar> quit
+        command! -nargs=* Activate call s:ActivatePyEnv(<q-args>) <bar> quit
         nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
         nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
         set guicursor+=a:blinkon0
