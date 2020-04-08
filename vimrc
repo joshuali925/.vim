@@ -382,7 +382,7 @@ function! s:LoadQuickUI(open_menu)
                 \ ['--', ''],
                 \ ['Git &Status', 'Git', 'Git status'],
                 \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last staged version'],
-                \ ['Git &Show Changes', 'Git difftool', 'Load changes into quickfix list (use [q, ]q to navigate)'],
+                \ ['Git &Changes', 'Git difftool', 'Load changes into quickfix list (use [q, ]q to navigate)'],
                 \ ['&Git File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed version of current file'],
                 \ ['--', ''],
                 \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],

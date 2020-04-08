@@ -5,8 +5,8 @@ set color256
 
 cmd mkdir %mkdir -p $@
 cmd touch %touch $@
-cmd mv %mv -i $@
-cmd cp %cp -i $@
+cmd mv %mv -i "$f" $@
+cmd cp %cp -i "$f" $@
 
 
 map x delete
