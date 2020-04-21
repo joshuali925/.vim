@@ -25,8 +25,15 @@ alias zf='cd $(z --list | awk "{print \$2}" | fzf --height 40%) && pwd'
 
 # alias f='a(){ find . -iname *$@*; }; a'
 # alias cc='a(){ gcc $1.c -o $1 -g && ./$@; }; a'
-function f { find . -iname \*$1\*; }
-function cc { gcc $1.c -o $1 -g && ./$@; }
+function f {
+    find . -iname \*$1\*;
+}
+function cc {
+    gcc $1.c -o $1 -g && ./$@;
+}
+function gdf {
+    git diff "$@" | diff-so-fancy | less --tabs=4 -RFX
+}
 
 function printcolor {
     awk -v term_cols="${width:-$(tput cols || echo 80)}" 'BEGIN{
