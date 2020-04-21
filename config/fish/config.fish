@@ -82,7 +82,7 @@ set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 # abbr -a gcpa 'git cherry-pick --abort'
 # abbr -a gcpc 'git cherry-pick --continue'
 # abbr -a gcs 'git commit -S'
-# abbr -a gd 'git diff | diff-so-fancy | less --tabs=4 -RFX'
+# abbr -a gd 'git diff'
 # abbr -a gdca 'git diff --cached'
 # abbr -a gdct 'git describe --tags `git rev-list --tags --max-count=1`'
 # abbr -a gdt 'git diff-tree --no-commit-id --name-only -r'
@@ -152,6 +152,12 @@ set -gx PATH $HOME/.local/bin $HOME/.vim/bin $PATH
 # abbr -a gvt 'git verify-tag'
 # abbr -a gwch 'git whatchanged -p --abbrev-commit --pretty=medium'
 # abbr -a gwip 'git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
+
+# git diff-so-fancy
+function gdf
+    git diff $argv | diff-so-fancy | less --tabs=4 -RFX
+end
+
 
 # lfcd
 function fl
