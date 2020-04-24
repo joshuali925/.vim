@@ -764,8 +764,11 @@ if has('gui_running')
     nmap <C-Tab> gt
     nmap <C-S-Tab> gT
     set guicursor+=a:blinkon0
-    " set guifont=Consolas_NF:h11:cANSI
-    set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
+    if has('macunix')
+        set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
+    else
+        set guifont=Consolas_NF:h11:cANSI
+    endif
     if &columns < 85 && &lines < 30
         set lines=25
         set columns=90
