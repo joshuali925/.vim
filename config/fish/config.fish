@@ -19,7 +19,7 @@ end
 
 # add path
 set -gx PATH $PATH $HOME/.local/bin $HOME/.vim/bin
-# set -gx PATH /usr/local/opt/coreutils/libexec/gnubin $PATH
+set -gx PATH /usr/local/opt/coreutils/libexec/gnubin $PATH
 
 # set -gx PATH $HOME/.local/bin $HOME/.vim/bin $HOME/miniconda3/bin $PATH
 # source /home/kite/miniconda3/etc/fish/conf.d/conda.fish
