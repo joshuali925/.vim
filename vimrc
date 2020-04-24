@@ -683,8 +683,8 @@ endif
 if has('nvim')
     let loaded_matchit = 1  " disable matchit
     " let g:python_host_prog = '/usr/bin/python2.7'
-    let g:python3_host_prog = '/usr/bin/python3.6'
-    let g:loaded_python_provider = 1
+    " let g:python3_host_prog = '/usr/bin/python3.6'
+    " let g:loaded_python_provider = 1
     " let g:loaded_python3_provider = 1
     tnoremap <F2> <C-\><C-n>gT
     tnoremap <F3> <C-\><C-n>gt
