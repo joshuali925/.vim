@@ -135,7 +135,7 @@ set -gx PATH /usr/local/opt/coreutils/libexec/gnubin $PATH
 # abbr -a grup 'git remote update'
 # abbr -a grv 'git remote -v'
 # abbr -a gsd 'git svn dcommit'
-# abbr -a gsps 'git show --pretty = short --show-signature'
+# abbr -a gsps 'git show --pretty=short --show-signature'
 # abbr -a gsr 'git svn rebase'
 # abbr -a gss 'git status -s'
 # abbr -a gst 'git status'
