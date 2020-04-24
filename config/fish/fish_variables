@@ -107,7 +107,7 @@ SETUVAR _fish_abbr_grset:git\x20remote\x20set\x2durl
 SETUVAR _fish_abbr_grup:git\x20remote\x20update
 SETUVAR _fish_abbr_grv:git\x20remote\x20\x2dv
 SETUVAR _fish_abbr_gsd:git\x20svn\x20dcommit
-SETUVAR _fish_abbr_gsps:git\x20show\x20\x2d\x2dpretty\x20\x3d\x20short\x20\x2d\x2dshow\x2dsignature
+SETUVAR _fish_abbr_gsps:git\x20show\x20\x2d\x2dpretty\x3dshort\x20\x2d\x2dshow\x2dsignature
 SETUVAR _fish_abbr_gsr:git\x20svn\x20rebase
 SETUVAR _fish_abbr_gss:git\x20status\x20\x2ds
 SETUVAR _fish_abbr_gst:git\x20status
