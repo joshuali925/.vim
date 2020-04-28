@@ -792,9 +792,9 @@ if has('gui_running')
     else
         " VimR settings for Karabiner
         noremap <M-1> ^
-        inoremap <M-1> ^
+        inoremap <M-1> <C-o>^
         noremap <M-2> $
-        inoremap <M-2> $
+        inoremap <M-2> <C-o>$
         noremap <M-3> <Nop>
         inoremap <M-3> <C-w>
         noremap <M-4> <Nop>
@@ -812,5 +812,14 @@ if has('gui_running')
         noremap <M-0> k
         imap <M-0> <C-o>O
     endif
+elseif has('macunix')
+    inoremap <C-a> <C-o>^
+    noremap <C-a> ^
+    inoremap <C-e> <C-o>$
+    noremap <C-e> $
+    inoremap <Esc>f <C-o>w
+    noremap <Esc>f w
+    inoremap <Esc>b <C-o>b
+    noremap <Esc>b b
 endif
 " }}}
