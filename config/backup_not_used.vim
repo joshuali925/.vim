@@ -448,3 +448,21 @@ endfunction
 " =======================================================
 " use separate file to store g:Theme instead of modify vimrc with sed
         call add(l:quickui_theme_list, [l:background_color. s:theme_list[l:index], "execute 'silent !sed --in-place \"2 s/let s:Theme = .*/let s:Theme = ". l:index. '/" '. $MYVIMRC. "' | call LoadColorscheme(". l:index. ')'])  " set sed --follow-symlinks flag to redirect neovim init.vim symlink to vimrc (windows sed doesn't have --follow-symlinks)
+
+" =======================================================
+" use Coc instead of yankstack and nerdtree
+Plug 'maxbrunsfeld/vim-yankstack'
+silent! call yankstack#setup()
+" for yankstack, do NOT use nnoremap for Y y$
+nmap Y y$
+nmap <leader>p <Plug>yankstack_substitute_older_paste
+nmap <leader>P <Plug>yankstack_substitute_newer_paste
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeToggle' }
+Plug 'ryanoasis/vim-devicons', { 'on': 'NERDTreeToggle' }
+nnoremap <C-b> :NERDTreeToggle<CR>
+let g:NERDTreeWinSize = 23
+let g:NERDTreeShowHidden = 1
+let g:NERDTreeMinimalUI = 1
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
