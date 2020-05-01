@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
 source <sfile>:p:h/colors/current_theme.vim  " load g:Theme value
-let s:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
+let s:Completion = -1  " 0: mucomplete, 1: YCM, 2: coc
 let s:PythonPath = 'python3'
 let s:ExecCommand = ''
 " }}}
@@ -756,13 +756,22 @@ endif
 " }}}
 
 " ================== Windows settings =================== {{{
-if has('win32')
+if has('gui_running')
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
     xnoremap <leader>y "+y
-    if has('gui_running')
-        set pythonthreedll=python38.dll  " set to python3x.dll for python3.x
+    nmap <C-Tab> gt
+    nmap <C-S-Tab> gT
+    set guicursor+=a:blinkon0
+    " set guifont=Consolas_NF:h11:cANSI
+    set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
+    if &columns < 85 && &lines < 30
+        set lines=25
+        set columns=90
+    endif
+    if has('win32')
+        " set pythonthreedll=python38.dll  " set to python3x.dll for python3.x
         let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
         function! s:ActivatePyEnv(environment)
             if a:environment == ''
@@ -774,12 +783,6 @@ if has('win32')
         command! -nargs=* Activate call s:ActivatePyEnv(<q-args>) <bar> quit
         nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
         nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
-        set guicursor+=a:blinkon0
-        set guifont=Consolas_NF:h11:cANSI
-        if &columns < 85 && &lines < 30
-            set lines=25
-            set columns=90
-        endif
     endif
 endif
 " }}}
