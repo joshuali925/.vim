@@ -10,9 +10,6 @@ call plug#begin(expand('<sfile>:p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfil
 Plug 'mhinz/vim-startify'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'skywind3000/vim-quickui', { 'on': [] }
-Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeToggle' }
-Plug 'ryanoasis/vim-devicons', { 'on': 'NERDTreeToggle' }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': ['TableModeToggle', 'TableModeRealign', 'Tableize', 'TableAddFormula', 'TableEvalFormulaLine'] }
@@ -34,7 +31,6 @@ Plug 'machakann/vim-sandwich'
 Plug 'machakann/vim-swap'
 Plug 'chaoren/vim-wordmotion'
 Plug 'markonm/traces.vim'
-Plug 'maxbrunsfeld/vim-yankstack'
 if s:Completion >= 0
     Plug 'shougo/echodoc.vim', { 'on': [] }
     Plug 'sirver/ultisnips', { 'on': [] }
@@ -53,7 +49,6 @@ if s:Completion >= 0
     endif
 endif
 call plug#end()
-silent! call yankstack#setup()
 runtime macros/sandwich/keymap/surround.vim
 " }}}
 
@@ -224,8 +219,6 @@ omap ia <Plug>(swap-textobject-i)
 xmap ia <Plug>(swap-textobject-i)
 omap aa <Plug>(swap-textobject-a)
 xmap aa <Plug>(swap-textobject-a)
-" for yankstack, do NOT use nnoremap for Y y$
-nmap Y y$
 noremap 0 ^
 noremap ^ 0
 noremap - $
@@ -241,6 +234,7 @@ inoremap <Up> <C-o>gk
 xnoremap @q :normal @q<CR>
 xnoremap @@ :normal @@<CR>
 nnoremap Q q:
+nnoremap Y y$
 xnoremap < <gv
 xnoremap > >gv
 nnoremap o o<Space><BS>
@@ -278,7 +272,7 @@ xnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
 nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>:echo<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
-nnoremap <C-b> :NERDTreeToggle<CR>
+nnoremap <C-b> :Lexplore<CR>
 nnoremap <silent> <C-h> :TmuxNavigateLeft<CR>
 nnoremap <silent> <C-j> :TmuxNavigateDown<CR>
 nnoremap <silent> <C-k> :TmuxNavigateUp<CR>
@@ -295,8 +289,6 @@ xmap <C-f> :<C-u>call <SID>LoadAutoformat()<CR>gv<C-f>
 nmap <C-n> :call <SID>LoadVisualMulti()<CR><C-n>
 xmap <C-n> :<C-u>call <SID>LoadVisualMulti()<CR>gv<C-n>
 nmap <leader><C-n> :call <SID>LoadVisualMulti()<CR><leader><C-n>
-nmap <leader>p <Plug>yankstack_substitute_older_paste
-nmap <leader>P <Plug>yankstack_substitute_newer_paste
 imap <leader>r <Esc><leader>r
 nmap <leader>r <F11>
 nnoremap <leader><F2> :-tabmove<CR>
@@ -320,6 +312,8 @@ nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>s :call <SID>PrintCurrVars(0)<CR>
 xnoremap <leader>s :<C-u>call <SID>PrintCurrVars(1)<CR>$
+nnoremap <leader>p :registers<CR>:normal! "p<Left>
+nnoremap <leader>P :registers<CR>:normal! "P<Left>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -549,12 +543,7 @@ endfunction
 let g:asyncrun_open = 12
 let g:EasyMotion_smartcase = 1
 let g:undotree_WindowLayout = 2
-let g:NERDTreeWinSize = 23
-let g:NERDTreeShowHidden = 1
-let g:NERDTreeMinimalUI = 1
-let g:NERDTreeDirArrowExpandable = '▸'
-let g:NERDTreeDirArrowCollapsible = '▾'
-let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings, replaced by NERDTree
+let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings
 let g:netrw_banner = 0
 let g:netrw_browse_split = 2
 let g:netrw_winsize = 20
@@ -676,11 +665,11 @@ elseif s:Completion == 2  " coc
     nmap <leader>d <Plug>(coc-definition)
     nmap <leader>R <Plug>(coc-rename)
     nmap <leader>a <Plug>(coc-fix-current)
-    nnoremap <leader>b :CocCommand explorer<CR>
-    nnoremap <leader>p :CocList --normal yank<CR>
     imap <C-k> <Plug>(coc-snippets-expand)
     let g:coc_snippet_next = '<Tab>'
     let g:coc_snippet_prev = '<S-Tab>'
+    nnoremap <C-b> :CocCommand explorer<CR>
+    nnoremap <leader>p :CocList --normal yank<CR>
 endif
 " }}}
 
