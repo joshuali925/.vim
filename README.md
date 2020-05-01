@@ -5,9 +5,7 @@ cd ~
 mkdir -p ~/.cache/vim/undo
 mkdir -p ~/.local/bin
 mkdir -p ~/.config
-mv ~/.vim ~/vim_backup
 git clone https://github.com/joshuali925/.vim.git ~/.vim
-pip install --user flake8 yapf rope neovim pynvim jedi
 ```
 
 ## Installl
@@ -29,6 +27,7 @@ sudo apt install yarn
 
 ## Set up vim
 ```bash
+pip3 install --user flake8 yapf
 vim -c "PlugInstall" -c "qa"
 ```
 
@@ -42,13 +41,15 @@ vim -c "PlugInstall" -c "qa"
 
 ## Set up nvim
 ```bash
-ln -s ~/.vim/config/nvim ~/.config/nvim
 curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage 
 chmod u+x nvim.appimage
 ./nvim.appimage --appimage-extract
 mv squashfs-root ~/.local/nvim
 ln -s ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
 rm nvim.appimage
+
+ln -s ~/.vim/config/nvim ~/.config/nvim
+pip3 install --user neovim
 nvim -c "PlugInstall" -c "qa"
 ```
 
@@ -68,4 +69,15 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/
 git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/plugins/zsh-history-substring-search
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
 ln -s .vim/config/.zshrc ~/.zshrc
+```
+
+## Mac OS
+- set up shortcuts for Karabiner
+```markdown
+Keyboard -> Shortcuts 
+    -> Services -> Searching -> Look Up in Dictionary: option command t
+    -> App Shortcuts -> Add new -> Tile Window to Right of Screen: option command ]
+    -> App Shortcuts -> Add new -> Tile Window to Left of Screen: option command [
+    -> App Shortcuts -> Add new -> Zoom: option command =
+iTerm2 -> Preferences -> Profiles -> Keys -> Presets... -> Natural Text Editing
 ```
