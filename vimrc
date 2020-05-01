@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
 source <sfile>:p:h/colors/current_theme.vim  " load g:Theme value
-let s:Completion = -1  " 0: mucomplete, 1: YCM, 2: coc
+let s:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let s:PythonPath = 'python3'
 let s:ExecCommand = ''
 " }}}
@@ -327,7 +327,8 @@ nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :quit<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
-xnoremap <leader>y :<C-u>call system('clip.exe', <SID>GetVisualSelection())<CR>
+" xnoremap <leader>y :<C-u>call system('clip.exe', <SID>GetVisualSelection())<CR>
+xnoremap <leader>y "+y
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
 " }}}
 
@@ -767,7 +768,7 @@ if has('gui_running')
     nmap <C-S-Tab> <F2>
     set guicursor+=a:blinkon0
     if has('macunix')
-        set guifont=JetBrainsMonoNerdFontComplete-Regular:h15
+        set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
     else
         set guifont=Consolas_NF:h11:cANSI
     endif
