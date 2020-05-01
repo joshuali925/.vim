@@ -761,11 +761,13 @@ if has('gui_running')
     let &t_SR=""
     let &t_EI=""
     xnoremap <leader>y "+y
-    nmap <C-Tab> gt
-    nmap <C-S-Tab> gT
+    imap <C-Tab> <F3>
+    imap <C-S-Tab> <F2>
+    nmap <C-Tab> <F3>
+    nmap <C-S-Tab> <F2>
     set guicursor+=a:blinkon0
     if has('macunix')
-        set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
+        set guifont=JetBrainsMonoNerdFontComplete-Regular:h15
     else
         set guifont=Consolas_NF:h11:cANSI
     endif
