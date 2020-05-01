@@ -767,17 +767,13 @@ if has('gui_running')
     nmap <C-Tab> <F3>
     nmap <C-S-Tab> <F2>
     set guicursor+=a:blinkon0
-    if has('macunix')
-        set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
-    else
-        set guifont=Consolas_NF:h11:cANSI
-    endif
     if &columns < 85 && &lines < 30
         set lines=25
         set columns=90
     endif
     if has('win32')
         " set pythonthreedll=python38.dll  " set to python3x.dll for python3.x
+        set guifont=Consolas_NF:h11:cANSI
         let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
         function! s:ActivatePyEnv(environment)
             if a:environment == ''
@@ -789,6 +785,30 @@ if has('gui_running')
         command! -nargs=* Activate call s:ActivatePyEnv(<q-args>) <bar> quit
         nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
         nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
+    elseif !has('gui_vimr')
+        set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
+    else
+        " VimR settings for Karabiner
+        noremap <M-1> ^
+        inoremap <M-1> ^
+        noremap <M-2> $
+        inoremap <M-2> $
+        noremap <M-3> <Nop>
+        inoremap <M-3> <C-w>
+        noremap <M-4> <Nop>
+        inoremap <M-4> <C-u>
+        noremap <M-5> w
+        inoremap <M-5> <C-o>w
+        noremap <M-6> b
+        inoremap <M-6> <C-o>b
+        noremap <M-7> G
+        inoremap <M-7> <C-o>G
+        noremap <M-8> gg
+        inoremap <M-8> <C-o>gg
+        noremap <M-9> j
+        imap <M-9> <C-o>o
+        noremap <M-0> k
+        imap <M-0> <C-o>O
     endif
 endif
 " }}}
