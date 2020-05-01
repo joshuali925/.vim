@@ -325,12 +325,12 @@ nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :write !sudo tee %<CR>
+nnoremap <leader>y "+yy
+xnoremap <leader>y "+y
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :quit<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
-" xnoremap <leader>y :<C-u>call system('clip.exe', <SID>GetVisualSelection())<CR>
-xnoremap <leader>y "+y
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
 " }}}
 
@@ -662,7 +662,7 @@ elseif s:Completion == 1  " YCM
     let g:ycm_global_ycm_extra_conf = '~/.vim/config/.ycm_extra_conf.py'
     let g:echodoc#enable_force_overwrite = 1
 elseif s:Completion == 2  " coc
-    let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python']
+    let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python', 'coc-explorer', 'coc-yank']
     " to manually install extensions, run :CocInstall coc-git coc-...
     " or run cd ~/.config/coc/extensions && yarn add coc-..., yarn cannot be cmdtest
     set updatetime=300
@@ -676,6 +676,8 @@ elseif s:Completion == 2  " coc
     nmap <leader>d <Plug>(coc-definition)
     nmap <leader>R <Plug>(coc-rename)
     nmap <leader>a <Plug>(coc-fix-current)
+    nnoremap <leader>b :CocCommand explorer<CR>
+    nnoremap <leader>p :CocList --normal yank<CR>
     imap <C-k> <Plug>(coc-snippets-expand)
     let g:coc_snippet_next = '<Tab>'
     let g:coc_snippet_prev = '<S-Tab>'
@@ -763,7 +765,6 @@ if has('gui_running')
     let &t_SI=""
     let &t_SR=""
     let &t_EI=""
-    xnoremap <leader>y "+y
     imap <C-Tab> <F3>
     imap <C-S-Tab> <F2>
     nmap <C-Tab> <F3>
@@ -774,8 +775,9 @@ if has('gui_running')
         set columns=90
     endif
     if has('win32')
-        " set pythonthreedll=python38.dll  " set to python3x.dll for python3.x
+        " Windows gVim
         set guifont=Consolas_NF:h11:cANSI
+        " set pythonthreedll=python38.dll  " set to python3x.dll for python3.x
         let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
         function! s:ActivatePyEnv(environment)
             if a:environment == ''
@@ -787,32 +789,30 @@ if has('gui_running')
         command! -nargs=* Activate call s:ActivatePyEnv(<q-args>) <bar> quit
         nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
         nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
-    elseif !has('gui_vimr')
-        set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
+    elseif has('gui_vimr')
+        " VimR
+        inoremap <D-Left> <C-o>^
+        noremap <D-Left> ^
+        inoremap <D-Right> <C-o>$
+        noremap <D-Right> $
+        inoremap <M-BS> <C-w>
+        noremap <M-BS> b
+        inoremap <D-BS> <C-u>
+        noremap <D-BS> 0
+        inoremap <M-Right> <C-o>w
+        noremap <M-Right> w
+        inoremap <M-Left> <C-o>b
+        noremap <M-Left> b
+        inoremap <D-Down> <C-o>G
+        noremap <D-Down> G
+        inoremap <D-Up> <C-o>gg
+        noremap <D-Up> gg
     else
-        " VimR settings for Karabiner
-        noremap <M-1> ^
-        inoremap <M-1> <C-o>^
-        noremap <M-2> $
-        inoremap <M-2> <C-o>$
-        noremap <M-3> <Nop>
-        inoremap <M-3> <C-w>
-        noremap <M-4> <Nop>
-        inoremap <M-4> <C-u>
-        noremap <M-5> w
-        inoremap <M-5> <C-o>w
-        noremap <M-6> b
-        inoremap <M-6> <C-o>b
-        noremap <M-7> G
-        inoremap <M-7> <C-o>G
-        noremap <M-8> gg
-        inoremap <M-8> <C-o>gg
-        noremap <M-9> j
-        imap <M-9> <C-o>o
-        noremap <M-0> k
-        imap <M-0> <C-o>O
+        " MacVim
+        set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
     endif
 elseif has('macunix')
+    " iTerm2 vim
     inoremap <C-a> <C-o>^
     noremap <C-a> ^
     inoremap <C-e> <C-o>$
@@ -821,5 +821,9 @@ elseif has('macunix')
     noremap <Esc>f w
     inoremap <Esc>b <C-o>b
     noremap <Esc>b b
+elseif has('win32')
+    " WSL vim
+    nmap <leader>y V<leader>y
+    xnoremap <leader>y :<C-u>call system('clip.exe', <SID>GetVisualSelection())<CR>
 endif
 " }}}

@@ -80,4 +80,15 @@ Keyboard -> Shortcuts
     -> App Shortcuts -> Add new -> Tile Window to Left of Screen: option command [
     -> App Shortcuts -> Add new -> Zoom: option command =
 iTerm2 -> Preferences -> Profiles -> Keys -> Presets... -> Natural Text Editing
+Clipy -> Preferences -> Shortcuts -> History -> option command p
 ```
+- set up Karabiner
+```bash
+# visit this link to import settings
+karabiner://karabiner/assets/complex_modifications/import?url=https://raw.githubusercontent.com/joshuali925/.vim/master/config/karabiner.json
+
+# or copy manually
+mkdir -p ~/.config/karabiner/assets/complex_modifications
+cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/14594837.json
+```
+then add complex modifications

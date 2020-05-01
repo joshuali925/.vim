@@ -3,5 +3,15 @@
   "python.linting.flake8Enabled": true,
   "python.linting.enabled": false,
   "python.jediEnabled": false,
-  "python.formatting.provider": "yapf"
+  "python.formatting.provider": "yapf",
+
+  "explorer.icon.enableNerdfont": true,
+  "explorer.file.showHiddenFiles": true,
+  "explorer.width": 23,
+  "explorer.keyMappings": {
+    "m": "actionMenu",
+    "c": "copyFilepath",
+    "y": "copyFile",
+    "v": "open:vsplit"
+  }
 }
