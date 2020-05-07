@@ -412,3 +412,5 @@ if has('nvim')
   let g:terminal_color_14 = g:terminal_color_6
   let g:terminal_color_15 = g:terminal_color_7
 endif
+
+hi Comment cterm=NONE
