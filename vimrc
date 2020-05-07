@@ -810,7 +810,7 @@ elseif has('macunix')
     noremap <Esc>f w
     inoremap <Esc>b <C-o>b
     noremap <Esc>b b
-elseif has('win32')
+else
     " WSL vim
     nmap <leader>y V<leader>y
     xnoremap <leader>y :<C-u>call system('clip.exe', <SID>GetVisualSelection())<CR>
