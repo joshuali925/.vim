@@ -14,6 +14,7 @@ Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': ['TableModeToggle', 'TableModeRealign', 'Tableize', 'TableAddFormula', 'TableEvalFormulaLine'] }
 Plug 'liuchengxu/vista.vim', { 'on': 'Vista' }
+Plug 'pechorin/any-jump.vim', { 'on': ['AnyJump', 'AnyJumpVisual'] }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
@@ -297,13 +298,16 @@ nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunctionAll<CR>
-nnoremap <leader>fg :LeaderfRgInteractive<CR>
+nnoremap <leader>fg :Leaderf! rg -F -e<Space>
 xnoremap <leader>fg :<C-u><C-r>=printf('Leaderf! rg -F -e %s', leaderf#Rg#visual())<CR><CR>
 nnoremap <leader>fG :LeaderfRgRecall<CR>
 nnoremap <leader>fl :LeaderfLineAll<CR>
 nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfSelf<CR>
 nnoremap <leader>ft :LeaderfBufTagAll<CR>
+nnoremap <leader>fj :AnyJump<CR>
+nnoremap <leader>fJ :AnyJumpLastResults<CR>
+xnoremap <leader>fj :AnyJumpVisual<CR>
 nnoremap <leader>fs :vertical sfind \c*
 nnoremap <leader>fv :Vista!!<CR>
 nnoremap <leader>k K
@@ -314,6 +318,7 @@ nnoremap <leader>s :call <SID>PrintCurrVars(0)<CR>
 xnoremap <leader>s :<C-u>call <SID>PrintCurrVars(1)<CR>$
 nnoremap <leader>p :registers<CR>:normal! "p<Left>
 nnoremap <leader>P :registers<CR>:normal! "P<Left>
+nnoremap <leader>b :buffers<CR>:buffer<Space>
 nnoremap <leader>tm :TableModeToggle<CR>
 nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
@@ -541,6 +546,7 @@ endfunction
 
 " =================== Other plugins ===================== {{{
 let g:asyncrun_open = 12
+let g:any_jump_disable_default_keybindings = 1
 let g:EasyMotion_smartcase = 1
 let g:undotree_WindowLayout = 2
 let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings
