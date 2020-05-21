@@ -1,8 +1,7 @@
 source ~/.vim/config/z.sh
 source ~/.vim/config/git.sh
 export PYTHONSTARTUP=~/.vim/config/.pythonrc
-export PATH=$PATH:$HOME/.local/bin
-export PATH=$PATH:$HOME/.vim/bin
+export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
 export LS_COLORS=$(cat ~/.vim/config/.dircolors)
 
 alias -- -='cd -'

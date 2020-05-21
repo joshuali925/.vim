@@ -16,7 +16,8 @@ setopt share_history          # share command history data
 
 setopt autocd
 
-PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )%1~ "
+PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) "
+PROMPT+="%{$fg[cyan]%}%c%{$reset_color%} "
 
 source ~/.vim/config/common.sh
 source ~/.vim/config/completion.zsh
