@@ -7,6 +7,7 @@
 
   "explorer.icon.enableNerdfont": true,
   "explorer.file.showHiddenFiles": true,
+  "explorer.previewAction.onHover": false,
   "explorer.width": 23,
   "explorer.keyMappings": {
     "m": "actionMenu",
