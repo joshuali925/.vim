@@ -15,7 +15,6 @@ fi
 # User specific aliases and functions
 
 source ~/.vim/config/common.sh
-source ~/.vim/config/git.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
 export PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
@@ -31,26 +30,21 @@ bind '"\e[B": history-search-forward'
 bind '"\eOA": history-search-backward'
 bind '"\eOB": history-search-forward'
 
-alias ~='cd ~'
-alias -- -='cd -'
-alias ..='cd ..'
-alias ...='cd ../..'
-
-# function cd { builtin cd $@ && ls -CF; }
-function cd() {
-    builtin cd $@
-    ls -CF
-    if [[ -z "$VIRTUAL_ENV" ]] ; then
-        if [[ -f ./venv/bin/activate ]] ; then
-            source ./venv/bin/activate
-        fi
-    else
-        parentdir="$(dirname "$VIRTUAL_ENV")"
-        if [[ "$PWD"/ != "$parentdir"/* ]] ; then
-            deactivate
-        fi
-    fi
-}
+function cd { builtin cd $@ && ls -CF; }
+# function cd() {
+#     builtin cd $@
+#     ls -CF
+#     if [[ -z "$VIRTUAL_ENV" ]] ; then
+#         if [[ -f ./venv/bin/activate ]] ; then
+#             source ./venv/bin/activate
+#         fi
+#     else
+#         parentdir="$(dirname "$VIRTUAL_ENV")"
+#         if [[ "$PWD"/ != "$parentdir"/* ]] ; then
+#             deactivate
+#         fi
+#     fi
+# }
 
 # WSL specific
 alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
