@@ -985,6 +985,41 @@
                         }
                     ],
                     "type": "basic"
+                },
+                {
+                    "from": {
+                        "key_code": "0",
+                        "modifiers": {
+                            "mandatory": [
+                                "left_command",
+                                "right_command",
+                                "right_control",
+                                "right_shift",
+                                "right_option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "key_code": "x",
+                            "modifiers": [
+                                "right_command"
+                            ]
+                        },
+                        {
+                            "key_code": "quote"
+                        },
+                        {
+                            "key_code": "v",
+                            "modifiers": [
+                                "right_command"
+                            ]
+                        },
+                        {
+                            "key_code": "quote"
+                        }
+                    ],
+                    "type": "basic"
                 }
             ]
         },
@@ -1263,7 +1298,7 @@
                     },
                     "to": [
                         {
-                            "shell_command": "open -a 'vimr'"
+                            "shell_command": "open -a 'macvim'"
                         }
                     ],
                     "type": "basic"

@@ -220,6 +220,10 @@ omap ia <Plug>(swap-textobject-i)
 xmap ia <Plug>(swap-textobject-i)
 omap aa <Plug>(swap-textobject-a)
 xmap aa <Plug>(swap-textobject-a)
+xnoremap ip ip
+xnoremap ap ap
+onoremap ip ip
+onoremap ap ap
 noremap 0 ^
 noremap ^ 0
 noremap - $
@@ -339,8 +343,9 @@ augroup AutoCommands
     autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g'\"" | endif  " restore last edit position
     autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
     autocmd FileType vim setlocal foldmethod=marker  " use triple curly brackets for fold instead of indentation
-    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> :edit! <bar> :redraw!<CR>
-    autocmd FileType python set nosmartindent | syntax keyword pythonSelf self | highlight def link pythonSelf Special  " fix python comment indentation, highlight keyword self
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> edit! <bar> redraw!<CR>
+    autocmd FileType json nnoremap <buffer> <C-f> :update <bar> %!python3 -m json.tool<CR>
+    autocmd FileType python setlocal nosmartindent | syntax keyword pythonSelf self | highlight def link pythonSelf Special  " fix python comment indentation, highlight keyword self
     autocmd FileType * setlocal formatoptions=jql
 augroup END
 " }}}
@@ -348,8 +353,8 @@ augroup END
 " ===================== Lazy load ======================= {{{
 function! s:LoadAutoformat()
     let g:formatters_python = ['yapf']
-    nnoremap <C-f> :Autoformat<CR>
     inoremap <C-f> <Esc>V:'<,'>Autoformat<CR>A
+    nnoremap <C-f> :Autoformat<CR>
     xnoremap <C-f> :'<,'>Autoformat<CR>$
     call plug#load('vim-autoformat')
 endfunction
@@ -666,8 +671,8 @@ elseif s:Completion == 2  " coc
     inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
     inoremap <expr> <C-@> coc#refresh()
     inoremap <expr> <C-Space> coc#refresh()
-    xmap <C-f> <Plug>(coc-format-selected)
     nnoremap <C-f> :call CocAction('format')<CR>
+    xmap <C-f> <Plug>(coc-format-selected)
     nmap <leader>d <Plug>(coc-definition)
     nmap <leader>R <Plug>(coc-rename)
     nmap <leader>a <Plug>(coc-fix-current)
@@ -686,6 +691,12 @@ if has('nvim')
     " let g:python3_host_prog = '/usr/bin/python3.6'
     " let g:loaded_python_provider = 1
     " let g:loaded_python3_provider = 1
+    augroup NvimTerminal
+        autocmd!
+        autocmd TermOpen * setlocal nonumber norelativenumber signcolumn=no | startinsert
+        autocmd TermClose * quit
+        autocmd BufEnter term://* startinsert
+    augroup END
     tnoremap <F2> <C-\><C-n>gT
     tnoremap <F3> <C-\><C-n>gt
     tnoremap <C-u> <C-\><C-n>
@@ -701,12 +712,6 @@ if has('nvim')
     nnoremap <leader>tt :tabedit <bar> terminal<CR>
     nnoremap <leader>te V:call <SID>SendToNvimTerminal()<CR>$
     xnoremap <leader>te <Esc>:call <SID>SendToNvimTerminal()<CR>
-    augroup NvimTerminal
-        autocmd!
-        autocmd TermOpen * set nonumber norelativenumber signcolumn=no | startinsert
-        autocmd TermClose * quit
-        autocmd BufEnter term://* startinsert
-    augroup END
     function! s:SendToNvimTerminal()
         let l:job_id = -1
         for l:buff_n in tabpagebuflist()
@@ -725,6 +730,10 @@ if has('nvim')
     endfunction
 else
     set viminfo+=n~/.cache/vim/viminfo
+    augroup VimTerminal
+        autocmd!
+        autocmd TerminalOpen * setlocal nonumber norelativenumber signcolumn=no
+    augroup END
     " do not tmap <Esc> in vim 8
     tnoremap <F2> <C-w>gT
     tnoremap <F3> <C-w>gt
@@ -755,7 +764,7 @@ else
 endif
 " }}}
 
-" ================== Windows settings =================== {{{
+" ================== System specific ==================== {{{
 if has('gui_running')
     let &t_SI=""
     let &t_SR=""

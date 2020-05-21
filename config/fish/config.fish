@@ -21,8 +21,8 @@ end
 set -gx PATH $PATH $HOME/.local/bin $HOME/.vim/bin
 
 # MacOS
-# set -gx PATH /usr/local/opt/coreutils/libexec/gnubin $PATH
-# set -x JAVA_HOME (/usr/libexec/java_home)
+set -gx PATH /usr/local/opt/coreutils/libexec/gnubin $PATH
+set -x JAVA_HOME (/usr/libexec/java_home)
 
 
 # set -gx PATH $HOME/.local/bin $HOME/.vim/bin $HOME/miniconda3/bin $PATH
@@ -49,6 +49,7 @@ set -gx PATH $PATH $HOME/.local/bin $HOME/.vim/bin
 # abbr -a zf 'cd (z --list | awk "{print \$2}" | fzf --height 40%) && pwd'
 # abbr -a - 'cd -'
 # abbr -a ... 'cd ../..'
+# abbr -a .... 'cd ../../..'
 
 # abbr -a g 'git'
 # abbr -a ga 'git add'

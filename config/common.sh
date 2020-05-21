@@ -1,9 +1,15 @@
 source ~/.vim/config/z.sh
+source ~/.vim/config/git.sh
 export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:$HOME/.vim/bin
 export LS_COLORS=$(cat ~/.vim/config/.dircolors)
 
+alias -- -='cd -'
+alias ~='cd ~'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
 alias mkdir='mkdir -p'
 alias ll='ls -AlhF --color=auto'
 alias la='ls -AF --color=auto'

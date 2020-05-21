@@ -64,14 +64,24 @@ ln -s .vim/config/.tmux.conf ~/.tmux.conf
 
 ## Set up zsh
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/plugins/zsh-history-substring-search
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.local/zsh/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-history-substring-search ~/.local/zsh/zsh-history-substring-search
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.local/zsh/zsh-syntax-highlighting
 ln -s .vim/config/.zshrc ~/.zshrc
 ```
 
 ## Mac OS
+- set up utils
+```
+# install brew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+# install coreutils
+brew install coreutils
+
+# put in rc file
+export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
+```
 - set up shortcuts for Karabiner
 ```markdown
 Keyboard -> Shortcuts 
