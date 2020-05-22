@@ -19,11 +19,14 @@ setopt autocd
 PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) "
 PROMPT+="%{$fg[cyan]%}%c%{$reset_color%} "
 
-source ~/.vim/config/common.sh
 source ~/.vim/config/completion.zsh
+source ~/.vim/config/fzf/completion.zsh
+source ~/.vim/config/fzf/key-bindings.zsh
 source ~/.local/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.local/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.local/zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+source ~/.vim/config/common.sh
 
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down

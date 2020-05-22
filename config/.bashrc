@@ -14,6 +14,9 @@ fi
 
 # User specific aliases and functions
 
+source ~/.vim/config/fzf/completion.bash
+source ~/.vim/config/fzf/key-bindings.bash
+
 source ~/.vim/config/common.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
@@ -48,7 +51,3 @@ function cd { builtin cd $@ && ls -CF; }
 
 # WSL specific
 alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
