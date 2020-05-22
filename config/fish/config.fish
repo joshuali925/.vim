@@ -1,35 +1,36 @@
-# RUN ONCE AT SETUP
-# set -Ux PYTHONSTARTUP $HOME/.vim/config/.pythonrc
-# set Z_DATA $HOME/.local/share/z/data
-# set Z_DATA_DIR $HOME/.local/share/z
-# set Z_EXCLUDE $HOME
-
 # install extensions, should be installed already
 # fisher add jethrokuan/z rafaelrinaldi/pure
 
-# cd triggers ls
-function echo_dir --on-variable PWD; ls -CF; end;
-
-function f
-    find . -iname \*$argv[1]\*
-end
-function cc
-    gcc $argv[1].c -o $argv[1] -g && ./$argv
-end
-
-# add path
+# add path and environmental variables
 set -gx PATH $HOME/.local/bin $PATH $HOME/.vim/bin
 
+set Z_DATA $HOME/.local/share/z/data
+set Z_DATA_DIR $HOME/.local/share/z
+set Z_EXCLUDE $HOME
+
+set -x PYTHONSTARTUP $HOME/.vim/config/.pythonrc
+
+set -x FZF_DEFAULT_OPTS '--layout=reverse --height 40%'
+set -x FZF_DEFAULT_COMMAND 'rg --files --hidden -g "!.git"'
+set -x FZF_CTRL_T_COMMAND 'rg --files --hidden -g "!.git"'
+set -x FZF_ALT_C_COMMAND "rg --files --hidden -g '!.git' --null | xargs -0 dirname | awk '!h[\$0]++'"
+
+
 # MacOS
-# set -gx PATH /usr/local/opt/coreutils/libexec/gnubin $PATH
-# set -x JAVA_HOME (/usr/libexec/java_home)
+if test (uname) = 'Darwin'
+    set -gx PATH /usr/local/opt/coreutils/libexec/gnubin $PATH
+    set -x JAVA_HOME (/usr/libexec/java_home)
+end
 
-
+# conda
 # set -gx PATH $HOME/.local/bin $HOME/.vim/bin $HOME/miniconda3/bin $PATH
 # source /home/kite/miniconda3/etc/fish/conf.d/conda.fish
 # abbr -a condabase 'source /home/kite/miniconda3/etc/fish/conf.d/conda.fish'
 
 # already added to fish_variables
+# abbr -a - 'cd -'
+# abbr -a ... 'cd ../..'
+# abbr -a .... 'cd ../../..'
 # abbr -a mkdir 'mkdir -p'
 # abbr -a ll 'ls -AlhF'
 # abbr -a la 'ls -AF'
@@ -37,19 +38,16 @@ set -gx PATH $HOME/.local/bin $PATH $HOME/.vim/bin
 # abbr -a size 'du -h --max-depth=1 | sort -hr'
 # abbr -a v 'vim'
 # abbr -a vi 'vim'
-# abbr -a vf 'vim (fd --hidden --exclude ".git" | fzf --height 40%)'
 # abbr -a vimm 'vim ~/.vim/vimrc'
-# abbr -a vims 'vim -c "source ~/.cache/vim/session.vim"'
 # abbr -a gacp 'git add -A && git commit -m "update" && git push origin master'
 # abbr -a venv 'source venv/bin/activate.fish'
 # abbr -a service 'sudo service'
 # abbr -a apt 'sudo apt'
 # abbr -a which 'type -a'
-# abbr -a cdf 'cd (fd --hidden --exclude ".git" --type="directory" | fzf --height 40%) && pwd'
-# abbr -a zf 'cd (z --list | awk "{print \$2}" | fzf --height 40%) && pwd'
-# abbr -a - 'cd -'
-# abbr -a ... 'cd ../..'
-# abbr -a .... 'cd ../../..'
+# abbr -a vf 'vim (fd --hidden --exclude ".git" | fzf)'
+# abbr -a zf 'cd (z --list | awk "{print \$2}" | fzf) && pwd'
+# abbr -a rgf 'rg --files --hidden -g "!.git" | rg'
+# abbr -a rgd 'rg --files --hidden -g "!.git" --null | xargs -0 dirname | sort -u | rg'
 
 # abbr -a g 'git'
 # abbr -a ga 'git add'
@@ -159,6 +157,16 @@ set -gx PATH $HOME/.local/bin $PATH $HOME/.vim/bin
 # abbr -a gvt 'git verify-tag'
 # abbr -a gwch 'git whatchanged -p --abbrev-commit --pretty=medium'
 # abbr -a gwip 'git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
+
+# cd triggers ls
+function echo_dir --on-variable PWD; ls -CF; end;
+
+function f
+    find . -iname \*$argv[1]\*
+end
+function cc
+    gcc $argv[1].c -o $argv[1] -g && ./$argv
+end
 
 # git diff-so-fancy
 function gdf

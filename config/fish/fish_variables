@@ -1,11 +1,10 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
-SETUVAR --export PYTHONSTARTUP:/home/kite/\x2evim/config/\x2epythonrc
 SETUVAR ZO_CMD:zo
 SETUVAR Z_CMD:z
-SETUVAR Z_DATA:/home/kite/\x2elocal/share/z/data
-SETUVAR Z_DATA_DIR:/home/kite/\x2elocal/share/z
-SETUVAR Z_EXCLUDE:/home/kite
+SETUVAR --export Z_DATA:/Users/lijshu/\x2elocal/share/z/data
+SETUVAR --export Z_DATA_DIR:/Users/lijshu/\x2elocal/share/z
+SETUVAR --export Z_EXCLUDE:/Users/lijshu
 SETUVAR __fish_init_2_39_8:\x1d
 SETUVAR __fish_init_2_3_0:\x1d
 SETUVAR __fish_init_3_x:\x1d
@@ -14,9 +13,7 @@ SETUVAR _fish_abbr__2D_:cd\x20\x2d
 SETUVAR _fish_abbr__2E_2E_2E_:cd\x20\x2e\x2e/\x2e\x2e
 SETUVAR _fish_abbr__2E_2E_2E_2E_:cd\x20\x2e\x2e/\x2e\x2e/\x2e\x2e
 SETUVAR _fish_abbr_apt:sudo\x20apt
-SETUVAR _fish_abbr_cdf:cd\x20\x28fd\x20\x2d\x2dhidden\x20\x2d\x2dexclude\x20\x22\x2egit\x22\x20\x2d\x2dtype\x3d\x22directory\x22\x20\x7c\x20fzf\x20\x2d\x2dheight\x2040\x25\x29\x20\x26\x26\x20pwd
 SETUVAR _fish_abbr_completions:completions/fisher\x2efish\x20conf\x2ed\x20conf\x2ed/_pure_init\x2efish\x20conf\x2ed/plugin\x2dbang\x2dbang_key_bindings\x2efish\x20conf\x2ed/pure\x2efish\x20conf\x2ed/z\x2efish\x20config\x2efish\x20fish_variables\x20fishfile\x20functions\x20functions/__history_previous_command\x2efish\x20functions/__history_previous_command_arguments\x2efish\x20functions/__z\x2efish\x20functions/__z_add\x2efish\x20functions/__z_clean\x2efish\x20functions/__z_complete\x2efish\x20functions/_pure_format_time\x2efish\x20functions/_pure_get_prompt_symbol\x2efish\x20functions/_pure_parse_directory\x2efish\x20functions/_pure_parse_git_branch\x2efish\x20functions/_pure_place_iterm2_prompt_mark\x2efish\x20functions/_pure_print_prompt\x2efish\x20functions/_pure_prompt\x2efish\x20functions/_pure_prompt_beginning\x2efish\x20functions/_pure_prompt_command_duration\x2efish\x20functions/_pure_prompt_current_folder\x2efish\x20functions/_pure_prompt_ending\x2efish\x20functions/_pure_prompt_first_line\x2efish\x20functions/_pure_prompt_git\x2efish\x20functions/_pure_prompt_git_branch\x2efish\x20functions/_pure_prompt_git_dirty\x2efish\x20functions/_pure_prompt_git_pending_commits\x2efish\x20functions/_pure_prompt_jobs\x2efish\x20functions/_pure_prompt_new_line\x2efish\x20functions/_pure_prompt_ssh\x2efish\x20functions/_pure_prompt_ssh_host\x2efish\x20functions/_pure_prompt_ssh_separator\x2efish\x20functions/_pure_prompt_ssh_user\x2efish\x20functions/_pure_prompt_symbol\x2efish\x20functions/_pure_prompt_vimode\x2efish\x20functions/_pure_prompt_virtualenv\x2efish\x20functions/_pure_set_color\x2efish\x20functions/_pure_set_default\x2efish\x20functions/_pure_string_width\x2efish\x20functions/fish_greeting\x2efish\x20functions/fish_mode_prompt\x2efish\x20functions/fish_prompt\x2efish\x20functions/fish_title\x2efish\x20functions/fisher\x2efish\x20\x28fd\x20\x7c\x20fzf\x20\x2d\x2dheight\x2040\x25\x29
-SETUVAR _fish_abbr_condabase:source\x20/home/kite/miniconda3/etc/fish/conf\x2ed/conda\x2efish
 SETUVAR _fish_abbr_g:git
 SETUVAR _fish_abbr_ga:git\x20add
 SETUVAR _fish_abbr_gaa:git\x20add\x20\x2d\x2dall
@@ -130,16 +127,17 @@ SETUVAR _fish_abbr_l:ls\x20\x2dCF
 SETUVAR _fish_abbr_la:ls\x20\x2dAF
 SETUVAR _fish_abbr_ll:ls\x20\x2dAlhF
 SETUVAR _fish_abbr_mkdir:mkdir\x20\x2dp
+SETUVAR _fish_abbr_rgd:rg\x20\x2d\x2dfiles\x20\x2d\x2dhidden\x20\x2dg\x20\x22\x21\x2egit\x22\x20\x2d\x2dnull\x20\x7c\x20xargs\x20\x2d0\x20dirname\x20\x7c\x20sort\x20\x2du\x20\x7c\x20rg
+SETUVAR _fish_abbr_rgf:rg\x20\x2d\x2dfiles\x20\x2d\x2dhidden\x20\x2dg\x20\x22\x21\x2egit\x22\x20\x7c\x20rg
 SETUVAR _fish_abbr_service:sudo\x20service
 SETUVAR _fish_abbr_size:du\x20\x2dh\x20\x2d\x2dmax\x2ddepth\x3d1\x20\x7c\x20sort\x20\x2dhr
 SETUVAR _fish_abbr_v:vim
 SETUVAR _fish_abbr_venv:source\x20venv/bin/activate\x2efish
-SETUVAR _fish_abbr_vf:vim\x20\x28fd\x20\x2d\x2dhidden\x20\x2d\x2dexclude\x20\x22\x2egit\x22\x20\x7c\x20fzf\x20\x2d\x2dheight\x2040\x25\x29
+SETUVAR _fish_abbr_vf:vim\x20\x28fd\x20\x2d\x2dhidden\x20\x2d\x2dexclude\x20\x22\x2egit\x22\x20\x7c\x20fzf\x29
 SETUVAR _fish_abbr_vi:vim
 SETUVAR _fish_abbr_vimm:vim\x20\x7e/\x2evim/vimrc
-SETUVAR _fish_abbr_vims:vim\x20\x2dc\x20\x22source\x20\x7e/\x2ecache/vim/session\x2evim\x22
 SETUVAR _fish_abbr_which:type\x20\x2da
-SETUVAR _fish_abbr_zf:cd\x20\x28z\x20\x2d\x2dlist\x20\x7c\x20awk\x20\x22\x7bprint\x20\x5c\x242\x7d\x22\x20\x7c\x20fzf\x20\x2d\x2dheight\x2040\x25\x29\x20\x26\x26\x20pwd
+SETUVAR _fish_abbr_zf:cd\x20\x28z\x20\x2d\x2dlist\x20\x7c\x20awk\x20\x22\x7bprint\x20\x5c\x242\x7d\x22\x20\x7c\x20fzf\x29\x20\x26\x26\x20pwd
 SETUVAR fish_color_autosuggestion:555\x1ebrblack
 SETUVAR fish_color_cancel:\x2dr
 SETUVAR fish_color_command:c397d8
