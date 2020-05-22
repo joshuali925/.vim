@@ -1,3 +1,6 @@
+# this file comes from oh-my-zsh
+# https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/lib/completion.zsh
+
 # fixme - the load process here seems a bit bizarre
 zmodload -i zsh/complist
 
