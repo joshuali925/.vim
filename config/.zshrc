@@ -47,6 +47,8 @@ bindkey "^[[1;5D" backward-word
 function chpwd() { emulate -L zsh; ls -ACF; }
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=cyan"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_USE_ASYNC=1
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.vim/config/.p10k.zsh ]] || source ~/.vim/config/.p10k.zsh
