@@ -3,7 +3,6 @@ source ~/.vim/config/z.sh
 export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
 export LS_COLORS=$(cat ~/.vim/config/.dircolors)
-
 export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
 export FZF_DEFAULT_COMMAND='rg --files --hidden -g "!.git"'
 export FZF_CTRL_T_COMMAND='rg --files --hidden -g "!.git"'
@@ -28,10 +27,10 @@ alias venv='source venv/bin/activate'
 alias service='sudo service'
 alias apt='sudo apt'
 alias which='type -a'  # zsh's which also works
-alias vf='vim $(fd --hidden --exclude ".git" | fzf)'
-alias zf='cd $(z --list | awk "{print \$2}" | fzf) && pwd'
-alias rgf='rg --files --hidden -g "!.git" | rg'
-alias rgd='rg --files --hidden -g "!.git" --null | xargs -0 dirname | sort -u | rg'
+alias cdf="FZFTEMP=\$(rg --files --hidden -g '!.git' | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
+alias vf="FZFTEMP=\$(rg --files --hidden -g '!.git' | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
+alias rgf="rg --files --hidden -g '!.git' | rg --smart-case"
+alias rgd="rg --files --hidden -g '!.git' --null | xargs -0 dirname | sort -u | rg --smart-case"
 
 alias g='git'
 alias ga='git add'
@@ -172,6 +171,8 @@ function printcolor {
 }
 
 function fl () {
+    local tmp
+    local dir
     tmp="$(mktemp)"
     lf -last-dir-path="$tmp" "$@"
     if [ -f "$tmp" ]; then
@@ -182,6 +183,16 @@ function fl () {
                 cd "$dir"
             fi
         fi
+    fi
+}
+
+unalias z 2> /dev/null
+z() {
+    local FZFTEMP
+    if [ -z "$1" ]; then
+        FZFTEMP=$(_z -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+    else
+        _z 2>&1 "$*"
     fi
 }
 

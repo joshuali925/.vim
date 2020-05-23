@@ -166,18 +166,18 @@ set statusline=%<[%{mode()}]\ %F\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(g
 
 " ====================== Mappings ======================= {{{
 let mapleader=';'
-nmap <leader>1 <F1>
-nmap <leader>2 <F2>
-nmap <leader>3 <F3>
-nmap <leader>4 <F4>
-nmap <leader>5 <F5>
-nmap <leader>6 <F6>
-nmap <leader>7 <F7>
-nmap <leader>8 <F8>
-nmap <leader>9 <F9>
-nmap <leader>0 <F10>
-nmap <leader>- <F11>
-nmap <leader>= <F12>
+map <leader>1 <F1>
+map <leader>2 <F2>
+map <leader>3 <F3>
+map <leader>4 <F4>
+map <leader>5 <F5>
+map <leader>6 <F6>
+map <leader>7 <F7>
+map <leader>8 <F8>
+map <leader>9 <F9>
+map <leader>0 <F10>
+map <leader>- <F11>
+map <leader>= <F12>
 imap <F1> <Esc><F1>
 xmap <F1> :<C-u>call <SID>LoadQuickUI(0)<CR>gv<F1>
 nmap <F1> :call <SID>LoadQuickUI(0)<CR><F1>

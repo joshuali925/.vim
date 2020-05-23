@@ -11,6 +11,7 @@ cmd cp %cp -i "$f" $@
 
 map x delete
 map D delete
+map R reload
 map zc set color256!
 map m
 map ms mark-save
