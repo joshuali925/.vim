@@ -1,11 +1,17 @@
 # Dot Files
-## Download
+## Set up shell
 ```bash
 cd ~
 mkdir -p ~/.cache/vim/undo
 mkdir -p ~/.local/bin
-mkdir -p ~/.config
+mkdir -p ~/.config/lf
 git clone https://github.com/joshuali925/.vim.git ~/.vim
+
+ln -s .vim/config/.bashrc ~/.bashrc
+ln -s .vim/config/.zshrc ~/.zshrc
+ln -s .vim/config/.tmux.conf ~/.tmux.conf
+ln -s ~/.vim/config/lfrc ~/.config/lf/lfrc
+ln -s ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
 ```
 
 ## Installl
@@ -53,24 +59,6 @@ pip3 install --user neovim
 nvim -c "PlugInstall" -c "qa"
 ```
 
-## Set up shell
-```bash
-ln -s .vim/config/.bashrc ~/.bashrc
-ln -s ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
-mkdir -p ~/.config/lf
-ln -s ~/.vim/config/lfrc ~/.config/lf/lfrc
-ln -s .vim/config/.tmux.conf ~/.tmux.conf
-```
-
-## Set up zsh
-```bash
-git clone https://github.com/zsh-users/zsh-autosuggestions ~/.local/zsh/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.local/zsh/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-history-substring-search ~/.local/zsh/zsh-history-substring-search
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.local/zsh/powerlevel10k
-ln -s .vim/config/.zshrc ~/.zshrc
-```
-
 ## Mac OS
 - set up utils
 ```
@@ -93,7 +81,7 @@ Keyboard -> Shortcuts
 iTerm2 -> Preferences -> Profiles -> Keys -> Presets... -> Natural Text Editing
 Clipy -> Preferences -> Shortcuts -> History -> option command p
 ```
-- set up Karabiner
+- set up [Karabiner](https://karabiner-elements.pqrs.org/)
 ```bash
 # visit this link to import settings
 karabiner://karabiner/assets/complex_modifications/import?url=https://raw.githubusercontent.com/joshuali925/.vim/master/config/karabiner.json
@@ -102,4 +90,4 @@ karabiner://karabiner/assets/complex_modifications/import?url=https://raw.github
 mkdir -p ~/.config/karabiner/assets/complex_modifications
 cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/14594837.json
 ```
-then add complex modifications
+then add complex modifications in Karabiner

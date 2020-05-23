@@ -33,6 +33,9 @@ bind '"\e[B": history-search-forward'
 bind '"\eOA": history-search-backward'
 bind '"\eOB": history-search-forward'
 
+# same as in zsh, C-x a expands aliases
+bind '"\C-xa": shell-expand-line'
+
 function cd { builtin cd $@ && ls -CF; }
 # function cd() {
 #     builtin cd $@

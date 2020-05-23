@@ -209,17 +209,17 @@ _z() {
         [ $? -eq 0 ] && [ "$cd" ] && {
           if [ "$echo" ]; then echo "$cd"; else builtin cd "$cd"; fi
         # custom code for auto ls and auto activate virtualenv
-        ls -CF
-        if [[ -z "$VIRTUAL_ENV" ]] ; then
-            if [[ -f ./venv/bin/activate ]] ; then
-                source ./venv/bin/activate
-            fi
-        else
-            parentdir="$(dirname "$VIRTUAL_ENV")"
-            if [[ "$PWD"/ != "$parentdir"/* ]] ; then
-                deactivate
-            fi
-        fi
+        # ls -CF
+        # if [[ -z "$VIRTUAL_ENV" ]] ; then
+        #     if [[ -f ./venv/bin/activate ]] ; then
+        #         source ./venv/bin/activate
+        #     fi
+        # else
+        #     parentdir="$(dirname "$VIRTUAL_ENV")"
+        #     if [[ "$PWD"/ != "$parentdir"/* ]] ; then
+        #         deactivate
+        #     fi
+        # fi
         }
     fi
 }
