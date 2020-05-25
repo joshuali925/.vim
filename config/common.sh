@@ -1,7 +1,8 @@
 source ~/.vim/config/z.sh
 
-export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
+export PYTHONSTARTUP=~/.vim/config/.pythonrc
+export EDITOR='vim'
 export LS_COLORS=$(cat ~/.vim/config/.dircolors)
 export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
 export FZF_DEFAULT_COMMAND='rg --files --hidden -g "!.git"'
@@ -193,6 +194,14 @@ z() {
         FZFTEMP=$(_z -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
     else
         _z 2>&1 "$*"
+    fi
+}
+zc() {
+    local FZFTEMP
+    if [ -z "$1" ]; then
+        FZFTEMP=$(_z -c -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+    else
+        _z 2>&1 -c "$*"
     fi
 }
 
