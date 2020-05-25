@@ -28,12 +28,13 @@ shopt -s cdspell
 bind 'set show-all-if-ambiguous on'
 bind 'set completion-ignore-case on'
 bind 'TAB:menu-complete'
+bind '"\C-x\C-e": edit-and-execute-command'
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
 bind '"\eOA": history-search-backward'
 bind '"\eOB": history-search-forward'
 
-# same as in zsh, C-x a expands aliases
+# same as in zsh, 'C-x a' expands aliases
 bind '"\C-xa": shell-expand-line'
 
 function cd { builtin cd $@ && ls -CF; }

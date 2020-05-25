@@ -468,28 +468,26 @@ let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 
 " =======================================================
-# Antigen: https://github.com/zsh-users/antigen
-ANTIGEN="$HOME/.local/bin/antigen.zsh"
-if [ ! -f "$ANTIGEN" ]; then
-	echo 'Installing antigen ...'
-	[ ! -d "$HOME/.local" ] && mkdir -p "$HOME/.local" 2> /dev/null
-	[ ! -d "$HOME/.local/bin" ] && mkdir -p "$HOME/.local/bin" 2> /dev/null
-	# [ ! -f "$HOME/.z" ] && touch "$HOME/.z"
-	URL='http://git.io/antigen'
-	TMPFILE='/tmp/antigen.zsh'
-	if [ -x "$(which curl)" ]; then
-		curl -L "$URL" -o "$TMPFILE"
-	elif [ -x "$(which wget)" ]; then
-		wget "$URL" -O "$TMPFILE"
-	else
-		echo 'ERROR: please install curl or wget before installation !!'
-		exit
-	fi
-	if [ ! $? -eq 0 ]; then
-		echo "ERROR: downloading antigen.zsh ($URL) failed !!"
-		exit
-	fi;
-	echo "move $TMPFILE to $ANTIGEN"
-	mv "$TMPFILE" "$ANTIGEN"
-fi
+" from .zshrc
+autoload -U compinit && compinit -u  # for autocomplete
+source ~/.zinit/bin/zinit.zsh
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+autoload -U +X bashcompinit && bashcompinit
 alias zf='FZFTEMP=$(z --list | awk "{print \$2}" | fzf) && cd "$FZFTEMP" && unset FZFTEMP'
+PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) %{$fg[cyan]%}%c%{$reset_color%} "
+
+" =======================================================
+" zinit binaries
+" https://www.aloxaf.com/2019/11/zplugin_tutorial
+zinit light zinit-zsh/z-a-bin-gem-node
+zinit wait"2" lucid as"program" from"gh-r" for \
+    mv"exa* -> exa" ogham/exa \
+    mv"*/rg -> rg"  BurntSushi/ripgrep \
+    mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
+    sbin junegunn/fzf-bin
+zinit ice mv="*.zsh -> _fzf" as="completion"
+zinit snippet 'https://github.com/junegunn/fzf/blob/master/shell/completion.zsh'
+zinit snippet 'https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh'
+zinit ice as="completion"
+zinit snippet 'https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd'

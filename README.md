@@ -11,10 +11,17 @@ ln -s .vim/config/.bashrc ~/.bashrc
 ln -s .vim/config/.zshrc ~/.zshrc
 ln -s .vim/config/.tmux.conf ~/.tmux.conf
 ln -s ~/.vim/config/lfrc ~/.config/lf/lfrc
+ln -s ~/.vim/config/nvim ~/.config/nvim
 ln -s ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
+
+# zsh inscure directories fix:
+# compaudit | xargs chmod g-w
+# compaudit | sudo xargs chmod -R 755
+# zsh fast-syntax-highlighting theme:
+# fast-theme clean
 ```
 
-## Installl
+## Install
 ```bash
 # vim
 sudo add-apt-repository ppa:jonathonf/vim
@@ -54,7 +61,6 @@ mv squashfs-root ~/.local/nvim
 ln -s ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
 rm nvim.appimage
 
-ln -s ~/.vim/config/nvim ~/.config/nvim
 pip3 install --user neovim
 nvim -c "PlugInstall" -c "qa"
 ```
