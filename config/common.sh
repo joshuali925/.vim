@@ -28,6 +28,7 @@ alias venv='source venv/bin/activate'
 alias service='sudo service'
 alias apt='sudo apt'
 alias which='type -a'  # zsh's which also works
+alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias cdf="FZFTEMP=\$(rg --files --hidden -g '!.git' | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
 alias vf="FZFTEMP=\$(rg --files --hidden -g '!.git' | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
 alias rgf="rg --files --hidden -g '!.git' | rg --smart-case"
@@ -169,6 +170,18 @@ function printcolor {
     }
     printf "\n";
     }'
+}
+
+function lfcd () {
+    local dir
+    if [ -f "$HOME/.cache/lf_dir" ]; then
+        dir="$(cat "$HOME/.cache/lf_dir")"
+        if [ -d "$dir" ]; then
+            if [ "$dir" != "$(pwd)" ]; then
+                cd "$dir"
+            fi
+        fi
+    fi
 }
 
 function fl () {

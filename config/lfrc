@@ -9,6 +9,8 @@ cmd mv %mv -i "$f" $@
 cmd cp %cp -i "$f" $@
 
 
+map v toggle
+map V invert
 map x delete
 map D delete
 map R reload
