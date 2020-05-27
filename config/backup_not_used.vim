@@ -474,6 +474,18 @@ source ~/.zinit/bin/zinit.zsh
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 autoload -U +X bashcompinit && bashcompinit
+zinit wait lucid for \
+    hlissner/zsh-autopair \
+    atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay" \
+    atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'" \
+    zdharma/fast-syntax-highlighting \
+    atload"!_zsh_autosuggest_start; \
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan'; \
+    ZSH_AUTOSUGGEST_STRATEGY+=(history completion); \
+    ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(up-line-or-beginning-search down-line-or-beginning-search); \
+    ZSH_AUTOSUGGEST_MANUAL_REBIND=1; \
+    ZSH_AUTOSUGGEST_USE_ASYNC=1" \
+    zsh-users/zsh-autosuggestions
 alias zf='FZFTEMP=$(z --list | awk "{print \$2}" | fzf) && cd "$FZFTEMP" && unset FZFTEMP'
 PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) %{$fg[cyan]%}%c%{$reset_color%} "
 
@@ -482,12 +494,16 @@ PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) %{$fg[cyan]%}%c%{$res
 " https://www.aloxaf.com/2019/11/zplugin_tutorial
 zinit light zinit-zsh/z-a-bin-gem-node
 zinit wait"2" lucid as"program" from"gh-r" for \
-    mv"exa* -> exa" ogham/exa \
-    mv"*/rg -> rg"  BurntSushi/ripgrep \
+    mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep
     mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
-    sbin junegunn/fzf-bin
+    mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
+    sbin junegunn/fzf-bin \
+    sbin gokcehan/lf \
+    mv"exa* -> exa" sbin ogham/exa
 zinit ice mv="*.zsh -> _fzf" as="completion"
 zinit snippet 'https://github.com/junegunn/fzf/blob/master/shell/completion.zsh'
 zinit snippet 'https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh'
 zinit ice as="completion"
 zinit snippet 'https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd'
+zinit ice as="completion"
+zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'

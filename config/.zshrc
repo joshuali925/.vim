@@ -5,13 +5,16 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
     source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-autoload -U colors && colors
-[[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
-
 [[ ! -f ~/.zinit/bin/zinit.zsh ]] && command git clone https://github.com/zdharma/zinit ~/.zinit/bin
 source ~/.zinit/bin/zinit.zsh
 
-zinit wait lucid for \
+zinit depth=1 light-mode for romkatv/powerlevel10k
+
+zinit wait lucid as"completion" for \
+    https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
+    https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg
+
+zinit wait lucid light-mode for \
     hlissner/zsh-autopair \
     atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay" \
     atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'" \
@@ -19,19 +22,27 @@ zinit wait lucid for \
     atload"!_zsh_autosuggest_start; \
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan'; \
     ZSH_AUTOSUGGEST_STRATEGY=(history completion); \
-    ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(up-line-or-beginning-search down-line-or-beginning-search); \
+    ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(up-line-or-beginning-search down-line-or-beginning-search); \
     ZSH_AUTOSUGGEST_MANUAL_REBIND=1; \
     ZSH_AUTOSUGGEST_USE_ASYNC=1" \
     zsh-users/zsh-autosuggestions
-zinit snippet OMZ::lib/directories.zsh
-zinit snippet OMZ::lib/history.zsh
-zinit snippet OMZ::lib/key-bindings.zsh
-zinit ice depth=1; zinit light romkatv/powerlevel10k
+
+zinit light-mode for \
+    OMZ::lib/directories.zsh \
+    OMZ::lib/history.zsh \
+    OMZ::lib/key-bindings.zsh
 
 source ~/.vim/config/fzf/completion.zsh
 source ~/.vim/config/fzf/key-bindings.zsh
 
 source ~/.vim/config/common.sh
+
+WORDCHARS=${WORDCHARS/\/}
+
+# autoload -U compinit && compinit -u
+# [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]] && compinit; zinit cdreplay -q
+# autoload -U colors && colors
+[[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
 
 setopt auto_cd
 setopt complete_in_word
@@ -39,7 +50,7 @@ setopt always_to_end
 setopt list_packed
 setopt globdots
 zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate
-zstyle ':completion:*' menu yes select search
+zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
