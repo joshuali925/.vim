@@ -65,7 +65,7 @@ fzf-file-widget() {
   return $ret
 }
 zle     -N   fzf-file-widget
-bindkey '^T' fzf-file-widget
+bindkey '^P' fzf-file-widget
 
 # Ensure precmds are run after cd
 fzf-redraw-prompt() {
