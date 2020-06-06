@@ -77,15 +77,18 @@ brew install coreutils
 # put in rc file
 export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
 ```
-- set up shortcuts for Karabiner
+- set up shortcuts, option command shortcuts are for Karabiner
 ```markdown
 Keyboard -> Shortcuts 
     -> Services -> Searching -> Look Up in Dictionary: option command t
-    -> App Shortcuts -> Add new -> Tile Window to Right of Screen: option command ]
-    -> App Shortcuts -> Add new -> Tile Window to Left of Screen: option command [
-    -> App Shortcuts -> Add new -> Zoom: option command =
+    -> App Shortcuts -> Add new -> Tile Window to Right of Screen: control right
+    -> App Shortcuts -> Add new -> Tile Window to Left of Screen: control left
+    -> App Shortcuts -> Add new -> Zoom: control up
+    -> App Shortcuts -> Add new -> Minimize: control down
+    -> App Shortcuts -> Add new -> Enter Full Screen: control shift up
+    -> App Shortcuts -> Add new -> Exit Full Screen: control shift up
 iTerm2 -> Preferences -> Profiles -> Keys -> Presets... -> Natural Text Editing
-Clipy -> Preferences -> Shortcuts -> History -> option command p
+Clipy -> Preferences -> Shortcuts -> History -> control shift v
 ```
 - set up [Karabiner](https://karabiner-elements.pqrs.org/)
 ```bash
@@ -94,6 +97,6 @@ karabiner://karabiner/assets/complex_modifications/import?url=https://raw.github
 
 # or copy manually
 mkdir -p ~/.config/karabiner/assets/complex_modifications
-cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/14594837.json
+cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
 ```
 then add complex modifications in Karabiner
