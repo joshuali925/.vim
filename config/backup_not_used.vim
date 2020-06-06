@@ -468,7 +468,7 @@ let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 
 " =======================================================
-" from .zshrc
+" from .zshrc - lazy load
 autoload -U compinit && compinit -u  # for autocomplete
 source ~/.zinit/bin/zinit.zsh
 autoload -Uz _zinit
@@ -507,3 +507,11 @@ zinit ice as="completion"
 zinit snippet 'https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd'
 zinit ice as="completion"
 zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'
+
+" =======================================================
+" from bashrc
+# alias f='a(){ find . -iname *$@*; }; a'
+# alias cc='a(){ gcc $1.c -o $1 -g && ./$@; }; a'
+function f {
+    find . -iname \*$1\*;
+}

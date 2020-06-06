@@ -15,13 +15,13 @@ zinit wait lucid as"completion" for \
     https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg
 
 zinit wait lucid light-mode for \
-    hlissner/zsh-autopair \
     atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay" \
     atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'" \
     zdharma/fast-syntax-highlighting \
     atload"!_zsh_autosuggest_start; \
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan'; \
     ZSH_AUTOSUGGEST_STRATEGY=(history completion); \
+    ZSH_AUTOSUGGEST_HISTORY_IGNORE=\"?(#c150,)\"; \
     ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(up-line-or-beginning-search down-line-or-beginning-search); \
     ZSH_AUTOSUGGEST_MANUAL_REBIND=1; \
     ZSH_AUTOSUGGEST_USE_ASYNC=1" \
@@ -37,13 +37,12 @@ source ~/.vim/config/fzf/key-bindings.zsh
 
 source ~/.vim/config/common.sh
 
-WORDCHARS=${WORDCHARS/\/}
-
 # autoload -U compinit && compinit -u
 # [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]] && compinit; zinit cdreplay -q
 # autoload -U colors && colors
-[[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
 
+WORDCHARS=${WORDCHARS/\/}
+[[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
 setopt auto_cd
 setopt complete_in_word
 setopt always_to_end

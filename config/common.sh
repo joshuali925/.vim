@@ -29,6 +29,8 @@ alias service='sudo service'
 alias apt='sudo apt'
 alias which='type -a'  # zsh's which also works
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
+alias fl='lf -last-dir-path="$HOME/.cache/lf_dir" && cd "$(cat "$HOME/.cache/lf_dir")"'
+alias lfcd='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias cdf="FZFTEMP=\$(rg --files --hidden -g '!.git' | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
 alias vf="FZFTEMP=\$(rg --files --hidden -g '!.git' | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
 alias rgf="rg --files --hidden -g '!.git' | rg --smart-case"
@@ -75,6 +77,7 @@ alias gcs='git commit -S'
 alias gd='git diff'
 alias gdca='git diff --cached'
 alias gdct='git describe --tags `git rev-list --tags --max-count=1`'
+alias gds='git diff --stat'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gdw='git diff --word-diff'
 alias gf='git fetch'
@@ -118,6 +121,7 @@ alias grbs='git rebase --skip'
 alias grbi='git rebase -i'
 alias grh='git reset HEAD'
 alias grhh='git reset HEAD --hard'
+alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset"'
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
@@ -127,7 +131,7 @@ alias grv='git remote -v'
 alias gsd='git svn dcommit'
 alias gsps='git show --pretty=short --show-signature'
 alias gsr='git svn rebase'
-alias gss='git status -s'
+alias gss='git status -sbu'
 alias gst='git status'
 alias gsta='git stash save'
 alias gstaa='git stash apply'
@@ -144,11 +148,6 @@ alias gvt='git verify-tag'
 alias gwch='git whatchanged -p --abbrev-commit --pretty=medium'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
 
-# alias f='a(){ find . -iname *$@*; }; a'
-# alias cc='a(){ gcc $1.c -o $1 -g && ./$@; }; a'
-function f {
-    find . -iname \*$1\*;
-}
 function cc {
     gcc $1.c -o $1 -g && ./$@;
 }
@@ -170,34 +169,6 @@ function printcolor {
     }
     printf "\n";
     }'
-}
-
-function lfcd () {
-    local dir
-    if [ -f "$HOME/.cache/lf_dir" ]; then
-        dir="$(cat "$HOME/.cache/lf_dir")"
-        if [ -d "$dir" ]; then
-            if [ "$dir" != "$(pwd)" ]; then
-                cd "$dir"
-            fi
-        fi
-    fi
-}
-
-function fl () {
-    local tmp
-    local dir
-    tmp="$(mktemp)"
-    lf -last-dir-path="$tmp" "$@"
-    if [ -f "$tmp" ]; then
-        dir="$(cat "$tmp")"
-        rm -f "$tmp"
-        if [ -d "$dir" ]; then
-            if [ "$dir" != "$(pwd)" ]; then
-                cd "$dir"
-            fi
-        fi
-    fi
 }
 
 unalias z 2> /dev/null
