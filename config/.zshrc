@@ -10,12 +10,12 @@ source ~/.zinit/bin/zinit.zsh
 
 zinit depth=1 light-mode for romkatv/powerlevel10k
 
-zinit wait lucid as"completion" for \
+zinit as"completion" for \
     https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
     https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg
 
-zinit wait lucid light-mode for \
-    atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay" \
+    # atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay"
+zinit light-mode for \
     atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'" \
     zdharma/fast-syntax-highlighting \
     atload"!_zsh_autosuggest_start; \
@@ -37,6 +37,7 @@ source ~/.vim/config/fzf/key-bindings.zsh
 
 source ~/.vim/config/common.sh
 
+zpcompinit
 # autoload -U compinit && compinit -u
 # [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]] && compinit; zinit cdreplay -q
 # autoload -U colors && colors
