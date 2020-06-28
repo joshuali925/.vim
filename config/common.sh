@@ -1,13 +1,14 @@
 source ~/.vim/config/z.sh
 
 export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
-export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export EDITOR='vim'
 export LS_COLORS=$(cat ~/.vim/config/.dircolors)
+export PYTHONSTARTUP=~/.vim/config/.pythonrc
+export RIPGREP_CONFIG_PATH=~/.vim/config/.ripgreprc
 export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
-export FZF_DEFAULT_COMMAND='rg --files --hidden -g "!.git"'
-export FZF_CTRL_T_COMMAND='rg --files --hidden -g "!.git"'
-export FZF_ALT_C_COMMAND="rg --files --hidden -g '!.git' --null | xargs -0 dirname | awk '!h[\$0]++'"
+export FZF_DEFAULT_COMMAND='rg --files --hidden'
+export FZF_CTRL_T_COMMAND='rg --files --hidden'
+export FZF_ALT_C_COMMAND="rg --files --hidden --null | xargs -0 dirname | awk '!h[\$0]++'"
 
 alias -- -='cd -'
 alias ~='cd ~'
@@ -25,16 +26,17 @@ alias vi='vim'
 alias vimm='vim ~/.vim/vimrc'
 alias gacp='git add -A && git commit -m "update" && git push origin master'
 alias venv='source venv/bin/activate'
+alias bpy='env PYTHONSTARTUP= bpython'
 alias service='sudo service'
 alias apt='sudo apt'
 alias which='type -a'  # zsh's which also works
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias fl='lf -last-dir-path="$HOME/.cache/lf_dir" && cd "$(cat "$HOME/.cache/lf_dir")"'
-alias lfcd='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
-alias cdf="FZFTEMP=\$(rg --files --hidden -g '!.git' | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
-alias vf="FZFTEMP=\$(rg --files --hidden -g '!.git' | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
-alias rgf="rg --files --hidden -g '!.git' | rg --smart-case"
-alias rgd="rg --files --hidden -g '!.git' --null | xargs -0 dirname | sort -u | rg --smart-case"
+alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
+alias cdf="FZFTEMP=\$(rg --files --hidden | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
+alias vf="FZFTEMP=\$(rg --files --hidden | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
+alias rgf="rg --files --hidden | rg"
+alias rgd="rg --files --hidden --null | xargs -0 dirname | sort -u | rg"
 
 alias g='git'
 alias ga='git add'
@@ -92,7 +94,6 @@ alias ggpur='git pull --rebase origin master'
 alias glum='git pull upstream master'
 alias ggpush='git push origin master'
 alias ggp='git push origin master'
-alias ggfl='git push --force-with-lease origin <your_argument>/master'
 alias ggsup='git branch --set-upstream-to=origin/master'
 alias gpsup='git push --set-upstream origin master'
 alias gignore='git update-index --assume-unchanged'
@@ -105,6 +106,7 @@ alias glgg='git log --graph --max-count=10'
 alias glgga='git log --graph --decorate --all'
 alias glo='git log --oneline --decorate --color'
 alias glog='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
+alias gloga='git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)" --all'
 alias glp='_git_log_prettily (git log --pretty=$1)'
 alias gm='git merge'
 alias gma='git merge --abort'
@@ -188,7 +190,7 @@ x(){
             *)           echo "Unable to extract '$1'" ;;
         esac
     else
-        tar -cvf $1.tar $1
+        tar cvf $1.tar $1
     fi
 }
 

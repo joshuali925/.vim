@@ -930,21 +930,22 @@
                             ]
                         },
                         {
-                            "key_code": "delete_or_backspace",
+                            "key_code": "left_arrow",
                             "modifiers": [
-                                "right_command"
-                            ]
-                        },
-                        {
-                            "key_code": "up_arrow",
-                            "modifiers": [
+                                "right_command",
                                 "right_shift"
                             ]
                         },
                         {
-                            "key_code": "right_arrow",
+                            "key_code": "left_arrow",
                             "modifiers": [
                                 "right_command",
+                                "right_shift"
+                            ]
+                        },
+                        {
+                            "key_code": "left_arrow",
+                            "modifiers": [
                                 "right_shift"
                             ]
                         },
@@ -952,7 +953,7 @@
                             "key_code": "delete_or_backspace"
                         },
                         {
-                            "key_code": "down_arrow"
+                            "key_code": "right_arrow"
                         },
                         {
                             "key_code": "right_arrow",
