@@ -49,6 +49,10 @@ setopt complete_in_word
 setopt always_to_end
 setopt list_packed
 setopt globdots
+setopt interactive_comments
+setopt hist_ignore_all_dups
+setopt hist_find_no_dups
+setopt hist_save_no_dups
 zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|=*'

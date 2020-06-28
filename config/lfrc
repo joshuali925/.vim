@@ -8,7 +8,6 @@ cmd touch %touch $@
 cmd mv %mv -i "$f" $@
 cmd cp %cp -i "$f" $@
 
-
 map v toggle
 map V invert
 map x delete
@@ -17,8 +16,10 @@ map R reload
 map zc set color256!
 map m
 map ms mark-save
+map ~ cd
 map mm push :mkdir<Space>
 map mt push :touch<Space>
 map <c-c> push cu
+map <enter> $gvim "$f"
 map i $bat --color=always --style='numbers,changes' --paging=always "$f"
 map zd !du -h --max-depth=1 | sort -hr
