@@ -7,19 +7,23 @@ cmd mkdir %mkdir -p $@
 cmd touch %touch $@
 cmd mv %mv -i "$f" $@
 cmd cp %cp -i "$f" $@
+cmd code %code .
+cmd size !du -h --max-depth=1 | sort -hr
 
 map v toggle
 map V invert
 map x delete
 map D delete
 map R reload
+map H push <c-u>
+map L push <c-d>
 map zc set color256!
+map ~ cd
 map m
 map ms mark-save
-map ~ cd
-map mm push :mkdir<Space>
-map mt push :touch<Space>
+map mm push :mkdir<space>
+map mt push :touch<space>
+map mz push :size<enter>
 map <c-c> push cu
 map <enter> $gvim "$f"
-map i $bat --color=always --style='numbers,changes' --paging=always "$f"
-map zd !du -h --max-depth=1 | sort -hr
+map I $bat --color=always --style='numbers,changes' --paging=always "$f"

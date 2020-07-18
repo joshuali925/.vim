@@ -44,6 +44,8 @@ zpcompinit
 
 WORDCHARS=${WORDCHARS/\/}
 [[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
+unsetopt no_match
+unsetopt share_history
 setopt auto_cd
 setopt complete_in_word
 setopt always_to_end
@@ -60,6 +62,7 @@ zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
+bindkey '^x^w' push-line-or-edit
 
 function chpwd() { emulate -L zsh; ls -ACF --color=auto; }
 
