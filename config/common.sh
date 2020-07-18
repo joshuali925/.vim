@@ -6,9 +6,9 @@ export LS_COLORS=$(cat ~/.vim/config/.dircolors)
 export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export RIPGREP_CONFIG_PATH=~/.vim/config/.ripgreprc
 export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
-export FZF_DEFAULT_COMMAND='rg --files --hidden'
-export FZF_CTRL_T_COMMAND='rg --files --hidden'
-export FZF_ALT_C_COMMAND="rg --files --hidden --null | xargs -0 dirname | awk '!h[\$0]++'"
+export FZF_DEFAULT_COMMAND='rg --files'
+export FZF_CTRL_T_COMMAND='rg --files'
+export FZF_ALT_C_COMMAND="rg --files --null | xargs -0 dirname | awk '!h[\$0]++'"
 
 alias -- -='cd -'
 alias ~='cd ~'
@@ -29,14 +29,14 @@ alias venv='source venv/bin/activate'
 alias bpy='env PYTHONSTARTUP= bpython'
 alias service='sudo service'
 alias apt='sudo apt'
-alias which='type -a'  # zsh's which also works
+alias which='type -a'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias fl='lf -last-dir-path="$HOME/.cache/lf_dir" && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
-alias cdf="FZFTEMP=\$(rg --files --hidden | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
-alias vf="FZFTEMP=\$(rg --files --hidden | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
-alias rgf="rg --files --hidden | rg"
-alias rgd="rg --files --hidden --null | xargs -0 dirname | sort -u | rg"
+alias cdf="FZFTEMP=\$(rg --files | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
+alias vf="FZFTEMP=\$(rg --files | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
+alias rgf="rg --files | rg"
+alias rgd="rg --files --null | xargs -0 dirname | sort -u | rg"
 
 alias g='git'
 alias ga='git add'
@@ -80,6 +80,7 @@ alias gd='git diff'
 alias gdca='git diff --cached'
 alias gdct='git describe --tags `git rev-list --tags --max-count=1`'
 alias gds='git diff --stat'
+alias gdst='git diff --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gdw='git diff --word-diff'
 alias gf='git fetch'
@@ -104,10 +105,8 @@ alias gl='git pull'
 alias glg='git log --stat --max-count=10'
 alias glgg='git log --graph --max-count=10'
 alias glgga='git log --graph --decorate --all'
-alias glo='git log --oneline --decorate --color'
-alias glog='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
-alias gloga='git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)" --all'
-alias glp='_git_log_prettily (git log --pretty=$1)'
+alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
+alias glog='git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)" --all'
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
@@ -130,11 +129,11 @@ alias grset='git remote set-url'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grup='git remote update'
 alias grv='git remote -v'
+alias gs='git status'
 alias gsd='git svn dcommit'
 alias gsps='git show --pretty=short --show-signature'
 alias gsr='git svn rebase'
-alias gss='git status -sbu'
-alias gst='git status'
+alias gss='git status -sb'
 alias gsta='git stash save'
 alias gstaa='git stash apply'
 alias gstd='git stash drop'
