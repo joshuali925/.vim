@@ -8,6 +8,7 @@ let s:ExecCommand = ''
 " ===================== Plugins ========================= {{{
 call plug#begin(expand('<sfile>:p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
+Plug 'ap/vim-buftabline'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'skywind3000/vim-quickui', { 'on': [] }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }

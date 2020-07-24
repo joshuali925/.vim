@@ -14,7 +14,8 @@ map v toggle
 map V invert
 map x delete
 map D delete
-map R reload
+map r reload
+map R rename
 map H push <c-u>
 map L push <c-d>
 map zc set color256!

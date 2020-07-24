@@ -515,3 +515,7 @@ zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'
 function f {
     find . -iname \*$1\*;
 }
+
+" =======================================================
+alias cdf="FZFTEMP=\$(rg --files | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
+alias vf="FZFTEMP=\$(rg --files | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"

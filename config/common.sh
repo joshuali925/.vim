@@ -11,10 +11,21 @@ export FZF_CTRL_T_COMMAND='rg --files'
 export FZF_ALT_C_COMMAND="rg --files --null | xargs -0 dirname | awk '!h[\$0]++'"
 
 alias -- -='cd -'
+alias 1='cd -'
+alias 2='cd -2'
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
 alias ~='cd ~'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ......='cd ../../../../..'
 alias mkdir='mkdir -p'
 alias ll='ls -AlhF --color=auto'
 alias la='ls -AF --color=auto'
@@ -33,8 +44,6 @@ alias which='type -a'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias fl='lf -last-dir-path="$HOME/.cache/lf_dir" && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
-alias cdf="FZFTEMP=\$(rg --files | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
-alias vf="FZFTEMP=\$(rg --files | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
 alias rgf="rg --files | rg"
 alias rgd="rg --files --null | xargs -0 dirname | sort -u | rg"
 
@@ -149,85 +158,112 @@ alias gvt='git verify-tag'
 alias gwch='git whatchanged -p --abbrev-commit --pretty=medium'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
 
-function cc {
-    gcc $1.c -o $1 -g && ./$@;
-}
-function gdf {
-    git diff "$@" | diff-so-fancy | less --tabs=4 -RFX
+d() {
+  if [[ -n $1 ]]; then
+    dirs "$@"
+  else
+    dirs -v | head -10
+  fi
 }
 
-function printcolor {
-    awk -v term_cols="${width:-$(tput cols || echo 80)}" 'BEGIN{
+cc() {
+  gcc $1.c -o $1 -g && ./$@;
+}
+
+gdf() {
+  git diff "$@" | diff-so-fancy | less --tabs=4 -RFX
+}
+
+printcolor() {
+  awk -v term_cols="${width:-$(tput cols || echo 80)}" 'BEGIN{
     s="/\\";
     for (colnum = 0; colnum<term_cols; colnum++) {
-        r = 255-(colnum*255/term_cols);
-        g = (colnum*510/term_cols);
-        b = (colnum*255/term_cols);
-        if (g>255) g = 510-g;
+      r = 255-(colnum*255/term_cols);
+      g = (colnum*510/term_cols);
+      b = (colnum*255/term_cols);
+      if (g>255) g = 510-g;
         printf "\033[48;2;%d;%d;%dm", r,g,b;
         printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
         printf "%s\033[0m", substr(s,colnum%2+1,1);
-    }
+      }
     printf "\n";
-    }'
+  }'
 }
 
-x(){
-    if [ -f $1 ] ; then
-        case $1 in
-            *.tar.bz2)   tar xvjf $1    ;;
-            *.tar.gz)    tar xvzf $1    ;;
-            *.bz2)       bunzip2 $1     ;;
-            *.rar)       unrar x $1     ;;
-            *.gz)        gunzip $1      ;;
-            *.tar)       tar xvf $1     ;;
-            *.tbz2)      tar xvjf $1    ;;
-            *.tgz)       tar xvzf $1    ;;
-            *.zip)       unzip $1       ;;
-            *.Z)         uncompress $1  ;;
-            *.7z)        7z x $1        ;;
-            *)           echo "Unable to extract '$1'" ;;
-        esac
-    else
-        tar cvf $1.tar $1
-    fi
+x() {
+  if [ -f $1 ] ; then
+    case $1 in
+      *.tar.bz2)   tar xvjf $1    ;;
+      *.tar.gz)    tar xvzf $1    ;;
+      *.bz2)       bunzip2 $1     ;;
+      *.rar)       unrar x $1     ;;
+      *.gz)        gunzip $1      ;;
+      *.tar)       tar xvf $1     ;;
+      *.tbz2)      tar xvjf $1    ;;
+      *.tgz)       tar xvzf $1    ;;
+      *.zip)       unzip $1       ;;
+      *.Z)         uncompress $1  ;;
+      *.7z)        7z x $1        ;;
+      *)           echo "Unable to extract '$1'" ;;
+    esac
+  else
+    tar cvf $1.tar $1
+  fi
+}
+
+vf() {
+  local FZFTEMP
+  if [ -z "$1" ]; then
+    FZFTEMP=$(rg --files | fzf) && vim "$FZFTEMP"
+  else
+    FZFTEMP=$(rg --files | rg "$*" | fzf) && vim "$FZFTEMP"
+  fi
+}
+
+cdf() {
+  local FZFTEMP
+  if [ -z "$1" ]; then
+    FZFTEMP=$(rg --files | fzf) && cd "$(dirname $FZFTEMP)"
+  else
+    FZFTEMP=$(rg --files | rg "$*" | fzf) && cd "$(dirname $FZFTEMP)"
+  fi
 }
 
 unalias z 2> /dev/null
 z() {
-    local FZFTEMP
-    if [ -z "$1" ]; then
-        FZFTEMP=$(_z -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
-    else
-        _z 2>&1 "$*"
-    fi
+  local FZFTEMP
+  if [ -z "$1" ]; then
+    FZFTEMP=$(_z -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+  else
+    _z 2>&1 "$*"
+  fi
 }
 zc() {
-    local FZFTEMP
-    if [ -z "$1" ]; then
-        FZFTEMP=$(_z -c -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
-    else
-        _z 2>&1 -c "$*"
-    fi
+  local FZFTEMP
+  if [ -z "$1" ]; then
+    FZFTEMP=$(_z -c -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+  else
+    _z 2>&1 -c "$*"
+  fi
 }
 
 nvm() {
-    unset -f nvm
-    export NVM_DIR=~/.nvm
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-    nvm "$@"
+  unset -f nvm
+  export NVM_DIR=~/.nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+  nvm "$@"
 }
 
 node() {
-    unset -f node
-    export NVM_DIR=~/.nvm
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-    node "$@"
+  unset -f node
+  export NVM_DIR=~/.nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+  node "$@"
 }
 
 yarn() {
-    unset -f yarn
-    export NVM_DIR=~/.nvm
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-    yarn "$@"
+  unset -f yarn
+  export NVM_DIR=~/.nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+  yarn "$@"
 }
