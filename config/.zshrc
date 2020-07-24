@@ -14,7 +14,6 @@ zinit as"completion" for \
     https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
     https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg
 
-    # atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay"
 zinit light-mode for \
     atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'" \
     zdharma/fast-syntax-highlighting \
@@ -27,11 +26,7 @@ zinit light-mode for \
     ZSH_AUTOSUGGEST_USE_ASYNC=1" \
     zsh-users/zsh-autosuggestions
 
-zinit light-mode for \
-    OMZ::lib/directories.zsh \
-    OMZ::lib/history.zsh \
-    OMZ::lib/key-bindings.zsh
-
+source ~/.vim/config/oh-my-zsh-key-bindings.zsh
 source ~/.vim/config/fzf/completion.zsh
 source ~/.vim/config/fzf/key-bindings.zsh
 
@@ -43,18 +38,32 @@ zpcompinit
 # autoload -U colors && colors
 
 WORDCHARS=${WORDCHARS/\/}
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=10000
+
 [[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
 unsetopt no_match
-unsetopt share_history
-setopt auto_cd
 setopt complete_in_word
 setopt always_to_end
 setopt list_packed
 setopt globdots
 setopt interactive_comments
+
+setopt auto_cd
+setopt auto_pushd
+setopt pushd_ignore_dups
+setopt pushdminus
+
+setopt extended_history
+setopt hist_expire_dups_first
+setopt hist_ignore_dups
 setopt hist_ignore_all_dups
+setopt hist_ignore_space
+setopt hist_verify
 setopt hist_find_no_dups
 setopt hist_save_no_dups
+
 zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|=*'
@@ -64,6 +73,7 @@ bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
 bindkey '^x^w' push-line-or-edit
 
+compdef _dirs d
 function chpwd() { emulate -L zsh; ls -ACF --color=auto; }
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.

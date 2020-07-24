@@ -37,7 +37,24 @@ bind '"\eOB": history-search-forward'
 # same as in zsh, 'C-x a' expands aliases
 bind '"\C-xa": shell-expand-line'
 
-function cd { builtin cd $@ && ls -CF; }
+cd() {
+    if [ "$1" == "" ]; then
+        pushd "$HOME" > /dev/null
+    elif [ "$1" == "-" ]; then
+        builtin cd "$OLDPWD" > /dev/null
+    elif [[ "$1" =~ ^-[0-9]+$ ]]; then
+        pushd +${1/-/} > /dev/null
+    elif [ "$1" == "--" ]; then
+        shift
+        pushd -- "$@" > /dev/null
+    else
+        pushd "$@" > /dev/null
+    fi
+    ls -ACF
+}
+complete -d cd
+
+# function cd { builtin cd $@ && ls -CF; }
 # function cd() {
 #     builtin cd $@
 #     ls -CF
