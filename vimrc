@@ -297,6 +297,7 @@ xmap <C-n> :<C-u>call <SID>LoadVisualMulti()<CR>gv<C-n>
 nmap <leader><C-n> :call <SID>LoadVisualMulti()<CR><leader><C-n>
 imap <leader>r <Esc><leader>r
 nmap <leader>r <F11>
+noremap <leader>y "+y
 nnoremap <leader><F2> :-tabmove<CR>
 nnoremap <leader><F3> :+tabmove<CR>
 nnoremap <leader>ff :LeaderfFile<CR>
@@ -329,13 +330,12 @@ nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :write !sudo tee %<CR>
-nnoremap <leader>y "+yy
-xnoremap <leader>y "+y
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :quit<CR>
 nnoremap <leader>vim :tabedit $MYVIMRC<CR>
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
+noremap <silent> <Leader>g :call setbufvar(winbufnr(popup_atcursor(systemlist("cd " . shellescape(fnamemodify(resolve(expand('%:p')), ":h")) . " && git log --no-merges -n 1 -L " . shellescape(line("v") . "," . line(".") . ":" . resolve(expand("%:p")))), { "padding": [1,1,1,1], "pos": "botleft", "wrap": 0 })), "&filetype", "git")<CR>
 " }}}
 
 " ====================== Autocmd ======================== {{{
@@ -385,7 +385,7 @@ function! s:LoadQuickUI(open_menu)
   call quickui#menu#switch('normal')
   call quickui#menu#reset()
   call quickui#menu#install("&Actions", [
-        \ ['Insert &Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line'],
+        \ ['&Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line'],
         \ ['Insert &Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
         \ ['--', ''],
         \ ['Git &Status', 'Git', 'Git status'],
@@ -400,6 +400,8 @@ function! s:LoadQuickUI(open_menu)
         \ ['Open &Functions', 'call quickui#tools#list_function()'],
         \ ['--', ''],
         \ ['Edit &Vimrc', 'tabedit $MYVIMRC'],
+        \ ['--', ''],
+        \ ['Open in &VSCode', "execute \"silent !code --goto '\" . expand(\"%\") . \":\" . line(\".\") . \":\" . col(\".\") . \"'\" | redraw!"],
         \ ])
   call quickui#menu#install("To&ggle", [
         \ ['&Netrw', 'Lexplore', 'Toggle Vim Netrw'],
@@ -573,6 +575,7 @@ let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_WorkingDirectoryMode = 'Aa'
 let g:Lf_CacheDirectory = expand('~/.cache/')
+let g:any_jump_search_prefered_engine = 'rg'
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
@@ -666,6 +669,7 @@ elseif s:Completion == 2  " coc
   let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python', 'coc-explorer', 'coc-yank']
   " to manually install extensions, run :CocInstall coc-git coc-...
   " or run cd ~/.config/coc/extensions && yarn add coc-..., yarn cannot be cmdtest
+  " in Windows run cd %LOCALAPPDATA%/coc/extensions && yarn add coc-...
   set updatetime=300
   set signcolumn=yes
   inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
@@ -782,7 +786,7 @@ if has('gui_running')
   if has('win32')
     " Windows gVim
     set guifont=Consolas_NF:h11:cANSI
-    " set pythonthreedll=python38.dll  " set to python3x.dll for python3.x
+    " set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 version need to match
     let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
     function! s:ActivatePyEnv(environment)
       if a:environment == ''

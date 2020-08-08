@@ -5,14 +5,17 @@ cd ~
 mkdir -p ~/.cache/vim/undo
 mkdir -p ~/.local/bin
 mkdir -p ~/.config/lf
+mkdir -p ~/.config/jesseduffield/lazygit
 git clone https://github.com/joshuali925/.vim.git ~/.vim
 
-ln -s .vim/config/.bashrc ~/.bashrc
-ln -s .vim/config/.zshrc ~/.zshrc
-ln -s .vim/config/.tmux.conf ~/.tmux.conf
-ln -s ~/.vim/config/lfrc ~/.config/lf/lfrc
-ln -s ~/.vim/config/nvim ~/.config/nvim
-ln -s ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
+ln -sr ~/.vim/config/.bashrc ~/.bashrc
+ln -sr ~/.vim/config/.zshrc ~/.zshrc
+ln -sr ~/.vim/config/.tmux.conf ~/.tmux.conf
+ln -sr ~/.vim/config/.gitconfig ~/.gitconfig
+ln -sr ~/.vim/config/lfrc ~/.config/lf/lfrc
+ln -sr ~/.vim/config/nvim ~/.config/nvim
+ln -sr ~/.vim/config/lazygit_config.yml ~/.config/jesseduffield/lazygit/config.yml
+ln -sr ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
 
 # zsh inscure directories fix:
 # compaudit | xargs chmod g-w
@@ -24,18 +27,23 @@ ln -s ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
 ## Install
 ```bash
 # vim
-sudo add-apt-repository ppa:jonathonf/vim
-sudo apt upgrade vim
+sudo add-apt-repository -y ppa:jonathonf/vim
+sudo apt upgrade -y vim
 
 # fish
-sudo apt-add-repository ppa:fish-shell/release-3
-sudo apt install fish
+sudo apt-add-repository -y ppa:fish-shell/release-3
+sudo apt install -y fish
 
 # yarn
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt update
-sudo apt install yarn
+sudo apt install -y yarn
+
+# dev environment
+sudo apt install -y zsh
+sudo apt install -y build-essential
+sudo apt install -y python3-dev python3-pip
 ```
 
 ## Set up vim
@@ -58,7 +66,7 @@ curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimag
 chmod u+x nvim.appimage
 ./nvim.appimage --appimage-extract
 mv squashfs-root ~/.local/nvim
-ln -s ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
+ln -sr ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
 rm nvim.appimage
 
 pip3 install --user neovim
@@ -76,6 +84,9 @@ brew install coreutils
 
 # put in rc file
 export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
+
+# add lazygit config
+ln -sr ~/.vim/config/lazygit_config.yml ~/Library/Application\ Support/jesseduffield/lazygit/config.yml
 ```
 - set up shortcuts, option command shortcuts are for Karabiner
 ```markdown
