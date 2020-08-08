@@ -25,6 +25,8 @@ stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
 
+alias which='type -a'
+
 bind 'set show-all-if-ambiguous on'
 bind 'set completion-ignore-case on'
 bind 'TAB:menu-complete'

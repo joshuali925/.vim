@@ -1,4 +1,5 @@
 source ~/.vim/config/z.sh
+source ~/.vim/config/lf_icons.sh
 
 export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
 export EDITOR='vim'
@@ -9,6 +10,7 @@ export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
 export FZF_ALT_C_COMMAND="rg --files --null | xargs -0 dirname | awk '!h[\$0]++'"
+export FZF_PREVIEW_COMMAND="bat --style=numbers --color=always --line-range :50 {}"
 
 alias -- -='cd -'
 alias 1='cd -'
@@ -40,7 +42,7 @@ alias venv='source venv/bin/activate'
 alias bpy='env PYTHONSTARTUP= bpython'
 alias service='sudo service'
 alias apt='sudo apt'
-alias which='type -a'
+alias lg='lazygit'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias fl='lf -last-dir-path="$HOME/.cache/lf_dir" && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
@@ -116,6 +118,7 @@ alias glgg='git log --graph --max-count=10'
 alias glgga='git log --graph --decorate --all'
 alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 alias glog='git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)" --all'
+alias gloo='git log --oneline --decorate --color'
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
@@ -171,7 +174,7 @@ cc() {
 }
 
 gdf() {
-  git diff "$@" | diff-so-fancy | less --tabs=4 -RFX
+  git diff --color "$@" | diff-so-fancy | less --tabs=4 -RFX
 }
 
 printcolor() {
@@ -227,6 +230,12 @@ cdf() {
   else
     FZFTEMP=$(rg --files | rg "$*" | fzf) && cd "$(dirname $FZFTEMP)"
   fi
+}
+
+fif() {
+  if [ ! "$#" -gt 0 ]; then echo "Need a string to search for!"; return 1; fi
+  local FZFTEMP
+  FZFTEMP="$(rg --files-with-matches --no-messages "$1" | fzf --preview "bat --style=plain --color=always {} | rg --colors 'match:bg:yellow' --pretty --context 5 '$1' || rg --pretty --context 5 '$1' {}")" && vim "$FZFTEMP" -c "silent execute '/$1'"
 }
 
 unalias z 2> /dev/null

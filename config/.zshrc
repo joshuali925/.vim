@@ -15,7 +15,8 @@ zinit as"completion" for \
     https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg
 
 zinit light-mode for \
-    atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'" \
+    atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
+    FAST_HIGHLIGHT[chroma-man]=" \
     zdharma/fast-syntax-highlighting \
     atload"!_zsh_autosuggest_start; \
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan'; \
@@ -44,30 +45,31 @@ SAVEHIST=10000
 
 [[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
 unsetopt no_match
+setopt glob_dots
 setopt complete_in_word
 setopt always_to_end
 setopt list_packed
-setopt globdots
 setopt interactive_comments
 
 setopt auto_cd
 setopt auto_pushd
 setopt pushd_ignore_dups
-setopt pushdminus
+setopt pushd_minus
 
 setopt extended_history
+setopt hist_find_no_dups
 setopt hist_expire_dups_first
 setopt hist_ignore_dups
-setopt hist_ignore_all_dups
 setopt hist_ignore_space
+setopt hist_reduce_blanks
 setopt hist_verify
-setopt hist_find_no_dups
-setopt hist_save_no_dups
 
 zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+alias history='builtin fc -l 1'
 
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line

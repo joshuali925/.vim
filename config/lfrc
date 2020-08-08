@@ -2,6 +2,7 @@ set hidden
 set info size
 set dircounts
 set color256
+set icons
 
 cmd mkdir %mkdir -p $@
 cmd touch %touch $@
@@ -9,6 +10,21 @@ cmd mv %mv -i "$f" $@
 cmd cp %cp -i "$f" $@
 cmd code %code .
 cmd size !du -h --max-depth=1 | sort -hr
+cmd current-dir-size %du -h --max-depth=0 "$f"
+cmd echo-path %echo $fx
+
+map <a-c> :dir-jump
+map zz :z
+map zf :locate-file
+map zv :vf
+
+map m
+map mm mark-save
+map mf echo-path
+map mg $lazygit
+map mp paste-symlink
+map mr bulk-rename
+map ms current-dir-size
 
 map v toggle
 map V invert
@@ -16,15 +32,190 @@ map x delete
 map D delete
 map r reload
 map R rename
+map ~ cd
+map , find-next
+map ; find-prev
 map H push <c-u>
 map L push <c-d>
-map zc set color256!
-map ~ cd
-map m
-map ms mark-save
-map mm push :mkdir<space>
-map mt push :touch<space>
-map mz push :size<enter>
-map <c-c> push cu
+map [ push hkl
+map ] push hjl
+map c :clear; unselect
+map se :set sortby ext; set info size
+map sn :set sortby natural; set info size
+map gs !git status
 map <enter> $gvim "$f"
 map I $bat --color=always --style='numbers,changes' --paging=always "$f"
+
+cmd vf ${{
+   res="$(rg --files | fzf)"
+   if [ -f "$res" ]; then
+      vim "$res"
+   fi
+}}
+cmd locate-file ${{
+   res="$(rg --files | fzf)"
+   if [ -f "$res" ]; then
+      lf -remote "send $id select \"$res\""
+   elif [ -d "$res" ]; then
+      lf -remote "send $id cd \"$res\""
+   fi
+}}
+cmd dir-jump ${{
+   res="$(fd --type=d --hidden --exclude '.git' | fzf)"
+   if [ -d "$res" ]; then
+      lf -remote "send $id cd \"$res\""
+   fi
+}}
+cmd z ${{
+   res="$(awk -F '|' '{print $1}' ~/.z | fzf)"
+   lf -remote "send $id cd \"$res\""
+}}
+
+cmd paste-symlink %{{
+  load=$(lf -remote 'load')
+  mode=$(echo "$load" | sed -n '1p')
+  list=$(echo "$load" | sed '1d')
+  if [ $mode = 'copy' ] || [ $mode = 'move' ]; then
+    ln='ln -sr' && [ $mode = 'move' ] && ln='ln'
+    please='' && [ ! -w . ] && please='sudo'
+    for f in $list
+    do
+      $please $ln "$f" "$(pwd)/$(basename $f)"
+    done
+    lf -remote 'send clear'
+    lf -remote 'send load'
+  fi
+}}
+
+cmd x %{{
+  set -f
+  filename="$(basename "$f")"
+  if [ -f $filename ] ; then
+    case $filename in
+      *.tar.bz2)   tar xvjf $filename    ;;
+      *.tar.gz)    tar xvzf $filename    ;;
+      *.bz2)       bunzip2 $filename     ;;
+      *.rar)       unrar x $filename     ;;
+      *.gz)        gunzip $filename      ;;
+      *.tar)       tar xvf $filename     ;;
+      *.tbz2)      tar xvjf $filename    ;;
+      *.tgz)       tar xvzf $filename    ;;
+      *.zip)       unzip $filename       ;;
+      *.Z)         uncompress $filename  ;;
+      *.7z)        7z x $filename        ;;
+      *)           echo "Unable to extract '$filename'" ;;
+    esac
+  else
+    tar cvf $filename.tar $filename
+  fi
+}}
+
+cmd bulk-rename ${{
+  case $1 in
+    # do not query extensions for renaming
+    -n) mode="no-exts" ;;
+    # only rename extensions
+    -e) mode="only-exts" ;;
+    # rename entire filepaths
+    -A) mode="all-path" ;;
+    # else, just rename filenames
+  esac
+  # make tmp files
+  oldnames=$(mktemp /tmp/lf-bulk-oldnames.XXXXXXXXXX)
+  newnames=$(mktemp /tmp/lf-bulk-newnames.XXXXXXXXXX)
+  if [ "$mode" != "all-path" ]
+  then
+    dirnames=$(mktemp /tmp/lf-bulk-dirnames.XXXXXXXXXX)
+    aux=$(mktemp /tmp/lf-bulk-aux.XXXXXXXXXX)
+  fi
+  # query selected files or all files in directory
+  if [ -n "$fs" ]
+  then
+    index="$fs"
+  else
+    index="$(ls $(dirname "$f"))"
+  fi
+  # separate and save useful variables in files
+  for path in $index
+  do
+    dir="$(dirname "$path")"
+    fullfilename=$(basename -- "$path")
+    filename="${fullfilename%.*}"  # must be here
+    ext="" && [ $(echo $fullfilename | grep "\." 2>/dev/null) ] && ext="${fullfilename##*.}"
+    case "$mode" in
+      "all-path") echo "$(realpath "$path")" >> $oldnames ;;
+      "no-exts")
+        echo "$filename" >> $oldnames
+        [ "$ext" != "" ] && ext=".$ext"
+        echo "$ext" >> $aux
+        ;;
+      "only-exts")
+        echo "$ext" >> $oldnames
+        echo $filename >> $aux
+        ;;
+      "") echo "$fullfilename" >> $oldnames ;;
+    esac
+    [ "$mode" != "all-path" ] && echo "$dir" >> $dirnames
+  done
+  cp $oldnames $newnames
+  # interact with user
+  $EDITOR $newnames
+  # run mv on each path if they were modified
+  n=$(cat $oldnames | wc -l)
+  if [ $(cat $newnames | wc -l) -eq $n ]
+  then
+    counter=1
+    while [ $counter -le $((n+1)) ]
+    do
+      case $mode in
+        "no-exts")
+          dir="$(cat $dirnames | sed "${counter}q;d")"
+          old="$(cat $oldnames | sed "${counter}q;d")"
+          new="$(cat $newnames | sed "${counter}q;d")"
+          ext="$(cat $aux      | sed "${counter}q;d")"
+          old="$dir/$old$ext" ; new="$dir/$new$ext"
+        ;;
+        "all-path")
+          old="$(cat $oldnames | sed "${counter}q;d")"
+          new="$(cat $newnames | sed "${counter}q;d")"
+        ;;
+        "only-exts")
+          old="$(cat $oldnames | sed "${counter}q;d")"
+          new="$(cat $newnames | sed "${counter}q;d")"
+          filename="$(cat $aux | sed "${counter}q;d")"
+          echo $old $new
+          [ "$old" != "" ] && old=".$old"
+          [ "$new" != "" ] && new=".$new"
+          old="$dir/$filename$old"
+          new="$dir/$filename$new"
+        ;;
+        *)
+          dir="$(cat $dirnames | sed "${counter}q;d")"
+          old="$(cat $oldnames | sed "${counter}q;d")"
+          new="$(cat $newnames | sed "${counter}q;d")"
+          old="$dir/$old" ; new="$dir/$new"
+        ;;
+      esac
+      counter=$(($counter+1))
+      [ "$old" = "$new" ] && continue
+      [ -e "$new" ] && echo "File exists: $b" && continue
+      # check write permission
+      please=''
+      for path in $old $new
+      do
+        [ ! -w $(dirname "$path") ] && please='sudo' && break
+      done
+      $please mv "$old" "$new"
+      lf -remote "send $id unselect"
+    done
+  else
+    echo "Number of filenames differ."
+  fi
+  # removing tmp files
+  rm $oldnames $newnames
+  if [ "$mode" != "all-path" ]
+  then
+    rm $dirnames
+    rm $aux
+  fi
+}}

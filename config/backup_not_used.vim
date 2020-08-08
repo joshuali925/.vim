@@ -509,6 +509,14 @@ zinit ice as="completion"
 zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'
 
 " =======================================================
+zinit light-mode for \
+    OMZ::lib/directories.zsh \
+    OMZ::lib/history.zsh \
+    OMZ::lib/key-bindings.zsh
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+
+" =======================================================
 " from bashrc
 # alias f='a(){ find . -iname *$@*; }; a'
 # alias cc='a(){ gcc $1.c -o $1 -g && ./$@; }; a'
