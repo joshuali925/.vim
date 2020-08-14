@@ -1346,7 +1346,7 @@
           },
           "to": [
             {
-              "pointing_button": "button2"
+              "pointing_button": "button1"
             }
           ],
           "type": "basic"
@@ -1384,7 +1384,7 @@
           },
           "to": [
             {
-              "pointing_button": "button1"
+              "pointing_button": "button2"
             }
           ],
           "type": "basic"
