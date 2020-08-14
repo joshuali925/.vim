@@ -32,11 +32,10 @@ vnoremap ( c(<C-r>")<Esc>
 vnoremap [ c[<C-r>"]<Esc>
 vnoremap { c{<C-r>"}<Esc>
 vnoremap <Space> c<Space><C-r>"<Space><Esc>
-nnoremap [<Space> O<Space><BS><Esc>
-nnoremap ]<Space> o<Space><BS><Esc>
+nnoremap [<Space> O<Esc>
+nnoremap ]<Space> o<Esc>
 nnoremap <C-c> /qwe<CR>
+noremap <leader>y "+y
 inoremap <leader>w <Esc>:write<CR>
 nnoremap <leader>w :write<CR>
-nnoremap <leader>y "+yy
-vnoremap <leader>y "+y
 nnoremap <leader>q :quit<CR>
