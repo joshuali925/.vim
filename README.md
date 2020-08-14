@@ -10,12 +10,13 @@ git clone https://github.com/joshuali925/.vim.git ~/.vim
 
 ln -sr ~/.vim/config/.bashrc ~/.bashrc
 ln -sr ~/.vim/config/.zshrc ~/.zshrc
+echo 'skip_global_compinit=1' >> ~/.zshenv
 ln -sr ~/.vim/config/.tmux.conf ~/.tmux.conf
 ln -sr ~/.vim/config/.gitconfig ~/.gitconfig
 ln -sr ~/.vim/config/lfrc ~/.config/lf/lfrc
 ln -sr ~/.vim/config/nvim ~/.config/nvim
 ln -sr ~/.vim/config/lazygit_config.yml ~/.config/jesseduffield/lazygit/config.yml
-ln -sr ~/.vim/config/fish ~/.config/fish  # use fisher to manage fish plugins
+ln -sr ~/.vim/config/fish ~/.config/fish
 
 # zsh inscure directories fix:
 # compaudit | xargs chmod g-w

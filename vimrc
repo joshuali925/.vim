@@ -3,12 +3,12 @@ source <sfile>:p:h/colors/current_theme.vim  " load g:Theme value
 let s:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let s:PythonPath = 'python3'
 let s:ExecCommand = ''
+set guioptions=Mgt  " set 'M' before vim-plug loads filetype and syntax
 " }}}
 
 " ===================== Plugins ========================= {{{
 call plug#begin(expand('<sfile>:p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
-Plug 'ap/vim-buftabline'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'skywind3000/vim-quickui', { 'on': [] }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
@@ -19,19 +19,19 @@ Plug 'pechorin/any-jump.vim', { 'on': ['AnyJump', 'AnyJumpVisual'] }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
-Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-bd-w)', '<Plug>(easymotion-bd-f)'] }
-Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_f', '<Plug>fanfingtastic_t', '<Plug>fanfingtastic_F', '<Plug>fanfingtastic_T'] }
-Plug 'tpope/vim-fugitive', { 'on': ['Git', 'Gdiffsplit', 'Gread'] }
+Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-'] }
+Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_' ] }
+Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'Gdiffsplit', 'Gread'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
-Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
+Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }  " load on insert doesn't work
+Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
+Plug 'wellle/targets.vim'
 Plug 'tpope/vim-repeat'
-Plug 'machakann/vim-sandwich'
-Plug 'machakann/vim-swap'
-Plug 'chaoren/vim-wordmotion'
+Plug 'ap/vim-buftabline'
 Plug 'markonm/traces.vim'
 if s:Completion >= 0
   Plug 'shougo/echodoc.vim', { 'on': [] }
@@ -55,10 +55,7 @@ runtime macros/sandwich/keymap/surround.vim
 " }}}
 
 " ====================== Themes ========================= {{{
-set guioptions=Mgt  " set before filetype and syntax
-filetype plugin indent on
-syntax enable
-set termguicolors  " load theme after filetype and syntax
+set termguicolors  " load theme after vim-plug loads filetype and syntax
 let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"  " truecolor
 let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
 let &t_SI.="\<Esc>[6 q"  " cursor shape
@@ -205,26 +202,16 @@ map ? <Plug>(easymotion-bd-f)
 nmap S <Plug>(easymotion-bd-w)
 map  gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
-xmap i <Plug>(textobj-sandwich-query-i)
-xmap a <Plug>(textobj-sandwich-query-a)
-omap i <Plug>(textobj-sandwich-query-i)
-omap a <Plug>(textobj-sandwich-query-a)
-xmap ib <Plug>(textobj-sandwich-auto-i)
-xmap ab <Plug>(textobj-sandwich-auto-a)
-omap ib <Plug>(textobj-sandwich-auto-i)
-omap ab <Plug>(textobj-sandwich-auto-a)
-xmap is <Plug>(textobj-sandwich-literal-query-i)
-xmap as <Plug>(textobj-sandwich-literal-query-a)
-omap is <Plug>(textobj-sandwich-literal-query-i)
-omap as <Plug>(textobj-sandwich-literal-query-a)
-omap ia <Plug>(swap-textobject-i)
-xmap ia <Plug>(swap-textobject-i)
-omap aa <Plug>(swap-textobject-a)
-xmap aa <Plug>(swap-textobject-a)
-xnoremap ip ip
-xnoremap ap ap
-onoremap ip ip
-onoremap ap ap
+nmap ds <Plug>Dsurround
+nmap cs <Plug>Csurround
+nmap cS <Plug>CSurround
+nmap ys <Plug>Ysurround
+nmap yS <Plug>YSurround
+nmap yss <Plug>Yssurround
+nmap ySs <Plug>YSsurround
+nmap ySS <Plug>YSsurround
+xmap S <Plug>VSurround
+xmap gS <Plug>VgSurround
 noremap 0 ^
 noremap ^ 0
 noremap - $
@@ -266,8 +253,8 @@ nnoremap [e :m .-2<CR>==
 nnoremap ]e :m .+1<CR>==
 xnoremap [e :m '<-2<CR>gv=gv
 xnoremap ]e :m '>+1<CR>gv=gv
-nnoremap [<Space> O<Space><BS><Esc>
-nnoremap ]<Space> o<Space><BS><Esc>
+nnoremap [<Space> O<Esc>
+nnoremap ]<Space> o<Esc>
 xnoremap " c"<C-r><C-p>""<Esc>
 xnoremap ' c'<C-r><C-p>"'<Esc>
 xnoremap ` c`<C-r><C-p>"`<Esc>
@@ -348,6 +335,7 @@ augroup AutoCommands
   autocmd FileType json nnoremap <buffer> <C-f> :update <bar> %!python3 -m json.tool<CR>
   autocmd FileType python setlocal nosmartindent | syntax keyword pythonSelf self | highlight def link pythonSelf Special  " fix python comment indentation, highlight keyword self
   autocmd FileType * setlocal formatoptions=jql
+  autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
 augroup END
 " }}}
 

@@ -494,7 +494,7 @@ PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) %{$fg[cyan]%}%c%{$res
 " https://www.aloxaf.com/2019/11/zplugin_tutorial
 zinit light zinit-zsh/z-a-bin-gem-node
 zinit wait"2" lucid as"program" from"gh-r" for \
-    mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep
+    mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
     mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
     mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
     sbin junegunn/fzf-bin \
@@ -527,3 +527,69 @@ function f {
 " =======================================================
 alias cdf="FZFTEMP=\$(rg --files | fzf) && cd \"\$(dirname \$FZFTEMP)\" && unset FZFTEMP"
 alias vf="FZFTEMP=\$(rg --files | fzf) && vim \"\$FZFTEMP\" && unset FZFTEMP"
+
+" =======================================================
+" stop using word motion
+Plug 'chaoren/vim-wordmotion'
+" stop using vim-sandwich, switch back to surround
+Plug 'machakann/vim-sandwich'
+Plug 'machakann/vim-swap', { 'on': ['<Plug>(swap-'] }
+xmap i <Plug>(textobj-sandwich-query-i)
+xmap a <Plug>(textobj-sandwich-query-a)
+omap i <Plug>(textobj-sandwich-query-i)
+omap a <Plug>(textobj-sandwich-query-a)
+xmap ib <Plug>(textobj-sandwich-auto-i)
+xmap ab <Plug>(textobj-sandwich-auto-a)
+omap ib <Plug>(textobj-sandwich-auto-i)
+omap ab <Plug>(textobj-sandwich-auto-a)
+xmap is <Plug>(textobj-sandwich-literal-query-i)
+xmap as <Plug>(textobj-sandwich-literal-query-a)
+omap is <Plug>(textobj-sandwich-literal-query-i)
+omap as <Plug>(textobj-sandwich-literal-query-a)
+omap ia <Plug>(swap-textobject-i)
+xmap ia <Plug>(swap-textobject-i)
+omap aa <Plug>(swap-textobject-a)
+xmap aa <Plug>(swap-textobject-a)
+nmap gs <Plug>(swap-interactive)
+xmap gs <Plug>(swap-interactive)
+xnoremap i< i<
+xnoremap a< a<
+onoremap i< i<
+onoremap a< a<
+xnoremap i> i>
+xnoremap a> a>
+onoremap i> i>
+onoremap a> a>
+xnoremap iw iw
+xnoremap aw aw
+onoremap iw iw
+onoremap aw aw
+xnoremap iW iW
+xnoremap aW aW
+onoremap iW iW
+onoremap aW aW
+xnoremap ip ip
+xnoremap ap ap
+onoremap ip ip
+onoremap ap ap
+" lazy load vim-sandwich doesn't work on first time
+Plug 'machakann/vim-sandwich', { 'on': ['<Plug>(operator-sandwich-', '<Plug>(textobj-sandwich-'] }
+" this doesn't work for y, d, c
+Plug 'machakann/vim-sandwich', { 'on': [] }
+nmap y :call <SID>LoadSandwich()<CR>y
+nmap d :call <SID>LoadSandwich()<CR>d
+nmap c :call <SID>LoadSandwich()<CR>c
+xmap i :<C-u>call <SID>LoadSandwich()<CR>gvi
+xmap a :<C-u>call <SID>LoadSandwich()<CR>gva
+xmap S :<C-u>call <SID>LoadSandwich()<CR>gvS
+function! s:LoadSandwich()
+  nunmap y
+  nunmap d
+  nunmap c
+  xunmap i
+  xunmap a
+  xunmap S
+  call plug#load('vim-sandwich')
+  runtime macros/sandwich/keymap/surround.vim
+  " add custom mappings below
+endfunction

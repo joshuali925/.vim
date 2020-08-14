@@ -10,6 +10,15 @@ source ~/.zinit/bin/zinit.zsh
 
 zinit depth=1 light-mode for romkatv/powerlevel10k
 
+# zinit light zinit-zsh/z-a-bin-gem-node
+# zinit light-mode as"program" from"gh-r" for \
+#     mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
+#     mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
+#     mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
+#     sbin junegunn/fzf-bin \
+#     sbin gokcehan/lf \
+#     sbin jesseduffield/lazygit
+
 zinit as"completion" for \
     https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
     https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg
@@ -33,9 +42,9 @@ source ~/.vim/config/fzf/key-bindings.zsh
 
 source ~/.vim/config/common.sh
 
-zpcompinit
-# autoload -U compinit && compinit -u
-# [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]] && compinit; zinit cdreplay -q
+autoload -Uz compinit && compinit -u
+zinit cdreplay -q
+# zpcompinit
 # autoload -U colors && colors
 
 WORDCHARS=${WORDCHARS/\/}
@@ -73,7 +82,8 @@ alias history='builtin fc -l 1'
 
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
-bindkey '^x^w' push-line-or-edit
+bindkey '^[q' push-line-or-edit
+bindkey '^q' push-line-or-edit
 
 compdef _dirs d
 function chpwd() { emulate -L zsh; ls -ACF --color=auto; }
