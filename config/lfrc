@@ -8,23 +8,36 @@ cmd mkdir %mkdir -p $@
 cmd touch %touch $@
 cmd mv %mv -i "$f" $@
 cmd cp %cp -i "$f" $@
+cmd rg !clear && rg $@
 cmd code %code .
+cmd pwd %echo $f
 cmd size !du -h --max-depth=1 | sort -hr
-cmd current-dir-size %du -h --max-depth=0 "$f"
-cmd echo-path %echo $fx
+cmd selected-dir-size %du -h --max-depth=0 "$f"
 
-map <a-c> :dir-jump
-map zz :z
-map zf :locate-file
-map zv :vf
+map zh
+map zr
+map zn
+map zs
+map zt
+map za
+map zz z
+map zf locate-file
+map zv vf
+
+map sh set hedden!
+map sr set reverse!
+map sis set info size
+map sit set info time
+map sia set info size:time
+map se :set sortby ext; set info size
+map sn :set sortby natural; set info size
 
 map m
 map mm mark-save
-map mf echo-path
 map mg $lazygit
 map mp paste-symlink
 map mr bulk-rename
-map ms current-dir-size
+map ms selected-dir-size
 
 map v toggle
 map V invert
@@ -40,9 +53,8 @@ map L push <c-d>
 map [ push hkl
 map ] push hjl
 map c :clear; unselect
-map se :set sortby ext; set info size
-map sn :set sortby natural; set info size
-map gs !git status
+map gs !clear && git status
+map <a-c> dir-jump
 map <enter> $gvim "$f"
 map I $bat --color=always --style='numbers,changes' --paging=always "$f"
 

@@ -1,12 +1,11 @@
 # Dot Files
 ## Set up shell
 ```bash
-cd ~
+git clone https://github.com/joshuali925/.vim.git ~/.vim
 mkdir -p ~/.cache/vim/undo
 mkdir -p ~/.local/bin
 mkdir -p ~/.config/lf
 mkdir -p ~/.config/jesseduffield/lazygit
-git clone https://github.com/joshuali925/.vim.git ~/.vim
 
 ln -sr ~/.vim/config/.bashrc ~/.bashrc
 ln -sr ~/.vim/config/.zshrc ~/.zshrc
@@ -31,6 +30,22 @@ ln -sr ~/.vim/config/fish ~/.config/fish
 sudo add-apt-repository -y ppa:jonathonf/vim
 sudo apt upgrade -y vim
 
+# neovim
+curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage 
+chmod u+x nvim.appimage
+./nvim.appimage --appimage-extract
+mv squashfs-root ~/.local/nvim
+ln -sr ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
+rm nvim.appimage
+
+# tmux
+curl -L https://github.com/tmux/tmux/releases/download/3.1b/tmux-3.1b-x86_64.AppImage -o tmux.appimage
+chmod u+x tmux.appimage
+./tmux.appimage --appimage-extract
+mv squashfs-root ~/.local/tmux
+ln -sr ~/.local/tmux/usr/bin/tmux ~/.local/bin/tmux
+rm tmux.appimage
+
 # fish
 sudo apt-add-repository -y ppa:fish-shell/release-3
 sudo apt install -y fish
@@ -45,11 +60,8 @@ sudo apt install -y yarn
 sudo apt install -y zsh
 sudo apt install -y build-essential
 sudo apt install -y python3-dev python3-pip
-```
 
-## Set up vim
-```bash
-pip3 install --user flake8 yapf
+pip3 install --user flake8 yapf neovim
 vim -c "PlugInstall" -c "qa"
 ```
 
@@ -59,19 +71,6 @@ vim -c "PlugInstall" -c "qa"
 mkdir %USERPROFILE%\.cache\vim\undo
 git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\vimfiles
 vim -c "PlugInstall" -c "qa"
-```
-
-## Set up nvim
-```bash
-curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage 
-chmod u+x nvim.appimage
-./nvim.appimage --appimage-extract
-mv squashfs-root ~/.local/nvim
-ln -sr ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
-rm nvim.appimage
-
-pip3 install --user neovim
-nvim -c "PlugInstall" -c "qa"
 ```
 
 ## Mac OS
