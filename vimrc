@@ -3,12 +3,12 @@ source <sfile>:p:h/colors/current_theme.vim  " load g:Theme value
 let s:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
 let s:PythonPath = 'python3'
 let s:ExecCommand = ''
-set guioptions=Mgt  " set 'M' before vim-plug loads filetype and syntax
 " }}}
 
 " ===================== Plugins ========================= {{{
 call plug#begin(expand('<sfile>:p:h'). '/plugged')  " ~/.vim/plugged or ~/vimfiles/plugged or ~/.config/nvim/plugged
 Plug 'mhinz/vim-startify'
+Plug 'ryanoasis/vim-devicons'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'skywind3000/vim-quickui', { 'on': [] }
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
@@ -31,27 +31,23 @@ Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record M
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
 Plug 'wellle/targets.vim'
 Plug 'tpope/vim-repeat'
-Plug 'ap/vim-buftabline'
+Plug 'pacha/vem-tabline'
 Plug 'markonm/traces.vim'
 if s:Completion >= 0
-  Plug 'shougo/echodoc.vim', { 'on': [] }
-  Plug 'sirver/ultisnips', { 'on': [] }
-  Plug 'honza/vim-snippets', { 'on': [] }
+  Plug 'sirver/ultisnips'
+  Plug 'honza/vim-snippets'
   Plug 'davidhalter/jedi-vim', { 'for': 'python' }
-  augroup LazyLoadCompletion
-    autocmd!
-    autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! LazyLoadCompletion
-  augroup END
   if s:Completion == 0
     Plug 'lifepillar/vim-mucomplete'
   elseif s:Completion == 1
+    Plug 'shougo/echodoc.vim'
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
   elseif s:Completion == 2
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
   endif
 endif
 call plug#end()
-runtime macros/sandwich/keymap/surround.vim
+set guioptions=Mgt  " should set 'M' before vim-plug loads filetype and syntax, but that breaks MacVim's cmd + v
 " }}}
 
 " ====================== Themes ========================= {{{
@@ -135,6 +131,7 @@ set hidden
 set complete-=i
 set completeopt=menuone
 set shortmess+=c
+set shortmess-=S
 set nrformats-=octal
 set scrolloff=2
 set nostartofline
@@ -164,33 +161,6 @@ set statusline=%<[%{mode()}]\ %F\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(g
 
 " ====================== Mappings ======================= {{{
 let mapleader=';'
-map <leader>1 <F1>
-map <leader>2 <F2>
-map <leader>3 <F3>
-map <leader>4 <F4>
-map <leader>5 <F5>
-map <leader>6 <F6>
-map <leader>7 <F7>
-map <leader>8 <F8>
-map <leader>9 <F9>
-map <leader>0 <F10>
-map <leader>- <F11>
-map <leader>= <F12>
-imap <F1> <Esc><F1>
-xmap <F1> :<C-u>call <SID>LoadQuickUI(0)<CR>gv<F1>
-nmap <F1> :call <SID>LoadQuickUI(0)<CR><F1>
-imap <F2> <Esc><F2>
-nnoremap <F2> gT
-imap <F3> <Esc><F3>
-nnoremap <F3> gt
-nnoremap <F4> *N
-xnoremap <F4> y/\V<C-r>"<CR>N
-imap <F10> <Esc><F10>
-nnoremap <F10> :wall <bar> execute '!clear && '. <SID>GetRunCommand()<CR>
-imap <F11> <Esc><F11>
-nnoremap <F11> :wall <bar> execute 'AsyncRun '. <SID>GetRunCommand()<CR>
-imap <F12> <Esc><F12>
-nnoremap <F12> :wall <bar> call <SID>RunShellCommand(<SID>GetRunCommand())<CR>
 imap <Space> <Plug>(PearTreeSpace)
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
@@ -212,10 +182,17 @@ nmap ySs <Plug>YSsurround
 nmap ySS <Plug>YSsurround
 xmap S <Plug>VSurround
 xmap gS <Plug>VgSurround
+nmap [b <Plug>vem_prev_buffer-
+nmap ]b <Plug>vem_next_buffer-
+nmap <leader>bH <Plug>vem_move_buffer_left-
+nmap <leader>bL <Plug>vem_move_buffer_right-
+nnoremap <leader>b< :-tabmove<CR>
+nnoremap <leader>b> :+tabmove<CR>
 noremap 0 ^
 noremap ^ 0
 noremap - $
 xnoremap - $h
+noremap g- g$
 noremap <Home> g^
 noremap <End> g$
 noremap <Down> gj
@@ -233,7 +210,6 @@ xnoremap > >gv
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
 nnoremap cc cc<Space><BS>
-noremap gf <C-w>gf
 nnoremap gp `[v`]
 nnoremap yp "0p
 nnoremap yP "0P
@@ -241,18 +217,16 @@ nnoremap cr :call <SID>EditRegister()<CR>
 nnoremap K :call <SID>LoadQuickUI(1)<CR>
 nnoremap [a :previous<CR>
 nnoremap ]a :next<CR>
-nnoremap [b :bprevious<CR>
-nnoremap ]b :bnext<CR>
 nnoremap [l :lprevious<CR>
 nnoremap ]l :lnext<CR>
 nnoremap [q :cprevious<CR>
 nnoremap ]q :cnext<CR>
 nnoremap [t :tprevious<CR>
 nnoremap ]t :tnext<CR>
-nnoremap [e :m .-2<CR>==
-nnoremap ]e :m .+1<CR>==
-xnoremap [e :m '<-2<CR>gv=gv
-xnoremap ]e :m '>+1<CR>gv=gv
+nnoremap [e :move .-2<CR>==
+nnoremap ]e :move .+1<CR>==
+xnoremap [e :move '<-2<CR>gv=gv
+xnoremap ]e :move '>+1<CR>gv=gv
 nnoremap [<Space> O<Esc>
 nnoremap ]<Space> o<Esc>
 xnoremap " c"<C-r><C-p>""<Esc>
@@ -283,10 +257,10 @@ nmap <C-n> :call <SID>LoadVisualMulti()<CR><C-n>
 xmap <C-n> :<C-u>call <SID>LoadVisualMulti()<CR>gv<C-n>
 nmap <leader><C-n> :call <SID>LoadVisualMulti()<CR><leader><C-n>
 imap <leader>r <Esc><leader>r
-nmap <leader>r <F11>
+nnoremap <leader>r :wall <bar> execute 'AsyncRun '. <SID>GetRunCommand()<CR>
+xmap <leader>m :<C-u>call <SID>LoadQuickUI(0)<CR>gv<F1>
+nmap <leader>m :call <SID>LoadQuickUI(0)<CR><F1>
 noremap <leader>y "+y
-nnoremap <leader><F2> :-tabmove<CR>
-nnoremap <leader><F3> :+tabmove<CR>
 nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
@@ -302,6 +276,8 @@ nnoremap <leader>fj :AnyJump<CR>
 nnoremap <leader>fJ :AnyJumpLastResults<CR>
 xnoremap <leader>fj :AnyJumpVisual<CR>
 nnoremap <leader>fs :vertical sfind \c*
+nnoremap <leader>fw *N
+xnoremap <leader>fw y/\V<C-r>"<CR>N
 nnoremap <leader>fv :Vista!!<CR>
 nnoremap <leader>k K
 nnoremap <leader>u :UndotreeToggle<CR>
@@ -319,10 +295,10 @@ nnoremap <leader>w :update<CR>
 nnoremap <leader>W :write !sudo tee %<CR>
 nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
 nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
-nnoremap <leader>q :quit<CR>
-nnoremap <leader>vim :tabedit $MYVIMRC<CR>
+nnoremap <leader>q :call <SID>Quit(0)<CR>
+nnoremap <leader>x :call <SID>Quit(1)<CR>
+nnoremap <leader>vim :edit $MYVIMRC<CR>
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
-noremap <silent> <Leader>g :call setbufvar(winbufnr(popup_atcursor(systemlist("cd " . shellescape(fnamemodify(resolve(expand('%:p')), ":h")) . " && git log --no-merges -n 1 -L " . shellescape(line("v") . "," . line(".") . ":" . resolve(expand("%:p")))), { "padding": [1,1,1,1], "pos": "botleft", "wrap": 0 })), "&filetype", "git")<CR>
 " }}}
 
 " ====================== Autocmd ======================== {{{
@@ -332,7 +308,6 @@ augroup AutoCommands
   autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
   autocmd FileType vim setlocal foldmethod=marker  " use triple curly brackets for fold instead of indentation
   autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> edit! <bar> redraw!<CR>
-  autocmd FileType json nnoremap <buffer> <C-f> :update <bar> %!python3 -m json.tool<CR>
   autocmd FileType python setlocal nosmartindent | syntax keyword pythonSelf self | highlight def link pythonSelf Special  " fix python comment indentation, highlight keyword self
   autocmd FileType * setlocal formatoptions=jql
   autocmd User targets#mappings#user call targets#mappings#extend({'b': {'pair': [{'o':'(', 'c':')'}, {'o':'[', 'c':']'}, {'o':'{', 'c':'}'}, {'o':'<', 'c':'>'}], 'quote': [{'d':"'"}, {'d':'"'}, {'d':'`'}]}})
@@ -372,41 +347,47 @@ function! s:LoadQuickUI(open_menu)
   call plug#load('vim-quickui')
   call quickui#menu#switch('normal')
   call quickui#menu#reset()
-  call quickui#menu#install("&Actions", [
+  call quickui#menu#install('&Actions', [
         \ ['&Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line'],
         \ ['Insert &Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
         \ ['--', ''],
-        \ ['Git &Status', 'Git', 'Git status'],
-        \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last staged version'],
-        \ ['Git &Changes', 'Git difftool', 'Load changes into quickfix list (use [q, ]q to navigate)'],
-        \ ['&Git File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed version of current file'],
-        \ ['--', ''],
         \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
         \ ['&Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
+        \ ['Format as JSO&N', 'execute "update | %!python3 -m json.tool" | keeppatterns %s;^\(\s\+\);\=repeat(" ", len(submatch(0))/2);g | execute "normal! ``"', 'Use `python3 -m json.tool` to format current buffer'],
         \ ['--', ''],
         \ ['Open &Buffers', 'call quickui#tools#list_buffer("vsplit")'],
         \ ['Open &Functions', 'call quickui#tools#list_function()'],
         \ ['--', ''],
-        \ ['Edit &Vimrc', 'tabedit $MYVIMRC'],
+        \ ['Edit Vi&mrc', 'tabedit $MYVIMRC'],
         \ ['--', ''],
         \ ['Open in &VSCode', "execute \"silent !code --goto '\" . expand(\"%\") . \":\" . line(\".\") . \":\" . col(\".\") . \"'\" | redraw!"],
         \ ])
-  call quickui#menu#install("To&ggle", [
-        \ ['&Netrw', 'Lexplore', 'Toggle Vim Netrw'],
+  call quickui#menu#install('&Git', [
+        \ ['Git &Status', 'Git', 'Git status'],
+        \ ['Git Check&out', 'Gread', 'Checkout current file and load as unsaved buffer'],
+        \ ['Git &Blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'],
+        \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last staged version'],
+        \ ['Git &Changes', 'Git difftool', 'Load unstaged changes into quickfix list (use [q, ]q to navigate)'],
+        \ ['Git &File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed version of current file'],
+        \ ['--', ''],
+        \ ['Copy &Remote URL', 'GitHubURL', 'Copy github remote url'],
+        \ ])
+  call quickui#menu#install('T&oggle', [
+        \ ['Ne&trw', 'Lexplore', 'Toggle Vim Netrw'],
         \ ['&Undo Tree', 'UndotreeToggle', 'Toggle Undotree'],
         \ ['&Vista', 'Vista!!', 'Toggle Vista'],
         \ ['&Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
-        \ ['Set &Diff %{&diff ? "Off" :"On"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
-        \ ['Set &Fold %{&foldlevel ? "On" :"Off"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
-        \ ['Set &Wrap %{&wrap ? "Off" :"On"}', 'set wrap!', 'Toggle wrap lines'],
-        \ ['Set &Paste %{&paste ? "Off" :"On"}', 'execute &paste ? "set nopaste number mouse=a signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
-        \ ['Set &Spelling %{&spell ? "Off" :"On"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
-        \ ['Set Pre&view %{&completeopt=~"preview" ? "Off" :"On"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview'],
-        \ ['Set CursorLi&ne %{&cursorline ? "Off" :"On"}', 'set cursorline!', 'Toggle cursorline'],
-        \ ['Set Cursor&Column %{&cursorcolumn ? "Off" :"On"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
+        \ ['Set &Diff         %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
+        \ ['Set &Fold         %{&foldlevel ? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
+        \ ['Set &Wrap         %{&wrap ? "[x]" :"[ ]"}', 'set wrap!', 'Toggle wrap lines'],
+        \ ['Set &Paste        %{&paste ? "[x]" :"[ ]"}', 'execute &paste ? "set nopaste number mouse=a signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
+        \ ['Set &Spelling     %{&spell ? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
+        \ ['Set Pre&view      %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview'],
+        \ ['Set CursorLi&ne   %{&cursorline ? "[x]" :"[ ]"}', 'set cursorline!', 'Toggle cursorline'],
+        \ ['Set Cursor&Column %{&cursorcolumn ? "[x]" :"[ ]"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
         \ ['Set &Background %{&background=~"dark" ? "Light" :"Dark"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color'],
         \ ])
-  call quickui#menu#install("Ta&bular", [
+  call quickui#menu#install('Ta&bular', [
         \ ['Align Using = (delimiter fixed)', 'Tabularize /=\zs', 'Tabularize /=\zs'],
         \ ['Align Using , (delimiter fixed)', 'Tabularize /,\zs', 'Tabularize /,\zs'],
         \ ['Align Using # (delimiter fixed)', 'Tabularize /#\zs', 'Tabularize /#\zs'],
@@ -417,7 +398,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Align Using # (delimiter centered)', 'Tabularize /#', 'Tabularize /#'],
         \ ['Align Using : (delimiter centered)', 'Tabularize /:', 'Tabularize /:'],
         \ ])
-  call quickui#menu#install("Table &Mode", [
+  call quickui#menu#install('Table &Mode', [
         \ ['Table &Mode', 'TableModeToggle', 'Toggle TableMode'],
         \ ['&Reformat Table', 'TableModeRealign', 'Reformat table'],
         \ ['&Format to Table', 'Tableize', 'Format to table, use <leader>T to set delimiter'],
@@ -438,10 +419,10 @@ function! s:LoadQuickUI(open_menu)
     endif
     call add(l:quickui_theme_list, [l:category. s:theme_list[l:index], "execute 'call writefile([\"let g:Theme = ". l:index. '"], "'. substitute(fnamemodify(expand('$MYVIMRC'), ':p:h'), '\', '\\\\', 'g'). "/colors/current_theme.vim\")' | call LoadColorscheme(". l:index. ')'])
   endfor
-  call quickui#menu#install("&Theme", l:quickui_theme_list)
+  call quickui#menu#install('&Theme', l:quickui_theme_list)
   call quickui#menu#switch('visual')
   call quickui#menu#reset()
-  call quickui#menu#install("&Tabular", [
+  call quickui#menu#install('&Tabular', [
         \ ['Align Using = (delimiter fixed)', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs"],
         \ ['Align Using , (delimiter fixed)', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs"],
         \ ['Align Using # (delimiter fixed)', "'<,'>Tabularize /#\\zs", "'<,'>Tabularize /#\\zs"],
@@ -457,12 +438,12 @@ function! s:LoadQuickUI(open_menu)
         \ ['Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)'],
         \ ['Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)'],
         \ ])
-  call quickui#menu#install("Table &Mode", [
+  call quickui#menu#install('Table &Mode', [
         \ ['Reformat Table', "'<,'>TableModeRealign", 'Reformat table'],
         \ ['Format to Table', "'<,'>Tableize", 'Format to table, use <leader>T to set delimiter'],
         \ ])
   if a:open_menu == 1
-    call s:OpenQuickUIContextMenu()
+    call <SID>OpenQuickUIContextMenu()
   endif
 endfunction
 function! s:OpenQuickUIContextMenu()
@@ -503,6 +484,82 @@ endfunction
 " }}}
 
 " ====================== Functions ====================== {{{
+function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text_objects_with_custom_functions
+  let sel_save = &selection
+  let cb_save = &clipboard
+  set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
+  let reg_save = @@
+  if a:type =~ '^\d\+$'
+    silent execute 'normal! V'. a:type. '$y'
+  elseif a:type =~ '^.$'
+    silent execute "normal! `<". a:type. "`>y"
+  elseif a:type == 'line'
+    silent execute "normal! '[V']y"
+  elseif a:type == 'block'
+    silent execute "normal! `[\<C-V>`]y"
+  else
+    silent execute "normal! `[v`]y"
+  endif
+  let repl = s:{a:algorithm}(@@)
+  if type(repl) == 1
+    call setreg('@', repl, getregtype('@'))
+    normal! gvp
+  endif
+  let @@ = reg_save
+  let &selection = sel_save
+  let &clipboard = cb_save
+endfunction
+function! s:ActionOpfunc(type)
+  return s:DoAction(s:encode_algorithm, a:type)
+endfunction
+function! s:ActionSetup(algorithm)
+  let s:encode_algorithm = a:algorithm
+  let &opfunc = matchstr(expand('<sfile>'), '<SNR>\d\+_'). 'ActionOpfunc'
+endfunction
+function! s:MapAction(algorithm, key)
+  execute 'nnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>ActionSetup("'. a:algorithm. '")<CR>g@'
+  execute 'xnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>DoAction("'. a:algorithm. '", visualmode())<CR>'
+  execute 'nnoremap <silent> <Plug>actionsLine'.a:algorithm.' :<C-U>call <SID>DoAction("'. a:algorithm. '", v:count1)<CR>'
+  execute 'nmap '. a:key. '  <Plug>actions'. a:algorithm
+  execute 'xmap '. a:key. '  <Plug>actions'. a:algorithm
+  execute 'nmap '. a:key.a:key[strlen(a:key)-1]. ' <Plug>actionsLine'. a:algorithm
+endfunction
+command! -nargs=* -range GitHubURL :call <SID>GitHubURL(<count>, <line1>, <line2>, <f-args>)
+function! s:GitHubRun(...)
+  let command = join(a:000, ' | ')
+  return substitute(system(command), "\n", '', '')
+endfunction
+function! s:GitHubURL(count, line1, line2, ...)
+  let github_url = 'https://github.com'
+  let get_remote = 'git remote -v | grep -E "github\.com.*\(fetch\)" | head -n 1'
+  let get_username = 'sed -E "s/.*com[:\/](.*)\/.*/\\1/"'
+  let get_repo = 'sed -E "s/.*com[:\/].*\/(.*).*/\\1/" | cut -d " " -f 1'
+  let optional_ext = 'sed -E "s/\.git//"'
+  if len(a:000) == 0
+    let username = s:GitHubRun(get_remote, get_username)
+    let repo = s:GitHubRun(get_remote, get_repo, optional_ext)
+  elseif len(a:000) == 1
+    let username = a:000[0]
+    let repo = s:GitHubRun(get_remote, get_repo, optional_ext)
+  elseif len(a:000) == 2
+    let username = a:000[0]
+    let repo = a:000[1]
+  else
+    return 'Too many arguments'
+  endif
+  let commit = s:GitHubRun('git rev-parse HEAD')
+  let repo_root = s:GitHubRun('git rev-parse --show-toplevel')
+  let file_path = expand('%:p')
+  let file_path = substitute(file_path, repo_root . '/', '', 'e')
+  let url = join([github_url, username, repo, 'blob', commit, file_path], '/')
+  if a:count == -1
+    let line = '#L' . line('.')
+  else
+    let line = '#L' . a:line1 . '-L' . a:line2
+  endif
+  let @+ = url. line
+  echom 'Copied: '. url. line
+endfunction
 function! s:EditRegister() abort
   let l:r = nr2char(getchar())
   call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
@@ -517,6 +574,16 @@ function! s:GetVisualSelection()
   let l:lines[-1] = l:lines[-1][: l:column_end - (&selection == 'inclusive' ? 1 : 2)]
   let l:lines[0] = l:lines[0][l:column_start - 1:]
   return join(l:lines, "\n")
+endfunction
+function! s:Quit(buffer_mode) abort
+  let l:current_buffer = bufnr('%')
+  let l:next_buffer = g:vem_tabline#tabline.get_replacement_buffer()
+  if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && l:current_buffer != l:next_buffer && l:next_buffer != 0
+    execute 'confirm '. l:current_buffer. 'bdelete'
+    execute l:next_buffer. 'buffer'
+  else
+    execute 'quit'
+  endif
 endfunction
 function! s:PrintCurrVars(visual)
   let l:new_line = "normal! o\<Space>\<BS>"
@@ -550,6 +617,8 @@ let g:netrw_banner = 0
 let g:netrw_browse_split = 2
 let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
+let g:vem_tabline_show = 2
+let g:vem_tabline_multiwindow_mode = 0
 set wildignore+=*/tmp/*,*/\.git/*,*/\.oh-my-zsh/*,*/node_modules/*,*/venv/*,*/\.env/*  " do NOT wildignore plugged
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
 let g:Lf_HideHelp = 1
@@ -575,7 +644,7 @@ let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html',
 
 " ==================== Execute code ===================== {{{
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
-command! -complete=shellcmd -nargs=+ Shell call s:RunShellCommand(<q-args>)
+command! -complete=shellcmd -nargs=+ Shell call <SID>RunShellCommand(<q-args>)
 let s:OutputCount = 1
 function! s:RunShellCommand(command)
   let l:expanded_command = substitute(a:command, './%<', './'. fnameescape(expand('%<')), '')
@@ -703,9 +772,8 @@ if has('nvim')
   nnoremap <leader>th :split <bar> terminal<CR>
   nnoremap <leader>tv :vsplit <bar> terminal<CR>
   nnoremap <leader>tt :tabedit <bar> terminal<CR>
-  nnoremap <leader>te V:call <SID>SendToNvimTerminal()<CR>$
-  xnoremap <leader>te <Esc>:call <SID>SendToNvimTerminal()<CR>
-  function! s:SendToNvimTerminal()
+  call <SID>MapAction('SendToNvimTerminal', '<leader>te')
+  function! s:SendToNvimTerminal(str)
     let l:job_id = -1
     for l:buff_n in tabpagebuflist()
       if nvim_buf_get_name(l:buff_n) =~ 'term://'
@@ -740,9 +808,8 @@ else
   nnoremap <leader>th :terminal ++close<CR>
   nnoremap <leader>tv :vertical terminal ++close<CR>
   nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
-  nnoremap <leader>te V:call <SID>SendToTerminal()<CR>$
-  xnoremap <leader>te <Esc>:call <SID>SendToTerminal()<CR>
-  function! s:SendToTerminal()
+  call <SID>MapAction('SendToTerminal', '<leader>te')
+  function! s:SendToTerminal(str)
     let l:buff_n = term_list()
     if len(l:buff_n) > 0
       let l:buff_n = l:buff_n[0]  " sends to most recently opened terminal
@@ -774,7 +841,7 @@ if has('gui_running')
   if has('win32')
     " Windows gVim
     set guifont=Consolas_NF:h11:cANSI
-    " set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 version need to match
+    set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 version need to match
     let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
     function! s:ActivatePyEnv(environment)
       if a:environment == ''
@@ -783,7 +850,7 @@ if has('gui_running')
         silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
       endif
     endfunction
-    command! -nargs=* Activate call s:ActivatePyEnv(<q-args>) <bar> quit
+    command! -nargs=* Activate call <SID>ActivatePyEnv(<q-args>) <bar> quit
     nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
     nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
   elseif has('gui_vimr')
@@ -820,7 +887,9 @@ elseif has('macunix')
   noremap <Esc>b b
 else
   " WSL vim
-  nmap <leader>y V<leader>y
-  xnoremap <leader>y :<C-u>call system('clip.exe', <SID>GetVisualSelection())<CR>
+  function! s:CopyToWinClip(str)
+    call system('clip.exe', a:str)
+  endfunction
+  call <SID>MapAction('CopyToWinClip', '<leader>y')
 endif
 " }}}

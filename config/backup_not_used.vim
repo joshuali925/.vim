@@ -593,3 +593,22 @@ function! s:LoadSandwich()
   runtime macros/sandwich/keymap/surround.vim
   " add custom mappings below
 endfunction
+
+" =======================================================
+" replaced by MapAction
+" send to vim terminal
+  nnoremap <leader>te V:call <SID>SendToTerminal()<CR>$
+  xnoremap <leader>te <Esc>:call <SID>SendToTerminal()<CR>
+" wsl copy
+  nmap <leader>y V<leader>y
+  xnoremap <leader>y :<C-u>call system('clip.exe', <SID>GetVisualSelection())<CR>
+" do not lazyload on insert to keep scroll position
+  augroup LazyLoadCompletion
+    autocmd!
+    autocmd InsertEnter * call plug#load('echodoc.vim') | call plug#load('ultisnips') | call plug#load('vim-snippets') | autocmd! LazyLoadCompletion
+  augroup END
+Plug 'ap/vim-buftabline'
+nnoremap [b :bprevious<CR>
+nnoremap ]b :bnext<CR>
+nnoremap <F10> :wall <bar> execute '!clear && '. <SID>GetRunCommand()<CR>
+nnoremap <F12> :wall <bar> call <SID>RunShellCommand(<SID>GetRunCommand())<CR>

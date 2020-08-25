@@ -25,6 +25,8 @@ stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
 
+export HISTCONTROL="ignorespace"
+
 alias which='type -a'
 
 bind 'set show-all-if-ambiguous on'
