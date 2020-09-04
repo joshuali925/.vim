@@ -27,6 +27,8 @@ vnoremap ( c(<C-r>")<Esc>
 vnoremap [ c[<C-r>"]<Esc>
 vnoremap { c{<C-r>"}<Esc>
 vnoremap <Space> c<Space><C-r>"<Space><Esc>
+nnoremap <Backspace> gT
+nnoremap <Space> gt
 nnoremap [b gT
 nnoremap ]b gt
 nnoremap [<Space> O<Esc>
