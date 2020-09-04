@@ -11,7 +11,7 @@ Plug 'mhinz/vim-startify'
 Plug 'ryanoasis/vim-devicons'
 Plug 'tweekmonster/startuptime.vim', { 'on': 'StartupTime' }
 Plug 'skywind3000/vim-quickui', { 'on': [] }
-Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
+Plug 'simnalamburt/vim-mundo', { 'on': 'MundoToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': ['TableModeToggle', 'TableModeRealign', 'Tableize', 'TableAddFormula', 'TableEvalFormulaLine'] }
 Plug 'liuchengxu/vista.vim', { 'on': 'Vista' }
@@ -21,7 +21,7 @@ Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_' ] }
-Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'Gdiffsplit', 'Gread'] }
+Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'Gblame', 'Ggrep', 'Glgrep', 'Gdiffsplit', 'Gread'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
@@ -91,7 +91,7 @@ endfunction
 call LoadColorscheme(g:Theme)
 " }}}
 
-" ======================= Basics ======================== {{{
+" ====================== Options ======================== {{{
 set backspace=eol,start,indent
 set whichwrap+=<,>,[,]
 set mouse=a
@@ -141,7 +141,6 @@ set foldmethod=indent
 set foldlevelstart=99
 set belloff=all
 set history=500
-set sessionoptions-=buffer
 set undofile
 set undolevels=1000
 set undoreload=10000
@@ -161,6 +160,10 @@ set statusline=%<[%{mode()}]\ %F\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(g
 
 " ====================== Mappings ======================= {{{
 let mapleader=';'
+inoremap <F2> <Esc>gT
+inoremap <F3> <Esc>gt
+noremap <F2> gT
+noremap <F3> gt
 imap <Space> <Plug>(PearTreeSpace)
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
@@ -182,12 +185,14 @@ nmap ySs <Plug>YSsurround
 nmap ySS <Plug>YSsurround
 xmap S <Plug>VSurround
 xmap gS <Plug>VgSurround
-nmap [b <Plug>vem_prev_buffer-
-nmap ]b <Plug>vem_next_buffer-
-nmap <leader>bH <Plug>vem_move_buffer_left-
-nmap <leader>bL <Plug>vem_move_buffer_right-
-nnoremap <leader>b< :-tabmove<CR>
-nnoremap <leader>b> :+tabmove<CR>
+nmap <Backspace> <Plug>vem_prev_buffer-
+nmap <Space> <Plug>vem_next_buffer-
+nmap <leader>bh <Plug>vem_move_buffer_left-
+nmap <leader>bl <Plug>vem_move_buffer_right-
+nnoremap <leader>bH :-tabmove<CR>
+nnoremap <leader>bL :+tabmove<CR>
+onoremap i<Space> iW
+onoremap a<Space> aW
 noremap 0 ^
 noremap ^ 0
 noremap - $
@@ -203,7 +208,8 @@ inoremap <Down> <C-o>gj
 inoremap <Up> <C-o>gk
 xnoremap @q :normal @q<CR>
 xnoremap @@ :normal @@<CR>
-nnoremap Q q:
+nnoremap Q q:k
+nnoremap <CR> :
 nnoremap Y y$
 xnoremap < <gv
 xnoremap > >gv
@@ -217,6 +223,8 @@ nnoremap cr :call <SID>EditRegister()<CR>
 nnoremap K :call <SID>LoadQuickUI(1)<CR>
 nnoremap [a :previous<CR>
 nnoremap ]a :next<CR>
+nnoremap [b :bprevious<CR>
+nnoremap ]b :bnext<CR>
 nnoremap [l :lprevious<CR>
 nnoremap ]l :lnext<CR>
 nnoremap [q :cprevious<CR>
@@ -229,6 +237,10 @@ xnoremap [e :move '<-2<CR>gv=gv
 xnoremap ]e :move '>+1<CR>gv=gv
 nnoremap [<Space> O<Esc>
 nnoremap ]<Space> o<Esc>
+nnoremap <silent> [Q :execute empty(filter(getwininfo(), 'v:val.quickfix')) ? 'copen' : 'cclose'<CR>
+nmap ]Q [Q
+nnoremap <silent> [L :execute empty(filter(getwininfo(), 'v:val.loclist')) ? 'lopen' : 'lclose'<CR>
+nmap ]L [L
 xnoremap " c"<C-r><C-p>""<Esc>
 xnoremap ' c'<C-r><C-p>"'<Esc>
 xnoremap ` c`<C-r><C-p>"`<Esc>
@@ -258,8 +270,8 @@ xmap <C-n> :<C-u>call <SID>LoadVisualMulti()<CR>gv<C-n>
 nmap <leader><C-n> :call <SID>LoadVisualMulti()<CR><leader><C-n>
 imap <leader>r <Esc><leader>r
 nnoremap <leader>r :wall <bar> execute 'AsyncRun '. <SID>GetRunCommand()<CR>
-xmap <leader>m :<C-u>call <SID>LoadQuickUI(0)<CR>gv<F1>
-nmap <leader>m :call <SID>LoadQuickUI(0)<CR><F1>
+xmap <leader>m :<C-u>call <SID>LoadQuickUI(0)<CR>gv<leader>m
+nmap <leader>m :call <SID>LoadQuickUI(0)<CR><leader>m
 noremap <leader>y "+y
 nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
@@ -268,9 +280,10 @@ nnoremap <leader>fu :LeaderfFunctionAll<CR>
 nnoremap <leader>fg :Leaderf! rg -F -e<Space>
 xnoremap <leader>fg :<C-u><C-r>=printf('Leaderf! rg -F -e %s', leaderf#Rg#visual())<CR><CR>
 nnoremap <leader>fG :LeaderfRgRecall<CR>
-nnoremap <leader>fl :LeaderfLineAll<CR>
+nnoremap <leader>fq :LeaderfQuickFix<CR>
+nnoremap <leader>fl :LeaderfLocList<CR>
 nnoremap <leader>fL :Leaderf rg -S<CR>
-nnoremap <leader>fa :LeaderfSelf<CR>
+nnoremap <leader>fa :LeaderfCommand<CR>
 nnoremap <leader>ft :LeaderfBufTagAll<CR>
 nnoremap <leader>fj :AnyJump<CR>
 nnoremap <leader>fJ :AnyJumpLastResults<CR>
@@ -280,7 +293,7 @@ nnoremap <leader>fw *N
 xnoremap <leader>fw y/\V<C-r>"<CR>N
 nnoremap <leader>fv :Vista!!<CR>
 nnoremap <leader>k K
-nnoremap <leader>u :UndotreeToggle<CR>
+nnoremap <leader>u :MundoToggle<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
 nnoremap <leader>s :call <SID>PrintCurrVars(0)<CR>
@@ -293,8 +306,6 @@ nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :write !sudo tee %<CR>
-nnoremap <leader>Q :mksession! ~/.cache/vim/session.vim <bar> wqall!<CR>
-nnoremap <leader>L :silent source ~/.cache/vim/session.vim<CR>
 nnoremap <leader>q :call <SID>Quit(0)<CR>
 nnoremap <leader>x :call <SID>Quit(1)<CR>
 nnoremap <leader>vim :edit $MYVIMRC<CR>
@@ -306,6 +317,8 @@ augroup AutoCommands
   autocmd!
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g'\"" | endif  " restore last edit position
   autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc when write
+  autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
+  autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
   autocmd FileType vim setlocal foldmethod=marker  " use triple curly brackets for fold instead of indentation
   autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> edit! <bar> redraw!<CR>
   autocmd FileType python setlocal nosmartindent | syntax keyword pythonSelf self | highlight def link pythonSelf Special  " fix python comment indentation, highlight keyword self
@@ -338,9 +351,10 @@ function! s:LoadVisualMulti()
   call plug#load('vim-visual-multi')
 endfunction
 function! s:LoadQuickUI(open_menu)
-  nnoremap <F1> :call quickui#menu#open('normal')<CR>
-  xnoremap <F1> :<C-u>call quickui#menu#open('visual')<CR>
+  nnoremap <leader>m :call quickui#menu#open('normal')<CR>
+  xnoremap <leader>m :<C-u>call quickui#menu#open('visual')<CR>
   nnoremap K :call <SID>OpenQuickUIContextMenu()<CR>
+  nnoremap <silent> <leader>tp :call quickui#terminal#open('zsh', {'h': winheight(0) * 3/4, 'w': winwidth(0) * 4/5, 'line': winheight(0) * 1/6, 'callback': 'FloatTermExit'})<CR>
   let g:quickui_color_scheme = g:Theme < 0 ? 'papercol' : 'solarized'
   let g:quickui_show_tip = 1
   let g:quickui_border_style = 2
@@ -349,32 +363,35 @@ function! s:LoadQuickUI(open_menu)
   call quickui#menu#reset()
   call quickui#menu#install('&Actions', [
         \ ['&Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line'],
-        \ ['Insert &Time', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
+        \ ['Insert Tim&e', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
         \ ['--', ''],
         \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
-        \ ['&Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
+        \ ['Trim &Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
         \ ['Format as JSO&N', 'execute "update | %!python3 -m json.tool" | keeppatterns %s;^\(\s\+\);\=repeat(" ", len(submatch(0))/2);g | execute "normal! ``"', 'Use `python3 -m json.tool` to format current buffer'],
         \ ['--', ''],
-        \ ['Open &Buffers', 'call quickui#tools#list_buffer("vsplit")'],
+        \ ['Open &Buffers', 'call quickui#tools#list_buffer("e")'],
         \ ['Open &Functions', 'call quickui#tools#list_function()'],
+        \ ['Open &Terminal', 'call quickui#terminal#open("zsh", {"h": winheight(0) * 3/4, "w": winwidth(0) * 4/5, "line": winheight(0) * 1/6, "callback": "FloatTermExit"})', 'Open terminal as popup window: <leader>tp'],
         \ ['--', ''],
-        \ ['Edit Vi&mrc', 'tabedit $MYVIMRC'],
+        \ ['Save Sessi&on', 'SSave', 'Save as a new session using vim-startify'],
+        \ ['&Delete Session', 'SDelete', 'Delete a session using vim-startify'],
         \ ['--', ''],
         \ ['Open in &VSCode', "execute \"silent !code --goto '\" . expand(\"%\") . \":\" . line(\".\") . \":\" . col(\".\") . \"'\" | redraw!"],
         \ ])
   call quickui#menu#install('&Git', [
         \ ['Git &Status', 'Git', 'Git status'],
-        \ ['Git Check&out', 'Gread', 'Checkout current file and load as unsaved buffer'],
-        \ ['Git &Blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'],
+        \ ['Git Check&out Current', 'Gread', 'Checkout current file and load as unsaved buffer'],
+        \ ['Git &Blame Line', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'],
+        \ ['Git Bla&me', 'Gblame', 'Git blame of current file'],
         \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last staged version'],
         \ ['Git &Changes', 'Git difftool', 'Load unstaged changes into quickfix list (use [q, ]q to navigate)'],
-        \ ['Git &File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed version of current file'],
+        \ ['Git &File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed versions of current file'],
         \ ['--', ''],
         \ ['Copy &Remote URL', 'GitHubURL', 'Copy github remote url'],
         \ ])
   call quickui#menu#install('T&oggle', [
         \ ['Ne&trw', 'Lexplore', 'Toggle Vim Netrw'],
-        \ ['&Undo Tree', 'UndotreeToggle', 'Toggle Undotree'],
+        \ ['&Undo Tree', 'MundoToggle', 'Toggle undo tree'],
         \ ['&Vista', 'Vista!!', 'Toggle Vista'],
         \ ['&Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
         \ ['Set &Diff         %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
@@ -484,6 +501,9 @@ endfunction
 " }}}
 
 " ====================== Functions ====================== {{{
+function! FloatTermExit(code)
+  setlocal number signcolumn=auto
+endfunction
 function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text_objects_with_custom_functions
   let sel_save = &selection
   let cb_save = &clipboard
@@ -576,11 +596,16 @@ function! s:GetVisualSelection()
   return join(l:lines, "\n")
 endfunction
 function! s:Quit(buffer_mode) abort
-  let l:current_buffer = bufnr('%')
-  let l:next_buffer = g:vem_tabline#tabline.get_replacement_buffer()
-  if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && l:current_buffer != l:next_buffer && l:next_buffer != 0
-    execute 'confirm '. l:current_buffer. 'bdelete'
-    execute l:next_buffer. 'buffer'
+  if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
+    let l:current_buffer = bufnr('%')
+    let l:next_buffer = g:vem_tabline#tabline.get_replacement_buffer()
+    try
+      execute 'confirm '. l:current_buffer. 'bdelete'
+      if l:next_buffer != 0
+        execute l:next_buffer. 'buffer'
+      endif
+    catch /E516:/
+    endtry
   else
     execute 'quit'
   endif
@@ -608,10 +633,26 @@ endfunction
 " }}}
 
 " =================== Other plugins ===================== {{{
+let g:startify_session_dir = '~/.cache/vim/sessions'
+let g:startify_session_persistence = 1
+let g:startify_enable_special = 0
+let g:startify_enable_unsafe = 1
+let g:startify_commands = [
+      \ { '!': ['Git modified', ':args `git diff --name-only` | Git difftool'] },
+      \ { 'f': ['Find files', 'LeaderfFile'] },
+      \ { 'm': ['Find MRU', 'LeaderfMru'] },
+      \ ]
+let g:startify_lists = [
+      \ { 'type': 'files',     'header': ['   MRU']            },
+      \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
+      \ { 'type': 'commands',  'header': ['   Commands']       },
+      \ { 'type': 'sessions',  'header': ['   Sessions']       },
+      \ ]
 let g:asyncrun_open = 12
 let g:any_jump_disable_default_keybindings = 1
 let g:EasyMotion_smartcase = 1
-let g:undotree_WindowLayout = 2
+let g:mundo_preview_bottom = 1
+let g:mundo_width = 30
 let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings
 let g:netrw_banner = 0
 let g:netrw_browse_split = 2
@@ -619,14 +660,16 @@ let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
 let g:vem_tabline_show = 2
 let g:vem_tabline_multiwindow_mode = 0
-set wildignore+=*/tmp/*,*/\.git/*,*/\.oh-my-zsh/*,*/node_modules/*,*/venv/*,*/\.env/*  " do NOT wildignore plugged
-let g:Lf_WildIgnore = { 'dir':['tmp','.git','.oh-my-zsh','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
+set wildignore+=*/tmp/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*  " do NOT wildignore plugged
+let g:Lf_WildIgnore = { 'dir':['tmp','.git','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
+let g:Lf_MruWildIgnore = { 'dir':['.git'], 'file':[] }
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_UseCache = 0
 let g:Lf_ShortcutF = '<C-p>'
 let g:Lf_WindowPosition = 'popup'
 let g:Lf_PreviewInPopup = 1
+let g:Lf_RgStorePattern = 'g'
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<C-j>','<DOWN>'],'<C-k>':['<C-k>','<UP>'] }
 let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
@@ -772,6 +815,7 @@ if has('nvim')
   nnoremap <leader>th :split <bar> terminal<CR>
   nnoremap <leader>tv :vsplit <bar> terminal<CR>
   nnoremap <leader>tt :tabedit <bar> terminal<CR>
+  nmap <leader>tp :call <SID>LoadQuickUI(0)<CR><leader>tp
   call <SID>MapAction('SendToNvimTerminal', '<leader>te')
   function! s:SendToNvimTerminal(str)
     let l:job_id = -1
@@ -808,6 +852,7 @@ else
   nnoremap <leader>th :terminal ++close<CR>
   nnoremap <leader>tv :vertical terminal ++close<CR>
   nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
+  nmap <leader>tp :call <SID>LoadQuickUI(0)<CR><leader>tp
   call <SID>MapAction('SendToTerminal', '<leader>te')
   function! s:SendToTerminal(str)
     let l:buff_n = term_list()
@@ -887,6 +932,8 @@ elseif has('macunix')
   noremap <Esc>b b
 else
   " WSL vim
+  " fix vim auto entering replace mode
+  set ambiwidth=double
   function! s:CopyToWinClip(str)
     call system('clip.exe', a:str)
   endfunction
