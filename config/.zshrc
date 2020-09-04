@@ -66,6 +66,7 @@ setopt pushd_ignore_dups
 setopt pushd_minus
 
 setopt extended_history
+setopt share_history
 setopt hist_find_no_dups
 setopt hist_expire_dups_first
 setopt hist_ignore_dups
@@ -81,10 +82,25 @@ zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
 alias history='builtin fc -l 1'
 
+up-line-or-local-history() {
+    zle set-local-history 1
+    zle up-line-or-history
+    zle set-local-history 0
+}
+zle -N up-line-or-local-history
+down-line-or-local-history() {
+    zle set-local-history 1
+    zle down-line-or-history
+    zle set-local-history 0
+}
+zle -N down-line-or-local-history
+
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
 bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
+bindkey "^[[1;2A" up-line-or-local-history    # <S-Up>
+bindkey "^[[1;2B" down-line-or-local-history  # <S-Down>
 
 compdef _dirs d
 function chpwd() { emulate -L zsh; ls -ACF --color=auto; }
