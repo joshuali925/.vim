@@ -15,7 +15,6 @@ Plug 'simnalamburt/vim-mundo', { 'on': 'MundoToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': ['TableModeToggle', 'TableModeRealign', 'Tableize', 'TableAddFormula', 'TableEvalFormulaLine'] }
 Plug 'liuchengxu/vista.vim', { 'on': 'Vista' }
-Plug 'pechorin/any-jump.vim', { 'on': ['AnyJump', 'AnyJumpVisual'] }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
@@ -23,7 +22,7 @@ Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-'] }
 Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_' ] }
 Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'Gblame', 'Ggrep', 'Glgrep', 'Gdiffsplit', 'Gread'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
-Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
+Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKeyVisual'] }
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }  " load on insert doesn't work
@@ -147,6 +146,8 @@ set undoreload=10000
 set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
 set path=**
+set list
+set listchars=tab:→\ ,nbsp:␣,trail:•
 set encoding=utf-8
 set timeoutlen=1500
 set ttimeoutlen=40
@@ -191,8 +192,14 @@ nmap <leader>bh <Plug>vem_move_buffer_left-
 nmap <leader>bl <Plug>vem_move_buffer_right-
 nnoremap <leader>bH :-tabmove<CR>
 nnoremap <leader>bL :+tabmove<CR>
+xnoremap i<Space> iW
 onoremap i<Space> iW
+xnoremap a<Space> aW
 onoremap a<Space> aW
+xnoremap il ^og_
+onoremap <silent> il :normal vil<CR>$
+xnoremap al 0o$
+onoremap <silent> al :normal val<CR>
 noremap 0 ^
 noremap ^ 0
 noremap - $
@@ -206,19 +213,14 @@ inoremap <Home> <C-o>g^
 inoremap <End> <C-o>g$
 inoremap <Down> <C-o>gj
 inoremap <Up> <C-o>gk
-xnoremap @q :normal @q<CR>
-xnoremap @@ :normal @@<CR>
+xnoremap @q :normal! @q<CR>
+xnoremap @@ :normal! @@<CR>
 nnoremap Q q:k
 nnoremap <CR> :
 nnoremap Y y$
 xnoremap < <gv
 xnoremap > >gv
-nnoremap o o<Space><BS>
-nnoremap O O<Space><BS>
-nnoremap cc cc<Space><BS>
 nnoremap gp `[v`]
-nnoremap yp "0p
-nnoremap yP "0P
 nnoremap cr :call <SID>EditRegister()<CR>
 nnoremap K :call <SID>LoadQuickUI(1)<CR>
 nnoremap [a :previous<CR>
@@ -237,6 +239,8 @@ xnoremap [e :move '<-2<CR>gv=gv
 xnoremap ]e :move '>+1<CR>gv=gv
 nnoremap [<Space> O<Esc>
 nnoremap ]<Space> o<Esc>
+nnoremap [p O<C-r>"<Esc>
+nnoremap ]p o<C-r>"<Esc>
 nnoremap <silent> [Q :execute empty(filter(getwininfo(), 'v:val.quickfix')) ? 'copen' : 'cclose'<CR>
 nmap ]Q [Q
 nnoremap <silent> [L :execute empty(filter(getwininfo(), 'v:val.loclist')) ? 'lopen' : 'lclose'<CR>
@@ -273,42 +277,47 @@ nnoremap <leader>r :wall <bar> execute 'AsyncRun '. <SID>GetRunCommand()<CR>
 xmap <leader>m :<C-u>call <SID>LoadQuickUI(0)<CR>gv<leader>m
 nmap <leader>m :call <SID>LoadQuickUI(0)<CR><leader>m
 noremap <leader>y "+y
+noremap <leader>p "0p
+noremap <leader>P "0P
 nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunctionAll<CR>
 nnoremap <leader>fg :Leaderf! rg -F -e<Space>
-xnoremap <leader>fg :<C-u><C-r>=printf('Leaderf! rg -F -e %s', leaderf#Rg#visual())<CR><CR>
+xnoremap <leader>fg :<C-u><C-r>=printf('Leaderf! rg -F -e %s', leaderf#Rg#visual())<CR>
 nnoremap <leader>fG :LeaderfRgRecall<CR>
+nmap <leader>fj <Plug>LeaderfRgBangCwordLiteralBoundary<CR>
+xmap <leader>fj <Plug>LeaderfRgBangVisualLiteralNoBoundary<CR>
 nnoremap <leader>fq :LeaderfQuickFix<CR>
 nnoremap <leader>fl :LeaderfLocList<CR>
 nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfCommand<CR>
 nnoremap <leader>ft :LeaderfBufTagAll<CR>
-nnoremap <leader>fj :AnyJump<CR>
-nnoremap <leader>fJ :AnyJumpLastResults<CR>
-xnoremap <leader>fj :AnyJumpVisual<CR>
+nnoremap <leader>fw :LeaderfWindow<CR>
 nnoremap <leader>fs :vertical sfind \c*
-nnoremap <leader>fw *N
-xnoremap <leader>fw y/\V<C-r>"<CR>N
-nnoremap <leader>fv :Vista!!<CR>
+nnoremap <leader>fy :registers<CR>:normal! "p<Left>
+nnoremap <leader>fY :registers<CR>:normal! "P<Left>
+nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
+xnoremap <leader>n "xy/\V<C-r>"<CR>N
 nnoremap <leader>k K
 nnoremap <leader>u :MundoToggle<CR>
+nnoremap <leader>v :Vista!!<CR>
 nnoremap <leader>h :WhichKey ';'<CR>
+xnoremap <leader>h :<C-u>WhichKeyVisual ';'<CR>
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
-nnoremap <leader>s :call <SID>PrintCurrVars(0)<CR>
-xnoremap <leader>s :<C-u>call <SID>PrintCurrVars(1)<CR>$
-nnoremap <leader>p :registers<CR>:normal! "p<Left>
-nnoremap <leader>P :registers<CR>:normal! "P<Left>
+nnoremap <Leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
+xnoremap <leader>s "xy:%s/<C-r>x/<C-r>x/gc<Left><Left><Left>
+nnoremap <leader>c :call <SID>PrintCurrVars(0, 0)<CR>
+xnoremap <leader>c :<C-u>call <SID>PrintCurrVars(1, 0)<CR>$
+nnoremap <leader>C :call <SID>PrintCurrVars(0, 1)<CR>
+xnoremap <leader>C :<C-u>call <SID>PrintCurrVars(1, 1)<CR>$
 nnoremap <leader>b :buffers<CR>:buffer<Space>
 nnoremap <leader>tm :TableModeToggle<CR>
-nnoremap <leader>tE :execute getline('.')<CR>``
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
 nnoremap <leader>W :write !sudo tee %<CR>
 nnoremap <leader>q :call <SID>Quit(0)<CR>
 nnoremap <leader>x :call <SID>Quit(1)<CR>
-nnoremap <leader>vim :edit $MYVIMRC<CR>
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
 " }}}
 
@@ -376,15 +385,15 @@ function! s:LoadQuickUI(open_menu)
         \ ['Save Sessi&on', 'SSave', 'Save as a new session using vim-startify'],
         \ ['&Delete Session', 'SDelete', 'Delete a session using vim-startify'],
         \ ['--', ''],
+        \ ['Edit Vimr&c', 'edit $MYVIMRC'],
         \ ['Open in &VSCode', "execute \"silent !code --goto '\" . expand(\"%\") . \":\" . line(\".\") . \":\" . col(\".\") . \"'\" | redraw!"],
         \ ])
   call quickui#menu#install('&Git', [
         \ ['Git &Status', 'Git', 'Git status'],
         \ ['Git Check&out Current', 'Gread', 'Checkout current file and load as unsaved buffer'],
-        \ ['Git &Blame Line', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'],
-        \ ['Git Bla&me', 'Gblame', 'Git blame of current file'],
+        \ ['Git &Blame', 'Gblame', 'Git blame of current file'],
         \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last staged version'],
-        \ ['Git &Changes', 'Git difftool', 'Load unstaged changes into quickfix list (use [q, ]q to navigate)'],
+        \ ['Git &Changes', 'Git! difftool', 'Load unstaged changes into quickfix list (use [q, ]q to navigate)'],
         \ ['Git &File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed versions of current file'],
         \ ['--', ''],
         \ ['Copy &Remote URL', 'GitHubURL', 'Copy github remote url'],
@@ -439,6 +448,9 @@ function! s:LoadQuickUI(open_menu)
   call quickui#menu#install('&Theme', l:quickui_theme_list)
   call quickui#menu#switch('visual')
   call quickui#menu#reset()
+  call quickui#menu#install('&Git', [
+        \ ['Copy &Remote URL', "'<,'>GitHubURL", 'Copy github remote url'],
+        \ ])
   call quickui#menu#install('&Tabular', [
         \ ['Align Using = (delimiter fixed)', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs"],
         \ ['Align Using , (delimiter fixed)', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs"],
@@ -465,7 +477,7 @@ function! s:LoadQuickUI(open_menu)
 endfunction
 function! s:OpenQuickUIContextMenu()
   let l:quickui_content = []
-  if &filetype == 'python'
+  if s:Completion >= 0 && &filetype == 'python'
     call add(l:quickui_content, ['Jedi Do&cumentation', 'call jedi#show_documentation()', 'Jedi documentation'])
     call add(l:quickui_content, ['Jedi &Goto', 'call jedi#goto()', 'Jedi goto'])
     call add(l:quickui_content, ['Jedi Definition', 'call jedi#goto_definitions()', 'Jedi definition'])
@@ -481,21 +493,25 @@ function! s:OpenQuickUIContextMenu()
     call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
     call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe references'])
     call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe implementation'])
-    call add(l:quickui_content, ['--', ''])
     call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe fix'])
     call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
+    call add(l:quickui_content, ['--', ''])
   elseif s:Completion == 2
-    call add(l:quickui_content, ['&Documentation', 'call CocAction("doHover")', 'Coc documentation'])
+    call add(l:quickui_content, ['Docu&mentation', 'call CocAction("doHover")', 'Coc documentation'])
     call add(l:quickui_content, ['D&efinition', 'execute "normal \<Plug>(coc-definition)"', 'Coc definition'])
     call add(l:quickui_content, ['&Type Definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc type definition'])
     call add(l:quickui_content, ['&References', 'execute "normal \<Plug>(coc-references)"', 'Coc references'])
     call add(l:quickui_content, ['&Implementation', 'execute "normal \<Plug>(coc-implementation)"', 'Coc implementation'])
-    call add(l:quickui_content, ['--', ''])
     call add(l:quickui_content, ['Re&name', 'execute "normal \<Plug>(coc-rename)"', 'Coc rename'])
     call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc fix'])
+    call add(l:quickui_content, ['--', ''])
+    call add(l:quickui_content, ['Git Hunk &Diff', 'CocCommand git.chunkInfo', 'Coc git chunk info'])
+    call add(l:quickui_content, ['Git Hunk &Undo', 'CocCommand git.chunkUndo', 'Coc git undo chunk'])
+    call add(l:quickui_content, ['Git Hunk &Stage', 'CocCommand git.chunkStage', 'Coc git stage chunk'])
   endif
+  call add(l:quickui_content, ['Git &Blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'])
   call add(l:quickui_content, ['--', ''])
-  call add(l:quickui_content, ['&Built-in Docs', 'execute "normal! K"', 'Vim built in help'])
+  call add(l:quickui_content, ['Built-in D&ocs', 'execute "normal! K"', 'Vim built in help'])
   call quickui#context#open(l:quickui_content, {'index': g:quickui#context#cursor})
 endfunction
 " }}}
@@ -505,10 +521,10 @@ function! FloatTermExit(code)
   setlocal number signcolumn=auto
 endfunction
 function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text_objects_with_custom_functions
-  let sel_save = &selection
-  let cb_save = &clipboard
+  let l:sel_save = &selection
+  let l:cb_save = &clipboard
   set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
-  let reg_save = @@
+  let l:reg_save = @@
   if a:type =~ '^\d\+$'
     silent execute 'normal! V'. a:type. '$y'
   elseif a:type =~ '^.$'
@@ -520,14 +536,14 @@ function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text
   else
     silent execute "normal! `[v`]y"
   endif
-  let repl = s:{a:algorithm}(@@)
-  if type(repl) == 1
-    call setreg('@', repl, getregtype('@'))
+  let l:repl = s:{a:algorithm}(@@)
+  if type(l:repl) == 1
+    call setreg('@', l:repl, getregtype('@'))
     normal! gvp
   endif
-  let @@ = reg_save
-  let &selection = sel_save
-  let &clipboard = cb_save
+  let @@ = l:reg_save
+  let &selection = l:sel_save
+  let &clipboard = l:cb_save
 endfunction
 function! s:ActionOpfunc(type)
   return s:DoAction(s:encode_algorithm, a:type)
@@ -546,54 +562,41 @@ function! s:MapAction(algorithm, key)
 endfunction
 command! -nargs=* -range GitHubURL :call <SID>GitHubURL(<count>, <line1>, <line2>, <f-args>)
 function! s:GitHubRun(...)
-  let command = join(a:000, ' | ')
-  return substitute(system(command), "\n", '', '')
+  let l:command = join(a:000, ' | ')
+  return substitute(system(l:command), "\n", '', '')
 endfunction
 function! s:GitHubURL(count, line1, line2, ...)
-  let github_url = 'https://github.com'
-  let get_remote = 'git remote -v | grep -E "github\.com.*\(fetch\)" | head -n 1'
-  let get_username = 'sed -E "s/.*com[:\/](.*)\/.*/\\1/"'
-  let get_repo = 'sed -E "s/.*com[:\/].*\/(.*).*/\\1/" | cut -d " " -f 1'
-  let optional_ext = 'sed -E "s/\.git//"'
+  let l:get_remote = 'git remote -v | grep -E "github\.com.*\(fetch\)" | head -n 1'
+  let l:get_username = 'sed -E "s/.*com[:\/](.*)\/.*/\\1/"'
+  let l:get_repo = 'sed -E "s/.*com[:\/].*\/(.*).*/\\1/" | cut -d " " -f 1'
+  let l:optional_ext = 'sed -E "s/\.git//"'
   if len(a:000) == 0
-    let username = s:GitHubRun(get_remote, get_username)
-    let repo = s:GitHubRun(get_remote, get_repo, optional_ext)
+    let l:username = s:GitHubRun(l:get_remote, l:get_username)
+    let l:repo = s:GitHubRun(l:get_remote, l:get_repo, l:optional_ext)
   elseif len(a:000) == 1
-    let username = a:000[0]
-    let repo = s:GitHubRun(get_remote, get_repo, optional_ext)
+    let l:username = a:000[0]
+    let l:repo = s:GitHubRun(l:get_remote, l:get_repo, l:optional_ext)
   elseif len(a:000) == 2
-    let username = a:000[0]
-    let repo = a:000[1]
+    let l:username = a:000[0]
+    let l:repo = a:000[1]
   else
     return 'Too many arguments'
   endif
-  let commit = s:GitHubRun('git rev-parse HEAD')
-  let repo_root = s:GitHubRun('git rev-parse --show-toplevel')
-  let file_path = expand('%:p')
-  let file_path = substitute(file_path, repo_root . '/', '', 'e')
-  let url = join([github_url, username, repo, 'blob', commit, file_path], '/')
+  let l:commit = s:GitHubRun('git rev-parse HEAD')
+  let l:repo_root = s:GitHubRun('git rev-parse --show-toplevel')
+  let l:file_path = substitute(expand('%:p'), l:repo_root . '/', '', 'e')
+  let l:url = join(['https://github.com', l:username, l:repo, 'blob', l:commit, l:file_path], '/')
   if a:count == -1
-    let line = '#L' . line('.')
+    let l:line = '#L' . line('.')
   else
-    let line = '#L' . a:line1 . '-L' . a:line2
+    let l:line = '#L' . a:line1 . '-L' . a:line2
   endif
-  let @+ = url. line
-  echom 'Copied: '. url. line
+  let @+ = l:url. l:line
+  echom 'Copied: '. l:url. l:line
 endfunction
 function! s:EditRegister() abort
   let l:r = nr2char(getchar())
-  call feedkeys("q:ilet @". l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
-endfunction
-function! s:GetVisualSelection()
-  let [l:line_start, l:column_start] = getpos("'<")[1:2]
-  let [l:line_end, l:column_end] = getpos("'>")[1:2]
-  let l:lines = getline(l:line_start, l:line_end)
-  if len(l:lines) == 0
-    return ''
-  endif
-  let l:lines[-1] = l:lines[-1][: l:column_end - (&selection == 'inclusive' ? 1 : 2)]
-  let l:lines[0] = l:lines[0][l:column_start - 1:]
-  return join(l:lines, "\n")
+  call feedkeys('q:ilet @'. l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
 endfunction
 function! s:Quit(buffer_mode) abort
   if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
@@ -610,8 +613,11 @@ function! s:Quit(buffer_mode) abort
     execute 'quit'
   endif
 endfunction
-function! s:PrintCurrVars(visual)
+function! s:PrintCurrVars(visual, printAbove)
   let l:new_line = "normal! o\<Space>\<BS>"
+  if a:printAbove
+    let l:new_line = "normal! O\<Space>\<BS>"
+  endif
   if a:visual  " print selection
     let l:vars = [getline('.')[getpos("'<")[2] - 1:getpos("'>")[2] - 1]]
   elseif getline('.') =~ '[^a-zA-Z0-9_,\[\]. ]\|[a-zA-Z0-9_\]]\s\+\w'  " print variable under cursor if line not comma separated
@@ -623,7 +629,11 @@ function! s:PrintCurrVars(visual)
   let l:print = {}
   let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
   let l:print['javascript'] = 'console.log(`'. join(map(copy(l:vars), "v:val. ': ${'. v:val. '}'"), ' | '). '`)'
+  let l:print['javascriptreact'] = l:print['javascript']
+  let l:print['typescript'] = l:print['javascript']
+  let l:print['typescriptreact'] = l:print['javascript']
   let l:print['java'] = 'System.out.println('. join(map(copy(l:vars), "'\"'. v:val. ': \" + '. v:val"), ' + " | " + '). ')'
+  let l:print['vim'] = 'echomsg '. join(map(copy(l:vars), "\"'\". v:val. \": '. \". v:val"), ". ' | '. ")
   if has_key(l:print, &filetype)
     execute l:new_line
     call append(line('.'), l:print[&filetype])
@@ -637,10 +647,12 @@ let g:startify_session_dir = '~/.cache/vim/sessions'
 let g:startify_session_persistence = 1
 let g:startify_enable_special = 0
 let g:startify_enable_unsafe = 1
+let g:startify_fortune_use_unicode = 1
 let g:startify_commands = [
-      \ { '!': ['Git modified', ':args `git diff --name-only` | Git difftool'] },
+      \ { '!': ['Git modified', ':args `Git ls-files --modified` | Git difftool'] },
       \ { 'f': ['Find files', 'LeaderfFile'] },
       \ { 'm': ['Find MRU', 'LeaderfMru'] },
+      \ { 'c': ['Edit vimrc', 'edit $MYVIMRC'] },
       \ ]
 let g:startify_lists = [
       \ { 'type': 'files',     'header': ['   MRU']            },
@@ -649,7 +661,6 @@ let g:startify_lists = [
       \ { 'type': 'sessions',  'header': ['   Sessions']       },
       \ ]
 let g:asyncrun_open = 12
-let g:any_jump_disable_default_keybindings = 1
 let g:EasyMotion_smartcase = 1
 let g:mundo_preview_bottom = 1
 let g:mundo_width = 30
@@ -670,12 +681,12 @@ let g:Lf_ShortcutF = '<C-p>'
 let g:Lf_WindowPosition = 'popup'
 let g:Lf_PreviewInPopup = 1
 let g:Lf_RgStorePattern = 'g'
+let g:Lf_PreviewResult = { 'Function': 0 }
 let g:Lf_CommandMap = { '<C-]>':['<C-v>'],'<C-j>':['<C-j>','<DOWN>'],'<C-k>':['<C-k>','<UP>'] }
 let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_WorkingDirectoryMode = 'Aa'
 let g:Lf_CacheDirectory = expand('~/.cache/')
-let g:any_jump_search_prefered_engine = 'rg'
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
@@ -770,22 +781,33 @@ elseif s:Completion == 2  " coc
   " to manually install extensions, run :CocInstall coc-git coc-...
   " or run cd ~/.config/coc/extensions && yarn add coc-..., yarn cannot be cmdtest
   " in Windows run cd %LOCALAPPDATA%/coc/extensions && yarn add coc-...
+  let g:coc_snippet_next = '<Tab>'
+  let g:coc_snippet_prev = '<S-Tab>'
   set updatetime=300
   set signcolumn=yes
   inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
   inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
   inoremap <expr> <C-@> coc#refresh()
   inoremap <expr> <C-Space> coc#refresh()
+  nnoremap <C-b> :CocCommand explorer<CR>
   nnoremap <C-f> :call CocAction('format')<CR>
   xmap <C-f> <Plug>(coc-format-selected)
   nmap <leader>d <Plug>(coc-definition)
   nmap <leader>R <Plug>(coc-rename)
   nmap <leader>a <Plug>(coc-fix-current)
+  nnoremap <leader>fA :CocList<CR>
+  nnoremap <leader>fy :CocList yank<CR>
   imap <C-k> <Plug>(coc-snippets-expand)
-  let g:coc_snippet_next = '<Tab>'
-  let g:coc_snippet_prev = '<S-Tab>'
-  nnoremap <C-b> :CocCommand explorer<CR>
-  nnoremap <leader>p :CocList --normal yank<CR>
+  nmap [g <Plug>(coc-git-prevchunk)
+  nmap ]g <Plug>(coc-git-nextchunk)
+  xmap if <Plug>(coc-funcobj-i)
+  omap if <Plug>(coc-funcobj-i)
+  xmap af <Plug>(coc-funcobj-a)
+  omap af <Plug>(coc-funcobj-a)
+  xmap ic <Plug>(coc-classobj-i)
+  omap ic <Plug>(coc-classobj-i)
+  xmap ac <Plug>(coc-classobj-a)
+  omap ac <Plug>(coc-classobj-a)
 endif
 " }}}
 
@@ -927,13 +949,11 @@ elseif has('macunix')
   inoremap <C-e> <C-o>$
   noremap <C-e> $
   inoremap <Esc>f <C-o>w
-  noremap <Esc>f w
+  nnoremap <Esc>f w
   inoremap <Esc>b <C-o>b
-  noremap <Esc>b b
+  nnoremap <Esc>b b
 else
   " WSL vim
-  " fix vim auto entering replace mode
-  set ambiwidth=double
   function! s:CopyToWinClip(str)
     call system('clip.exe', a:str)
   endfunction

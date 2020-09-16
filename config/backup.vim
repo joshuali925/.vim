@@ -167,7 +167,7 @@ endfunction
 
 " =======================================================
 " leaderf
-let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] 
+let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']]
             \        'Mru': [['<C-p>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfRgInteractive<CR>'],
             \               ['<C-f>', ':exec g:Lf_py "mruExplManager.quit()" <bar> LeaderfFunctionAll<CR>']] }
 
@@ -612,3 +612,71 @@ nnoremap [b :bprevious<CR>
 nnoremap ]b :bnext<CR>
 nnoremap <F10> :wall <bar> execute '!clear && '. <SID>GetRunCommand()<CR>
 nnoremap <F12> :wall <bar> call <SID>RunShellCommand(<SID>GetRunCommand())<CR>
+
+" =======================================================
+  " WSL vim
+  " fix vim auto entering replace mode, but breaks unicode
+  set ambiwidth=double
+
+  " functions not in use
+nnoremap <leader>tE :execute getline('.')<CR>``
+function! s:GetVisualSelection()
+  let [l:line_start, l:column_start] = getpos("'<")[1:2]
+  let [l:line_end, l:column_end] = getpos("'>")[1:2]
+  let l:lines = getline(l:line_start, l:line_end)
+  if len(l:lines) == 0
+    return ''
+  endif
+  let l:lines[-1] = l:lines[-1][: l:column_end - (&selection == 'inclusive' ? 1 : 2)]
+  let l:lines[0] = l:lines[0][l:column_start - 1:]
+  return join(l:lines, "\n")
+endfunction
+
+" =======================================================
+" any-jump.vim
+Plug 'pechorin/any-jump.vim', { 'on': ['AnyJump', 'AnyJumpVisual'] }
+nnoremap <leader>fj :AnyJump<CR>
+nnoremap <leader>fJ :AnyJumpLastResults<CR>
+xnoremap <leader>fj :AnyJumpVisual<CR>
+let g:any_jump_disable_default_keybindings = 1
+let g:any_jump_search_prefered_engine = 'rg'
+
+" =======================================================
+" https://gist.github.com/romainl/c0a8b57a36aec71a986f1120e1931f20
+for char in [ '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
+	execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
+	execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
+	execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vf'. char. '<CR>'
+	execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
+endfor
+xnoremap <silent> in :<C-u>call <SID>VisualNumber()<CR>
+onoremap <silent> in :normal vin<CR>
+function! s:VisualNumber()
+	call search('\d\([^0-9\.]\|$\)', 'cW')
+	normal! v
+	call search('\(^\|[^0-9\.]\d\)', 'becW')
+	normal! o
+endfunction
+
+" =======================================================
+" has error
+Plug 'tamago324/LeaderF-filer'
+let g:Lf_FilerShowHiddenFiles = 1
+let g:Lf_FilerInsertMap = { '<C-v>': 'accept_vertical', '<Up>': 'up', '<Down>': 'down', '<CR>': 'open_current' }
+let g:Lf_FilerNormalMap = { 'i': 'switch_insert_mode', '<Esc>': 'quit', '~': 'goto_root_marker_dir', 'M': 'mkdir', 'T': 'create_file' }
+
+" =======================================================
+set showbreak=↪\  " a trailing space after arrow
+nnoremap o o<Space><BS>
+nnoremap O O<Space><BS>
+nnoremap cc cc<Space><BS>
+
+" =======================================================
+" lf cd on exit - not stable
+push mmx
+map w quit
+map q push 'xw
+map W $$SHELL
+" common.sh
+alias lf='lf -last-dir-path="$HOME/.cache/lf_dir" && [[ $PWD != $(cat "$HOME/.cache/lf_dir") ]] && cd "$(cat "$HOME/.cache/lf_dir")"'
+
