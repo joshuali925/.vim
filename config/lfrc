@@ -20,9 +20,9 @@ map zn
 map zs
 map zt
 map za
-map zz z
-map zf locate-file
-map zv vf
+map z z
+map t locate-file-pwd
+map T locate-file
 
 map sh set hedden!
 map sr set reverse!
@@ -35,11 +35,12 @@ map sn :set sortby natural; set info size
 map m
 map mm mark-save
 map mg $lazygit
+map mv $gvim "$f"
 map mp paste-symlink
 map mr bulk-rename
 map ms selected-dir-size
 
-map v toggle
+map v :toggle; down
 map V invert
 map x delete
 map D delete
@@ -55,13 +56,17 @@ map ] push hjl
 map c :clear; unselect
 map gs !clear && git status
 map <a-c> dir-jump
-map <enter> $gvim "$f"
 map I $bat --color=always --style='numbers,changes' --paging=always "$f"
 
-cmd vf ${{
-   res="$(rg --files | fzf)"
+cmap <up> cmd-history-prev
+cmap <down> cmd-history-next
+
+cmd locate-file-pwd ${{
+   res="$(ls -A | fzf)"
    if [ -f "$res" ]; then
-      vim "$res"
+      lf -remote "send $id select \"$res\""
+   elif [ -d "$res" ]; then
+      lf -remote "send $id cd \"$res\""
    fi
 }}
 cmd locate-file ${{
