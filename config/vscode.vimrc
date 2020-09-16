@@ -14,8 +14,6 @@ noremap <Down> gj
 noremap <Up> gk
 nnoremap Y y$
 nnoremap gp `[v`]
-noremap <leader>p "0p
-noremap <leader>P "0P
 nnoremap ZZ :wq<CR>
 nnoremap ZQ :q!<CR>
 vnoremap < <gv
@@ -33,10 +31,14 @@ nnoremap [b gT
 nnoremap ]b gt
 nnoremap [<Space> O<Esc>
 nnoremap ]<Space> o<Esc>
+nnoremap [p O<C-r>"<Esc>
+nnoremap ]p o<C-r>"<Esc>
 nnoremap <C-c> /qwe<CR>
-nnoremap <leader>fw *N
-vnoremap <leader>fw y/<C-r>"<CR>N
+nnoremap <leader>n *N
+vnoremap <leader>n y/<C-r>"<CR>N
 noremap <leader>y "+y
+noremap <leader>p "0p
+noremap <leader>P "0P
 inoremap <leader>w <Esc>:write<CR>
 nnoremap <leader>w :write<CR>
 nnoremap <leader>q :quit<CR>

@@ -6,6 +6,7 @@ export EDITOR='vim'
 export LS_COLORS=$(cat ~/.vim/config/.dircolors)
 export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export RIPGREP_CONFIG_PATH=~/.vim/config/.ripgreprc
+export FZF_COMPLETION_TRIGGER='\'
 export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
@@ -157,6 +158,7 @@ alias gstp='git stash pop'
 alias gsts='git stash show --text'
 alias gsu='git submodule update'
 alias gts='git tag -s'
+alias gtree='git ls-files | tree --fromfile'
 alias gunignore='git update-index --no-assume-unchanged'
 alias gunwip='git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
 alias gup='git pull --rebase'
