@@ -390,7 +390,7 @@ function! s:LoadQuickUI(open_menu)
         \ ])
   call quickui#menu#install('&Git', [
         \ ['Git &Status', 'Git', 'Git status'],
-        \ ['Git Check&out Current', 'Gread', 'Checkout current file and load as unsaved buffer'],
+        \ ['Git Check&out Buffer', 'Gread', 'Checkout current file and load as unsaved buffer'],
         \ ['Git &Blame', 'Gblame', 'Git blame of current file'],
         \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last staged version'],
         \ ['Git &Changes', 'Git! difftool', 'Load unstaged changes into quickfix list (use [q, ]q to navigate)'],
@@ -562,8 +562,7 @@ function! s:MapAction(algorithm, key)
 endfunction
 command! -nargs=* -range GitHubURL :call <SID>GitHubURL(<count>, <line1>, <line2>, <f-args>)
 function! s:GitHubRun(...)
-  let l:command = join(a:000, ' | ')
-  return substitute(system(l:command), "\n", '', '')
+  return substitute(system(join(a:000, ' | ')), "\n", '', '')
 endfunction
 function! s:GitHubURL(count, line1, line2, ...)
   let l:get_remote = 'git remote -v | grep -E "github\.com.*\(fetch\)" | head -n 1'
