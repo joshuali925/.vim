@@ -33,7 +33,7 @@ nnoremap [<Space> O<Esc>
 nnoremap ]<Space> o<Esc>
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
-nnoremap <C-c> /qwe<CR>
+nnoremap <C-c> /qwe<CR>:<CR>
 nnoremap <leader>n *N
 vnoremap <leader>n y/<C-r>"<CR>N
 noremap <leader>y "+y
