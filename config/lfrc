@@ -3,6 +3,7 @@ set info size
 set dircounts
 set color256
 set icons
+set previewer ~/.vim/bin/lf-preview.sh
 
 cmd mkdir %mkdir -p $@
 cmd touch %touch $@
@@ -56,7 +57,7 @@ map ] push hjl
 map c :clear; unselect
 map gs !clear && git status
 map <a-c> dir-jump
-map I $bat --color=always --style='numbers,changes' --paging=always "$f"
+map I $bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always "$f"
 
 cmap <up> cmd-history-prev
 cmap <down> cmd-history-next

@@ -11,7 +11,7 @@ export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
 export FZF_ALT_C_COMMAND="rg --files --null | xargs -0 dirname | awk '!h[\$0]++'"
-export FZF_PREVIEW_COMMAND='bat --style=numbers --color=always --line-range :50 {}'
+export FZF_PREVIEW_COMMAND='bat --style=numbers --color=always --theme=OneHalfDark --line-range :50 {}'
 
 alias -- -='cd -'
 alias 1='cd -'
