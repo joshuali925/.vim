@@ -243,9 +243,9 @@ else
   call s:h("CursorLine", { "bg": s:cursor_grey }) " the screen line that the cursor is in when 'cursorline' is set
 endif
 call s:h("Directory", { "fg": s:blue }) " directory names (and other special names in listings)
-call s:h("DiffAdd", { "bg": s:green, "fg": s:black }) " diff mode: Added line
-call s:h("DiffChange", { "fg": s:yellow, "gui": "underline", "cterm": "underline" }) " diff mode: Changed line
-call s:h("DiffDelete", { "bg": s:red, "fg": s:black }) " diff mode: Deleted line
+call s:h("DiffAdd", { "fg": s:green }) " diff mode: Added line
+call s:h("DiffChange", { "fg": s:yellow }) " diff mode: Changed line
+call s:h("DiffDelete", { "fg": s:red }) " diff mode: Deleted line
 call s:h("DiffText", { "bg": s:yellow, "fg": s:black }) " diff mode: Changed text within a changed line
 if get(g:, 'onedark_hide_endofbuffer', 0)
     " If enabled, will style end-of-buffer filler lines (~) to appear to be hidden.

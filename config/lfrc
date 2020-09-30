@@ -3,7 +3,7 @@ set info size
 set dircounts
 set color256
 set icons
-set previewer ~/.vim/bin/lf-preview.sh
+set previewer ~/.vim/config/lf-preview.sh
 
 cmd mkdir %mkdir -p $@
 cmd touch %touch $@
@@ -57,7 +57,8 @@ map ] push hjl
 map c :clear; unselect
 map gs !clear && git status
 map <a-c> dir-jump
-map I $bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always "$f"
+map i $bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always "$f"
+map I $$PAGER "$f"
 
 cmap <up> cmd-history-prev
 cmap <down> cmd-history-next
@@ -111,6 +112,7 @@ cmd x %{{
   if [ -f $filename ] ; then
     case $filename in
       *.tar.bz2)   tar xvjf $filename    ;;
+      *.tar.xz)    tar xvJf $filename    ;;
       *.tar.gz)    tar xvzf $filename    ;;
       *.bz2)       bunzip2 $filename     ;;
       *.rar)       unrar x $filename     ;;
