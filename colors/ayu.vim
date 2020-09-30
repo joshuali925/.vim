@@ -94,6 +94,7 @@ exe "hi! LineNr"        .s:fg_guide       .s:bg_none        .s:fmt_none
 exe "hi! Directory"     .s:fg_fg_idle     .s:bg_none        .s:fmt_none
 exe "hi! DiffAdd"       .s:fg_string      .s:bg_panel       .s:fmt_none
 exe "hi! DiffChange"    .s:fg_tag         .s:bg_panel       .s:fmt_none
+exe "hi! DiffDelete"    .s:fg_markup      .s:bg_panel       .s:fmt_none
 exe "hi! DiffText"      .s:fg_fg          .s:bg_panel       .s:fmt_none
 exe "hi! ErrorMsg"      .s:fg_fg          .s:bg_error       .s:fmt_stnd
 exe "hi! VertSplit"     .s:fg_bg          .s:bg_none        .s:fmt_none
@@ -192,7 +193,7 @@ exe "hi! Conceal"         .s:fg_guide     .s:bg_none        .s:fmt_none
 exe "hi! CursorLineConceal" .s:fg_guide   .s:bg_line        .s:fmt_none
 
 
-" Terminal in NVIM
+" Terminal
 " ---------
 if has("nvim")
   let g:terminal_color_0 =  s:palette.bg[s:style]
@@ -213,6 +214,15 @@ if has("nvim")
   let g:terminal_color_15 = s:palette.comment[s:style]
   let g:terminal_color_background = g:terminal_color_0
   let g:terminal_color_foreground = s:palette.fg[s:style]
+else
+  let g:terminal_ansi_colors =  [s:palette.bg[s:style],      s:palette.markup[s:style]]
+  let g:terminal_ansi_colors += [s:palette.string[s:style],  s:palette.accent[s:style]]
+  let g:terminal_ansi_colors += [s:palette.tag[s:style],     s:palette.constant[s:style]]
+  let g:terminal_ansi_colors += [s:palette.regexp[s:style],  "#FFFFFF"]
+  let g:terminal_ansi_colors += [s:palette.fg_idle[s:style], s:palette.error[s:style]]
+  let g:terminal_ansi_colors += [s:palette.string[s:style],  s:palette.accent[s:style]]
+  let g:terminal_ansi_colors += [s:palette.tag[s:style],     s:palette.constant[s:style]]
+  let g:terminal_ansi_colors += [s:palette.regexp[s:style],  s:palette.comment[s:style]]
 endif
 
 
@@ -225,9 +235,9 @@ exe "hi! NERDTreeClosable"          .s:fg_accent      .s:bg_none        .s:fmt_n
 " exe "hi! NERDTreeBookmarkName"      .s:fg_keyword     .s:bg_none        .s:fmt_none
 " exe "hi! NERDTreeCWD"               .s:fg_pink        .s:bg_none        .s:fmt_none
 exe "hi! NERDTreeUp"                .s:fg_fg_idle    .s:bg_none        .s:fmt_none
-exe "hi! NERDTreeDir"               .s:fg_fg_idle    .s:bg_none        .s:fmt_none
-exe "hi! NERDTreeFile"              .s:fg_fg_idle    .s:bg_none        .s:fmt_none
-exe "hi! NERDTreeDirSlash"          .s:fg_guide      .s:bg_none        .s:fmt_none
+exe "hi! NERDTreeDir"               .s:fg_function   .s:bg_none        .s:fmt_none
+exe "hi! NERDTreeFile"              .s:fg_none       .s:bg_none        .s:fmt_none
+exe "hi! NERDTreeDirSlash"          .s:fg_accent     .s:bg_none        .s:fmt_none
 
 
 " GitGutter
