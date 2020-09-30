@@ -1,6 +1,6 @@
 " ==================== Settings ========================= {{{
 source <sfile>:p:h/colors/current_theme.vim  " load g:Theme value
-let s:Completion = 2  " 0: mucomplete, 1: YCM, 2: coc
+let s:Completion = 1  " 0: mucomplete, 1: coc
 let s:PythonPath = 'python3'
 let s:ExecCommand = ''
 " }}}
@@ -35,13 +35,9 @@ Plug 'markonm/traces.vim'
 if s:Completion >= 0
   Plug 'sirver/ultisnips'
   Plug 'honza/vim-snippets'
-  Plug 'davidhalter/jedi-vim', { 'for': 'python' }
   if s:Completion == 0
     Plug 'lifepillar/vim-mucomplete'
   elseif s:Completion == 1
-    Plug 'shougo/echodoc.vim'
-    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
-  elseif s:Completion == 2
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
   endif
 endif
@@ -61,11 +57,9 @@ let s:theme_list[0] = 'solarized8_flat'
 let s:theme_list[1] = 'PaperColor'
 let s:theme_list[2] = 'github'
 let s:theme_list[3] = 'one'
-let s:theme_list[4] = 'two-firewatch'
-let s:theme_list[5] = 'ayu'
-let s:theme_list[6] = 'material'
-let s:theme_list[7] = 'gruvbox'
-let s:theme_list[8] = 'gruvbox-material'
+let s:theme_list[4] = 'ayu'
+let s:theme_list[5] = 'material'
+let s:theme_list[6] = 'gruvbox-material'
 let s:theme_list[-1] = 'onedark'
 let s:theme_list[-2] = 'material'
 let s:theme_list[-3] = 'ayu'
@@ -73,11 +67,9 @@ let s:theme_list[-4] = 'dracula'
 let s:theme_list[-5] = 'nord'
 let s:theme_list[-6] = 'solarized8_flat'
 let s:theme_list[-7] = 'forest-night'
-let s:theme_list[-8] = 'gruvbox'
-let s:theme_list[-9] = 'gruvbox-material'
-let s:theme_list[-10] = 'two-firewatch'
-let s:theme_list[-11] = 'molokai'
-let g:material_terminal_italics = 1
+let s:theme_list[-8] = 'gruvbox-material'
+let s:theme_list[-9] = 'sonokai'
+let g:sonokai_style = 'andromeda'
 function! LoadColorscheme(index)
   let g:material_theme_style = a:index < 0 ? 'palenight' : 'lighter'
   let g:ayucolor = a:index < 0 ? 'mirage' : 'light'
@@ -223,8 +215,6 @@ xnoremap > >gv
 nnoremap gp `[v`]
 nnoremap cr :call <SID>EditRegister()<CR>
 nnoremap K :call <SID>LoadQuickUI(1)<CR>
-nnoremap [a :previous<CR>
-nnoremap ]a :next<CR>
 nnoremap [b :bprevious<CR>
 nnoremap ]b :bnext<CR>
 nnoremap [l :lprevious<CR>
@@ -283,7 +273,7 @@ nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunctionAll<CR>
-nnoremap <leader>fg :Leaderf! rg -F -e<Space>
+nnoremap <leader>fg :Leaderf! rg -F -e<Space>""<Left>
 xnoremap <leader>fg :<C-u><C-r>=printf('Leaderf! rg -F -e %s', leaderf#Rg#visual())<CR>
 nnoremap <leader>fG :LeaderfRgRecall<CR>
 nmap <leader>fj <Plug>LeaderfRgBangCwordLiteralBoundary<CR>
@@ -371,7 +361,7 @@ function! s:LoadQuickUI(open_menu)
   call quickui#menu#switch('normal')
   call quickui#menu#reset()
   call quickui#menu#install('&Actions', [
-        \ ['&Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55i=" | execute "Commentary"', 'Insert a dividing line'],
+        \ ['&Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "Commentary"', 'Insert a dividing line'],
         \ ['Insert Tim&e', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
         \ ['--', ''],
         \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
@@ -398,10 +388,8 @@ function! s:LoadQuickUI(open_menu)
         \ ['--', ''],
         \ ['Copy &Remote URL', 'GitHubURL', 'Copy github remote url'],
         \ ])
-  call quickui#menu#install('T&oggle', [
+  call quickui#menu#install('&Toggle', [
         \ ['Ne&trw', 'Lexplore', 'Toggle Vim Netrw'],
-        \ ['&Undo Tree', 'MundoToggle', 'Toggle undo tree'],
-        \ ['&Vista', 'Vista!!', 'Toggle Vista'],
         \ ['&Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
         \ ['Set &Diff         %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
         \ ['Set &Fold         %{&foldlevel ? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
@@ -445,7 +433,7 @@ function! s:LoadQuickUI(open_menu)
     endif
     call add(l:quickui_theme_list, [l:category. s:theme_list[l:index], "execute 'call writefile([\"let g:Theme = ". l:index. '"], "'. substitute(fnamemodify(expand('$MYVIMRC'), ':p:h'), '\', '\\\\', 'g'). "/colors/current_theme.vim\")' | call LoadColorscheme(". l:index. ')'])
   endfor
-  call quickui#menu#install('&Theme', l:quickui_theme_list)
+  call quickui#menu#install('&Color Scheme', l:quickui_theme_list)
   call quickui#menu#switch('visual')
   call quickui#menu#reset()
   call quickui#menu#install('&Git', [
@@ -477,26 +465,7 @@ function! s:LoadQuickUI(open_menu)
 endfunction
 function! s:OpenQuickUIContextMenu()
   let l:quickui_content = []
-  if s:Completion >= 0 && &filetype == 'python'
-    call add(l:quickui_content, ['Jedi Do&cumentation', 'call jedi#show_documentation()', 'Jedi documentation'])
-    call add(l:quickui_content, ['Jedi &Goto', 'call jedi#goto()', 'Jedi goto'])
-    call add(l:quickui_content, ['Jedi Definition', 'call jedi#goto_definitions()', 'Jedi definition'])
-    call add(l:quickui_content, ['Jedi Assignments', 'call jedi#goto_assignments()', 'Jedi assignments'])
-    call add(l:quickui_content, ['Jedi Stubs', 'call jedi#goto_stubs()', 'Jedi stubs'])
-    call add(l:quickui_content, ['Jedi Re&ferences', 'call jedi#usages()', 'Jedi references'])
-    call add(l:quickui_content, ['Jedi Rena&me', 'call jedi#rename()', 'Jedi rename'])
-    call add(l:quickui_content, ['--', ''])
-  endif
   if s:Completion == 1
-    call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
-    call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe definition'])
-    call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
-    call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe references'])
-    call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe implementation'])
-    call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe fix'])
-    call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
-    call add(l:quickui_content, ['--', ''])
-  elseif s:Completion == 2
     call add(l:quickui_content, ['Docu&mentation', 'call CocAction("doHover")', 'Coc documentation'])
     call add(l:quickui_content, ['D&efinition', 'execute "normal \<Plug>(coc-definition)"', 'Coc definition'])
     call add(l:quickui_content, ['&Type Definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc type definition'])
@@ -565,7 +534,7 @@ function! s:GitHubRun(...)
   return substitute(system(join(a:000, ' | ')), "\n", '', '')
 endfunction
 function! s:GitHubURL(count, line1, line2, ...)
-  let l:get_remote = 'git remote -v | grep -E "github\.com.*\(fetch\)" | head -n 1'
+  let l:get_remote = 'git remote -v | grep -E "^origin\s+.*github\.com.*\(fetch\)" | head -n 1'
   let l:get_username = 'sed -E "s/.*com[:\/](.*)\/.*/\\1/"'
   let l:get_repo = 'sed -E "s/.*com[:\/].*\/(.*).*/\\1/" | cut -d " " -f 1'
   let l:optional_ext = 'sed -E "s/\.git//"'
@@ -660,6 +629,7 @@ let g:startify_lists = [
       \ { 'type': 'sessions',  'header': ['   Sessions']       },
       \ ]
 let g:asyncrun_open = 12
+let g:vista_executive_for = { 'typescriptreact': 'coc' }
 let g:EasyMotion_smartcase = 1
 let g:mundo_preview_bottom = 1
 let g:mundo_width = 30
@@ -686,6 +656,7 @@ let g:Lf_NormalMap = { 'File': [['u', ':LeaderfFile ..<CR>']] }
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_WorkingDirectoryMode = 'Aa'
 let g:Lf_CacheDirectory = expand('~/.cache/')
+let g:Lf_CtagsFuncOpts = { 'typescriptreact': '--map-typescript=.tsx' }
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
@@ -739,20 +710,9 @@ endif
 " }}}
 
 " ==================== Auto complete ==================== {{{
-" let g:ycm_path_to_python_interpreter=''  " for ycmd, don't modify
-let g:ycm_python_binary_path=s:PythonPath  " for JediHTTP, comment out if venv doesn't work
-let g:echodoc_enable_at_startup = 1
 let g:UltiSnipsExpandTrigger = '<C-k>'
 let g:UltiSnipsJumpForwardTrigger = '<TAB>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
-let g:jedi#auto_initialization = 1
-let g:jedi#auto_vim_configuration = 0
-let g:jedi#completions_enabled = 0
-let g:jedi#show_call_signatures = '2'
-let g:jedi#documentation_command = '<leader>k'
-let g:jedi#goto_command = '<leader>d'
-let g:jedi#rename_command = '<leader>R'
-let g:jedi#goto_stubs_command = ''
 imap <expr> <CR> pumvisible() ? "\<Esc>a" : "\<C-g>u\<Plug>(PearTreeExpand)\<Space>\<BS>"
 if s:Completion == 0  " mucomplete
   set omnifunc=syntaxcomplete#Complete
@@ -761,22 +721,8 @@ if s:Completion == 0  " mucomplete
   inoremap <expr> <C-Space> pumvisible() ? "\<C-e>\<C-x>\<C-o>\<C-p>" : "\<C-x>\<C-o>\<C-p>"
   let g:mucomplete#enable_auto_at_startup = 1
   let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'file']}
-elseif s:Completion == 1  " YCM
-  inoremap <expr> <C-e> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-e>"
-  nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
-  nnoremap <leader>a :YcmCompleter FixIt<CR>
-  " let g:ycm_show_diagnostics_ui = 0
-  " let g:ycm_semantic_triggers = { 'c,cpp,python,java,javscript': ['re!\w{2}'] }  " auto semantic complete, can be slow
-  let g:ycm_collect_identifiers_from_comments_and_strings = 1
-  let g:ycm_complete_in_comments = 1
-  let g:ycm_complete_in_strings = 1
-  " for c include files, add to .ycm_extra_conf.py
-  " '-isystem',
-  " '/path/to/include'
-  let g:ycm_global_ycm_extra_conf = '~/.vim/config/.ycm_extra_conf.py'
-  let g:echodoc#enable_force_overwrite = 1
-elseif s:Completion == 2  " coc
-  let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python', 'coc-explorer', 'coc-yank']
+elseif s:Completion == 1  " coc
+  let g:coc_global_extensions = ['coc-git', 'coc-snippets', 'coc-highlight', 'coc-vimlsp', 'coc-tsserver', 'coc-html', 'coc-css', 'coc-emmet', 'coc-python', 'coc-explorer', 'coc-yank']
   " to manually install extensions, run :CocInstall coc-git coc-...
   " or run cd ~/.config/coc/extensions && yarn add coc-..., yarn cannot be cmdtest
   " in Windows run cd %LOCALAPPDATA%/coc/extensions && yarn add coc-...
@@ -797,6 +743,8 @@ elseif s:Completion == 2  " coc
   nnoremap <leader>fA :CocList<CR>
   nnoremap <leader>fy :CocList yank<CR>
   imap <C-k> <Plug>(coc-snippets-expand)
+  nmap [a <Plug>(coc-diagnostic-prev)
+  nmap ]a <Plug>(coc-diagnostic-next)
   nmap [g <Plug>(coc-git-prevchunk)
   nmap ]g <Plug>(coc-git-nextchunk)
   xmap if <Plug>(coc-funcobj-i)
@@ -812,11 +760,6 @@ endif
 
 " ====================== Terminal ======================= {{{
 if has('nvim')
-  let loaded_matchit = 1  " disable matchit
-  " let g:python_host_prog = '/usr/bin/python2.7'
-  " let g:python3_host_prog = '/usr/bin/python3.6'
-  " let g:loaded_python_provider = 1
-  " let g:loaded_python3_provider = 1
   augroup NvimTerminal
     autocmd!
     autocmd TermOpen * setlocal nonumber norelativenumber signcolumn=no | startinsert

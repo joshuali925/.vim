@@ -4,6 +4,9 @@ source ~/.vim/config/lf_icons.sh
 export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
 export EDITOR='vim'
 export LS_COLORS=$(cat ~/.vim/config/.dircolors)
+export BAT_PAGER='less -R'
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANROFFOPT='-c'
 export PYTHONSTARTUP=~/.vim/config/.pythonrc
 export RIPGREP_CONFIG_PATH=~/.vim/config/.ripgreprc
 export FZF_COMPLETION_TRIGGER='\'
@@ -202,6 +205,7 @@ x() {
   if [ -f $1 ] ; then
     case $1 in
       *.tar.bz2)   tar xvjf $1    ;;
+      *.tar.xz)    tar xvJf $1    ;;
       *.tar.gz)    tar xvzf $1    ;;
       *.bz2)       bunzip2 $1     ;;
       *.rar)       unrar x $1     ;;

@@ -680,3 +680,70 @@ map W $$SHELL
 " common.sh
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir" && [[ $PWD != $(cat "$HOME/.cache/lf_dir") ]] && cd "$(cat "$HOME/.cache/lf_dir")"'
 
+" =======================================================
+" nvim config
+  let loaded_matchit = 1  " disable matchit
+  " let g:python_host_prog = '/usr/bin/python2.7'
+  " let g:python3_host_prog = '/usr/bin/python3.6'
+  " let g:loaded_python_provider = 1
+  " let g:loaded_python3_provider = 1
+
+" =======================================================
+" jedi and youcompleteme
+if s:Completion >= 0
+  Plug 'davidhalter/jedi-vim', { 'for': 'python' }
+  elseif s:Completion == 1
+    Plug 'shougo/echodoc.vim'
+    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
+endif
+  if s:Completion >= 0 && &filetype == 'python'
+    call add(l:quickui_content, ['Jedi Do&cumentation', 'call jedi#show_documentation()', 'Jedi documentation'])
+    call add(l:quickui_content, ['Jedi &Goto', 'call jedi#goto()', 'Jedi goto'])
+    call add(l:quickui_content, ['Jedi Definition', 'call jedi#goto_definitions()', 'Jedi definition'])
+    call add(l:quickui_content, ['Jedi Assignments', 'call jedi#goto_assignments()', 'Jedi assignments'])
+    call add(l:quickui_content, ['Jedi Stubs', 'call jedi#goto_stubs()', 'Jedi stubs'])
+    call add(l:quickui_content, ['Jedi Re&ferences', 'call jedi#usages()', 'Jedi references'])
+    call add(l:quickui_content, ['Jedi Rena&me', 'call jedi#rename()', 'Jedi rename'])
+    call add(l:quickui_content, ['--', ''])
+  endif
+  if s:Completion == 1
+    call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
+    call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe definition'])
+    call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
+    call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe references'])
+    call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe implementation'])
+    call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe fix'])
+    call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
+    call add(l:quickui_content, ['--', ''])
+" let g:ycm_path_to_python_interpreter=''  " for ycmd, don't modify
+let g:ycm_python_binary_path=s:PythonPath  " for JediHTTP, comment out if venv doesn't work
+let g:echodoc_enable_at_startup = 1
+let g:jedi#auto_initialization = 1
+let g:jedi#auto_vim_configuration = 0
+let g:jedi#completions_enabled = 0
+let g:jedi#show_call_signatures = '2'
+let g:jedi#documentation_command = '<leader>k'
+let g:jedi#goto_command = '<leader>d'
+let g:jedi#rename_command = '<leader>R'
+let g:jedi#goto_stubs_command = ''
+elseif s:Completion == 1  " YCM
+  inoremap <expr> <C-e> pumvisible() ? "\<C-e>\<Esc>a" : "\<C-e>"
+  nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
+  nnoremap <leader>a :YcmCompleter FixIt<CR>
+  " let g:ycm_show_diagnostics_ui = 0
+  " let g:ycm_semantic_triggers = { 'c,cpp,python,java,javscript': ['re!\w{2}'] }  " auto semantic complete, can be slow
+  let g:ycm_collect_identifiers_from_comments_and_strings = 1
+  let g:ycm_complete_in_comments = 1
+  let g:ycm_complete_in_strings = 1
+  " for c include files, add to .ycm_extra_conf.py
+  " '-isystem',
+  " '/path/to/include'
+  let g:ycm_global_ycm_extra_conf = '~/.vim/config/.ycm_extra_conf.py'
+  let g:echodoc#enable_force_overwrite = 1
+
+" =======================================================
+" to find '~/.vim/config/.ycm_extra_conf.py' and fish configs, see commit before 22874af1f0031634770005b467b65e603e759b2d
+ln -sr ~/.vim/config/fish ~/.config/fish
+# fish
+sudo apt-add-repository -y ppa:fish-shell/release-3
+sudo apt install -y fish

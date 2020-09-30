@@ -15,7 +15,6 @@ ln -sr ~/.vim/config/.gitconfig ~/.gitconfig
 ln -sr ~/.vim/config/lfrc ~/.config/lf/lfrc
 ln -sr ~/.vim/config/nvim ~/.config/nvim
 ln -sr ~/.vim/config/lazygit_config.yml ~/.config/jesseduffield/lazygit/config.yml
-ln -sr ~/.vim/config/fish ~/.config/fish
 
 # zsh inscure directories fix:
 # compaudit | xargs chmod g-w
@@ -45,10 +44,6 @@ chmod u+x tmux.appimage
 mv squashfs-root ~/.local/tmux
 ln -sr ~/.local/tmux/usr/bin/tmux ~/.local/bin/tmux
 rm tmux.appimage
-
-# fish
-sudo apt-add-repository -y ppa:fish-shell/release-3
-sudo apt install -y fish
 
 # yarn
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
