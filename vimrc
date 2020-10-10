@@ -19,14 +19,15 @@ Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-'] }
-Plug 'dahu/vim-fanfingtastic', { 'on': ['<Plug>fanfingtastic_' ] }
 Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'Gblame', 'Ggrep', 'Glgrep', 'Gdiffsplit', 'Gread'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKeyVisual'] }
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
 Plug 'tpope/vim-surround', { 'on': ['<Plug>Dsurround', '<Plug>Csurround', '<Plug>CSurround', '<Plug>Ysurround', '<Plug>YSurround', '<Plug>Yssurround', '<Plug>YSsurround', '<Plug>VSurround', '<Plug>VgSurround'] }
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }  " load on insert doesn't work
+Plug 'thezeroalpha/vim-lf', { 'on': ['<Plug>Lf'] }
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
+Plug 'dahu/vim-fanfingtastic'  " lazy load breaks ct/cf
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
 Plug 'wellle/targets.vim'
 Plug 'tpope/vim-repeat'
@@ -141,6 +142,7 @@ set path=**
 set list
 set listchars=tab:→\ ,nbsp:␣,trail:•
 set encoding=utf-8
+set timeout
 set timeoutlen=1500
 set ttimeoutlen=40
 set synmaxcol=500
@@ -157,6 +159,7 @@ inoremap <F2> <Esc>gT
 inoremap <F3> <Esc>gt
 noremap <F2> gT
 noremap <F3> gt
+nmap <expr> <C-q> tabpagenr('$') > 1 ? 'gt' : "\<Space>"
 imap <Space> <Plug>(PearTreeSpace)
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
@@ -256,6 +259,7 @@ nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
 nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
+nmap <C-p> <Plug>LfEdit
 nmap <C-f> :call <SID>LoadAutoformat()<CR><C-f>
 imap <C-f> <Esc>:call <SID>LoadAutoformat()<CR>V<C-f>A
 xmap <C-f> :<C-u>call <SID>LoadAutoformat()<CR>gv<C-f>
@@ -269,7 +273,6 @@ nmap <leader>m :call <SID>LoadQuickUI(0)<CR><leader>m
 noremap <leader>y "+y
 noremap <leader>p "0p
 noremap <leader>P "0P
-nnoremap <leader>ff :LeaderfFile<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunctionAll<CR>
@@ -284,6 +287,7 @@ nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfCommand<CR>
 nnoremap <leader>ft :LeaderfBufTagAll<CR>
 nnoremap <leader>fw :LeaderfWindow<CR>
+nnoremap <leader>f/ :LeaderfLineAll<CR>
 nnoremap <leader>fs :vertical sfind \c*
 nnoremap <leader>fy :registers<CR>:normal! "p<Left>
 nnoremap <leader>fY :registers<CR>:normal! "P<Left>
@@ -309,6 +313,7 @@ nnoremap <leader>W :write !sudo tee %<CR>
 nnoremap <leader>q :call <SID>Quit(0)<CR>
 nnoremap <leader>x :call <SID>Quit(1)<CR>
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
+cnoremap <expr> <Backspace> '/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<Backspace><Backspace><Backspace><Backspace><Backspace>' : '<Backspace>'
 " }}}
 
 " ====================== Autocmd ======================== {{{
@@ -353,7 +358,7 @@ function! s:LoadQuickUI(open_menu)
   nnoremap <leader>m :call quickui#menu#open('normal')<CR>
   xnoremap <leader>m :<C-u>call quickui#menu#open('visual')<CR>
   nnoremap K :call <SID>OpenQuickUIContextMenu()<CR>
-  nnoremap <silent> <leader>tp :call quickui#terminal#open('zsh', {'h': winheight(0) * 3/4, 'w': winwidth(0) * 4/5, 'line': winheight(0) * 1/6, 'callback': 'FloatTermExit'})<CR>
+  nnoremap <silent> <leader>tp :call quickui#terminal#open('zsh', {'h': winheight(0) * 3/4, 'w': winwidth(0) * 4/5, 'line': winheight(0) * 1/6, 'callback': ''})<CR>
   let g:quickui_color_scheme = g:Theme < 0 ? 'papercol' : 'solarized'
   let g:quickui_show_tip = 1
   let g:quickui_border_style = 2
@@ -365,17 +370,17 @@ function! s:LoadQuickUI(open_menu)
         \ ['Insert Tim&e', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
         \ ['--', ''],
         \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
-        \ ['Trim &Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
+        \ ['&Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
         \ ['Format as JSO&N', 'execute "update | %!python3 -m json.tool" | keeppatterns %s;^\(\s\+\);\=repeat(" ", len(submatch(0))/2);g | execute "normal! ``"', 'Use `python3 -m json.tool` to format current buffer'],
         \ ['--', ''],
         \ ['Open &Buffers', 'call quickui#tools#list_buffer("e")'],
         \ ['Open &Functions', 'call quickui#tools#list_function()'],
-        \ ['Open &Terminal', 'call quickui#terminal#open("zsh", {"h": winheight(0) * 3/4, "w": winwidth(0) * 4/5, "line": winheight(0) * 1/6, "callback": "FloatTermExit"})', 'Open terminal as popup window: <leader>tp'],
-        \ ['--', ''],
+        \ ['Open &Startify', 'Startify', 'Open vim-startify'],
         \ ['Save Sessi&on', 'SSave', 'Save as a new session using vim-startify'],
         \ ['&Delete Session', 'SDelete', 'Delete a session using vim-startify'],
         \ ['--', ''],
         \ ['Edit Vimr&c', 'edit $MYVIMRC'],
+        \ ['View &Markdown', 'MarkdownPreview', 'Open markdown preview'],
         \ ['Open in &VSCode', "execute \"silent !code --goto '\" . expand(\"%\") . \":\" . line(\".\") . \":\" . col(\".\") . \"'\" | redraw!"],
         \ ])
   call quickui#menu#install('&Git', [
@@ -390,16 +395,15 @@ function! s:LoadQuickUI(open_menu)
         \ ])
   call quickui#menu#install('&Toggle', [
         \ ['Ne&trw', 'Lexplore', 'Toggle Vim Netrw'],
-        \ ['&Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
-        \ ['Set &Diff         %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
-        \ ['Set &Fold         %{&foldlevel ? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
-        \ ['Set &Wrap         %{&wrap ? "[x]" :"[ ]"}', 'set wrap!', 'Toggle wrap lines'],
-        \ ['Set &Paste        %{&paste ? "[x]" :"[ ]"}', 'execute &paste ? "set nopaste number mouse=a signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
-        \ ['Set &Spelling     %{&spell ? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
-        \ ['Set Pre&view      %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview'],
-        \ ['Set CursorLi&ne   %{&cursorline ? "[x]" :"[ ]"}', 'set cursorline!', 'Toggle cursorline'],
-        \ ['Set Cursor&Column %{&cursorcolumn ? "[x]" :"[ ]"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
-        \ ['Set &Background %{&background=~"dark" ? "Light" :"Dark"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color'],
+        \ ['Set &Diff             %{&diff ? "[x]" :"[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
+        \ ['Set &Fold             %{&foldlevel ? "[ ]" :"[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
+        \ ['Set &Wrap             %{&wrap ? "[x]" :"[ ]"}', 'set wrap!', 'Toggle wrap lines'],
+        \ ['Set &Paste            %{&paste ? "[x]" :"[ ]"}', 'execute &paste ? "set nopaste number mouse=a signcolumn=auto" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
+        \ ['Set &Spelling         %{&spell ? "[x]" :"[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
+        \ ['Set Pre&view          %{&completeopt=~"preview" ? "[x]" :"[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview'],
+        \ ['Set CursorLi&ne       %{&cursorline ? "[x]" :"[ ]"}', 'set cursorline!', 'Toggle cursorline'],
+        \ ['Set Cursor&Column     %{&cursorcolumn ? "[x]" :"[ ]"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
+        \ ['Set Light &Background %{&background=~"light" ? "[x]" :"[ ]"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color'],
         \ ])
   call quickui#menu#install('Ta&bular', [
         \ ['Align Using = (delimiter fixed)', 'Tabularize /=\zs', 'Tabularize /=\zs'],
@@ -486,9 +490,6 @@ endfunction
 " }}}
 
 " ====================== Functions ====================== {{{
-function! FloatTermExit(code)
-  setlocal number signcolumn=auto
-endfunction
 function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text_objects_with_custom_functions
   let l:sel_save = &selection
   let l:cb_save = &clipboard
@@ -646,7 +647,7 @@ let g:Lf_MruWildIgnore = { 'dir':['.git'], 'file':[] }
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_UseCache = 0
-let g:Lf_ShortcutF = '<C-p>'
+let g:Lf_ShortcutF = '<leader>ff'
 let g:Lf_WindowPosition = 'popup'
 let g:Lf_PreviewInPopup = 1
 let g:Lf_RgStorePattern = 'g'
@@ -663,6 +664,7 @@ let g:table_mode_motion_up_map = '<leader>tk'
 let g:table_mode_motion_down_map = '<leader>tj'
 let g:table_mode_motion_right_map = '<leader>tl'
 let g:table_mode_corner = '|'  " markdown compatible tablemode
+let g:mkdp_auto_close = 0  " markdown-preview.nvim
 let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c', 'bash=sh']  " should work without plugins
 " }}}
 
@@ -768,6 +770,7 @@ if has('nvim')
   augroup END
   tnoremap <F2> <C-\><C-n>gT
   tnoremap <F3> <C-\><C-n>gt
+  tmap <expr> <C-q> tabpagenr('$') > 1 ? "\<C-\>\<C-n>gt" : "\<C-\>\<C-n>\<Space>"
   tnoremap <C-u> <C-\><C-n>
   tnoremap <Esc> <C-\><C-n>
   tnoremap <silent> <C-h> <C-\><C-n>:TmuxNavigateLeft<CR>
@@ -780,8 +783,7 @@ if has('nvim')
   nnoremap <leader>tv :vsplit <bar> terminal<CR>
   nnoremap <leader>tt :tabedit <bar> terminal<CR>
   nmap <leader>tp :call <SID>LoadQuickUI(0)<CR><leader>tp
-  call <SID>MapAction('SendToNvimTerminal', '<leader>te')
-  function! s:SendToNvimTerminal(str)
+  function! s:SendToTerminal(str)
     let l:job_id = -1
     for l:buff_n in tabpagebuflist()
       if nvim_buf_get_name(l:buff_n) =~ 'term://'
@@ -801,11 +803,12 @@ else
   set viminfo+=n~/.cache/vim/viminfo
   augroup VimTerminal
     autocmd!
-    autocmd TerminalOpen * setlocal nonumber norelativenumber signcolumn=no
+    autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no
   augroup END
   " do not tmap <Esc> in vim 8
   tnoremap <F2> <C-w>gT
   tnoremap <F3> <C-w>gt
+  tnoremap <expr> <C-q> tabpagenr('$') > 1 ? "\<C-w>gt" : "\<C-w>:bnext\<CR>"
   tnoremap <C-u> <C-\><C-n>
   tnoremap <silent> <C-h> <C-w>:TmuxNavigateLeft<CR>
   tnoremap <silent> <C-j> <C-w>:TmuxNavigateDown<CR>
@@ -817,7 +820,6 @@ else
   nnoremap <leader>tv :vertical terminal ++close<CR>
   nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
   nmap <leader>tp :call <SID>LoadQuickUI(0)<CR><leader>tp
-  call <SID>MapAction('SendToTerminal', '<leader>te')
   function! s:SendToTerminal(str)
     let l:buff_n = term_list()
     if len(l:buff_n) > 0
@@ -831,6 +833,7 @@ else
     endif
   endfunction
 endif
+call <SID>MapAction('SendToTerminal', '<leader>te')
 " }}}
 
 " ================== System specific ==================== {{{
@@ -849,17 +852,9 @@ if has('gui_running')
   endif
   if has('win32')
     " Windows gVim
-    set guifont=Consolas_NF:h11:cANSI
-    set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 version need to match
+    set guifont=JetBransMono_NF:h10:cANSI
+    set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 versions need to match
     let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
-    function! s:ActivatePyEnv(environment)
-      if a:environment == ''
-        silent execute '!venv & '. g:gVimPath. expand('%:p')
-      else
-        silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
-      endif
-    endfunction
-    command! -nargs=* Activate call <SID>ActivatePyEnv(<q-args>) <bar> quit
     nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
     nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
   elseif has('gui_vimr')
@@ -886,10 +881,8 @@ if has('gui_running')
   endif
 elseif has('macunix')
   " iTerm2 vim
-  inoremap <C-a> <C-o>^
-  noremap <C-a> ^
-  inoremap <C-e> <C-o>$
-  noremap <C-e> $
+  " do not xnoremap <Esc> for faster escaping in visual mode
+  inoremap <Esc><Backspace> <C-w>
   inoremap <Esc>f <C-o>w
   nnoremap <Esc>f w
   inoremap <Esc>b <C-o>b

@@ -57,7 +57,7 @@ map ] push hjl
 map c :clear; unselect
 map gs !clear && git status
 map <a-c> dir-jump
-map i $bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always "$f"
+map i $~/.vim/config/lf-preview.sh "$f" | bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always
 map I $$PAGER "$f"
 
 cmap <up> cmd-history-prev

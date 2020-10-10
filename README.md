@@ -82,19 +82,23 @@ export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
 
 # add lazygit config
 ln -sr ~/.vim/config/lazygit_config.yml ~/Library/Application\ Support/jesseduffield/lazygit/config.yml
+
+# install applications
+brew cask install iterm2
+brew cask install rectangle
+brew cask install maccy
+brew cask install karabiner-elements
+brew cask install visual-studio-code
 ```
 - set up shortcuts, option command shortcuts are for Karabiner
 ```markdown
 Keyboard -> Shortcuts 
     -> Services -> Searching -> Look Up in Dictionary: option command t
-    -> App Shortcuts -> Add new -> Tile Window to Right of Screen: control right
-    -> App Shortcuts -> Add new -> Tile Window to Left of Screen: control left
-    -> App Shortcuts -> Add new -> Zoom: control up
-    -> App Shortcuts -> Add new -> Minimize: control down
-    -> App Shortcuts -> Add new -> Enter Full Screen: control shift up
-    -> App Shortcuts -> Add new -> Exit Full Screen: control shift up
 iTerm2 -> Preferences -> Profiles -> Keys -> Presets... -> Natural Text Editing
-Clipy -> Preferences -> Shortcuts -> History -> control shift v
+                                  -> Terminal -> uncheck Save lines to scrollback in alternative screen mode
+Maccy -> Preferences -> Hotkey -> control shift v
+      -> Behavior -> Paste automatically (cmd + shift + enter pastes without formatting)
+      -> History size -> 999
 ```
 - set up [Karabiner](https://karabiner-elements.pqrs.org/)
 ```bash
