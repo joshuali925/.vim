@@ -747,3 +747,40 @@ ln -sr ~/.vim/config/fish ~/.config/fish
 # fish
 sudo apt-add-repository -y ppa:fish-shell/release-3
 sudo apt install -y fish
+
+" =======================================================
+" Windows gVim activate python virtualenv
+    function! s:ActivatePyEnv(environment)
+      if a:environment == ''
+        silent execute '!venv & '. g:gVimPath. expand('%:p')
+      else
+        silent execute '!activate '. a:environment. ' & '. g:gVimPath. expand('%:p')
+      endif
+    endfunction
+    command! -nargs=* Activate call <SID>ActivatePyEnv(<q-args>) <bar> quit
+
+" =======================================================
+function! FloatTermExit(code)
+  setlocal number signcolumn=auto
+endfunction
+" quickmenu open float terminal, toggle markdown
+        \ ['Open &Terminal', 'call quickui#terminal#open("zsh", {"h": winheight(0) * 3/4, "w": winwidth(0) * 4/5, "line": winheight(0) * 1/6, "callback": "FloatTermExit"})', 'Open terminal as popup window: <leader>tp'],
+        \ ['&Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
+
+" =======================================================
+" doesn't work in neovim
+function! s:LF()
+    let l:temp = tempname()
+    execute 'silent !lf -selection-path='. shellescape(l:temp). ' "'. expand('%:p'). '"'
+    if !filereadable(l:temp)
+        redraw!
+        return
+    endif
+    for l:name in readfile(l:temp)
+        execute 'edit ' . fnameescape(l:name)
+    endfor
+    redraw!
+endfunction
+nnoremap <C-p> :call <SID>LF()<CR>
+" change ../plugged/vim-lf/autoload/lf.vim to have better terminal width/height
+    let winid = popup_dialog(buf, #{minwidth: max([80, winwidth(0) * 4/5]), minheight: max([20, winheight(0) * 3/4]), highlight: 'Normal'})
