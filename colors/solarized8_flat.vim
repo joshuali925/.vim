@@ -49,6 +49,7 @@ hi! link Structure Type
 hi! link Tag Special
 hi! link Typedef Type
 hi! link lCursor Cursor
+hi! link markdownItalic Normal
 
 if (has('termguicolors') && &termguicolors) || has('gui_running')
   if &background ==# 'dark'

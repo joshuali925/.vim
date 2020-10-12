@@ -784,3 +784,75 @@ endfunction
 nnoremap <C-p> :call <SID>LF()<CR>
 " change ../plugged/vim-lf/autoload/lf.vim to have better terminal width/height
     let winid = popup_dialog(buf, #{minwidth: max([80, winwidth(0) * 4/5]), minheight: max([20, winheight(0) * 3/4]), highlight: 'Normal'})
+
+" =======================================================
+nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
+nnoremap <CR> :
+  autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
+  autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
+
+
+" =======================================================
+" Shell command, use asyncrun/terminal instead
+command! -complete=shellcmd -nargs=+ Shell call <SID>RunShellCommand(<q-args>)
+let s:OutputCount = 1
+function! s:RunShellCommand(command)
+  let l:expanded_command = substitute(a:command, './%<', './'. fnameescape(expand('%<')), '')
+  let l:expanded_command = substitute(l:expanded_command, '%<', fnameescape(expand('%<')), '')
+  let l:expanded_command = substitute(l:expanded_command, '%', fnameescape(expand('%')), '')
+  let l:curr_bufnr = bufwinnr('%')
+  let l:win_remain = winnr('$')
+  while l:win_remain > 1 && bufname('%') !~ '[Output_'
+    execute 'wincmd w'
+    let l:win_remain = l:win_remain - 1
+  endwhile
+  if bufname('%') =~ '[Output_'
+    setlocal modifiable
+    execute '%d'
+  else
+    botright new
+    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile norelativenumber wrap nocursorline nocursorcolumn
+    silent execute '0f | file [Output_'. s:OutputCount. '] | resize '. (winheight(0) * 4/5)
+    let s:OutputCount = s:OutputCount + 1
+  endif
+  call setline(1, 'Run: '. l:expanded_command)
+  call setline(2, substitute(getline(1), '.', '=', 'g'))
+  execute '$read !'. l:expanded_command
+  setlocal nomodifiable
+  execute l:curr_bufnr. 'wincmd w'
+endfunction
+
+" =======================================================
+" use quickui or surround
+xnoremap " c"<C-r><C-p>""<Esc>
+xnoremap ' c'<C-r><C-p>"'<Esc>
+xnoremap ` c`<C-r><C-p>"`<Esc>
+xnoremap ( c(<C-r><C-p>")<Esc>
+xnoremap [ c[<C-r><C-p>"]<Esc>
+xnoremap { c{<C-r><C-p>"}<Esc>
+xnoremap <Space> c<Space><C-r><C-p>"<Space><Esc>
+" use unimpaired.vim instead
+nnoremap [b :bprevious<CR>
+nnoremap ]b :bnext<CR>
+nnoremap [B :bfirst<CR>
+nnoremap ]B :blast<CR>
+nnoremap [l :lprevious<CR>
+nnoremap ]l :lnext<CR>
+nnoremap [L :lfirst<CR>
+nnoremap ]L :llast<CR>
+nnoremap [q :cprevious<CR>
+nnoremap ]q :cnext<CR>
+nnoremap [Q :cfirst<CR>
+nnoremap ]Q :clast<CR>
+nnoremap [t :tprevious<CR>
+nnoremap ]t :tnext<CR>
+nnoremap [T :tfirst<CR>
+nnoremap ]T :tlast<CR>
+nnoremap [e :move .-2<CR>==
+nnoremap ]e :move .+1<CR>==
+xnoremap [e :move '<-2<CR>gv=gv
+xnoremap ]e :move '>+1<CR>gv=gv
+nnoremap [<Space> O<Esc>
+nnoremap ]<Space> o<Esc>
+nnoremap [p O<C-r>"<Esc>
+nnoremap ]p o<C-r>"<Esc>
