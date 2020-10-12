@@ -106,7 +106,7 @@ cmd paste-symlink %{{
   fi
 }}
 
-cmd x %{{
+cmd x ${{
   set -f
   filename="$(basename "$f")"
   if [ -f $filename ] ; then

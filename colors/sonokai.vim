@@ -2070,4 +2070,5 @@ highlight! link helpSectionDelim Grey
 " }}}
 
 " vim: set sw=2 ts=2 sts=2 et tw=80 ft=vim fdm=marker fmr={{{,}}}:
+hi! link markdownItalic Normal
 hi Comment cterm=NONE

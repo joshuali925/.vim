@@ -2240,3 +2240,4 @@ call s:apply_syntax_highlightings()
 " =============================================================================
 " Cheers!
 " vim: fdm=marker ff=unix
+hi! link markdownItalic Normal
