@@ -538,3 +538,4 @@ endif
 " }}}
 
 " }}}
+hi! link markdownItalic Normal
