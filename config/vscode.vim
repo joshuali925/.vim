@@ -1,54 +1,200 @@
-set nocompatible
-set viminfo=
-set noswapfile
-set nobackup
-set nowritebackup
-let mapleader=';'
+call plug#begin('~/.vim/plugged/vscode')
+" change these in plugged/vscode/vim-easymotion/autoload/EasyMotion.vim after installing easymotion to limit line range instead of whole file
+" let win_first_line = max([line('w0'), line('.') - 20]) " visible first line num
+" let win_last_line  = min([line('w$'), line('.') + 20]) " visible last line num
+Plug 'asvetliakov/vim-easymotion'
+Plug 'dahu/vim-fanfingtastic'
+Plug 'machakann/vim-swap'
+Plug 'machakann/vim-sandwich'
+Plug 'tpope/vim-repeat'
+Plug 'dhruvasagar/vim-table-mode'
+call plug#end()
 
-noremap , ;
-noremap ;, ,
+set whichwrap+=<,>,[,]
+set ignorecase
+set smartcase
+
+let mapleader=';'
+map <BS> gT
+map \ gt
+map f <Plug>fanfingtastic_f
+map t <Plug>fanfingtastic_t
+map F <Plug>fanfingtastic_F
+map T <Plug>fanfingtastic_T
+map , <Plug>fanfingtastic_;
+map ;, <Plug>fanfingtastic_,
+map S <Plug>(easymotion-bd-w)
+map ;; <Plug>(easymotion-prefix)
+map gc <Plug>VSCodeCommentary
+nmap gcc <Plug>VSCodeCommentaryLine
+for char in [ '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
+  execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
+  execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
+  execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vf'. char. '<CR>'
+  execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
+endfor
+omap ia <Plug>(swap-textobject-i)
+xmap ia <Plug>(swap-textobject-i)
+omap aa <Plug>(swap-textobject-a)
+xmap aa <Plug>(swap-textobject-a)
+nmap ys <Plug>(operator-sandwich-add)
+nmap <silent> yss <Plug>(operator-sandwich-add)iw
+nmap yS ysg_
+nmap ds <Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)
+nmap dss <Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
+nmap cs <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)
+nmap css <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
+xmap s <Plug>(operator-sandwich-add)
+xmap s< <Plug>(operator-sandwich-add)t
+xnoremap i<Space> iW
+onoremap i<Space> iW
+xnoremap a<Space> aW
+onoremap a<Space> aW
+xnoremap il ^og_
+onoremap <silent> il :normal vil<CR>
+xnoremap al 0o$
+onoremap <silent> al :normal val<CR>
 noremap 0 ^
 noremap ^ 0
 nnoremap - $
-vnoremap - $h
-noremap <C-h> <C-w>h
-noremap <C-j> <C-w>j
-noremap <C-k> <C-w>k
-noremap <C-l> <C-w>l
-noremap <Home> g^
-noremap <End> g$
-noremap <Down> gj
-noremap <Up> gk
+xnoremap - g_
+noremap g- g$
+map <Down> gj
+map <Up> gk
 nnoremap Y y$
+xnoremap < <gv
+xnoremap > >gv
 nnoremap gp `[v`]
-nnoremap ZZ :wq<CR>
-nnoremap ZQ :q!<CR>
-vnoremap < <gv
-vnoremap > >gv
-nnoremap <BS> gT
-nnoremap \ gt
-nnoremap [b gT
-nnoremap ]b gt
+nnoremap <C-c> :nohlsearch<CR>
+nnoremap <C-b> :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
+nnoremap <C-f> :call VSCodeNotify('editor.action.formatDocument')<CR>
+xnoremap <C-f> =
+nnoremap <leader>r :call VSCodeNotify('code-runner.run')<CR>
+noremap <leader>y "+y
+nnoremap <leader>Y "+y$
+noremap <leader>p "0p
+noremap <leader>P "0P
+nnoremap <leader>ff :call VSCodeNotify('workbench.action.quickOpen')<CR>
+nnoremap <leader>fm :call VSCodeNotify('workbench.action.openRecent')<CR>
+nnoremap <leader>fb :call VSCodeNotify('workbench.files.action.focusFilesExplorer')<CR>
+nnoremap <leader>fu :call VSCodeNotify('workbench.action.gotoSymbol')<CR>
+nnoremap <leader>ft :call VSCodeNotify('workbench.action.showAllSymbols')<CR>
+nnoremap <leader>fg :call VSCodeNotify('workbench.view.search')<CR>
+xnoremap <leader>fg <Cmd>call VSCodeNotifyRangePos('workbench.action.findInFiles', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1)<CR>
+nnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': expand('<cword>')})<CR>
+xnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': <SID>GetVisualSelection() })<CR>
+nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
+nnoremap <leader>fy :registers<CR>
+nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
+xnoremap <leader>n "xy/\V<C-r>"<CR>N
+nnoremap <leader>u :call VSCodeNotify('timeline.focus')<CR>
+nnoremap <leader>v :call VSCodeNotify('outline.focus')<CR>
+nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
+xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
+nnoremap <leader>l :call <SID>PrintCurrVars(0, 0)<CR>
+xnoremap <leader>l :<C-u>call <SID>PrintCurrVars(1, 0)<CR>$
+nnoremap <leader>L :call <SID>PrintCurrVars(0, 1)<CR>
+xnoremap <leader>L :<C-u>call <SID>PrintCurrVars(1, 1)<CR>$
+nnoremap <leader>b :call VSCodeNotify('workbench.action.focusSideBar')<CR>
+nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
+nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
+nnoremap <leader>q :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
+cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
+
+nnoremap Z[ :call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
+nnoremap Z] :call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
+nnoremap [g :call VSCodeNotify('workbench.action.editor.previousChange')<CR>
+nnoremap ]g :call VSCodeNotify('workbench.action.editor.nextChange')<CR>
+nnoremap [a :call VSCodeNotify('editor.action.marker.prev')<CR>
+nnoremap ]a :call VSCodeNotify('editor.action.marker.next')<CR>
+nmap [b gT
+nmap ]b gt
+nnoremap [e :call VSCodeNotify('editor.action.moveLinesUpAction')<CR>
+xnoremap [e <Cmd>call VSCodeNotifyRange('editor.action.moveLinesUpAction', line('v'), line('.'), 1)<CR>
+nnoremap ]e :call VSCodeNotify('editor.action.moveLinesDownAction')<CR>
+xnoremap ]e <Cmd>call VSCodeNotifyRange('editor.action.moveLinesDownAction', line('v'), line('.'), 1)<CR>
 nnoremap [<Space> O<Esc>
 nnoremap ]<Space> o<Esc>
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
-nnoremap <C-c> /qwe<CR>:<CR>
-nnoremap <leader>n *N
-vnoremap <leader>n y/<C-r>"<CR>N
-noremap <leader>y "+y
-noremap <leader>p "0p
-noremap <leader>P "0P
-inoremap <leader>w <Esc>:write<CR>
-nnoremap <leader>w :write<CR>
-nnoremap <leader>q :quit<CR>
 
-nnoremap <leader>1 1gt
-nnoremap <leader>2 2gt
-nnoremap <leader>3 3gt
-nnoremap <leader>4 4gt
-nnoremap <leader>5 5gt
-nnoremap <leader>6 6gt
-nnoremap <leader>7 7gt
-nnoremap <leader>8 8gt
-nnoremap <leader>9 9gt
+nnoremap gr :call VSCodeNotify('references-view.find')<CR>
+nnoremap <leader>a :call VSCodeNotify('editor.action.quickFix')<CR>
+nnoremap <leader>R :call VSCodeNotify('editor.action.rename')<CR>
+nnoremap <leader>d :call VSCodeNotify('references-view.findImplementations')<CR>
+
+nnoremap <leader>to :call VSCodeNotify('workbench.action.terminal.focus')<CR>
+nnoremap <leader>tt :call VSCodeNotify('workbench.action.terminal.newWithCwd', { 'cwd': '${fileDirname}' })<CR>
+nnoremap <leader>te :call VSCodeNotify('workbench.action.terminal.runSelectedText')<CR>
+xnoremap <leader>te <Cmd>call VSCodeNotifyRange('workbench.action.terminal.runSelectedText', line('v'), line('.'), 1)<CR>
+
+nnoremap zc :call VSCodeNotify('editor.fold')<CR>
+nnoremap zC :call VSCodeNotify('editor.foldRecursively')<CR>
+nnoremap zo :call VSCodeNotify('editor.unfold')<CR>
+nnoremap zO :call VSCodeNotify('editor.unfoldRecursively')<CR>
+nnoremap za :call VSCodeNotify('editor.toggleFold')<CR>
+nnoremap zm :call VSCodeNotify('editor.foldAll')<CR>
+nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
+nnoremap zr :call VSCodeNotify('editor.unfoldAll')<CR>
+nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
+
+nnoremap H :call VSCodeExtensionNotify('move-cursor', 'top')<CR>
+xnoremap H 10k
+nnoremap M :call VSCodeExtensionNotify('move-cursor', 'middle')<CR>
+nnoremap L :call VSCodeExtensionNotify('move-cursor', 'bottom')<CR>
+xnoremap L 10j
+
+" nnoremap <C-d> :call VSCodeExtensionCall('scroll', 'halfPage', 'down')<CR>
+nnoremap <C-d> 15j
+xnoremap <C-d> 15j
+" nnoremap <C-u> :call VSCodeExtensionCall('scroll', 'halfPage', 'up')<CR>
+nnoremap <C-u> 15k
+xnoremap <C-u> 15k
+
+function! s:GetVisualSelection()
+  let [l:line_start, l:column_start] = getpos("'<")[1:2]
+  let [l:line_end, l:column_end] = getpos("'>")[1:2]
+  let l:lines = getline(l:line_start, l:line_end)
+  if len(l:lines) == 0
+    return ''
+  endif
+  let l:lines[-1] = l:lines[-1][: l:column_end - (&selection == 'inclusive' ? 1 : 2)]
+  let l:lines[0] = l:lines[0][l:column_start - 1:]
+  return join(l:lines, "\n")
+endfunction
+function! s:PrintCurrVars(visual, printAbove)
+  let l:new_line = "normal! o\<Space>\<BS>"
+  if a:printAbove
+    let l:new_line = "normal! O\<Space>\<BS>"
+  endif
+  if a:visual  " print selection
+    let l:vars = [getline('.')[getpos("'<")[2] - 1:getpos("'>")[2] - 1]]
+  elseif getline('.') =~ '[^a-zA-Z0-9_,\[\]. ]\|[a-zA-Z0-9_\]]\s\+\w'  " print variable under cursor if line not comma separated
+    let l:vars = [expand('<cword>')]
+  else  " print variables on current line separated by commas
+    let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
+    let l:new_line = "normal! cc\<Space>\<BS>"
+  endif
+  let l:print = {}
+  let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
+  let l:print['javascript'] = 'console.log(`'. join(map(copy(l:vars), "v:val. ': ${'. v:val. '}'"), ' | '). '`);'
+  let l:print['javascriptreact'] = l:print['javascript']
+  let l:print['typescript'] = l:print['javascript']
+  let l:print['typescriptreact'] = l:print['javascript']
+  let l:print['java'] = 'System.out.println('. join(map(copy(l:vars), "'\"'. v:val. ': \" + '. v:val"), ' + " | " + '). ');'
+  let l:print['vim'] = 'echomsg '. join(map(copy(l:vars), "\"'\". v:val. \": '. \". v:val"), ". ' | '. ")
+  if has_key(l:print, &filetype)
+    execute l:new_line
+    call append(line('.'), l:print[&filetype])
+    normal! J
+  endif
+endfunction
+
+let g:sandwich_no_default_key_mappings = 1
+let g:operator_sandwich_no_default_key_mappings = 1
+let g:table_mode_tableize_map = ''
+let g:table_mode_motion_left_map = '<leader>th'
+let g:table_mode_motion_up_map = '<leader>tk'
+let g:table_mode_motion_down_map = '<leader>tj'
+let g:table_mode_motion_right_map = '<leader>tl'
+let g:table_mode_corner = '|'  " markdown compatible tablemode

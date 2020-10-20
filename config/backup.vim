@@ -644,18 +644,18 @@ let g:any_jump_search_prefered_engine = 'rg'
 " =======================================================
 " https://gist.github.com/romainl/c0a8b57a36aec71a986f1120e1931f20
 for char in [ '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
-	execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
-	execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
-	execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vf'. char. '<CR>'
-	execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
+  execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
+  execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
+  execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vf'. char. '<CR>'
+  execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
 endfor
 xnoremap <silent> in :<C-u>call <SID>VisualNumber()<CR>
 onoremap <silent> in :normal vin<CR>
 function! s:VisualNumber()
-	call search('\d\([^0-9\.]\|$\)', 'cW')
-	normal! v
-	call search('\(^\|[^0-9\.]\d\)', 'becW')
-	normal! o
+  call search('\d\([^0-9\.]\|$\)', 'cW')
+  normal! v
+  call search('\(^\|[^0-9\.]\d\)', 'becW')
+  normal! o
 endfunction
 
 " =======================================================
@@ -787,6 +787,7 @@ nnoremap <C-p> :call <SID>LF()<CR>
 
 " =======================================================
 nnoremap <leader>l :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> let @/='QwQ'<CR><C-l>
+nnoremap <leader>b :buffers<CR>:buffer<Space>
 nnoremap <CR> :
   autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
@@ -856,3 +857,42 @@ nnoremap [<Space> O<Esc>
 nnoremap ]<Space> o<Esc>
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
+
+" =======================================================
+" sneak
+Plug 'justinmk/vim-sneak', { 'on': '<Plug>Sneak_' }
+map f <Plug>Sneak_f
+map F <Plug>Sneak_F
+map t <Plug>Sneak_t
+map T <Plug>Sneak_T
+map , <Plug>Sneak_;
+map ;, <Plug>Sneak_,
+map <F99> <Plug>Sneak_s<Plug>Sneak_S  " disable mapping for s
+nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>:call sneak#cancel() <bar> echo<CR>
+
+" =======================================================
+" vem-tabline
+Plug 'pacha/vem-tabline'
+set statusline=%<[%{mode()}]\ %F\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
+map <expr> <F2> tabpagenr('$') > 1 ? 'gT' : '<Plug>vem_prev_buffer-'
+map <expr> <F3> tabpagenr('$') > 1 ? 'gt' : '<Plug>vem_next_buffer-'
+map <BS> <Plug>vem_prev_buffer-
+map \ <Plug>vem_next_buffer-
+nnoremap <leader>1 :VemTablineGo 1<CR>
+nnoremap <leader>2 :VemTablineGo 2<CR>
+nnoremap <leader>3 :VemTablineGo 3<CR>
+nnoremap <leader>4 :VemTablineGo 4<CR>
+nnoremap <leader>5 :VemTablineGo 5<CR>
+nnoremap <leader>6 :VemTablineGo 6<CR>
+nnoremap <leader>7 :VemTablineGo 7<CR>
+nnoremap <leader>8 :VemTablineGo 8<CR>
+nnoremap <leader>9 :VemTablineGo 9<CR>
+        \ ['&1. Move Buffer Left', 'call feedkeys("\<Plug>vem_move_buffer_left-", "")', 'Use vem-tabline to move buffer'],
+        \ ['&2. Move Buffer Right', 'call feedkeys("\<Plug>vem_move_buffer_right-", "")', 'Use vem-tabline to move buffer'],
+        \ ['&3. Move Tab Left', '-tabmove'],
+        \ ['&4. Move Tab Right', '+tabmove'],
+let g:vem_tabline_show_number = 'index'
+let g:vem_tabline_show = 2
+let g:vem_tabline_multiwindow_mode = 0
+  tmap <expr> <F2> tabpagenr('$') > 1 ? '<C-\><C-n>gT' : '<C-\><C-n><Plug>vem_prev_buffer-'
+  tmap <expr> <F3> tabpagenr('$') > 1 ? '<C-\><C-n>gt' : '<C-\><C-n><Plug>vem_next_buffer-'

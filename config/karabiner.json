@@ -34,7 +34,7 @@
           },
           "to": [
             {
-              "shell_command": "open -a 'Google Chrome'"
+              "shell_command": "(pgrep Chrome && open -a 'Google Chrome') || (open -a 'Firefox')"
             }
           ]
         },
