@@ -7,8 +7,7 @@ set previewer ~/.vim/config/lf-preview.sh
 
 cmd mkdir %mkdir -p $@
 cmd touch %touch $@
-cmd mv %mv -i "$f" $@
-cmd cp %cp -i "$f" $@
+cmd vim !vim $@
 cmd rg !clear && rg $@
 cmd code %code .
 cmd pwd %echo $f

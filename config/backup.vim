@@ -792,9 +792,8 @@ nnoremap <CR> :
   autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
 
-
 " =======================================================
-" Shell command, use asyncrun/terminal instead
+" Shell command, use asyncrun/terminal instead, github copy remote
 command! -complete=shellcmd -nargs=+ Shell call <SID>RunShellCommand(<q-args>)
 let s:OutputCount = 1
 function! s:RunShellCommand(command)
@@ -821,6 +820,39 @@ function! s:RunShellCommand(command)
   execute '$read !'. l:expanded_command
   setlocal nomodifiable
   execute l:curr_bufnr. 'wincmd w'
+endfunction
+command! -nargs=* -range GitHubURL :call <SID>GitHubURL(<count>, <line1>, <line2>, <f-args>)
+function! s:GitHubRun(...)
+  return substitute(system(join(a:000, ' | ')), "\n", '', '')
+endfunction
+function! s:GitHubURL(count, line1, line2, ...)
+  let l:get_remote = 'git remote -v | grep -E "^origin\s+.*github\.com.*\(fetch\)" | head -n 1'
+  let l:get_username = 'sed -E "s/.*com[:\/](.*)\/.*/\\1/"'
+  let l:get_repo = 'sed -E "s/.*com[:\/].*\/(.*).*/\\1/" | cut -d " " -f 1'
+  let l:optional_ext = 'sed -E "s/\.git//"'
+  if len(a:000) == 0
+    let l:username = s:GitHubRun(l:get_remote, l:get_username)
+    let l:repo = s:GitHubRun(l:get_remote, l:get_repo, l:optional_ext)
+  elseif len(a:000) == 1
+    let l:username = a:000[0]
+    let l:repo = s:GitHubRun(l:get_remote, l:get_repo, l:optional_ext)
+  elseif len(a:000) == 2
+    let l:username = a:000[0]
+    let l:repo = a:000[1]
+  else
+    return 'Too many arguments'
+  endif
+  let l:commit = s:GitHubRun('git rev-parse HEAD')
+  let l:repo_root = s:GitHubRun('git rev-parse --show-toplevel')
+  let l:file_path = substitute(expand('%:p'), l:repo_root . '/', '', 'e')
+  let l:url = join(['https://github.com', l:username, l:repo, 'blob', l:commit, l:file_path], '/')
+  if a:count == -1
+    let l:line = '#L' . line('.')
+  else
+    let l:line = '#L' . a:line1 . '-L' . a:line2
+  endif
+  let @+ = l:url. l:line
+  echom 'Copied: '. l:url. l:line
 endfunction
 
 " =======================================================
@@ -896,3 +928,15 @@ let g:vem_tabline_show = 2
 let g:vem_tabline_multiwindow_mode = 0
   tmap <expr> <F2> tabpagenr('$') > 1 ? '<C-\><C-n>gT' : '<C-\><C-n><Plug>vem_prev_buffer-'
   tmap <expr> <F3> tabpagenr('$') > 1 ? '<C-\><C-n>gt' : '<C-\><C-n><Plug>vem_next_buffer-'
+
+" =======================================================
+function! LightlineCurrFunction() abort
+  return get(b:, 'vista_nearest_method_or_function', '')
+endfunction
+let g:lightline.component_function = {
+      \   'method': 'LightlineCurrFunction',
+      \ }
+
+" =======================================================
+" javascript log prints object as string
+  let l:print['javascript'] = 'console.log(`'. join(map(copy(l:vars), "v:val. ': ${'. v:val. '}'"), ' | '). '`);'
