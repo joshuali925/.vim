@@ -2,10 +2,10 @@
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-[[ ! -f ~/.zinit/bin/zinit.zsh ]] && command git clone https://github.com/zdharma/zinit ~/.zinit/bin
+[[ ! -f ~/.zinit/bin/zinit.zsh ]] && command git clone https://github.com/zdharma/zinit --depth 1 ~/.zinit/bin
 source ~/.zinit/bin/zinit.zsh
 
 zinit depth=1 light-mode for romkatv/powerlevel10k
@@ -20,37 +20,42 @@ zinit depth=1 light-mode for romkatv/powerlevel10k
 #     sbin jesseduffield/lazygit
 
 zinit as"completion" for \
-    https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
-    https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg
+  https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
+  https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
+  https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
+  https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose
 
 zinit light-mode for \
-    atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
-    FAST_HIGHLIGHT[chroma-man]=" \
-    zdharma/fast-syntax-highlighting \
-    atload"!_zsh_autosuggest_start; \
-    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan'; \
-    ZSH_AUTOSUGGEST_STRATEGY=(history completion); \
-    ZSH_AUTOSUGGEST_HISTORY_IGNORE=\"?(#c150,)\"; \
-    ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(up-line-or-beginning-search down-line-or-beginning-search); \
-    ZSH_AUTOSUGGEST_MANUAL_REBIND=1; \
-    ZSH_AUTOSUGGEST_USE_ASYNC=1" \
-    zsh-users/zsh-autosuggestions
+  atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
+  FAST_HIGHLIGHT[chroma-man]=" \
+  zdharma/fast-syntax-highlighting \
+  atload"!_zsh_autosuggest_start; \
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan'; \
+  ZSH_AUTOSUGGEST_STRATEGY=(history completion); \
+  ZSH_AUTOSUGGEST_HISTORY_IGNORE=\"?(#c150,)\"; \
+  ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(up-line-or-beginning-search down-line-or-beginning-search); \
+  ZSH_AUTOSUGGEST_MANUAL_REBIND=1; \
+  ZSH_AUTOSUGGEST_USE_ASYNC=1" \
+  zsh-users/zsh-autosuggestions \
+  supercrabtree/k
 
+# vim <tab>: files in current directory or args completion
+# vim <C-p>: all files in current and subdirectories, respects .gitignore
+# vim \<tab>: all files in current and subdirectories
 source ~/.vim/config/oh-my-zsh-key-bindings.zsh
-source ~/.vim/config/fzf/completion.zsh
 source ~/.vim/config/fzf/key-bindings.zsh
+source ~/.vim/config/fzf/completion.zsh
+zinit light Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
 
 source ~/.vim/config/common.sh
 
 autoload -Uz compinit && compinit -u
 zinit cdreplay -q
-# zpcompinit
-# autoload -U colors && colors
 
 WORDCHARS=${WORDCHARS/\/}
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=50000
-SAVEHIST=10000
+SAVEHIST=40000
 
 [[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
 unsetopt no_match
@@ -71,27 +76,29 @@ setopt hist_find_no_dups
 setopt hist_expire_dups_first
 setopt hist_ignore_dups
 setopt hist_ignore_space
-setopt hist_reduce_blanks
 setopt hist_verify
-setopt hist_ignore_space
 
 zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ":completion:*:git-checkout:*" sort false
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -CF --color=always -1 $realpath'
 
 alias history='builtin fc -l 1'
+alias k='k -h'
 
 up-line-or-local-history() {
-    zle set-local-history 1
-    zle up-line-or-history
-    zle set-local-history 0
+  zle set-local-history 1
+  zle up-line-or-history
+  zle set-local-history 0
 }
 zle -N up-line-or-local-history
 down-line-or-local-history() {
-    zle set-local-history 1
-    zle down-line-or-history
-    zle set-local-history 0
+  zle set-local-history 1
+  zle down-line-or-history
+  zle set-local-history 0
 }
 zle -N down-line-or-local-history
 

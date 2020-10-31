@@ -6,8 +6,10 @@ Plug 'asvetliakov/vim-easymotion'
 Plug 'dahu/vim-fanfingtastic'
 Plug 'machakann/vim-swap'
 Plug 'machakann/vim-sandwich'
-Plug 'tpope/vim-repeat'
+Plug 'gcmt/wildfire.vim'
+Plug 'michaeljsmith/vim-indent-object'
 Plug 'dhruvasagar/vim-table-mode'
+Plug 'tpope/vim-repeat'
 call plug#end()
 
 set whichwrap+=<,>,[,]
@@ -15,8 +17,9 @@ set ignorecase
 set smartcase
 
 let mapleader=';'
-map <BS> gT
-map \ gt
+nmap <BS> gT
+nmap \ gt
+map <Space> <Plug>(wildfire-fuel)
 map f <Plug>fanfingtastic_f
 map t <Plug>fanfingtastic_t
 map F <Plug>fanfingtastic_F
@@ -24,13 +27,12 @@ map T <Plug>fanfingtastic_T
 map , <Plug>fanfingtastic_;
 map ;, <Plug>fanfingtastic_,
 map S <Plug>(easymotion-bd-w)
-map ;; <Plug>(easymotion-prefix)
 map gc <Plug>VSCodeCommentary
 nmap gcc <Plug>VSCodeCommentaryLine
-for char in [ '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
+for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
   execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
   execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
-  execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vf'. char. '<CR>'
+  execute 'xnoremap a'. char. ' :<C-u>normal! T'. char. 'vf'. char. '<CR>'
   execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
 endfor
 omap ia <Plug>(swap-textobject-i)
@@ -46,15 +48,11 @@ nmap cs <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)
 nmap css <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
 xmap s <Plug>(operator-sandwich-add)
 xmap s< <Plug>(operator-sandwich-add)t
-xnoremap i<Space> iW
-onoremap i<Space> iW
-xnoremap a<Space> aW
-onoremap a<Space> aW
 xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
-noremap 0 ^
+noremap <expr> 0 col('.') - 1 == match(getline('.'), '\S') ? '0' : '^'
 noremap ^ 0
 nnoremap - $
 xnoremap - g_
@@ -68,6 +66,7 @@ nnoremap gp `[v`]
 nnoremap <C-c> :nohlsearch<CR>
 nnoremap <C-b> :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
 nnoremap <C-f> :call VSCodeNotify('editor.action.formatDocument')<CR>
+nnoremap <leader><C-f> :call VSCodeNotify('editor.action.formatChanges')<CR>
 xnoremap <C-f> =
 nnoremap <leader>r :call VSCodeNotify('code-runner.run')<CR>
 noremap <leader>y "+y
@@ -86,20 +85,21 @@ xnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query'
 nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
-xnoremap <leader>n "xy/\V<C-r>"<CR>N
-nnoremap <leader>u :call VSCodeNotify('timeline.focus')<CR>
-nnoremap <leader>v :call VSCodeNotify('outline.focus')<CR>
+xnoremap <leader>n "xy/\V<C-r>=escape(@x, '/\')<CR><CR>N
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 nnoremap <leader>l :call <SID>PrintCurrVars(0, 0)<CR>
-xnoremap <leader>l :<C-u>call <SID>PrintCurrVars(1, 0)<CR>$
+xnoremap <leader>l :<C-u>call <SID>PrintCurrVars(1, 0)<CR>
 nnoremap <leader>L :call <SID>PrintCurrVars(0, 1)<CR>
-xnoremap <leader>L :<C-u>call <SID>PrintCurrVars(1, 1)<CR>$
+xnoremap <leader>L :<C-u>call <SID>PrintCurrVars(1, 1)<CR>
 nnoremap <leader>b :call VSCodeNotify('workbench.action.focusSideBar')<CR>
 nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
 nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
 nnoremap <leader>q :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
 cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
+
+nnoremap <leader>l mx"xyiwoconsole.log('<C-r>x', <C-r>x);<Esc>`x
+nnoremap <leader>L mx"xyiwOconsole.log('<C-r>x', <C-r>x);<Esc>`x
 
 nnoremap Z[ :call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
 nnoremap Z] :call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
@@ -119,6 +119,8 @@ nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 
 nnoremap gr :call VSCodeNotify('references-view.find')<CR>
+nnoremap Ku :call VSCodeNotify('git.revertSelectedRanges')<CR>
+nmap Kd gh
 nnoremap <leader>a :call VSCodeNotify('editor.action.quickFix')<CR>
 nnoremap <leader>R :call VSCodeNotify('editor.action.rename')<CR>
 nnoremap <leader>d :call VSCodeNotify('references-view.findImplementations')<CR>
@@ -177,21 +179,31 @@ function! s:PrintCurrVars(visual, printAbove)
   endif
   let l:print = {}
   let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
-  let l:print['javascript'] = 'console.log(`'. join(map(copy(l:vars), "v:val. ': ${'. v:val. '}'"), ' | '). '`);'
+  let l:print['javascript'] = 'console.log('. join(map(copy(l:vars), "\"'\". v:val. \":', \". v:val"), ", '|', "). ');'
   let l:print['javascriptreact'] = l:print['javascript']
   let l:print['typescript'] = l:print['javascript']
   let l:print['typescriptreact'] = l:print['javascript']
   let l:print['java'] = 'System.out.println('. join(map(copy(l:vars), "'\"'. v:val. ': \" + '. v:val"), ' + " | " + '). ');'
   let l:print['vim'] = 'echomsg '. join(map(copy(l:vars), "\"'\". v:val. \": '. \". v:val"), ". ' | '. ")
   if has_key(l:print, &filetype)
+    let l:pos = getcurpos()
     execute l:new_line
     call append(line('.'), l:print[&filetype])
-    normal! J
+    join
+    call setpos('.', l:pos)
   endif
 endfunction
 
+let g:wildfire_objects = {
+      \ '*' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'i>', 'ii', 'aI'],
+      \ 'javascript,typescript,typescriptreact' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'at', 'aI'],
+      \ 'python' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'ai', 'ii'],
+      \ }
 let g:sandwich_no_default_key_mappings = 1
 let g:operator_sandwich_no_default_key_mappings = 1
+let g:EasyMotion_do_mapping = 0
+let g:EasyMotion_smartcase = 1
+let g:EasyMotion_do_shade = 0
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
