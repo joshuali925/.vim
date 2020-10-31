@@ -32,16 +32,17 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias ......='cd ../../../../..'
-alias mkdir='mkdir -p'
+alias mv='mv -iv'
+alias cp='cp -riv'
+alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto'
 alias la='ls -AF --color=auto'
 alias ls='ls -CF --color=auto'
 alias l='ls -CF --color=auto'
 alias size='du -h --max-depth=1 | sort -hr'
 alias path='echo -e ${PATH//:/\\n}'
-alias file_permission='stat --printf "%a %n \n"'
+alias chmod\?='stat --printf "%a %n \n"'
 alias v='vim'
-alias vp='vim $($(fc -ln -1))'
 alias vimm='vim ~/.vim/vimrc'
 alias which='type -a'
 alias gacp='git add -A && git commit -m "update" && git push origin master'
@@ -185,7 +186,12 @@ gdf() {
   git diff --color "$@" | diff-so-fancy | less --tabs=4 -RFX
 }
 
-printcolor() {
+printcolors() {
+  printf 'Foreground 256 colors\n'
+  for i in {0..255}; do printf '\e[38;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
+  printf '\n\nBackground 256 colors\n'
+  for i in {0..255}; do printf '\e[48;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
+  printf '\e[0m\n\n'
   awk -v term_cols="${width:-$(tput cols || echo 80)}" 'BEGIN{
     s="/\\";
     for (colnum = 0; colnum<term_cols; colnum++) {
@@ -193,10 +199,10 @@ printcolor() {
       g = (colnum*510/term_cols);
       b = (colnum*255/term_cols);
       if (g>255) g = 510-g;
-        printf "\033[48;2;%d;%d;%dm", r,g,b;
-        printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
-        printf "%s\033[0m", substr(s,colnum%2+1,1);
-      }
+      printf "\033[48;2;%d;%d;%dm", r,g,b;
+      printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
+      printf "%s\033[0m", substr(s,colnum%2+1,1);
+    }
     printf "\n";
   }'
 }

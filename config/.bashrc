@@ -3,11 +3,11 @@
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
-    . /etc/bashrc
+  . /etc/bashrc
 fi
 
 [[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && \
-    . /usr/share/bash-completion/bash_completion
+  . /usr/share/bash-completion/bash_completion
 
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=
@@ -40,19 +40,19 @@ bind '"\eOB": history-search-forward'
 bind '"\C-xa": shell-expand-line'
 
 cd() {
-    if [ "$1" == "" ]; then
-        pushd "$HOME" > /dev/null
-    elif [ "$1" == "-" ]; then
-        builtin cd "$OLDPWD" > /dev/null
-    elif [[ "$1" =~ ^-[0-9]+$ ]]; then
-        pushd +${1/-/} > /dev/null
-    elif [ "$1" == "--" ]; then
-        shift
-        pushd -- "$@" > /dev/null
-    else
-        pushd "$@" > /dev/null
-    fi
-    ls -ACF
+  if [ "$1" == "" ]; then
+    pushd "$HOME" > /dev/null
+  elif [ "$1" == "-" ]; then
+    builtin cd "$OLDPWD" > /dev/null
+  elif [[ "$1" =~ ^-[0-9]+$ ]]; then
+    pushd +${1/-/} > /dev/null
+  elif [ "$1" == "--" ]; then
+    shift
+    pushd -- "$@" > /dev/null
+  else
+    pushd "$@" > /dev/null
+  fi
+  ls -ACF
 }
 complete -d cd
 
