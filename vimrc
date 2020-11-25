@@ -21,9 +21,12 @@ Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': '<Plug>(easymotion-' }
-Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'Gblame', 'Ggrep', 'Glgrep', 'Gdiffsplit', 'Gread'] }
+Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'Gbrowse', 'Gblame', 'Ggrep', 'Glgrep', 'Gdiffsplit', 'Gread', 'Gedit'] }
+Plug 'tpope/vim-rhubarb', { 'on': ['Gbrowse'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
-Plug 'suy/vim-context-commentstring', { 'for': 'typescriptreact' }  " need to disable CursorMoved autocmd and call UpdateCommentString before <Plug>Commentary
+" comment out CursorMoved autocmd in plugged/vim-context-commentstring/plugin/context-commentstring.vim:23, change s:UpdateCommentString to UpdateCommentString
+" add "if &filetype == 'typescriptreact' | call UpdateCommentString() | endif" to plugged/vim-commentary/plugin/commentary.vim:28 in s:go()
+Plug 'suy/vim-context-commentstring', { 'for': 'typescriptreact' }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKeyVisual'] }
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
 Plug 'machakann/vim-swap', { 'on': '<Plug>(swap-' }
@@ -181,6 +184,9 @@ map T <Plug>fanfingtastic_T
 map , <Plug>fanfingtastic_;
 map ;, <Plug>fanfingtastic_,
 map S <Plug>(easymotion-bd-w)
+map <leader>e <Plug>(easymotion-lineanywhere)
+map <leader>j <Plug>(easymotion-sol-j)
+map <leader>k <Plug>(easymotion-sol-k)
 map gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
@@ -367,80 +373,80 @@ function! s:LoadQuickUI(open_menu)
   call quickui#menu#switch('normal')
   call quickui#menu#reset()
   call quickui#menu#install('&Actions', [
-        \ ['&Insert Line', 'execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "Commentary"', 'Insert a dividing line'],
-        \ ['Insert Tim&e', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
+        \ ['&Insert line', 'execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "Commentary"', 'Insert a dividing line'],
+        \ ['Insert tim&e', "put=strftime('%x %X')", 'Insert MM/dd/yyyy hh:mm:ss tt'],
         \ ['--', ''],
-        \ ['&Word Count', 'call feedkeys("g\<C-g>")', 'Show document details'],
-        \ ['&Trim Spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
-        \ ['Format as JSO&N', 'execute "update | %!python3 -m json.tool" | keeppatterns %s;^\(\s\+\);\=repeat(" ", len(submatch(0))/2);g | execute "normal! ``"', 'Use `python3 -m json.tool` to format current buffer'],
+        \ ['&Word count', 'call feedkeys("g\<C-g>")', 'Show document details'],
+        \ ['&Trim spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
+        \ ['Cou&nt occurrences', 'keeppatterns %s///gn | execute "normal! ``"', 'Count occurrences of current search pattern'],
+        \ ['Search in &buffers', 'execute "cexpr [] | bufdo vimgrepadd //g %" | copen', 'Grep current search pattern in all buffers, add to quickfix'],
         \ ['--', ''],
-        \ ['Open &Buffers', 'call quickui#tools#list_buffer("e")'],
-        \ ['Open &Functions', 'call quickui#tools#list_function()'],
+        \ ['Move tab left &-', '-tabmove'],
+        \ ['Move tab right &+', '+tabmove'],
+        \ ['Move buffer rightmost &>', 'call MoveBufferRight()', 'Wipe out current buffer and reopen, will lose temporary variables'],
+        \ ['&Refresh screen', 'execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"', 'Show WhichKey for ;'],
+        \ ['--', ''],
         \ ['Open WhichKe&y', 'WhichKey ";"', 'Show WhichKey for ;'],
-        \ ['&Refresh Screen', 'execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"', 'Show WhichKey for ;'],
-        \ ['--', ''],
-        \ ['Move Tab Left &-', '-tabmove'],
-        \ ['Move Tab Right &+', '+tabmove'],
-        \ ['Move Buffer Rightmost &>', 'call MoveBufferRight()', 'Wipe out current buffer and reopen, will lose temporary variables'],
-        \ ['--', ''],
         \ ['Open &Startify', 'Startify', 'Open vim-startify'],
-        \ ['Save Sessi&on', 'SSave', 'Save as a new session using vim-startify'],
-        \ ['&Delete Session', 'SDelete', 'Delete a session using vim-startify'],
+        \ ['Save sessi&on', 'SSave', 'Save as a new session using vim-startify'],
+        \ ['&Delete session', 'SDelete', 'Delete a session using vim-startify'],
         \ ['--', ''],
         \ ['Edit Vimr&c', 'edit $MYVIMRC'],
         \ ['Open in &VSCode', "execute \"silent !code --goto '\" . expand(\"%\") . \":\" . line(\".\") . \":\" . col(\".\") . \"'\" | redraw!"],
         \ ])
   call quickui#menu#install('&Git', [
-        \ ['Git &Status', 'Git', 'Git status'],
-        \ ['Git Checko&ut File', 'Gread', 'Checkout current file and load as unsaved buffer'],
-        \ ['Git &Blame', 'Gblame', 'Git blame of current file'],
-        \ ['Git &Diff', 'Gdiffsplit', 'Diff current file with last staged version'],
-        \ ['Git Diff H&EAD', 'Gdiffsplit HEAD', 'Diff current file with last committed version'],
-        \ ['Git &Changes', 'Git! difftool', 'Load unstaged changes into quickfix list (use [q, ]q to navigate)'],
-        \ ['Git &File History', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed versions of current file'],
-        \ ['Git L&og', 'Git log --decorate --all', 'Show git logs (use <CR> to navigate)'],
+        \ ['Git &status', 'Git', 'Git status'],
+        \ ['Git checko&ut file', 'Gread', 'Checkout current file and load as unsaved buffer'],
+        \ ['Git &blame', 'Gblame', 'Git blame of current file'],
+        \ ['Git &diff', 'Gdiffsplit', 'Diff current file with last staged version'],
+        \ ['Git diff H&EAD', 'Gdiffsplit HEAD', 'Diff current file with last committed version'],
+        \ ['Git &changes', 'Git! difftool', 'Load unstaged changes into quickfix list (use [q, ]q to navigate)'],
+        \ ['Git &file history', 'call plug#load("vim-fugitive") | vsplit | 0Gclog', 'Browse previously committed versions of current file'],
+        \ ['Git l&og', 'Git log --decorate --all --full-history', 'Show git logs (use <CR>/- to navigate)'],
         \ ['--', ''],
-        \ ['Git Search &All', 'call feedkeys(":Git log -p --all -S \"\"\<Left>", "")', 'Search a string in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
-        \ ['Git G&rep All', 'call feedkeys(":Git log -p --all -G \"\"\<Left>", "")', 'Search a regex in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
-        \ ['Git Fi&nd Files All', 'call feedkeys(":Git log --all --full-history --name-only -- \"**/**\"\<Left>\<Left>", "")', 'Grep file names in all commits'],
+        \ ['Git search &all', 'call feedkeys(":Git log -p --all -S \"\"\<Left>", "n")', 'Search a string in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
+        \ ['Git gre&p all', 'call feedkeys(":Git log -p --all -G \"\"\<Left>", "n")', 'Search a regex in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
+        \ ['Git fi&nd files all', 'call feedkeys(":Git log --all --full-history --name-only -- \"**\"\<Left>\<Left>", "n")', 'Grep file names in all commits'],
+        \ ['--', ''],
+        \ ['Git open &remote', 'Gbrowse', 'Open remote url in browser'],
         \ ])
   call quickui#menu#install('&Toggle', [
         \ ['Quick&fix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"'],
-        \ ['Location L&ist        %{empty(filter(getwininfo(), "v:val.loclist")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"'],
-        \ ['Set &Diff             %{&diff ? "[x]" : "[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
-        \ ['Set F&old             %{&foldlevel ? "[ ]" : "[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
-        \ ['Set &Wrap             %{&wrap ? "[x]" : "[ ]"}', 'set wrap!', 'Toggle wrap lines'],
-        \ ['Set &Paste            %{&paste ? "[x]" : "[ ]"}', 'execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
-        \ ['Set &Spelling         %{&spell ? "[x]" : "[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
-        \ ['Set &Virtualedit      %{&virtualedit=~#"all" ? "[x]" : "[ ]"}', 'execute &virtualedit=~#"all" ? "set virtualedit-=all" : "set virtualedit+=all"', 'Toggle virtualedit'],
-        \ ['Set Previ&ew          %{&completeopt=~"preview" ? "[x]" : "[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview'],
-        \ ['Set &CursorLine       %{&cursorline ? "[x]" : "[ ]"}', 'set cursorline!', 'Toggle cursorline'],
-        \ ['Set CursorCol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
-        \ ['Set Light &Background %{&background=~"light" ? "[x]" : "[ ]"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color'],
+        \ ['Location l&ist        %{empty(filter(getwininfo(), "v:val.loclist")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"'],
+        \ ['Set &diff             %{&diff ? "[x]" : "[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
+        \ ['Set f&old             %{&foldlevel ? "[ ]" : "[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
+        \ ['Set &wrap             %{&wrap ? "[x]" : "[ ]"}', 'set wrap!', 'Toggle wrap lines'],
+        \ ['Set &paste            %{&paste ? "[x]" : "[ ]"}', 'execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
+        \ ['Set &spelling         %{&spell ? "[x]" : "[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
+        \ ['Set &virtualedit      %{&virtualedit=~#"all" ? "[x]" : "[ ]"}', 'execute &virtualedit=~#"all" ? "set virtualedit-=all" : "set virtualedit+=all"', 'Toggle virtualedit'],
+        \ ['Set previ&ew          %{&completeopt=~"preview" ? "[x]" : "[ ]"}', 'execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"', 'Toggle function preview'],
+        \ ['Set &cursorline       %{&cursorline ? "[x]" : "[ ]"}', 'set cursorline!', 'Toggle cursorline'],
+        \ ['Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', 'set cursorcolumn!', 'Toggle cursorcolumn'],
+        \ ['Set light &background %{&background=~"light" ? "[x]" : "[ ]"}', 'let &background = &background=="dark" ? "light" : "dark"', 'Toggle background color'],
         \ ['--', ''],
         \ ['Ne&trw', 'Lexplore', 'Toggle Vim Netrw'],
-        \ ['&Markdown Preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
+        \ ['&Markdown preview', 'execute "normal \<Plug>MarkdownPreviewToggle"', 'Toggle markdown preview'],
         \ ])
   call quickui#menu#install('Ta&bles', [
-        \ ['Table &Mode', 'TableModeToggle', 'Toggle TableMode'],
-        \ ['&Reformat Table', 'TableModeRealign', 'Reformat table'],
-        \ ['&Format to Table', 'Tableize', 'Format to table, use <leader>T to set delimiter'],
-        \ ['&Delete Row', 'execute "normal \<Plug>(table-mode-delete-row)"', 'Delete row'],
-        \ ['Delete &Column', 'execute "normal \<Plug>(table-mode-delete-column)"', 'Delete column'],
-        \ ['Show Cell &Position', 'execute "normal \<Plug>(table-mode-echo-cell)"', 'Show cell index number'],
+        \ ['Table &mode', 'TableModeToggle', 'Toggle TableMode'],
+        \ ['&Reformat table', 'TableModeRealign', 'Reformat table'],
+        \ ['&Format to table', 'Tableize', 'Format to table, use <leader>T to set delimiter'],
+        \ ['&Delete row', 'execute "normal \<Plug>(table-mode-delete-row)"', 'Delete row'],
+        \ ['Delete &column', 'execute "normal \<Plug>(table-mode-delete-column)"', 'Delete column'],
+        \ ['Show cell &position', 'execute "normal \<Plug>(table-mode-echo-cell)"', 'Show cell index number'],
         \ ['--', ''],
-        \ ['&Add Formula', 'TableAddFormula', 'Add formula to current cell, i.e. Sum(r1,c1:r2,c2)'],
-        \ ['&Evaluate Formula', 'TableEvalFormulaLine', 'Evaluate formula'],
+        \ ['&Add formula', 'TableAddFormula', 'Add formula to current cell, i.e. Sum(r1,c1:r2,c2)'],
+        \ ['&Evaluate formula', 'TableEvalFormulaLine', 'Evaluate formula'],
         \ ['--', ''],
-        \ ['Align Using = (delimiter fixed)', 'Tabularize /=\zs', 'Tabularize /=\zs'],
-        \ ['Align Using , (delimiter fixed)', 'Tabularize /,\zs', 'Tabularize /,\zs'],
-        \ ['Align Using # (delimiter fixed)', 'Tabularize /#\zs', 'Tabularize /#\zs'],
-        \ ['Align Using : (delimiter fixed)', 'Tabularize /:\zs', 'Tabularize /:\zs'],
+        \ ['Align using = (delimiter fixed)', 'Tabularize /=\zs', 'Tabularize /=\zs'],
+        \ ['Align using , (delimiter fixed)', 'Tabularize /,\zs', 'Tabularize /,\zs'],
+        \ ['Align using # (delimiter fixed)', 'Tabularize /#\zs', 'Tabularize /#\zs'],
+        \ ['Align using : (delimiter fixed)', 'Tabularize /:\zs', 'Tabularize /:\zs'],
         \ ['--', ''],
-        \ ['Align Using = (delimiter centered)', 'Tabularize /=', 'Tabularize /='],
-        \ ['Align Using , (delimiter centered)', 'Tabularize /,', 'Tabularize /,'],
-        \ ['Align Using # (delimiter centered)', 'Tabularize /#', 'Tabularize /#'],
-        \ ['Align Using : (delimiter centered)', 'Tabularize /:', 'Tabularize /:'],
+        \ ['Align using = (delimiter centered)', 'Tabularize /=', 'Tabularize /='],
+        \ ['Align using , (delimiter centered)', 'Tabularize /,', 'Tabularize /,'],
+        \ ['Align using # (delimiter centered)', 'Tabularize /#', 'Tabularize /#'],
+        \ ['Align using : (delimiter centered)', 'Tabularize /:', 'Tabularize /:'],
         \ ])
   let l:quickui_theme_list = []
   let l:used_chars = 'hjklqg'
@@ -459,36 +465,39 @@ function! s:LoadQuickUI(open_menu)
   call quickui#menu#switch('visual')
   call quickui#menu#reset()
   call quickui#menu#install('&Actions', [
-        \ ['Surround with &Space', "normal! gvc\<Space>\<C-r>\<C-p>\"\<Space>\<Esc>"],
+        \ ['Surround with &space', "normal! gvc\<Space>\<C-r>\<C-p>\"\<Space>\<Esc>"],
         \ ["Surround with &''", "normal! gvc'\<C-r>\<C-p>\"'\<Esc>"],
         \ ['Surround with &""', "normal! gvc\"\<C-r>\<C-p>\"\"\<Esc>"],
         \ ['Surround with &()', "normal! gvc(\<C-r>\<C-p>\")\<Esc>"],
         \ ['Surround with &[]', "normal! gvc[\<C-r>\<C-p>\"]\<Esc>"],
         \ ['Surround with &{}', "normal! gvc{\<C-r>\<C-p>\"}\<Esc>"],
+        \ ['--', ''],
         \ ['Open WhichKe&y', 'WhichKeyVisual ";"', 'Show WhichKey for ;'],
         \ ])
   call quickui#menu#install('&Git', [
-        \ ['Git &File History', "call plug#load('vim-fugitive') | vsplit | '<,'>Gclog", 'Browse previously committed versions of selected range'],
-        \ ['Git L&og', "execute 'Git log -L' line(\"'<\"). ','. line(\"'>\"). ':'. expand('%')", 'Show git log of selected range'],
+        \ ['Git &file history', "call plug#load('vim-fugitive') | vsplit | '<,'>Gclog", 'Browse previously committed versions of selected range'],
+        \ ['Git l&og', "execute 'Git log -L' line(\"'<\"). ','. line(\"'>\"). ':'. expand('%')", 'Show git log of selected range'],
+        \ ['--', ''],
+        \ ['Git open &remote', "'<,'>Gbrowse", 'Open remote url in browser'],
         \ ])
   call quickui#menu#install('Ta&bles', [
-        \ ['Reformat Table', "'<,'>TableModeRealign", 'Reformat table'],
-        \ ['Format to Table', "'<,'>Tableize", 'Format to table, use <leader>T to set delimiter'],
+        \ ['Reformat table', "'<,'>TableModeRealign", 'Reformat table'],
+        \ ['Format to table', "'<,'>Tableize", 'Format to table, use <leader>T to set delimiter'],
         \ ['--', ''],
-        \ ['Align Using = (delimiter fixed)', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs"],
-        \ ['Align Using , (delimiter fixed)', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs"],
-        \ ['Align Using # (delimiter fixed)', "'<,'>Tabularize /#\\zs", "'<,'>Tabularize /#\\zs"],
-        \ ['Align Using : (delimiter fixed)', "'<,'>Tabularize /:\\zs", "'<,'>Tabularize /:\\zs"],
+        \ ['Align using = (delimiter fixed)', "'<,'>Tabularize /=\\zs", "'<,'>Tabularize /=\\zs"],
+        \ ['Align using , (delimiter fixed)', "'<,'>Tabularize /,\\zs", "'<,'>Tabularize /,\\zs"],
+        \ ['Align using # (delimiter fixed)', "'<,'>Tabularize /#\\zs", "'<,'>Tabularize /#\\zs"],
+        \ ['Align using : (delimiter fixed)', "'<,'>Tabularize /:\\zs", "'<,'>Tabularize /:\\zs"],
         \ ['--', ''],
-        \ ['Align Using = (delimiter centered)', "'<,'>Tabularize /=", "'<,'>Tabularize /="],
-        \ ['Align Using , (delimiter centered)', "'<,'>Tabularize /,", "'<,'>Tabularize /,"],
-        \ ['Align Using # (delimiter centered)', "'<,'>Tabularize /#", "'<,'>Tabularize /#"],
-        \ ['Align Using : (delimiter centered)', "'<,'>Tabularize /:", "'<,'>Tabularize /:"],
+        \ ['Align using = (delimiter centered)', "'<,'>Tabularize /=", "'<,'>Tabularize /="],
+        \ ['Align using , (delimiter centered)', "'<,'>Tabularize /,", "'<,'>Tabularize /,"],
+        \ ['Align using # (delimiter centered)', "'<,'>Tabularize /#", "'<,'>Tabularize /#"],
+        \ ['Align using : (delimiter centered)', "'<,'>Tabularize /:", "'<,'>Tabularize /:"],
         \ ['--', ''],
-        \ ['Sort Asc', "'<,'>sort", 'Sort in ascending order (sort)'],
-        \ ['Sort Desc', "'<,'>sort!", 'Sort in descending order (sort!)'],
-        \ ['Sort Num Asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)'],
-        \ ['Sort Num Desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)'],
+        \ ['Sort asc', "'<,'>sort", 'Sort in ascending order (sort)'],
+        \ ['Sort desc', "'<,'>sort!", 'Sort in descending order (sort!)'],
+        \ ['Sort num asc', "'<,'>sort n", 'Sort numerically in ascending order (sort n)'],
+        \ ['Sort num desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)'],
         \ ])
   if a:open_menu == 1
     call <SID>OpenQuickUIContextMenu()
@@ -499,29 +508,29 @@ function! s:OpenQuickUIContextMenu()
   if s:Completion == 1
     call add(l:quickui_content, ['Docu&mentation', 'call CocAction("doHover")', 'Coc documentation'])
     call add(l:quickui_content, ['D&efinition', 'execute "normal \<Plug>(coc-definition)"', 'Coc definition'])
-    call add(l:quickui_content, ['&Type Definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc type definition'])
+    call add(l:quickui_content, ['&Type definition', 'execute "normal \<Plug>(coc-type-definition)"', 'Coc type definition'])
     call add(l:quickui_content, ['&References', 'execute "normal \<Plug>(coc-references)"', 'Coc references'])
     call add(l:quickui_content, ['&Implementation', 'execute "normal \<Plug>(coc-implementation)"', 'Coc implementation'])
     call add(l:quickui_content, ['Re&name', 'execute "normal \<Plug>(coc-rename)"', 'Coc rename'])
     call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc fix'])
     call add(l:quickui_content, ['--', ''])
-    call add(l:quickui_content, ['Git Hunk &Diff', 'CocCommand git.chunkInfo', 'Coc git chunk info'])
-    call add(l:quickui_content, ['Git Hunk &Undo', 'CocCommand git.chunkUndo', 'Coc git undo chunk'])
-    call add(l:quickui_content, ['Git Hunk &Add', 'CocCommand git.chunkStage', 'Coc git stage chunk'])
-    call add(l:quickui_content, ['Git &Copy URL', 'CocCommand git.copyUrl', 'Coc git copy remote url'])
+    call add(l:quickui_content, ['Git hunk &diff', 'CocCommand git.chunkInfo', 'Coc git chunk info'])
+    call add(l:quickui_content, ['Git hunk &undo', 'CocCommand git.chunkUndo', 'Coc git undo chunk'])
+    call add(l:quickui_content, ['Git hunk &add', 'CocCommand git.chunkStage', 'Coc git stage chunk'])
+    call add(l:quickui_content, ['Git &copy link', 'CocCommand git.copyUrl', 'Coc git copy remote url'])
   elseif s:Completion == 2
     call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
     call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe definition'])
-    call add(l:quickui_content, ['&Type Definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
+    call add(l:quickui_content, ['&Type definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
     call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe references'])
     call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe implementation'])
     call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe fix'])
-    call add(l:quickui_content, ['&Organize Imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
+    call add(l:quickui_content, ['&Organize imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
     call add(l:quickui_content, ['--', ''])
   endif
-  call add(l:quickui_content, ['Git &Blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'])
+  call add(l:quickui_content, ['Git &blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'])
   call add(l:quickui_content, ['--', ''])
-  call add(l:quickui_content, ['Built-in D&ocs', 'execute "normal! K"', 'Vim built in help'])
+  call add(l:quickui_content, ['Built-in d&ocs', 'execute "normal! K"', 'Vim built in help'])
   call quickui#context#open(l:quickui_content, {'index': g:quickui#context#cursor})
 endfunction
 " }}}
@@ -592,7 +601,10 @@ function! s:EditRegister() abort
 endfunction
 function! s:Quit(buffer_mode) abort
   if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
-    execute 'bprevious | bdelete #'
+    execute 'bprevious'
+    if len(getbufinfo({'buflisted':1})) > 1
+      execute 'bdelete #'
+    endif
   else
     execute 'quit'
   endif
@@ -701,7 +713,7 @@ let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
 set wildignore+=*/tmp/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*  " do NOT wildignore plugged
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
-let g:Lf_MruWildIgnore = { 'dir':['.git'], 'file':[] }
+let g:Lf_MruWildIgnore = { 'dir':['tmp', '.git'], 'file':[] }
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_UseCache = 0
@@ -888,7 +900,7 @@ if has('gui_running')
     set columns=90
   endif
   if has('win32')  " Windows gVim
-    set guifont=JetBransMono_NF:h10:cANSI
+    set guifont=JetBrainsMono_NF:h10:cANSI
     set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 versions need to match
     let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
     nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>

@@ -940,3 +940,12 @@ let g:lightline.component_function = {
 " =======================================================
 " javascript log prints object as string
   let l:print['javascript'] = 'console.log(`'. join(map(copy(l:vars), "v:val. ': ${'. v:val. '}'"), ' | '). '`);'
+
+" =======================================================
+" unused quickui
+        \ ['Format as JSO&N', 'execute "update | %!python3 -m json.tool" | keeppatterns %s;^\(\s\+\);\=repeat(" ", len(submatch(0))/2);g | execute "normal! ``"', 'Use `python3 -m json.tool` to format current buffer'],
+        \ ['Open &Buffers', 'call quickui#tools#list_buffer("e")'],
+        \ ['Open &Functions', 'call quickui#tools#list_function()'],
+
+" =======================================================
+set t_ut="" "https://github.com/microsoft/terminal/issues/832
