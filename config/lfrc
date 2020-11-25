@@ -38,7 +38,9 @@ map mg $lazygit
 map mv $gvim "$f"
 map mp paste-symlink
 map mr bulk-rename
+map mv vidir-bulk-rename
 map ms selected-dir-size
+map mc edit-config
 
 map v :toggle; down
 map V invert
@@ -51,8 +53,8 @@ map , find-next
 map ; find-prev
 map H push <c-u>
 map L push <c-d>
-map [ push hkl
-map ] push hjl
+map K push hkl
+map J push hjl
 map c :clear; unselect
 map gs !clear && git status
 map <a-c> dir-jump
@@ -62,6 +64,7 @@ map I $$PAGER "$f"
 cmap <up> cmd-history-prev
 cmap <down> cmd-history-next
 
+cmd edit-config ${{ vim ~/.vim/config/lfrc }}
 cmd locate-file-pwd ${{
    res="$(ls -A | fzf)"
    if [ -f "$res" ]; then
@@ -129,6 +132,7 @@ cmd x ${{
   fi
 }}
 
+cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
 cmd bulk-rename ${{
   case $1 in
     # do not query extensions for renaming
