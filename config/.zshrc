@@ -86,7 +86,7 @@ zstyle ":completion:*:git-checkout:*" sort false
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -CF --color=always -1 $realpath'
 
-alias history='builtin fc -l 1'
+alias history='history -f 0'
 alias k='k -h'
 
 up-line-or-local-history() {

@@ -1,7 +1,7 @@
 call plug#begin('~/.vim/plugged/vscode')
-" change these in plugged/vscode/vim-easymotion/autoload/EasyMotion.vim after installing easymotion to limit line range instead of whole file
-" let win_first_line = max([line('w0'), line('.') - 20]) " visible first line num
-" let win_last_line  = min([line('w$'), line('.') + 20]) " visible last line num
+" change these in plugged/vscode/vim-easymotion/autoload/EasyMotion.vim:1159 after installing easymotion to limit line range instead of whole file
+" let win_first_line = max([line('w0'), line('.') - 30]) " visible first line num
+" let win_last_line  = min([line('w$'), line('.') + 30]) " visible last line num
 Plug 'asvetliakov/vim-easymotion'
 Plug 'dahu/vim-fanfingtastic'
 Plug 'machakann/vim-swap'
@@ -27,6 +27,9 @@ map T <Plug>fanfingtastic_T
 map , <Plug>fanfingtastic_;
 map ;, <Plug>fanfingtastic_,
 map S <Plug>(easymotion-bd-w)
+map <leader>e <Plug>(easymotion-lineanywhere)
+map <leader>j <Plug>(easymotion-sol-j)
+map <leader>k <Plug>(easymotion-sol-k)
 map gc <Plug>VSCodeCommentary
 nmap gcc <Plug>VSCodeCommentaryLine
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
@@ -120,6 +123,7 @@ nnoremap ]p o<C-r>"<Esc>
 
 nnoremap gr :call VSCodeNotify('references-view.find')<CR>
 nnoremap Ku :call VSCodeNotify('git.revertSelectedRanges')<CR>
+nnoremap Ka :call VSCodeNotify('git.stageSelectedRanges')<CR>
 nmap Kd gh
 nnoremap <leader>a :call VSCodeNotify('editor.action.quickFix')<CR>
 nnoremap <leader>R :call VSCodeNotify('editor.action.rename')<CR>
