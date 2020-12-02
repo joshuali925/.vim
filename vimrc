@@ -33,6 +33,7 @@ Plug 'machakann/vim-swap', { 'on': '<Plug>(swap-' }
 Plug 'wellle/context.vim', { 'on': ['ContextToggleWindow', 'ContextPeek'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }
 Plug 'gcmt/wildfire.vim', { 'on': '<Plug>(wildfire-' }
+Plug 'ojroques/vim-oscyank', { 'on': 'OSCYank' }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
 Plug 'machakann/vim-sandwich'  " lazy load breaks y, d, c
 Plug 'dahu/vim-fanfingtastic'  " lazy load breaks ct/cf
@@ -472,7 +473,9 @@ function! s:LoadQuickUI(open_menu)
         \ ['Surround with &[]', "normal! gvc[\<C-r>\<C-p>\"]\<Esc>"],
         \ ['Surround with &{}', "normal! gvc{\<C-r>\<C-p>\"}\<Esc>"],
         \ ['--', ''],
-        \ ['Open WhichKe&y', 'WhichKeyVisual ";"', 'Show WhichKey for ;'],
+        \ ['Open &WhichKey', 'WhichKeyVisual ";"', 'Show WhichKey for ;'],
+        \ ['--', ''],
+        \ ['OSC &yank', 'OSCYank', 'Use ANSI OSC52 sequence to copy from remote SSH sessions'],
         \ ])
   call quickui#menu#install('&Git', [
         \ ['Git &file history', "call plug#load('vim-fugitive') | vsplit | '<,'>Gclog", 'Browse previously committed versions of selected range'],
