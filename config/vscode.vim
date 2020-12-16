@@ -8,6 +8,7 @@ Plug 'machakann/vim-swap'
 Plug 'machakann/vim-sandwich'
 Plug 'gcmt/wildfire.vim'
 Plug 'michaeljsmith/vim-indent-object'
+Plug 'AndrewRadev/splitjoin.vim'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'tpope/vim-repeat'
 call plug#end()
@@ -67,7 +68,7 @@ xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
 nnoremap <C-c> :nohlsearch<CR>
-nnoremap <C-b> :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
+nnoremap <C-b> :call VSCodeNotify('workbench.action.toggleZenMode')<CR>
 nnoremap <C-f> :call VSCodeNotify('editor.action.formatDocument')<CR>
 nnoremap <leader><C-f> :call VSCodeNotify('editor.action.formatChanges')<CR>
 xnoremap <C-f> =
@@ -87,6 +88,7 @@ nnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query'
 xnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': <SID>GetVisualSelection() })<CR>
 nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
 nnoremap <leader>fy :registers<CR>
+nnoremap <leader>b :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy/\V<C-r>=escape(@x, '/\')<CR><CR>N
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
@@ -95,6 +97,7 @@ nnoremap <leader>l :call <SID>PrintCurrVars(0, 0)<CR>
 xnoremap <leader>l :<C-u>call <SID>PrintCurrVars(1, 0)<CR>
 nnoremap <leader>L :call <SID>PrintCurrVars(0, 1)<CR>
 xnoremap <leader>L :<C-u>call <SID>PrintCurrVars(1, 1)<CR>
+nnoremap <leader>tu :call VSCodeNotify('workbench.action.reopenClosedEditor')<CR>
 nnoremap <leader>b :call VSCodeNotify('workbench.action.focusSideBar')<CR>
 nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
 nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>

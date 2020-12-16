@@ -2,23 +2,22 @@
 ## Set up shell
 ```bash
 git clone https://github.com/joshuali925/.vim.git ~/.vim
-mkdir -p ~/.cache/vim/undo
-mkdir -p ~/.local/bin
-mkdir -p ~/.config/lf
-mkdir -p ~/.config/jesseduffield/lazygit
+mkdir -p ~/.cache/vim/undo ~/.local/bin ~/.config/lf ~/.config/jesseduffield/lazygit
 
-ln -sr ~/.vim/config/.bashrc ~/.bashrc
-ln -sr ~/.vim/config/.zshrc ~/.zshrc
+echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
+echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc
 echo 'skip_global_compinit=1' >> ~/.zshenv
 ln -sr ~/.vim/config/.tmux.conf ~/.tmux.conf
 ln -sr ~/.vim/config/.gitconfig ~/.gitconfig
 ln -sr ~/.vim/config/lfrc ~/.config/lf/lfrc
 ln -sr ~/.vim/config/nvim ~/.config/nvim
 ln -sr ~/.vim/config/lazygit_config.yml ~/.config/jesseduffield/lazygit/config.yml
+ln -sr ~/.vim/config/.ideavimrc ~/.ideavimrc
 
 # zsh inscure directories fix:
 # compaudit | xargs chmod g-w
 # compaudit | sudo xargs chmod -R 755
+
 # zsh fast-syntax-highlighting theme:
 fast-theme clean
 ```
@@ -31,7 +30,6 @@ sudo apt update && sudo apt install -y zsh build-essential python3-dev python3-p
 # vim
 sudo add-apt-repository -y ppa:jonathonf/vim
 sudo apt upgrade -y vim
-vim -c "PlugInstall" -c "qa"
 
 # neovim
 curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
@@ -55,14 +53,18 @@ curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt update
 sudo apt install -y yarn
+
+# pathpicker
+git clone https://github.com/facebook/PathPicker.git ~/.local/PathPicker --depth=1
+ln -sr ~/.local/PathPicker/fpp ~/.local/bin/fpp
 ```
 
-## Set up vim on Windows
+## Windows
 ```bash
+# vim
 # download 64-bit gvim from https://github.com/vim/vim-win32-installer/releases/latest
 mkdir %USERPROFILE%\.cache\vim\undo
 git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\vimfiles
-vim -c "PlugInstall" -c "qa"
 ```
 
 ## Mac OS
@@ -71,11 +73,11 @@ vim -c "PlugInstall" -c "qa"
 # install brew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-# install coreutils
+# install gnu coreutils and sed, override default utils
 brew install coreutils
-
-# put in rc file
+brew install gnu-sed
 export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
+ln -sr $(command which gsed) ~/.local/bin/sed
 
 # add lazygit config
 ln -sr ~/.vim/config/lazygit_config.yml ~/Library/Application\ Support/jesseduffield/lazygit/config.yml
@@ -94,6 +96,7 @@ brew cask install visual-studio-code
 ```markdown
 Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: option command t
 iTerm2 -> Preferences -> Profiles -> Keys -> Presets... -> Natural Text Editing
+                                  -> General -> Working Directory -> Advanced Configuration -> Working Directory for New Split Panes -> Reuse previous session's directory
                                   -> Terminal -> uncheck Save lines to scrollback in alternative screen mode
                                               -> Scrollback lines -> 10000
                                   -> Advanced -> Semantic History -> Run command -> open -a MacVim \1
