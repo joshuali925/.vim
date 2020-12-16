@@ -7,12 +7,16 @@ set previewer ~/.vim/config/lf-preview.sh
 
 cmd mkdir %mkdir -p $@
 cmd touch %touch $@
+cmd chmod %chmod $@ "$f"
+cmd chmod? %stat --printf "%a %n \n" "$f"
 cmd vim !vim $@
 cmd rg !clear && rg $@
 cmd code %code .
 cmd pwd %echo $f
 cmd size !du -h --max-depth=1 | sort -hr
+cmd md5 !md5sum "$f"
 cmd selected-dir-size %du -h --max-depth=0 "$f"
+cmd cwd-size %du -h --max-depth=0 .
 
 map zh
 map zr
@@ -21,7 +25,7 @@ map zs
 map zt
 map za
 map z z
-map t locate-file-pwd
+map t locate-file-cwd
 map T locate-file
 
 map sh set hedden!
@@ -35,11 +39,13 @@ map sn :set sortby natural; set info size
 map m
 map mm mark-save
 map mg $lazygit
+map <c-p> $lazygit
 map mv $gvim "$f"
 map mp paste-symlink
 map mr bulk-rename
 map mv vidir-bulk-rename
 map ms selected-dir-size
+map mS cwd-size
 map mc edit-config
 
 map v :toggle; down
@@ -57,7 +63,7 @@ map K push hkl
 map J push hjl
 map c :clear; unselect
 map gs !clear && git status
-map <a-c> dir-jump
+map <a-c> dir-jump-cwd
 map i $~/.vim/config/lf-preview.sh "$f" | bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always
 map I $$PAGER "$f"
 
@@ -65,7 +71,7 @@ cmap <up> cmd-history-prev
 cmap <down> cmd-history-next
 
 cmd edit-config ${{ vim ~/.vim/config/lfrc }}
-cmd locate-file-pwd ${{
+cmd locate-file-cwd ${{
    res="$(ls -A | fzf)"
    if [ -f "$res" ]; then
       lf -remote "send $id select \"$res\""
@@ -78,6 +84,12 @@ cmd locate-file ${{
    if [ -f "$res" ]; then
       lf -remote "send $id select \"$res\""
    elif [ -d "$res" ]; then
+      lf -remote "send $id cd \"$res\""
+   fi
+}}
+cmd dir-jump-cwd ${{
+   res="$(fd --type=d --hidden --max-depth=1 --no-ignore-vcs | fzf)"
+   if [ -d "$res" ]; then
       lf -remote "send $id cd \"$res\""
    fi
 }}

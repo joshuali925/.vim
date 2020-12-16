@@ -1,0 +1,115 @@
+let mapleader=";"
+
+""" Plugins  --------------------------------
+set surround
+set multiple-cursors
+set commentary
+set argtextobj
+set easymotion
+set exchange
+
+""" Plugin settings -------------------------
+let g:argtextobj_pairs="[:],(:),<:>,{:}"
+let g:EasyMotion_do_mapping = 0
+let g:EasyMotion_startofline = 0
+
+""" Common settings -------------------------
+set showmode
+set scrolloff=2
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+
+""" Idea specific settings ------------------
+set ideajoin
+set ideastatusicon=gray
+set idearefactormode=keep
+
+""" Mappings --------------------------------
+nnoremap <BS> gT
+nnoremap \ gt
+noremap , ;
+noremap ;, ,
+map S <Plug>(easymotion-bd-w)
+map <leader>e <Plug>(easymotion-lineanywhere)
+map <leader>j <Plug>(easymotion-sol-j)
+map <leader>k <Plug>(easymotion-sol-k)
+noremap 0 ^
+noremap ^ 0
+nnoremap - $
+xnoremap - g_
+noremap g- g$
+map <Down> gj
+map <Up> gk
+nnoremap Y y$
+xnoremap < <gv
+xnoremap > >gv
+nnoremap gp `[v`]
+nnoremap <C-c> :nohlsearch<CR>
+inoremap <C-c> <Esc>
+xnoremap <C-c> <Esc>
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+noremap <leader>y "+y
+nnoremap <leader>Y "+y$
+noremap <leader>p "0p
+noremap <leader>P "0P
+map <leader>ff <Action>(GotoFile)
+map <leader>fu <Action>(FileStructurePopup)
+map <leader>ft <Action>(GotoSymbol)
+map <leader>fm <Action>(RecentLocations)
+map <leader>fM <Action>(RecentFiles)
+map <leader>fg <Action>(SearchEverywhere)
+nmap <leader>fj viw<Action>(FindInPath)
+xmap <leader>fj <Action>(FindInPath)
+map <leader>fa <Action>(GotoAction)
+nnoremap <leader>fy :registers<CR>
+nnoremap <leader>n *N
+xnoremap <leader>n y/\V<C-r>"<CR>N
+nmap <leader>tu <Action>(ReopenClosedTab)
+nmap <C-b> <Action>(ToggleDistractionFreeMode)
+nmap <leader>b <Action>(SelectInProjectView)
+inoremap <leader>w <Esc>:w<CR>
+nnoremap <leader>w :w<CR>
+nnoremap <leader>q :q<CR>
+map <C-n> <Action>(SelectNextOccurrence)
+map <leader><C-n> <Action>(SelectAllOccurrences)
+map <C-p> <Action>(UnselectPreviousOccurrence)
+
+nmap <leader>r <Action>(CompileDirty)
+nmap <leader>to <Action>(ActivateTerminalToolWindow)
+nmap <leader>tt <Action>(Terminal.OpenInTerminal)
+
+nmap ZH <Action>(HideActiveWindow)
+nmap Z[ <Action>(CloseAllToTheLeft)
+nmap Z] <Action>(CloseAllToTheRight)
+nmap [g <Action>(VcsShowPrevChangeMarker)
+nmap ]g <Action>(VcsShowNextChangeMarker)
+nmap [a <Action>(GotoPreviousError)
+nmap ]a <Action>(GotoNextError)
+nnoremap [<Space> O<Esc>
+nnoremap ]<Space> o<Esc>
+nnoremap [p O<C-r>"<Esc>
+nnoremap ]p o<C-r>"<Esc>
+
+nmap gr <Action>(FindUsages)
+nmap Ku <Action>(Vcs.RollbackChangedLines)
+nmap Kd <Action>(Vcs.Show.Local.Changes)
+nmap Kf <Action>(Vcs.ShowTabbedFileHistory)
+nmap Kg <Action>(Generate)
+nmap Kr <Action>(Refactorings.QuickListPopupAction)
+nnoremap gh K
+nmap gd <Action>(GotoDeclaration)
+nmap <C-f> <Action>(ReformatCode)
+nmap <leader>a <Action>(ShowIntentionActions)
+nmap <leader>s <Action>(QuickActionPopup)
+nmap <leader>R <Action>(RenameElement)
+nmap <leader>d <Action>(QuickImplementations)
+
+nnoremap <leader>l mx"xyiwoprintln("<C-r>x $<C-r>x")<Esc>`x
+nnoremap <leader>L mx"xyiwOprintln("<C-r>x $<C-r>x")<Esc>`x
+xnoremap <leader>l mx"xyoprintln("<C-r>x $<C-r>x")<Esc>`x
+xnoremap <leader>L mx"xyOprintln("<C-r>x $<C-r>x")<Esc>`x

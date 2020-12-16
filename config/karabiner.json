@@ -93,6 +93,66 @@
       "manipulators": [
         {
           "from": {
+            "key_code": "spacebar",
+            "modifiers": {
+              "mandatory": [
+                "right_command",
+                "right_control",
+                "right_shift",
+                "right_option"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "up_arrow",
+              "modifiers": [
+                "right_option"
+              ]
+            }
+          ],
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "bundle_identifiers": [
+                "^com\\.jetbrains\\.intellij$"
+              ]
+            }
+          ]
+        },
+        {
+          "from": {
+            "key_code": "delete_or_backspace",
+            "modifiers": {
+              "mandatory": [
+                "right_command",
+                "right_control",
+                "right_shift",
+                "right_option"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "down_arrow",
+              "modifiers": [
+                "right_option"
+              ]
+            }
+          ],
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "bundle_identifiers": [
+                "^com\\.jetbrains\\.intellij$"
+              ]
+            }
+          ]
+        },
+        {
+          "from": {
             "key_code": "return_or_enter",
             "modifiers": {
               "mandatory": [
@@ -451,6 +511,37 @@
                 "^com\\.googlecode\\.iterm2$",
                 "^com\\.qvacua\\.VimR$",
                 "^org\\.vim\\.MacVim$"
+              ]
+            }
+          ]
+        },
+        {
+          "from": {
+            "key_code": "u",
+            "modifiers": {
+              "mandatory": [
+                "right_command",
+                "right_control",
+                "right_shift",
+                "right_option"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "slash",
+              "modifiers": [
+                "right_control"
+              ]
+            }
+          ],
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "bundle_identifiers": [
+                "^com\\.apple\\.Terminal$",
+                "^com\\.googlecode\\.iterm2$"
               ]
             }
           ]
