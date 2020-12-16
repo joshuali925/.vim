@@ -949,3 +949,8 @@ let g:lightline.component_function = {
 
 " =======================================================
 set t_ut="" "https://github.com/microsoft/terminal/issues/832
+
+" =======================================================
+# <a-c> fzf cd all subdirectories
+export FZF_ALT_C_COMMAND='fd --type=d'
+export FZF_ALT_C_COMMAND="rg --files --null | xargs -0 dirname | awk '!h[\$0]++'"

@@ -39,6 +39,7 @@ Plug 'machakann/vim-sandwich'  " lazy load breaks y, d, c
 Plug 'dahu/vim-fanfingtastic'  " lazy load breaks ct/cf
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
 Plug 'michaeljsmith/vim-indent-object'
+Plug 'AndrewRadev/splitjoin.vim'
 Plug 'tpope/vim-unimpaired'
 Plug 'markonm/traces.vim'
 Plug 'tpope/vim-repeat'
@@ -83,14 +84,22 @@ let s:theme_list[-8] = 'gruvbox_material'
 let s:theme_list[-9] = 'sonokai'
 let g:sonokai_style = 'andromeda'
 let g:lightline = {}
-function! LoadColorscheme(index)
-  let g:lightline.colorscheme = s:theme_list[a:index] =~ 'github' ? 'one' : s:theme_list[a:index]
+function! LoadColorscheme(index, ...)
+  let l:refresh_theme = get(a:, 1, 0)
+  let g:lightline.colorscheme = s:theme_list[a:index]
   let g:material_theme_style = a:index < 0 ? 'palenight' : 'lighter'
   let g:ayucolor = a:index < 0 ? 'mirage' : 'light'
   execute 'set background='. (a:index < 0 ? 'dark' : 'light')
   execute 'colorscheme '. get(s:theme_list, a:index, 'desert')
-  if exists('*QuickThemeChange')  " QuickThemeChange fixes vim-quickui issue #8
-    call QuickThemeChange(a:index < 0 ? 'papercol-dark' : 'papercol-light')
+  if l:refresh_theme
+    call lightline#init()
+    execute 'source' globpath(&runtimepath, 'autoload/lightline/colorscheme/'. s:theme_list[a:index]. '.vim')
+    call lightline#colorscheme()
+    call lightline#update()
+    execute 'set filetype='. &filetype
+    if exists('*QuickThemeChange')  " QuickThemeChange fixes vim-quickui issue #8
+      call QuickThemeChange(a:index < 0 ? 'papercol-dark' : 'papercol-light')
+    endif
   endif
 endfunction
 call LoadColorscheme(g:Theme)
@@ -138,6 +147,7 @@ set shortmess+=c
 set shortmess-=S
 set nrformats-=octal
 set scrolloff=2
+set sidescrolloff=5
 set signcolumn=yes
 set nostartofline
 set display=lastline
@@ -151,7 +161,7 @@ set undolevels=1000
 set undoreload=10000
 set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
-set path=**
+set path=.,,*
 set list
 set listchars=tab:→\ ,nbsp:␣,trail:•
 set encoding=utf-8
@@ -242,12 +252,10 @@ nnoremap Z] :.+,$ bdelete<CR>
 nnoremap <C-c> :nohlsearch <bar> silent! AsyncStop!<CR>:echo<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
-nnoremap <C-b> :Lexplore<CR>
 nnoremap <silent> <C-h> :TmuxNavigateLeft<CR>
 nnoremap <silent> <C-j> :TmuxNavigateDown<CR>
 nnoremap <silent> <C-k> :TmuxNavigateUp<CR>
 nnoremap <silent> <C-l> :TmuxNavigateRight<CR>
-nnoremap <silent> <C-\> :TmuxNavigatePrevious<CR>
 nnoremap <C-w><C-c> <Esc>
 nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
@@ -297,6 +305,7 @@ nnoremap <leader>f/ :LeaderfLineAll<CR>
 nnoremap <leader>fs :vertical sfind \c*
 nnoremap <leader>fy :registers<CR>:normal! "p<Left>
 nnoremap <leader>fY :registers<CR>:normal! "P<Left>
+nnoremap <leader>b :Lexplore<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy/\V<C-r>=escape(@x, '/\')<CR><CR>N
 nnoremap <leader>u :MundoToggle<CR>
@@ -328,8 +337,7 @@ cnoremap <expr> <BS> '/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()
 augroup AutoCommands
   autocmd!
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif  " restore last edit position
-  autocmd BufWritePost $MYVIMRC source $MYVIMRC  " auto source vimrc on write
-  autocmd FileType vim setlocal foldmethod=marker  " use triple curly brackets for fold instead of indentation
+  autocmd BufWritePost $MYVIMRC ++nested source $MYVIMRC | setlocal foldmethod=marker  " auto source vimrc on write
   autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> edit! <bar> redraw!<CR>
   autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
   autocmd FileType * setlocal formatoptions=jql
@@ -385,7 +393,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Move tab left &-', '-tabmove'],
         \ ['Move tab right &+', '+tabmove'],
         \ ['Move buffer rightmost &>', 'call MoveBufferRight()', 'Wipe out current buffer and reopen, will lose temporary variables'],
-        \ ['&Refresh screen', 'execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"', 'Show WhichKey for ;'],
+        \ ['&Refresh screen', 'execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"', 'Clear search and refresh screen'],
         \ ['--', ''],
         \ ['Open WhichKe&y', 'WhichKey ";"', 'Show WhichKey for ;'],
         \ ['Open &Startify', 'Startify', 'Open vim-startify'],
@@ -409,7 +417,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Git gre&p all', 'call feedkeys(":Git log -p --all -G \"\"\<Left>", "n")', 'Search a regex in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
         \ ['Git fi&nd files all', 'call feedkeys(":Git log --all --full-history --name-only -- \"**\"\<Left>\<Left>", "n")', 'Grep file names in all commits'],
         \ ['--', ''],
-        \ ['Git open &remote', 'Gbrowse', 'Open remote url in browser'],
+        \ ['Git open &remote', '.GBrowse', 'Open remote url in browser'],
         \ ])
   call quickui#menu#install('&Toggle', [
         \ ['Quick&fix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"'],
@@ -460,7 +468,7 @@ function! s:LoadQuickUI(open_menu)
     endif
     let l:hint_pos = match(s:theme_list[l:index], '\c[^'. l:used_chars. ']')
     let l:used_chars .= s:theme_list[l:index][l:hint_pos]
-    call add(l:quickui_theme_list, [l:category. (l:hint_pos < 0 ? s:theme_list[l:index] : strcharpart(s:theme_list[l:index], 0, l:hint_pos). '&'. strcharpart(s:theme_list[l:index], l:hint_pos)), "execute 'call writefile([\"let g:Theme = ". l:index. '"], "'. substitute(fnamemodify(expand('$MYVIMRC'), ':p:h'), '\', '\\\\', 'g'). "/colors/current_theme.vim\")' | call LoadColorscheme(". l:index. ')'])
+    call add(l:quickui_theme_list, [l:category. (l:hint_pos < 0 ? s:theme_list[l:index] : strcharpart(s:theme_list[l:index], 0, l:hint_pos). '&'. strcharpart(s:theme_list[l:index], l:hint_pos)), "execute 'call writefile([\"let g:Theme = ". l:index. '"], "'. substitute(fnamemodify(expand('$MYVIMRC'), ':p:h'), '\', '\\\\', 'g'). "/colors/current_theme.vim\")' | call LoadColorscheme(". l:index. ', 1)'])
   endfor
   call quickui#menu#install('&Colors', l:quickui_theme_list)
   call quickui#menu#switch('visual')
@@ -765,7 +773,7 @@ elseif s:Completion == 1  " coc
   set updatetime=300
   inoremap <silent> <expr> <Tab> pumvisible() ? '<C-n>' : col('.') > 1 && getline('.')[col('.')-2] =~ '\S' ? coc#refresh() : '<Tab>'
   inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
-  nnoremap <C-b> :CocCommand explorer<CR>
+  nnoremap <leader>b :CocCommand explorer<CR>
   nmap <C-f> <Plug>(coc-format)
   xmap <C-f> <Plug>(coc-format-selected)
   nmap gr <Plug>(coc-references)
@@ -924,3 +932,5 @@ elseif !has('macunix')  " WSL Vim
   call <SID>MapAction('CopyToWinClip', '<leader>y')
 endif
 " }}}
+
+" vim:fdm=marker

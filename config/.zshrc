@@ -15,6 +15,7 @@ zinit depth=1 light-mode for romkatv/powerlevel10k
 #     mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
 #     mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
 #     mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
+#     mv"delta* -> delta" sbin"delta/delta" dandavison/delta \
 #     sbin junegunn/fzf-bin \
 #     sbin gokcehan/lf \
 #     sbin jesseduffield/lazygit
@@ -101,6 +102,14 @@ down-line-or-local-history() {
   zle set-local-history 0
 }
 zle -N down-line-or-local-history
+tab-complete-or-cd() {
+  if [[ -z "$BUFFER" ]]; then
+    zle fzf-cd-widget
+  else
+    zle fzf-tab-complete
+  fi
+}
+zle -N tab-complete-or-cd
 
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
@@ -108,9 +117,11 @@ bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
 bindkey "^[[1;2A" up-line-or-local-history    # <S-Up>
 bindkey "^[[1;2B" down-line-or-local-history  # <S-Down>
+bindkey '^i' tab-complete-or-cd
+bindkey -s '^z' 'fg^m'
 
 compdef _dirs d
 function chpwd() { emulate -L zsh; ls -ACF --color=auto; }
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+# To customize prompt, run `p10k configure` or edit ~/.vim/config/.p10k.zsh.
 [[ ! -f ~/.vim/config/.p10k.zsh ]] || source ~/.vim/config/.p10k.zsh
