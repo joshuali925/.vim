@@ -1,11 +1,11 @@
 source ~/.vim/config/z.sh
-source ~/.vim/config/lf_icons.sh
 
 export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
 export EDITOR='vim'
-export LS_COLORS=$(cat ~/.vim/config/.dircolors)
-export BAT_PAGER='less -R'
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export LS_COLORS=$(cat ~/.vim/config/dircolors)
+export LF_ICONS=$(cat ~/.vim/config/lf-icons)
+export BAT_PAGER='less -R --ignore-case'
+export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH=~/.vim/config/.ripgreprc
 export FZF_COMPLETION_TRIGGER='\'
@@ -42,9 +42,9 @@ alias size='du -h --max-depth=1 | sort -hr'
 alias path='echo -e ${PATH//:/\\n}'
 alias chmod\?='stat --printf "%a %n \n"'
 alias v='vim'
+alias vi='vim -u ~/.vim/config/mini.vim -i NONE'
 alias vimm='vim ~/.vim/vimrc'
 alias which='type -a'
-alias gacp='git add -A && git commit -m "update" && git push origin master'
 alias venv='source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias service='sudo service'
@@ -57,15 +57,12 @@ alias rgf="rg --files | rg"
 alias rgd="rg --files --null | xargs -0 dirname | sort -u | rg"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
 
-alias g='git'
 alias ga='git add'
 alias gau='git add -u'
 alias gaa='git add --all'
-alias gapa='git add --patch'
 alias gb='git branch'
 alias gba='git branch -a'
 alias gbd='git branch -d'
-alias gbl='git blame -b -w'
 alias gbnm='git branch --no-merged'
 alias gbr='git branch --remote'
 alias gbs='git bisect'
@@ -105,21 +102,13 @@ alias gdw='git diff --word-diff'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
 alias gfo='git fetch origin'
-alias gg='git gui citool'
-alias gga='git gui citool --amend'
-alias ggpnp='git pull origin master && git push origin master'
-alias ggpull='git pull origin master'
 alias ggl='git pull origin master'
-alias ggpur='git pull --rebase origin master'
 alias glum='git pull upstream master'
-alias ggpush='git push origin master'
 alias ggp='git push origin master'
 alias ggsup='git branch --set-upstream-to=origin/master'
 alias gpsup='git push --set-upstream origin master'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^:lower:"'
-alias git-svn-dcommit-push='git svn dcommit && git push github master:svntrunk'
-alias gk='gitk --all --branches'
 alias gl='git pull'
 alias glg='git log --stat --max-count=10'
 alias glgg='git log --graph --max-count=10'
@@ -143,6 +132,7 @@ alias grbi='git rebase -i'
 alias grh='git reset HEAD'
 alias grhh='git reset HEAD --hard'
 alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset"'
+alias gra='git remote add'
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
@@ -150,9 +140,7 @@ alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grup='git remote update'
 alias grv='git remote -v'
 alias gs='git status'
-alias gsd='git svn dcommit'
 alias gsps='git show --pretty=short --show-signature'
-alias gsr='git svn rebase'
 alias gss='git status -sb'
 alias gsta='git stash save'
 alias gstaa='git stash apply'
@@ -263,9 +251,8 @@ cdf() {
 }
 
 fif() {
-  if [ ! "$#" -gt 0 ]; then echo "Need a string to search for!"; return 1; fi
-  local FZFTEMP
-  FZFTEMP="$(rg --files-with-matches --no-messages "$1" | fzf --preview "bat --style=plain --color=always {} | rg --colors 'match:bg:yellow' --pretty --context 5 '$1' || rg --pretty --context 5 '$1' {}")" && vim "$FZFTEMP" -c "silent execute '/$1'"
+  if [ "$#" -eq 0 ]; then echo "Need a string to search for."; return 1; fi
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "bat --style=plain --color=always {+} | rg --colors 'match:bg:yellow' --pretty --context 5 $(printf "%q " "$@") --max-columns 0 || rg --pretty --context 5 --max-columns 0 $(printf "%q " "$@"){+}" --bind="enter:execute(vim {+} -c \"silent execute '/$@'\" < /dev/tty)"
 }
 
 unalias z 2> /dev/null

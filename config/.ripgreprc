@@ -1,4 +1,4 @@
---max-columns=150
+--max-columns=500
 --max-columns-preview
 --glob=!.git
 --smart-case

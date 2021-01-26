@@ -59,7 +59,8 @@ HISTSIZE=50000
 SAVEHIST=40000
 
 [[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
-unsetopt no_match
+unsetopt flow_control  # man zshoptions; man zshbuiltins
+unsetopt nomatch
 setopt glob_dots
 setopt complete_in_word
 setopt always_to_end

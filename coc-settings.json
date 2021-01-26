@@ -1,5 +1,6 @@
 {
   "coc.preferences.extensionUpdateCheck": "weekly",
+  "coc.source.file.ignoreHidden": false,
   "suggest.completionItemKindLabels": {
     "class": "\uf0e8",
     "color": "\ue22b",
