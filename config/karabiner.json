@@ -25,6 +25,23 @@
         {
           "type": "basic",
           "from": {
+            "key_code": "grave_accent_and_tilde",
+            "modifiers": {
+              "mandatory": [
+                "left_command",
+                "left_option"
+              ]
+            }
+          },
+          "to": [
+            {
+              "shell_command": "open -a 'Slack'"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
             "key_code": "1",
             "modifiers": {
               "mandatory": [
@@ -1872,7 +1889,7 @@
           },
           "to": [
             {
-              "shell_command": "open -a 'macvim'"
+              "shell_command": "open -a 'MacVim'"
             }
           ],
           "type": "basic"

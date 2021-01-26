@@ -25,8 +25,8 @@ map zs
 map zt
 map za
 map z z
-map t locate-file-cwd
-map T locate-file
+map <tab> locate-file-cwd
+map t locate-file
 
 map sh set hedden!
 map sr set reverse!

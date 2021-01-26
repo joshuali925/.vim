@@ -21,6 +21,7 @@ function! gruvbox_material#get_configuration() "{{{
         \ 'current_word': get(g:, 'gruvbox_material_current_word', get(g:, 'gruvbox_material_transparent_background', 0) == 0 ? 'grey background' : 'bold'),
         \ 'statusline_style': get(g:, 'gruvbox_material_statusline_style', 'default'),
         \ 'lightline_disable_bold': get(g:, 'gruvbox_material_lightline_disable_bold', 0),
+        \ 'diagnostic_text_highlight': get(g:, 'gruvbox_material_diagnostic_text_highlight', 0),
         \ 'diagnostic_line_highlight': get(g:, 'gruvbox_material_diagnostic_line_highlight', 0),
         \ 'better_performance': get(g:, 'gruvbox_material_better_performance', 0),
         \ }
@@ -334,7 +335,10 @@ function! gruvbox_material#ft_write(rootpath, ft, content) "{{{
   " If there is something like `call gruvbox_material#highlight()`, then add
   " code to initialize the palette and configuration.
   if matchstr(a:content, 'gruvbox_material#highlight') !=# ''
-    call writefile(['let s:configuration = gruvbox_material#get_configuration()', 'let s:palette = gruvbox_material#get_palette(s:configuration.background, s:configuration.palette)'], ft_path, 'a')
+    call writefile([
+          \ 'let s:configuration = gruvbox_material#get_configuration()',
+          \ 'let s:palette = gruvbox_material#get_palette(s:configuration.background, s:configuration.palette)'
+          \ ], ft_path, 'a')
   endif
   " Append the content.
   call writefile(split(a:content, "\n"), ft_path, 'a')
@@ -342,7 +346,7 @@ endfunction "}}}
 function! gruvbox_material#ft_rootpath(path) "{{{
   " Get the directory where `after/ftplugin` is generated.
   if (matchstr(a:path, '^/usr/share') ==# '') || has('win32') " Return the plugin directory. The `after/ftplugin` directory should never be generated in `/usr/share`, even if you are a root user.
-    return substitute(a:path, '/colors/gruvbox-material\.vim$', '', '')
+    return fnamemodify(a:path, ':p:h:h')
   else " Use vim home directory.
     if has('nvim')
       return stdpath('config')

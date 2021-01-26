@@ -95,7 +95,9 @@ brew cask install visual-studio-code
 - configs
 ```markdown
 Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: option command t
-iTerm2 -> Preferences -> Profiles -> Keys -> Presets... -> Natural Text Editing
+                      -> App Shortcuts -> Add -> iTerm -> Clear Buffer: command shift k
+iTerm2 -> Preferences -> Keys -> Key Bindings -> Add -> Select Split Pane Left/Below/Above/Right: command h/j/k/l
+                      -> Profiles -> Keys -> Presets... -> Natural Text Editing
                                   -> General -> Working Directory -> Advanced Configuration -> Working Directory for New Split Panes -> Reuse previous session's directory
                                   -> Terminal -> uncheck Save lines to scrollback in alternative screen mode
                                               -> Scrollback lines -> 10000
