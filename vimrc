@@ -33,8 +33,9 @@ Plug 'machakann/vim-swap', { 'on': '<Plug>(swap-' }
 Plug 'wellle/context.vim', { 'on': ['ContextToggleWindow', 'ContextPeek'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }
 Plug 'gcmt/wildfire.vim', { 'on': '<Plug>(wildfire-' }
-Plug 'ojroques/vim-oscyank', { 'on': 'OSCYank' }
+Plug 'ojroques/vim-oscyank', { 'on': ['OSCYank', 'OSCYankReg'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
+Plug 'tamago324/LeaderF-filer'
 Plug 'machakann/vim-sandwich'  " lazy load breaks y, d, c
 Plug 'dahu/vim-fanfingtastic'  " lazy load breaks ct/cf
 Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
@@ -71,17 +72,15 @@ let s:theme_list[1] = 'PaperColor'
 let s:theme_list[2] = 'github'
 let s:theme_list[3] = 'one'
 let s:theme_list[4] = 'ayu'
-let s:theme_list[5] = 'material'
-let s:theme_list[6] = 'gruvbox_material'
+let s:theme_list[5] = 'gruvbox_material'
 let s:theme_list[-1] = 'one'
-let s:theme_list[-2] = 'material'
-let s:theme_list[-3] = 'ayu'
-let s:theme_list[-4] = 'dracula'
-let s:theme_list[-5] = 'nord'
-let s:theme_list[-6] = 'solarized'
-let s:theme_list[-7] = 'forest_night'
-let s:theme_list[-8] = 'gruvbox_material'
-let s:theme_list[-9] = 'sonokai'
+let s:theme_list[-2] = 'ayu'
+let s:theme_list[-3] = 'dracula'
+let s:theme_list[-4] = 'nord'
+let s:theme_list[-5] = 'solarized'
+let s:theme_list[-6] = 'forest_night'
+let s:theme_list[-7] = 'gruvbox_material'
+let s:theme_list[-8] = 'sonokai'
 let g:sonokai_style = 'andromeda'
 let g:lightline = {}
 function! LoadColorscheme(index, ...)
@@ -286,6 +285,7 @@ noremap <leader>y "+y
 nnoremap <leader>Y "+y$
 noremap <leader>p "0p
 noremap <leader>P "0P
+nnoremap <leader>fF :Leaderf filer<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunction<CR>
@@ -596,7 +596,7 @@ function! s:ActionOpfunc(type)
 endfunction
 function! s:ActionSetup(algorithm)
   let s:encode_algorithm = a:algorithm
-  let &opfunc = matchstr(expand('<sfile>'), '<SNR>\d\+_'). 'ActionOpfunc'
+  let &operatorfunc = matchstr(expand('<sfile>'), '<SNR>\d\+_'). 'ActionOpfunc'
 endfunction
 function! s:MapAction(algorithm, key)
   execute 'nnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>ActionSetup("'. a:algorithm. '")<CR>g@'
@@ -660,6 +660,8 @@ function! s:GetRunCommand()
   let l:run_command['java'] = 'AsyncRun javac % && java %<'
   let l:run_command['javascript'] = 'AsyncRun node %'
   let l:run_command['markdown'] = 'MarkdownPreview'
+  let l:run_command['html'] = 'AsyncRun -silent open %'
+  let l:run_command['xhtml'] = 'AsyncRun -silent open %'
   return get(l:run_command, &filetype, ''). get(b:, 'args', '')
 endfunction
 command! -complete=file -nargs=* SetRunCommand let g:RunCommand = <q-args>
@@ -680,7 +682,6 @@ let g:context_max_height = 8
 let g:startify_session_dir = '~/.cache/vim/sessions'
 let g:startify_session_persistence = 1
 let g:startify_enable_special = 0
-let g:startify_enable_unsafe = 1
 let g:startify_fortune_use_unicode = 1
 let g:startify_commands = [
       \ { '!': ['Git modified', ':args `Git ls-files --modified` | Git difftool'] },
@@ -711,6 +712,8 @@ let g:lightline#bufferline#unicode_symbols = 1
 let g:lightline#bufferline#clickable = 1
 let g:lightline#bufferline#unnamed = ''
 let g:asyncrun_open = 12
+let g:pear_tree_repeatable_expand = 0
+let g:pear_tree_smart_closers = 1
 let g:vista_executive_for = { 'typescriptreact': 'coc' }
 let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_smartcase = 1
@@ -740,6 +743,9 @@ let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_WorkingDirectoryMode = 'Aa'
 let g:Lf_CacheDirectory = expand('~/.cache/')
 let g:Lf_CtagsFuncOpts = { 'typescriptreact': '--map-typescript=.tsx' }
+let g:Lf_FilerShowHiddenFiles = 1
+let g:Lf_FilerInsertMap = { '<C-v>': 'accept_vertical', '<Up>': 'up', '<Down>': 'down', '<CR>': 'open_current' }
+let g:Lf_FilerNormalMap = { 'i': 'switch_insert_mode', '<Esc>': 'quit', '~': 'goto_root_marker_dir', 'M': 'mkdir', 'T': 'create_file' }
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
@@ -925,6 +931,12 @@ if has('gui_running')
       set columns=115
     endif
   endif
+elseif $SSH_CLIENT != ""  " ssh session
+  function! s:CopyWithOSCYank(str)
+    let @" = a:str
+    OSCYankReg "
+  endfunction
+  call <SID>MapAction('CopyWithOSCYank', '<leader>y')
 elseif !has('macunix')  " WSL Vim
   function! s:CopyToWinClip(str)
     call system('clip.exe', a:str)
@@ -933,4 +945,4 @@ elseif !has('macunix')  " WSL Vim
 endif
 " }}}
 
-" vim:fdm=marker
+" vim:fdm=marker:fdl=99

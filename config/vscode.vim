@@ -98,11 +98,10 @@ xnoremap <leader>l :<C-u>call <SID>PrintCurrVars(1, 0)<CR>
 nnoremap <leader>L :call <SID>PrintCurrVars(0, 1)<CR>
 xnoremap <leader>L :<C-u>call <SID>PrintCurrVars(1, 1)<CR>
 nnoremap <leader>tu :call VSCodeNotify('workbench.action.reopenClosedEditor')<CR>
-nnoremap <leader>b :call VSCodeNotify('workbench.action.focusSideBar')<CR>
+nnoremap <leader>b :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
 nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
 nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
 nnoremap <leader>q :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
-cnoremap <expr> <Space> '/?' =~ getcmdtype() ? '.\{-}' : '<Space>'
 
 nnoremap <leader>l mx"xyiwoconsole.log('<C-r>x', <C-r>x);<Esc>`x
 nnoremap <leader>L mx"xyiwOconsole.log('<C-r>x', <C-r>x);<Esc>`x

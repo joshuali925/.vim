@@ -659,13 +659,6 @@ function! s:VisualNumber()
 endfunction
 
 " =======================================================
-" has error
-Plug 'tamago324/LeaderF-filer'
-let g:Lf_FilerShowHiddenFiles = 1
-let g:Lf_FilerInsertMap = { '<C-v>': 'accept_vertical', '<Up>': 'up', '<Down>': 'down', '<CR>': 'open_current' }
-let g:Lf_FilerNormalMap = { 'i': 'switch_insert_mode', '<Esc>': 'quit', '~': 'goto_root_marker_dir', 'M': 'mkdir', 'T': 'create_file' }
-
-" =======================================================
 set showbreak=↪\  " a trailing space after arrow
 nnoremap o o<Space><BS>
 nnoremap O O<Space><BS>
@@ -954,3 +947,16 @@ set t_ut="" "https://github.com/microsoft/terminal/issues/832
 # <a-c> fzf cd all subdirectories
 export FZF_ALT_C_COMMAND='fd --type=d'
 export FZF_ALT_C_COMMAND="rg --files --null | xargs -0 dirname | awk '!h[\$0]++'"
+
+" =======================================================
+" tmux wsl copy
+bind -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "clip.exe"
+" tmux join panes to <session:window>
+bind j command-prompt -p "send pane to window:" "join-pane -h -t :'%%'"
+
+" =======================================================
+" far.vim: **/*.* doesn't include filenames without dot, **/* doesn't respect .gitignore, cannot specify multiple globs
+Plug 'brooth/far.vim', { 'on': ['F', 'Far', 'Farr', 'Farf'] }
+let g:far#enable_undo = 1
+let g:far#source = 'rg'
+let g:far#default_file_mask = '**/*.*'

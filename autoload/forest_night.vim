@@ -16,6 +16,7 @@ function! forest_night#get_configuration() "{{{
         \ 'sign_column_background': get(g:, 'forest_night_sign_column_background', 'default'),
         \ 'current_word': get(g:, 'forest_night_current_word', get(g:, 'forest_night_transparent_background', 0) == 0 ? 'grey background' : 'bold'),
         \ 'lightline_disable_bold': get(g:, 'forest_night_lightline_disable_bold', 0),
+        \ 'diagnostic_text_highlight': get(g:, 'forest_night_diagnostic_text_highlight', 0),
         \ 'diagnostic_line_highlight': get(g:, 'forest_night_diagnostic_line_highlight', 0),
         \ 'better_performance': get(g:, 'forest_night_better_performance', 0),
         \ }
@@ -110,7 +111,10 @@ function! forest_night#ft_write(rootpath, ft, content) "{{{
   " If there is something like `call forest_night#highlight()`, then add
   " code to initialize the palette and configuration.
   if matchstr(a:content, 'forest_night#highlight') !=# ''
-    call writefile(['let s:configuration = forest_night#get_configuration()', 'let s:palette = forest_night#get_palette()'], ft_path, 'a')
+    call writefile([
+          \ 'let s:configuration = forest_night#get_configuration()',
+          \ 'let s:palette = forest_night#get_palette()'
+          \ ], ft_path, 'a')
   endif
   " Append the content.
   call writefile(split(a:content, "\n"), ft_path, 'a')
@@ -118,7 +122,7 @@ endfunction "}}}
 function! forest_night#ft_rootpath(path) "{{{
   " Get the directory where `after/ftplugin` is generated.
   if (matchstr(a:path, '^/usr/share') ==# '') || has('win32') " Return the plugin directory. The `after/ftplugin` directory should never be generated in `/usr/share`, even if you are a root user.
-    return substitute(a:path, '/colors/forest-night\.vim$', '', '')
+    return fnamemodify(a:path, ':p:h:h')
   else " Use vim home directory.
     if has('nvim')
       return stdpath('config')
