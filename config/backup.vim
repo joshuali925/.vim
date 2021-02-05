@@ -955,8 +955,57 @@ bind -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "clip.exe"
 bind j command-prompt -p "send pane to window:" "join-pane -h -t :'%%'"
 
 " =======================================================
-" far.vim: **/*.* doesn't include filenames without dot, **/* doesn't respect .gitignore, cannot specify multiple globs
+" far.vim
 Plug 'brooth/far.vim', { 'on': ['F', 'Far', 'Farr', 'Farf'] }
-let g:far#enable_undo = 1
+let g:far#default_file_mask = '**/*.*'  " **/*.* doesn't include filenames without dot, **/* doesn't respect .gitignore
 let g:far#source = 'rg'
-let g:far#default_file_mask = '**/*.*'
+let g:far#enable_undo = 1
+
+" =======================================================
+" ycm doesn't need these now, also python2 is not used
+let s:PythonPath = 'python3'
+" let g:ycm_path_to_python_interpreter=''  " for ycmd, don't modify
+" let g:ycm_python_binary_path=s:PythonPath  " for JediHTTP, comment out if venv doesn't work
+" let g:ycm_semantic_triggers = { 'c,cpp,python,java,javscript': ['re!\w{2}'] }  " auto semantic complete, can be slow
+
+" =======================================================
+" coc-git replaced by gitgutter
+  let g:coc_global_extensions = ['coc-git', ...]
+  nmap [g <Plug>(coc-git-prevchunk)
+  nmap ]g <Plug>(coc-git-nextchunk)
+let g:lightline.active = { 'left': [['mode', 'paste', 'readonly'], ['absolutepath'], ['modified']], 'right': [['lineinfo'], ['colinfo'], ['cocgit'], ['cocstatus']] }
+let g:lightline.component = { 'lineinfo': '%l/%L', 'colinfo': '%{len(col(".")) == 1 ? " " : ""}%c', 'cocgit': '%{get(g:, "coc_git_status", "")}' }
+    call add(l:quickui_content, ['--', ''])
+    call add(l:quickui_content, ['Git hunk &diff', 'CocCommand git.chunkInfo', 'Coc git chunk info'])
+    call add(l:quickui_content, ['Git hunk &undo', 'CocCommand git.chunkUndo', 'Coc git undo chunk'])
+    call add(l:quickui_content, ['Git hunk &add', 'CocCommand git.chunkStage', 'Coc git stage chunk'])
+    call add(l:quickui_content, ['Git &copy link', 'CocCommand git.copyUrl', 'Coc git copy remote url'])
+" coc-settings.json
+  "git.changedSign.text": "░",
+  "git.addedSign.text": "▎",
+  "git.removedSign.text": "▏",
+  "git.topRemovedSign.text": "▔",
+  "git.changeRemovedSign.text": "▒",
+
+" =======================================================
+" lgetbuffer doesn't work here
+function! s:Scratch(...) range
+  let l:bufnr = bufnr()
+  let l:is_quickfix = getwininfo(win_getid())[0]['quickfix']  " quickfix or location list
+  let l:is_loclist = getwininfo(win_getid())[0]['loclist']
+  botright new
+  execute 'resize '. min([15, &lines * 2/5])
+  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile errorformat=%f\|%l\ col\ %c\|%m
+  if a:firstline < a:lastline
+    put =getbufline(l:bufnr, a:firstline, a:lastline)
+  endif
+  if l:is_quickfix
+    execute 'nnoremap <buffer> <leader>w :'. (l:is_loclist ? 'l' : 'c'). 'getbuffer<CR>'
+    if a:firstline >= a:lastline
+      put =getbufline(l:bufnr, 1, '$')
+    endif
+  endif
+  execute 'read !'. join(a:000)
+  1d
+endfunction
+command! -complete=shellcmd -nargs=* -range S <line1>,<line2>call s:Scratch(<q-args>)
