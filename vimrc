@@ -1,8 +1,5 @@
 " ==================== Settings ========================= {{{
-source <sfile>:p:h/colors/current_theme.vim  " load g:Theme value
-let s:Completion = 1  " 0: mucomplete, 1: coc, 2: ycm
-let s:PythonPath = 'python3'
-let g:RunCommand = ''
+let s:Completion = 0  " 0: mucomplete, 1: coc, 2: ycm
 " }}}
 
 " ===================== Plugins ========================= {{{
@@ -34,11 +31,13 @@ Plug 'wellle/context.vim', { 'on': ['ContextToggleWindow', 'ContextPeek'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }
 Plug 'gcmt/wildfire.vim', { 'on': '<Plug>(wildfire-' }
 Plug 'ojroques/vim-oscyank', { 'on': ['OSCYank', 'OSCYankReg'] }
-Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }  " load on startup to record MRU
+Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }
 Plug 'tamago324/LeaderF-filer'
-Plug 'machakann/vim-sandwich'  " lazy load breaks y, d, c
-Plug 'dahu/vim-fanfingtastic'  " lazy load breaks ct/cf
-Plug 'tmsvg/pear-tree'  " lazy load breaks <CR>
+Plug 'svermeulen/vim-yoink'
+Plug 'airblade/vim-gitgutter'
+Plug 'machakann/vim-sandwich'
+Plug 'dahu/vim-fanfingtastic'
+Plug 'tmsvg/pear-tree'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'tpope/vim-unimpaired'
@@ -60,6 +59,7 @@ set guioptions=Mgt  " should set 'M' before vim-plug loads filetype and syntax, 
 " }}}
 
 " ====================== Themes ========================= {{{
+source <sfile>:p:h/colors/current_theme.vim  " load g:Theme value
 set termguicolors  " load theme after vim-plug loads filetype and syntax
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"  " truecolor
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
@@ -70,9 +70,8 @@ let s:theme_list = {}  " g:Theme < 0 for dark themes
 let s:theme_list[0] = 'solarized'
 let s:theme_list[1] = 'PaperColor'
 let s:theme_list[2] = 'github'
-let s:theme_list[3] = 'one'
-let s:theme_list[4] = 'ayu'
-let s:theme_list[5] = 'gruvbox_material'
+let s:theme_list[3] = 'ayu'
+let s:theme_list[4] = 'gruvbox_material'
 let s:theme_list[-1] = 'one'
 let s:theme_list[-2] = 'ayu'
 let s:theme_list[-3] = 'dracula'
@@ -160,19 +159,22 @@ set undolevels=1000
 set undoreload=10000
 set undodir=~/.cache/vim/undo
 set tags=./.tags;,.tags
-set path=.,,*
+set path=.,,**5
 set list
 set listchars=tab:→\ ,nbsp:␣,trail:•
 set encoding=utf-8
 set timeout
 set timeoutlen=1500
 set ttimeoutlen=40
+set updatetime=300
 set synmaxcol=500
 set lazyredraw
 set noswapfile
 set nobackup
 set nowritebackup
 set wildcharm=<C-z>
+set grepprg=rg\ --vimgrep\ --no-heading
+set grepformat=%f:%l:%c:%m,%f:%l:%m
 " }}}
 
 " ====================== Mappings ======================= {{{
@@ -199,6 +201,8 @@ map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
 map gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
+nmap [g <Plug>(GitGutterPrevHunk)
+nmap ]g <Plug>(GitGutterNextHunk)
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
   execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
   execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
@@ -281,17 +285,19 @@ nmap <Leader>7 <Plug>lightline#bufferline#go(7)
 nmap <Leader>8 <Plug>lightline#bufferline#go(8)
 nmap <Leader>9 <Plug>lightline#bufferline#go(9)
 nmap <Leader>0 <Plug>lightline#bufferline#go(10)
+nmap y <Plug>(YoinkYankPreserveCursorPosition)
+xmap y <Plug>(YoinkYankPreserveCursorPosition)
 noremap <leader>y "+y
 nnoremap <leader>Y "+y$
 noremap <leader>p "0p
 noremap <leader>P "0P
-nnoremap <leader>fF :Leaderf filer<CR>
+nnoremap <leader>fF :LeaderfFiler<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunction<CR>
 nnoremap <leader>fU :LeaderfFunctionAll<CR>
 nnoremap <leader>ft :LeaderfBufTagAll<CR>
-nnoremap <leader>fg :Leaderf! rg -F -e<Space>""<Left>
+nnoremap <leader>fg :Leaderf! rg -e<Space>""<Left>
 xnoremap <leader>fg :<C-u><C-r>=printf('Leaderf! rg -F -e %s', leaderf#Rg#visual())<CR>
 nnoremap <leader>fG :LeaderfRgRecall<CR>
 nmap <leader>fj <Plug>LeaderfRgBangCwordLiteralBoundary<CR>
@@ -302,12 +308,13 @@ nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfCommand<CR>
 nnoremap <leader>fw :LeaderfWindow<CR>
 nnoremap <leader>f/ :LeaderfLineAll<CR>
-nnoremap <leader>fs :vertical sfind \c*
-nnoremap <leader>fy :registers<CR>:normal! "p<Left>
+nnoremap <leader>fr :Leaderf registers<CR>
+nnoremap <leader>fy :Leaderf yank<CR>
 nnoremap <leader>fY :registers<CR>:normal! "P<Left>
+nnoremap <leader>fs :vertical sfind \c*
 nnoremap <leader>b :Lexplore<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
-xnoremap <leader>n "xy/\V<C-r>=escape(@x, '/\')<CR><CR>N
+xnoremap <leader>n "xy/\V<C-r>=substitute(escape(@x, '/\'), '\n', '\\n', 'g')<CR><CR>N
 nnoremap <leader>u :MundoToggle<CR>
 nnoremap <leader>v :Vista!!<CR>
 nnoremap <Leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
@@ -337,10 +344,12 @@ cnoremap <expr> <BS> '/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()
 augroup AutoCommands
   autocmd!
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif  " restore last edit position
-  autocmd BufWritePost $MYVIMRC ++nested source $MYVIMRC | setlocal foldmethod=marker  " auto source vimrc on write
+  autocmd BufWritePost $MYVIMRC ++nested source $MYVIMRC  " auto source vimrc on write
   autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> edit! <bar> redraw!<CR>
+  autocmd FileType json if s:Completion != 1 | nnoremap <buffer> <C-f> :update <bar> execute "normal! mx" <bar> silent execute "%!python3 -m json.tool" <bar> keeppatterns %s;^\(\s\+\);\=repeat(" ", len(submatch(0))/2);g <bar> execute "normal! `xzz"<CR> | endif  " use python json.tool to format if not using coc
   autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
   autocmd FileType * setlocal formatoptions=jql
+  autocmd filetype netrw setlocal bufhidden=wipe | call s:NetrwMapping()
   autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
 augroup END
@@ -414,10 +423,10 @@ function! s:LoadQuickUI(open_menu)
         \ ['Git l&og', 'Git log --decorate --all --full-history', 'Show git logs (use <CR>/- to navigate)'],
         \ ['--', ''],
         \ ['Git search &all', 'call feedkeys(":Git log -p --all -S \"\"\<Left>", "n")', 'Search a string in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
-        \ ['Git gre&p all', 'call feedkeys(":Git log -p --all -G \"\"\<Left>", "n")', 'Search a regex in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
+        \ ['Git gre&p all', 'call feedkeys(":Git log -p --all -i -G \"\"\<Left>", "n")', 'Search a regex in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
         \ ['Git fi&nd files all', 'call feedkeys(":Git log --all --full-history --name-only -- \"**\"\<Left>\<Left>", "n")', 'Grep file names in all commits'],
         \ ['--', ''],
-        \ ['Git open &remote', '.GBrowse', 'Open remote url in browser'],
+        \ ['Git open &remote', 'call plug#load("vim-rhubarb") | call plug#load("vim-fugitive") | .Gbrowse', 'Open remote url in browser'],
         \ ])
   call quickui#menu#install('&Toggle', [
         \ ['Quick&fix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"'],
@@ -524,13 +533,8 @@ function! s:OpenQuickUIContextMenu()
     call add(l:quickui_content, ['&Implementation', 'execute "normal \<Plug>(coc-implementation)"', 'Coc implementation'])
     call add(l:quickui_content, ['Re&name', 'execute "normal \<Plug>(coc-rename)"', 'Coc rename'])
     call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc fix'])
-    call add(l:quickui_content, ['--', ''])
-    call add(l:quickui_content, ['Git hunk &diff', 'CocCommand git.chunkInfo', 'Coc git chunk info'])
-    call add(l:quickui_content, ['Git hunk &undo', 'CocCommand git.chunkUndo', 'Coc git undo chunk'])
-    call add(l:quickui_content, ['Git hunk &add', 'CocCommand git.chunkStage', 'Coc git stage chunk'])
-    call add(l:quickui_content, ['Git &copy link', 'CocCommand git.copyUrl', 'Coc git copy remote url'])
   elseif s:Completion == 2
-    call add(l:quickui_content, ['&Documentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
+    call add(l:quickui_content, ['Docu&mentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
     call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe definition'])
     call add(l:quickui_content, ['&Type definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
     call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe references'])
@@ -540,6 +544,11 @@ function! s:OpenQuickUIContextMenu()
     call add(l:quickui_content, ['--', ''])
   endif
   call add(l:quickui_content, ['Git &blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'])
+  call add(l:quickui_content, ['--', ''])
+  call add(l:quickui_content, ['Git hunk &diff', 'GitGutterPreviewHunk', 'Git gutter preview hunk'])
+  call add(l:quickui_content, ['Git hunk &undo', 'GitGutterUndoHunk', 'Git gutter undo hunk'])
+  call add(l:quickui_content, ['Git hunk &add', 'GitGutterStageHunk', 'Git gutter stage hunk'])
+  call add(l:quickui_content, ['Git fo&ld', 'GitGutterFold', 'Git gutter fold unchanged'])
   call add(l:quickui_content, ['--', ''])
   call add(l:quickui_content, ['Built-in d&ocs', 'execute "normal! K"', 'Vim built in help'])
   call quickui#context#open(l:quickui_content, {'index': g:quickui#context#cursor})
@@ -555,6 +564,10 @@ function! MoveBufferRight() abort
   call setpos('.', l:pos)
   normal! zz
 endfunction
+function! GitGutterStatus()
+  let [a, m, r] = GitGutterGetHunkSummary()
+  return printf('+%d ~%d -%d', a, m, r)
+endfunction
 function! LightlineTabs() abort
   return tabpagenr('$') > 1 ? reverse(lightline#tabs()) : ''
 endfunction
@@ -565,6 +578,28 @@ function! LFEditCallback(code) abort
     endfor
     call delete(g:lf_selection_path)
   endif
+endfunction
+function! s:LfYankList(...)
+  return split(execute('Yank'), '\n')[1:]
+endfunction
+function! s:LfYankAccept(line, args) abort
+  let l:index = str2nr(a:line, 10)
+  if l:index > 0
+    call yoink#rotate(l:index)
+  endif
+  normal! p
+endfunction
+function! s:LfRegisters(...) abort
+  return map(split(execute('registers'), '\n')[1:], 'substitute(v:val[6:], "\\^J", " ", "ge")')
+endfunction
+function! s:LfRegistersAccept(line, args) abort
+  execute 'normal! "'. a:line[:0]. 'p'
+endfunction
+function! s:NetrwMapping()
+  nmap <buffer> h [[<CR>^
+  nmap <buffer> l <CR>
+  nnoremap <buffer> <C-l> <C-w>l
+  nnoremap <buffer> <nowait> q :Lexplore<CR>
 endfunction
 function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text_objects_with_custom_functions
   let l:sel_save = &selection
@@ -650,11 +685,11 @@ function! s:PrintCurrVars(visual, printAbove) abort
   endif
 endfunction
 function! s:GetRunCommand()
-  if g:RunCommand != ''
-    return 'AsyncRun '. g:RunCommand
+  if get(b:, 'RunCommand', '') != ''
+    return 'AsyncRun '. b:RunCommand
   endif
   let l:run_command = {}
-  let l:run_command['python'] = 'AsyncRun '. s:PythonPath. ' %'
+  let l:run_command['python'] = 'AsyncRun python3 %'
   let l:run_command['c'] = 'AsyncRun gcc % -o %< -g && ./%<'
   let l:run_command['cpp'] = 'AsyncRun g++ % -o %< -g && ./%<'
   let l:run_command['java'] = 'AsyncRun javac % && java %<'
@@ -664,9 +699,9 @@ function! s:GetRunCommand()
   let l:run_command['xhtml'] = 'AsyncRun -silent open %'
   return get(l:run_command, &filetype, ''). get(b:, 'args', '')
 endfunction
-command! -complete=file -nargs=* SetRunCommand let g:RunCommand = <q-args>
+command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
-command! -complete=shellcmd -nargs=* -range S let @x = bufnr() | execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | 0put =getbufline('. getreg('x'). ', <line1>, <line2>) | endif | 0read !'. <q-args> | 0
+command! -complete=shellcmd -nargs=* -range S if getwininfo(win_getid())[0]['quickfix'] && <line1> < <line2> | echo 'use :cgetbuffer to write to quickfix' | endif | let @x = bufnr() | execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile errorformat=%f\|%l\ col\ %c\|%m | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. getreg('x'). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d  " lgetbuffer doesn't work
 " }}}
 
 " =================== Other plugins ===================== {{{
@@ -688,6 +723,7 @@ let g:startify_commands = [
       \ { 'f': ['Find files', 'LeaderfFile'] },
       \ { 'm': ['Find MRU', 'LeaderfMru'] },
       \ { 'c': ['Edit vimrc', 'edit $MYVIMRC'] },
+      \ { 's': ['Profile startup time', 'StartupTime'] },
       \ ]
 let g:startify_lists = [
       \ { 'type': 'files',     'header': ['   MRU']            },
@@ -699,10 +735,10 @@ let g:lightline.separator = { 'left': '', 'right': '' }
 let g:lightline.subseparator = { 'left': '', 'right': '' }
 let g:lightline.tabline = { 'left': [['buffers']], 'right': [['close'], ['tabs']] }
 let g:lightline.tab = { 'active': ['tabnum'], 'inactive': ['tabnum'] }
-let g:lightline.active = { 'left': [['mode', 'paste', 'readonly'], ['absolutepath'], ['modified']], 'right': [['lineinfo'], ['colinfo'], ['cocgit'], ['cocstatus']] }
+let g:lightline.active = { 'left': [['mode', 'paste', 'readonly'], ['absolutepath'], ['modified']], 'right': [['lineinfo'], ['colinfo'], ['gitgutter'], ['cocstatus']] }
 let g:lightline.inactive = { 'left': [['absolutepath']], 'right': [['lineinfo']] }
-let g:lightline.component = { 'lineinfo': '%l/%L', 'colinfo': '%{len(col(".")) == 1 ? " " : ""}%c', 'cocgit': '%{get(g:, "coc_git_status", "")}' }
-let g:lightline.component_function = { 'cocstatus': 'coc#status' }
+let g:lightline.component = { 'lineinfo': '%l/%L', 'colinfo': '%{len(col(".")) == 1 ? " " : ""}%c' }
+let g:lightline.component_function = { 'cocstatus': 'coc#status', 'gitgutter': 'GitGutterStatus' }
 let g:lightline.component_expand = { 'buffers': 'lightline#bufferline#buffers', 'tabs': 'LightlineTabs' }
 let g:lightline.component_type = { 'buffers': 'tabsel' }
 let g:lightline.component_raw = { 'buffers': 1 }
@@ -720,14 +756,17 @@ let g:EasyMotion_smartcase = 1
 let g:EasyMotion_do_shade = 0
 let g:mundo_preview_bottom = 1
 let g:mundo_width = 30
+let g:yoinkIncludeDeleteOperations = 1
+let g:yoinkMaxItems = 99
 let g:netrw_dirhistmax = 0  " built in :Lexplore<CR> settings
 let g:netrw_banner = 0
-let g:netrw_browse_split = 2
+let g:netrw_browse_split = 4
 let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
 set wildignore+=*/tmp/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*  " do NOT wildignore plugged
 let g:Lf_WildIgnore = { 'dir':['tmp','.git','plugged','node_modules','venv','.env','.local','.idea','*cache*'],'file':[] }
 let g:Lf_MruWildIgnore = { 'dir':['tmp', '.git'], 'file':[] }
+let g:Lf_RgConfig = ['--glob=!.git/*', '--hidden']
 let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_UseCache = 0
@@ -746,6 +785,23 @@ let g:Lf_CtagsFuncOpts = { 'typescriptreact': '--map-typescript=.tsx' }
 let g:Lf_FilerShowHiddenFiles = 1
 let g:Lf_FilerInsertMap = { '<C-v>': 'accept_vertical', '<Up>': 'up', '<Down>': 'down', '<CR>': 'open_current' }
 let g:Lf_FilerNormalMap = { 'i': 'switch_insert_mode', '<Esc>': 'quit', '~': 'goto_root_marker_dir', 'M': 'mkdir', 'T': 'create_file' }
+let g:Lf_Extensions = {
+      \   'registers': {
+      \     'source': string(function('s:LfRegisters'))[10:-3],
+      \     'accept': string(function('s:LfRegistersAccept'))[10:-3],
+      \   },
+      \  'yank': {
+      \     'source': string(function('s:LfYankList'))[10:-3],
+      \     'accept': string(function('s:LfYankAccept'))[10:-3],
+      \   },
+      \ }
+let g:gitgutter_map_keys = 0
+let g:gitgutter_preview_win_floating = 1
+let g:gitgutter_sign_added = '▎'
+let g:gitgutter_sign_modified = '░'
+let g:gitgutter_sign_removed = '▏'
+let g:gitgutter_sign_removed_first_line = '▔'
+let g:gitgutter_sign_modified_removed = '▒'
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'
@@ -770,13 +826,12 @@ if s:Completion == 0  " mucomplete
   let g:mucomplete#enable_auto_at_startup = 1
   let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'c-n', 'uspl']}
 elseif s:Completion == 1  " coc
-  let g:coc_global_extensions = ['coc-git', 'coc-explorer', 'coc-yank', 'coc-snippets', 'coc-highlight', 'coc-vimlsp', 'coc-python', 'coc-tsserver', 'coc-prettier', 'coc-eslint', 'coc-html', 'coc-css', 'coc-emmet']
-  " to manually install extensions, run :CocInstall coc-git coc-...
+  let g:coc_global_extensions = ['coc-explorer', 'coc-yank', 'coc-snippets', 'coc-highlight', 'coc-vimlsp', 'coc-python', 'coc-tsserver', 'coc-prettier', 'coc-eslint', 'coc-html', 'coc-css', 'coc-emmet']
+  " to manually install extensions, run :CocInstall coc-...
   " or run cd ~/.config/coc/extensions && yarn add coc-..., yarn cannot be cmdtest
   " in Windows run cd %LOCALAPPDATA%/coc/extensions && yarn add coc-...
   let g:coc_snippet_next = '<Tab>'
   let g:coc_snippet_prev = '<S-Tab>'
-  set updatetime=300
   inoremap <silent> <expr> <Tab> pumvisible() ? '<C-n>' : col('.') > 1 && getline('.')[col('.')-2] =~ '\S' ? coc#refresh() : '<Tab>'
   inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
   nnoremap <leader>b :CocCommand explorer<CR>
@@ -796,8 +851,6 @@ elseif s:Completion == 1  " coc
   imap <C-k> <Plug>(coc-snippets-expand)
   nmap [a <Plug>(coc-diagnostic-prev)
   nmap ]a <Plug>(coc-diagnostic-next)
-  nmap [g <Plug>(coc-git-prevchunk)
-  nmap ]g <Plug>(coc-git-nextchunk)
   xmap if <Plug>(coc-funcobj-i)
   omap if <Plug>(coc-funcobj-i)
   xmap af <Plug>(coc-funcobj-a)
@@ -806,17 +859,16 @@ elseif s:Completion == 1  " coc
   omap ic <Plug>(coc-classobj-i)
   xmap ac <Plug>(coc-classobj-a)
   omap ac <Plug>(coc-classobj-a)
-  function! CocLightlineGit() abort
-    return get(g:, 'coc_git_status', '')
-  endfunction
 elseif s:Completion == 2  " YCM
+  if exists('+completepopup')  " vim only
+    set completeopt+=popup
+    set completepopup=align:menu,border:off,highlight:WildMenu
+  endif
   inoremap <expr> <C-e> pumvisible() ? '<C-e><Esc>a' : '<C-e>'
+  nmap gh <Plug>(YCMHover)
   nnoremap gr :YcmCompleter GoToReferences<CR>
   nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
   nnoremap <leader>a :YcmCompleter FixIt<CR>
-  " let g:ycm_path_to_python_interpreter=''  " for ycmd, don't modify
-  " let g:ycm_python_binary_path=s:PythonPath  " for JediHTTP, comment out if venv doesn't work
-  " let g:ycm_semantic_triggers = { 'c,cpp,python,java,javscript': ['re!\w{2}'] }  " auto semantic complete, can be slow
   let g:ycm_collect_identifiers_from_comments_and_strings = 1
   let g:ycm_complete_in_comments = 1
   let g:ycm_complete_in_strings = 1
@@ -879,7 +931,7 @@ else
   tnoremap <silent> <C-k> <C-w>:TmuxNavigateUp<CR>
   tnoremap <silent> <C-l> <C-w>:TmuxNavigateRight<CR>
   nnoremap <leader>to :execute 'terminal ++close ++rows='. min([15, &lines * 2/5])<CR>
-  nnoremap <leader>tO :terminal ++curwin ++close<CR>
+  nnoremap <leader>tO :terminal ++curwin ++noclose<CR>
   nnoremap <leader>th :terminal ++close<CR>
   nnoremap <leader>tv :vertical terminal ++close<CR>
   nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
@@ -902,9 +954,9 @@ call <SID>MapAction('SendToTerminal', '<leader>te')
 
 " ================== System specific ==================== {{{
 if has('gui_running')
-  let &t_SI = ""
-  let &t_SR = ""
-  let &t_EI = ""
+  let &t_SI = ''
+  let &t_SR = ''
+  let &t_EI = ''
   imap <C-Tab> <F3>
   imap <C-S-Tab> <F2>
   nmap <C-Tab> <F3>
@@ -912,7 +964,7 @@ if has('gui_running')
   tmap <C-Tab> <F3>
   tmap <C-S-Tab> <F2>
   set guicursor+=a:blinkon0
-  if &columns < 85 && &lines < 30
+  if &columns < 90 || &lines < 25
     set lines=25
     set columns=90
   endif
@@ -931,7 +983,7 @@ if has('gui_running')
       set columns=115
     endif
   endif
-elseif $SSH_CLIENT != ""  " ssh session
+elseif $SSH_CLIENT != ''  " ssh session
   function! s:CopyWithOSCYank(str)
     let @" = a:str
     OSCYankReg "
@@ -945,4 +997,4 @@ elseif !has('macunix')  " WSL Vim
 endif
 " }}}
 
-" vim:fdm=marker:fdl=99
+" vim: foldmethod=marker foldlevel=99

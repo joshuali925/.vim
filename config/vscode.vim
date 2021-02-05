@@ -90,7 +90,7 @@ nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>b :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
-xnoremap <leader>n "xy/\V<C-r>=escape(@x, '/\')<CR><CR>N
+xnoremap <leader>n "xy/\V<C-r>=substitute(escape(@x, '/\'), '\n', '\\n', 'g')<CR><CR>N
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 nnoremap <leader>l :call <SID>PrintCurrVars(0, 0)<CR>
@@ -146,18 +146,14 @@ nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
 nnoremap zr :call VSCodeNotify('editor.unfoldAll')<CR>
 nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
 
-nnoremap H :call VSCodeExtensionNotify('move-cursor', 'top')<CR>
-xnoremap H 10k
-nnoremap M :call VSCodeExtensionNotify('move-cursor', 'middle')<CR>
-nnoremap L :call VSCodeExtensionNotify('move-cursor', 'bottom')<CR>
-xnoremap L 10j
-
 " nnoremap <C-d> :call VSCodeExtensionCall('scroll', 'halfPage', 'down')<CR>
 nnoremap <C-d> 15j
 xnoremap <C-d> 15j
 " nnoremap <C-u> :call VSCodeExtensionCall('scroll', 'halfPage', 'up')<CR>
 nnoremap <C-u> 15k
 xnoremap <C-u> 15k
+xnoremap H 10k
+xnoremap L 10j
 
 function! s:GetVisualSelection()
   let [l:line_start, l:column_start] = getpos("'<")[1:2]
