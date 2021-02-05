@@ -123,24 +123,24 @@ cmd paste-symlink %{{
 cmd x ${{
   set -f
   filename="$(basename "$f")"
-  if [ -f $filename ] ; then
-    case $filename in
-      *.tar.bz2)   tar xvjf $filename    ;;
-      *.tar.xz)    tar xvJf $filename    ;;
-      *.tar.gz)    tar xvzf $filename    ;;
-      *.bz2)       bunzip2 $filename     ;;
-      *.rar)       unrar x $filename     ;;
-      *.gz)        gunzip $filename      ;;
-      *.tar)       tar xvf $filename     ;;
-      *.tbz2)      tar xvjf $filename    ;;
-      *.tgz)       tar xvzf $filename    ;;
-      *.zip)       unzip $filename       ;;
-      *.Z)         uncompress $filename  ;;
-      *.7z)        7z x $filename        ;;
+  if [ -f "$filename" ] ; then
+    case "$filename" in
+      *.tar.bz2)   tar xvjf "$filename"    ;;
+      *.tar.xz)    tar xvJf "$filename"    ;;
+      *.tar.gz)    tar xvzf "$filename"    ;;
+      *.bz2)       bunzip2 "$filename"     ;;
+      *.rar)       unrar x "$filename"     ;;
+      *.gz)        gunzip "$filename"      ;;
+      *.tar)       tar xvf "$filename"     ;;
+      *.tbz2)      tar xvjf "$filename"    ;;
+      *.tgz)       tar xvzf "$filename"    ;;
+      *.zip)       unzip "$filename"       ;;
+      *.Z)         uncompress "$filename"  ;;
+      *.7z)        7z x "$filename"        ;;
       *)           echo "Unable to extract '$filename'" ;;
     esac
   else
-    tar cvf $filename.tar $filename
+    tar cvf "$filename.tar" "$filename"
   fi
 }}
 
