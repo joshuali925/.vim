@@ -12,7 +12,7 @@ export FZF_COMPLETION_TRIGGER='\'
 export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
-export FZF_ALT_C_COMMAND='ls -1dA */ 2> /dev/null'
+export FZF_ALT_C_COMMAND='ls -1A 2> /dev/null'
 export FZF_PREVIEW_COMMAND='bat --style=numbers --color=always --theme=OneHalfDark --line-range :50 {}'
 
 alias -- -='cd -'
@@ -83,7 +83,7 @@ alias gcf='git config --list'
 alias gcl='git clone --recursive'
 alias gclean='git clean -fd'
 alias gpristine='git reset --hard && git clean -fdx'
-alias gcm='git checkout master || git checkout main'
+alias gcm='git checkout main || git checkout master'
 alias gcd='git checkout develop || git checkout dev'
 alias gcmsg='git commit -m'
 alias gco='git checkout'
@@ -130,7 +130,7 @@ alias grbs='git rebase --skip'
 alias grbi='git rebase -i'
 alias grh='git reset HEAD'
 alias grhh='git reset HEAD --hard'
-alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset"'
+alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset" --date=iso'
 alias gra='git remote add'
 alias grmv='git remote rename'
 alias grrm='git remote remove'
@@ -249,9 +249,14 @@ cdf() {
   fi
 }
 
+vrg() {
+  if [ "$#" -eq 0 ]; then echo "Need a string to search for."; return 1; fi
+  vim -q <(rg $@ --vimgrep) -c "silent execute '/$1'"
+}
+
 fif() {
   if [ "$#" -eq 0 ]; then echo "Need a string to search for."; return 1; fi
-  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "bat --style=plain --color=always {+} | rg --colors 'match:bg:yellow' --pretty --context 5 $(printf "%q " "$@") --max-columns 0 || rg --pretty --context 5 --max-columns 0 $(printf "%q " "$@"){+}" --bind="enter:execute(vim {+} -c \"silent execute '/$@'\" < /dev/tty)"
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute(vim {+} -c \"silent execute '/$1'\" < /dev/tty)"
 }
 
 unalias z 2> /dev/null
@@ -291,4 +296,16 @@ yarn() {
   export NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
   yarn "$@"
+}
+
+docker-shell() {
+  local CONTAINERS
+  local SELECTED_ID
+  CONTAINERS=`docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}'`
+  SELECTED_ID=`echo $CONTAINERS | fzf --height=40% --no-sort --tiebreak=begin,index`
+  if [[ -n $SELECTED_ID ]]; then
+    printf "\n → $SELECTED_ID\n"
+    SELECTED_ID=`echo $SELECTED_ID | awk '{print $1}'`
+    docker exec -it $SELECTED_ID /bin/bash
+  fi
 }

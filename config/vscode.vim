@@ -3,12 +3,14 @@ call plug#begin('~/.vim/plugged/vscode')
 " let win_first_line = max([line('w0'), line('.') - 30]) " visible first line num
 " let win_last_line  = min([line('w$'), line('.') + 30]) " visible last line num
 Plug 'asvetliakov/vim-easymotion'
-Plug 'dahu/vim-fanfingtastic'
+Plug 'justinmk/vim-sneak'
 Plug 'machakann/vim-swap'
 Plug 'machakann/vim-sandwich'
 Plug 'gcmt/wildfire.vim'
+" swap aI and ai in plugged/vscode/vim-indent-object/plugin/indent-object.vim:28
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'AndrewRadev/splitjoin.vim'
+Plug 'machakann/vim-highlightedyank'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'tpope/vim-repeat'
 call plug#end()
@@ -21,12 +23,18 @@ let mapleader=';'
 nmap <BS> gT
 nmap \ gt
 map <Space> <Plug>(wildfire-fuel)
-map f <Plug>fanfingtastic_f
-map t <Plug>fanfingtastic_t
-map F <Plug>fanfingtastic_F
-map T <Plug>fanfingtastic_T
-map , <Plug>fanfingtastic_;
-map ;, <Plug>fanfingtastic_,
+map f <Plug>Sneak_f
+map F <Plug>Sneak_F
+nmap t <Plug>Sneak_s
+nmap T <Plug>Sneak_S
+xmap t <Plug>Sneak_t
+xmap T <Plug>Sneak_T
+omap t <Plug>Sneak_t
+omap T <Plug>Sneak_T
+map , <Plug>Sneak_;
+map ;, <Plug>Sneak_,
+map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
+map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
 map S <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
@@ -68,8 +76,7 @@ xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
 nnoremap <C-c> :nohlsearch<CR>
-nnoremap <C-b> :call VSCodeNotify('workbench.action.toggleZenMode')<CR>
-nnoremap <C-f> :call VSCodeNotify('editor.action.formatDocument')<CR>
+nnoremap <C-f> :call VSCodeNotify('editor.action.organizeImports') <bar> sleep 200m <bar> call VSCodeNotify('editor.action.formatDocument')<CR>
 nnoremap <leader><C-f> :call VSCodeNotify('editor.action.formatChanges')<CR>
 xnoremap <C-f> =
 nnoremap <leader>r :call VSCodeNotify('code-runner.run')<CR>
@@ -77,7 +84,7 @@ noremap <leader>y "+y
 nnoremap <leader>Y "+y$
 noremap <leader>p "0p
 noremap <leader>P "0P
-nnoremap <leader>ff :call VSCodeNotify('workbench.action.quickOpen')<CR>
+nnoremap <leader>fs :call VSCodeNotify('workbench.action.quickOpen')<CR>
 nnoremap <leader>fm :call VSCodeNotify('workbench.action.openRecent')<CR>
 nnoremap <leader>fb :call VSCodeNotify('workbench.files.action.focusFilesExplorer')<CR>
 nnoremap <leader>fu :call VSCodeNotify('workbench.action.gotoSymbol')<CR>
@@ -90,7 +97,7 @@ nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>b :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
-xnoremap <leader>n "xy/\V<C-r>=substitute(escape(@x, '/\'), '\n', '\\n', 'g')<CR><CR>N
+xnoremap <leader>n "xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 nnoremap <leader>l :call <SID>PrintCurrVars(0, 0)<CR>
@@ -102,6 +109,7 @@ nnoremap <leader>b :call VSCodeNotify('workbench.action.toggleSidebarVisibility'
 nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
 nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
 nnoremap <leader>q :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
+nnoremap <leader>x :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
 
 nnoremap <leader>l mx"xyiwoconsole.log('<C-r>x', <C-r>x);<Esc>`x
 nnoremap <leader>L mx"xyiwOconsole.log('<C-r>x', <C-r>x);<Esc>`x
@@ -206,6 +214,8 @@ let g:operator_sandwich_no_default_key_mappings = 1
 let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_smartcase = 1
 let g:EasyMotion_do_shade = 0
+let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnmfj2345789;'
+let g:highlightedyank_highlight_duration = 500
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'
 let g:table_mode_motion_up_map = '<leader>tk'

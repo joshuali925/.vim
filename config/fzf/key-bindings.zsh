@@ -87,7 +87,11 @@ fzf-cd-widget() {
     zle redisplay
     return 0
   fi
-  cd "$dir"
+  if [[ -d "$dir" ]]; then
+    cd "$dir"
+  else
+    $EDITOR "$dir" < /dev/tty
+  fi
   printf "\n\n"
   unset dir # ensure this doesn't end up appearing in prompt expansion
   local ret=$?

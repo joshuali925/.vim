@@ -24,7 +24,8 @@ zinit as"completion" for \
   https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
   https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
   https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
-  https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose
+  https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \
+  https://github.com/zsh-users/zsh-completions/blob/master/src/_golang
 
 zinit light-mode for \
   atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\

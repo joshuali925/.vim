@@ -941,9 +941,6 @@ let g:lightline.component_function = {
         \ ['Open &Functions', 'call quickui#tools#list_function()'],
 
 " =======================================================
-set t_ut="" "https://github.com/microsoft/terminal/issues/832
-
-" =======================================================
 # <a-c> fzf cd all subdirectories
 export FZF_ALT_C_COMMAND='fd --type=d'
 export FZF_ALT_C_COMMAND="rg --files --null | xargs -0 dirname | awk '!h[\$0]++'"
@@ -1009,3 +1006,116 @@ function! s:Scratch(...) range
   1d
 endfunction
 command! -complete=shellcmd -nargs=* -range S <line1>,<line2>call s:Scratch(<q-args>)
+
+" =======================================================
+" include files in alt-c fzf
+export FZF_ALT_C_COMMAND='ls -1dA */ 2> /dev/null'  # dir only
+export FZF_ALT_C_COMMAND='ls -1A 2> /dev/null'  # include files
+" use bat
+alias man="LESS_TERMCAP_md=$'\e[01;31m' LESS_TERMCAP_me=$'\e[0m' LESS_TERMCAP_se=$'\e[0m' LESS_TERMCAP_so=$'\e[01;44;33m' LESS_TERMCAP_ue=$'\e[0m' LESS_TERMCAP_us=$'\e[01;32m' man"
+
+" =======================================================
+nnoremap <leader>fs :vertical sfind \c*
+xnoremap <leader>n "xy/\V<C-r>=substitute(escape(@x, '/\'), '\n', '\\n', 'g')<CR><CR>N
+xnoremap <leader>n "xy:let @/=substitute(escape(@x, "\\/.*'$^~[]"), '\n', '\\n', 'g') <bar> set hlsearch<CR>
+let s:RelativeNumber = 0
+  if s:RelativeNumber == 1
+    set relativenumber
+    autocmd BufEnter,FocusGained,InsertLeave,WinEnter * set relativenumber
+    autocmd BufLeave,FocusLost,InsertEnter,WinLeave * set norelativenumber
+  endif
+
+" =======================================================
+" too slow, and doesn't work for vscode
+Plug 'andymass/vim-matchup'
+let g:matchup_matchparen_deferred = 1
+let g:matchup_transmute_enabled = 1
+let g:matchup_matchparen_offscreen = { 'method': '' }
+
+" =======================================================
+" coc-yank
+nnoremap <leader>fy :CocList yank<CR>
+
+" =======================================================
+" use neoterm for terminal
+if has('nvim')
+  augroup NvimTerminal
+    autocmd!
+    autocmd TermOpen * setlocal nonumber norelativenumber signcolumn=no | startinsert
+    autocmd BufEnter term://* startinsert
+  augroup END
+  tnoremap <expr> <F2> tabpagenr('$') > 1 ? '<C-\><C-n>gT' : '<C-\><C-n>:bprevious<CR>'
+  tnoremap <expr> <F3> tabpagenr('$') > 1 ? '<C-\><C-n>gt' : '<C-\><C-n>:bnext<CR>'
+  tnoremap <C-u> <C-\><C-n>
+  tnoremap <silent> <C-h> <C-\><C-n>:TmuxNavigateLeft<CR>
+  tnoremap <silent> <C-j> <C-\><C-n>:TmuxNavigateDown<CR>
+  tnoremap <silent> <C-k> <C-\><C-n>:TmuxNavigateUp<CR>
+  tnoremap <silent> <C-l> <C-\><C-n>:TmuxNavigateRight<CR>
+  nnoremap <leader>to :execute 'split <bar> resize'. min([15, &lines * 2/5]). ' <bar> terminal'<CR>
+  nnoremap <leader>tO :terminal<CR>
+  nnoremap <leader>th :split <bar> terminal<CR>
+  nnoremap <leader>tv :vsplit <bar> terminal<CR>
+  nnoremap <leader>tt :tabedit <bar> terminal<CR>
+  nmap <leader>tp :call <SID>LoadQuickUI(0)<CR><leader>tp
+  function! s:SendToTerminal(str)
+    let l:job_id = -1
+    for l:buff_n in tabpagebuflist()
+      if nvim_buf_get_name(l:buff_n) =~ 'term://'
+        let l:job_id = nvim_buf_get_var(l:buff_n, 'terminal_job_id')  " sends to last opened terminal in current tab
+        break
+      endif
+    endfor
+    if l:job_id > 0
+      let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
+      let l:indent = match(l:lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
+      for l:line in l:lines
+        call jobsend(l:job_id, (match(l:line, '[^ \t]') ? l:line[l:indent:] : l:line). "\n")
+      endfor
+    endif
+  endfunction
+else
+  set viminfo+=n~/.cache/vim/viminfo
+  set undodir=~/.cache/vim/undo
+  set cursorlineopt=number,screenline
+  augroup VimTerminal
+    autocmd!
+    autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no
+  augroup END
+  " do not tmap <Esc> in vim
+  tnoremap <expr> <F2> tabpagenr('$') > 1 ? '<C-w>gT' : '<C-w>:bprevious<CR>'
+  tnoremap <expr> <F3> tabpagenr('$') > 1 ? '<C-w>gt' : '<C-w>:bnext<CR>'
+  tnoremap <C-u> <C-\><C-n>
+  tnoremap <silent> <C-h> <C-w>:TmuxNavigateLeft<CR>
+  tnoremap <silent> <C-j> <C-w>:TmuxNavigateDown<CR>
+  tnoremap <silent> <C-k> <C-w>:TmuxNavigateUp<CR>
+  tnoremap <silent> <C-l> <C-w>:TmuxNavigateRight<CR>
+  nnoremap <leader>to :execute 'terminal ++close ++rows='. min([15, &lines * 2/5])<CR>
+  nnoremap <leader>tO :terminal ++curwin ++noclose<CR>
+  nnoremap <leader>th :terminal ++close<CR>
+  nnoremap <leader>tv :vertical terminal ++close<CR>
+  nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
+  nmap <leader>tp :call <SID>LoadQuickUI(0)<CR><leader>tp
+  function! s:SendToTerminal(str)
+    let l:buff_n = term_list()
+    if len(l:buff_n) > 0
+      let l:buff_n = l:buff_n[0]  " sends to most recently opened terminal
+      let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
+      let l:indent = match(l:lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
+      for l:line in l:lines
+        call term_sendkeys(l:buff_n, (match(l:line, '[^ \t]') ? l:line[l:indent:] : l:line). "\<CR>")
+        sleep 10m
+      endfor
+    endif
+  endfunction
+endif
+call <SID>MapAction('SendToTerminal', '<leader>te')
+
+" =======================================================
+" mucomplete
+Plug 'lifepillar/vim-mucomplete'
+set omnifunc=syntaxcomplete#Complete
+inoremap <expr> <C-@> pumvisible() ? '<C-e><C-x><C-o><C-p>' : '<C-x><C-o><C-p>'
+inoremap <expr> <C-Space> pumvisible() ? '<C-e><C-x><C-o><C-p>' : '<C-x><C-o><C-p>'
+let g:mucomplete#enable_auto_at_startup = 1
+let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'c-n', 'uspl']}
+
