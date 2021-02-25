@@ -57,7 +57,7 @@ noremap <leader>y "+y
 nnoremap <leader>Y "+y$
 noremap <leader>p "0p
 noremap <leader>P "0P
-map <leader>ff <Action>(GotoFile)
+map <leader>fs <Action>(GotoFile)
 map <leader>fu <Action>(FileStructurePopup)
 map <leader>ft <Action>(GotoSymbol)
 map <leader>fm <Action>(RecentLocations)
