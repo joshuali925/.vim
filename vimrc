@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let s:Completion = 0  " 0: completor, 1: coc, 2: ycm
+let s:Completion = 0  " 0: custom, 1: coc, 2: ycm
 " }}}
 
 " ===================== Plugins ========================= {{{
@@ -31,7 +31,7 @@ Plug 'wellle/context.vim', { 'on': ['ContextToggleWindow', 'ContextPeek'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }
 Plug 'gcmt/wildfire.vim', { 'on': '<Plug>(wildfire-' }
 Plug 'ojroques/vim-oscyank', { 'on': ['OSCYank', 'OSCYankReg'] }
-Plug 'kassio/neoterm', { 'on': ['Ttoggle', 'Topen'] }
+Plug 'kassio/neoterm', { 'on': ['Ttoggle', 'Tnew'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }
 Plug 'tamago324/LeaderF-filer'
 Plug 'svermeulen/vim-yoink'
@@ -39,7 +39,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'machakann/vim-sandwich'
 Plug 'justinmk/vim-sneak'
 Plug 'tmsvg/pear-tree'
-" swap aI and ai in plugged/vscode/vim-indent-object/plugin/indent-object.vim:28
+" swap aI and ai in plugged/vim-indent-object/plugin/indent-object.vim:28
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
@@ -47,14 +47,12 @@ Plug 'tpope/vim-unimpaired'
 Plug 'markonm/traces.vim'
 Plug 'tpope/vim-repeat'
 Plug 'jdhao/better-escape.vim'
-if s:Completion >= 0
+if s:Completion >= 1
   Plug 'sirver/ultisnips'
   Plug 'honza/vim-snippets'
-  if s:Completion == 0
-    Plug 'maralla/completor.vim'
-  elseif s:Completion == 1
+  if s:Completion == 1
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  elseif s:Completion == 2
+  elseif s:Completion == 1
     Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
   endif
 endif
@@ -87,14 +85,12 @@ let s:theme_list[-7] = 'gruvbox_material'
 let s:theme_list[-8] = 'sonokai'
 let g:sonokai_style = 'andromeda'
 let g:lightline = {}
-function! LoadColorscheme(index, ...)
-  let l:refresh_theme = get(a:, 1, 0)
+function! LoadColorscheme(index, refresh)
   let g:lightline.colorscheme = s:theme_list[a:index]
-  let g:material_theme_style = a:index < 0 ? 'palenight' : 'lighter'
   let g:ayucolor = a:index < 0 ? 'mirage' : 'light'
   execute 'set background='. (a:index < 0 ? 'dark' : 'light')
   execute 'colorscheme '. get(s:theme_list, a:index, 'desert')
-  if l:refresh_theme
+  if a:refresh
     call lightline#init()
     execute 'source' globpath(&runtimepath, 'autoload/lightline/colorscheme/'. s:theme_list[a:index]. '.vim')
     call lightline#colorscheme()
@@ -105,7 +101,7 @@ function! LoadColorscheme(index, ...)
     endif
   endif
 endfunction
-call LoadColorscheme(g:Theme)
+call LoadColorscheme(g:Theme, 0)
 " }}}
 
 " ====================== Options ======================== {{{
@@ -213,7 +209,7 @@ map gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
 nmap [g <Plug>(GitGutterPrevHunk)
 nmap ]g <Plug>(GitGutterNextHunk)
-for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
+for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=' ]
   execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
   execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
   execute 'xnoremap a'. char. ' :<C-u>normal! T'. char. 'vf'. char. '<CR>'
@@ -260,6 +256,7 @@ xnoremap @q :normal! @q<CR>
 xnoremap @@ :normal! @@<CR>
 nnoremap Q q:k
 nnoremap Y y$
+xnoremap p "_dP
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
@@ -281,7 +278,6 @@ nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
 nmap <C-p> :call <SID>LoadQuickUI(0)<CR><C-p>
 nmap <C-f> :call <SID>LoadAutoformat()<CR><C-f>
-imap <C-f> <Esc>:call <SID>LoadAutoformat()<CR>V<C-f>A
 xmap <C-f> :<C-u>call <SID>LoadAutoformat()<CR>gv<C-f>
 nmap <C-n> :call <SID>LoadVisualMulti()<CR><C-n>
 xmap <C-n> :<C-u>call <SID>LoadVisualMulti()<CR>gv<C-n>
@@ -290,16 +286,6 @@ imap <leader>r <Esc><leader>r
 nnoremap <leader>r :update <bar> execute <SID>GetRunCommand()<CR>
 nmap <CR> :call <SID>LoadQuickUI(0)<CR><CR>
 xmap <CR> :<C-u>call <SID>LoadQuickUI(0)<CR>gv<CR>
-nmap <Leader>1 <Plug>lightline#bufferline#go(1)
-nmap <Leader>2 <Plug>lightline#bufferline#go(2)
-nmap <Leader>3 <Plug>lightline#bufferline#go(3)
-nmap <Leader>4 <Plug>lightline#bufferline#go(4)
-nmap <Leader>5 <Plug>lightline#bufferline#go(5)
-nmap <Leader>6 <Plug>lightline#bufferline#go(6)
-nmap <Leader>7 <Plug>lightline#bufferline#go(7)
-nmap <Leader>8 <Plug>lightline#bufferline#go(8)
-nmap <Leader>9 <Plug>lightline#bufferline#go(9)
-nmap <Leader>0 <Plug>lightline#bufferline#go(10)
 nmap y <Plug>(YoinkYankPreserveCursorPosition)
 xmap y <Plug>(YoinkYankPreserveCursorPosition)
 noremap <leader>y "+y
@@ -311,7 +297,7 @@ nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
 nnoremap <leader>fu :LeaderfFunction<CR>
 nnoremap <leader>fU :LeaderfFunctionAll<CR>
-nnoremap <leader>ft :LeaderfBufTagAll<CR>
+nnoremap <leader>f] :LeaderfBufTagAll<CR>
 nnoremap <leader>fg :Leaderf! rg -e<Space>""<Left>
 xnoremap <leader>fg :<C-u><C-r>=printf('Leaderf! rg -F -e %s', leaderf#Rg#visual())<CR>
 nnoremap <leader>fG :LeaderfRgRecall<CR>
@@ -321,6 +307,7 @@ nnoremap <leader>fq :LeaderfQuickFix<CR>
 nnoremap <leader>fl :LeaderfLocList<CR>
 nnoremap <leader>fL :Leaderf rg -S<CR>
 nnoremap <leader>fa :LeaderfCommand<CR>
+nnoremap <leader>ft :LeaderfFiletype<CR>
 nnoremap <leader>ff :LeaderfSelf<CR>
 nnoremap <leader>fw :LeaderfWindow<CR>
 nnoremap <leader>f/ :LeaderfLineAll<CR>
@@ -359,8 +346,8 @@ cnoremap <expr> <BS> '/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()
 " ====================== Autocmd ======================== {{{
 augroup AutoCommands
   autocmd!
-  autocmd BufLeave * call <SID>AutoSaveWinView()
-  autocmd BufEnter * call <SID>AutoRestoreWinView()
+  autocmd BufLeave * call s:AutoSaveWinView()
+  autocmd BufEnter * call s:AutoRestoreWinView()
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif  " restore last edit position
   autocmd BufWritePost $MYVIMRC ++nested source $MYVIMRC  " auto source vimrc on write, ++nested required by lightline
   autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
@@ -369,17 +356,12 @@ augroup AutoCommands
   autocmd filetype netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable errorformat=%f\|%l\ col\ %c\|%m | nnoremap <buffer> <leader>w :cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
-  if s:Completion != 1  " use astyle and python json.tool to format if not using coc
-    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :silent! update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> edit! <bar> redraw!<CR>
-    autocmd FileType json nnoremap <buffer> <C-f> :silent! update <bar> execute 'normal! mx' <bar> silent execute '%!python3 -m json.tool' <bar> keeppatterns %s;^\(\s\+\);\=repeat(' ', len(submatch(0))/2);g <bar> redraw! <bar> execute 'normal! `xzz'<CR>
-  endif
 augroup END
 " }}}
 
 " ===================== Lazy load ======================= {{{
 function! s:LoadAutoformat()
   let g:formatters_python = ['yapf']
-  inoremap <C-f> <Esc>V:'<,'>Autoformat<CR>A
   nnoremap <C-f> :Autoformat<CR>
   xnoremap <C-f> :'<,'>Autoformat<CR>$
   call plug#load('vim-autoformat')
@@ -419,11 +401,12 @@ function! s:LoadQuickUI(open_menu)
         \ ['&Trim spaces', 'keeppatterns %s/\s\+$//e | execute "normal! ``"', 'Remove trailing spaces'],
         \ ['Cou&nt occurrences', 'keeppatterns %s///gn | execute "normal! ``"', 'Count occurrences of current search pattern'],
         \ ['Search in &buffers', 'execute "cexpr [] | bufdo vimgrepadd //g %" | copen', 'Grep current search pattern in all buffers, add to quickfix'],
+        \ ['Calculate line &=', 'let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"', 'Calculate expression from previous "=" or current line'],
         \ ['--', ''],
         \ ['Move tab left &-', '-tabmove'],
         \ ['Move tab right &+', '+tabmove'],
         \ ['Move buffer rightmost &>', 'call MoveBufferRight()', 'Wipe out current buffer and reopen, will lose temporary variables'],
-        \ ['&Refresh screen', 'execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"', 'Clear search and refresh screen'],
+        \ ['&Refresh screen', 'execute "nohlsearch | syntax sync fromstart | diffupdate | GitGutter | let @/=\"QWQ\" | normal! \<C-l>"', 'Clear search and refresh screen'],
         \ ['--', ''],
         \ ['Open WhichKe&y', 'WhichKey ";"', 'Show WhichKey for ;'],
         \ ['Open &Startify', 'Startify', 'Open vim-startify'],
@@ -436,7 +419,7 @@ function! s:LoadQuickUI(open_menu)
   call quickui#menu#install('&Git', [
         \ ['Git &status', 'Git', 'Git status'],
         \ ['Git checko&ut file', 'Gread', 'Checkout current file and load as unsaved buffer'],
-        \ ['Git &blame', 'Gblame', 'Git blame of current file'],
+        \ ['Git &blame', 'Git blame', 'Git blame of current file'],
         \ ['Git &diff', 'Gdiffsplit', 'Diff current file with last staged version'],
         \ ['Git diff H&EAD', 'Gdiffsplit HEAD', 'Diff current file with last committed version'],
         \ ['Git &changes', 'Git! difftool', 'Load unstaged changes into quickfix list (use [q, ]q to navigate)'],
@@ -541,7 +524,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Sort num desc', "'<,'>sort! n", 'Sort numerically in descending order (sort! n)'],
         \ ])
   if a:open_menu == 1
-    call <SID>OpenQuickUIContextMenu()
+    call s:OpenQuickUIContextMenu()
   endif
 endfunction
 function! s:OpenQuickUIContextMenu()
@@ -729,7 +712,7 @@ function! s:PrintCurrVars(visual, printAbove) abort
 endfunction
 function! s:GetRunCommand()
   if get(b:, 'RunCommand', '') != ''
-    return 'AsyncRun '. b:RunCommand
+    return b:RunCommand
   endif
   let l:run_command = {}
   let l:run_command['vim'] = 'source %'
@@ -745,7 +728,7 @@ function! s:GetRunCommand()
 endfunction
 command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
-command! -complete=shellcmd -nargs=* -range S let @x = bufnr() | execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile errorformat=%f\|%l\ col\ %c\|%m | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. getreg('x'). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d
+command! -complete=shellcmd -nargs=* -range S let @x = bufnr() | execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile errorformat=%f\|%l\ col\ %c\|%m | let b:RunCommand = "write !python3 -i" | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. getreg('x'). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d
 " }}}
 
 " =================== Other plugins ===================== {{{
@@ -868,9 +851,8 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
 imap <expr> <CR> pumvisible() ? '<Esc>a' : '<C-g>u<Plug>(PearTreeExpand)'
 inoremap <expr> <Down> pumvisible() ? '<C-n>' : '<C-o>gj'
 inoremap <expr> <Up> pumvisible() ? '<C-p>' : '<C-o>gk'
-if s:Completion == 0  " completor
-  inoremap <expr> <Tab> pumvisible() ? '<C-n>' : '<Tab>'
-  inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
+if s:Completion == 0  " custom
+  call completion#init()
 elseif s:Completion == 1  " coc
   let g:coc_global_extensions = ['coc-marketplace', 'coc-explorer', 'coc-snippets', 'coc-highlight', 'coc-vimlsp', 'coc-python', 'coc-tsserver', 'coc-prettier', 'coc-eslint', 'coc-html', 'coc-css', 'coc-emmet']
   " to manually install extensions, run :CocInstall coc-...
@@ -880,6 +862,8 @@ elseif s:Completion == 1  " coc
   let g:coc_snippet_prev = '<S-Tab>'
   inoremap <silent> <expr> <Tab> pumvisible() ? '<C-n>' : col('.') > 1 && getline('.')[col('.')-2] =~ '\S' ? coc#refresh() : '<Tab>'
   inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
+  inoremap <expr> <C-@> coc#refresh()
+  inoremap <expr> <C-Space> coc#refresh()
   nnoremap <leader>b :CocCommand explorer<CR>
   nmap <C-f> <Plug>(coc-format)
   xmap <C-f> <Plug>(coc-format-selected)
@@ -926,7 +910,7 @@ endif
 
 " ====================== Terminal ======================= {{{
 nnoremap <C-b> :execute 'Ttoggle resize='. min([15, &lines * 2/5])<CR>
-nnoremap <leader>to :Topen<CR>
+nnoremap <leader>to :Tnew<CR>
 nnoremap <leader>tt :Ttoggle resize=999<CR>
 nmap <leader>te <Plug>(neoterm-repl-send)
 nmap <leader>tee <Plug>(neoterm-repl-send-line)

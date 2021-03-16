@@ -1,9 +1,8 @@
 source ~/.vim/config/z.sh
+source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 
 export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
 export EDITOR='vim'
-export LS_COLORS=$(cat ~/.vim/config/dircolors)
-export LF_ICONS=$(cat ~/.vim/config/lf-icons)
 export BAT_PAGER='less -R --ignore-case'
 export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
@@ -39,12 +38,10 @@ alias la='ls -AF --color=auto'
 alias ls='ls -CF --color=auto'
 alias l='ls -CF --color=auto'
 alias size='du -h --max-depth=1 | sort -hr'
-alias path='echo -e ${PATH//:/\\n}'
 alias chmod\?='stat --printf "%a %n \n"'
 alias v='vim'
 alias vi='vim -u ~/.vim/config/mini.vim -i NONE'
 alias vimm='vim ~/.vim/vimrc'
-alias which='type -a'
 alias venv='source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias service='sudo service'
@@ -181,15 +178,28 @@ gdg() {
   git diff "$@" | delta --line-numbers --navigate --side-by-side
 }
 
+printascii() {
+  echo 'Dec Hex    Dec Hex    Dec Hex    Dec Hex  Dec Hex  Dec Hex   Dec Hex   Dec Hex'
+  echo '  0 00 NUL  16 10 DLE  32 20 SPC  48 30 0  64 40 @  80 50 P   96 60 `  112 70 p'
+  echo '  1 01 SOH  17 11 DC1  33 21 !    49 31 1  65 41 A  81 51 Q   97 61 a  113 71 q'
+  echo '  2 02 STX  18 12 DC2  34 22 "    50 32 2  66 42 B  82 52 R   98 62 b  114 72 r'
+  echo '  3 03 ETX  19 13 DC3  35 23 #    51 33 3  67 43 C  83 53 S   99 63 c  115 73 s'
+  echo '  4 04 EOT  20 14 DC4  36 24 $    52 34 4  68 44 D  84 54 T  100 64 d  116 74 t'
+  echo '  5 05 ENQ  21 15 NAK  37 25 %    53 35 5  69 45 E  85 55 U  101 65 e  117 75 u'
+  echo '  6 06 ACK  22 16 SYN  38 26 &    54 36 6  70 46 F  86 56 V  102 66 f  118 76 v'
+  echo "  7 07 BEL  23 17 ETB  39 27 '    55 37 7  71 47 G  87 57 W  103 67 g  119 77 w"
+  echo '  8 08 BS   24 18 CAN  40 28 (    56 38 8  72 48 H  88 58 X  104 68 h  120 78 x'
+  echo '  9 09 TAB  25 19 EM   41 29 )    57 39 9  73 49 I  89 59 Y  105 69 i  121 79 y'
+  echo ' 10 0A LF   26 1A SUB  42 2A *    58 3A :  74 4A J  90 5A Z  106 6A j  122 7A z'
+  echo ' 11 0B VT   27 1B ESC  43 2B +    59 3B ;  75 4B K  91 5B [  107 6B k  123 7B {'
+  echo ' 12 0C FF   28 1C FS   44 2C ,    60 3C <  76 4C L  92 5C \  108 6C l  124 7C |'
+  echo ' 13 0D CR   29 1D GS   45 2D -    61 3D =  77 4D M  93 5D ]  109 6D m  125 7D }'
+  echo ' 14 0E SO   30 1E RS   46 2E .    62 3E >  78 4E N  94 5E ^  110 6E n  126 7E ~'
+  echo ' 15 0F SI   31 1F US   47 2F /    63 3F ?  79 4F O  95 5F _  111 6F o  127 7F DEL'
+}
+
 printcolors() {
-  awk 'BEGIN{print "\t\t\t    ## ASCII Chart ##"
-           ab="SOH,STX,ETX,EOT,ENQ,ACK,BEL,BS,TAB,LF,VT,FF,CR,SO,SI,DLE,"
-           ad="DC1,DC2,DC3,DC4,NAK,SYN,ETB,CAN,EM,SUB,ESC,FS,GS,RS,US,SPC"
-           split(ab ad,abr,",");abr[0]="NUL";abr[127]="DEL";
-           fm1="|%0'"${1:- 4d}"' %-3s"
-           for(idx=0;idx<128;idx++){fmt=fm1 (++colz%8?"":"|\n")
-           printf(fmt,idx,(idx in abr)?abr[idx]:sprintf("%c",idx))} }'
-  printf '\nForeground 256 colors\n'
+  printf 'Foreground 256 colors\n'
   for i in {0..255}; do printf '\e[38;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
   printf '\n\nBackground 256 colors\n'
   for i in {0..255}; do printf '\e[48;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
@@ -231,12 +241,21 @@ x() {
   fi
 }
 
+path() {
+  if [ -z "$1" ]; then
+    echo -e ${PATH//:/\\n}
+  else
+    type -a "$@"
+    declare -f "$@" || true
+  fi
+}
+
 vf() {
   local FZFTEMP
   if [ -z "$1" ]; then
     FZFTEMP=$(rg --files | fzf) && vim "$FZFTEMP"
   else
-    FZFTEMP=$(rg --files | rg "$*" | fzf) && vim "$FZFTEMP"
+    FZFTEMP=$(rg --files | rg "$@" | fzf) && vim "$FZFTEMP"
   fi
 }
 
@@ -245,18 +264,22 @@ cdf() {
   if [ -z "$1" ]; then
     FZFTEMP=$(rg --files | fzf) && cd "$(dirname $FZFTEMP)"
   else
-    FZFTEMP=$(rg --files | rg "$*" | fzf) && cd "$(dirname $FZFTEMP)"
+    FZFTEMP=$(rg --files | rg "$@" | fzf) && cd "$(dirname $FZFTEMP)"
   fi
 }
 
 vrg() {
-  if [ "$#" -eq 0 ]; then echo "Need a string to search for."; return 1; fi
-  vim -q <(rg $@ --vimgrep) -c "silent execute '/$1'"
+  if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
+  if [[ \ $*\  == *\ --fixed-strings\ * ]] || [[ \ $*\  == *\ -F\ * ]]; then
+    vim -q <(rg "$@" --vimgrep) -c "/\V$1"
+  else
+    vim -q <(rg "$@" --vimgrep) -c "/\v$1"
+  fi
 }
 
 fif() {
-  if [ "$#" -eq 0 ]; then echo "Need a string to search for."; return 1; fi
-  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute(vim {+} -c \"silent execute '/$1'\" < /dev/tty)"
+  if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute(vim {+} -c \"/\v$1\" < /dev/tty)"
 }
 
 unalias z 2> /dev/null

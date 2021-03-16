@@ -85,7 +85,7 @@ zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ":completion:*:git-checkout:*" sort false
+zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -CF --color=always -1 $realpath'
 
@@ -109,6 +109,7 @@ tab-complete-or-cd() {
     zle fzf-cd-widget
   else
     zle fzf-tab-complete
+    # zle fzf-completion  # if fzf-tab doesn't work
   fi
 }
 zle -N tab-complete-or-cd
@@ -123,6 +124,10 @@ bindkey '^i' tab-complete-or-cd
 bindkey -s '^z' 'fg^m'
 
 compdef _dirs d
+compdef _command_names path
+compdef _git gdf=git-diff
+compdef _git gdd=git-diff
+compdef _git gdg=git-diff
 function chpwd() { emulate -L zsh; ls -ACF --color=auto; }
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/.p10k.zsh.
