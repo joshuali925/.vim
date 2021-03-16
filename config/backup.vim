@@ -1015,6 +1015,24 @@ export FZF_ALT_C_COMMAND='ls -1A 2> /dev/null'  # include files
 alias man="LESS_TERMCAP_md=$'\e[01;31m' LESS_TERMCAP_me=$'\e[0m' LESS_TERMCAP_se=$'\e[0m' LESS_TERMCAP_so=$'\e[01;44;33m' LESS_TERMCAP_ue=$'\e[0m' LESS_TERMCAP_us=$'\e[01;32m' man"
 
 " =======================================================
+" auto virtualenv for bash
+function cd { builtin cd $@ && ls -CF; }
+function cd() {
+    builtin cd $@
+    ls -CF
+    if [[ -z "$VIRTUAL_ENV" ]] ; then
+        if [[ -f ./venv/bin/activate ]] ; then
+            source ./venv/bin/activate
+        fi
+    else
+        parentdir="$(dirname "$VIRTUAL_ENV")"
+        if [[ "$PWD"/ != "$parentdir"/* ]] ; then
+            deactivate
+        fi
+    fi
+}
+
+" =======================================================
 nnoremap <leader>fs :vertical sfind \c*
 xnoremap <leader>n "xy/\V<C-r>=substitute(escape(@x, '/\'), '\n', '\\n', 'g')<CR><CR>N
 xnoremap <leader>n "xy:let @/=substitute(escape(@x, "\\/.*'$^~[]"), '\n', '\\n', 'g') <bar> set hlsearch<CR>
@@ -1119,3 +1137,9 @@ inoremap <expr> <C-Space> pumvisible() ? '<C-e><C-x><C-o><C-p>' : '<C-x><C-o><C-
 let g:mucomplete#enable_auto_at_startup = 1
 let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'c-n', 'uspl']}
 
+" =======================================================
+" use fixjson for json
+  if s:Completion != 1  " use astyle and python json.tool to format if not using coc
+    autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :silent! update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> edit! <bar> redraw!<CR>
+    autocmd FileType json nnoremap <buffer> <C-f> :silent! update <bar> execute 'normal! mx' <bar> silent execute '%!python3 -m json.tool' <bar> keeppatterns %s;^\(\s\+\);\=repeat(' ', len(submatch(0))/2);g <bar> redraw! <bar> execute 'normal! `xzz'<CR>
+  endif

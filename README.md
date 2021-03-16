@@ -24,7 +24,11 @@ fast-theme clean
 
 ## Install
 ```bash
-# dev environment
+# centos environment
+sudo yum groupinstall -y 'Development Tools'
+sudo yum install -y zsh
+
+# ubuntu environment
 sudo apt update && sudo apt install -y zsh build-essential python3-dev python3-pip
 
 # vim

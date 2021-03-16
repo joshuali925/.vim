@@ -56,21 +56,5 @@ cd() {
 }
 complete -d cd
 
-# function cd { builtin cd $@ && ls -CF; }
-# function cd() {
-#     builtin cd $@
-#     ls -CF
-#     if [[ -z "$VIRTUAL_ENV" ]] ; then
-#         if [[ -f ./venv/bin/activate ]] ; then
-#             source ./venv/bin/activate
-#         fi
-#     else
-#         parentdir="$(dirname "$VIRTUAL_ENV")"
-#         if [[ "$PWD"/ != "$parentdir"/* ]] ; then
-#             deactivate
-#         fi
-#     fi
-# }
-
 # WSL specific
 alias cmd='/mnt/c/Windows/System32/cmd.exe /k'

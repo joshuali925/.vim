@@ -72,6 +72,7 @@ noremap g- g$
 map <Down> gj
 map <Up> gk
 nnoremap Y y$
+xnoremap p "_dP
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
@@ -88,7 +89,7 @@ nnoremap <leader>fs :call VSCodeNotify('workbench.action.quickOpen')<CR>
 nnoremap <leader>fm :call VSCodeNotify('workbench.action.openRecent')<CR>
 nnoremap <leader>fb :call VSCodeNotify('workbench.files.action.focusFilesExplorer')<CR>
 nnoremap <leader>fu :call VSCodeNotify('workbench.action.gotoSymbol')<CR>
-nnoremap <leader>ft :call VSCodeNotify('workbench.action.showAllSymbols')<CR>
+nnoremap <leader>f] :call VSCodeNotify('workbench.action.showAllSymbols')<CR>
 nnoremap <leader>fg :call VSCodeNotify('workbench.view.search')<CR>
 xnoremap <leader>fg <Cmd>call VSCodeNotifyRangePos('workbench.action.findInFiles', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1)<CR>
 nnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': expand('<cword>')})<CR>
@@ -110,6 +111,8 @@ nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
 nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
 nnoremap <leader>q :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
 nnoremap <leader>x :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
+" open current file in gvim
+nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', {'text': "gvim '${file}'\u000D"})<CR>
 
 nnoremap <leader>l mx"xyiwoconsole.log('<C-r>x', <C-r>x);<Esc>`x
 nnoremap <leader>L mx"xyiwOconsole.log('<C-r>x', <C-r>x);<Esc>`x
@@ -126,8 +129,8 @@ nnoremap [e :call VSCodeNotify('editor.action.moveLinesUpAction')<CR>
 xnoremap [e <Cmd>call VSCodeNotifyRange('editor.action.moveLinesUpAction', line('v'), line('.'), 1)<CR>
 nnoremap ]e :call VSCodeNotify('editor.action.moveLinesDownAction')<CR>
 xnoremap ]e <Cmd>call VSCodeNotifyRange('editor.action.moveLinesDownAction', line('v'), line('.'), 1)<CR>
-nnoremap [<Space> O<Esc>
-nnoremap ]<Space> o<Esc>
+nnoremap [<Space> mxO<Esc>`x
+nnoremap ]<Space> mxo<Esc>`x
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 
