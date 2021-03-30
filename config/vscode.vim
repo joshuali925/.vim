@@ -66,13 +66,12 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 noremap <expr> 0 col('.') - 1 == match(getline('.'), '\S') ? '0' : '^'
 noremap ^ 0
-nnoremap - $
+noremap - $
 xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
 nnoremap Y y$
-xnoremap p "_dP
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]

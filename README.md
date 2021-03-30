@@ -14,12 +14,12 @@ ln -sr ~/.vim/config/nvim ~/.config/nvim
 ln -sr ~/.vim/config/lazygit_config.yml ~/.config/jesseduffield/lazygit/config.yml
 ln -sr ~/.vim/config/.ideavimrc ~/.ideavimrc
 
+# zsh fast-syntax-highlighting theme:
+fast-theme clean
+
 # zsh inscure directories fix:
 # compaudit | xargs chmod g-w
 # compaudit | sudo xargs chmod -R 755
-
-# zsh fast-syntax-highlighting theme:
-fast-theme clean
 ```
 
 ## Install
@@ -30,6 +30,9 @@ sudo yum install -y zsh
 
 # ubuntu environment
 sudo apt update && sudo apt install -y zsh build-essential python3-dev python3-pip
+
+# change default shell to zsh
+sudo chsh -s $(which zsh) $(whoami)
 
 # vim
 sudo add-apt-repository -y ppa:jonathonf/vim
@@ -61,6 +64,10 @@ sudo apt install -y yarn
 # pathpicker
 git clone https://github.com/facebook/PathPicker.git ~/.local/PathPicker --depth=1
 ln -sr ~/.local/PathPicker/fpp ~/.local/bin/fpp
+
+# ssh key
+ssh-keygen -t ed25519 -C "email@example.com"
+cat ~/.ssh/id_ed25519.pub  # copy and add in https://github.com/settings/keys
 ```
 
 ## Windows
@@ -77,11 +84,11 @@ git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\vimfiles
 # install brew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-# install gnu coreutils and sed, override default utils
-brew install coreutils
-brew install gnu-sed
-export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
-ln -sr $(command which gsed) ~/.local/bin/sed
+# install gnu utils and override default utils
+brew install coreutils && echo 'export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH' >> ~/.zshrc
+brew install gnu-sed && ln -sr $(command which gsed) ~/.local/bin/sed
+brew install findutils && ln -sr $(command which gxargs) ~/.local/bin/xargs
+brew install gawk && ln -sr $(command which gawk) ~/.local/bin/awk
 
 # add lazygit config
 ln -sr ~/.vim/config/lazygit_config.yml ~/Library/Application\ Support/jesseduffield/lazygit/config.yml

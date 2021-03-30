@@ -8,10 +8,11 @@ export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH=~/.vim/config/.ripgreprc
 export FZF_COMPLETION_TRIGGER='\'
-export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
+export FZF_DEFAULT_OPTS='--layout=reverse --height 40% --bind change:top'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
 export FZF_ALT_C_COMMAND='ls -1A 2> /dev/null'
+export FZF_ALT_C_OPTS='--bind "tab:down,btab:up"'
 export FZF_PREVIEW_COMMAND='bat --style=numbers --color=always --theme=OneHalfDark --line-range :50 {}'
 
 alias -- -='cd -'
@@ -253,69 +254,68 @@ path() {
 vf() {
   local FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=$(rg --files | fzf) && vim "$FZFTEMP"
+    FZFTEMP=$(rg --files | fzf --multi) && echo $FZFTEMP | xargs -d '\n' -o vim
   else
-    FZFTEMP=$(rg --files | rg "$@" | fzf) && vim "$FZFTEMP"
+    FZFTEMP=$(rg --files | rg "$@" | fzf --multi) && echo $FZFTEMP | xargs -d '\n' -o vim
   fi
 }
 
 cdf() {
   local FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=$(rg --files | fzf) && cd "$(dirname $FZFTEMP)"
+    FZFTEMP=$(rg --files | fzf --bind 'tab:down,btab:up') && cd "$(dirname $FZFTEMP)"
   else
-    FZFTEMP=$(rg --files | rg "$@" | fzf) && cd "$(dirname $FZFTEMP)"
+    FZFTEMP=$(rg --files | rg "$@" | fzf --bind 'tab:down,btab:up') && cd "$(dirname $FZFTEMP)"
   fi
 }
 
 vrg() {
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
   if [[ \ $*\  == *\ --fixed-strings\ * ]] || [[ \ $*\  == *\ -F\ * ]]; then
-    vim -q <(rg "$@" --vimgrep) -c "/\V$1"
+    vim -q <(rg "$@" --vimgrep) -c "/\V$1"  # use \V if rg is called with -F/--fixed-strings to search for string literal
   else
-    vim -q <(rg "$@" --vimgrep) -c "/\v$1"
+    vim -q <(rg "$@" --vimgrep) -c "/$1"
   fi
 }
 
 fif() {
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
-  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute(vim {+} -c \"/\v$1\" < /dev/tty)"
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute(vim {+} -c \"/$1\" < /dev/tty)"
 }
 
 unalias z 2> /dev/null
 z() {
   local FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=$(_z -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+    FZFTEMP=$(_z -l 2>&1 | fzf --tac --bind 'tab:down,btab:up') && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
   else
-    _z 2>&1 "$*"
+    _z 2>&1 "$@"
   fi
 }
 zc() {
-  local FZFTEMP
-  if [ -z "$1" ]; then
-    FZFTEMP=$(_z -c -l 2>&1 | fzf --tac) && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
-  else
-    _z 2>&1 -c "$*"
-  fi
+  local FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind 'tab:down,btab:up' --query "$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+}
+
+manf() {
+  man -k . | fzf -q "$1" --prompt='man> '  --preview $'echo {} | tr -d \'()\' | awk \'{printf "%s ", $2} {print $1}\' | xargs -r man' | tr -d '()' | awk '{printf "%s ", $2} {print $1}' | xargs -r man
 }
 
 nvm() {
-  unset -f nvm
+  unset -f nvm node yarn
   export NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
   nvm "$@"
 }
 
 node() {
-  unset -f node
+  unset -f nvm node yarn
   export NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
   node "$@"
 }
 
 yarn() {
-  unset -f yarn
+  unset -f nvm node yarn
   export NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
   yarn "$@"
