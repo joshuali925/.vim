@@ -1,5 +1,5 @@
 " ==================== Settings ========================= {{{
-let s:Completion = 0  " 0: custom, 1: coc, 2: ycm
+let s:Completion = 0  " 0: custom fuzzy completion, 1: coc
 " }}}
 
 " ===================== Plugins ========================= {{{
@@ -18,8 +18,8 @@ Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
 Plug 'mg979/vim-visual-multi', { 'on': [] }
 Plug 'easymotion/vim-easymotion', { 'on': '<Plug>(easymotion-' }
-Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'Gbrowse', 'Gblame', 'Ggrep', 'Glgrep', 'Gdiffsplit', 'Gread', 'Gwrite', 'Gedit'] }
-Plug 'tpope/vim-rhubarb', { 'on': ['Gbrowse'] }
+Plug 'tpope/vim-fugitive', { 'on': ['G', 'Git', 'GBrowse', 'Ggrep', 'Glgrep', 'Gdiffsplit', 'Gread', 'Gwrite', 'Gedit'] }
+Plug 'tpope/vim-rhubarb', { 'on': ['GBrowse'] }
 Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 " comment out CursorMoved autocmd in plugged/vim-context-commentstring/plugin/context-commentstring.vim:23, change s:UpdateCommentString to UpdateCommentString
 " add "if &filetype == 'typescriptreact' | call UpdateCommentString() | endif" to plugged/vim-commentary/plugin/commentary.vim:28 in s:go()
@@ -31,6 +31,7 @@ Plug 'wellle/context.vim', { 'on': ['ContextToggleWindow', 'ContextPeek'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }
 Plug 'gcmt/wildfire.vim', { 'on': '<Plug>(wildfire-' }
 Plug 'ojroques/vim-oscyank', { 'on': ['OSCYank', 'OSCYankReg'] }
+" use noautocmd for Tnew/Ttoggle to avoid triggering BufReadPost and restoring last edit position again
 Plug 'kassio/neoterm', { 'on': ['Ttoggle', 'Tnew'] }
 Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }
 Plug 'tamago324/LeaderF-filer'
@@ -48,12 +49,9 @@ Plug 'markonm/traces.vim'
 Plug 'tpope/vim-repeat'
 Plug 'jdhao/better-escape.vim'
 if s:Completion >= 1
-  Plug 'sirver/ultisnips'
   Plug 'honza/vim-snippets'
   if s:Completion == 1
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  elseif s:Completion == 1
-    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
   endif
 endif
 call plug#end()
@@ -79,14 +77,17 @@ let s:theme_list[-1] = 'one'
 let s:theme_list[-2] = 'ayu'
 let s:theme_list[-3] = 'dracula'
 let s:theme_list[-4] = 'nord'
-let s:theme_list[-5] = 'solarized'
-let s:theme_list[-6] = 'forest_night'
-let s:theme_list[-7] = 'gruvbox_material'
-let s:theme_list[-8] = 'sonokai'
+let s:theme_list[-5] = 'github'
+let s:theme_list[-6] = 'solarized'
+let s:theme_list[-7] = 'forest_night'
+let s:theme_list[-8] = 'gruvbox_material'
+let s:theme_list[-9] = 'sonokai'
 let g:sonokai_style = 'andromeda'
+let g:github_colors_soft = 1
 let g:lightline = {}
 function! LoadColorscheme(index, refresh)
   let g:lightline.colorscheme = s:theme_list[a:index]
+  let g:quickui_color_scheme = a:index < 0 ? 'papercol-dark' : 'papercol-light'
   let g:ayucolor = a:index < 0 ? 'mirage' : 'light'
   execute 'set background='. (a:index < 0 ? 'dark' : 'light')
   execute 'colorscheme '. get(s:theme_list, a:index, 'desert')
@@ -96,9 +97,6 @@ function! LoadColorscheme(index, refresh)
     call lightline#colorscheme()
     call lightline#update()
     execute 'set filetype='. &filetype
-    if exists('*QuickThemeChange')  " QuickThemeChange fixes vim-quickui issue #8
-      call QuickThemeChange(a:index < 0 ? 'papercol-dark' : 'papercol-light')
-    endif
   endif
 endfunction
 call LoadColorscheme(g:Theme, 0)
@@ -154,7 +152,7 @@ set previewheight=7
 set foldmethod=indent
 set foldlevelstart=99
 set belloff=all
-set history=500
+set history=1000
 set undofile
 set undolevels=1000
 set undoreload=10000
@@ -256,7 +254,6 @@ xnoremap @q :normal! @q<CR>
 xnoremap @@ :normal! @@<CR>
 nnoremap Q q:k
 nnoremap Y y$
-xnoremap p "_dP
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
@@ -376,6 +373,7 @@ function! s:LoadVisualMulti()
   let g:VM_maps['Remove Last Region'] = '<C-p>'
   let g:VM_maps['Skip Region'] = '<C-x>'
   let g:VM_maps['Switch Mode'] = '<C-c>'
+  let g:VM_maps['Add Cursor At Pos'] = 'gn'
   let g:VM_maps['Case Setting'] = ''
   nmap <C-n> <Plug>(VM-Find-Under)
   xmap <C-n> <Plug>(VM-Find-Subword-Under)
@@ -386,7 +384,7 @@ function! s:LoadQuickUI(open_menu)
   xnoremap <CR> :<C-u>call quickui#menu#open('visual')<CR>
   nnoremap <silent> K :call <SID>OpenQuickUIContextMenu()<CR>
   nnoremap <silent> <leader>tp :call quickui#terminal#open('zsh', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': ''})<CR>
-  nnoremap <silent> <C-p> :let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('sh -c "lf -last-dir-path=\"$HOME/.cache/lf_dir\" -selection-path='. shellescape(g:lf_selection_path). ' '. expand('%'). '"', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': 'LFEditCallback'})<CR>
+  nnoremap <silent> <C-p> :let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('sh -c "lf -last-dir-path=\"$HOME/.cache/lf_dir\" -selection-path='. shellescape(g:lf_selection_path). ' \"'. expand('%'). '\""', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': 'LFEditCallback'})<CR>
   let g:quickui_color_scheme = g:Theme < 0 ? 'papercol-dark' : 'papercol-light'
   let g:quickui_show_tip = 1
   let g:quickui_border_style = 2
@@ -402,6 +400,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Cou&nt occurrences', 'keeppatterns %s///gn | execute "normal! ``"', 'Count occurrences of current search pattern'],
         \ ['Search in &buffers', 'execute "cexpr [] | bufdo vimgrepadd //g %" | copen', 'Grep current search pattern in all buffers, add to quickfix'],
         \ ['Calculate line &=', 'let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"', 'Calculate expression from previous "=" or current line'],
+        \ ['&Diff unsaved', 'execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"', 'Diff current buffer with file on disk'],
         \ ['--', ''],
         \ ['Move tab left &-', '-tabmove'],
         \ ['Move tab right &+', '+tabmove'],
@@ -411,7 +410,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Open WhichKe&y', 'WhichKey ";"', 'Show WhichKey for ;'],
         \ ['Open &Startify', 'Startify', 'Open vim-startify'],
         \ ['Save sessi&on', 'SSave!', 'Save as a new session using vim-startify'],
-        \ ['&Delete session', 'SDelete!', 'Delete a session using vim-startify'],
+        \ ['Delete session', 'SDelete!', 'Delete a session using vim-startify'],
         \ ['--', ''],
         \ ['Edit Vimr&c', 'edit $MYVIMRC'],
         \ ['Open in &VSCode', "execute \"silent !code --goto '\" . expand(\"%\") . \":\" . line(\".\") . \":\" . col(\".\") . \"'\" | redraw!"],
@@ -430,7 +429,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Git gre&p all', 'call feedkeys(":Git log -p --all -i -G \"\"\<Left>", "n")', 'Search a regex in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
         \ ['Git fi&nd files all', 'call feedkeys(":Git log --all --full-history --name-only -- \"**\"\<Left>\<Left>", "n")', 'Grep file names in all commits'],
         \ ['--', ''],
-        \ ['Git open &remote', 'call plug#load("vim-rhubarb") | call plug#load("vim-fugitive") | .Gbrowse', 'Open remote url in browser'],
+        \ ['Git open &remote', 'call plug#load("vim-rhubarb") | call plug#load("vim-fugitive") | .GBrowse', 'Open remote url in browser'],
         \ ])
   call quickui#menu#install('&Toggle', [
         \ ['Quick&fix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"'],
@@ -502,7 +501,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Git &file history', "call plug#load('vim-fugitive') | vsplit | '<,'>Gclog", 'Browse previously committed versions of selected range'],
         \ ['Git l&og', "execute 'Git log -L' line(\"'<\"). ','. line(\"'>\"). ':'. expand('%')", 'Show git log of selected range'],
         \ ['--', ''],
-        \ ['Git open &remote', "'<,'>Gbrowse", 'Open remote url in browser'],
+        \ ['Git open &remote', "'<,'>GBrowse", 'Open remote url in browser'],
         \ ])
   call quickui#menu#install('Ta&bles', [
         \ ['Reformat table', "'<,'>TableModeRealign", 'Reformat table'],
@@ -537,22 +536,13 @@ function! s:OpenQuickUIContextMenu()
     call add(l:quickui_content, ['&Implementation', 'execute "normal \<Plug>(coc-implementation)"', 'Coc implementation'])
     call add(l:quickui_content, ['Re&name', 'execute "normal \<Plug>(coc-rename)"', 'Coc rename'])
     call add(l:quickui_content, ['&Fix', 'execute "normal \<Plug>(coc-fix-current)"', 'Coc fix'])
-  elseif s:Completion == 2
-    call add(l:quickui_content, ['Docu&mentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
-    call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe definition'])
-    call add(l:quickui_content, ['&Type definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
-    call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe references'])
-    call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe implementation'])
-    call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe fix'])
-    call add(l:quickui_content, ['&Organize imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
     call add(l:quickui_content, ['--', ''])
   endif
-  call add(l:quickui_content, ['Git &blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'])
-  call add(l:quickui_content, ['--', ''])
   call add(l:quickui_content, ['Git hunk &diff', 'GitGutterPreviewHunk', 'Git gutter preview hunk'])
   call add(l:quickui_content, ['Git hunk &undo', 'GitGutterUndoHunk', 'Git gutter undo hunk'])
   call add(l:quickui_content, ['Git hunk &add', 'GitGutterStageHunk', 'Git gutter stage hunk'])
   call add(l:quickui_content, ['Git fo&ld', 'GitGutterFold', 'Git gutter fold unchanged'])
+  call add(l:quickui_content, ['Git &blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'])
   call add(l:quickui_content, ['--', ''])
   call add(l:quickui_content, ['Built-in d&ocs', 'execute "normal! K"', 'Vim built in help'])
   call quickui#context#open(l:quickui_content, {'index': g:quickui#context#cursor})
@@ -728,7 +718,7 @@ function! s:GetRunCommand()
 endfunction
 command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
-command! -complete=shellcmd -nargs=* -range S let @x = bufnr() | execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile errorformat=%f\|%l\ col\ %c\|%m | let b:RunCommand = "write !python3 -i" | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. getreg('x'). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d
+command! -complete=shellcmd -nargs=* -range S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile errorformat=%f\|%l\ col\ %c\|%m | let b:RunCommand = "write !python3 -i" | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. bufnr(). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d
 " }}}
 
 " =================== Other plugins ===================== {{{
@@ -845,26 +835,25 @@ let g:markdown_fenced_languages = ['javascript', 'js=javascript', 'css', 'html',
 
 " ==================== Auto complete ==================== {{{
 set completefunc=CompleteWORD
-let g:UltiSnipsExpandTrigger = '<C-k>'
-let g:UltiSnipsJumpForwardTrigger = '<TAB>'
-let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
-imap <expr> <CR> pumvisible() ? '<Esc>a' : '<C-g>u<Plug>(PearTreeExpand)'
+imap <expr> <CR> pumvisible() ? '<C-y>' : '<C-g>u<Plug>(PearTreeExpand)'
+inoremap <expr> <Tab> pumvisible() ? '<C-n>' : '<Tab>'
+inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 inoremap <expr> <Down> pumvisible() ? '<C-n>' : '<C-o>gj'
 inoremap <expr> <Up> pumvisible() ? '<C-p>' : '<C-o>gk'
-if s:Completion == 0  " custom
-  call completion#init()
+if s:Completion == 0  " custom fuzzy completion
+  call fpc#init()
+  imap <expr> <CR> pumvisible() ? fpc#accept() : '<C-g>u<Plug>(PearTreeExpand)'
 elseif s:Completion == 1  " coc
-  let g:coc_global_extensions = ['coc-marketplace', 'coc-explorer', 'coc-snippets', 'coc-highlight', 'coc-vimlsp', 'coc-python', 'coc-tsserver', 'coc-prettier', 'coc-eslint', 'coc-html', 'coc-css', 'coc-emmet']
+  let g:coc_global_extensions = ['coc-marketplace', 'coc-explorer', 'coc-yank', 'coc-snippets', 'coc-highlight', 'coc-json', 'coc-vimlsp', 'coc-pyright', 'coc-tsserver', 'coc-prettier', 'coc-eslint', 'coc-html', 'coc-css', 'coc-emmet']
   " to manually install extensions, run :CocInstall coc-...
   " or run cd ~/.config/coc/extensions && yarn add coc-..., yarn cannot be cmdtest
   " in Windows run cd %LOCALAPPDATA%/coc/extensions && yarn add coc-...
   let g:coc_snippet_next = '<Tab>'
   let g:coc_snippet_prev = '<S-Tab>'
-  inoremap <silent> <expr> <Tab> pumvisible() ? '<C-n>' : col('.') > 1 && getline('.')[col('.')-2] =~ '\S' ? coc#refresh() : '<Tab>'
-  inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
   inoremap <expr> <C-@> coc#refresh()
   inoremap <expr> <C-Space> coc#refresh()
   nnoremap <leader>b :CocCommand explorer<CR>
+  imap <C-k> <Plug>(coc-snippets-expand)
   nmap <C-f> <Plug>(coc-format)
   xmap <C-f> <Plug>(coc-format-selected)
   nmap gr <Plug>(coc-references)
@@ -875,9 +864,9 @@ elseif s:Completion == 1  " coc
   nmap <leader>A <Plug>(coc-codeaction)
   xmap <leader>a <Plug>(coc-codeaction-selected)
   nnoremap <leader>fa :CocList<CR>
+  nnoremap <leader>fy :CocList yank<CR>
   nnoremap <leader>fA :LeaderfCommand<CR>
   nnoremap <leader>fo :CocList outline<CR>
-  imap <C-k> <Plug>(coc-snippets-expand)
   nmap [a <Plug>(coc-diagnostic-prev)
   nmap ]a <Plug>(coc-diagnostic-next)
   xmap if <Plug>(coc-funcobj-i)
@@ -888,30 +877,13 @@ elseif s:Completion == 1  " coc
   omap ic <Plug>(coc-classobj-i)
   xmap ac <Plug>(coc-classobj-a)
   omap ac <Plug>(coc-classobj-a)
-elseif s:Completion == 2  " YCM
-  if exists('+completepopup')  " vim only
-    set completeopt+=popup
-    set completepopup=align:menu,border:off,highlight:WildMenu
-  endif
-  inoremap <expr> <C-e> pumvisible() ? '<C-e><Esc>a' : '<C-e>'
-  nmap gh <Plug>(YCMHover)
-  nnoremap gr :YcmCompleter GoToReferences<CR>
-  nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
-  nnoremap <leader>a :YcmCompleter FixIt<CR>
-  let g:ycm_collect_identifiers_from_comments_and_strings = 1
-  let g:ycm_complete_in_comments = 1
-  let g:ycm_complete_in_strings = 1
-  " for c include files, add to .ycm_extra_conf.py
-  " '-isystem',
-  " '/path/to/include'
-  let g:ycm_global_ycm_extra_conf = '~/.vim/config/.ycm_extra_conf.py'
 endif
 " }}}
 
 " ====================== Terminal ======================= {{{
-nnoremap <C-b> :execute 'Ttoggle resize='. min([15, &lines * 2/5])<CR>
-nnoremap <leader>to :Tnew<CR>
-nnoremap <leader>tt :Ttoggle resize=999<CR>
+nnoremap <C-b> :noautocmd execute 'Ttoggle resize='. min([15, &lines * 2/5])<CR>
+nnoremap <leader>to :noautocmd Tnew<CR>
+nnoremap <leader>tt :noautocmd Ttoggle resize=999<CR>
 nmap <leader>te <Plug>(neoterm-repl-send)
 nmap <leader>tee <Plug>(neoterm-repl-send-line)
 xmap <leader>te <Plug>(neoterm-repl-send)

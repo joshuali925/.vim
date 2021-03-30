@@ -29,7 +29,7 @@ export HISTCONTROL="ignorespace"
 
 bind 'set show-all-if-ambiguous on'
 bind 'set completion-ignore-case on'
-bind 'TAB:menu-complete'
+bind 'TAB: menu-complete'
 bind '"\C-x\C-e": edit-and-execute-command'
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
@@ -52,7 +52,7 @@ cd() {
   else
     pushd "$@" > /dev/null
   fi
-  ls -ACF
+  ls -ACF --color=auto
 }
 complete -d cd
 

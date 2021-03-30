@@ -1143,3 +1143,40 @@ let g:mucomplete#chains = {'default': ['path', 'ulti', 'keyn', 'omni', 'c-n', 'u
     autocmd FileType c,cpp,java nnoremap <buffer> <C-f> :silent! update <bar> silent execute '!~/.vim/bin/astyle % --style=k/r -s4ncpUHk1A2 > /dev/null' <bar> edit! <bar> redraw!<CR>
     autocmd FileType json nnoremap <buffer> <C-f> :silent! update <bar> execute 'normal! mx' <bar> silent execute '%!python3 -m json.tool' <bar> keeppatterns %s;^\(\s\+\);\=repeat(' ', len(submatch(0))/2);g <bar> redraw! <bar> execute 'normal! `xzz'<CR>
   endif
+
+" =======================================================
+" youcompleteme, ultisnips
+  Plug 'sirver/ultisnips'
+let g:UltiSnipsExpandTrigger = '<C-k>'
+let g:UltiSnipsJumpForwardTrigger = '<TAB>'
+let g:UltiSnipsJumpBackwardTrigger = '<S-TAB>'
+  elseif s:Completion == 2
+    Plug 'valloric/youcompleteme', { 'do': './install.py --clang-completer --ts-completer --java-completer' }
+
+  elseif s:Completion == 2
+    call add(l:quickui_content, ['Docu&mentation', 'YcmCompleter GetDoc', 'YouCompleteMe documentation'])
+    call add(l:quickui_content, ['D&efinition', 'YcmCompleter GoToDefinitionElseDeclaration', 'YouCompleteMe definition'])
+    call add(l:quickui_content, ['&Type definition', 'YcmCompleter GetType', 'YouCompleteMe type definition'])
+    call add(l:quickui_content, ['&References', 'YcmCompleter GoToReferences', 'YouCompleteMe references'])
+    call add(l:quickui_content, ['&Implementation', 'YcmCompleter GoToImplementation', 'YouCompleteMe implementation'])
+    call add(l:quickui_content, ['&Fix', 'YcmCompleter FixIt', 'YouCompleteMe fix'])
+    call add(l:quickui_content, ['&Organize imports', 'YcmCompleter OrganizeImports', 'YouCompleteMe organize imports'])
+
+elseif s:Completion == 2  " YCM
+  if exists('+completepopup')  " vim only
+    set completeopt+=popup
+    set completepopup=align:menu,border:off,highlight:WildMenu
+  endif
+  inoremap <expr> <C-e> pumvisible() ? '<C-e><Esc>a' : '<C-e>'
+  nmap gh <Plug>(YCMHover)
+  nnoremap gr :YcmCompleter GoToReferences<CR>
+  nnoremap <leader>d :YcmCompleter GoToDefinitionElseDeclaration<CR>
+  nnoremap <leader>a :YcmCompleter FixIt<CR>
+  let g:ycm_collect_identifiers_from_comments_and_strings = 1
+  let g:ycm_complete_in_comments = 1
+  let g:ycm_complete_in_strings = 1
+  " for c include files, add to .ycm_extra_conf.py
+  " '-isystem',
+  " '/path/to/include'
+  " copied from https://github.com/ycm-core/ycmd/blob/master/.ycm_extra_conf.py
+  let g:ycm_global_ycm_extra_conf = '~/.vim/config/.ycm_extra_conf.py'

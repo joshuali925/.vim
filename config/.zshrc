@@ -21,11 +21,13 @@ zinit depth=1 light-mode for romkatv/powerlevel10k
 #     sbin jesseduffield/lazygit
 
 zinit as"completion" for \
-  https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
   https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
+  https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
   https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
   https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \
-  https://github.com/zsh-users/zsh-completions/blob/master/src/_golang
+  https://github.com/gradle/gradle-completion/blob/master/_gradle \
+  https://github.com/gradle/gradle-completion/blob/master/gradle-completion.plugin.zsh \
+  https://github.com/zsh-users/zsh-completions/blob/master/src/_yarn
 
 zinit light-mode for \
   atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
@@ -47,6 +49,7 @@ zinit light-mode for \
 source ~/.vim/config/oh-my-zsh-key-bindings.zsh
 source ~/.vim/config/fzf/key-bindings.zsh
 source ~/.vim/config/fzf/completion.zsh
+# zplugin ice ver'fe9fa652390c78859450838825a8b5c40e9921ef'  # use this commit if master doesn't work
 zinit light Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
 
 source ~/.vim/config/common.sh
@@ -56,8 +59,8 @@ zinit cdreplay -q
 
 WORDCHARS=${WORDCHARS/\/}
 HISTFILE="$HOME/.zsh_history"
-HISTSIZE=50000
-SAVEHIST=40000
+HISTSIZE=1000000
+SAVEHIST=1000000
 
 [[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
 unsetopt flow_control  # man zshoptions; man zshbuiltins
@@ -84,10 +87,11 @@ setopt hist_verify
 zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|=*'
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -CF --color=always -1 $realpath'
+zstyle ':fzf-tab:*' switch-group '[' ']'
 
 alias history='history -f 0'
 alias k='k -h'
@@ -109,7 +113,6 @@ tab-complete-or-cd() {
     zle fzf-cd-widget
   else
     zle fzf-tab-complete
-    # zle fzf-completion  # if fzf-tab doesn't work
   fi
 }
 zle -N tab-complete-or-cd

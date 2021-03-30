@@ -37,7 +37,7 @@ map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
 noremap 0 ^
 noremap ^ 0
-nnoremap - $
+noremap - $
 xnoremap - g_
 noremap g- g$
 map <Down> gj

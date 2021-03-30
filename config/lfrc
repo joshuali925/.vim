@@ -5,19 +5,6 @@ set color256
 set icons
 set previewer ~/.vim/config/lf-preview.sh
 
-cmd mkdir %mkdir -p $@
-cmd touch %touch $@
-cmd chmod %chmod $@ "$f"
-cmd chmod? %stat --printf "%a %n \n" "$f"
-cmd vim !vim $@
-cmd rg !clear && rg $@
-cmd code %code .
-cmd pwd %echo $f
-cmd size !du -h --max-depth=1 | sort -hr
-cmd md5 !md5sum "$f"
-cmd selected-dir-size %du -h --max-depth=0 "$f"
-cmd cwd-size %du -h --max-depth=0 .
-
 map zh
 map zr
 map zn
@@ -25,8 +12,6 @@ map zs
 map zt
 map za
 map z z
-map <tab> locate-file-cwd
-map t locate-file
 
 map sh set hedden!
 map sr set reverse!
@@ -38,12 +23,11 @@ map sn :set sortby natural; set info size
 
 map m
 map mm mark-save
-map mg $lazygit
-map <c-p> $lazygit
-map mv $gvim "$f"
+map me edit-selected
 map mp paste-symlink
-map mr bulk-rename
-map mv vidir-bulk-rename
+map mP paste-symlink-absolute-path
+map mr vidir-bulk-rename
+map mR lf-bulk-rename
 map ms selected-dir-size
 map mS cwd-size
 map mc edit-config
@@ -63,42 +47,49 @@ map K push hkl
 map J push hjl
 map c :clear; unselect
 map gs !clear && git status
-map <a-c> dir-jump-cwd
+map t locate-file
+map <tab> locate-file-cwd
+map <c-p> $lazygit
 map i $~/.vim/config/lf-preview.sh "$f" | bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always
 map I $$PAGER "$f"
 
 cmap <up> cmd-history-prev
 cmap <down> cmd-history-next
 
+cmd mkdir %mkdir -p "$@"
+cmd touch %touch "$@"
+cmd chmod %chmod "$@" "$f"
+cmd chmod? %stat --printf "%a %n \n" "$f"
+cmd vim !vim "$@"
+cmd rg !clear && rg "$@"
+cmd code %code .
+cmd pwd %echo $f
+cmd size !du -h --max-depth=1 | sort -hr
+cmd md5 !md5sum "$f"
+cmd selected-dir-size %du -h --max-depth=0 "$f"
+cmd cwd-size %du -h --max-depth=0 .
 cmd edit-config ${{ vim ~/.vim/config/lfrc }}
+cmd edit-selected ${{ echo "$fx" | xargs -d '\n' -o vim }}
+cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
+
 cmd locate-file-cwd ${{
-   res="$(ls -A | fzf)"
+   res="$(ls -1A 2> /dev/null | fzf --bind 'tab:down,btab:up')"
    if [ -f "$res" ]; then
       lf -remote "send $id select \"$res\""
    elif [ -d "$res" ]; then
       lf -remote "send $id cd \"$res\""
    fi
 }}
+
 cmd locate-file ${{
-   res="$(rg --files | fzf)"
+   res="$(rg --files | fzf --bind 'tab:down,btab:up')"
    if [ -f "$res" ]; then
       lf -remote "send $id select \"$res\""
    elif [ -d "$res" ]; then
       lf -remote "send $id cd \"$res\""
    fi
 }}
-cmd dir-jump-cwd ${{
-   res="$(fd --type=d --hidden --max-depth=1 --no-ignore-vcs | fzf)"
-   if [ -d "$res" ]; then
-      lf -remote "send $id cd \"$res\""
-   fi
-}}
-cmd dir-jump ${{
-   res="$(fd --type=d --hidden --exclude '.git' | fzf)"
-   if [ -d "$res" ]; then
-      lf -remote "send $id cd \"$res\""
-   fi
-}}
+
 cmd z ${{
    res="$(awk -F '|' '{print $1}' ~/.z | fzf)"
    lf -remote "send $id cd \"$res\""
@@ -110,6 +101,22 @@ cmd paste-symlink %{{
   list=$(echo "$load" | sed '1d')
   if [ $mode = 'copy' ] || [ $mode = 'move' ]; then
     ln='ln -sr' && [ $mode = 'move' ] && ln='ln'
+    please='' && [ ! -w . ] && please='sudo'
+    for f in $list
+    do
+      $please $ln "$f" "$(pwd)/$(basename $f)"
+    done
+    lf -remote 'send clear'
+    lf -remote 'send load'
+  fi
+}}
+
+cmd paste-symlink-absolute-path %{{
+  load=$(lf -remote 'load')
+  mode=$(echo "$load" | sed -n '1p')
+  list=$(echo "$load" | sed '1d')
+  if [ $mode = 'copy' ] || [ $mode = 'move' ]; then
+    ln='ln -s' && [ $mode = 'move' ] && ln='ln'
     please='' && [ ! -w . ] && please='sudo'
     for f in $list
     do
@@ -144,8 +151,7 @@ cmd x ${{
   fi
 }}
 
-cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
-cmd bulk-rename ${{
+cmd lf-bulk-rename ${{
   case $1 in
     # do not query extensions for renaming
     -n) mode="no-exts" ;;
@@ -254,3 +260,4 @@ cmd bulk-rename ${{
     rm $aux
   fi
 }}
+
