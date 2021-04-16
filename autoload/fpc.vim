@@ -1,5 +1,5 @@
 function! fpc#init() abort
-  let g:fpc_custom_matcher = get(g:, 'fpc_custom_matcher', 1)
+  let g:fpc_custom_matcher = get(g:, 'fpc_custom_matcher', 0)
   let g:fpc_min_match_len = get(g:, 'fpc_min_match_len', 2)
   let g:fpc_max_keyword_len = get(g:, 'fpc_max_keyword_len', 100)
   let g:fpc_max_matches = get(g:, 'fpc_max_matches', 50)

@@ -25,14 +25,15 @@ fast-theme clean
 ## Install
 ```bash
 # centos environment
-sudo yum groupinstall -y 'Development Tools'
-sudo yum install -y zsh
+sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh python3
 
 # ubuntu environment
 sudo apt update && sudo apt install -y zsh build-essential python3-dev python3-pip
 
 # change default shell to zsh
 sudo chsh -s $(which zsh) $(whoami)
+# or run zsh when bash starts
+sed -i -e '1i[ -t 1 ] && exec zsh\' ~/.bashrc
 
 # vim
 sudo add-apt-repository -y ppa:jonathonf/vim
@@ -45,7 +46,7 @@ chmod u+x nvim.appimage
 mv squashfs-root ~/.local/nvim
 ln -sr ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
 rm nvim.appimage
-pip3 install --user neovim
+pip3 install --user pynvim
 
 # tmux
 curl -L https://github.com/tmux/tmux/releases/download/3.1b/tmux-3.1b-x86_64.AppImage -o tmux.appimage
@@ -55,11 +56,11 @@ mv squashfs-root ~/.local/tmux
 ln -sr ~/.local/tmux/usr/bin/tmux ~/.local/bin/tmux
 rm tmux.appimage
 
-# yarn
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-sudo apt update
-sudo apt install -y yarn
+# nvm, node, yarn
+curl https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash
+nvm install 10.23.1
+curl -o- -L https://yarnpkg.com/install.sh | bash
+ln -sr ~/.yarn/bin/yarn ~/.local/bin/yarn
 
 # pathpicker
 git clone https://github.com/facebook/PathPicker.git ~/.local/PathPicker --depth=1

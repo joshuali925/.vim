@@ -1180,3 +1180,16 @@ elseif s:Completion == 2  " YCM
   " '/path/to/include'
   " copied from https://github.com/ycm-core/ycmd/blob/master/.ycm_extra_conf.py
   let g:ycm_global_ycm_extra_conf = '~/.vim/config/.ycm_extra_conf.py'
+
+" =======================================================
+" tmux bind gf to open filepath, gF to open filepath:line
+bind -T copyModeMultiKey_g f if-shell -F '#{selection_active}' '' 'send-keys -X select-word' \; send-keys -X copy-pipe 'xargs -I{} tmux new-window "$EDITOR #{pane_current_path}/{}"'
+bind -T copyModeMultiKey_g F if-shell -F '#{selection_active}' '' 'send-keys -X select-word' \; send-keys -X copy-pipe "awk -F: '{print \"$EDITOR #{pane_current_path}/\" $1 \" +\" $2 \" < /dev/tty\"}' | xargs -I{} tmux new-window {}"
+" above two merged together by testing file existence
+bind -T copyModeMultiKey_g f if-shell -F '#{selection_active}' '' 'send-keys -X select-word' \; send-keys -X copy-pipe "xargs -I{} sh -c \"test -f \\\"#{pane_current_path}/{}\\\" && tmux new-window \\\"$EDITOR #{pane_current_path}/{}\\\" || echo {} | awk -F: '{print \\\"$EDITOR #{pane_current_path}/\\\" \\\$1 \\\" +\\\" \\\$2 \\\" < /dev/tty\\\"}' | xargs -I{} tmux new-window {}\""
+# replaced by this, doesn't work if filepath contains ':' but simpler
+bind -T copyModeMultiKey_g f if-shell -F '#{selection_active}' '' 'send-keys -X select-word' \; send-keys -X copy-pipe "awk -F: '{line=($2==\"\")?\"\":\" +\"$2; print \"$EDITOR #{pane_current_path}/\" $1 line}' | xargs -I{} tmux new-window {}"
+" tmux fingers, slow
+set -g @plugin 'Morantron/tmux-fingers'       # <prefix>e
+set -g @fingers-key e
+set -g @fingers-main-action 'xargs tmux new-window -c "#{pane_current_path}" $EDITOR'

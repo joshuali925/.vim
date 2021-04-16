@@ -157,10 +157,10 @@ nnoremap zr :call VSCodeNotify('editor.unfoldAll')<CR>
 nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
 
 " nnoremap <C-d> :call VSCodeExtensionCall('scroll', 'halfPage', 'down')<CR>
-nnoremap <C-d> 15j
+nmap <C-d> Lzz
 xnoremap <C-d> 15j
 " nnoremap <C-u> :call VSCodeExtensionCall('scroll', 'halfPage', 'up')<CR>
-nnoremap <C-u> 15k
+nmap <C-u> Hzz
 xnoremap <C-u> 15k
 xnoremap H 10k
 xnoremap L 10j

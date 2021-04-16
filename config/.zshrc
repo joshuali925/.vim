@@ -49,7 +49,7 @@ zinit light-mode for \
 source ~/.vim/config/oh-my-zsh-key-bindings.zsh
 source ~/.vim/config/fzf/key-bindings.zsh
 source ~/.vim/config/fzf/completion.zsh
-# zplugin ice ver'fe9fa652390c78859450838825a8b5c40e9921ef'  # use this commit if master doesn't work
+zplugin ice ver'fe9fa652390c78859450838825a8b5c40e9921ef'  # use this commit if master doesn't work
 zinit light Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
 
 source ~/.vim/config/common.sh
@@ -113,6 +113,7 @@ tab-complete-or-cd() {
     zle fzf-cd-widget
   else
     zle fzf-tab-complete
+    # zle fzf-completion  " old tab complete
   fi
 }
 zle -N tab-complete-or-cd
