@@ -40,9 +40,10 @@ alias ls='ls -CF --color=auto'
 alias l='ls -CF --color=auto'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
-alias v='vim'
+alias v='$EDITOR'
 alias vi='vim -u ~/.vim/config/mini.vim -i NONE'
-alias vimm='vim ~/.vim/vimrc'
+alias vim='$EDITOR'
+alias vimm='$EDITOR ~/.vim/vimrc'
 alias venv='source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias service='sudo service'
@@ -253,10 +254,10 @@ path() {
 
 vf() {
   local FZFTEMP
-  if [ -z "$1" ]; then
-    FZFTEMP=$(rg --files | fzf --multi) && echo $FZFTEMP | xargs -d '\n' -o vim
+  if [ -z "$1" ]; then  # for xargs 2017 and later, use xargs -d '\n' -o $EDITOR
+    FZFTEMP=$(rg --files | fzf --multi) && echo $FZFTEMP | xargs -d '\n' sh -c '$EDITOR "$@" < /dev/tty' $EDITOR
   else
-    FZFTEMP=$(rg --files | rg "$@" | fzf --multi) && echo $FZFTEMP | xargs -d '\n' -o vim
+    FZFTEMP=$(rg --files | rg "$@" | fzf --multi) && echo $FZFTEMP | xargs -d '\n' sh -c '$EDITOR "$@" < /dev/tty' $EDITOR
   fi
 }
 
@@ -272,15 +273,29 @@ cdf() {
 vrg() {
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
   if [[ \ $*\  == *\ --fixed-strings\ * ]] || [[ \ $*\  == *\ -F\ * ]]; then
-    vim -q <(rg "$@" --vimgrep) -c "/\V$1"  # use \V if rg is called with -F/--fixed-strings to search for string literal
+    $EDITOR -q <(rg "$@" --vimgrep) -c "/\V$1"  # use \V if rg is called with -F/--fixed-strings to search for string literal
   else
-    vim -q <(rg "$@" --vimgrep) -c "/$1"
+    $EDITOR -q <(rg "$@" --vimgrep) -c "/$1"
   fi
 }
 
-fif() {
+fif() {  # find in file
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
-  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute(vim {+} -c \"/$1\" < /dev/tty)"
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute($EDITOR {+} -c \"/$1\" < /dev/tty)"
+}
+
+rf() {  # flygrep
+  local RG_PREFIX="rg --column --line-number --no-heading --color=always "
+  local INITIAL_QUERY="${*:-}"
+  FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "$INITIAL_QUERY")" \
+  fzf --ansi \
+      --disabled --query "$INITIAL_QUERY" \
+      --bind "change:reload:sleep 0.3; $RG_PREFIX {q} || true" \
+      --bind "enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
+      --bind 'tab:down,btab:up' \
+      --delimiter : \
+      --preview 'bat --color=always {1} --highlight-line {2}' \
+      --preview-window 'up,60%,border-bottom,+{2}+3/3,~3'
 }
 
 unalias z 2> /dev/null

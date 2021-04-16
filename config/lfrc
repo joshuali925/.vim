@@ -1,7 +1,6 @@
 set hidden
 set info size
 set dircounts
-set color256
 set icons
 set previewer ~/.vim/config/lf-preview.sh
 
@@ -47,6 +46,7 @@ map K push hkl
 map J push hjl
 map c :clear; unselect
 map gs !clear && git status
+map gr cd-git-root
 map t locate-file
 map <tab> locate-file-cwd
 map <c-p> $lazygit
@@ -60,7 +60,7 @@ cmd mkdir %mkdir -p "$@"
 cmd touch %touch "$@"
 cmd chmod %chmod "$@" "$f"
 cmd chmod? %stat --printf "%a %n \n" "$f"
-cmd vim !vim "$@"
+cmd vim !$EDITOR "$@"
 cmd rg !clear && rg "$@"
 cmd code %code .
 cmd pwd %echo $f
@@ -68,31 +68,32 @@ cmd size !du -h --max-depth=1 | sort -hr
 cmd md5 !md5sum "$f"
 cmd selected-dir-size %du -h --max-depth=0 "$f"
 cmd cwd-size %du -h --max-depth=0 .
-cmd edit-config ${{ vim ~/.vim/config/lfrc }}
-cmd edit-selected ${{ echo "$fx" | xargs -d '\n' -o vim }}
+cmd edit-config ${{ $EDITOR ~/.vim/config/lfrc }}
+cmd edit-selected ${{ echo "$fx" | xargs -d '\n' -o $EDITOR }}
 cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
+cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
 
 cmd locate-file-cwd ${{
-   res="$(ls -1A 2> /dev/null | fzf --bind 'tab:down,btab:up')"
-   if [ -f "$res" ]; then
-      lf -remote "send $id select \"$res\""
-   elif [ -d "$res" ]; then
-      lf -remote "send $id cd \"$res\""
-   fi
+  res="$(ls -1A 2> /dev/null | fzf --bind 'tab:down,btab:up')"
+  if [ -f "$res" ]; then
+    lf -remote "send $id select \"$res\""
+  elif [ -d "$res" ]; then
+    lf -remote "send $id cd \"$res\""
+  fi
 }}
 
 cmd locate-file ${{
-   res="$(rg --files | fzf --bind 'tab:down,btab:up')"
-   if [ -f "$res" ]; then
-      lf -remote "send $id select \"$res\""
-   elif [ -d "$res" ]; then
-      lf -remote "send $id cd \"$res\""
-   fi
+  res="$(rg --files | fzf --bind 'tab:down,btab:up')"
+  if [ -f "$res" ]; then
+    lf -remote "send $id select \"$res\""
+  elif [ -d "$res" ]; then
+    lf -remote "send $id cd \"$res\""
+  fi
 }}
 
 cmd z ${{
-   res="$(awk -F '|' '{print $1}' ~/.z | fzf)"
-   lf -remote "send $id cd \"$res\""
+  res="$(awk -F '|' '{print $1}' ~/.z | fzf)"
+  lf -remote "send $id cd \"$res\""
 }}
 
 cmd paste-symlink %{{

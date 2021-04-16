@@ -207,7 +207,7 @@ map gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
 nmap [g <Plug>(GitGutterPrevHunk)
 nmap ]g <Plug>(GitGutterNextHunk)
-for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=' ]
+for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
   execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
   execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
   execute 'xnoremap a'. char. ' :<C-u>normal! T'. char. 'vf'. char. '<CR>'
@@ -261,6 +261,7 @@ nnoremap cr :call <SID>EditRegister()<CR>
 nnoremap K :call <SID>LoadQuickUI(1)<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
+nnoremap gx :execute 'AsyncRun -mode=term -pos=hide open '. expand('<cfile>')<CR><BS><BS>  " https://github.com/vim/vim/issues/4738
 nnoremap <C-c> :nohlsearch <bar> call sneak#cancel() <bar> silent! AsyncStop!<CR>:echo<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
@@ -327,7 +328,7 @@ nnoremap <leader>C :ContextToggleWindow<CR>
 nnoremap <leader>tm :TableModeToggle<CR>
 inoremap <leader>w <Esc>:update<CR>
 nnoremap <leader>w :update<CR>
-nnoremap <leader>W :write !sudo tee %<CR>
+nnoremap <leader>W :wall<CR>
 nnoremap <silent> <leader>q :call <SID>Quit(0, 0)<CR>
 nnoremap <silent> <leader>x :call <SID>Quit(1, 0)<CR>
 nnoremap <silent> <leader>X :call <SID>Quit(1, 1)<CR>
@@ -351,7 +352,7 @@ augroup AutoCommands
   autocmd FileType make,go setlocal noexpandtab shiftwidth=4 softtabstop=4
   autocmd FileType * setlocal formatoptions=jql
   autocmd filetype netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
-  autocmd BufReadPost quickfix setlocal nobuflisted modifiable errorformat=%f\|%l\ col\ %c\|%m | nnoremap <buffer> <leader>w :cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> <CR> <CR>
+  autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
 augroup END
 " }}}
@@ -373,7 +374,7 @@ function! s:LoadVisualMulti()
   let g:VM_maps['Remove Last Region'] = '<C-p>'
   let g:VM_maps['Skip Region'] = '<C-x>'
   let g:VM_maps['Switch Mode'] = '<C-c>'
-  let g:VM_maps['Add Cursor At Pos'] = 'gn'
+  let g:VM_maps['Add Cursor At Pos'] = 'g<C-n>'
   let g:VM_maps['Case Setting'] = ''
   nmap <C-n> <Plug>(VM-Find-Under)
   xmap <C-n> <Plug>(VM-Find-Subword-Under)
@@ -718,7 +719,8 @@ function! s:GetRunCommand()
 endfunction
 command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
-command! -complete=shellcmd -nargs=* -range S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile errorformat=%f\|%l\ col\ %c\|%m | let b:RunCommand = "write !python3 -i" | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. bufnr(). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d
+command! -complete=shellcmd -nargs=* -range S execute 'botright new | setlocal filetype='. &filetype. ' buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. bufnr(). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d
+command! W write !sudo tee %
 " }}}
 
 " =================== Other plugins ===================== {{{
@@ -877,12 +879,13 @@ elseif s:Completion == 1  " coc
   omap ic <Plug>(coc-classobj-i)
   xmap ac <Plug>(coc-classobj-a)
   omap ac <Plug>(coc-classobj-a)
+  command! -nargs=0 Tsc call CocAction('runCommand', 'tsserver.watchBuild') | copen
 endif
 " }}}
 
 " ====================== Terminal ======================= {{{
 nnoremap <C-b> :noautocmd execute 'Ttoggle resize='. min([15, &lines * 2/5])<CR>
-nnoremap <leader>to :noautocmd Tnew<CR>
+nmap <leader>to <C-b>
 nnoremap <leader>tt :noautocmd Ttoggle resize=999<CR>
 nmap <leader>te <Plug>(neoterm-repl-send)
 nmap <leader>tee <Plug>(neoterm-repl-send-line)
@@ -953,11 +956,13 @@ elseif $SSH_CLIENT != ''  " ssh session
     OSCYankReg "
   endfunction
   call <SID>MapAction('CopyWithOSCYank', '<leader>y')
+  nmap <leader>Y <leader>y$
 elseif !has('macunix')  " WSL Vim
   function! s:CopyToWinClip(str)
     call system('clip.exe', a:str)
   endfunction
   call <SID>MapAction('CopyToWinClip', '<leader>y')
+  nmap <leader>Y <leader>y$
 endif
 " }}}
 
