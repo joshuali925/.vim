@@ -30,6 +30,8 @@ Plug 'machakann/vim-swap', { 'on': '<Plug>(swap-' }
 Plug 'wellle/context.vim', { 'on': ['ContextToggleWindow', 'ContextPeek'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }
 Plug 'gcmt/wildfire.vim', { 'on': '<Plug>(wildfire-' }
+Plug 'inkarkat/vim-ingo-library', { 'on': '<Plug>Mark' }
+Plug 'inkarkat/vim-mark', { 'on': '<Plug>Mark' }
 Plug 'ojroques/vim-oscyank', { 'on': ['OSCYank', 'OSCYankReg'] }
 " use noautocmd for Tnew/Ttoggle to avoid triggering BufReadPost and restoring last edit position again
 Plug 'kassio/neoterm', { 'on': ['Ttoggle', 'Tnew'] }
@@ -148,6 +150,7 @@ set sidescrolloff=5
 set signcolumn=yes
 set nostartofline
 set display=lastline
+set virtualedit+=block
 set previewheight=7
 set foldmethod=indent
 set foldlevelstart=99
@@ -187,12 +190,18 @@ nnoremap [\ :tabedit<CR>
 nnoremap ]\ :enew<CR>
 imap <Space> <Plug>(PearTreeSpace)
 map <Space> <Plug>(wildfire-fuel)
+map [m <Plug>MarkSearchOrCurPrev
+map ]m <Plug>MarkSearchOrCurNext
+map [n <Plug>MarkSearchAnyPrev
+map ]n <Plug>MarkSearchAnyNext
+map <leader>m <Plug>MarkSet
+map <leader>M <Plug>MarkRegex
 map f <Plug>Sneak_f
 map F <Plug>Sneak_F
 nmap t <Plug>Sneak_s
 nmap T <Plug>Sneak_S
-xmap t <Plug>Sneak_s
-xmap T <Plug>Sneak_S
+xmap t <Plug>Sneak_t
+xmap T <Plug>Sneak_T
 omap t <Plug>Sneak_t
 omap T <Plug>Sneak_T
 map , <Plug>Sneak_;
@@ -262,7 +271,7 @@ nnoremap K :call <SID>LoadQuickUI(1)<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
 nnoremap gx :execute 'AsyncRun -mode=term -pos=hide open '. expand('<cfile>')<CR><BS><BS>  " https://github.com/vim/vim/issues/4738
-nnoremap <C-c> :nohlsearch <bar> call sneak#cancel() <bar> silent! AsyncStop!<CR>:echo<CR>
+nmap <C-c> <Plug>MarkAllClear:nohlsearch <bar> call sneak#cancel() <bar> silent! AsyncStop!<CR>:echo<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
 nnoremap <silent> <C-h> :TmuxNavigateLeft<CR>
@@ -436,7 +445,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Quick&fix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"'],
         \ ['Location l&ist        %{empty(filter(getwininfo(), "v:val.loclist")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"'],
         \ ['Set &diff             %{&diff ? "[x]" : "[ ]"}', 'execute &diff ? "windo diffoff" : "windo diffthis"', 'Toggle diff in current window'],
-        \ ['Set f&old             %{&foldlevel ? "[ ]" : "[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
+        \ ['Set scr&ollbind       %{&scrollbind ? "[x]" : "[ ]"}', 'execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"', 'Toggle scrollbind in current window'],
         \ ['Set &wrap             %{&wrap ? "[x]" : "[ ]"}', 'set wrap!', 'Toggle wrap lines'],
         \ ['Set &paste            %{&paste ? "[x]" : "[ ]"}', 'execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"', 'Toggle paste mode (shift alt drag to select and copy)'],
         \ ['Set &spelling         %{&spell ? "[x]" : "[ ]"}', 'set spell!', 'Toggle spell checker (z= to auto correct current word)'],
@@ -729,6 +738,8 @@ let g:wildfire_objects = {
       \ 'javascript,typescript,typescriptreact' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'at', 'aI'],
       \ 'python' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'ai', 'ii'],
       \ }
+let g:mw_no_mappings = 1  " vim-mark
+let g:mwIgnoreCase = 0
 let g:sandwich_no_default_key_mappings = 1
 let g:operator_sandwich_no_default_key_mappings = 1
 let g:context_enabled = 0
@@ -894,6 +905,7 @@ nmap <leader>tp :call <SID>LoadQuickUI(0)<CR><leader>tp
 tnoremap <C-u> <C-\><C-n>
 if has('nvim')
   set undodir=~/.cache/nvim/undo
+  set jumpoptions=stack
   augroup NvimTerminal
     autocmd!
     autocmd BufEnter term://* startinsert
@@ -909,13 +921,14 @@ else
   set viminfo+=n~/.cache/vim/viminfo
   set undodir=~/.cache/vim/undo
   set cursorlineopt=number,screenline
-  tnoremap <expr> <F2> tabpagenr('$') > 1 ? '<C-w>gT' : '<C-w>:bprevious<CR>'
-  tnoremap <expr> <F3> tabpagenr('$') > 1 ? '<C-w>gt' : '<C-w>:bnext<CR>'
-  tnoremap <silent> <C-h> <C-w>:TmuxNavigateLeft<CR>
-  tnoremap <silent> <C-j> <C-w>:TmuxNavigateDown<CR>
-  tnoremap <silent> <C-k> <C-w>:TmuxNavigateUp<CR>
-  tnoremap <silent> <C-l> <C-w>:TmuxNavigateRight<CR>
-  tnoremap <C-b> <C-w>:Ttoggle<CR>
+  set termwinkey=<C-s>
+  tnoremap <expr> <F2> tabpagenr('$') > 1 ? '<C-s>gT' : '<C-s>:bprevious<CR>'
+  tnoremap <expr> <F3> tabpagenr('$') > 1 ? '<C-s>gt' : '<C-s>:bnext<CR>'
+  tnoremap <silent> <C-h> <C-s>:TmuxNavigateLeft<CR>
+  tnoremap <silent> <C-j> <C-s>:TmuxNavigateDown<CR>
+  tnoremap <silent> <C-k> <C-s>:TmuxNavigateUp<CR>
+  tnoremap <silent> <C-l> <C-s>:TmuxNavigateRight<CR>
+  tnoremap <C-b> <C-s>:Ttoggle<CR>
 endif
 " }}}
 
