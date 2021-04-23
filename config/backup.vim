@@ -488,6 +488,7 @@ zinit wait lucid for \
     zsh-users/zsh-autosuggestions
 alias zf='FZFTEMP=$(z --list | awk "{print \$2}" | fzf) && cd "$FZFTEMP" && unset FZFTEMP'
 PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) %{$fg[cyan]%}%c%{$reset_color%} "
+" # zinit snippet OMZ::lib/key-bindings.zsh
 
 " =======================================================
 " zinit binaries
@@ -1042,6 +1043,7 @@ let s:RelativeNumber = 0
     autocmd BufEnter,FocusGained,InsertLeave,WinEnter * set relativenumber
     autocmd BufLeave,FocusLost,InsertEnter,WinLeave * set norelativenumber
   endif
+        \ ['Set f&old             %{&foldlevel ? "[ ]" : "[x]"}', 'execute &foldlevel ? "normal! zM" : "normal! zR"', 'Toggle fold by indent'],
 
 " =======================================================
 " too slow, and doesn't work for vscode

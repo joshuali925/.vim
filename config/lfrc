@@ -30,6 +30,7 @@ map mR lf-bulk-rename
 map ms selected-dir-size
 map mS cwd-size
 map mc edit-config
+map md5 md5
 
 map v :toggle; down
 map V invert

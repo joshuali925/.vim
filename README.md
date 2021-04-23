@@ -1,9 +1,9 @@
 # Dot Files
 ## Set up shell
 ```bash
-git clone https://github.com/joshuali925/.vim.git ~/.vim
-mkdir -p ~/.cache/vim/undo ~/.local/bin ~/.config/lf ~/.config/jesseduffield/lazygit
+git clone https://github.com/joshuali925/.vim.git ~/.vim --depth 1
 
+mkdir -p ~/.cache/vim/undo ~/.local/bin ~/.config/jesseduffield/lazygit ~/.config/{lf,bpytop}
 echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
 echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc
 echo 'skip_global_compinit=1' >> ~/.zshenv
@@ -20,6 +20,10 @@ fast-theme clean
 # zsh inscure directories fix:
 # compaudit | xargs chmod g-w
 # compaudit | sudo xargs chmod -R 755
+
+# ssh key
+ssh-keygen -t ed25519 -C "email@example.com"
+cat ~/.ssh/id_ed25519.pub  # copy and add in https://github.com/settings/keys
 ```
 
 ## Install
@@ -31,9 +35,15 @@ sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh python3
 sudo apt update && sudo apt install -y zsh build-essential python3-dev python3-pip
 
 # change default shell to zsh
-sudo chsh -s $(which zsh) $(whoami)
+sudo chsh -s $(command which zsh) $(whoami)
 # or run zsh when bash starts
 sed -i -e '1i[ -t 1 ] && exec zsh\' ~/.bashrc
+
+# nvm, node, yarn
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+nvm install 10.23.1 && node --version && ln -sr $(command which node) ~/.local/bin/node
+curl -o- -L https://yarnpkg.com/install.sh | bash
+ln -sr ~/.yarn/bin/yarn ~/.local/bin/yarn
 
 # vim
 sudo add-apt-repository -y ppa:jonathonf/vim
@@ -41,34 +51,23 @@ sudo apt upgrade -y vim
 
 # neovim
 curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
-chmod u+x nvim.appimage
-./nvim.appimage --appimage-extract
-mv squashfs-root ~/.local/nvim
-ln -sr ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
-rm nvim.appimage
+chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
+mv squashfs-root ~/.local/nvim && ln -sr ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
 pip3 install --user pynvim
 
 # tmux
 curl -L https://github.com/tmux/tmux/releases/download/3.1b/tmux-3.1b-x86_64.AppImage -o tmux.appimage
-chmod u+x tmux.appimage
-./tmux.appimage --appimage-extract
-mv squashfs-root ~/.local/tmux
-ln -sr ~/.local/tmux/usr/bin/tmux ~/.local/bin/tmux
-rm tmux.appimage
-
-# nvm, node, yarn
-curl https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash
-nvm install 10.23.1
-curl -o- -L https://yarnpkg.com/install.sh | bash
-ln -sr ~/.yarn/bin/yarn ~/.local/bin/yarn
+chmod u+x tmux.appimage && ./tmux.appimage --appimage-extract && rm tmux.appimage
+mv squashfs-root ~/.local/tmux && ln -sr ~/.local/tmux/usr/bin/tmux ~/.local/bin/tmux
 
 # pathpicker
 git clone https://github.com/facebook/PathPicker.git ~/.local/PathPicker --depth=1
 ln -sr ~/.local/PathPicker/fpp ~/.local/bin/fpp
 
-# ssh key
-ssh-keygen -t ed25519 -C "email@example.com"
-cat ~/.ssh/id_ed25519.pub  # copy and add in https://github.com/settings/keys
+# bpytop
+python3 -m venv ~/.local/bpytop && source ~/.local/bpytop/bin/activate && pip install bpytop && deactivate
+echo 'color_theme="dracula"' >> ~/.config/bpytop/bpytop.conf && echo 'show_init=False' >> ~/.config/bpytop/bpytop.conf
+ln -sr ~/.local/bpytop/bin/bpytop ~/.local/bin/bpytop
 ```
 
 ## Windows
@@ -98,11 +97,7 @@ ln -sr ~/.vim/config/lazygit_config.yml ~/Library/Application\ Support/jesseduff
 ln -s ~/.zshrc ~/.zprofile
 
 # install applications
-brew cask install iterm2
-brew cask install rectangle
-brew cask install maccy
-brew cask install karabiner-elements
-brew cask install visual-studio-code
+brew install --cask iterm2 rectangle maccy karabiner-elements visual-studio-code
 ```
 - configs
 ```markdown
