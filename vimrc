@@ -47,6 +47,7 @@ Plug 'michaeljsmith/vim-indent-object'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-unimpaired'
+Plug 'rhysd/conflict-marker.vim'
 Plug 'markonm/traces.vim'
 Plug 'tpope/vim-repeat'
 Plug 'jdhao/better-escape.vim'
@@ -192,8 +193,6 @@ imap <Space> <Plug>(PearTreeSpace)
 map <Space> <Plug>(wildfire-fuel)
 map [m <Plug>MarkSearchOrCurPrev
 map ]m <Plug>MarkSearchOrCurNext
-map [n <Plug>MarkSearchAnyPrev
-map ]n <Plug>MarkSearchAnyNext
 map <leader>m <Plug>MarkSet
 map <leader>M <Plug>MarkRegex
 map f <Plug>Sneak_f
@@ -270,7 +269,8 @@ nnoremap cr :call <SID>EditRegister()<CR>
 nnoremap K :call <SID>LoadQuickUI(1)<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
-nnoremap gx :execute 'AsyncRun -mode=term -pos=hide open '. expand('<cfile>')<CR><BS><BS>  " https://github.com/vim/vim/issues/4738
+" https://github.com/vim/vim/issues/4738
+nnoremap gx :execute 'AsyncRun -mode=term -pos=hide open '. expand('<cfile>')<CR>
 nmap <C-c> <Plug>MarkAllClear:nohlsearch <bar> call sneak#cancel() <bar> silent! AsyncStop!<CR>:echo<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
@@ -439,7 +439,7 @@ function! s:LoadQuickUI(open_menu)
         \ ['Git gre&p all', 'call feedkeys(":Git log -p --all -i -G \"\"\<Left>", "n")', 'Search a regex in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'],
         \ ['Git fi&nd files all', 'call feedkeys(":Git log --all --full-history --name-only -- \"**\"\<Left>\<Left>", "n")', 'Grep file names in all commits'],
         \ ['--', ''],
-        \ ['Git open &remote', 'call plug#load("vim-rhubarb") | call plug#load("vim-fugitive") | .GBrowse', 'Open remote url in browser'],
+        \ ['Git open &remote', 'let temp = getcurpos() | call plug#load("vim-rhubarb") | call plug#load("vim-fugitive") | call setpos(".", temp) | .GBrowse', 'Open remote url in browser'],
         \ ])
   call quickui#menu#install('&Toggle', [
         \ ['Quick&fix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', 'execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"'],
@@ -553,6 +553,17 @@ function! s:OpenQuickUIContextMenu()
   call add(l:quickui_content, ['Git hunk &add', 'GitGutterStageHunk', 'Git gutter stage hunk'])
   call add(l:quickui_content, ['Git fo&ld', 'GitGutterFold', 'Git gutter fold unchanged'])
   call add(l:quickui_content, ['Git &blame', "call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')", 'Git blame of current line'])
+  let l:current_styles = map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+  if match(l:current_styles, '^ConflictMarker') != -1
+    call add(l:quickui_content, ['--', ''])
+    if match(l:current_styles, '^ConflictMarker\(Begin\|Ours\)$') != -1
+      call add(l:quickui_content, ['Git &conflict get', 'ConflictMarkerOurselves', 'Get change from ours'])
+    elseif match(l:current_styles, '^ConflictMarker\(End\|Theirs\)$') != -1
+      call add(l:quickui_content, ['Git &conflict get', 'ConflictMarkerThemselves', 'Get change from theirs'])
+    endif
+    call add(l:quickui_content, ['Git conflict get all', 'ConflictMarkerBoth', 'Get change from both'])
+    call add(l:quickui_content, ['Git conflict remove', 'ConflictMarkerNone', 'Remove conflict'])
+  endif
   call add(l:quickui_content, ['--', ''])
   call add(l:quickui_content, ['Built-in d&ocs', 'execute "normal! K"', 'Vim built in help'])
   call quickui#context#open(l:quickui_content, {'index': g:quickui#context#cursor})
@@ -834,6 +845,14 @@ let g:gitgutter_sign_modified = '░'
 let g:gitgutter_sign_removed = '▏'
 let g:gitgutter_sign_removed_first_line = '▔'
 let g:gitgutter_sign_modified_removed = '▒'
+let g:conflict_marker_enable_mappings = 0
+let g:conflict_marker_begin = '^<<<<<<< .*$'
+let g:conflict_marker_end   = '^>>>>>>> .*$'
+let g:conflict_marker_highlight_group = ''
+highlight ConflictMarkerBegin guibg=#427266
+highlight ConflictMarkerOurs guibg=#364f49
+highlight ConflictMarkerTheirs guibg=#3a4f67
+highlight ConflictMarkerEnd guibg=#234a78
 let g:neoterm_default_mod = 'botright'
 let g:neoterm_autoinsert = 1
 let g:table_mode_tableize_map = ''
@@ -949,6 +968,7 @@ if has('gui_running')
     set columns=90
   endif
   if has('win32')  " Windows gVim
+    " :set guifont=* :set guifont?  " manually run to pick font and get value
     set guifont=JetBrainsMono_NF:h10:cANSI
     set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 versions need to match
     let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '

@@ -1,12 +1,12 @@
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 
-export PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin
+export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"
 export EDITOR='vim'
 export BAT_PAGER='less -R --ignore-case'
 export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
-export RIPGREP_CONFIG_PATH=~/.vim/config/.ripgreprc
+export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER='\'
 export FZF_DEFAULT_OPTS='--layout=reverse --height 40% --bind change:top'
 export FZF_DEFAULT_COMMAND='rg --files'
@@ -50,6 +50,7 @@ alias btop='bpytop -b "cpu proc"'
 alias service='sudo service'
 alias apt='sudo apt'
 alias lg='lazygit'
+alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias fl='lf -last-dir-path="$HOME/.cache/lf_dir" && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
@@ -151,6 +152,7 @@ alias gsu='git submodule update'
 alias gts='git tag -s'
 alias gtree='git ls-files | tree --fromfile'
 alias gunignore='git update-index --no-assume-unchanged'
+alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
 alias gunwip='git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
 alias gup='git pull --rebase'
 alias gvt='git verify-tag'
@@ -202,7 +204,11 @@ printascii() {
 }
 
 printcolors() {
-  printf 'Foreground 256 colors\n'
+  printf 'Foreground 8 colors\n'
+  echo "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
+  printf '\nBackground 8 colors\n'
+  echo "$(tput setab 0) black $(tput setab 1) red $(tput setaf 0)$(tput setab 2) green $(tput setab 3) yellow $(tput setaf 7)$(tput setab 4) blue $(tput setab 5) magenta $(tput setaf 0)$(tput setab 6) cyan $(tput setab 7) white $(tput sgr 0)"
+  printf '\nForeground 256 colors\n'
   for i in {0..255}; do printf '\e[38;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
   printf '\n\nBackground 256 colors\n'
   for i in {0..255}; do printf '\e[48;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
@@ -254,12 +260,13 @@ path() {
 }
 
 vf() {
-  local FZFTEMP
-  if [ -z "$1" ]; then  # for xargs 2017 and later, use xargs -d '\n' -o $EDITOR
-    FZFTEMP=$(rg --files | fzf --multi) && echo $FZFTEMP | xargs -d '\n' sh -c '$EDITOR "$@" < /dev/tty' $EDITOR
+  local IFS=$'\n' FZFTEMP
+  if [ -z "$1" ]; then
+    FZFTEMP=($(rg --files | fzf --multi))
   else
-    FZFTEMP=$(rg --files | rg "$@" | fzf --multi) && echo $FZFTEMP | xargs -d '\n' sh -c '$EDITOR "$@" < /dev/tty' $EDITOR
+    FZFTEMP=($(rg --files | rg "$@" | fzf --multi))
   fi
+  [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
 }
 
 cdf() {
@@ -310,6 +317,17 @@ z() {
 }
 zc() {
   local FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind 'tab:down,btab:up' --query "$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+}
+
+t() {  # create or switch tmux session
+  local CHANGE SESSIONS CURRENT FZFTEMP
+  [ -n "$TMUX" ] && CHANGE='switch-client' && CURRENT=$(tmux display-message -p '#{session_name}') || CHANGE='attach-session'
+  if [ -z "$1" ]; then
+    SESSIONS=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d")
+    FZFTEMP=$(echo $SESSIONS | fzf --bind 'tab:down,btab:up') && tmux $CHANGE -t "$FZFTEMP"
+  else
+    tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s $1 && tmux $CHANGE -t "$1")
+  fi
 }
 
 manf() {

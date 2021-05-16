@@ -19,6 +19,17 @@
   new = green bold
   whitespace = red reverse
 
+[delta]
+  syntax-theme = TwoDark
+  hunk-header-style = line-number syntax bold
+  hunk-header-line-number-style = white
+  hunk-header-decoration-style = "#4b5263" box
+  file-style = "#e5b34a" italic
+  file-decoration-style = "#e5b34a" ul
+  line-numbers-zero-style = "#4b5263"
+  line-numbers-left-format = "{nm:^4} "
+  line-numbers-right-format = "{np:^4} "
+
 [diff-so-fancy]
   stripLeadingSymbols = false
 
