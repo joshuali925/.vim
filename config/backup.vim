@@ -1195,3 +1195,14 @@ bind -T copyModeMultiKey_g f if-shell -F '#{selection_active}' '' 'send-keys -X 
 set -g @plugin 'Morantron/tmux-fingers'       # <prefix>e
 set -g @fingers-key e
 set -g @fingers-main-action 'xargs tmux new-window -c "#{pane_current_path}" $EDITOR'
+
+" =======================================================
+" xargs changes current directory to home
+vf() {
+  local FZFTEMP
+  if [ -z "$1" ]; then  # for xargs 2017 and later, use xargs -d '\n' -o $EDITOR
+    FZFTEMP=$(rg --files | fzf --multi) && echo $FZFTEMP | xargs -d '\n' sh -c '$EDITOR "$@" < /dev/tty' $EDITOR
+  else
+    FZFTEMP=$(rg --files | rg "$@" | fzf --multi) && echo $FZFTEMP | xargs -d '\n' sh -c '$EDITOR "$@" < /dev/tty' $EDITOR
+  fi
+}

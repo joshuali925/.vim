@@ -5,6 +5,7 @@ git:
     colorArg: always
     pager: delta --dark --paging=never --24-bit-color=never
 gui:
+  showCommandLog: false
   theme:
     lightTheme: false
     activeBorderColor:
