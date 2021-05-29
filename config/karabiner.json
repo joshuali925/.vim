@@ -127,6 +127,33 @@
       "manipulators": [
         {
           "from": {
+            "key_code": "2",
+            "modifiers": {
+              "mandatory": [
+                "right_command",
+                "right_control",
+                "right_shift",
+                "right_option"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "t"
+            }
+          ],
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "bundle_identifiers": [
+                "^cn\\.better365\\.ishot$"
+              ]
+            }
+          ]
+        },
+        {
+          "from": {
             "key_code": "spacebar",
             "modifiers": {
               "mandatory": [

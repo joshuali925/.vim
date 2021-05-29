@@ -1206,3 +1206,13 @@ vf() {
     FZFTEMP=$(rg --files | rg "$@" | fzf --multi) && echo $FZFTEMP | xargs -d '\n' sh -c '$EDITOR "$@" < /dev/tty' $EDITOR
   fi
 }
+
+" =======================================================
+" use vim expand region
+Plug 'gcmt/wildfire.vim', { 'on': '<Plug>(wildfire-' }
+map v <Plug>(wildfire-fuel)
+let g:wildfire_objects = {
+      \ '*' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'i>', 'ii', 'aI'],
+      \ 'javascript,typescript,typescriptreact' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'at', 'aI'],
+      \ 'python' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'ai', 'ii'],
+      \ }
