@@ -5,10 +5,10 @@ call plug#begin('~/.vim/plugged/vscode')
 Plug 'asvetliakov/vim-easymotion'
 Plug 'justinmk/vim-sneak'
 Plug 'machakann/vim-swap'
+Plug 'chaoren/vim-wordmotion'
+Plug 'terryma/vim-expand-region'
 Plug 'machakann/vim-sandwich'
-Plug 'gcmt/wildfire.vim'
-" swap aI and ai in plugged/vscode/vim-indent-object/plugin/indent-object.vim:28
-Plug 'michaeljsmith/vim-indent-object'
+Plug 'joshuali925/vim-indent-object'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
 Plug 'dhruvasagar/vim-table-mode'
@@ -22,7 +22,16 @@ set smartcase
 let mapleader=';'
 nmap <BS> gT
 nmap \ gt
-map <Space> <Plug>(wildfire-fuel)
+map gw <Plug>WordMotion_w
+map gb <Plug>WordMotion_b
+map ge <Plug>WordMotion_e
+omap u <Plug>WordMotion_w
+omap iu <Plug>WordMotion_iw
+xmap iu <Plug>WordMotion_iw
+omap au <Plug>WordMotion_aw
+xmap au <Plug>WordMotion_aw
+xmap v <Plug>(expand_region_expand)
+xmap <BS> <Plug>(expand_region_shrink)
 map f <Plug>Sneak_f
 map F <Plug>Sneak_F
 nmap t <Plug>Sneak_s
@@ -76,10 +85,10 @@ xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
 nnoremap <C-c> :nohlsearch<CR>
-nnoremap <C-f> :call VSCodeNotify('editor.action.organizeImports') <bar> sleep 200m <bar> call VSCodeNotify('editor.action.formatDocument')<CR>
+nnoremap <C-f> :call VSCodeCall('editor.action.organizeImports') <bar> sleep 500m <bar> call VSCodeCall('editor.action.formatDocument')<CR>
 nnoremap <leader><C-f> :call VSCodeNotify('editor.action.formatChanges')<CR>
 xnoremap <C-f> =
-nnoremap <leader>r :call VSCodeNotify('code-runner.run')<CR>
+nnoremap <leader>r :call <SID>RunCode()<CR>
 noremap <leader>y "+y
 nnoremap <leader>Y "+y$
 noremap <leader>p "0p
@@ -165,6 +174,13 @@ xnoremap <C-u> 15k
 xnoremap H 10k
 xnoremap L 10j
 
+function! s:RunCode()
+  if expand('%') =~ 'test.[tj]sx\?'
+    call VSCodeNotify('extension.runJest')
+  else
+    call VSCodeNotify('code-runner.run')
+  endif
+endfunction
 function! s:GetVisualSelection()
   let [l:line_start, l:column_start] = getpos("'<")[1:2]
   let [l:line_end, l:column_end] = getpos("'>")[1:2]
@@ -206,11 +222,7 @@ function! s:PrintCurrVars(visual, printAbove)
   endif
 endfunction
 
-let g:wildfire_objects = {
-      \ '*' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'i>', 'ii', 'aI'],
-      \ 'javascript,typescript,typescriptreact' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'at', 'aI'],
-      \ 'python' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'ai', 'ii'],
-      \ }
+let g:wordmotion_nomap = 1
 let g:sandwich_no_default_key_mappings = 1
 let g:operator_sandwich_no_default_key_mappings = 1
 let g:EasyMotion_do_mapping = 0

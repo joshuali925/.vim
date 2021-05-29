@@ -86,8 +86,8 @@ alias gcf='git config --list'
 alias gcl='git clone --recursive'
 alias gclean='git clean -fd'
 alias gpristine='git reset --hard && git clean -fdx'
-alias gcm='git checkout main || git checkout master'
-alias gcd='git checkout develop || git checkout dev'
+alias gcm='git checkout main 2> /dev/null || git checkout master'
+alias gcd='git checkout develop 2> /dev/null || git checkout dev'
 alias gco='git checkout'
 alias gcount='git shortlog -sn'
 alias gcp='git cherry-pick'
@@ -102,16 +102,16 @@ alias gdw='git diff --word-diff'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
 alias gfo='git fetch origin'
-alias ggl='git pull origin master'
-alias glum='git pull upstream master'
-alias ggp='git push origin master'
-alias ggsup='git branch --set-upstream-to=origin/master'
-alias gpsup='git push --set-upstream origin master'
+alias ggl='git pull origin $(git symbolic-ref --short HEAD)'
+alias glum='git pull upstream $(git symbolic-ref --short HEAD)'
+alias ggp='git push origin $(git symbolic-ref --short HEAD)'
+alias ggsup='git branch --set-upstream-to=origin/$(git symbolic-ref --short HEAD)'
+alias gpsup='git push --set-upstream origin $(git symbolic-ref --short HEAD)'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gl='git pull'
-alias glg='git log --stat --max-count=10'
-alias glgg='git log --graph --max-count=10'
+alias glg='git log --stat'
+alias glgg='git log --graph'
 alias glgga='git log --graph --decorate --all'
 alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 alias glog='git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ai)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)" --all'
@@ -125,8 +125,6 @@ alias gr='git remote'
 alias grb='git rebase'
 alias grba='git rebase --abort'
 alias grbc='git rebase --continue'
-alias grbd='git rebase develop'
-alias grbm='git rebase master'
 alias grbs='git rebase --skip'
 alias grbi='git rebase -i'
 alias grh='git reset HEAD'
@@ -320,18 +318,17 @@ zc() {
 }
 
 t() {  # create or switch tmux session
-  local CHANGE SESSIONS CURRENT FZFTEMP
+  local CHANGE CURRENT FZFTEMP
   [ -n "$TMUX" ] && CHANGE='switch-client' && CURRENT=$(tmux display-message -p '#{session_name}') || CHANGE='attach-session'
   if [ -z "$1" ]; then
-    SESSIONS=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d")
-    FZFTEMP=$(echo $SESSIONS | fzf --bind 'tab:down,btab:up') && tmux $CHANGE -t "$FZFTEMP"
+    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind 'tab:down,btab:up' --exit-0) && tmux $CHANGE -t "$FZFTEMP" || echo 'No tmux sessions, pass a string to create one.'
   else
-    tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s $1 && tmux $CHANGE -t "$1")
+    tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$1" && tmux $CHANGE -t "$1")
   fi
 }
 
 manf() {
-  man -k . | fzf -q "$1" --prompt='man> '  --preview $'echo {} | tr -d \'()\' | awk \'{printf "%s ", $2} {print $1}\' | xargs -r man' | tr -d '()' | awk '{printf "%s ", $2} {print $1}' | xargs -r man
+  man -k . | fzf -q "$1" --prompt='man> ' --preview $'echo {} | tr -d \'()\' | awk \'{printf "%s ", $2} {print $1}\' | xargs -r man' | tr -d '()' | awk '{printf "%s ", $2} {print $1}' | xargs -r man
 }
 
 nvm() {

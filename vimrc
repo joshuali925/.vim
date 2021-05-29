@@ -13,6 +13,7 @@ Plug 'skywind3000/vim-quickui', { 'on': [] }
 Plug 'simnalamburt/vim-mundo', { 'on': 'MundoToggle' }
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 Plug 'dhruvasagar/vim-table-mode', { 'on': ['TableModeToggle', 'TableModeRealign', 'Tableize', 'TableAddFormula', 'TableEvalFormulaLine'] }
+Plug 'will133/vim-dirdiff', { 'on': 'DirDiff' }
 Plug 'liuchengxu/vista.vim', { 'on': 'Vista' }
 Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
 Plug 'chiel92/vim-autoformat', { 'on': [] }
@@ -27,9 +28,10 @@ Plug 'suy/vim-context-commentstring', { 'for': 'typescriptreact' }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKeyVisual'] }
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
 Plug 'machakann/vim-swap', { 'on': '<Plug>(swap-' }
+Plug 'chaoren/vim-wordmotion', { 'on': '<Plug>WordMotion_' }
+Plug 'terryma/vim-expand-region', { 'on': '<Plug>(expand_region_' }
 Plug 'wellle/context.vim', { 'on': ['ContextToggleWindow', 'ContextPeek'] }
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug'] }
-Plug 'gcmt/wildfire.vim', { 'on': '<Plug>(wildfire-' }
 Plug 'inkarkat/vim-ingo-library', { 'on': '<Plug>Mark' }
 Plug 'inkarkat/vim-mark', { 'on': '<Plug>Mark' }
 Plug 'ojroques/vim-oscyank', { 'on': ['OSCYank', 'OSCYankReg'] }
@@ -42,8 +44,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'machakann/vim-sandwich'
 Plug 'justinmk/vim-sneak'
 Plug 'tmsvg/pear-tree'
-" swap aI and ai in plugged/vim-indent-object/plugin/indent-object.vim:28
-Plug 'michaeljsmith/vim-indent-object'
+Plug 'joshuali925/vim-indent-object'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-unimpaired'
@@ -189,8 +190,17 @@ nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
 nnoremap [\ :tabedit<CR>
 nnoremap ]\ :enew<CR>
+map gw <Plug>WordMotion_w
+map gb <Plug>WordMotion_b
+map ge <Plug>WordMotion_e
+omap u <Plug>WordMotion_w
+omap iu <Plug>WordMotion_iw
+xmap iu <Plug>WordMotion_iw
+omap au <Plug>WordMotion_aw
+xmap au <Plug>WordMotion_aw
+xmap v <Plug>(expand_region_expand)
+xmap <BS> <Plug>(expand_region_shrink)
 imap <Space> <Plug>(PearTreeSpace)
-map <Space> <Plug>(wildfire-fuel)
 map [m <Plug>MarkSearchOrCurPrev
 map ]m <Plug>MarkSearchOrCurNext
 map <leader>m <Plug>MarkSet
@@ -744,11 +754,7 @@ command! W write !sudo tee %
 " }}}
 
 " =================== Other plugins ===================== {{{
-let g:wildfire_objects = {
-      \ '*' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'i>', 'ii', 'aI'],
-      \ 'javascript,typescript,typescriptreact' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'at', 'aI'],
-      \ 'python' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'ai', 'ii'],
-      \ }
+let g:wordmotion_nomap = 1
 let g:mw_no_mappings = 1  " vim-mark
 let g:mwIgnoreCase = 0
 let g:sandwich_no_default_key_mappings = 1

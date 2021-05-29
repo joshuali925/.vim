@@ -7,12 +7,12 @@ mkdir -p ~/.cache/vim/undo ~/.local/bin ~/.config/jesseduffield/lazygit ~/.confi
 echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
 echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc
 echo 'skip_global_compinit=1' >> ~/.zshenv
-ln -s .vim/config/.tmux.conf ~/.tmux.conf
-ln -s .vim/config/.gitconfig ~/.gitconfig
-ln -s .vim/config/lfrc ~/.config/lf/lfrc
-ln -s .vim/config/nvim ~/.config/nvim
-ln -s .vim/config/lazygit_config.yml ~/.config/jesseduffield/lazygit/config.yml
-ln -s .vim/config/.ideavimrc ~/.ideavimrc
+ln -s ~/.vim/config/.tmux.conf ~/.tmux.conf
+ln -s ~/.vim/config/.gitconfig ~/.gitconfig
+ln -s ~/.vim/config/lfrc ~/.config/lf/lfrc
+ln -s ~/.vim/config/nvim ~/.config/nvim
+ln -s ~/.vim/config/lazygit_config.yml ~/.config/jesseduffield/lazygit/config.yml
+ln -s ~/.vim/config/.ideavimrc ~/.ideavimrc
 
 # zsh fast-syntax-highlighting theme:
 fast-theme clean
@@ -60,6 +60,9 @@ pip3 install --user pynvim
 # need to export after p10k instant prompt loads
 echo "export \$EDITOR='nvim'" >> ~/.zshrc
 
+# install vscode-neovim plugins
+nvim -u ~/.vim/config/vscode.vim +PlugInstall +quitall
+
 # tmux
 curl -L https://github.com/tmux/tmux/releases/download/3.1b/tmux-3.1b-x86_64.AppImage -o tmux.appimage
 chmod u+x tmux.appimage && ./tmux.appimage --appimage-extract && rm tmux.appimage
@@ -103,8 +106,11 @@ ln -s ~/.vim/config/lazygit_config.yml ~/Library/Application\ Support/jesseduffi
 # link .zshrc for MacVim
 ln -s ~/.zshrc ~/.zprofile
 
+# enable key repeats
+defaults write -g ApplePressAndHoldEnabled -bool false
+
 # install applications
-brew install --cask iterm2 rectangle maccy karabiner-elements visual-studio-code
+brew install --cask iterm2 rectangle maccy karabiner-elements alt-tab visual-studio-code
 ```
 - configs
 ```markdown
@@ -120,13 +126,13 @@ Maccy -> Preferences -> Hotkey -> control shift v
                      -> Paste automatically (cmd + shift + enter pastes without formatting)
                      -> History size 999
                      -> Appearance -> Menu size 100
+Alt-tab -> Preferences -> Controls -> change "Hold option" to "Hold cmd"
+                                   -> change "Select previous window" to shift tab
+                       -> Appearance -> check Hide apps with no open window
 ```
-- set up [Karabiner](https://karabiner-elements.pqrs.org/)
+- Karabiner settings [import](karabiner://karabiner/assets/complex_modifications/import?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjoshuali925%2F.vim%2Fmaster%2Fconfig%2Fkarabiner.json)
 ```bash
-# visit this link to import settings
-karabiner://karabiner/assets/complex_modifications/import?url=https://raw.githubusercontent.com/joshuali925/.vim/master/config/karabiner.json
-
-# or copy manually
+# click link above or copy manually
 mkdir -p ~/.config/karabiner/assets/complex_modifications
 cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
 ```
