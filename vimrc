@@ -217,6 +217,7 @@ map , <Plug>Sneak_;
 map ;, <Plug>Sneak_,
 map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
 map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
+map ' <Plug>(easymotion-bd-f)
 map S <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
@@ -270,6 +271,8 @@ inoremap <End> <C-o>g$
 inoremap <C-_> <C-o>u
 xnoremap @q :normal! @q<CR>
 xnoremap @@ :normal! @@<CR>
+nnoremap _ <C-o>
+nnoremap + <C-i>
 nnoremap Q q:k
 nnoremap Y y$
 xnoremap < <gv
@@ -293,7 +296,7 @@ nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
 nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
-nmap <C-p> :call <SID>LoadQuickUI(0)<CR><C-p>
+nmap <C-o> :call <SID>LoadQuickUI(0)<CR><C-o>
 nmap <C-f> :call <SID>LoadAutoformat()<CR><C-f>
 xmap <C-f> :<C-u>call <SID>LoadAutoformat()<CR>gv<C-f>
 nmap <C-n> :call <SID>LoadVisualMulti()<CR><C-n>
@@ -309,6 +312,7 @@ noremap <leader>y "+y
 nnoremap <leader>Y "+y$
 noremap <leader>p "0p
 noremap <leader>P "0P
+nnoremap <leader>fs :LeaderfFile<CR>
 nnoremap <leader>fd :LeaderfFiler<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
 nnoremap <leader>fb :Leaderf! buffer<CR>
@@ -404,7 +408,7 @@ function! s:LoadQuickUI(open_menu)
   xnoremap <CR> :<C-u>call quickui#menu#open('visual')<CR>
   nnoremap <silent> K :call <SID>OpenQuickUIContextMenu()<CR>
   nnoremap <silent> <leader>tp :call quickui#terminal#open('zsh', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': ''})<CR>
-  nnoremap <silent> <C-p> :let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('sh -c "lf -last-dir-path=\"$HOME/.cache/lf_dir\" -selection-path='. shellescape(g:lf_selection_path). ' \"'. expand('%'). '\""', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': 'LFEditCallback'})<CR>
+  nnoremap <silent> <C-o> :let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('sh -c "lf -last-dir-path=\"$HOME/.cache/lf_dir\" -selection-path='. shellescape(g:lf_selection_path). ' \"'. expand('%'). '\""', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': 'LFEditCallback'})<CR>
   let g:quickui_color_scheme = g:Theme < 0 ? 'papercol-dark' : 'papercol-light'
   let g:quickui_show_tip = 1
   let g:quickui_border_style = 2
@@ -799,8 +803,6 @@ let g:pear_tree_smart_closers = 1
 let g:vista_executive_for = { 'typescriptreact': 'coc' }
 let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_smartcase = 1
-let g:EasyMotion_do_shade = 0
-let g:EasyMotion_keys = "asdghklqwertyuiopzxcvbnmfj2345789;"
 let g:mundo_preview_bottom = 1
 let g:mundo_width = 30
 let g:yoinkIncludeDeleteOperations = 1
@@ -819,7 +821,7 @@ let g:Lf_HideHelp = 1
 let g:Lf_ShowHidden = 1
 let g:Lf_UseCache = 0
 let g:Lf_MruMaxFiles = 1000
-let g:Lf_ShortcutF = '<leader>fs'
+let g:Lf_ShortcutF = '<C-p>'
 let g:Lf_WindowPosition = 'popup'
 let g:Lf_PreviewInPopup = 1
 let g:Lf_RgStorePattern = 'g'
