@@ -35,6 +35,7 @@ bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
 bind '"\eOA": history-search-backward'
 bind '"\eOB": history-search-forward'
+bind -x '"\C-o":"lf"'
 
 # same as in zsh, 'C-x a' expands aliases
 bind '"\C-xa": shell-expand-line'

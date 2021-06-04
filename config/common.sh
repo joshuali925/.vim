@@ -321,7 +321,7 @@ t() {  # create or switch tmux session
   local CHANGE CURRENT FZFTEMP
   [ -n "$TMUX" ] && CHANGE='switch-client' && CURRENT=$(tmux display-message -p '#{session_name}') || CHANGE='attach-session'
   if [ -z "$1" ]; then
-    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind 'tab:down,btab:up' --exit-0) && tmux $CHANGE -t "$FZFTEMP" || echo 'No tmux sessions, pass a string to create one.'
+    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind 'tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP" || echo 'No tmux sessions, pass a string to create one.'
   else
     tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$1" && tmux $CHANGE -t "$1")
   fi

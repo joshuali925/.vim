@@ -44,6 +44,7 @@ map , <Plug>Sneak_;
 map ;, <Plug>Sneak_,
 map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
 map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
+map ' <Plug>(easymotion-bd-f)
 map S <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
@@ -80,6 +81,8 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
+nnoremap _ <C-o>
+nnoremap + <C-i>
 nnoremap Y y$
 xnoremap < <gv
 xnoremap > >gv
@@ -93,6 +96,7 @@ noremap <leader>y "+y
 nnoremap <leader>Y "+y$
 noremap <leader>p "0p
 noremap <leader>P "0P
+nnoremap <C-p> :call VSCodeNotify('workbench.action.quickOpen')<CR>
 nnoremap <leader>fs :call VSCodeNotify('workbench.action.quickOpen')<CR>
 nnoremap <leader>fm :call VSCodeNotify('workbench.action.openRecent')<CR>
 nnoremap <leader>fb :call VSCodeNotify('workbench.files.action.focusFilesExplorer')<CR>
@@ -227,8 +231,6 @@ let g:sandwich_no_default_key_mappings = 1
 let g:operator_sandwich_no_default_key_mappings = 1
 let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_smartcase = 1
-let g:EasyMotion_do_shade = 0
-let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnmfj2345789;'
 let g:highlightedyank_highlight_duration = 500
 let g:table_mode_tableize_map = ''
 let g:table_mode_motion_left_map = '<leader>th'

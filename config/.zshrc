@@ -109,6 +109,7 @@ down-line-or-local-history() {
   zle set-local-history 0
 }
 zle -N down-line-or-local-history
+
 tab-complete-or-cd() {
   if [[ -z "$BUFFER" ]]; then
     zle fzf-cd-widget
@@ -119,6 +120,13 @@ tab-complete-or-cd() {
 }
 zle -N tab-complete-or-cd
 
+run-lf () {
+    lf -last-dir-path="$HOME/.cache/lf_dir" < /dev/tty
+    zle reset-prompt
+}
+zle -N run-lf
+
+bindkey '^o' run-lf
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
 bindkey '^[q' push-line-or-edit
