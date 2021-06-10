@@ -1,0 +1,297 @@
+local map = require("utils").map
+vim.g.mapleader = ";"
+
+local function map_text_object(char)
+    map("x", "i" .. char, ":<C-u>normal! T" .. char .. "vt" .. char .. "<CR>", {noremap = true, silent = true})
+    map("o", "i" .. char, "<Cmd>normal vi" .. char .. "<CR>", {noremap = true, silent = true})
+    map("x", "a" .. char, ":<C-u>normal! T" .. char .. "vf" .. char .. "<CR>", {noremap = true, silent = true})
+    map("o", "a" .. char, "<Cmd>normal va" .. char .. "<CR>", {noremap = true, silent = true})
+end
+
+-- custom text objects
+local text_objects = {"<Space>", "_", ".", ":", ",", ";", "<bar>", "/", "<bslash>", "*", "+", "-", "#", "=", "&"}
+for i = 1, #text_objects do
+    map_text_object(text_objects[i])
+end
+map("x", "il", "^og_")
+map("o", "il", "<Cmd>normal vil<CR>")
+map("x", "al", "0o$")
+map("o", "al", "<Cmd>normal val<CR>")
+
+map("n", "[\\", "<Cmd>tabedit<CR>")
+map("n", "]\\", "<Cmd>enew<CR>")
+map("", "0", "funcs#home()", {expr = true, noremap = true})
+map("", "^", "0")
+map("n", "-", "$") -- $ in normal mode will always put cursor at last column when scrolling, g_ will not
+map("o", "-", "$")
+map("x", "-", "g_")
+map("", "g-", "g$")
+map("", "<Home>", "g^")
+map("", "<End>", "g$")
+map("", "<Down>", "gj")
+map("", "<Up>", "gk")
+map("i", "<Home>", "<C-o>g^")
+map("i", "<End>", "<C-o>g$")
+map("i", "<C-_>", "<C-o>u")
+map("n", "Q", "q")
+map("x", "@q", "<Cmd>normal! @q<CR>")
+map("x", "@@", "<Cmd>normal! @@<CR>")
+map("n", "_", "<C-o>")
+map("n", "+", "<C-i>")
+map("n", "Y", "y$")
+map("x", "<", "<gv")
+map("x", ">", ">gv")
+map("n", "gp", "`[v`]")
+map("n", "cr", "<Cmd>call funcs#edit_register()<CR>")
+map("n", "Z[", "<Cmd>BufferCloseBuffersLeft<CR>")
+map("n", "Z]", "<Cmd>BufferCloseBuffersRight<CR>")
+map("n", "gx", "<Cmd>execute 'silent! !open '. expand('<cfile>')<CR>")
+map("x", "gx", ":<C-u>execute 'silent! !open '. funcs#get_visual_selection()<CR>")
+map("n", "<C-c>", "<Cmd>nohlsearch <bar> silent! AsyncStop!<CR>:echo<CR>")
+map("i", "<C-c>", "<Esc>")
+map("x", "<C-c>", "<Esc>")
+map("n", "<C-w><C-c>", "<Esc>")
+map("n", "<C-w><", "<C-w><<C-w>", {})
+map("n", "<C-w>>", "<C-w>><C-w>", {})
+map("n", "<C-w>+", "<C-w>+<C-w>", {})
+map("n", "<C-w>-", "<C-w>-<C-w>", {})
+map("n", "<C-f>", "<Cmd>Neoformat<CR>")
+map("x", "<C-f>", "<Cmd>Neoformat<CR>")
+map("i", "<leader>r", "<Esc><leader>r", {})
+map("n", "<leader>r", "<Cmd>update <bar> execute funcs#get_run_command()<CR>")
+map("", "<leader>y", '"+y')
+map("n", "<leader>Y", '"+y$')
+map("n", "<leader>b", "<Cmd>NvimTreeToggle<CR>")
+map("n", "<leader>B", "<Cmd>NvimTreeFindFile<CR>")
+map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]])
+map("x", "<leader>n", [["xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>]])
+map("n", "<leader>u", "<Cmd>MundoToggle<CR>")
+map("n", "<leader>v", "<Cmd>Vista!!<CR>")
+map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
+map("x", "<leader>s", [["xy:%s/<C-r>x/<C-r>x/gc<Left><Left><Left>]])
+map("n", "<leader>l", "<Cmd>call funcs#print_curr_vars(0, 0)<CR>")
+map("x", "<leader>l", "<Cmd>call funcs#print_curr_vars(1, 0)<CR>")
+map("n", "<leader>L", "<Cmd>call funcs#print_curr_vars(0, 1)<CR>")
+map("x", "<leader>L", "<Cmd>call funcs#print_curr_vars(1, 1)<CR>")
+map("n", "<leader>tm", "<Cmd>TableModeToggle<CR>")
+map("i", "<leader>w", "<Esc><Cmd>update<CR>")
+map("n", "<leader>w", "<Cmd>update<CR>")
+map("n", "<leader>W", "<Cmd>wall<CR>")
+map("n", "<leader>q", "<Cmd>call funcs#quit(0, 0)<CR>")
+map("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>")
+map("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>")
+map(
+    "n",
+    "yoq",
+    "empty(filter(getwininfo(), 'v:val.quickfix')) ? ':copen<CR>' : ':cclose<CR>'",
+    {expr = true, noremap = true}
+)
+map(
+    "n",
+    "yol",
+    "empty(filter(getwininfo(), 'v:val.loclist')) ? ':lopen<CR>' : ':lclose<CR>'",
+    {expr = true, noremap = true}
+)
+map("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", {expr = true, noremap = true})
+map("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", {expr = true, noremap = true})
+map("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], {expr = true, noremap = true})
+map(
+    "c",
+    "<BS>",
+    [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']],
+    {expr = true, noremap = true}
+)
+
+-- bufferline
+map("n", "<BS>", "<Cmd>BufferPrevious<CR>")
+map("n", "\\", "<Cmd>BufferNext<CR>")
+map("n", "<C-w><BS>", "<Cmd>BufferMovePrevious<CR><C-w>", {})
+map("n", "<C-w>\\", "<Cmd>BufferMoveNext<CR><C-w>", {})
+
+-- terminal
+-- use noautocmd for Tnew/Ttoggle to avoid triggering BufReadPost and restoring last edit position again
+map("n", "<C-b>", "<Cmd>noautocmd execute 'Ttoggle resize='. min([10, &lines * 2/5])<CR>")
+map("n", "<leader>to", "<C-b>", {})
+map("n", "<leader>tt", "<Cmd>noautocmd execute 'Ttoggle resize='. min([10, &lines * 2/5])<CR>")
+map("n", "<leader>te", "<Plug>(neoterm-repl-send)", {})
+map("n", "<leader>tee", "<Plug>(neoterm-repl-send-line)", {})
+map("x", "<leader>te", "<Plug>(neoterm-repl-send)", {})
+map("t", "<C-u>", "<C-\\><C-n>")
+map("t", "<C-b>", "<Cmd>Ttoggle<CR>")
+
+-- quickui
+map("n", "K", "<Cmd>call v:lua.quickui_context_menu()<CR>")
+map("n", "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>")
+map("x", "<CR>", "<Esc><Cmd>call quickui#menu#open('visual')<CR>")
+map(
+    "n",
+    "<leader>tp",
+    [[<Cmd>call quickui#terminal#open('zsh', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': ''})<CR>]]
+)
+map(
+    "n",
+    "<C-o>",
+    [[<Cmd>let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('sh -c "lf -last-dir-path=\"$HOME/.cache/lf_dir\" -selection-path='. shellescape(g:lf_selection_path). ' \"'. expand('%'). '\""', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': 'funcs#lf_edit_callback'})<CR>]]
+)
+
+-- kommentary
+map("n", "gc", "<Plug>kommentary_motion_default", {})
+map("n", "gcc", "<Plug>kommentary_line_default", {})
+map("x", "gc", "<Plug>kommentary_visual_default<Esc>", {})
+
+-- miniyank
+map("", "p", "<Plug>(miniyank-autoput)", {})
+map("", "P", "<Plug>(miniyank-autoPut)", {})
+map("n", "<leader>p", "<Plug>(miniyank-cycle)", {})
+map("x", "<leader>p", '"0p')
+map("n", "<leader>P", "<Plug>(miniyank-cycleback)", {})
+map("x", "<leader>P", '"0P')
+map("n", "=c", "<Plug>(miniyank-tochar)", {})
+map("n", "=l", "<Plug>(miniyank-toline)", {})
+map("n", "=b", "<Plug>(miniyank-toblock)", {})
+
+-- visualmulti
+map("n", "<C-n>", "<Plug>(VM-Find-Under)", {})
+map("x", "<C-n>", "<Plug>(VM-Find-Subword-Under)", {})
+
+-- hop
+map("", "'", "<Cmd>HopChar1<CR>")
+map("", "q", "<Cmd>HopWord<CR>")
+map("", "<leader>j", "<Cmd>HopLine<CR>")
+map("", "<leader>k", "<Cmd>HopLine<CR>")
+
+-- fanfingtastic
+map("", ",", "<Plug>fanfingtastic_;", {})
+map("", ";,", "<Plug>fanfingtastic_,", {})
+
+-- wordmotion
+map("", "gw", "<Plug>WordMotion_w", {})
+map("", "gb", "<Plug>WordMotion_b", {})
+map("", "ge", "<Plug>WordMotion_e", {})
+map("o", "u", "<Plug>WordMotion_w", {})
+map("o", "iu", "<Plug>WordMotion_iw", {})
+map("x", "iu", "<Plug>WordMotion_iw", {})
+map("o", "au", "<Plug>WordMotion_aw", {})
+map("x", "au", "<Plug>WordMotion_aw", {})
+
+-- sandwich
+map("n", "ys", "<Plug>(operator-sandwich-add)", {})
+map("n", "yss", "<Plug>(operator-sandwich-add)iw", {})
+map("n", "yS", "ysg_", {})
+map(
+    "n",
+    "ds",
+    "<Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)",
+    {}
+)
+map(
+    "n",
+    "dss",
+    "<Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)",
+    {}
+)
+map(
+    "n",
+    "cs",
+    "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)",
+    {}
+)
+map(
+    "n",
+    "css",
+    "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)",
+    {}
+)
+map("x", "s", "<Plug>(operator-sandwich-add)", {})
+map("x", "s<", "<Plug>(operator-sandwich-add)t", {})
+
+-- vim-swap
+map("o", "ia", "<Plug>(swap-textobject-i)", {})
+map("x", "ia", "<Plug>(swap-textobject-i)", {})
+map("o", "aa", "<Plug>(swap-textobject-a)", {})
+map("x", "aa", "<Plug>(swap-textobject-a)", {})
+map("n", "g<", "<Plug>(swap-prev)", {})
+map("n", "g>", "<Plug>(swap-next)", {})
+map("n", "gs", "<Plug>(swap-interactive)", {})
+map("x", "gs", "<Plug>(swap-interactive)", {})
+
+-- vim-expand-region
+map("x", "v", "<Plug>(expand_region_expand)", {})
+map("x", "<BS>", "<Plug>(expand_region_shrink)", {})
+
+-- tmux-navigator
+map("n", "<C-h>", "<Cmd>TmuxNavigateLeft<CR>")
+map("n", "<C-j>", "<Cmd>TmuxNavigateDown<CR>")
+map("n", "<C-k>", "<Cmd>TmuxNavigateUp<CR>")
+map("n", "<C-l>", "<Cmd>TmuxNavigateRight<CR>")
+map("t", "<C-h>", "<Cmd>TmuxNavigateLeft<CR>")
+map("t", "<C-j>", "<Cmd>TmuxNavigateDown<CR>")
+map("t", "<C-k>", "<Cmd>TmuxNavigateUp<CR>")
+map("t", "<C-l>", "<Cmd>TmuxNavigateRight<CR>")
+
+-- telescope
+-- TODO multi select issue https://github.com/nvim-telescope/telescope.nvim/issues/416
+map(
+    "n",
+    "<C-p>",
+    "<Cmd>lua require('telescope.builtin').find_files({hidden = true, cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p'))})<CR>"
+)
+map("n", "<Leader>fs", "<C-p>", {})
+map("n", "<Leader>fd", "<Cmd>lua require('telescope.builtin').file_browser({cwd = vim.fn.expand('%:h'), hidden = true})<CR>")
+map("n", "<Leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
+map("n", "<Leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR>")
+map("n", "<Leader>fu", "<Cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>")
+map("n", "<Leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
+-- TODO visual grep pending on https://github.com/neovim/neovim/pull/13896
+map(
+    "n",
+    "<Leader>fg",
+    ":lua require('telescope.builtin').grep_string({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p')), use_regex = true, search = [[]]})<Left><Left><Left><Left>",
+    {noremap = true}
+)
+map(
+    "x",
+    "<Leader>fg",
+    ":lua require('telescope.builtin').grep_string({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p')), use_regex = false, search = [[<C-r>=funcs#get_visual_selection()<CR>]]})<Left><Left><Left><Left>",
+    {noremap = true}
+)
+map(
+    "n",
+    "<Leader>fj",
+    ":lua require('telescope.builtin').grep_string({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p')), search = [[\\b<C-r><C-w>\\b]], use_regex = true})<CR>",
+    {noremap = true, silent = true}
+)
+map(
+    "x",
+    "<Leader>fj",
+    ":lua require('telescope.builtin').grep_string({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p')), search = [[<C-r>=funcs#get_visual_selection()<CR>]]})<CR>",
+    {noremap = true, silent = true}
+)
+map("n", "<Leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
+map("n", "<Leader>fl", "<Cmd>lua require('telescope.builtin').loclist()<CR>")
+map(
+    "n",
+    "<Leader>fL",
+    "<Cmd>lua require('telescope.builtin').live_grep({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p'))})<CR>",
+    {noremap = true, silent = true}
+)
+map("n", "<Leader>fa", "<Cmd>lua require('telescope.builtin').commands()<CR>")
+map("n", "<Leader>ft", "<Cmd>lua require('telescope.builtin').filetypes()<CR>")
+map("n", "<Leader>ff", "<Cmd>lua require('telescope.builtin').builtin()<CR>")
+map("n", "<Leader>f/", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>")
+map("n", "<Leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>")
+map("n", "<Leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>")
+map("n", "<Leader>fy", "<Cmd>lua require('telescope').extensions.yank.history()<CR>")
+
+-- lsp
+map("n", "<leader>d", "<Cmd>lua vim.lsp.buf.definition()<CR>")
+map("n", "gR", "<Cmd>lua vim.lsp.buf.references()<CR>")
+map("n", "gr", "<Cmd>TroubleToggle lsp_references<CR>")
+map("n", "<leader>a", "<Cmd>lua require('lspsaga.codeaction').code_action()<CR>")
+map("x", "<leader>a", ":<C-u>lua require('lspsaga.codeaction').range_code_action()<CR>")
+map("n", "gh", "<Cmd>lua require('lspsaga.hover').render_hover_doc()<CR>")
+map("n", "<leader>R", "<Cmd>lua require('lspsaga.rename').rename()<CR>")
+map("n", "[a", "<Cmd>lua require('lspsaga.diagnostic').lsp_jump_diagnostic_prev()<CR>")
+map("n", "]a", "<Cmd>lua require('lspsaga.diagnostic').lsp_jump_diagnostic_next()<CR>")
+map("n", "<leader>tb", "<Cmd>TroubleToggle<CR>")
+map("n", "<leader>td", "<Cmd>TroubleToggle lsp_workspace_diagnostics<CR>")

@@ -22,6 +22,7 @@ map sn :set sortby natural; set info size
 
 map m
 map mm mark-save
+map mM mark-remove
 map me edit-selected
 map mp paste-symlink
 map mP paste-symlink-absolute-path
@@ -45,9 +46,11 @@ map H push <c-u>
 map L push <c-d>
 map K push hkl
 map J push hjl
+map `` push ''
 map c :clear; unselect
 map gs !clear && git status
 map gr cd-git-root
+map gl follow-symlink
 map t locate-file
 map <c-p> locate-file
 map <c-o> $lazygit
@@ -65,7 +68,7 @@ cmd chmod? %stat --printf "%a %n \n" "$f"
 cmd vim !$EDITOR "$@"
 cmd rg !clear && rg "$@"
 cmd code %code .
-cmd pwd %echo $f
+cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
 cmd md5 !md5sum "$f"
 cmd selected-dir-size %du -h --max-depth=0 "$f"
@@ -74,6 +77,15 @@ cmd edit-config ${{ $EDITOR ~/.vim/config/lfrc }}
 cmd edit-selected ${{ echo "$fx" | xargs -d '\n' -o $EDITOR }}
 cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
+
+cmd follow-symlink ${{
+  res=$(readlink -f $f || echo '.')
+  if [ -f "$res" ]; then
+    lf -remote "send $id select \"$res\""
+  elif [ -d "$res" ]; then
+    lf -remote "send $id cd \"$res\""
+  fi
+}}
 
 cmd locate-file-cwd ${{
   res="$(ls -1A 2> /dev/null | fzf --bind 'tab:down,btab:up')"
@@ -99,7 +111,7 @@ cmd z ${{
 }}
 
 cmd paste-symlink %{{
-  load=$(lf -remote 'load')
+  load=$(cat ~/.local/share/lf/files)
   mode=$(echo "$load" | sed -n '1p')
   list=$(echo "$load" | sed '1d')
   if [ $mode = 'copy' ] || [ $mode = 'move' ]; then
@@ -115,7 +127,7 @@ cmd paste-symlink %{{
 }}
 
 cmd paste-symlink-absolute-path %{{
-  load=$(lf -remote 'load')
+  load=$(cat ~/.local/share/lf/files)
   mode=$(echo "$load" | sed -n '1p')
   list=$(echo "$load" | sed '1d')
   if [ $mode = 'copy' ] || [ $mode = 'move' ]; then

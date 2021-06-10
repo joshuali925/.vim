@@ -25,6 +25,8 @@ Plug 'tpope/vim-commentary', { 'on': ['<Plug>Commentary', 'Commentary'] }
 " comment out CursorMoved autocmd in plugged/vim-context-commentstring/plugin/context-commentstring.vim:23, change s:UpdateCommentString to UpdateCommentString
 " add "if &filetype == 'typescriptreact' | call UpdateCommentString() | endif" to plugged/vim-commentary/plugin/commentary.vim:28 in s:go()
 Plug 'suy/vim-context-commentstring', { 'for': 'typescriptreact' }
+Plug 'leafgarland/typescript-vim', { 'for': 'typescriptreact' }
+Plug 'peitalin/vim-jsx-typescript', { 'for': 'typescriptreact' }
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKeyVisual'] }
 Plug 'christoomey/vim-tmux-navigator', { 'on': ['TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight', 'TmuxNavigatePrevious'] }
 Plug 'machakann/vim-swap', { 'on': '<Plug>(swap-' }
@@ -218,7 +220,7 @@ map ;, <Plug>Sneak_,
 map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
 map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
 map ' <Plug>(easymotion-bd-f)
-map S <Plug>(easymotion-bd-w)
+map q <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
@@ -269,11 +271,11 @@ noremap <Up> gk
 inoremap <Home> <C-o>g^
 inoremap <End> <C-o>g$
 inoremap <C-_> <C-o>u
+nnoremap Q q
 xnoremap @q :normal! @q<CR>
 xnoremap @@ :normal! @@<CR>
 nnoremap _ <C-o>
 nnoremap + <C-i>
-nnoremap Q q:k
 nnoremap Y y$
 xnoremap < <gv
 xnoremap > >gv
@@ -310,8 +312,10 @@ nmap y <Plug>(YoinkYankPreserveCursorPosition)
 xmap y <Plug>(YoinkYankPreserveCursorPosition)
 noremap <leader>y "+y
 nnoremap <leader>Y "+y$
-noremap <leader>p "0p
-noremap <leader>P "0P
+nmap p <Plug>(YoinkPaste_p)
+nmap P <Plug>(YoinkPaste_P)
+nmap <leader>p <Plug>(YoinkPostPasteSwapBack)
+nmap <leader>P <Plug>(YoinkPostPasteSwapForward)
 nnoremap <leader>fs :LeaderfFile<CR>
 nnoremap <leader>fd :LeaderfFiler<CR>
 nnoremap <leader>fm :LeaderfMru<CR>
@@ -374,7 +378,7 @@ augroup AutoCommands
   autocmd FileType python syntax keyword pythonSelf self | highlight def link pythonSelf Special
   autocmd FileType make,go setlocal noexpandtab shiftwidth=4 softtabstop=4
   autocmd FileType * setlocal formatoptions=jql
-  autocmd filetype netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
+  autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
 augroup END
@@ -754,6 +758,7 @@ endfunction
 command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
 command! -complete=shellcmd -nargs=* -range S execute 'botright new | setlocal filetype='. &filetype. ' buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. bufnr(). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d
+command! -complete=command -nargs=* C execute "botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | put =execute('". <q-args>. "')"
 command! W write !sudo tee %
 " }}}
 
@@ -930,33 +935,17 @@ nmap <leader>tee <Plug>(neoterm-repl-send-line)
 xmap <leader>te <Plug>(neoterm-repl-send)
 nmap <leader>tp :call <SID>LoadQuickUI(0)<CR><leader>tp
 tnoremap <C-u> <C-\><C-n>
-if has('nvim')
-  set undodir=~/.cache/nvim/undo
-  set jumpoptions=stack
-  augroup NvimTerminal
-    autocmd!
-    autocmd BufEnter term://* startinsert
-  augroup END
-  tnoremap <expr> <F2> tabpagenr('$') > 1 ? '<C-\><C-n>gT' : '<C-\><C-n>:bprevious<CR>'
-  tnoremap <expr> <F3> tabpagenr('$') > 1 ? '<C-\><C-n>gt' : '<C-\><C-n>:bnext<CR>'
-  tnoremap <silent> <C-h> <C-\><C-n>:TmuxNavigateLeft<CR>
-  tnoremap <silent> <C-j> <C-\><C-n>:TmuxNavigateDown<CR>
-  tnoremap <silent> <C-k> <C-\><C-n>:TmuxNavigateUp<CR>
-  tnoremap <silent> <C-l> <C-\><C-n>:TmuxNavigateRight<CR>
-  tnoremap <C-b> <C-\><C-n>:Ttoggle<CR>
-else
-  set viminfo+=n~/.cache/vim/viminfo
-  set undodir=~/.cache/vim/undo
-  set cursorlineopt=number,screenline
-  set termwinkey=<C-s>
-  tnoremap <expr> <F2> tabpagenr('$') > 1 ? '<C-s>gT' : '<C-s>:bprevious<CR>'
-  tnoremap <expr> <F3> tabpagenr('$') > 1 ? '<C-s>gt' : '<C-s>:bnext<CR>'
-  tnoremap <silent> <C-h> <C-s>:TmuxNavigateLeft<CR>
-  tnoremap <silent> <C-j> <C-s>:TmuxNavigateDown<CR>
-  tnoremap <silent> <C-k> <C-s>:TmuxNavigateUp<CR>
-  tnoremap <silent> <C-l> <C-s>:TmuxNavigateRight<CR>
-  tnoremap <C-b> <C-s>:Ttoggle<CR>
-endif
+set viminfo+=n~/.cache/vim/viminfo
+set undodir=~/.cache/vim/undo
+set cursorlineopt=number,screenline
+set termwinkey=<C-s>
+tnoremap <expr> <F2> tabpagenr('$') > 1 ? '<C-s>gT' : '<C-s>:bprevious<CR>'
+tnoremap <expr> <F3> tabpagenr('$') > 1 ? '<C-s>gt' : '<C-s>:bnext<CR>'
+tnoremap <silent> <C-h> <C-s>:TmuxNavigateLeft<CR>
+tnoremap <silent> <C-j> <C-s>:TmuxNavigateDown<CR>
+tnoremap <silent> <C-k> <C-s>:TmuxNavigateUp<CR>
+tnoremap <silent> <C-l> <C-s>:TmuxNavigateRight<CR>
+tnoremap <C-b> <C-s>:Ttoggle<CR>
 " }}}
 
 " ================== System specific ==================== {{{

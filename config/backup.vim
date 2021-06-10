@@ -1216,3 +1216,65 @@ let g:wildfire_objects = {
       \ 'javascript,typescript,typescriptreact' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'at', 'aI'],
       \ 'python' : ["i'", 'i"', 'i)', 'i]', 'i}', 'i`', 'ip', 'ai', 'ii'],
       \ }
+
+" =======================================================
+" neovim doesn't need -inlcr
+    STTY=-inlcr $EDITOR "$dir" < /dev/tty
+  STTY=-inlcr lf -last-dir-path="$HOME/.cache/lf_dir" < /dev/tty
+
+" =======================================================
+" treesitter, use expand region and vim swap
+        --[[ incremental_selection = {
+            enable = true,
+            keymaps = {
+                node_incremental = "v",
+                scope_incremental = "<leader>v",
+                node_decremental = "<BS>"
+            }
+        }, ]]
+                keymaps = {
+                    -- TODO @parameter.outer is not supported by most languages, use vim-swap for now
+                    --[[ ['ia'] = '@parameter.inner',
+                    ['aa'] = '@parameter.outer', ]]
+                    ["if"] = "@function.inner",
+                    ["af"] = "@function.outer",
+                    ["ic"] = "@class.inner",
+                    ["ac"] = "@class.outer"
+                }
+            --[[ swap = {
+                -- enable = true,
+                swap_previous = {
+                    ['gsh'] = '@parameter.inner',
+                },
+                swap_next = {
+                    ['gsl'] = '@parameter.inner',
+                },
+            }, ]]
+
+
+" =======================================================
+" using neoformat
+    --[[ local function mapb(mode, lhs, rhs)
+        vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, { noremap = true, silent = true })
+    end
+    if client.resolved_capabilities.document_formatting then
+        mapb('n', '<C-f>', '<Cmd>lua vim.lsp.buf.formatting()<CR>')
+    elseif client.resolved_capabilities.document_range_formatting then
+        mapb('n', '<C-f>', '<Cmd>lua vim.lsp.buf.range_formatting()<CR>')
+    end ]]
+
+" vim-sneak
+            use {"justinmk/vim-sneak", fn = "sneak#*", keys = "<Plug>Sneak_"}
+map("", "f", "<Plug>Sneak_f", {})
+map("", "F", "<Plug>Sneak_F", {})
+map("n", "t", "<Plug>Sneak_s", {})
+map("n", "T", "<Plug>Sneak_S", {})
+map("x", "t", "<Plug>Sneak_t", {})
+map("x", "T", "<Plug>Sneak_T", {})
+map("o", "t", "<Plug>Sneak_t", {})
+map("o", "T", "<Plug>Sneak_T", {})
+map("", ",", "<Plug>Sneak_;", {})
+map("", ";,", "<Plug>Sneak_,", {})
+map("", "n", "sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'", {expr = true})
+map("", "N", "sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'", {expr = true})
+
