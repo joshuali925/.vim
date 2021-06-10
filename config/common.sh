@@ -1,8 +1,8 @@
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 
-export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"
-export EDITOR='vim'
+export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin:$HOME/.local/node-packages/node_modules/.bin"
+export EDITOR='nvim'
 export BAT_PAGER='less -R --ignore-case'
 export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
@@ -41,9 +41,9 @@ alias l='ls -CF --color=auto'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
 alias v='$EDITOR'
-alias vi='vim -u ~/.vim/config/mini.vim -i NONE'
+alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
-alias vimm='$EDITOR ~/.vim/vimrc'
+alias vimm='nvim +PackerCompile +PackerInstall -c "edit \$MYVIMRC"'
 alias venv='source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias btop='bpytop -b "cpu proc"'
@@ -86,8 +86,8 @@ alias gcf='git config --list'
 alias gcl='git clone --recursive'
 alias gclean='git clean -fd'
 alias gpristine='git reset --hard && git clean -fdx'
-alias gcm='git checkout main 2> /dev/null || git checkout master'
-alias gcd='git checkout develop 2> /dev/null || git checkout dev'
+alias gcm='git checkout main || git checkout master'
+alias gcd='git checkout develop || git checkout dev'
 alias gco='git checkout'
 alias gcount='git shortlog -sn'
 alias gcp='git cherry-pick'
@@ -139,6 +139,7 @@ alias grup='git remote update'
 alias grv='git remote -v'
 alias gs='git status'
 alias gshow='git show --pretty=short --show-signature'
+alias gsall="find . -type d -name .git -execdir bash -c 'echo -en \"\\033[1;31m\"repo: \"\\033[1;34m\"; basename \"\$(git rev-parse --show-toplevel)\"; git status -s' \\;"
 alias gss='git status -sb'
 alias gsta='git stash save'
 alias gstaa='git stash apply'
@@ -329,6 +330,19 @@ t() {  # create or switch tmux session
 
 manf() {
   man -k . | fzf -q "$1" --prompt='man> ' --preview $'echo {} | tr -d \'()\' | awk \'{printf "%s ", $2} {print $1}\' | xargs -r man' | tr -d '()' | awk '{printf "%s ", $2} {print $1}' | xargs -r man
+}
+
+react() {
+  if [ "$#" -lt 2 ]; then echo 'Usage: react <dir_to_watch> <command>, use {} as placeholder of modified files.'; return 1; fi
+  local CHANGED
+  echo "Watching \"$1\", passing modified files to \"${@:2}\" command every 2 seconds."
+  while true; do
+    CHANGED=($(fd --base-directory $1 --absolute-path --type=f --changed-within 2s))
+    if [ $CHANGED ]; then
+      eval "${${@:2}//\{\}/${CHANGED[@]}}"
+    fi
+    sleep 2
+  done
 }
 
 nvm() {

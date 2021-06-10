@@ -31,7 +31,8 @@ nnoremap <BS> gT
 nnoremap \ gt
 noremap , ;
 noremap ;, ,
-map S <Plug>(easymotion-bd-w)
+map ' <Plug>(easymotion-bd-f)
+map q <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
@@ -42,6 +43,7 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
+nnoremap Q q
 nnoremap Y y$
 xnoremap < <gv
 xnoremap > >gv

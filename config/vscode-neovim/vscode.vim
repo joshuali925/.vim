@@ -1,5 +1,9 @@
-call plug#begin('~/.vim/plugged/vscode')
-" change these in plugged/vscode/vim-easymotion/autoload/EasyMotion.vim:1159 after installing easymotion to limit line range instead of whole file
+set packpath=
+set runtimepath-=$HOME/.config/nvim
+set runtimepath+=$HOME/.vim/config/vscode-neovim
+
+call plug#begin('~/.vim/config/vscode-neovim/plugged')
+" change these in plugged/vim-easymotion/autoload/EasyMotion.vim:1159 after installing easymotion to limit line range instead of whole file
 " let win_first_line = max([line('w0'), line('.') - 30]) " visible first line num
 " let win_last_line  = min([line('w$'), line('.') + 30]) " visible last line num
 Plug 'asvetliakov/vim-easymotion'
@@ -13,7 +17,9 @@ Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'tpope/vim-repeat'
+Plug 'maxbrunsfeld/vim-yankstack'
 call plug#end()
+call yankstack#setup()
 
 set whichwrap+=<,>,[,]
 set ignorecase
@@ -45,13 +51,13 @@ map ;, <Plug>Sneak_,
 map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
 map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
 map ' <Plug>(easymotion-bd-f)
-map S <Plug>(easymotion-bd-w)
+map q <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
 map gc <Plug>VSCodeCommentary
 nmap gcc <Plug>VSCodeCommentaryLine
-for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#' ]
+for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
   execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
   execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
   execute 'xnoremap a'. char. ' :<C-u>normal! T'. char. 'vf'. char. '<CR>'
@@ -81,9 +87,11 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
+nnoremap Q q
 nnoremap _ <C-o>
 nnoremap + <C-i>
-nnoremap Y y$
+" yankstack needs nmap
+nmap Y y$
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
@@ -94,12 +102,13 @@ xnoremap <C-f> =
 nnoremap <leader>r :call <SID>RunCode()<CR>
 noremap <leader>y "+y
 nnoremap <leader>Y "+y$
-noremap <leader>p "0p
-noremap <leader>P "0P
+nmap <leader>p <Plug>yankstack_substitute_older_paste
+nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nnoremap <C-p> :call VSCodeNotify('workbench.action.quickOpen')<CR>
 nnoremap <leader>fs :call VSCodeNotify('workbench.action.quickOpen')<CR>
+nnoremap <leader>fd :call VSCodeNotify('breadcrumbs.focus')<CR>
 nnoremap <leader>fm :call VSCodeNotify('workbench.action.openRecent')<CR>
-nnoremap <leader>fb :call VSCodeNotify('workbench.files.action.focusFilesExplorer')<CR>
+nnoremap <leader>fb :call VSCodeNotify('workbench.explorer.openEditorsView.toggleVisibility')<CR>
 nnoremap <leader>fu :call VSCodeNotify('workbench.action.gotoSymbol')<CR>
 nnoremap <leader>f] :call VSCodeNotify('workbench.action.showAllSymbols')<CR>
 nnoremap <leader>fg :call VSCodeNotify('workbench.view.search')<CR>
@@ -107,8 +116,9 @@ xnoremap <leader>fg <Cmd>call VSCodeNotifyRangePos('workbench.action.findInFiles
 nnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': expand('<cword>')})<CR>
 xnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': <SID>GetVisualSelection() })<CR>
 nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
+nnoremap <leader>fA :call VSCodeNotify('workbench.action.focusActivityBar')<CR>
 nnoremap <leader>fy :registers<CR>
-nnoremap <leader>b :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
+nnoremap <leader>b :call VSCodeNotify('workbench.view.explorer')<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
@@ -118,16 +128,13 @@ xnoremap <leader>l :<C-u>call <SID>PrintCurrVars(1, 0)<CR>
 nnoremap <leader>L :call <SID>PrintCurrVars(0, 1)<CR>
 xnoremap <leader>L :<C-u>call <SID>PrintCurrVars(1, 1)<CR>
 nnoremap <leader>tu :call VSCodeNotify('workbench.action.reopenClosedEditor')<CR>
-nnoremap <leader>b :call VSCodeNotify('workbench.action.toggleSidebarVisibility')<CR>
 nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
 nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
 nnoremap <leader>q :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
 nnoremap <leader>x :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
 " open current file in gvim
-nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', {'text': "gvim '${file}'\u000D"})<CR>
-
-nnoremap <leader>l mx"xyiwoconsole.log('<C-r>x', <C-r>x);<Esc>`x
-nnoremap <leader>L mx"xyiwOconsole.log('<C-r>x', <C-r>x);<Esc>`x
+" nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', {'text': "gvim '${file}'\u000D"})<CR>
+nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', {'text': "iterm \"vim '${file}' && exit\"\u000D"})<CR>
 
 nnoremap Z[ :call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
 nnoremap Z] :call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
@@ -180,7 +187,7 @@ xnoremap L 10j
 
 function! s:RunCode()
   if expand('%') =~ 'test.[tj]sx\?'
-    call VSCodeNotify('extension.runJest')
+    call VSCodeNotify('extension.runJestAndUpdateSnapshots')
   else
     call VSCodeNotify('code-runner.run')
   endif
@@ -197,33 +204,19 @@ function! s:GetVisualSelection()
   return join(l:lines, "\n")
 endfunction
 function! s:PrintCurrVars(visual, printAbove)
-  let l:new_line = "normal! o\<Space>\<BS>"
-  if a:printAbove
-    let l:new_line = "normal! O\<Space>\<BS>"
-  endif
-  if a:visual  " print selection
-    let l:vars = [getline('.')[getpos("'<")[2] - 1:getpos("'>")[2] - 1]]
-  elseif getline('.') =~ '[^a-zA-Z0-9_,\[\]. ]\|[a-zA-Z0-9_\]]\s\+\w'  " print variable under cursor if line not comma separated
-    let l:vars = [expand('<cword>')]
-  else  " print variables on current line separated by commas
-    let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
-    let l:new_line = "normal! cc\<Space>\<BS>"
-  endif
+  let l:new_line = a:printAbove ? 'O' : 'o'
+  let l:word = a:visual ? <SID>GetVisualSelection() : expand('<cword>')
   let l:print = {}
-  let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
-  let l:print['javascript'] = 'console.log('. join(map(copy(l:vars), "\"'\". v:val. \":', \". v:val"), ", '|', "). ');'
+  let l:print['python'] = "print('". l:word. "', ". l:word. ')'
+  let l:print['javascript'] = "console.log('". l:word. "', ". l:word. ');'
   let l:print['javascriptreact'] = l:print['javascript']
   let l:print['typescript'] = l:print['javascript']
   let l:print['typescriptreact'] = l:print['javascript']
-  let l:print['java'] = 'System.out.println('. join(map(copy(l:vars), "'\"'. v:val. ': \" + '. v:val"), ' + " | " + '). ');'
-  let l:print['vim'] = 'echomsg '. join(map(copy(l:vars), "\"'\". v:val. \": '. \". v:val"), ". ' | '. ")
-  if has_key(l:print, &filetype)
-    let l:pos = getcurpos()
-    execute l:new_line
-    call append(line('.'), l:print[&filetype])
-    join
-    call setpos('.', l:pos)
-  endif
+  let l:print['java'] = 'System.out.println("'. l:word. '" + '. l:word. ');'
+  let l:print['vim'] = "echomsg '". l:word. "' ". l:word
+  let l:pos = getcurpos()
+  execute 'normal! '. l:new_line. get(l:print, &filetype, l:print['javascript'])
+  call setpos('.', l:pos)
 endfunction
 
 let g:wordmotion_nomap = 1
