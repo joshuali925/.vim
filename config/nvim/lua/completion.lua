@@ -50,7 +50,7 @@ function _G.cr_confirm()
             return t "<CR>"
         end
     else
-        return t "<CR><C-r>=AutoPairsReturn()<CR>"
+        return t "<C-g>u<CR><C-r>=AutoPairsReturn()<CR>"
     end
 end
 

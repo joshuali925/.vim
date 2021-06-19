@@ -1,7 +1,7 @@
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 
-export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin:$HOME/.local/node-packages/node_modules/.bin"
+export PATH="$HOME/.local/bin:$HOME/.local/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
 export BAT_PAGER='less -R --ignore-case'
 export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
@@ -40,6 +40,7 @@ alias ls='ls -CF --color=auto'
 alias l='ls -CF --color=auto'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
+alias bell='echo -n -e "\a"'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
@@ -56,7 +57,7 @@ alias fl='lf -last-dir-path="$HOME/.cache/lf_dir" && cd "$(cat "$HOME/.cache/lf_
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias rgf="rg --files | rg"
 alias rgd="rg --files --null | xargs -0 dirname | sort -u | rg"
-alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
+alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | grep -v \"./\" | column -c3 -s \" \" -t | sort -nr | nl | head -n 30"
 
 alias ga='git add'
 alias gau='git add -u'
@@ -97,6 +98,7 @@ alias gd='git diff'
 alias gdca='git diff --cached'
 alias gds='git diff --stat'
 alias gdst='git diff --staged'
+alias gdsst='git diff --stat --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gdw='git diff --word-diff'
 alias gf='git fetch'
@@ -105,6 +107,7 @@ alias gfo='git fetch origin'
 alias ggl='git pull origin $(git symbolic-ref --short HEAD)'
 alias glum='git pull upstream $(git symbolic-ref --short HEAD)'
 alias ggp='git push origin $(git symbolic-ref --short HEAD)'
+alias gsup='FZFTEMP=$(git remote | fzf) && git branch --set-upstream-to=$FZFTEMP/$(git symbolic-ref --short HEAD) && unset FZFTEMP'
 alias ggsup='git branch --set-upstream-to=origin/$(git symbolic-ref --short HEAD)'
 alias gpsup='git push --set-upstream origin $(git symbolic-ref --short HEAD)'
 alias gignore='git update-index --assume-unchanged'
@@ -207,6 +210,12 @@ printcolors() {
   echo "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
   printf '\nBackground 8 colors\n'
   echo "$(tput setab 0) black $(tput setab 1) red $(tput setaf 0)$(tput setab 2) green $(tput setab 3) yellow $(tput setaf 7)$(tput setab 4) blue $(tput setab 5) magenta $(tput setaf 0)$(tput setab 6) cyan $(tput setab 7) white $(tput sgr 0)"
+  printf '\nANSI 16 colors\n'
+  echo ' \033[0;30mblack="\\033[0;30m" \033[0;31mred="\\033[0;31m"     \033[0;32mgreen="\\033[0;32m" \033[0;33myellow="\\033[0;33m"'
+  echo ' \033[0;34mblue="\\033[0;34m"  \033[0;35mmagenta="\\033[0;35m" \033[0;36mcyan="\\033[0;36m"  \033[0;37mwhite="\\033[0;37m"'
+  echo -e ' \033[0mno_color="\\033[0m"       \u2191 original 8 colors      \u2193 lighter 8 colors'
+  echo ' \033[1;30mblack="\\033[1;30m" \033[1;31mred="\\033[1;31m"     \033[1;32mgreen="\\033[1;32m" \033[1;33myellow="\\033[1;33m"'
+  echo ' \033[1;34mblue="\\033[1;34m"  \033[1;35mmagenta="\\033[1;35m" \033[1;36mcyan="\\033[1;36m"  \033[1;37mwhite="\\033[1;37m"'
   printf '\nForeground 256 colors\n'
   for i in {0..255}; do printf '\e[38;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
   printf '\n\nBackground 256 colors\n'
@@ -268,6 +277,16 @@ vf() {
   [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
 }
 
+gvf() {
+  local IFS=$'\n' FZFTEMP
+  if [ -z "$1" ]; then
+    FZFTEMP=($(git ls-files $(git rev-parse --show-toplevel) | fzf --multi))
+  else
+    FZFTEMP=($(git ls-files $(git rev-parse --show-toplevel) | rg "$@" | fzf --multi))
+  fi
+  [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
+}
+
 cdf() {
   local FZFTEMP
   if [ -z "$1" ]; then
@@ -324,12 +343,16 @@ t() {  # create or switch tmux session
   if [ -z "$1" ]; then
     FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind 'tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP" || echo 'No tmux sessions, pass a string to create one.'
   else
-    tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$1" && tmux $CHANGE -t "$1")
+    tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
   fi
 }
 
 manf() {
-  man -k . | fzf -q "$1" --prompt='man> ' --preview $'echo {} | tr -d \'()\' | awk \'{printf "%s ", $2} {print $1}\' | xargs -r man' | tr -d '()' | awk '{printf "%s ", $2} {print $1}' | xargs -r man
+  local FZFTEMP=$(man -k . 2>/dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind 'tab:down,btab:up' -q "$1" --prompt='man> ' --preview $'echo {} | xargs -r man') && man "$(echo "$FZFTEMP" | awk -F' |,' '{print $1}')"
+}
+
+envf() {
+  local FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind 'tab:down,btab:up' -q "$1") && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
 }
 
 react() {
@@ -342,6 +365,16 @@ react() {
       eval "${${@:2}//\{\}/${CHANGED[@]}}"
     fi
     sleep 2
+  done
+}
+
+try-until-success() {
+  local i=1
+  while true; do
+    echo "Try $i, $(date)."
+    $* && break
+    ((i+=1))
+    echo
   done
 }
 

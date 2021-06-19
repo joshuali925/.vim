@@ -38,17 +38,8 @@ function init#setup()
   command! W write !sudo tee %
 
   if $SSH_CLIENT != ''  " ssh session
-    function! s:CopyWithOSCYank(str)
-      let @" = a:str
-      OSCYankReg "
-    endfunction
-    call funcs#map_action('CopyWithOSCYank', '<leader>y')
-    nmap <leader>Y <leader>y$
+    call funcs#map_copy_with_osc_yank()
   elseif !has('macunix') && !has('gui_running')  " WSL Vim
-    function! s:CopyToWinClip(str)
-      call system('clip.exe', a:str)
-    endfunction
-    call funcs#map_action('CopyToWinClip', '<leader>y')
-    nmap <leader>Y <leader>y$
+    call funcs#map_copy_to_win_clip()
   endif
 endfunction

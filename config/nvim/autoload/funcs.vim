@@ -29,6 +29,10 @@ function! funcs#lf_edit_callback(code) abort
   endif
 endfunction
 
+function! funcs#quitall() abort
+  quitall!
+endfunction
+
 function! funcs#quit(buffer_mode, force) abort
   if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
     if a:force == 1
@@ -133,11 +137,28 @@ function! s:ActionSetup(algorithm)
   let s:encode_algorithm = a:algorithm
   let &operatorfunc = matchstr(expand('<sfile>'), '<SNR>\d\+_'). 'ActionOpfunc'
 endfunction
-function! funcs#map_action(algorithm, key)
+function! s:MapAction(algorithm, key)
   execute 'nnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>ActionSetup("'. a:algorithm. '")<CR>g@'
   execute 'xnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>DoAction("'. a:algorithm. '", visualmode())<CR>'
   execute 'nnoremap <silent> <Plug>actionsLine'.a:algorithm.' :<C-U>call <SID>DoAction("'. a:algorithm. '", v:count1)<CR>'
   execute 'nmap '. a:key. '  <Plug>actions'. a:algorithm
   execute 'xmap '. a:key. '  <Plug>actions'. a:algorithm
   execute 'nmap '. a:key.a:key[strlen(a:key)-1]. ' <Plug>actionsLine'. a:algorithm
+endfunction
+
+function! funcs#map_copy_with_osc_yank()
+  function! s:CopyWithOSCYank(str)
+    let @" = a:str
+    OSCYankReg "
+  endfunction
+  call <SID>MapAction('CopyWithOSCYank', '<leader>y')
+  nmap <leader>Y <leader>y$
+endfunction
+
+function! funcs#map_copy_to_win_clip()
+  function! s:CopyToWinClip(str)
+    call system('clip.exe', a:str)
+  endfunction
+  call <SID>MapAction('CopyToWinClip', '<leader>y')
+  nmap <leader>Y <leader>y$
 endfunction

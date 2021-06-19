@@ -74,7 +74,7 @@ cmd md5 !md5sum "$f"
 cmd selected-dir-size %du -h --max-depth=0 "$f"
 cmd cwd-size %du -h --max-depth=0 .
 cmd edit-config ${{ $EDITOR ~/.vim/config/lfrc }}
-cmd edit-selected ${{ echo "$fx" | xargs -d '\n' -o $EDITOR }}
+cmd edit-selected ${{ echo "$fx" | xargs -d '\n' $EDITOR }}
 cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
 
