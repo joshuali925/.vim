@@ -47,7 +47,8 @@ function M.treesitter()
             }
         },
         indent = {
-            enable = true
+            enable = true,
+            disable = {"python"}
         },
         -- for nvim-ts-context-commentstring
         context_commentstring = {
@@ -58,8 +59,17 @@ function M.treesitter()
 end
 
 function M.telescope()
+    local actions = require("telescope.actions")
     require("telescope").setup {
         defaults = {
+            mappings = {
+                i = {
+                    ["<Esc>"] = actions.close,
+                    ["<C-u>"] = function()
+                        vim.cmd("stopinsert")
+                    end
+                }
+            },
             vimgrep_arguments = {
                 "rg",
                 "--color=never",
@@ -108,11 +118,6 @@ function M.barbar()
     let bufferline.animation = v:false
     let bufferline.maximum_padding = 1
     let bufferline.no_name_title = ""
-    highlight! link BufferVisible BufferInactive
-    highlight! link BufferVisibleIndex BufferInactiveIndex
-    highlight! link BufferVisibleMod BufferInactiveMod
-    highlight! link BufferVisibleSign BufferInactiveSign
-    highlight! link BufferVisibleTarget BufferInactiveTarget
     ]]
 end
 
@@ -206,6 +211,14 @@ function M.nvim_bufferline()
     }
 end
 
+function M.tmux_nvim()
+    require("tmux").setup {
+        navigation = {
+            cycle_navigation = false
+        }
+    }
+end
+
 function M.conflict_marker()
     g.conflict_marker_enable_mappings = 0
     g.conflict_marker_begin = "^<<<<<<< .*$"
@@ -239,7 +252,8 @@ function M.setup_vim_visual_multi()
         ["Skip Region"] = "<C-x>",
         ["Switch Mode"] = "<C-c>",
         ["Add Cursor At Pos"] = "g<C-n>",
-        ["Case Setting"] = ""
+        ["Select Operator"] = "v",
+        ["Case Conversion Menu"] = "s"
     }
 end
 
@@ -285,19 +299,28 @@ function M.galaxyline()
                 }
                 local color = mode_color[vim.fn.mode()] or colors.blue
                 vim.api.nvim_command("highlight GalaxyViMode guibg=" .. color)
-                return "    █"
+                vim.api.nvim_command("highlight GalaxyViModeSeparator guifg=" .. color)
+                return "   "
             end,
             highlight = {colors.lightbg, "GalaxyViMode"}
         }
     }
     gls.left[2] = {
+        ViModeSeparator = {
+            provider = function()
+                return "  "
+            end,
+            highlight = {"GalaxyViModeSeparator", colors.lightbg}
+        }
+    }
+    gls.left[3] = {
         FileIcon = {
             provider = "FileIcon",
             condition = condition.buffer_not_empty,
             highlight = {fileinfo.get_file_icon_color, colors.lightbg}
         }
     }
-    gls.left[3] = {
+    gls.left[4] = {
         FileName = {
             -- TODO update when https://github.com/glepnir/galaxyline.nvim/pull/154 is merged
             provider = function()
@@ -309,7 +332,7 @@ function M.galaxyline()
             separator_highlight = {colors.lightbg, colors.lightbg2}
         }
     }
-    gls.left[4] = {
+    gls.left[5] = {
         CurrentDir = {
             provider = function()
                 local dir_name = vim.fn.fnamemodify(vim.loop.cwd(), ":t")
@@ -320,7 +343,7 @@ function M.galaxyline()
             separator_highlight = {colors.lightbg2, colors.bg}
         }
     }
-    gls.left[5] = {
+    gls.left[6] = {
         DiffAdd = {
             provider = "DiffAdd",
             condition = checkwidth,
@@ -328,7 +351,7 @@ function M.galaxyline()
             highlight = {colors.grey, colors.bg}
         }
     }
-    gls.left[6] = {
+    gls.left[7] = {
         DiffModified = {
             provider = "DiffModified",
             condition = checkwidth,
@@ -336,7 +359,7 @@ function M.galaxyline()
             highlight = {colors.grey, colors.bg}
         }
     }
-    gls.left[7] = {
+    gls.left[8] = {
         DiffRemove = {
             provider = "DiffRemove",
             condition = checkwidth,
@@ -344,14 +367,14 @@ function M.galaxyline()
             highlight = {colors.grey, colors.bg}
         }
     }
-    gls.left[8] = {
+    gls.left[9] = {
         DiagnosticError = {
             provider = "DiagnosticError",
             icon = "  ",
             highlight = {colors.red, colors.bg}
         }
     }
-    gls.left[9] = {
+    gls.left[10] = {
         DiagnosticWarn = {
             provider = "DiagnosticWarn",
             icon = "  ",
@@ -361,7 +384,7 @@ function M.galaxyline()
     gls.right[1] = {
         LspStatus = {
             provider = function()
-                local clients = vim.lsp.get_active_clients()
+                local clients = vim.lsp.buf_get_clients()
                 if next(clients) ~= nil then
                     return "  " .. " active "
                 else
@@ -376,7 +399,6 @@ function M.galaxyline()
             provider = function()
                 return " "
             end,
-            condition = condition.buffer_not_empty,
             highlight = {colors.grey, colors.lightbg},
             separator = "",
             separator_highlight = {colors.lightbg, colors.bg}
@@ -385,7 +407,6 @@ function M.galaxyline()
     gls.right[3] = {
         GitBranch = {
             provider = "GitBranch",
-            condition = condition.buffer_not_empty,
             highlight = {colors.grey, colors.lightbg}
         }
     }
@@ -420,14 +441,15 @@ function M.galaxyline()
     gls.short_line_left[1] = {
         Inactive = {
             provider = function()
-                return "    █"
+                return "   "
             end,
-            highlight = {colors.lightbg, colors.darkblue}
+            highlight = {colors.lightbg, colors.darkblue},
+            separator = "  ",
+            separator_highlight = {colors.darkblue, colors.lightbg}
         }
     }
-    gls.short_line_left[2] = gls.left[2]
-    gls.short_line_left[3] = gls.left[3]
-    gls.short_line_left[4] = gls.left[4]
+    gls.short_line_left[2] = gls.left[3]
+    gls.short_line_left[3] = gls.left[4]
 end
 
 function M.startify()
@@ -436,6 +458,7 @@ function M.startify()
     g.startify_fortune_use_unicode = 1
     g.startify_commands = {
         {["!"] = {"Git modified", ":args `Git ls-files --modified` | Git difftool"}},
+        {["*"] = {"Git diff HEAD", "DiffviewOpen"}},
         {f = {"Find files", "lua require('telescope.builtin').find_files({hidden = true})"}},
         {m = {"Find MRU", "lua require('telescope.builtin').oldfiles({include_current_session = true})"}},
         {c = {"Edit vimrc", "cd ~/.vim | edit $MYVIMRC"}},
@@ -555,18 +578,23 @@ function M.vim_quickui()
         "&Git",
         {
             {"Git &status", [[Git]], "Git status"},
+            {"Git l&og", [[Git log --decorate --all --full-history]], "Show git logs (use <CR>/- to navigate)"},
             {"Git checko&ut file", [[Gread]], "Checkout current file and load as unsaved buffer"},
             {"Git &blame", [[Git blame]], "Git blame of current file"},
             {"Git &diff", [[Gdiffsplit]], "Diff current file with last staged version"},
             {"Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version"},
-            {"Git &changes", [[Git! difftool]], "Load unstaged changes into quickfix list (use [q, ]q to navigate)"},
             {
                 "Git &file history",
                 [[vsplit | silent Git remote | 0Gclog]],
                 "Browse previously committed versions of current file"
             },
-            {"Git l&og", [[Git log --decorate --all --full-history]], "Show git logs (use <CR>/- to navigate)"},
             {"--", ""},
+            {"Git &changes", [[Git! difftool]], "Load unstaged changes of files into quickfix"},
+            {
+                "Git Diff&view",
+                [[DiffviewOpen]],
+                "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits"
+            },
             {
                 "Git search &all",
                 [[call feedkeys(":Git log -p --all -S \"\"\<Left>", "n")]],
@@ -582,8 +610,8 @@ function M.vim_quickui()
                 [[call feedkeys(":Git log --all --full-history --name-only -- \"**\"\<Left>\<Left>", "n")]],
                 "Grep file names in all commits"
             },
-            {"Git open &modified", [[args `Git ls-files --modified` | Git difftool]], "Open modified files"},
             {"--", ""},
+            {"Git roo&t", [[Gcd]], "Change current directory to git root"},
             {
                 "GitHub &issues",
                 [[lua require('telescope').extensions.gh.issues()]],

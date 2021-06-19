@@ -1277,4 +1277,66 @@ map("", ",", "<Plug>Sneak_;", {})
 map("", ";,", "<Plug>Sneak_,", {})
 map("", "n", "sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'", {expr = true})
 map("", "N", "sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'", {expr = true})
+" use vim.inspect
+function M.dump(tbl, indent)
+    if type(tbl) ~= "table" then
+        print(tostring(tbl))
+        return
+    end
+    if not indent then
+        indent = 0
+    end
+    for k, v in pairs(tbl) do
+        local formatting = string.rep("  ", indent) .. k .. ": "
+        if type(v) == "table" then
+            print(formatting)
+            M.debug(v, indent + 1)
+        else
+            print(formatting .. tostring(v))
+        end
+    end
+end
 
+
+" =======================================================
+" tmux theme
+# # -- theme
+# # panes
+# # # set -g pane-border-status top
+# set -g pane-border-format '#[align=right] #{?#{&&:#{pane_active},#{client_prefix}},#[underscore],}\
+# #{pane_current_command}  #{pane_tty} #{?pane_active,❐ #S:#I/#{session_windows} ,}\
+# #{?window_zoomed_flag,⬢,❄} #P '
+# set -g pane-active-border-style '#{?pane_in_mode,fg=yellow,\
+# #{?synchronize-panes,fg=cyan#,bold,#{?#{==:#{client_key_table},resize},fg=white,fg=blue#,bold}}}'
+# set -g pane-border-style fg=magenta
+# set -g pane-border-lines heavy
+# set -g copy-mode-mark-style fg=black,bg=white,underscore
+# set -g copy-mode-match-style fg=black,bg=cyan
+# set -g copy-mode-current-match-style fg=black,bg=magenta,underscore
+# # windows
+# set -g status-justify left
+# set -g status-right-length '80'
+# set -g window-status-separator ''
+# # statusbar
+# set -g status-bg colour234
+# set -g status-left ' #{?client_prefix,#[fg=brightyellow],#[fg=magenta]}❐ #S'
+# set -g status-right '  #[fg=magenta] %a %m/%d %I:%M %p '
+# set -g window-status-format ' #I #W '
+# set -g window-status-current-format ' #I #W '
+# set -g window-status-style fg=magenta
+# set -g window-status-current-style fg=brightblue,bold
+# set -g window-status-bell-style fg=yellow,bold
+
+" =======================================================
+# pathpicker
+git clone https://github.com/facebook/PathPicker.git ~/.local/PathPicker --depth=1
+ln -s ~/.local/PathPicker/fpp ~/.local/bin/fpp
+alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
+# vim
+sudo add-apt-repository -y ppa:jonathonf/vim
+sudo apt upgrade -y vim
+# need to export after p10k instant prompt loads
+echo "export \$EDITOR='vim'" >> ~/.zshrc
+# zsh inscure directories fix:
+compaudit | xargs chmod g-w
+compaudit | sudo xargs chmod -R 755

@@ -10,16 +10,27 @@ source ~/.zinit/bin/zinit.zsh
 
 zinit depth=1 light-mode for romkatv/powerlevel10k
 
-# zinit light zinit-zsh/z-a-bin-gem-node
-# zinit light-mode as"program" from"gh-r" for mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep
-# zinit light-mode as"program" from"gh-r" for mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd
-# zinit light-mode as"program" from"gh-r" for mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat
-# zinit light-mode as"program" from"gh-r" for mv"delta* -> delta" sbin"delta/delta" dandavison/delta
-# zinit light-mode as"program" from"gh-r" for sbin junegunn/fzf-bin
-# zinit light-mode as"program" from"gh-r" for sbin gokcehan/lf
-# zinit light-mode as"program" from"gh-r" for sbin jesseduffield/lazygit
-# zinit light-mode as"program" from"gh-r" for sbin jesseduffield/lazydocker
+zinit light zinit-zsh/z-a-bin-gem-node
+zinit light-mode as"program" from"gh-r" for \
+  mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
+  mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
+  mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
+  mv"delta* -> delta" sbin"delta/delta" dandavison/delta \
+  sbin so-fancy/diff-so-fancy \
+  sbin junegunn/fzf \
+  sbin gokcehan/lf \
+  sbin jesseduffield/lazygit \
+  sbin jesseduffield/lazydocker
+
+# zinit light-mode as"program" from"gh-r" for dylanaraps/neofetch
+# zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq
+# zinit light-mode as"program" from"gh-r" for sbin pemistahl/grex
+# zinit light-mode as"program" from"gh-r" for sbin schollz/croc
+# zinit light-mode as"program" from"gh-r" for mv"up* -> up" sbin akavel/up
 # zinit light-mode as"program" from"gh-r" for sbin XAMPPRocky/tokei
+# zinit light-mode as"program" from"gh-r" for mv"dust* -> dust" sbin"dust/dust" bootandy/dust
+# zinit light-mode as"program" from"gh-r" for sbin muesli/duf
+# zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
 
 zinit as"completion" for \
   https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
@@ -50,7 +61,7 @@ zinit light-mode for \
 source ~/.vim/config/oh-my-zsh-key-bindings.zsh
 source ~/.vim/config/fzf/key-bindings.zsh
 source ~/.vim/config/fzf/completion.zsh
-zplugin ice ver'fe9fa652390c78859450838825a8b5c40e9921ef'  # use this commit if master doesn't work
+# zplugin ice ver'fe9fa652390c78859450838825a8b5c40e9921ef'  # use this commit if master doesn't work
 zinit light Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
 
 source ~/.vim/config/common.sh
@@ -121,7 +132,6 @@ tab-complete-or-cd() {
 zle -N tab-complete-or-cd
 
 run-lf () {
-  # https://unix.stackexchange.com/questions/484764/how-to-prevent-vim-from-translating-c-j-into-c-m-when-started-by-the-zle-widget
   lf -last-dir-path="$HOME/.cache/lf_dir" < /dev/tty
   zle reset-prompt
 }
@@ -138,6 +148,7 @@ bindkey '^i' tab-complete-or-cd
 bindkey -s '^z' 'fg^m'
 
 compdef _dirs d
+compdef _tmux t
 compdef _command_names path
 compdef _git gdf=git-diff
 compdef _git gdd=git-diff

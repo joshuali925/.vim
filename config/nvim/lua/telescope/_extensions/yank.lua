@@ -17,6 +17,7 @@ local get_yanks = function()
     return yank_history
 end
 
+---@diagnostic disable-next-line: unused-local
 local function make_entry(opts)
     local displayer = entry_display.create({separator = " │ ", items = {{width = 120}, {remaining = true}}})
     local make_display = function(entry)

@@ -972,7 +972,7 @@ if has('gui_running')
     nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
     nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
   elseif has('gui_macvim')  " MacVim
-    set guifont=JetBrainsMonoNerdFontComplete-Regular:h13
+    set guifont=JetBrainsMono\ Nerd\ Font:h14
     set pythonthreedll=/usr/local/Frameworks/Python.framework/Versions/3.9/Python
     set pythonthreehome=/usr/local/Frameworks/Python.framework/Versions/3.9
     if &columns < 115 || &lines < 32

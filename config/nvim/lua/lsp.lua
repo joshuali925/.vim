@@ -1,10 +1,13 @@
-local required_servers = {"lua", "vim", "json", "yaml", "html", "css", "typescript", "python"}
-local installed_servers = require("lspinstall").installed_servers()
-for _, server in pairs(required_servers) do
-    if not vim.tbl_contains(installed_servers, server) then
-        require("lspinstall").install_server(server)
+function _G.lsp_install_all()
+    local required_servers = {"lua", "vim", "json", "yaml", "html", "css", "typescript", "python"}
+    local installed_servers = require("lspinstall").installed_servers()
+    for _, server in pairs(required_servers) do
+        if not vim.tbl_contains(installed_servers, server) then
+            require("lspinstall").install_server(server)
+        end
     end
 end
+vim.cmd("command! LspInstallAll call v:lua.lsp_install_all()")
 
 local function on_attach(client, bufnr)
     require("lsp_signature").on_attach()
@@ -44,12 +47,11 @@ local lsp_configs = {
             }
         }
     },
+    -- https://github.com/theia-ide/typescript-language-server/pull/218
     typescript = {
-        settings = {
-            typescript = {
-                preferences = {
-                    importModuleSpecifier = "relative"
-                }
+        init_options = {
+            preferences = {
+                importModuleSpecifierPreference = "relative"
             }
         },
         commands = {

@@ -1,6 +1,6 @@
 local install_path = vim.fn.stdpath("data") .. "/site/pack/packer/opt/packer.nvim"
 if vim.fn.glob(install_path) == "" then
-    vim.cmd("!git clone https://github.com/wbthomason/packer.nvim " .. install_path)
+    vim.cmd("silent !git clone https://github.com/wbthomason/packer.nvim " .. install_path)
 end
 vim.cmd("packadd packer.nvim")
 
@@ -85,6 +85,7 @@ return require("packer").startup(
                 fn = "fugitive#*",
                 cmd = {
                     "Git",
+                    "Gcd",
                     "GBrowse",
                     "Ggrep",
                     "Glgrep",
@@ -106,6 +107,7 @@ return require("packer").startup(
                 opt = true,
                 config = get_config("conflict_marker")
             }
+            use {"sindrets/diffview.nvim", cmd = "DiffviewOpen"}
 
             -- lang
             use {
@@ -188,6 +190,7 @@ return require("packer").startup(
                     require("lsp-rooter").setup()
                 end
             }
+            use {"udalov/kotlin-vim", ft = "kotlin"}
 
             -- editing
             use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}
@@ -238,10 +241,7 @@ return require("packer").startup(
                 keys = "<Plug>(miniyank-",
                 config = get_config("nvim_miniyank")
             }
-            use {
-                "christoomey/vim-tmux-navigator",
-                cmd = {"TmuxNavigateLeft", "TmuxNavigateDown", "TmuxNavigateUp", "TmuxNavigateRight"}
-            }
+            use {"aserowy/tmux.nvim", module = "tmux", config = get_config("tmux_nvim")}
 
             -- tools
             use {"tweekmonster/startuptime.vim", cmd = "StartupTime"}
@@ -249,7 +249,7 @@ return require("packer").startup(
             use {
                 "iamcco/markdown-preview.nvim",
                 run = "cd app && yarn install",
-                ft = {"markdown"},
+                ft = "markdown",
                 setup = [[vim.g.mkdp_auto_close = 0]]
             }
             use {"godlygeek/tabular", cmd = "Tabularize"}
