@@ -24,6 +24,7 @@ local function lazyload()
         "lsp-rooter.nvim",
         "vim-indent-object",
         "quick-scope",
+        "vim-wordmotion",
         "vim-fanfingtastic",
         "vim-sandwich",
         "vim-sleuth"

@@ -76,6 +76,9 @@ local function make_config()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     return {
         capabilities = capabilities,
+        flags = {
+            debounce_text_changes = 150,
+        },
         on_attach = on_attach
     }
 end

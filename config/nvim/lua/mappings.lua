@@ -66,7 +66,7 @@ map("n", "<leader>B", "<Cmd>NvimTreeFindFile<CR>")
 map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]])
 map("x", "<leader>n", [["xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>]])
 map("n", "<leader>u", "<Cmd>MundoToggle<CR>")
-map("n", "<leader>v", "<Cmd>Vista!!<CR>")
+map("n", "<leader>v", "<Cmd>SymbolsOutline<CR>")
 map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
 map("x", "<leader>s", [["xy:%s/<C-r>x/<C-r>x/gc<Left><Left><Left>]])
 map("n", "<leader>l", "<Cmd>call funcs#print_curr_vars(0, 0)<CR>")
@@ -156,9 +156,8 @@ map("x", "<C-n>", "<Plug>(VM-Find-Subword-Under)", {})
 
 -- hop
 map("", "'", "<Cmd>HopChar1<CR>")
-map("", "q", "<Cmd>HopWord<CR>")
-map("", "<leader>j", "<Cmd>HopLine<CR>")
-map("", "<leader>k", "<Cmd>HopLine<CR>")
+map("", "s", "<Cmd>HopWord<CR>")
+map("", "q", "<Cmd>HopLine<CR>")
 
 -- fanfingtastic
 map("", ",", "<Plug>fanfingtastic_;", {})
@@ -202,8 +201,8 @@ map(
     "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)",
     {}
 )
-map("x", "s", "<Plug>(operator-sandwich-add)", {})
-map("x", "s<", "<Plug>(operator-sandwich-add)t", {})
+map("x", "S", "<Plug>(operator-sandwich-add)", {})
+map("x", "S<", "<Plug>(operator-sandwich-add)t", {})
 
 -- vim-swap
 map("o", "ia", "<Plug>(swap-textobject-i)", {})
@@ -292,7 +291,8 @@ map("n", "<Leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<
 map("n", "<Leader>fy", "<Cmd>lua require('telescope').extensions.yank.history()<CR>")
 
 -- lsp
-map("n", "<leader>d", "<Cmd>lua vim.lsp.buf.definition()<CR>")
+map("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>")
+map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').lsp_finder()<CR>")
 map("n", "gR", "<Cmd>lua vim.lsp.buf.references()<CR>")
 map("n", "gr", "<Cmd>TroubleToggle lsp_references<CR>")
 map("n", "<leader>a", "<Cmd>lua require('lspsaga.codeaction').code_action()<CR>")

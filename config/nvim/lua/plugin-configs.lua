@@ -80,12 +80,14 @@ function M.telescope()
                 "--smart-case",
                 "--hidden"
             },
+            -- https://github.com/nvim-telescope/telescope.nvim/issues/938
             layout_strategy = "vertical",
-            layout_defaults = {
+            layout_config = {
                 vertical = {
                     preview_height = 0.3
                 }
             },
+            -- https://github.com/nvim-telescope/telescope.nvim/issues/917
             file_ignore_patterns = {".git", "node_modules", "venv"}
         },
         extensions = {
@@ -151,7 +153,7 @@ function M.gitsigns()
         watch_index = {
             interval = 250
         },
-        update_debounce = 100
+        update_debounce = 150
     }
 end
 
@@ -177,6 +179,8 @@ function M.setup_vim_sandwich()
 end
 
 function M.quick_scope()
+    g.qs_filetype_blacklist = {"startify", "TelescopePrompt"}
+    g.qs_buftype_blacklist = {"terminal"}
     vim.cmd [[
     highlight QuickScopePrimary guifg='#ffe9c2'
     ]]
@@ -207,6 +211,17 @@ function M.nvim_bufferline()
             buffer_selected = {
                 gui = "bold"
             }
+        }
+    }
+end
+
+function M.setup_symbols_outline()
+    vim.g.symbols_outline = {
+        auto_preview = false,
+        keymaps = {
+            close = "q",
+            hover_symbol = "p",
+            rename_symbol = "R"
         }
     }
 end
@@ -262,7 +277,7 @@ function M.galaxyline()
     local gls = gl.section
     local condition = require("galaxyline.condition")
     local fileinfo = require("galaxyline.provider_fileinfo")
-    gl.short_line_list = {"NvimTree", "vista"}
+    gl.short_line_list = {"NvimTree"}
     local colors = {
         bg = "#22262e",
         fg = "#abb2bf",
@@ -477,7 +492,7 @@ function _G.quickui_context_menu()
         {"Docu&mentation", "lua require('lspsaga.provider').preview_definition()", "Preview definition with lspsaga"},
         {"&Select reference", "lua require('lspsaga.provider').lsp_finder()", "Jump to a reference with lspsaga"},
         {"&Preview references", "TroubleToggle lsp_references", "Preview references with Trouble"},
-        {"Quickfix &references", "lua vim.lsp.buf.references()", "Use quickfix to navigate references"},
+        {"Quick&fix references", "lua vim.lsp.buf.references()", "Use quickfix to navigate references"},
         {"--", ""},
         {"Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation"},
         {"Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration"},
@@ -493,6 +508,11 @@ function _G.quickui_context_menu()
         {"Git hunk &add", "lua require('gitsigns').stage_hunk()", "Git stage hunk"},
         {"Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk"},
         {"Git &blame", "lua require('gitsigns').blame_line(true)", "Git blame of current line"},
+        {
+            "Git &remote",
+            [[let g:temp = getcurpos() | silent Git remote | call setpos('.', g:temp) | .GBrowse]],
+            "Open remote url in browser"
+        },
         {"--", ""}
     }
     local conflict_state = vim.fn["funcs#get_conflict_state"]()
@@ -578,7 +598,6 @@ function M.vim_quickui()
         "&Git",
         {
             {"Git &status", [[Git]], "Git status"},
-            {"Git l&og", [[Git log --decorate --all --full-history]], "Show git logs (use <CR>/- to navigate)"},
             {"Git checko&ut file", [[Gread]], "Checkout current file and load as unsaved buffer"},
             {"Git &blame", [[Git blame]], "Git blame of current file"},
             {"Git &diff", [[Gdiffsplit]], "Diff current file with last staged version"},
@@ -595,6 +614,7 @@ function M.vim_quickui()
                 [[DiffviewOpen]],
                 "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits"
             },
+            {"Git l&og", [[Git log --decorate --all --full-history]], "Show git logs (use <CR>/- to navigate)"},
             {
                 "Git search &all",
                 [[call feedkeys(":Git log -p --all -S \"\"\<Left>", "n")]],
@@ -611,16 +631,11 @@ function M.vim_quickui()
                 "Grep file names in all commits"
             },
             {"--", ""},
-            {"Git roo&t", [[Gcd]], "Change current directory to git root"},
+            {"Git &root", [[Gcd]], "Change current directory to git root"},
             {
                 "GitHub &issues",
                 [[lua require('telescope').extensions.gh.issues()]],
                 "Fuzzy search issues with Telescope"
-            },
-            {
-                "Git open &remote",
-                [[let g:temp = getcurpos() | silent Git remote | call setpos('.', g:temp) | .GBrowse]],
-                "Open remote url in browser"
             }
         }
     )

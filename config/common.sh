@@ -37,23 +37,22 @@ alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto'
 alias la='ls -AF --color=auto'
 alias ls='ls -CF --color=auto'
-alias l='ls -CF --color=auto'
+alias l='exa -alF --git --color=always --color-scale --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
-alias vimm='nvim +PackerCompile +PackerInstall -c "edit \$MYVIMRC"'
+alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "edit \$MYVIMRC"'
 alias venv='source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias btop='bpytop -b "cpu proc"'
-alias service='sudo service'
+alias croc='croc --curve p256'
 alias apt='sudo apt'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
-alias fl='lf -last-dir-path="$HOME/.cache/lf_dir" && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias rgf="rg --files | rg"
 alias rgd="rg --files --null | xargs -0 dirname | sort -u | rg"
@@ -122,6 +121,10 @@ alias gloo='git log --oneline --decorate --color'
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
+alias gmlog='glo HEAD..'  # commits in target but not in HEAD (will be merged with git merge target)
+gmdiff() {
+  git diff HEAD..."$@"  # diff between target and the common ancestor of HEAD and target
+}
 alias gp='git push'
 alias gpoat='git push origin --all && git push origin --tags'
 alias gr='git remote'
@@ -141,9 +144,9 @@ alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grup='git remote update'
 alias grv='git remote -v'
 alias gs='git status'
-alias gshow='git show --pretty=short --show-signature'
-alias gsall="find . -type d -name .git -execdir bash -c 'echo -en \"\\033[1;31m\"repo: \"\\033[1;34m\"; basename \"\$(git rev-parse --show-toplevel)\"; git status -s' \\;"
+alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \$(git symbolic-ref --short HEAD)\"\\033[0m\"; git status -s' \\;"
 alias gss='git status -sb'
+alias gshow='git show --pretty=short --show-signature'
 alias gsta='git stash save'
 alias gstaa='git stash apply'
 alias gstd='git stash drop'
@@ -185,7 +188,7 @@ gdg() {
   git diff "$@" | delta --line-numbers --navigate --side-by-side
 }
 
-printascii() {
+print-ascii() {
   echo 'Dec Hex    Dec Hex    Dec Hex    Dec Hex  Dec Hex  Dec Hex   Dec Hex   Dec Hex'
   echo '  0 00 NUL  16 10 DLE  32 20 SPC  48 30 0  64 40 @  80 50 P   96 60 `  112 70 p'
   echo '  1 01 SOH  17 11 DC1  33 21 !    49 31 1  65 41 A  81 51 Q   97 61 a  113 71 q'
@@ -205,7 +208,7 @@ printascii() {
   echo ' 15 0F SI   31 1F US   47 2F /    63 3F ?  79 4F O  95 5F _  111 6F o  127 7F DEL'
 }
 
-printcolors() {
+print-colors() {
   printf 'Foreground 8 colors\n'
   echo "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
   printf '\nBackground 8 colors\n'

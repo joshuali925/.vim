@@ -1340,3 +1340,12 @@ echo "export \$EDITOR='vim'" >> ~/.zshrc
 # zsh inscure directories fix:
 compaudit | xargs chmod g-w
 compaudit | sudo xargs chmod -R 755
+
+" =======================================================
+" tmux plugins
+set -g @plugin 'laktak/extrakto'              # <prefix>f
+set -g @extrakto_key 'f'
+set -g @extrakto_split_size 12
+set -g @extrakto_insert_key 'enter'
+set -g @extrakto_copy_key 'tab'
+set -g @extrakto_clip_tool_run 'fg'

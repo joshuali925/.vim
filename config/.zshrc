@@ -22,15 +22,18 @@ zinit light-mode as"program" from"gh-r" for \
   sbin jesseduffield/lazygit \
   sbin jesseduffield/lazydocker
 
-# zinit light-mode as"program" from"gh-r" for dylanaraps/neofetch
-# zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq
-# zinit light-mode as"program" from"gh-r" for sbin pemistahl/grex
 # zinit light-mode as"program" from"gh-r" for sbin schollz/croc
+# zinit light-mode as"program" from"gh-r" for sbin"bin/exa" ogham/exa
+# zinit light-mode as"program" from"gh-r" for sbin dylanaraps/neofetch
+# zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq
+# zinit light-mode as"program" from"gh-r" for mv"uni* -> uni" sbin arp242/uni
+# zinit light-mode as"program" from"gh-r" for sbin pemistahl/grex
 # zinit light-mode as"program" from"gh-r" for mv"up* -> up" sbin akavel/up
 # zinit light-mode as"program" from"gh-r" for sbin XAMPPRocky/tokei
 # zinit light-mode as"program" from"gh-r" for mv"dust* -> dust" sbin"dust/dust" bootandy/dust
 # zinit light-mode as"program" from"gh-r" for sbin muesli/duf
 # zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
+# zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
 
 zinit as"completion" for \
   https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
@@ -52,8 +55,7 @@ zinit light-mode for \
   ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(up-line-or-beginning-search down-line-or-beginning-search); \
   ZSH_AUTOSUGGEST_MANUAL_REBIND=1; \
   ZSH_AUTOSUGGEST_USE_ASYNC=1" \
-  zsh-users/zsh-autosuggestions \
-  supercrabtree/k
+  zsh-users/zsh-autosuggestions
 
 # vim <tab>: files in current directory or args completion
 # vim <C-p>: all files in current and subdirectories, respects .gitignore
@@ -106,7 +108,6 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -CF --color=always -1 $realpath'
 zstyle ':fzf-tab:*' switch-group '[' ']'
 
 alias history='history -f 0'
-alias k='k -h'
 
 up-line-or-local-history() {
   zle set-local-history 1

@@ -1871,7 +1871,7 @@
           },
           "to": [
             {
-              "shell_command": "osascript -e 'tell app \"Terminal\" to do script \"$HOME/.local/bin/gvim\"' && sleep 1 && killall Terminal"
+              "shell_command": "osascript -e 'tell app \"Terminal\" to do script \"$HOME/.local/bin/gvim && killall Terminal\"'"
             }
           ],
           "type": "basic"
