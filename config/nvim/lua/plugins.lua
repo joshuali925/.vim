@@ -5,7 +5,7 @@ end
 vim.cmd("packadd packer.nvim")
 
 local function get_config(name)
-    return ('require("plugin-configs").%s()'):format(name)
+    return ("require('plugin-configs').%s()"):format(name)
 end
 
 return require("packer").startup(
@@ -50,7 +50,7 @@ return require("packer").startup(
             -- ui
             use {
                 "kassio/neoterm",
-                cmd = {"Ttoggle", "Tnew"},
+                cmd = {"T", "Ttoggle", "Tnew"},
                 keys = "<Plug>(neoterm-repl-send",
                 setup = get_config("setup_neoterm")
             }
@@ -61,7 +61,7 @@ return require("packer").startup(
                 config = get_config("vim_quickui")
             }
             use {"skywind3000/asyncrun.vim", cmd = "AsyncRun", config = [[vim.g.asyncrun_open = 12]]}
-            use {"liuchengxu/vista.vim", cmd = "Vista", setup = [[vim.g.vista_default_executive = 'nvim_lsp']]}
+            use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = get_config("setup_symbols_outline")}
             use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = get_config("mundo")}
             use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = get_config("nvim_tree")}
             use {"mhinz/vim-startify", opt = false, config = get_config("startify")}
@@ -211,7 +211,7 @@ return require("packer").startup(
             }
             use {"unblevable/quick-scope", opt = true, config = get_config("quick_scope")}
             use {"dahu/vim-fanfingtastic", opt = true}
-            use {"chaoren/vim-wordmotion", keys = "<Plug>WordMotion", setup = [[vim.g.wordmotion_nomap = 1]]}
+            use {"chaoren/vim-wordmotion", opt = true, setup = [[vim.g.wordmotion_nomap = 1]]}
             use {"machakann/vim-sandwich", opt = true, setup = get_config("setup_vim_sandwich")}
             use {"machakann/vim-swap", keys = "<Plug>(swap-"}
             use {"AndrewRadev/splitjoin.vim", keys = {{"n", "gS"}, {"n", "gJ"}}}

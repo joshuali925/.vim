@@ -3,7 +3,7 @@
 set -e
 cd "$HOME"
 
-NODE_VERSION=10.23.1
+NODE_VERSION=10.24.1
 # NODE_VERSION=16.3.0
 DOCKER_COMPOSE_VERSION=1.29.2
 BACKUP_DIR=$HOME/config-backup
@@ -62,12 +62,14 @@ install_development_tools() {
     elif [ $platform == 'MacOS' ]; then
         mkdir -pv ~/.local/bin
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-        brew install coreutils && echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.zshrc
+        brew install coreutils
+        echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.zshrc
+        echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.bashrc
         brew install gnu-sed && ln -s $(which gsed) ~/.local/bin/sed
         brew install findutils && ln -s $(which gxargs) ~/.local/bin/xargs
         brew install gawk && ln -s $(which gawk) ~/.local/bin/awk
         export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
-        log "Installed homebrew and packages, exported to ~/.zshrc"
+        log "Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc"
         defaults write -g ApplePressAndHoldEnabled -bool false  # enable key repeats
         log "Disabled ApplePressAndHoldEnabled to support key repeats"
         # brew install --cask iterm2 rectangle maccy karabiner-elements alt-tab visual-studio-code
@@ -184,8 +186,8 @@ install_node() {
     NVM_DIR=~/.nvm
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
     log "Installing node.."
-    # nvm install 10.23.1
-    nvm install 16.3.0
+    nvm install "$NODE_VERSION"
+    nvm alias default "$NODE_VERSION"
     node --version && ln -s $(which node) ~/.local/bin/node && ln -s $(which npm) ~/.local/bin/npm
     log "Installing yarn.."
     curl -o- -L https://yarnpkg.com/install.sh | bash

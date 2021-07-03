@@ -75,9 +75,26 @@ function! funcs#print_curr_vars(visual, printAbove) abort
   endif
 endfunction
 
-function! funcs#get_run_command()
+function! funcs#jest_context() abort
+  let l:pos = getcurpos()
+  normal! $
+  let l:regex = '(''\zs[^'']\+\ze'
+  let l:desc_match = matchstr(getline(search('describe'. l:regex, 'cbnW')), 'describe'. l:regex)
+  let l:it_match = matchstr(getline(search('\(it\|test\)'. l:regex, 'cbnW')), '\(it\|test\)'. l:regex)
+  call setpos('.', l:pos)
+  let l:context = "'". l:desc_match. ' '. l:it_match. "'"
+  return escape(l:context, '<>')
+endfunction
+
+function! funcs#get_run_command() abort
   if get(b:, 'RunCommand', '') != ''
     return b:RunCommand
+  endif
+  if expand('%') =~ 'test.[tj]sx\?'
+    if !exists('g:neoterm')
+      lua require('packer').loader('neoterm')
+    endif
+    return 'vertical T yarn test '. expand('%'). ' -t '. funcs#jest_context(). ' --coverage -u'
   endif
   let l:run_command = {}
   let l:run_command['vim'] = 'source %'
