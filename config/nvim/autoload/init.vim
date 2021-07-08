@@ -17,6 +17,7 @@ endfunction
 
 function init#setup()
   filetype plugin indent on  " needed for setting formatoptions https://github.com/neovim/neovim/issues/4684
+  " TODO add user completion when this is merged https://github.com/neovim/neovim/pull/12995
 
   augroup AutoCommands
     autocmd!

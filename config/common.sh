@@ -300,7 +300,10 @@ cdf() {
 }
 
 vrg() {
-  if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
+  if [ "$#" -eq 0 ]; then
+    [[ ! $(fc -ln -1) =~ "^rg*" ]] && echo 'Need a string to search for.' || eval "v$(fc -ln -1)"
+    return 0
+  fi
   if [[ \ $*\  == *\ --fixed-strings\ * ]] || [[ \ $*\  == *\ -F\ * ]]; then
     $EDITOR -q <(rg "$@" --vimgrep) -c "/\V$1"  # use \V if rg is called with -F/--fixed-strings to search for string literal
   else
@@ -319,7 +322,7 @@ rf() {  # flygrep
   FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "$INITIAL_QUERY")" \
   fzf --ansi \
       --disabled --query "$INITIAL_QUERY" \
-      --bind "change:reload:sleep 0.3; $RG_PREFIX {q} || true" \
+      --bind "change:reload:sleep 0.2; $RG_PREFIX {q} || true" \
       --bind "enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
       --bind 'tab:down,btab:up' \
       --delimiter : \
