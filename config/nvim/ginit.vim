@@ -17,10 +17,10 @@ noremap! <M-BS> <C-w>
 
 if exists('g:neovide')
   let g:neovide_cursor_vfx_mode = "railgun"
-  let g:neovide_cursor_animation_length=0.12
-  let g:neovide_cursor_vfx_particle_lifetime=1.2
-  let g:neovide_cursor_vfx_particle_density=7.0
-  let g:neovide_cursor_vfx_particle_speed=10.0
+  " let g:neovide_cursor_animation_length=0.12
+  " let g:neovide_cursor_vfx_particle_lifetime=1.2
+  " let g:neovide_cursor_vfx_particle_density=7.0
+  " let g:neovide_cursor_vfx_particle_speed=10.0
   " let g:neovide_refresh_rate = 30
   " let g:neovide_fullscreen = v:true
 

@@ -8,6 +8,9 @@ require("compe").setup {
         vsnip = {kind = "﬌"},
         nvim_lsp = true,
         nvim_lua = true
+    },
+    documentation = {
+        border = "rounded"
     }
 }
 

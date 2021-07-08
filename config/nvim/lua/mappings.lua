@@ -201,8 +201,8 @@ map(
     "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)",
     {}
 )
-map("x", "S", "<Plug>(operator-sandwich-add)", {})
-map("x", "S<", "<Plug>(operator-sandwich-add)t", {})
+map("x", "s", "<Plug>(operator-sandwich-add)", {})
+map("x", "s<", "<Plug>(operator-sandwich-add)t", {})
 
 -- vim-swap
 map("o", "ia", "<Plug>(swap-textobject-i)", {})

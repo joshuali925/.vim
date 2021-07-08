@@ -33,7 +33,7 @@ local function lazyload()
 
     require("lsp")
     vim.cmd [[
-    " for lsp-rooter.nvim to change directory
+    " for lsp and lsp-rooter.nvim
     silent! edit
 
     " for barbar

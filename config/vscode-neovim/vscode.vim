@@ -51,7 +51,8 @@ map ;, <Plug>Sneak_,
 map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
 map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
 map ' <Plug>(easymotion-bd-f)
-map q <Plug>(easymotion-bd-w)
+map s <Plug>(easymotion-bd-w)
+map q <Plug>(easymotion-bd-jk)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
