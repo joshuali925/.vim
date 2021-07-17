@@ -12,8 +12,8 @@ return require("packer").startup(
     {
         config = {
             auto_clean = false,
+            opt_default = true,
             display = {
-                opt_default = true,
                 open_fn = require("packer.util").float
             },
             profile = {
@@ -35,13 +35,10 @@ return require("packer").startup(
             use {"glepnir/galaxyline.nvim", opt = false, config = get_config("galaxyline")}
             use {
                 "lukas-reineke/indent-blankline.nvim",
-                opt = true,
-                branch = "lua",
                 config = get_config("indent_blankline")
             }
             use {
                 "norcalli/nvim-colorizer.lua",
-                opt = true,
                 config = function()
                     require("colorizer").setup()
                 end
@@ -64,22 +61,26 @@ return require("packer").startup(
             use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = get_config("setup_symbols_outline")}
             use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = get_config("mundo")}
             use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = get_config("nvim_tree")}
-            use {"mhinz/vim-startify", opt = false, config = get_config("startify")}
+            use {
+                "mhinz/vim-startify",
+                cmd = "Startify",
+                cond = function()
+                    return vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1
+                end,
+                config = get_config("startify")
+            }
             use {
                 "nvim-telescope/telescope.nvim",
-                requires = {
-                    {"nvim-lua/popup.nvim"},
-                    {"nvim-lua/plenary.nvim", opt = true},
-                    {"nvim-telescope/telescope-github.nvim"},
-                    {"nvim-telescope/telescope-fzf-native.nvim", run = "make"}
-                },
+                requires = {{"nvim-lua/popup.nvim"}, {"nvim-lua/plenary.nvim"}},
                 module = "telescope",
                 cmd = "Telescope",
                 config = get_config("telescope")
             }
+            use {"nvim-telescope/telescope-github.nvim", opt = false}
+            use {"nvim-telescope/telescope-fzf-native.nvim", opt = false, run = "make"}
 
             -- git
-            use {"tpope/vim-rhubarb", opt = true}
+            use {"tpope/vim-rhubarb"}
             use {
                 "tpope/vim-fugitive",
                 fn = "fugitive#*",
@@ -98,13 +99,11 @@ return require("packer").startup(
             }
             use {
                 "lewis6991/gitsigns.nvim",
-                requires = {"nvim-lua/plenary.nvim", opt = true},
-                opt = true,
+                requires = {"nvim-lua/plenary.nvim"},
                 config = get_config("gitsigns")
             }
             use {
                 "rhysd/conflict-marker.vim",
-                opt = true,
                 config = get_config("conflict_marker")
             }
             use {"sindrets/diffview.nvim", cmd = "DiffviewOpen"}
@@ -113,11 +112,11 @@ return require("packer").startup(
             use {
                 "nvim-treesitter/nvim-treesitter",
                 run = ":TSUpdate",
-                opt = true,
-                requires = "nvim-treesitter/nvim-treesitter-textobjects",
+                cond = "vim.g.IsFileSmall", -- delay load resets cursor position
+                require = {"nvim-treesitter/nvim-treesitter-textobjects", cond = "vim.g.IsFileSmall"},
                 config = get_config("treesitter")
             }
-            use {"neovim/nvim-lspconfig", opt = true}
+            use {"neovim/nvim-lspconfig"}
             use {
                 "glepnir/lspsaga.nvim",
                 module = "lspsaga",
@@ -139,7 +138,7 @@ return require("packer").startup(
                     }
                 end
             }
-            use {"ray-x/lsp_signature.nvim", opt = true}
+            use {"ray-x/lsp_signature.nvim"}
             use {
                 "onsails/lspkind-nvim",
                 event = "InsertEnter",
@@ -160,14 +159,13 @@ return require("packer").startup(
             use {
                 "folke/trouble.nvim",
                 cmd = "TroubleToggle",
-                requires = "kyazdani42/nvim-web-devicons",
                 config = function()
                     require("trouble").setup()
                 end
             }
             use {"sbdchd/neoformat", cmd = "Neoformat"}
-            use {"kabouzeid/nvim-lspinstall", opt = true}
-            use {"JoosepAlviste/nvim-ts-context-commentstring", opt = true}
+            use {"kabouzeid/nvim-lspinstall"}
+            use {"JoosepAlviste/nvim-ts-context-commentstring"}
             use {
                 "b3nj5m1n/kommentary",
                 requires = "JoosepAlviste/nvim-ts-context-commentstring",
@@ -185,7 +183,6 @@ return require("packer").startup(
             use {"MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log"}
             use {
                 "ahmedkhalf/lsp-rooter.nvim",
-                opt = true,
                 config = function()
                     require("lsp-rooter").setup()
                 end
@@ -194,7 +191,7 @@ return require("packer").startup(
 
             -- editing
             use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}
-            use {"joshuali925/vim-indent-object", opt = true}
+            use {"joshuali925/vim-indent-object"}
             use {"terryma/vim-expand-region", keys = "<Plug>(expand_region_"}
             use {
                 "mg979/vim-visual-multi",
@@ -209,15 +206,15 @@ return require("packer").startup(
                     require("hop").setup({})
                 end
             }
-            use {"unblevable/quick-scope", opt = true, config = get_config("quick_scope")}
-            use {"dahu/vim-fanfingtastic", opt = true}
-            use {"chaoren/vim-wordmotion", opt = true, setup = [[vim.g.wordmotion_nomap = 1]]}
-            use {"machakann/vim-sandwich", opt = true, setup = get_config("setup_vim_sandwich")}
+            use {"unblevable/quick-scope", config = get_config("quick_scope")}
+            use {"dahu/vim-fanfingtastic"}
+            use {"chaoren/vim-wordmotion", setup = [[vim.g.wordmotion_nomap = 1]]}
+            use {"machakann/vim-sandwich", event = "BufEnter", setup = get_config("setup_vim_sandwich")} -- delay load resets cursor position
             use {"machakann/vim-swap", keys = "<Plug>(swap-"}
             use {"AndrewRadev/splitjoin.vim", keys = {{"n", "gS"}, {"n", "gJ"}}}
 
             -- misc
-            use {"tpope/vim-sleuth", opt = true}
+            use {"tpope/vim-sleuth"}
             use {"tpope/vim-repeat", opt = false}
             use {
                 "tpope/vim-unimpaired",
@@ -242,6 +239,7 @@ return require("packer").startup(
                 config = get_config("nvim_miniyank")
             }
             use {"aserowy/tmux.nvim", module = "tmux", config = get_config("tmux_nvim")}
+            use {"kyazdani42/nvim-web-devicons", opt = false}
 
             -- tools
             use {"tweekmonster/startuptime.vim", cmd = "StartupTime"}

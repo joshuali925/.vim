@@ -45,7 +45,7 @@ alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "edit \$MYVIMRC"'
-alias venv='source venv/bin/activate'
+alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias btop='bpytop -b "cpu proc"'
 alias croc='croc --curve p256'
@@ -57,6 +57,7 @@ alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias rgf="rg --files | rg"
 alias rgd="rg --files --null | xargs -0 dirname | sort -u | rg"
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | grep -v \"./\" | column -c3 -s \" \" -t | sort -nr | nl | head -n 30"
+alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
 
 alias ga='git add'
 alias gau='git add -u'

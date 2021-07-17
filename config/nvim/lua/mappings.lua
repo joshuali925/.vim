@@ -33,11 +33,11 @@ map("", "<Up>", "gk")
 map("i", "<Home>", "<C-o>g^")
 map("i", "<End>", "<C-o>g$")
 map("i", "<C-_>", "<C-o>u")
+map("n", "_", "<C-o>")
+map("n", "+", "<C-i>")
 map("n", "Q", "q")
 map("x", "@q", "<Cmd>normal! @q<CR>")
 map("x", "@@", "<Cmd>normal! @@<CR>")
-map("n", "_", "<C-o>")
-map("n", "+", "<C-i>")
 map("n", "Y", "y$")
 map("x", "<", "<gv")
 map("x", ">", ">gv")
@@ -156,8 +156,9 @@ map("x", "<C-n>", "<Plug>(VM-Find-Subword-Under)", {})
 
 -- hop
 map("", "'", "<Cmd>HopChar1<CR>")
-map("", "s", "<Cmd>HopWord<CR>")
-map("", "q", "<Cmd>HopLine<CR>")
+map("", "q", "<Cmd>HopWord<CR>")
+map("", "<leader>j", "<Cmd>HopLine<CR>")
+map("", "<leader>k", "<Cmd>HopLine<CR>")
 
 -- fanfingtastic
 map("", ",", "<Plug>fanfingtastic_;", {})
@@ -244,34 +245,37 @@ map(
     "<Cmd>lua require('telescope.builtin').find_files({hidden = true, cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p'))})<CR>"
 )
 map("n", "<Leader>fs", "<C-p>", {})
-map("n", "<Leader>fd", "<Cmd>lua require('telescope.builtin').file_browser({cwd = vim.fn.expand('%:h'), hidden = true})<CR>")
-map("n", "<Leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
-map("n", "<Leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR>")
-map("n", "<Leader>fu", "<Cmd>lua require('telescope.builtin')[next(vim.lsp.buf_get_clients()) == nil and 'treesitter' or 'lsp_document_symbols']()<CR>")
-map("n", "<Leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
--- TODO visual grep pending on https://github.com/neovim/neovim/pull/13896
 map(
     "n",
-    "<Leader>fg",
-    ":lua require('telescope.builtin').grep_string({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p')), use_regex = true, search = [[]]})<Left><Left><Left><Left>",
-    {noremap = true}
+    "<Leader>fd",
+    "<Cmd>lua require('telescope.builtin').file_browser({cwd = vim.fn.expand('%:h'), hidden = true})<CR>"
 )
+map("n", "<Leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
+map("n", "<Leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR>")
+map(
+    "n",
+    "<Leader>fu",
+    "<Cmd>lua require('telescope.builtin')[next(vim.lsp.buf_get_clients()) == nil and 'treesitter' or 'lsp_document_symbols']()<CR>"
+)
+map("n", "<Leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
+-- TODO visual grep pending on https://github.com/neovim/neovim/pull/13896, https://github.com/nvim-telescope/telescope.nvim/pull/494
+map("n", "<Leader>fg", ":lua require('utils').telescope_grep(true, [[]])<Left><Left><Left>", {noremap = true})
 map(
     "x",
     "<Leader>fg",
-    ":lua require('telescope.builtin').grep_string({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p')), use_regex = false, search = [[<C-r>=funcs#get_visual_selection()<CR>]]})<Left><Left><Left><Left>",
+    ":<C-u>lua require('utils').telescope_grep(false, [[<C-r>=funcs#get_visual_selection()<CR>]])<Left><Left><Left>",
     {noremap = true}
 )
 map(
     "n",
     "<Leader>fj",
-    ":lua require('telescope.builtin').grep_string({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p')), search = [[\\b<C-r><C-w>\\b]], use_regex = true})<CR>",
+    ":lua require('utils').telescope_grep(true, [[\\b<C-r>=expand('<cword>')<CR>\\b]])<CR>",
     {noremap = true, silent = true}
 )
 map(
     "x",
     "<Leader>fj",
-    ":lua require('telescope.builtin').grep_string({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p')), search = [[<C-r>=funcs#get_visual_selection()<CR>]]})<CR>",
+    ":lua require('utils').telescope_grep(false, [[<C-r>=funcs#get_visual_selection()<CR>]])<CR>",
     {noremap = true, silent = true}
 )
 map("n", "<Leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
