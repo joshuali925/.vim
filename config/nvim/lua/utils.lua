@@ -12,4 +12,10 @@ function M.map(mode, lhs, rhs, opts)
     end
 end
 
+function M.telescope_grep(use_regex, pattern)
+    local cwd = require("lspconfig.util").root_pattern(".git")(vim.fn.expand("%:p"))
+    vim.cmd("cd " .. cwd)
+    require("telescope.builtin").grep_string({cwd = cwd, use_regex = use_regex, search = pattern})
+end
+
 return M

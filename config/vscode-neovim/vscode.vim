@@ -51,8 +51,7 @@ map ;, <Plug>Sneak_,
 map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
 map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
 map ' <Plug>(easymotion-bd-f)
-map s <Plug>(easymotion-bd-w)
-map q <Plug>(easymotion-bd-jk)
+map q <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
@@ -88,9 +87,9 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
-nnoremap Q q
 nnoremap _ <C-o>
 nnoremap + <C-i>
+nnoremap Q q
 " yankstack needs nmap
 nmap Y y$
 xnoremap < <gv

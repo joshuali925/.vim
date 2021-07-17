@@ -3,6 +3,7 @@
 set -e
 cd "$HOME"
 
+NVM_VERSION=0.38.0
 NODE_VERSION=10.24.1
 # NODE_VERSION=16.3.0
 DOCKER_COMPOSE_VERSION=1.29.2
@@ -126,13 +127,14 @@ install_python() {
     fi
     log "Installed python3 and pip3"
     pip3 install --user pynvim
-    python3 -m venv ~/.local/python-packages
     log "Installed pynvim for neovim"
-    source ~/.local/python-packages/bin/activate && pip install bpytop tmuxp && deactivate
+    python3 -m venv ~/.local/python-packages
+    source ~/.local/python-packages/bin/activate && pip install bpytop && deactivate
     echo -e "color_theme=\"dracula\"\nshow_init=False" >> ~/.config/bpytop/bpytop.conf
     ln -s ~/.local/python-packages/bin/bpytop ~/.local/bin/bpytop
-    ln -s ~/.local/python-packages/bin/tmuxp ~/.local/bin/tmuxp
-    log "Install bpytop and tmuxp"
+    git clone https://github.com/facebook/PathPicker.git ~/.local/python-packages/PathPicker --depth=1
+    ln -s ~/.local/python-packages/PathPicker/fpp ~/.local/bin/fpp
+    log "Installed bpytop, fpp"
 }
 
 install_dotfiles() {
@@ -182,7 +184,7 @@ install_tmux() {
 
 install_node() {
     log "\nInstalling nvm.."
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh | bash
     NVM_DIR=~/.nvm
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
     log "Installing node.."
@@ -193,7 +195,7 @@ install_node() {
     curl -o- -L https://yarnpkg.com/install.sh | bash
     ln -s ~/.yarn/bin/yarn ~/.local/bin/yarn
     log "Installing node packages.."
-    cd ~/.local/node-packages && ~/.yarn/bin/yarn add prettier lua-fmt fixjson
+    cd ~/.local/node-packages && ~/.yarn/bin/yarn add prettier lua-fmt fixjson || true
     echo
 }
 

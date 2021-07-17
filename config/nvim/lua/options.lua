@@ -1,6 +1,19 @@
 local g = vim.g
 local opt = vim.opt
 
+vim.paste = (function(overridden)
+    return function(lines, phase)
+        if (phase == -1 or phase == 1) and vim.fn.mode() == 'i' then
+            vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
+        end
+        overridden(lines, phase)
+    end
+end)(vim.paste)
+
+local fname = vim.fn.expand("%:p:f")
+local fsize = vim.fn.getfsize(fname)
+vim.g.IsFileSmall = fsize == nil or fsize < 6291456 -- 6MB
+
 -- need this PR to replace netrw https://github.com/kyazdani42/nvim-tree.lua/pull/288
 g.netrw_dirhistmax = 0
 g.netrw_banner = 0
@@ -35,7 +48,6 @@ opt.softtabstop = 2
 opt.shiftwidth = 2
 opt.shiftround = true
 opt.textwidth = 0
--- opt.autochdir = true
 opt.hidden = true
 opt.complete = {".", "w", "b", "u"}
 opt.completeopt = {"menuone", "noselect"}

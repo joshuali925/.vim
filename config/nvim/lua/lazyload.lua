@@ -1,11 +1,16 @@
 local function lazyload()
     local loader = require("packer").loader
-    local fname = vim.fn.expand("%:p:f")
-    local fsize = vim.fn.getfsize(fname)
-    if fsize == nil or fsize < 0 then
-        fsize = 1
-    end
-    if fsize > 6291456 then -- 6MB
+
+    vim.cmd [[
+    " for barbar
+    highlight! link BufferVisible BufferInactive
+    highlight! link BufferVisibleIndex BufferInactiveIndex
+    highlight! link BufferVisibleMod BufferInactiveMod
+    highlight! link BufferVisibleSign BufferInactiveSign
+    highlight! link BufferVisibleTarget BufferInactiveTarget
+    ]]
+
+    if not vim.g.IsFileSmall then
         return
     end
 
@@ -16,7 +21,6 @@ local function lazyload()
         "vim-rhubarb",
         "gitsigns.nvim",
         "conflict-marker.vim",
-        "nvim-treesitter",
         "nvim-lspconfig",
         "lsp_signature.nvim",
         "nvim-lspinstall",
@@ -26,23 +30,15 @@ local function lazyload()
         "quick-scope",
         "vim-wordmotion",
         "vim-fanfingtastic",
-        "vim-sandwich",
         "vim-sleuth"
     }
     loader(table.concat(plugins, " "))
 
     require("lsp")
-    vim.cmd [[
-    " for lsp and lsp-rooter.nvim
-    silent! edit
 
-    " for barbar
-    highlight! link BufferVisible BufferInactive
-    highlight! link BufferVisibleIndex BufferInactiveIndex
-    highlight! link BufferVisibleMod BufferInactiveMod
-    highlight! link BufferVisibleSign BufferInactiveSign
-    highlight! link BufferVisibleTarget BufferInactiveTarget
-    ]]
+    local saved_view = vim.fn.winsaveview()
+    vim.cmd("silent! edit") -- for lsp and lsp-rooter.nvim
+    vim.fn.winrestview(saved_view)
 end
 
 vim.defer_fn(lazyload, 80)

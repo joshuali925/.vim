@@ -1,3 +1,6 @@
+" set commands: https://github.com/JetBrains/ideavim/wiki/%22set%22-commands
+" actions (from :actionlist [pattern]): https://gist.github.com/zchee/9c78f91cc5ad771c1f5d
+
 let mapleader=";"
 
 """ Plugins  --------------------------------
@@ -5,7 +8,7 @@ set surround
 set multiple-cursors
 set commentary
 set argtextobj
-set easymotion
+set easymotion  " requires https://plugins.jetbrains.com/plugin/13360-ideavim-easymotion/
 set exchange
 
 """ Plugin settings -------------------------
@@ -29,6 +32,8 @@ set idearefactormode=keep
 """ Mappings --------------------------------
 nnoremap <BS> gT
 nnoremap \ gt
+xmap v <Action>(EditorSelectWord)
+xmap <BS> <Action>(EditorUnSelectWord)
 noremap , ;
 noremap ;, ,
 map ' <Plug>(easymotion-bd-f)
@@ -43,6 +48,8 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
+nnoremap _ <C-o>
+nnoremap + <C-i>
 nnoremap Q q
 nnoremap Y y$
 xnoremap < <gv
@@ -102,7 +109,8 @@ nmap Ku <Action>(Vcs.RollbackChangedLines)
 nmap Kd <Action>(Vcs.Show.Local.Changes)
 nmap Kf <Action>(Vcs.ShowTabbedFileHistory)
 nmap Kg <Action>(Generate)
-nmap Kr <Action>(Refactorings.QuickListPopupAction)
+nmap Kr <Action>(Github.Open.In.Browser)
+nmap KR <Action>(Refactorings.QuickListPopupAction)
 nnoremap gh K
 nmap gd <Action>(GotoDeclaration)
 nmap <C-f> <Action>(ReformatCode)

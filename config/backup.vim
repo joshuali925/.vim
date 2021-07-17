@@ -1328,10 +1328,6 @@ end
 # set -g window-status-bell-style fg=yellow,bold
 
 " =======================================================
-# pathpicker
-git clone https://github.com/facebook/PathPicker.git ~/.local/PathPicker --depth=1
-ln -s ~/.local/PathPicker/fpp ~/.local/bin/fpp
-alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
 # vim
 sudo add-apt-repository -y ppa:jonathonf/vim
 sudo apt upgrade -y vim
@@ -1349,3 +1345,8 @@ set -g @extrakto_split_size 12
 set -g @extrakto_insert_key 'enter'
 set -g @extrakto_copy_key 'tab'
 set -g @extrakto_clip_tool_run 'fg'
+
+" =======================================================
+" somehow not needed for telescope extensions
+    require("telescope").load_extension("gh")
+    require("telescope").load_extension("yank")

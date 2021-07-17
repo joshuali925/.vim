@@ -80,7 +80,6 @@ function M.telescope()
                 "--smart-case",
                 "--hidden"
             },
-            -- https://github.com/nvim-telescope/telescope.nvim/issues/938
             layout_strategy = "vertical",
             layout_config = {
                 vertical = {
@@ -89,6 +88,14 @@ function M.telescope()
             },
             -- https://github.com/nvim-telescope/telescope.nvim/issues/917
             file_ignore_patterns = {".git", "node_modules", "venv"}
+        },
+        pickers = {
+            -- https://github.com/nvim-telescope/telescope.nvim/issues/938
+            file_browser = {theme = "dropdown"},
+            filetypes = {theme = "dropdown"},
+            registers = {theme = "dropdown"},
+            commands = {theme = "dropdown"},
+            builtin = {theme = "dropdown"}
         },
         extensions = {
             fzf = {
@@ -100,8 +107,6 @@ function M.telescope()
         }
     }
     require("telescope").load_extension("fzf")
-    require("telescope").load_extension("gh")
-    require("telescope").load_extension("yank")
 end
 
 function M.auto_pairs()
@@ -127,10 +132,11 @@ function M.nvim_tree()
     local tree_cb = require("nvim-tree.config").nvim_tree_callback
     g.nvim_tree_highlight_opened_files = 1
     g.nvim_tree_bindings = {
-        ["s"] = tree_cb("split"),
-        ["yy"] = tree_cb("copy_absolute_path"),
-        ["l"] = tree_cb("edit"),
-        ["h"] = tree_cb("close_node")
+        {key = {"C"}, cb = tree_cb("cd")},
+        {key = {"s"}, cb = tree_cb("split")},
+        {key = {"yy"}, cb = tree_cb("copy_absolute_path")},
+        {key = {"l"}, cb = tree_cb("edit")},
+        {key = {"h"}, cb = tree_cb("close_node")}
     }
 end
 
