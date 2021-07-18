@@ -10,10 +10,6 @@ vim.paste = (function(overridden)
     end
 end)(vim.paste)
 
-local fname = vim.fn.expand("%:p:f")
-local fsize = vim.fn.getfsize(fname)
-vim.g.IsFileSmall = fsize == nil or fsize < 6291456 -- 6MB
-
 -- need this PR to replace netrw https://github.com/kyazdani42/nvim-tree.lua/pull/288
 g.netrw_dirhistmax = 0
 g.netrw_banner = 0
@@ -35,7 +31,7 @@ opt.showmode = false
 opt.title = true
 opt.showtabline = 2
 opt.wildmode = "longest:full,full"
-opt.diffopt = opt.diffopt + {"vertical"}
+opt.diffopt = opt.diffopt + {"vertical", "indent-heuristic", "algorithm:patience"}
 opt.splitright = true
 opt.splitbelow = true
 opt.ignorecase = true
@@ -80,3 +76,5 @@ opt.writebackup = false
 opt.wildcharm = 26 -- <C-z>
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m,%f:%l:%m"
+opt.inccommand = "nosplit"
+opt.cedit = '<C-x>'

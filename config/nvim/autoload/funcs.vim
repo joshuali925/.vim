@@ -35,10 +35,14 @@ endfunction
 
 function! funcs#quit(buffer_mode, force) abort
   if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
-    if a:force == 1
-      BufferClose!
-    else
-      BufferClose
+    execute 'bprevious'
+    if len(getbufinfo({'buflisted':1})) > 1
+      try
+        execute 'bdelete'. (a:force ? '!' : ''). ' #'
+      catch
+        execute 'bnext'
+        throw 'Unsaved buffer'
+      endtry
     endif
   else
     execute 'quit'. (a:force ? '!' : '')

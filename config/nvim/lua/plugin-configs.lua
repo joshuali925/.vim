@@ -119,19 +119,12 @@ function M.auto_pairs()
     vim.fn.AutoPairsTryInit()
 end
 
-function M.barbar()
-    vim.cmd [[
-    let bufferline = get(g:, 'bufferline', {})
-    let bufferline.animation = v:false
-    let bufferline.maximum_padding = 1
-    let bufferline.no_name_title = ""
-    ]]
-end
-
 function M.nvim_tree()
     local tree_cb = require("nvim-tree.config").nvim_tree_callback
     g.nvim_tree_highlight_opened_files = 1
+    g.nvim_tree_lsp_diagnostics = 1
     g.nvim_tree_bindings = {
+        {key = {"?"}, cb = tree_cb("toggle_help")},
         {key = {"C"}, cb = tree_cb("cd")},
         {key = {"s"}, cb = tree_cb("split")},
         {key = {"yy"}, cb = tree_cb("copy_absolute_path")},
@@ -209,6 +202,24 @@ function M.indent_blankline()
     g.indent_blankline_show_first_indent_level = false
     g.indent_blankline_filetype_exclude = {"help", "man", "startify"}
     g.indent_blankline_buftype_exclude = {"terminal"}
+end
+
+function M.lspsaga()
+    require("lspsaga").init_lsp_saga {
+        use_saga_diagnostic_sign = false,
+        finder_action_keys = {
+            open = "<CR>",
+            vsplit = "s",
+            split = "i",
+            quit = {"<Esc>", "q"},
+            scroll_down = "<NOP>",
+            scroll_up = "<NOP>"
+        },
+        code_action_keys = {
+            quit = {"<Esc>", "q"},
+            exec = "<CR>"
+        }
+    }
 end
 
 function M.nvim_bufferline()
@@ -516,7 +527,7 @@ function _G.quickui_context_menu()
         {"Git &blame", "lua require('gitsigns').blame_line(true)", "Git blame of current line"},
         {
             "Git &remote",
-            [[let g:temp = getcurpos() | silent Git remote | call setpos('.', g:temp) | .GBrowse]],
+            [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | .GBrowse]],
             "Open remote url in browser"
         },
         {"--", ""}
@@ -599,7 +610,6 @@ function M.vim_quickui()
             }
         }
     )
-    -- silent Git remote is a dummy command to load fugitive
     vim.fn["quickui#menu#install"](
         "&Git",
         {
@@ -610,7 +620,7 @@ function M.vim_quickui()
             {"Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version"},
             {
                 "Git &file history",
-                [[vsplit | silent Git remote | 0Gclog]],
+                [[vsplit | execute "lua require('packer').loader('vim-fugitive')" | 0Gclog]],
                 "Browse previously committed versions of current file"
             },
             {"--", ""},
@@ -779,7 +789,11 @@ function M.vim_quickui()
                 "Show git log of selected range"
             },
             {"--", ""},
-            {"Git open &remote", [['<,'>GBrowse]], "Open remote url in browser"}
+            {
+                "Git open &remote",
+                [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | '<,'>GBrowse]],
+                "Open remote url in browser"
+            }
         }
     )
     vim.fn["quickui#menu#install"](

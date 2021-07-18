@@ -23,8 +23,8 @@ function init#setup()
     autocmd!
     autocmd BufLeave * call s:AutoSaveWinView()
     autocmd BufEnter * call s:AutoRestoreWinView()
-    autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
-    autocmd BufWritePost plugins.lua PackerCompile
+    autocmd BufWinEnter * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
+    autocmd BufWritePost */lua/plugins.lua source <afile> | PackerCompile
     autocmd FileType * setlocal formatoptions=jql
     autocmd TextYankPost * silent! lua vim.highlight.on_yank { higroup='IncSearch', timeout=300 }
     autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
@@ -36,7 +36,7 @@ function init#setup()
   command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
   command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
   command! -complete=shellcmd -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr(). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | else | execute "put =execute('". <q-args>. "')" | endif | 1d
-  command! W write !sudo tee %
+  command! W execute "noautocmd T sudo nvim +'set paste' +'1,$d' +startinsert %" | wincmd w | vnew | 0put='Enter password in terminal and run TREPLSendFile in edited buffer.' | wincmd w
   command! Grt Gcd
 
   if $SSH_CLIENT != ''  " ssh session
