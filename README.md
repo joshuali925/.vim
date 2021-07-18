@@ -33,8 +33,8 @@ Alt-tab -> Preferences -> Controls -> change "Hold option" to "Hold cmd"
                                    -> change "Select previous window" to shift tab
                        -> Appearance -> check Hide apps with no open window
 ```
-- Surfingkeys settings https://raw.githubusercontent.com/joshuali925/.vim/master/config/surfingkeys.js
-- Karabiner settings [import](karabiner://karabiner/assets/complex_modifications/import?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjoshuali925%2F.vim%2Fmaster%2Fconfig%2Fkarabiner.json)
+- Surfingkeys settings https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js
+- Karabiner settings [import](karabiner://karabiner/assets/complex_modifications/import?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjoshuali925%2F.vim%2FHEAD%2Fconfig%2Fkarabiner.json)
 ```bash
 # click link above or copy manually
 mkdir -p ~/.config/karabiner/assets/complex_modifications

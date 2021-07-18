@@ -43,11 +43,15 @@ map("x", "<", "<gv")
 map("x", ">", ">gv")
 map("n", "gp", "`[v`]")
 map("n", "cr", "<Cmd>call funcs#edit_register()<CR>")
-map("n", "Z[", "<Cmd>BufferCloseBuffersLeft<CR>")
-map("n", "Z]", "<Cmd>BufferCloseBuffersRight<CR>")
+map("n", "Z[", "<Cmd>BufferLineCloseLeft<CR>")
+map("n", "Z]", "<Cmd>BufferLineCloseRight<CR>")
 map("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
 map("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
-map("n", "<C-c>", "<Cmd>nohlsearch <bar> silent! AsyncStop!<CR>:echo<CR>")
+map(
+    "n",
+    "<C-c>",
+    "<Cmd>execute 'ColorizerAttachToBuffer' | nohlsearch <bar> silent! AsyncStop! <bar> lua require('gitsigns').refresh()<CR>:echo<CR>"
+)
 map("i", "<C-c>", "<Esc>")
 map("x", "<C-c>", "<Esc>")
 map("n", "<C-w><C-c>", "<Esc>")
@@ -63,8 +67,13 @@ map("", "<leader>y", '"+y')
 map("n", "<leader>Y", '"+y$')
 map("n", "<leader>b", "<Cmd>NvimTreeToggle<CR>")
 map("n", "<leader>B", "<Cmd>NvimTreeFindFile<CR>")
-map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]])
-map("x", "<leader>n", [["xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>]])
+map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], {noremap = true, silent = true})
+map(
+    "x",
+    "<leader>n",
+    [["xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>]],
+    {noremap = true, silent = true}
+)
 map("n", "<leader>u", "<Cmd>MundoToggle<CR>")
 map("n", "<leader>v", "<Cmd>SymbolsOutline<CR>")
 map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
@@ -92,6 +101,12 @@ map(
     "empty(filter(getwininfo(), 'v:val.loclist')) ? ':lopen<CR>' : ':lclose<CR>'",
     {expr = true, noremap = true}
 )
+map(
+    "n",
+    "yof",
+    "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <bar> -tabedit %<CR><Cmd>call winrestview(g:temp) <bar> let b:is_zoomed = 1<CR>' : get(b:, 'is_zoomed', 0) ? '<Cmd>tabclose<CR>' : ''",
+    {expr = true, noremap = true}
+)
 map("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", {expr = true, noremap = true})
 map("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", {expr = true, noremap = true})
 map("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], {expr = true, noremap = true})
@@ -102,11 +117,11 @@ map(
     {expr = true, noremap = true}
 )
 
--- bufferline
-map("n", "<BS>", "<Cmd>BufferPrevious<CR>")
-map("n", "\\", "<Cmd>BufferNext<CR>")
-map("n", "<C-w><BS>", "<Cmd>BufferMovePrevious<CR><C-w>", {})
-map("n", "<C-w>\\", "<Cmd>BufferMoveNext<CR><C-w>", {})
+-- nvim_bufferline
+map("n", "<BS>", "<Cmd>BufferLineCyclePrev<CR>")
+map("n", "\\", "<Cmd>BufferLineCycleNext<CR>")
+map("n", "<C-w><BS>", "<Cmd>BufferLineMovePrev<CR><C-w>", {})
+map("n", "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", {})
 
 -- terminal
 -- use noautocmd for Tnew/Ttoggle to avoid triggering BufReadPost and restoring last edit position again
@@ -161,6 +176,10 @@ map("", "<leader>j", "<Cmd>HopLine<CR>")
 map("", "<leader>k", "<Cmd>HopLine<CR>")
 
 -- fanfingtastic
+map("", "f", "<Plug>fanfingtastic_f", {})
+map("", "F", "<Plug>fanfingtastic_F", {})
+map("", "t", "<Plug>fanfingtastic_t", {})
+map("", "T", "<Plug>fanfingtastic_T", {})
 map("", ",", "<Plug>fanfingtastic_;", {})
 map("", ";,", "<Plug>fanfingtastic_,", {})
 

@@ -31,7 +31,7 @@ return require("packer").startup(
                     require("zephyr")
                 end
             }
-            use {"romgrk/barbar.nvim", opt = false, config = get_config("barbar")}
+            use {"akinsho/nvim-bufferline.lua", opt = false, config = get_config("nvim_bufferline")}
             use {"glepnir/galaxyline.nvim", opt = false, config = get_config("galaxyline")}
             use {
                 "lukas-reineke/indent-blankline.nvim",
@@ -40,7 +40,7 @@ return require("packer").startup(
             use {
                 "norcalli/nvim-colorizer.lua",
                 config = function()
-                    require("colorizer").setup()
+                    require("colorizer").setup({}, {rgb_fn = true})
                 end
             }
 
@@ -80,7 +80,7 @@ return require("packer").startup(
             use {"nvim-telescope/telescope-fzf-native.nvim", opt = false, run = "make"}
 
             -- git
-            use {"tpope/vim-rhubarb"}
+            use {"tpope/vim-rhubarb", cmd = "GBrowse"}
             use {
                 "tpope/vim-fugitive",
                 fn = "fugitive#*",
@@ -112,31 +112,15 @@ return require("packer").startup(
             use {
                 "nvim-treesitter/nvim-treesitter",
                 run = ":TSUpdate",
-                cond = "vim.g.IsFileSmall", -- delay load resets cursor position
-                require = {"nvim-treesitter/nvim-treesitter-textobjects", cond = "vim.g.IsFileSmall"},
+                requires = {"nvim-treesitter/nvim-treesitter-textobjects"},
                 config = get_config("treesitter")
             }
             use {"neovim/nvim-lspconfig"}
+            use {"kabouzeid/nvim-lspinstall"}
             use {
                 "glepnir/lspsaga.nvim",
                 module = "lspsaga",
-                config = function()
-                    require("lspsaga").init_lsp_saga {
-                        use_saga_diagnostic_sign = false,
-                        finder_action_keys = {
-                            open = "<CR>",
-                            vsplit = "s",
-                            split = "i",
-                            quit = {"<Esc>", "q"},
-                            scroll_down = "<NOP>",
-                            scroll_up = "<NOP>"
-                        },
-                        code_action_keys = {
-                            quit = {"<Esc>", "q"},
-                            exec = "<CR>"
-                        }
-                    }
-                end
+                config = get_config("lspsaga")
             }
             use {"ray-x/lsp_signature.nvim"}
             use {
@@ -164,7 +148,6 @@ return require("packer").startup(
                 end
             }
             use {"sbdchd/neoformat", cmd = "Neoformat"}
-            use {"kabouzeid/nvim-lspinstall"}
             use {"JoosepAlviste/nvim-ts-context-commentstring"}
             use {
                 "b3nj5m1n/kommentary",
@@ -191,7 +174,19 @@ return require("packer").startup(
 
             -- editing
             use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}
-            use {"joshuali925/vim-indent-object"}
+            use {
+                "joshuali925/vim-indent-object",
+                keys = {
+                    {"o", "ii"},
+                    {"o", "ai"},
+                    {"x", "ii"},
+                    {"x", "ai"},
+                    {"o", "iI"},
+                    {"o", "aI"},
+                    {"x", "iI"},
+                    {"x", "aI"}
+                }
+            }
             use {"terryma/vim-expand-region", keys = "<Plug>(expand_region_"}
             use {
                 "mg979/vim-visual-multi",
@@ -207,9 +202,9 @@ return require("packer").startup(
                 end
             }
             use {"unblevable/quick-scope", config = get_config("quick_scope")}
-            use {"dahu/vim-fanfingtastic"}
-            use {"chaoren/vim-wordmotion", setup = [[vim.g.wordmotion_nomap = 1]]}
-            use {"machakann/vim-sandwich", event = "BufEnter", setup = get_config("setup_vim_sandwich")} -- delay load resets cursor position
+            use {"dahu/vim-fanfingtastic", keys = "<Plug>fanfingtastic_"}
+            use {"chaoren/vim-wordmotion", keys = "<Plug>WordMotion_", setup = [[vim.g.wordmotion_nomap = 1]]}
+            use {"machakann/vim-sandwich", setup = get_config("setup_vim_sandwich")}
             use {"machakann/vim-swap", keys = "<Plug>(swap-"}
             use {"AndrewRadev/splitjoin.vim", keys = {{"n", "gS"}, {"n", "gJ"}}}
 

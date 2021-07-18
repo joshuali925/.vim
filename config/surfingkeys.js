@@ -1,3 +1,4 @@
+// https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js
 chrome.storage.local.set({ "noPdfViewer": 1 }); // https://github.com/brookhong/Surfingkeys/issues/320
 settings.tabsThreshold = 0;
 settings.richHintsForKeystroke = 1500;
@@ -36,6 +37,7 @@ map('i', 'gi'); // first input box
 map('gi', '<Ctrl-q>'); // select input box
 map('I', '<Alt-i>'); // disable surfingkeys
 map('<Ctrl-o>', 'p'); // temporarily disable surfingkeys
+map('<Ctrl-t>', 'on'); // new tab
 map('H', 'S'); // back in history
 map('L', 'D'); // forward in history
 map(';fi', 'oi'); // open incognito
@@ -69,7 +71,7 @@ map(';r', ';pm'); // preview markdown
 map(';b', 'ab'); // add bookmark
 map(';B', ';db'); // remove bookmark
 map(';c', ';e'); // edit configs
-map(';e', ';u'); // edit url
+map(';e', ';U'); // edit url
 unmap('r');
 unmap('gr');
 vunmap('gr');
@@ -116,11 +118,22 @@ mapkey('P', 'Open url or google', function() {
         });
     }
 });
+mapkey(';p', 'DuckDuckGo first result', function() {
+    if (window.getSelection().toString()) {
+        open("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(window.getSelection().toString()));
+    } else {
+        Clipboard.read(function(response) {
+            open("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(response.data));
+        });
+    }
+});
 map('yop', ';s'); // toggle pdf viewer
 mapkey('yoe', 'Toggle editable', function() { document.body.contentEditable = document.body.contentEditable === 'true' ? 'false' : 'true'; });
 mapkey('yof', 'Toggle full screen', function() {
     if (location.hostname === 'www.bilibili.com')
         document.getElementsByClassName('bilibili-player-video-web-fullscreen')[0].click();
+    else if (/age.?fans/.test(location.hostname))
+        document.getElementsByClassName('fullscn')[0].click();
     else
         document.getElementById('playerControlBtn').click(); // https://greasyfork.org/en/scripts/4870-maximize-video, escape also works
 });

@@ -1350,3 +1350,52 @@ set -g @extrakto_clip_tool_run 'fg'
 " somehow not needed for telescope extensions
     require("telescope").load_extension("gh")
     require("telescope").load_extension("yank")
+opt.showbreak = '╰─➤ '
+
+" =======================================================
+" lazyload file type
+g.did_load_filetypes = 1
+    vim.cmd([[
+        syntax enable
+        unlet g:did_load_filetypes
+        filetype on
+        doautoall filetypedetect BufRead
+    ]])
+
+" =======================================================
+" barbar too slow
+            use {"romgrk/barbar.nvim", opt = false, config = get_config("barbar")}
+function M.barbar()
+    vim.cmd [[
+    let bufferline = get(g:, 'bufferline', {})
+    let bufferline.animation = v:false
+    let bufferline.maximum_padding = 1
+    let bufferline.no_name_title = ""
+    ]]
+end
+map("n", "Z[", "<Cmd>BufferCloseBuffersLeft<CR>")
+map("n", "Z]", "<Cmd>BufferCloseBuffersRight<CR>")
+map("n", "<BS>", "<Cmd>BufferLineCyclePrev<CR>")
+map("n", "\\", "<Cmd>BufferLineCycleNext<CR>")
+map("n", "<C-w><BS>", "<Cmd>BufferLineMovePrev<CR><C-w>", {})
+map("n", "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", {})
+function! funcs#quit(buffer_mode, force) abort
+  if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
+    if a:force == 1
+      BufferClose!
+    else
+      BufferClose
+    endif
+  else
+    execute 'quit'. (a:force ? '!' : '')
+  endif
+endfunction
+    vim.cmd [[
+    " for barbar
+    highlight! link BufferVisible BufferInactive
+    highlight! link BufferVisibleIndex BufferInactiveIndex
+    highlight! link BufferVisibleMod BufferInactiveMod
+    highlight! link BufferVisibleSign BufferInactiveSign
+    highlight! link BufferVisibleTarget BufferInactiveTarget
+    ]]
+
