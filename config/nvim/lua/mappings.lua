@@ -1,5 +1,4 @@
 local map = require("utils").map
-vim.g.mapleader = ";"
 
 local function map_text_object(char)
     map("x", "i" .. char, ":<C-u>normal! T" .. char .. "vt" .. char .. "<CR>", {noremap = true, silent = true})
@@ -50,7 +49,7 @@ map("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), n
 map(
     "n",
     "<C-c>",
-    "<Cmd>execute 'ColorizerAttachToBuffer' | nohlsearch <bar> silent! AsyncStop! <bar> lua require('gitsigns').refresh()<CR>:echo<CR>"
+    "<Cmd>execute 'ColorizerAttachToBuffer' | nohlsearch <bar> silent! AsyncStop!<CR><Cmd>lua require('gitsigns').refresh()<CR>:echo<CR>"
 )
 map("i", "<C-c>", "<Esc>")
 map("x", "<C-c>", "<Esc>")
@@ -124,10 +123,9 @@ map("n", "<C-w><BS>", "<Cmd>BufferLineMovePrev<CR><C-w>", {})
 map("n", "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", {})
 
 -- terminal
--- use noautocmd for Tnew/Ttoggle to avoid triggering BufReadPost and restoring last edit position again
-map("n", "<C-b>", "<Cmd>noautocmd execute 'Ttoggle resize='. min([10, &lines * 2/5])<CR>")
+map("n", "<C-b>", "<Cmd>execute 'Ttoggle resize='. min([10, &lines * 2/5])<CR>")
 map("n", "<leader>to", "<C-b>", {})
-map("n", "<leader>tt", "<Cmd>noautocmd Tnew<CR>")
+map("n", "<leader>tt", "<Cmd>Tnew<CR>")
 map("n", "<leader>te", "<Plug>(neoterm-repl-send)", {})
 map("n", "<leader>tee", "<Plug>(neoterm-repl-send-line)", {})
 map("x", "<leader>te", "<Plug>(neoterm-repl-send)", {})

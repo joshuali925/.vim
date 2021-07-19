@@ -21,7 +21,7 @@ return require("packer").startup(
             }
         },
         function(use)
-            use {"wbthomason/packer.nvim", setup = ""}
+            use {"wbthomason/packer.nvim"}
 
             -- appearance
             use {
@@ -115,8 +115,15 @@ return require("packer").startup(
                 requires = {"nvim-treesitter/nvim-treesitter-textobjects"},
                 config = get_config("treesitter")
             }
-            use {"neovim/nvim-lspconfig"}
+            use {"nvim-treesitter/playground", cmd = {"TSPlaygroundToggle", "TSHighlightCapturesUnderCursor"}}
             use {"kabouzeid/nvim-lspinstall"}
+            use {
+                "neovim/nvim-lspconfig",
+                after = {"nvim-lspinstall", "lsp_signature.nvim"},
+                config = function()
+                    require("lsp")
+                end
+            }
             use {
                 "glepnir/lspsaga.nvim",
                 module = "lspsaga",
@@ -130,16 +137,15 @@ return require("packer").startup(
                     require("lspkind").init({symbol_map = {Enum = "", Field = ""}})
                 end
             }
-            use {"hrsh7th/vim-vsnip", event = "InsertEnter"}
-            use {"rafamadriz/friendly-snippets", event = "InsertEnter"}
             use {
                 "hrsh7th/nvim-compe",
                 event = "InsertEnter",
-                after = {"vim-vsnip", "friendly-snippets"},
                 config = function()
                     require("completion")
                 end
             }
+            use {"hrsh7th/vim-vsnip", event = "InsertEnter"}
+            use {"rafamadriz/friendly-snippets", event = "InsertEnter"}
             use {
                 "folke/trouble.nvim",
                 cmd = "TroubleToggle",
@@ -148,10 +154,9 @@ return require("packer").startup(
                 end
             }
             use {"sbdchd/neoformat", cmd = "Neoformat"}
-            use {"JoosepAlviste/nvim-ts-context-commentstring"}
             use {
                 "b3nj5m1n/kommentary",
-                requires = "JoosepAlviste/nvim-ts-context-commentstring",
+                requires = {"JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-lspconfig"},
                 keys = "<Plug>kommentary_",
                 setup = [[vim.g.kommentary_create_default_mappings = false]],
                 config = get_config("kommentary")
@@ -166,11 +171,12 @@ return require("packer").startup(
             use {"MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log"}
             use {
                 "ahmedkhalf/lsp-rooter.nvim",
+                after = "nvim-lspconfig",
                 config = function()
                     require("lsp-rooter").setup()
                 end
             }
-            use {"udalov/kotlin-vim", ft = "kotlin"}
+            use {"udalov/kotlin-vim", event = "BufEnter"} -- load on filetype doesn't work for first kotlin buffer
 
             -- editing
             use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}
@@ -202,8 +208,8 @@ return require("packer").startup(
                 end
             }
             use {"unblevable/quick-scope", config = get_config("quick_scope")}
-            use {"dahu/vim-fanfingtastic", keys = "<Plug>fanfingtastic_"}
-            use {"chaoren/vim-wordmotion", keys = "<Plug>WordMotion_", setup = [[vim.g.wordmotion_nomap = 1]]}
+            use {"dahu/vim-fanfingtastic"}
+            use {"chaoren/vim-wordmotion", setup = [[vim.g.wordmotion_nomap = 1]]}
             use {"machakann/vim-sandwich", setup = get_config("setup_vim_sandwich")}
             use {"machakann/vim-swap", keys = "<Plug>(swap-"}
             use {"AndrewRadev/splitjoin.vim", keys = {{"n", "gS"}, {"n", "gJ"}}}

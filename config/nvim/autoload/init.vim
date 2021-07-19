@@ -17,8 +17,8 @@ endfunction
 
 function init#setup()
   filetype plugin indent on  " needed for setting formatoptions https://github.com/neovim/neovim/issues/4684
-  " TODO add user completion when this is merged https://github.com/neovim/neovim/pull/12995
 
+  " TODO add user completion when this is merged https://github.com/neovim/neovim/pull/12995
   augroup AutoCommands
     autocmd!
     autocmd BufLeave * call s:AutoSaveWinView()
@@ -36,7 +36,8 @@ function init#setup()
   command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
   command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
   command! -complete=shellcmd -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr(). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | else | execute "put =execute('". <q-args>. "')" | endif | 1d
-  command! W execute "noautocmd T sudo nvim +'set paste' +'1,$d' +startinsert %" | wincmd w | vnew | 0put='Enter password in terminal and run TREPLSendFile in edited buffer.' | wincmd w
+  command! W write !sudo tee %  " for nvim only works if no password is required
+  command! Write execute 'lua require("packer").loader("neoterm")' | execute "T sudo nvim +'set paste' +'1,$d' +startinsert %" | wincmd w | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and run TREPLSendFile in edited buffer.' | wincmd w
   command! Grt Gcd
 
   if $SSH_CLIENT != ''  " ssh session

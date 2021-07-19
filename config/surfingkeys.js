@@ -53,8 +53,8 @@ map('Q', '<Ctrl-j>'); // unhover
 map('f', 'gf'); // open in background new tab
 map('F', 'cf'); // open multiple links in new tab
 map('gf', 'w'); // switch frames
-map('gj', 'cs'); // switch scroll target
-map('gJ', 'cS'); // reset scroll target
+map('e', 'cs'); // switch scroll target
+map('E', 'cS'); // reset scroll target
 map(';fj', ';fs'); // choose scroll target
 map('gv', 'V'); // restore visual mode
 map('c', 'v'); // enter caret mode
@@ -118,7 +118,7 @@ mapkey('P', 'Open url or google', function() {
         });
     }
 });
-mapkey(';p', 'DuckDuckGo first result', function() {
+mapkey('gp', 'DuckDuckGo first result', function() {
     if (window.getSelection().toString()) {
         open("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(window.getSelection().toString()));
     } else {
@@ -151,12 +151,12 @@ var scrollX, scrollY;
 mapkey('gg', 'Go to top', function() {
     scrollX = document.scrollingElement.scrollLeft;
     scrollY = document.scrollingElement.scrollTop;
-    window.scrollTo(0, 0);
+    Normal.scroll("top");
 });
 mapkey('G', 'Go to bottom', function() {
     scrollX = document.scrollingElement.scrollLeft;
     scrollY = document.scrollingElement.scrollTop;
-    window.scrollTo(0, document.body.scrollHeight);
+    Normal.scroll("bottom");
 });
 mapkey('``', 'Go to previous position', function() {
     var tempX = document.scrollingElement.scrollLeft;
