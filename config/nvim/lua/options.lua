@@ -1,15 +1,7 @@
 local g = vim.g
 local opt = vim.opt
 
-vim.paste = (function(overridden)
-    return function(lines, phase)
-        if (phase == -1 or phase == 1) and vim.fn.mode() == 'i' then
-            vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
-        end
-        overridden(lines, phase)
-    end
-end)(vim.paste)
-
+g.mapleader = ";"
 -- need this PR to replace netrw https://github.com/kyazdani42/nvim-tree.lua/pull/288
 g.netrw_dirhistmax = 0
 g.netrw_banner = 0
@@ -77,4 +69,14 @@ opt.wildcharm = 26 -- <C-z>
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m,%f:%l:%m"
 opt.inccommand = "nosplit"
-opt.cedit = '<C-x>'
+opt.cedit = "<C-x>"
+
+vim.paste =
+    (function(overridden)
+    return function(lines, phase)
+        if (phase == -1 or phase == 1) and vim.fn.mode() == "i" then
+            vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
+        end
+        overridden(lines, phase)
+    end
+end)(vim.paste)

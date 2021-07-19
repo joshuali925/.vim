@@ -341,7 +341,8 @@ z() {
   fi
 }
 zc() {
-  local FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind 'tab:down,btab:up' --query "$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+  local FZFTEMP
+  FAFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind 'tab:down,btab:up' --query "$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
 }
 
 t() {  # create or switch tmux session
@@ -355,11 +356,13 @@ t() {  # create or switch tmux session
 }
 
 manf() {
-  local FZFTEMP=$(man -k . 2>/dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind 'tab:down,btab:up' -q "$1" --prompt='man> ' --preview $'echo {} | xargs -r man') && man "$(echo "$FZFTEMP" | awk -F' |,' '{print $1}')"
+  local FZFTEMP
+  FZFTEMP=$(man -k . 2>/dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind 'tab:down,btab:up' -q "$1" --prompt='man> ' --preview $'echo {} | xargs -r man') && man "$(echo "$FZFTEMP" | awk -F' |,' '{print $1}')"
 }
 
 envf() {
-  local FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind 'tab:down,btab:up' -q "$1") && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
+  local FZFTEMP
+  FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind 'tab:down,btab:up' --query "$1" --preview 'printenv {}') && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
 }
 
 react() {

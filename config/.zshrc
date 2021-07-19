@@ -33,6 +33,7 @@ zinit light-mode as"program" from"gh-r" for \
 # zinit light-mode as"program" from"gh-r" for mv"dust* -> dust" sbin"dust/dust" bootandy/dust
 # zinit light-mode as"program" from"gh-r" for sbin muesli/duf
 # zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
+# zinit light-mode as"program" from"gh-r" for mv"hyperfine* -> hyperfine" sbin"hyperfine/hyperfine" @sharkdp/hyperfine
 # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
 
 zinit as"completion" for \

@@ -52,7 +52,8 @@ if exists('g:neovide')
     call timer_start(500, 'SetWindowSize')
   endif
 else
-  " nvim-qt
-  GuiPopupmenu 0
-  GuiTabline 0
+  if &columns < 115 || &lines < 32
+    set lines=32
+    set columns=115
+  endif
 endif

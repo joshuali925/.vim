@@ -1399,3 +1399,6 @@ endfunction
     highlight! link BufferVisibleTarget BufferInactiveTarget
     ]]
 
+" =======================================================
+" tmux gf binding use fzf query
+bind -T copyModeMultiKey_semicolon f if-shell -F '#{selection_active}' '' 'send-keys -X select-word' \; send-keys -X pipe 'xargs basename | xargs -I {} tmux new-window -a -c "#{pane_current_path}" "rg --files | rg \"{}\" | fzf --multi --bind=\"enter:execute($EDITOR {+} < /dev/tty)+abort\""'

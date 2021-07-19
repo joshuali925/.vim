@@ -1,32 +1,51 @@
-local function lazyload()
-    local fname = vim.fn.expand("%:p:f")
-    local fsize = vim.fn.getfsize(fname)
-    if fsize ~= nil and fsize > 6291456 then -- 6MB
-        return
-    end
-
-    local loader = require("packer").loader
-    local plugins = {
-        "indent-blankline.nvim",
-        "nvim-colorizer.lua",
-        "plenary.nvim",
-        "gitsigns.nvim",
-        "conflict-marker.vim",
-        "nvim-lspconfig",
-        "nvim-treesitter",
-        "lsp_signature.nvim",
-        "nvim-lspinstall",
-        "nvim-ts-context-commentstring",
-        "lsp-rooter.nvim",
-        "quick-scope",
-        "vim-sandwich", -- cs/ds/ab doesn't work when loaded by keys
-        "vim-sleuth"
-    }
-    loader(table.concat(plugins, " "))
-    require("lsp")
-    vim.cmd("silent! edit") -- for lsp and lsp-rooter.nvim
+local fname = vim.fn.expand("%:p:f")
+local fsize = vim.fn.getfsize(fname)
+if fsize ~= nil and fsize > 6291456 then -- 6MB
+    return
 end
 
-vim.schedule(function ()
-    vim.defer_fn(lazyload, 80)
-end)
+vim.schedule(
+    function()
+        local loader = require("packer").loader
+        vim.defer_fn(
+            function()
+                local plugins = {
+                    "nvim-treesitter",
+                    "nvim-lspinstall",
+                    "lsp_signature.nvim"
+                }
+                loader(table.concat(plugins, " "))
+            end,
+            30
+        )
+        vim.defer_fn(
+            function()
+                local plugins = {
+                    "indent-blankline.nvim",
+                    "nvim-colorizer.lua",
+                    "plenary.nvim",
+                    "gitsigns.nvim",
+                    "conflict-marker.vim",
+                    "vim-sleuth",
+                    "quick-scope",
+                    "vim-wordmotion", -- motions/text objects sometimes don't work if loaded on keys
+                    "vim-sandwich",
+                    "vim-fanfingtastic"
+                }
+                loader(table.concat(plugins, " "))
+            end,
+            100
+        )
+        vim.defer_fn(
+            function()
+                local plugins = {
+                    "nvim-lspconfig", -- load after lspinstall so activates automatically
+                    "nvim-ts-context-commentstring",
+                    "lsp-rooter.nvim"
+                }
+                loader(table.concat(plugins, " "))
+            end,
+            200
+        )
+    end
+)
