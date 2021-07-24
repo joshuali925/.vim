@@ -26,13 +26,13 @@ return require("packer").startup(
             -- appearance
             use {
                 "glepnir/zephyr-nvim",
-                opt = false,
+                event = "BufEnter",
                 config = function()
                     require("zephyr")
                 end
             }
-            use {"akinsho/nvim-bufferline.lua", opt = false, config = get_config("nvim_bufferline")}
-            use {"glepnir/galaxyline.nvim", opt = false, config = get_config("galaxyline")}
+            use {"akinsho/nvim-bufferline.lua", event = "BufEnter", config = get_config("nvim_bufferline")}
+            use {"glepnir/galaxyline.nvim", event = "BufEnter", config = get_config("galaxyline")}
             use {
                 "lukas-reineke/indent-blankline.nvim",
                 config = get_config("indent_blankline")
@@ -112,8 +112,7 @@ return require("packer").startup(
             use {
                 "nvim-treesitter/nvim-treesitter",
                 run = ":TSUpdate",
-                requires = {"nvim-treesitter/nvim-treesitter-textobjects"},
-                config = get_config("treesitter")
+                requires = {"nvim-treesitter/nvim-treesitter-textobjects"}
             }
             use {"nvim-treesitter/playground", cmd = {"TSPlaygroundToggle", "TSHighlightCapturesUnderCursor"}}
             use {"kabouzeid/nvim-lspinstall"}
@@ -176,7 +175,13 @@ return require("packer").startup(
                     require("lsp-rooter").setup()
                 end
             }
-            use {"udalov/kotlin-vim", event = "BufEnter"} -- load on filetype doesn't work for first kotlin buffer
+            use {
+                "udalov/kotlin-vim",
+                ft = "kotlin",
+                config = function()
+                    vim.cmd("syntax enable")
+                end
+            }
 
             -- editing
             use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}

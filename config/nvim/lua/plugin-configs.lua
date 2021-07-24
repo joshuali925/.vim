@@ -1,114 +1,6 @@
 local M = {}
 local g = vim.g
 
-function M.treesitter()
-    require("nvim-treesitter.configs").setup {
-        ensure_installed = {
-            "javascript",
-            "typescript",
-            "tsx",
-            "html",
-            "css",
-            "bash",
-            "lua",
-            "json",
-            "yaml",
-            "python"
-        },
-        highlight = {
-            enable = true,
-            use_languagetree = true
-        },
-        textobjects = {
-            select = {
-                enable = true,
-                keymaps = {
-                    ["if"] = "@function.inner",
-                    ["af"] = "@function.outer",
-                    ["ic"] = "@class.inner",
-                    ["ac"] = "@class.outer"
-                }
-            },
-            move = {
-                enable = true,
-                set_jumps = true,
-                goto_next_start = {
-                    ["]]"] = "@function.outer"
-                },
-                goto_next_end = {
-                    ["]["] = "@function.outer"
-                },
-                goto_previous_start = {
-                    ["[["] = "@function.outer"
-                },
-                goto_previous_end = {
-                    ["[]"] = "@function.outer"
-                }
-            }
-        },
-        indent = {
-            enable = true,
-            disable = {"python"}
-        },
-        -- for nvim-ts-context-commentstring
-        context_commentstring = {
-            enable = true,
-            enable_autocmd = false
-        }
-    }
-end
-
-function M.telescope()
-    local actions = require("telescope.actions")
-    require("telescope").setup {
-        defaults = {
-            mappings = {
-                i = {
-                    ["<Esc>"] = actions.close,
-                    ["<C-u>"] = function()
-                        vim.cmd("stopinsert")
-                    end
-                }
-            },
-            vimgrep_arguments = {
-                "rg",
-                "--color=never",
-                "--no-heading",
-                "--with-filename",
-                "--line-number",
-                "--column",
-                "--smart-case",
-                "--hidden"
-            },
-            layout_strategy = "vertical",
-            layout_config = {
-                vertical = {
-                    preview_height = 0.3
-                }
-            },
-            -- https://github.com/nvim-telescope/telescope.nvim/issues/917
-            file_ignore_patterns = {".git", "node_modules", "venv"}
-        },
-        pickers = {
-            -- https://github.com/nvim-telescope/telescope.nvim/issues/938
-            file_browser = {theme = "dropdown"},
-            filetypes = {theme = "dropdown"},
-            registers = {theme = "dropdown"},
-            commands = {theme = "dropdown"},
-            builtin = {theme = "dropdown"}
-        },
-        extensions = {
-            fzf = {
-                fuzzy = true,
-                override_generic_sorter = true,
-                override_file_sorter = true,
-                case_mode = "smart_case"
-            }
-        }
-    }
-    require("telescope").load_extension("fzf")
-end
-
 function M.auto_pairs()
     g.AutoPairsShortcutToggle = ""
     g.AutoPairsShortcutFastWrap = "<C-l>"
@@ -180,9 +72,7 @@ end
 function M.quick_scope()
     g.qs_filetype_blacklist = {"startify", "TelescopePrompt"}
     g.qs_buftype_blacklist = {"terminal"}
-    vim.cmd [[
-    highlight QuickScopePrimary guifg='#ffe9c2'
-    ]]
+    vim.cmd("highlight QuickScopePrimary guifg='#ffe9c2'")
 end
 
 function M.mundo()
@@ -257,10 +147,10 @@ function M.conflict_marker()
     g.conflict_marker_end = "^>>>>>>> .*$"
     g.conflict_marker_highlight_group = ""
     vim.cmd [[
-    highlight ConflictMarkerBegin guibg=#427266
-    highlight ConflictMarkerOurs guibg=#364f49
-    highlight ConflictMarkerTheirs guibg=#3a4f67
-    highlight ConflictMarkerEnd guibg=#234a78
+        highlight ConflictMarkerBegin guibg=#427266
+        highlight ConflictMarkerOurs guibg=#364f49
+        highlight ConflictMarkerTheirs guibg=#3a4f67
+        highlight ConflictMarkerEnd guibg=#234a78
     ]]
 end
 
@@ -287,6 +177,57 @@ function M.setup_vim_visual_multi()
         ["Select Operator"] = "v",
         ["Case Conversion Menu"] = "s"
     }
+end
+
+function M.telescope()
+    local actions = require("telescope.actions")
+    require("telescope").setup {
+        defaults = {
+            mappings = {
+                i = {
+                    ["<Esc>"] = actions.close,
+                    ["<C-u>"] = function()
+                        vim.cmd("stopinsert")
+                    end
+                }
+            },
+            vimgrep_arguments = {
+                "rg",
+                "--color=never",
+                "--no-heading",
+                "--with-filename",
+                "--line-number",
+                "--column",
+                "--smart-case",
+                "--hidden"
+            },
+            layout_strategy = "vertical",
+            layout_config = {
+                vertical = {
+                    preview_height = 0.3
+                }
+            },
+            -- https://github.com/nvim-telescope/telescope.nvim/issues/917
+            file_ignore_patterns = {".git", "node_modules", "venv"}
+        },
+        pickers = {
+            -- https://github.com/nvim-telescope/telescope.nvim/issues/938
+            file_browser = {theme = "dropdown"},
+            filetypes = {theme = "dropdown"},
+            registers = {theme = "dropdown"},
+            commands = {theme = "dropdown"},
+            builtin = {theme = "dropdown"}
+        },
+        extensions = {
+            fzf = {
+                fuzzy = true,
+                override_generic_sorter = true,
+                override_file_sorter = true,
+                case_mode = "smart_case"
+            }
+        }
+    }
+    require("telescope").load_extension("fzf")
 end
 
 function M.galaxyline()
@@ -558,9 +499,11 @@ function M.vim_quickui()
     vim.fn["quickui#menu#install"](
         "&Actions",
         {
-            -- execute "normal \<Plug>kommentary_line_default" doesn't work when kommentary isn't loaded
-            -- {'&Insert line', [[execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]], 'Insert a dividing line'},
-            {"Insert line", [[execute "normal! o\<Space>\<BS>\<Esc>55a="]], "Insert a dividing line"},
+            {
+                "Insert line",
+                [[execute "lua require('packer').loader('kommentary')" | execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]],
+                "Insert a dividing line"
+            },
             {"Insert time", [[put=strftime('%x %X')]], "Insert MM/dd/yyyy hh:mm:ss tt"},
             {"&Trim spaces", [[keeppatterns %s/\s\+$//e | silent! execute "normal! ``"]], "Remove trailing spaces"},
             {

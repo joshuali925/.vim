@@ -1,12 +1,16 @@
 local g = vim.g
 local opt = vim.opt
 
+g.did_load_filetypes = 1
+vim.cmd("syntax off")
+g.loaded_2html_plugin = 1
+g.loaded_remote_plugins = 1
+g.loaded_tutor_mode_plugin = 1
+
 g.mapleader = ";"
 -- need this PR to replace netrw https://github.com/kyazdani42/nvim-tree.lua/pull/288
 g.netrw_dirhistmax = 0
 g.netrw_banner = 0
-g.netrw_browse_split = 4
-g.netrw_winsize = 20
 g.netrw_liststyle = 3
 g.markdown_fenced_languages = {"javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh"}
 
