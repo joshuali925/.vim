@@ -16,7 +16,7 @@ export FZF_ALT_C_OPTS='--bind "tab:down,btab:up"'
 export FZF_PREVIEW_COMMAND='bat --style=numbers --color=always --theme=OneHalfDark --line-range :50 {}'
 
 alias -- -='cd -'
-alias 1='cd -'
+alias 1='cd -1'
 alias 2='cd -2'
 alias 3='cd -3'
 alias 4='cd -4'
@@ -37,7 +37,7 @@ alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto'
 alias la='ls -AF --color=auto'
 alias ls='ls -CF --color=auto'
-alias l='exa -alF --git --color=always --color-scale --group-directories-first'
+alias l='exa -alF --git --color=always --color-scale --icons --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
@@ -342,7 +342,7 @@ z() {
 }
 zc() {
   local FZFTEMP
-  FAFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind 'tab:down,btab:up' --query "$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+  FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind 'tab:down,btab:up' --query "$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
 }
 
 t() {  # create or switch tmux session

@@ -9,12 +9,20 @@ vim.schedule(
         local loader = require("packer").loader
         vim.defer_fn(
             function()
-                local plugins = {
-                    "nvim-treesitter",
-                    "nvim-lspinstall",
-                    "lsp_signature.nvim"
-                }
-                loader(table.concat(plugins, " "))
+                vim.cmd("syntax enable")
+                require("treesitter")
+                vim.cmd [[
+                    unlet g:did_load_filetypes
+                    autocmd! syntaxset
+                    autocmd syntaxset FileType * lua require('treesitter').hijack_synset()
+                    filetype on
+                    doautoall filetypedetect BufRead
+                    augroup FormatOptions
+                        autocmd!
+                        autocmd FileType * setlocal formatoptions=jql
+                    augroup END
+                ]]
+                loader("nvim-lspinstall lsp_signature.nvim")
             end,
             30
         )

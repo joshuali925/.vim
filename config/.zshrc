@@ -10,7 +10,7 @@ source ~/.zinit/bin/zinit.zsh
 
 zinit depth=1 light-mode for romkatv/powerlevel10k
 
-zinit light zinit-zsh/z-a-bin-gem-node
+zinit depth=1 light-mode for zinit-zsh/z-a-bin-gem-node
 zinit light-mode as"program" from"gh-r" for \
   mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
   mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
@@ -37,15 +37,13 @@ zinit light-mode as"program" from"gh-r" for \
 # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
 
 zinit as"completion" for \
-  https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
-  https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd \
   https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
   https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \
   https://github.com/gradle/gradle-completion/blob/master/_gradle \
   https://github.com/gradle/gradle-completion/blob/master/gradle-completion.plugin.zsh \
   https://github.com/zsh-users/zsh-completions/blob/master/src/_yarn
 
-zinit light-mode for \
+zinit depth=1 light-mode for \
   atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
   FAST_HIGHLIGHT[chroma-man]=" \
   zdharma/fast-syntax-highlighting \
@@ -61,11 +59,10 @@ zinit light-mode for \
 # vim <tab>: files in current directory or args completion
 # vim <C-p>: all files in current and subdirectories, respects .gitignore
 # vim \<tab>: all files in current and subdirectories
-source ~/.vim/config/oh-my-zsh-key-bindings.zsh
+zinit snippet OMZ::lib/key-bindings.zsh
 source ~/.vim/config/fzf/key-bindings.zsh
-source ~/.vim/config/fzf/completion.zsh
-# zplugin ice ver'fe9fa652390c78859450838825a8b5c40e9921ef'  # use this commit if master doesn't work
-zinit light Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
+zinit snippet https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.zsh
+zinit depth=1 light-mode for Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
 
 source ~/.vim/config/common.sh
 

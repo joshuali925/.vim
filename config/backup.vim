@@ -488,7 +488,9 @@ zinit wait lucid for \
     zsh-users/zsh-autosuggestions
 alias zf='FZFTEMP=$(z --list | awk "{print \$2}" | fzf) && cd "$FZFTEMP" && unset FZFTEMP'
 PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) %{$fg[cyan]%}%c%{$reset_color%} "
-" # zinit snippet OMZ::lib/key-bindings.zsh
+zinit snippet OMZ::lib/key-bindings.zsh
+zplugin ice ver'fe9fa652390c78859450838825a8b5c40e9921ef'  # use this commit if master doesn't work
+zinit depth=1 light-mode for Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
 
 " =======================================================
 " zinit binaries
