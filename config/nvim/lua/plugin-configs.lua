@@ -432,10 +432,13 @@ function M.startify()
     g.startify_commands = {
         {["!"] = {"Git modified", ":args `Git ls-files --modified` | Git difftool"}},
         {["*"] = {"Git diff HEAD", "DiffviewOpen"}},
+        {o = {"Git log", "Flog"}},
+        {["\\"] = {"Open quickui", "call quickui#menu#open('normal')"}},
         {f = {"Find files", "lua require('telescope.builtin').find_files({hidden = true})"}},
         {m = {"Find MRU", "lua require('telescope.builtin').oldfiles({include_current_session = true})"}},
-        {c = {"Edit vimrc", "cd ~/.vim | edit $MYVIMRC"}},
-        {s = {"Profile startup time", "StartupTime"}}
+        {c = {"Edit vimrc", "edit $MYVIMRC"}},
+        {s = {"Profile startup time", "StartupTime"}},
+        {D = {"Delete session", "SDelete!"}}
     }
     g.startify_lists = {
         {type = "files", header = {"   MRU"}},
@@ -573,7 +576,7 @@ function M.vim_quickui()
                 [[DiffviewOpen]],
                 "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits"
             },
-            {"Git l&og", [[Git log --decorate --all --full-history]], "Show git logs (use <CR>/- to navigate)"},
+            {"Git l&og", [[Flog]], "Show git logs with vim-flog"},
             {
                 "Git search &all",
                 [[call feedkeys(":Git log -p --all -S \"\"\<Left>", "n")]],
@@ -728,8 +731,8 @@ function M.vim_quickui()
             {"Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range"},
             {
                 "Git l&og",
-                [[execute 'Git log -L' line(\"'<\"). ','. line(\"'>\"). ':'. expand('%')]],
-                "Show git log of selected range"
+                [[execute "lua require('packer').loader('vim-flog')" | '<,'>Flogsplit]],
+                "Show git log of selected range with vim-flog"
             },
             {"--", ""},
             {

@@ -491,6 +491,7 @@ PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) %{$fg[cyan]%}%c%{$res
 zinit snippet OMZ::lib/key-bindings.zsh
 zplugin ice ver'fe9fa652390c78859450838825a8b5c40e9921ef'  # use this commit if master doesn't work
 zinit depth=1 light-mode for Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
+" zinit light-mode as"program" from"gh-r" for sbin dylanaraps/neofetch  # somehow only downloads v5.0.0
 
 " =======================================================
 " zinit binaries
@@ -1404,3 +1405,19 @@ endfunction
 " =======================================================
 " tmux gf binding use fzf query
 bind -T copyModeMultiKey_semicolon f if-shell -F '#{selection_active}' '' 'send-keys -X select-word' \; send-keys -X pipe 'xargs basename | xargs -I {} tmux new-window -a -c "#{pane_current_path}" "rg --files | rg \"{}\" | fzf --multi --bind=\"enter:execute($EDITOR {+} < /dev/tty)+abort\""'
+
+" =======================================================
+" install.sh no need to packer compile
+    sh -c 'sleep 20 && killall nvim && echo "Timeout, killed neovim"' &
+    local pid2=$!
+    ~/.local/bin/nvim +"lua vim.defer_fn(vim.fn['funcs#quitall'], 15000)" || true
+    kill $pid1 $pid2 > /dev/null 2>&1 || true
+
+" =======================================================
+" normal and visual git log, use vim-flog instead
+            {"Git l&og", [[Git log --decorate --all --full-history]], "Show git logs (use <CR>/- to navigate)"},
+            {
+                "Git l&og",
+                [[execute 'Git log -L '. line("'<"). ','. line("'>"). ':'. expand('%')]],
+                "Show git log of selected range"
+            },

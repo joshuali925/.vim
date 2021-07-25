@@ -1,7 +1,7 @@
 local M = {}
-local do_sy_tbl = {}
+local treesitter_hl_enabled = {}
 
-local function init()
+function M.init()
     local config = {
         ensure_installed = {
             "javascript",
@@ -59,23 +59,24 @@ local function init()
     }
     vim.cmd("packadd nvim-treesitter")
     vim.cmd("packadd nvim-treesitter-textobjects")
-    require("nvim-treesitter.configs").setup(config)
-    local parsers = require("nvim-treesitter.parsers")
-    local hl_disabled = config.highlight.disable
-    for lang in pairs(parsers.list) do
-        if not vim.tbl_contains(hl_disabled, lang) then
-            do_sy_tbl[lang] = true
+    local present, treesitter = pcall(require, "nvim-treesitter.configs")
+    if present then
+        treesitter.setup(config)
+        local parsers = config.ensure_installed
+        local hl_disabled = config.highlight.disable
+        for _, lang in ipairs(parsers) do
+            if not vim.tbl_contains(hl_disabled, lang) then
+                treesitter_hl_enabled[lang] = true
+            end
         end
     end
 end
 
 function M.hijack_synset()
     local ft = vim.fn.expand("<amatch>")
-    if not do_sy_tbl[ft] then
+    if not treesitter_hl_enabled[ft] then
         vim.opt.syntax = ft
     end
 end
-
-init()
 
 return M

@@ -26,13 +26,13 @@ return require("packer").startup(
             -- appearance
             use {
                 "glepnir/zephyr-nvim",
-                event = "BufEnter",
+                event = "VimEnter",
                 config = function()
                     require("zephyr")
                 end
             }
-            use {"akinsho/nvim-bufferline.lua", event = "BufEnter", config = get_config("nvim_bufferline")}
-            use {"glepnir/galaxyline.nvim", event = "BufEnter", config = get_config("galaxyline")}
+            use {"akinsho/nvim-bufferline.lua", event = "VimEnter", config = get_config("nvim_bufferline")}
+            use {"glepnir/galaxyline.nvim", event = "VimEnter", config = get_config("galaxyline")}
             use {
                 "lukas-reineke/indent-blankline.nvim",
                 config = get_config("indent_blankline")
@@ -80,7 +80,6 @@ return require("packer").startup(
             use {"nvim-telescope/telescope-fzf-native.nvim", opt = false, run = "make"}
 
             -- git
-            use {"tpope/vim-rhubarb", cmd = "GBrowse"}
             use {
                 "tpope/vim-fugitive",
                 fn = "fugitive#*",
@@ -97,6 +96,8 @@ return require("packer").startup(
                     "Gclog"
                 }
             }
+            use {"tpope/vim-rhubarb", cmd = "GBrowse"}
+            use {"rbong/vim-flog", cmd = {"Flog", "Flogsplit"}}
             use {
                 "lewis6991/gitsigns.nvim",
                 requires = {"nvim-lua/plenary.nvim"},
@@ -175,13 +176,7 @@ return require("packer").startup(
                     require("lsp-rooter").setup()
                 end
             }
-            use {
-                "udalov/kotlin-vim",
-                ft = "kotlin",
-                config = function()
-                    vim.cmd("syntax enable")
-                end
-            }
+            use {"udalov/kotlin-vim", ft = "kotlin"}
 
             -- editing
             use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}

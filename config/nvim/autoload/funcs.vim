@@ -29,18 +29,20 @@ function! funcs#lf_edit_callback(code) abort
   endif
 endfunction
 
-function! funcs#quitall() abort
-  quitall!
-endfunction
-
 function! funcs#quit(buffer_mode, force) abort
-  if (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
-    execute 'bprevious'
+  if a:buffer_mode == 0 && a:force == 1
+    if tabpagenr('$') == 1
+      quit
+    else
+      tabclose
+    endif
+  elseif (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
+    bprevious
     if len(getbufinfo({'buflisted':1})) > 1
       try
         execute 'bdelete'. (a:force ? '!' : ''). ' #'
       catch
-        execute 'bnext'
+        bnext
         throw 'Unsaved buffer'
       endtry
     endif

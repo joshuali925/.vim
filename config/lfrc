@@ -52,7 +52,7 @@ map gs !clear && git status
 map gr cd-git-root
 map gl follow-symlink
 map t locate-file
-map <c-p> locate-file
+map <c-p> locate-git-file
 map <c-o> $lazygit
 map <tab> locate-file-cwd
 map i $~/.vim/config/lf-preview.sh "$f" | bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always
@@ -99,6 +99,20 @@ cmd locate-file-cwd ${{
 
 cmd locate-file ${{
   res="$(rg --files | fzf --bind 'tab:down,btab:up')"
+  if [ -f "$res" ]; then
+    lf -remote "send $id select \"$res\""
+  elif [ -d "$res" ]; then
+    lf -remote "send $id cd \"$res\""
+  fi
+}}
+
+cmd locate-git-file ${{
+  git_repo="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
+  if [ "$git_repo" ]; then
+    res="$(git ls-files $(git rev-parse --show-toplevel) | fzf --bind 'tab:down,btab:up')"
+  else
+    res="$(rg --files | fzf --bind 'tab:down,btab:up')"
+  fi
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then
