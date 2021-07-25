@@ -47,8 +47,7 @@ backup() {
 }
 
 link_file() {
-    local sourceFile="$1"
-    local destFile="$2"
+    local sourceFile="$1" destFile="$2"
     backup "$destFile"
     ln -s "$sourceFile" "$destFile"
     log "Linked $sourceFile to $destFile"
@@ -170,16 +169,16 @@ install_dotfiles() {
 }
 
 install_tmux() {
-    log "Installing tmux plugins.."
-    backup "$HOME/.tmux"
-    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth 1
-    ~/.tmux/plugins/tpm/bin/install_plugins || true
-    echo
     if [[ $platform == Linux* ]]; then
         link_file $HOME/.vim/bin/tmux $HOME/.local/bin/tmux
     elif [ $platform == 'MacOS' ]; then
         brew install tmux --HEAD
     fi
+    log "Installed tmux, installing tmux plugins.."
+    backup "$HOME/.tmux"
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth 1
+    ~/.tmux/plugins/tpm/bin/install_plugins || true
+    echo
 }
 
 install_node() {
@@ -203,22 +202,20 @@ install_neovim() {
     if [[ $platform == Linux* ]]; then
         curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
         chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
+        backup "$HOME/.local/nvim"
         mv squashfs-root ~/.local/nvim && ln -sf ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
     elif [ $platform == 'MacOS' ]; then
         curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
+        backup "$HOME/.local/nvim-osx64"
         tar xf nvim-macos.tar.gz -C ~/.local && rm nvim-macos.tar.gz
         ln -sf ~/.local/nvim-osx64/bin/nvim ~/.local/bin/nvim
     fi
     log "Installed neovim"
-    [ ! -d ~/.local/share/nvim/site/pack/packer ] && git clone https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/opt/packer.nvim --depth 1
     # https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
     sh -c 'sleep 60 && killall nvim && echo "Timeout, killed neovim"' &
     local pid1=$!
-    ~/.local/bin/nvim -u ~/.vim/config/nvim/lua/plugins.lua +'autocmd User PackerComplete sleep 100m | quitall!' +PackerSync || true
-    sh -c 'sleep 20 && killall nvim && echo "Timeout, killed neovim"' &
-    local pid2=$!
-    ~/.local/bin/nvim +"lua vim.defer_fn(vim.fn['funcs#quitall'], 15000)" +PackerCompile || true
-    kill $pid1 $pid2 > /dev/null 2>&1 || true
+    ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').install()" || true
+    kill $pid1 > /dev/null 2>&1 || true
     log "Installed neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"
     log "Run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
     echo

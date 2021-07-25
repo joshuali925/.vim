@@ -24,7 +24,6 @@ zinit light-mode as"program" from"gh-r" for \
 
 # zinit light-mode as"program" from"gh-r" for sbin schollz/croc
 # zinit light-mode as"program" from"gh-r" for sbin"bin/exa" ogham/exa
-# zinit light-mode as"program" from"gh-r" for sbin dylanaraps/neofetch
 # zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq
 # zinit light-mode as"program" from"gh-r" for mv"uni* -> uni" sbin arp242/uni
 # zinit light-mode as"program" from"gh-r" for sbin pemistahl/grex

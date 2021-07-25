@@ -85,9 +85,10 @@ map("n", "<leader>tm", "<Cmd>TableModeToggle<CR>")
 map("i", "<leader>w", "<Esc><Cmd>update<CR>")
 map("n", "<leader>w", "<Cmd>update<CR>")
 map("n", "<leader>W", "<Cmd>wall<CR>")
-map("n", "<leader>q", "<Cmd>call funcs#quit(0, 0)<CR>")
-map("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>")
-map("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>")
+map("n", "<leader>q", "<Cmd>call funcs#quit(0, 0)<CR>") -- close window
+map("n", "<leader>Q", "<Cmd>call funcs#quit(0, 1)<CR>") -- close tab
+map("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>") -- close buffer and preserve layout
+map("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
 map(
     "n",
     "yoq",
@@ -149,7 +150,8 @@ map(
 
 -- kommentary
 map("n", "gc", "<Plug>kommentary_motion_default", {})
-map("n", "gcc", "<Plug>kommentary_line_default", {})
+-- map("n", "gcc", "<Plug>kommentary_line_default", {}) -- doesn't repeat https://github.com/b3nj5m1n/kommentary/issues/41
+map("n", "gcc", "<Plug>kommentary_motion_defaultl", {})
 map("x", "gc", "<Plug>kommentary_visual_default<Esc>", {})
 
 -- miniyank
@@ -312,7 +314,11 @@ map("n", "<Leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<
 map("n", "<Leader>fy", "<Cmd>lua require('telescope').extensions.yank.history()<CR>")
 
 -- lsp
-map("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>")
+map(
+    "n",
+    "gd",
+    "<Cmd>lua if next(vim.lsp.buf_get_clients()) == nil then vim.cmd('normal! gd') else vim.lsp.buf.definition() end<CR>"
+)
 map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').lsp_finder()<CR>")
 map("n", "gR", "<Cmd>lua vim.lsp.buf.references()<CR>")
 map("n", "gr", "<Cmd>TroubleToggle lsp_references<CR>")

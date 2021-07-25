@@ -9,8 +9,9 @@ vim.schedule(
         local loader = require("packer").loader
         vim.defer_fn(
             function()
+                -- https://github.com/kevinhwang91/dotfiles/blob/da97fbe354931d440b0ff12215de67a8233ce319/nvim/init.lua#L499
                 vim.cmd("syntax enable")
-                require("treesitter")
+                require("treesitter").init()
                 vim.cmd [[
                     unlet g:did_load_filetypes
                     autocmd! syntaxset
