@@ -1421,3 +1421,38 @@ bind -T copyModeMultiKey_semicolon f if-shell -F '#{selection_active}' '' 'send-
                 [[execute 'Git log -L '. line("'<"). ','. line("'>"). ':'. expand('%')]],
                 "Show git log of selected range"
             },
+
+" =======================================================
+" .zshrc
+[[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
+alias gbd='git branch -d'
+alias gbnm='git branch --no-merged'
+alias gbr='git branch --remote'
+alias gbs='git bisect'
+alias gbsb='git bisect bad'
+alias gbsg='git bisect good'
+alias gbsr='git bisect reset'
+alias gbss='git bisect start'
+alias gcan!='git commit -v -a --no-edit --amend'
+alias gcans!='git commit -v -a -s --no-edit --amend'
+alias gcam='git commit -a -m'
+alias gclean='git clean -fd'
+alias gdw='git diff --word-diff'
+alias gpoat='git push origin --all && git push origin --tags'
+alias grh='git reset HEAD'
+alias grhh='git reset HEAD --hard'
+alias gfo='git fetch origin'
+alias ggp='git push origin $(git symbolic-ref --short HEAD)'
+alias ggl='git pull origin $(git symbolic-ref --short HEAD)'
+alias glum='git pull upstream $(git symbolic-ref --short HEAD)'
+alias ggsup='git branch --set-upstream-to=origin/$(git symbolic-ref --short HEAD)'
+alias gpsup='git push --set-upstream origin $(git symbolic-ref --short HEAD)'
+alias gsta='git stash save'
+alias gstaa='git stash apply'
+alias gstd='git stash drop'
+alias gstl='git stash list'
+alias gstp='git stash pop'
+alias gsts='git stash show --text'
+cc() {
+  gcc $1.c -o $1 -g && ./$@;
+}

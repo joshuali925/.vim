@@ -41,6 +41,8 @@ map q <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
 map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
+nmap yss ysiw
+xmap s <Plug>VSurround
 noremap 0 ^
 noremap ^ 0
 noremap - $
@@ -84,6 +86,7 @@ nmap <leader>b <Action>(SelectInProjectView)
 inoremap <leader>w <Esc>:w<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
+nnoremap <leader>x :q<CR>
 map <C-n> <Action>(SelectNextOccurrence)
 map <leader><C-n> <Action>(SelectAllOccurrences)
 map <C-p> <Action>(UnselectPreviousOccurrence)
@@ -119,7 +122,7 @@ nmap <leader>s <Action>(QuickActionPopup)
 nmap <leader>R <Action>(RenameElement)
 nmap <leader>d <Action>(QuickImplementations)
 
-nnoremap <leader>l mx"xyiwoprintln("<C-r>x $<C-r>x")<Esc>`x
-nnoremap <leader>L mx"xyiwOprintln("<C-r>x $<C-r>x")<Esc>`x
-xnoremap <leader>l mx"xyoprintln("<C-r>x $<C-r>x")<Esc>`x
-xnoremap <leader>L mx"xyOprintln("<C-r>x $<C-r>x")<Esc>`x
+nnoremap <leader>l mx"xyiwolog.info(<C-r>x)<Esc>`x
+nnoremap <leader>L mx"xyiwOlog.info(<C-r>x)<Esc>`x
+xnoremap <leader>l mx"xyolog.info(<C-r>x)<Esc>`x
+xnoremap <leader>L mx"xyOlog.info(<C-r>x)<Esc>`x
