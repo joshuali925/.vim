@@ -60,6 +60,7 @@ map('gv', 'V'); // restore visual mode
 map('c', 'v'); // enter caret mode
 map('v', 'zv'); // visual select element
 map('ys', 'ya'); // select url to copy
+map('J', 'W'); // move tab to window
 map(';q', 'x'); // close tab
 map(';x', 'x'); // close tab
 map('ZZ', 'x'); // close tab
@@ -83,6 +84,9 @@ mapkey(';vs', 'split vertically', function() { document.write('<html><head></hea
 mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + location.href + '><frame src=' + location.href + '></frameset></html>'); })
 mapkey(';vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
 mapkey('<Ctrl-r>', 'Hard reload', function() { location.reload(); });
+mapkey('p', '#0enter ephemeral PassThrough mode to temporarily suppress SurfingKeys', function() {
+    Normal.passThrough(1500);
+});
 mapkey('K', '#8Open omnibar for word translation', function() {
     Front.openOmniquery({query: Normal.getWordUnderCursor()});
 });
@@ -120,10 +124,10 @@ mapkey('P', 'Open url or google', function() {
 });
 mapkey('gp', 'DuckDuckGo first result', function() {
     if (window.getSelection().toString()) {
-        open("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(window.getSelection().toString()));
+        tabOpenLink("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(window.getSelection().toString()));
     } else {
         Clipboard.read(function(response) {
-            open("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(response.data));
+            tabOpenLink("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(response.data));
         });
     }
 });
@@ -131,7 +135,11 @@ map('yop', ';s'); // toggle pdf viewer
 mapkey('yoe', 'Toggle editable', function() { document.body.contentEditable = document.body.contentEditable === 'true' ? 'false' : 'true'; });
 mapkey('yof', 'Toggle full screen', function() {
     if (location.hostname === 'www.bilibili.com')
-        document.getElementsByClassName('bilibili-player-video-web-fullscreen')[0].click();
+        if (location.pathname.startsWith('/bangumi')) {
+            document.getElementsByClassName('squirtle-video-pagefullscreen')[0].click();
+        } else {
+            document.getElementsByClassName('bilibili-player-video-web-fullscreen')[0].click();
+        }
     else if (/age.?fans/.test(location.hostname))
         document.getElementsByClassName('fullscn')[0].click();
     else
@@ -248,6 +256,7 @@ settings.theme = `
 #sk_editor {
     height: 75% !important;
     background: var(--theme-ace-bg) !important;
+    opacity: 0.9;
 }
 .ace_content {
     background: var(--theme-ace-bg) !important;

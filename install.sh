@@ -5,7 +5,6 @@ cd "$HOME"
 
 NVM_VERSION=0.38.0
 NODE_VERSION=10.24.1
-# NODE_VERSION=16.3.0
 DOCKER_COMPOSE_VERSION=1.29.2
 BACKUP_DIR=$HOME/config-backup
 
@@ -183,10 +182,10 @@ install_tmux() {
 
 install_node() {
     log "\nInstalling nvm.."
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v$NVM_VERSION/install.sh | bash
     NVM_DIR=~/.nvm
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-    log "Installing node.."
+    log "Installing node $NODE_VERSION.."
     nvm install "$NODE_VERSION"
     nvm alias default "$NODE_VERSION"
     node --version && ln -s $(which node) ~/.local/bin/node && ln -s $(which npm) ~/.local/bin/npm
@@ -287,14 +286,13 @@ fi
 log "Installing for $platform"
 install_development_tools
 install_dotfiles
-log "\nInstalling zsh plugins.."
-zsh -ic 'exit'
-zsh -ic 'fast-theme clean'
 install_java
 install_python
 install_node
 install_tmux
 install_neovim
+log "\nInstalling zsh plugins.."
+zsh
 
 read -p "Set up ssh key? (y/n) " -n 1;
 echo

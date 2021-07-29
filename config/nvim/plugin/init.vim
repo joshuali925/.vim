@@ -15,7 +15,6 @@ function! s:AutoRestoreWinView()
   endif
 endfunction
 
-" TODO add user completion when this is merged https://github.com/neovim/neovim/pull/12995
 augroup AutoCommands
   autocmd!
   autocmd BufLeave * call s:AutoSaveWinView()

@@ -20,6 +20,8 @@ Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: option 
          -> Text -> uncheck Use smart quotes and dashes
 iTerm2 -> Preferences -> Keys -> Key Bindings -> Change next/previous tab to C-Tab and C-S-Tab
                       -> General -> Selection -> Application in terminal may access clipboard
+                      -> Appearance -> General -> Theme Compact
+                                    -> Windows -> uncheck Show window number in title bar
                       -> Profiles -> Keys -> Presets... -> Natural Text Editing (need to clear mission control C-Up/Down/Left/Right shortcuts)
                                   -> General -> Working Directory -> Advanced Configuration -> Working Directory for New Split Panes -> Reuse previous session's directory
                                   -> Terminal -> uncheck Save lines to scrollback in alternative screen mode

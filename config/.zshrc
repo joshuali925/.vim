@@ -5,59 +5,59 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-[[ ! -f ~/.zinit/bin/zinit.zsh ]] && command git clone https://github.com/zdharma/zinit --depth 1 ~/.zinit/bin
+[[ ! -f ~/.zinit/bin/zinit.zsh ]] && command git clone https://github.com/zdharma/zinit --depth 1 ~/.zinit/bin && ZINIT_POST_INSTALL=1
 source ~/.zinit/bin/zinit.zsh
 
+if [ -n "$ZINIT_POST_INSTALL" ]; then
+  zinit depth=1 light-mode for zinit-zsh/z-a-bin-gem-node
+  zinit light-mode as"program" from"gh-r" for \
+    mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
+    mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
+    mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
+    mv"delta* -> delta" sbin"delta/delta" dandavison/delta \
+    sbin so-fancy/diff-so-fancy \
+    sbin junegunn/fzf \
+    sbin gokcehan/lf \
+    sbin jesseduffield/lazygit \
+    sbin jesseduffield/lazydocker
+
+  # zinit light-mode as"program" from"gh-r" for sbin schollz/croc
+  # zinit light-mode as"program" from"gh-r" for sbin"bin/exa" ogham/exa
+  # zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq
+  # zinit light-mode as"program" from"gh-r" for mv"uni* -> uni" sbin arp242/uni
+  # zinit light-mode as"program" from"gh-r" for sbin pemistahl/grex
+  # zinit light-mode as"program" from"gh-r" for mv"up* -> up" sbin akavel/up
+  # zinit light-mode as"program" from"gh-r" for sbin XAMPPRocky/tokei
+  # zinit light-mode as"program" from"gh-r" for mv"dust* -> dust" sbin"dust/dust" bootandy/dust
+  # zinit light-mode as"program" from"gh-r" for sbin muesli/duf
+  # zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
+  # zinit light-mode as"program" from"gh-r" for mv"hyperfine* -> hyperfine" sbin"hyperfine/hyperfine" @sharkdp/hyperfine
+  # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
+
+  zinit as"completion" for \
+    https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
+    https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \
+    https://github.com/gradle/gradle-completion/blob/master/_gradle \
+    https://github.com/gradle/gradle-completion/blob/master/gradle-completion.plugin.zsh \
+    https://github.com/zsh-users/zsh-completions/blob/master/src/_yarn
+fi
+
 zinit depth=1 light-mode for romkatv/powerlevel10k
-
-zinit depth=1 light-mode for zinit-zsh/z-a-bin-gem-node
-zinit light-mode as"program" from"gh-r" for \
-  mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
-  mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
-  mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
-  mv"delta* -> delta" sbin"delta/delta" dandavison/delta \
-  sbin so-fancy/diff-so-fancy \
-  sbin junegunn/fzf \
-  sbin gokcehan/lf \
-  sbin jesseduffield/lazygit \
-  sbin jesseduffield/lazydocker
-
-# zinit light-mode as"program" from"gh-r" for sbin schollz/croc
-# zinit light-mode as"program" from"gh-r" for sbin"bin/exa" ogham/exa
-# zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq
-# zinit light-mode as"program" from"gh-r" for mv"uni* -> uni" sbin arp242/uni
-# zinit light-mode as"program" from"gh-r" for sbin pemistahl/grex
-# zinit light-mode as"program" from"gh-r" for mv"up* -> up" sbin akavel/up
-# zinit light-mode as"program" from"gh-r" for sbin XAMPPRocky/tokei
-# zinit light-mode as"program" from"gh-r" for mv"dust* -> dust" sbin"dust/dust" bootandy/dust
-# zinit light-mode as"program" from"gh-r" for sbin muesli/duf
-# zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
-# zinit light-mode as"program" from"gh-r" for mv"hyperfine* -> hyperfine" sbin"hyperfine/hyperfine" @sharkdp/hyperfine
-# zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
-
-zinit as"completion" for \
-  https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
-  https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \
-  https://github.com/gradle/gradle-completion/blob/master/_gradle \
-  https://github.com/gradle/gradle-completion/blob/master/gradle-completion.plugin.zsh \
-  https://github.com/zsh-users/zsh-completions/blob/master/src/_yarn
-
-zinit depth=1 light-mode for \
+zinit depth=1 wait"0" lucid light-mode for \
+  as"program" pick"$ZPFX/bin/git-*" src"etc/git-extras-completion.zsh" make"PREFIX=$ZPFX" tj/git-extras \
   atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
   FAST_HIGHLIGHT[chroma-man]=" \
   zdharma/fast-syntax-highlighting \
   atload"!_zsh_autosuggest_start; \
-  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan'; \
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'; \
   ZSH_AUTOSUGGEST_STRATEGY=(history completion); \
   ZSH_AUTOSUGGEST_HISTORY_IGNORE=\"?(#c150,)\"; \
+  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20; \
   ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(up-line-or-beginning-search down-line-or-beginning-search); \
   ZSH_AUTOSUGGEST_MANUAL_REBIND=1; \
   ZSH_AUTOSUGGEST_USE_ASYNC=1" \
   zsh-users/zsh-autosuggestions
 
-# vim <tab>: files in current directory or args completion
-# vim <C-p>: all files in current and subdirectories, respects .gitignore
-# vim \<tab>: all files in current and subdirectories
 zinit snippet OMZ::lib/key-bindings.zsh
 source ~/.vim/config/fzf/key-bindings.zsh
 zinit snippet https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.zsh
@@ -73,7 +73,6 @@ HISTFILE="$HOME/.zsh_history"
 HISTSIZE=1000000
 SAVEHIST=1000000
 
-[[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE  # fix wsl bug
 unsetopt flow_control  # man zshoptions; man zshbuiltins
 unsetopt nomatch
 setopt glob_dots
@@ -101,10 +100,15 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|
 zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -CF --color=always -1 $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -ACF --color=always -1 $realpath'
 zstyle ':fzf-tab:*' switch-group '[' ']'
 
-alias history='history -f 0'
+compdef _dirs d
+compdef _tmux t
+compdef _command_names path
+compdef _git gdf=git-diff
+compdef _git gdd=git-diff
+compdef _git gdg=git-diff
 
 up-line-or-local-history() {
   zle set-local-history 1
@@ -119,12 +123,15 @@ down-line-or-local-history() {
 }
 zle -N down-line-or-local-history
 
+# vim <tab>: files in current directory or args completion
+# vim <C-p>: all files in current and subdirectories, respects .gitignore
+# vim \<tab>: all files in current and subdirectories
 tab-complete-or-cd() {
   if [[ -z "$BUFFER" ]]; then
     zle fzf-cd-widget
   else
     zle fzf-tab-complete
-    # zle fzf-completion  " old tab complete
+    # zle fzf-completion  # zsh original tab complete
   fi
 }
 zle -N tab-complete-or-cd
@@ -145,12 +152,7 @@ bindkey "^[[1;2B" down-line-or-local-history  # <S-Down>
 bindkey '^i' tab-complete-or-cd
 bindkey -s '^z' 'fg^m'
 
-compdef _dirs d
-compdef _tmux t
-compdef _command_names path
-compdef _git gdf=git-diff
-compdef _git gdd=git-diff
-compdef _git gdg=git-diff
+alias history='history -f 0'
 function chpwd() { emulate -L zsh; ls -ACF --color=auto; }
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/.p10k.zsh.

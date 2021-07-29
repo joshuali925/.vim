@@ -43,6 +43,7 @@ opt.textwidth = 0
 opt.hidden = true
 opt.complete = {".", "w", "b", "u"}
 opt.completeopt = {"menuone", "noselect"}
+opt.completefunc = "funcs#complete_word"
 opt.shortmess = opt.shortmess + {c = true}
 opt.shortmess = opt.shortmess - {S = true}
 opt.scrolloff = 2

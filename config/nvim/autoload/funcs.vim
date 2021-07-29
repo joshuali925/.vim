@@ -1,3 +1,13 @@
+" TODO use matchfuzzy when this is merged https://github.com/neovim/neovim/pull/12995
+function! funcs#complete_word(findstart, base)
+  if a:findstart
+    return match(getline('.'), '\S\+\%'. col('.'). 'c')
+  else
+    let l:words = map(split(join(getline(1, '$'), "\n")), '{"word": v:val, "kind": "[WORD]"}')
+    return len(a:base) ? filter(l:words, 'match(v:val.word, "\\V". a:base) != -1') : l:words
+  endif
+endfunction
+
 function! funcs#get_conflict_state() abort  " conflict-marker.vim
   let l:current_styles = map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
   if match(l:current_styles, '^ConflictMarker') != -1
