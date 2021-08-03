@@ -1,20 +1,5 @@
 set guifont=JetBrainsMono\ Nerd\ Font:h14
 
-inoremap <D-v> <C-g>u<C-o>"+p
-nnoremap <D-v> "+p
-xnoremap <D-v> "+p
-inoremap <D-z> <C-o>u
-nnoremap <D-z> u
-noremap <D-Left> <Home>
-noremap! <D-Left> <Home>
-noremap <D-Right> <End>
-noremap! <D-Right> <End>
-noremap <M-Left> <C-Left>
-noremap! <M-Left> <C-Left>
-noremap <M-Right> <C-right>
-noremap! <M-Right> <C-right>
-noremap! <M-BS> <C-w>
-
 if exists('g:neovide')
   let g:neovide_cursor_vfx_mode = "railgun"
   " let g:neovide_cursor_animation_length=0.12
@@ -23,6 +8,21 @@ if exists('g:neovide')
   " let g:neovide_cursor_vfx_particle_speed=10.0
   " let g:neovide_refresh_rate = 30
   " let g:neovide_fullscreen = v:true
+
+  inoremap <D-v> <C-g>u<C-o>"+p
+  nnoremap <D-v> "+p
+  xnoremap <D-v> "+p
+  inoremap <D-z> <C-o>u
+  nnoremap <D-z> u
+  noremap <D-Left> <Home>
+  noremap! <D-Left> <Home>
+  noremap <D-Right> <End>
+  noremap! <D-Right> <End>
+  noremap <M-Left> <C-Left>
+  noremap! <M-Left> <C-Left>
+  noremap <M-Right> <C-right>
+  noremap! <M-Right> <C-right>
+  noremap! <M-BS> <C-w>
 
   " https://github.com/Kethku/neovide/issues/445
   imap <S-(> (

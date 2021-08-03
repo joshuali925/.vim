@@ -17,9 +17,9 @@ unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)
         if [ -x "$(command -v yum)" ]; then
-            platform=Linux:CentOS
+            platform=Linux:yum
         elif [ -x "$(command -v apt)" ]; then
-            platform=Linux:Ubuntu
+            platform=Linux:apt
         else
             platform=Linux
         fi
@@ -34,7 +34,7 @@ log() {
 
 usage() {
     echo "usage: bash install.sh [install <package>,...]"
-    echo "  package list: dotfiles, devtools, binaries, docker, java, python, node, neovim, tmux, ssh-key"
+    echo "  package list: devtools, dotfiles, binaries, docker, java, python, node, neovim, tmux, ssh-key"
 }
 
 backup() {
@@ -54,9 +54,9 @@ link_file() {
 
 install_development_tools() {
     log "\nInstalling development tools.."
-    if [ $platform == 'Linux:CentOS' ]; then
+    if [ $platform == 'Linux:yum' ]; then
         sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh
-    elif [ $platform == 'Linux:Ubuntu' ]; then
+    elif [ $platform == 'Linux:apt' ]; then
         sudo apt update && sudo apt install -y build-essential zsh
     elif [ $platform == 'MacOS' ]; then
         mkdir -pv ~/.local/bin
@@ -76,9 +76,9 @@ install_development_tools() {
 }
 
 install_docker() {
-    if [ $platform == 'Linux:CentOS' ]; then
+    if [ $platform == 'Linux:yum' ]; then
         sudo yum install -y docker
-    elif [ $platform == 'Linux:Ubuntu' ]; then
+    elif [ $platform == 'Linux:apt' ]; then
         curl -fsSL https://get.docker.com/ | sh
     else
         echo "Unknown distro.."
@@ -114,10 +114,10 @@ install_java() {
 }
 
 install_python() {
-    if [ $platform == 'Linux:CentOS' ]; then
+    if [ $platform == 'Linux:yum' ]; then
         sudo yum install -y python3
         curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
-    elif [ $platform == 'Linux:Ubuntu' ]; then
+    elif [ $platform == 'Linux:apt' ]; then
         sudo apt update && sudo apt install python3-dev python3-pip
     elif [ $platform != 'MacOS' ]; then
         echo "Unknown distro.."
@@ -211,11 +211,11 @@ install_neovim() {
     fi
     log "Installed neovim"
     # https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
-    sh -c 'sleep 60 && killall nvim && echo "Timeout, killed neovim"' &
+    sh -c 'sleep 120 && killall nvim && echo "Timeout, killed neovim"' &
     local pid1=$!
     ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').install()" || true
     kill $pid1 > /dev/null 2>&1 || true
-    log "Installed neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"
+    log "\nInstalled neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"
     log "Run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
     echo
 }

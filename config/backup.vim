@@ -1456,3 +1456,36 @@ alias gsts='git stash show --text'
 cc() {
   gcc $1.c -o $1 -g && ./$@;
 }
+
+" =======================================================
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+  vim.lsp.handlers.hover, {
+    border = 'rounded'
+  }
+)
+" lspsaga
+        {"Docu&mentation", "lua require('lspsaga.provider').preview_definition()", "Preview definition with lspsaga"},
+        {"&Select reference", "lua require('lspsaga.provider').lsp_finder()", "Jump to a reference with lspsaga"},
+map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').lsp_finder()<CR>")
+            use {
+                -- "glepnir/zephyr-nvim",
+                event = "VimEnter",
+                config = function()
+                    require("zephyr")
+                end
+            }
+    " galaxyline for zephyr
+    local colors = {
+        bg = "#22262e",
+        fg = "#abb2bf",
+        green = "#B2CD8C",
+        red = "#d47d85",
+        lightbg = "#2d3139",
+        lightbg2 = "#262a32",
+        blue = "#659ECB",
+        darkblue = "#46617a",
+        yellow = "#E9C780",
+        orange = "#EB9C6B",
+        purple = "#B598E9",
+        grey = "#6f737b"
+    }

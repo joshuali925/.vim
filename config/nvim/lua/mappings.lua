@@ -161,9 +161,9 @@ map("n", "<leader>p", "<Plug>(miniyank-cycle)", {})
 map("x", "<leader>p", '"0p')
 map("n", "<leader>P", "<Plug>(miniyank-cycleback)", {})
 map("x", "<leader>P", '"0P')
-map("n", "=c", "<Plug>(miniyank-tochar)", {})
-map("n", "=l", "<Plug>(miniyank-toline)", {})
-map("n", "=b", "<Plug>(miniyank-toblock)", {})
+map("n", "=v", "<Plug>(miniyank-tochar)", {})
+map("n", "=V", "<Plug>(miniyank-toline)", {})
+map("n", "=<C-v>", "<Plug>(miniyank-toblock)", {})
 
 -- visualmulti
 map("n", "<C-n>", "<Plug>(VM-Find-Under)", {})
@@ -263,55 +263,55 @@ map(
     "<C-p>",
     "<Cmd>lua require('telescope.builtin').find_files({hidden = true, cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p'))})<CR>"
 )
-map("n", "<Leader>fs", "<C-p>", {})
+map("n", "<leader>fs", "<C-p>", {})
 map(
     "n",
-    "<Leader>fd",
+    "<leader>fd",
     "<Cmd>lua require('telescope.builtin').file_browser({cwd = vim.fn.expand('%:h'), hidden = true})<CR>"
 )
-map("n", "<Leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
-map("n", "<Leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR>")
+map("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
+map("n", "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR>")
 map(
     "n",
-    "<Leader>fu",
+    "<leader>fu",
     "<Cmd>lua require('telescope.builtin')[next(vim.lsp.buf_get_clients()) == nil and 'treesitter' or 'lsp_document_symbols']()<CR>"
 )
-map("n", "<Leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
+map("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
 -- TODO visual grep pending on https://github.com/neovim/neovim/pull/13896, https://github.com/nvim-telescope/telescope.nvim/pull/494
-map("n", "<Leader>fg", ":lua require('utils').telescope_grep(true, [[]])<Left><Left><Left>", {noremap = true})
+map("n", "<leader>fg", ":lua require('utils').telescope_grep(true, [[]])<Left><Left><Left>", {noremap = true})
 map(
     "x",
-    "<Leader>fg",
+    "<leader>fg",
     ":<C-u>lua require('utils').telescope_grep(false, [[<C-r>=funcs#get_visual_selection()<CR>]])<Left><Left><Left>",
     {noremap = true}
 )
 map(
     "n",
-    "<Leader>fj",
+    "<leader>fj",
     ":lua require('utils').telescope_grep(true, [[\\b<C-r>=expand('<cword>')<CR>\\b]])<CR>",
     {noremap = true, silent = true}
 )
 map(
     "x",
-    "<Leader>fj",
+    "<leader>fj",
     ":lua require('utils').telescope_grep(false, [[<C-r>=funcs#get_visual_selection()<CR>]])<CR>",
     {noremap = true, silent = true}
 )
-map("n", "<Leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
-map("n", "<Leader>fl", "<Cmd>lua require('telescope.builtin').loclist()<CR>")
+map("n", "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
+map("n", "<leader>fl", "<Cmd>lua require('telescope.builtin').loclist()<CR>")
 map(
     "n",
-    "<Leader>fL",
+    "<leader>fL",
     "<Cmd>lua require('telescope.builtin').live_grep({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p'))})<CR>",
     {noremap = true, silent = true}
 )
-map("n", "<Leader>fa", "<Cmd>lua require('telescope.builtin').commands()<CR>")
-map("n", "<Leader>ft", "<Cmd>lua require('telescope.builtin').filetypes()<CR>")
-map("n", "<Leader>ff", "<Cmd>lua require('telescope.builtin').builtin()<CR>")
-map("n", "<Leader>f/", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>")
-map("n", "<Leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>")
-map("n", "<Leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>")
-map("n", "<Leader>fy", "<Cmd>lua require('telescope').extensions.yank.history()<CR>")
+map("n", "<leader>fa", "<Cmd>lua require('telescope.builtin').commands()<CR>")
+map("n", "<leader>ft", "<Cmd>lua require('telescope.builtin').filetypes()<CR>")
+map("n", "<leader>ff", "<Cmd>lua require('telescope.builtin').builtin()<CR>")
+map("n", "<leader>f/", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>")
+map("n", "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>")
+map("n", "<leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>")
+map("n", "<leader>fy", "<Cmd>lua require('telescope').extensions.yank.history()<CR>")
 
 -- lsp
 map(
@@ -319,12 +319,12 @@ map(
     "gd",
     "<Cmd>lua if next(vim.lsp.buf_get_clients()) == nil then vim.cmd('normal! gd') else vim.lsp.buf.definition() end<CR>"
 )
-map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').lsp_finder()<CR>")
+map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').preview_definition()<CR>")
 map("n", "gR", "<Cmd>lua vim.lsp.buf.references()<CR>")
 map("n", "gr", "<Cmd>TroubleToggle lsp_references<CR>")
 map("n", "<leader>a", "<Cmd>lua require('lspsaga.codeaction').code_action()<CR>")
 map("x", "<leader>a", ":<C-u>lua require('lspsaga.codeaction').range_code_action()<CR>")
-map("n", "gh", "<Cmd>lua require('lspsaga.hover').render_hover_doc()<CR>")
+map("n", "gh", "<Cmd>lua require('lspsaga.diagnostic').show_line_diagnostics()<CR>")
 map("n", "<leader>R", "<Cmd>lua require('lspsaga.rename').rename()<CR>")
 map("n", "[a", "<Cmd>lua require('lspsaga.diagnostic').lsp_jump_diagnostic_prev()<CR>")
 map("n", "]a", "<Cmd>lua require('lspsaga.diagnostic').lsp_jump_diagnostic_next()<CR>")

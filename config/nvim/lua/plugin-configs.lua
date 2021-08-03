@@ -1,6 +1,14 @@
 local M = {}
 local g = vim.g
 
+function M.tokyonight()
+    g.tokyonight_italic_keywords = false
+    g.tokyonight_italic_comments = false
+    g.tokyonight_sidebars = {"qf", "terminal", "Outline", "Mundo"}
+    g.tokyonight_colors = {comment = "#717993"}
+    vim.cmd("colorscheme tokyonight")
+end
+
 function M.auto_pairs()
     g.AutoPairsShortcutToggle = ""
     g.AutoPairsShortcutFastWrap = "<C-l>"
@@ -70,7 +78,7 @@ function M.setup_vim_sandwich()
 end
 
 function M.quick_scope()
-    g.qs_filetype_blacklist = {"startify", "TelescopePrompt"}
+    g.qs_filetype_blacklist = {"qf", "startify", "TelescopePrompt", "Trouble", "LspSagaCodeAction"}
     g.qs_buftype_blacklist = {"terminal"}
     vim.cmd("highlight QuickScopePrimary guifg='#ffe9c2'")
 end
@@ -85,7 +93,7 @@ function M.setup_neoterm()
     g.neoterm_autoinsert = 1
 end
 
-function M.indent_blankline()
+function M.setup_indent_blankline()
     -- TODO remove when this is fixed https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
     vim.opt.colorcolumn = "99999"
     g.indent_blankline_char = "▏"
@@ -239,15 +247,15 @@ function M.galaxyline()
     local colors = {
         bg = "#22262e",
         fg = "#abb2bf",
-        green = "#B2CD8C",
-        red = "#d47d85",
+        green = "#9ece6a",
+        red = "#f7768e",
         lightbg = "#2d3139",
         lightbg2 = "#262a32",
-        blue = "#659ECB",
+        blue = "#7aa2f7",
         darkblue = "#46617a",
-        yellow = "#E9C780",
-        orange = "#EB9C6B",
-        purple = "#B598E9",
+        yellow = "#e0af68",
+        orange = "#ff9e64",
+        purple = "#9d7cd8",
         grey = "#6f737b"
     }
     local function checkwidth()
@@ -317,6 +325,24 @@ function M.galaxyline()
         }
     }
     gls.left[6] = {
+        FileFlags = {
+            provider = function()
+                local flags = ""
+                if vim.o.readonly then
+                    flags = flags .. "[RO]"
+                end
+                if vim.o.paste then
+                    flags = flags .. "[paste]"
+                end
+                if #flags > 0 then
+                    return " " .. flags .. " "
+                end
+                return ""
+            end,
+            highlight = {colors.grey, colors.bg}
+        }
+    }
+    gls.left[7] = {
         DiffAdd = {
             provider = "DiffAdd",
             condition = checkwidth,
@@ -324,7 +350,7 @@ function M.galaxyline()
             highlight = {colors.grey, colors.bg}
         }
     }
-    gls.left[7] = {
+    gls.left[8] = {
         DiffModified = {
             provider = "DiffModified",
             condition = checkwidth,
@@ -332,7 +358,7 @@ function M.galaxyline()
             highlight = {colors.grey, colors.bg}
         }
     }
-    gls.left[8] = {
+    gls.left[9] = {
         DiffRemove = {
             provider = "DiffRemove",
             condition = checkwidth,
@@ -340,14 +366,14 @@ function M.galaxyline()
             highlight = {colors.grey, colors.bg}
         }
     }
-    gls.left[9] = {
+    gls.left[10] = {
         DiagnosticError = {
             provider = "DiagnosticError",
             icon = "  ",
             highlight = {colors.red, colors.bg}
         }
     }
-    gls.left[10] = {
+    gls.left[11] = {
         DiagnosticWarn = {
             provider = "DiagnosticWarn",
             icon = "  ",
@@ -450,8 +476,7 @@ end
 
 function _G.quickui_context_menu()
     local content = {
-        {"Docu&mentation", "lua require('lspsaga.provider').preview_definition()", "Preview definition with lspsaga"},
-        {"&Select reference", "lua require('lspsaga.provider').lsp_finder()", "Jump to a reference with lspsaga"},
+        {"Docu&mentation", "lua require('lspsaga.hover').render_hover_doc()", "Show documentation with lspsaga"},
         {"&Preview references", "TroubleToggle lsp_references", "Preview references with Trouble"},
         {"Quick&fix references", "lua vim.lsp.buf.references()", "Use quickfix to navigate references"},
         {"--", ""},
@@ -714,7 +739,8 @@ function M.vim_quickui()
                 "Add diagnostics to locl&ist",
                 [[lua vim.lsp.diagnostic.set_loclist()]],
                 "Populate diagnostics to location list"
-            }
+            },
+            {"&Toggle diagnostics", [[call v:lua.toggle_diagnostics()]], "Toggle lsp diagnostics"}
         }
     )
     vim.fn["quickui#menu#switch"]("visual")

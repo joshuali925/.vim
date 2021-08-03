@@ -91,7 +91,8 @@ map <C-n> <Action>(SelectNextOccurrence)
 map <leader><C-n> <Action>(SelectAllOccurrences)
 map <C-p> <Action>(UnselectPreviousOccurrence)
 
-nmap <leader>r <Action>(CompileDirty)
+" nmap <leader>r <Action>(CompileDirty)
+nmap <leader>r <Action>(RunContextGroup)
 nmap <leader>to <Action>(ActivateTerminalToolWindow)
 nmap <leader>tt <Action>(Terminal.OpenInTerminal)
 
@@ -108,13 +109,14 @@ nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 
 nmap gr <Action>(FindUsages)
+nnoremap Km K
 nmap Ku <Action>(Vcs.RollbackChangedLines)
 nmap Kd <Action>(Vcs.Show.Local.Changes)
 nmap Kf <Action>(Vcs.ShowTabbedFileHistory)
 nmap Kg <Action>(Generate)
 nmap Kr <Action>(Github.Open.In.Browser)
 nmap KR <Action>(Refactorings.QuickListPopupAction)
-nnoremap gh K
+nmap gh <Action>(ShowErrorDescription)
 nmap gd <Action>(GotoDeclaration)
 nmap <C-f> <Action>(ReformatCode)
 nmap <leader>a <Action>(ShowIntentionActions)
@@ -122,7 +124,7 @@ nmap <leader>s <Action>(QuickActionPopup)
 nmap <leader>R <Action>(RenameElement)
 nmap <leader>d <Action>(QuickImplementations)
 
-nnoremap <leader>l mx"xyiwolog.info(<C-r>x)<Esc>`x
-nnoremap <leader>L mx"xyiwOlog.info(<C-r>x)<Esc>`x
-xnoremap <leader>l mx"xyolog.info(<C-r>x)<Esc>`x
-xnoremap <leader>L mx"xyOlog.info(<C-r>x)<Esc>`x
+nnoremap <leader>l mx"xyiwoprintln(<C-r>x)<Esc>`x
+nnoremap <leader>L mx"xyiwOprintln(<C-r>x)<Esc>`x
+xnoremap <leader>l mx"xyoprintln(<C-r>x)<Esc>`x
+xnoremap <leader>L mx"xyOprintln(<C-r>x)<Esc>`x
