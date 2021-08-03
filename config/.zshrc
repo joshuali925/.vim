@@ -1,3 +1,5 @@
+[ -n "$ZSHRC_INIT" ] && return || ZSHRC_INIT=1
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -52,7 +54,7 @@ zinit depth=1 wait"0" lucid light-mode for \
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'; \
   ZSH_AUTOSUGGEST_STRATEGY=(history completion); \
   ZSH_AUTOSUGGEST_HISTORY_IGNORE=\"?(#c150,)\"; \
-  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20; \
+  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=50; \
   ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(up-line-or-beginning-search down-line-or-beginning-search); \
   ZSH_AUTOSUGGEST_MANUAL_REBIND=1; \
   ZSH_AUTOSUGGEST_USE_ASYNC=1" \

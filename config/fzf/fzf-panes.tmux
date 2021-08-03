@@ -1,5 +1,5 @@
-# https://github.com/kevinhwang91/fzf-tmux-script/tree/main/panes
 #!/usr/bin/env bash
+# https://raw.githubusercontent.com/kevinhwang91/fzf-tmux-script/main/panes/fzf-panes.tmux
 
 new_window() {
     [[ -x $(command -v fzf 2>/dev/null) ]] || return

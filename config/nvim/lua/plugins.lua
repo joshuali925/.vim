@@ -25,17 +25,15 @@ return require("packer").startup(
 
             -- appearance
             use {
-                "glepnir/zephyr-nvim",
+                "folke/tokyonight.nvim",
                 event = "VimEnter",
-                config = function()
-                    require("zephyr")
-                end
+                config = get_config("tokyonight")
             }
             use {"akinsho/nvim-bufferline.lua", event = "VimEnter", config = get_config("nvim_bufferline")}
             use {"glepnir/galaxyline.nvim", event = "VimEnter", config = get_config("galaxyline")}
             use {
                 "lukas-reineke/indent-blankline.nvim",
-                config = get_config("indent_blankline")
+                setup = get_config("setup_indent_blankline")
             }
             use {
                 "norcalli/nvim-colorizer.lua",
@@ -60,7 +58,11 @@ return require("packer").startup(
             use {"skywind3000/asyncrun.vim", cmd = "AsyncRun", config = [[vim.g.asyncrun_open = 12]]}
             use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = get_config("setup_symbols_outline")}
             use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = get_config("mundo")}
-            use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = get_config("nvim_tree")}
+            use {
+                "kyazdani42/nvim-tree.lua",
+                cmd = {"NvimTreeToggle", "NvimTreeFindFile"},
+                config = get_config("nvim_tree")
+            }
             use {
                 "mhinz/vim-startify",
                 cmd = "Startify",

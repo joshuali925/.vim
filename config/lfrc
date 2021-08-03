@@ -68,6 +68,7 @@ cmd chmod? %stat --printf "%a %n \n" "$f"
 cmd vim !$EDITOR "$@"
 cmd rg !clear && rg "$@"
 cmd code %code .
+cmd tail $tail -n 100 -f "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
 cmd gdu $$HOME/.zinit/polaris/bin/gdu

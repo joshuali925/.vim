@@ -57,7 +57,7 @@ map('e', 'cs'); // switch scroll target
 map('E', 'cS'); // reset scroll target
 map(';fj', ';fs'); // choose scroll target
 map('gv', 'V'); // restore visual mode
-map('c', 'v'); // enter caret mode
+// map('c', 'v'); // enter caret mode
 map('v', 'zv'); // visual select element
 map('ys', 'ya'); // select url to copy
 map('J', 'W'); // move tab to window
@@ -76,6 +76,8 @@ map(';e', ';U'); // edit url
 unmap('r');
 unmap('gr');
 vunmap('gr');
+unmap('c'); // unmap z, x, c for Global Speed
+unmap('z');
 
 mapkey('g+', 'Increment url', function() { var e,s; IB=1; function isDigit(c) { return ('0' <= c && c <= '9') } L = location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; location.href = L.substring(0,s) + newNum + L.slice(e+1); });
 mapkey('g-', 'Decrement url', function() { var e,s; IB=-1; function isDigit(c) { return ('0' <= c && c <= '9') } L = location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; location.href = L.substring(0,s) + newNum + L.slice(e+1); });

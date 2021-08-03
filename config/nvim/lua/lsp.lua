@@ -9,21 +9,31 @@ function _G.lsp_install_all()
 end
 vim.cmd("command! LspInstallAll call v:lua.lsp_install_all()")
 
+local timer = vim.loop.new_timer()
 local function on_attach(client, bufnr)
     require("lsp_signature").on_attach()
     vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
     if client.resolved_capabilities.document_highlight then
-        vim.api.nvim_exec(
-            [[
+        function _G.lsp_document_highlight()
+            timer:start(
+                50,
+                0,
+                vim.schedule_wrap(
+                    function()
+                        vim.cmd("silent! lua vim.lsp.buf.clear_references()")
+                        vim.cmd("silent! lua vim.lsp.buf.document_highlight()")
+                    end
+                )
+            )
+        end
+        vim.cmd [[
             augroup lsp_document_highlight
                 autocmd! * <buffer>
-                autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-                autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+                autocmd CursorMoved <buffer> call v:lua.lsp_document_highlight()
+                autocmd CursorMovedI <buffer> call v:lua.lsp_document_highlight()
             augroup END
-            ]],
-            false
-        )
+        ]]
     end
 end
 
@@ -47,7 +57,6 @@ local lsp_configs = {
             }
         }
     },
-    -- https://github.com/theia-ide/typescript-language-server/pull/218
     typescript = {
         init_options = {
             preferences = {
@@ -110,3 +119,27 @@ vim.fn.sign_define("LspDiagnosticsSignWarning", {text = ""})
 vim.fn.sign_define("LspDiagnosticsSignInformation", {text = ""})
 vim.fn.sign_define("LspDiagnosticsSignHint", {text = ""})
 vim.fn.sign_define("LspDiagnosticsSignOther", {text = "﫠"})
+vim.cmd("highlight LspDiagnosticsVirtualTextHint guifg=#666666")
+
+-- https://github.com/neovim/neovim/issues/14825
+vim.g.diagnostics_visible = true
+function _G.toggle_diagnostics()
+    if vim.g.diagnostics_visible then
+        vim.g.diagnostics_visible = false
+        vim.lsp.diagnostic.clear(0)
+        vim.lsp.handlers["textDocument/publishDiagnostics"] = function()
+        end
+    else
+        vim.g.diagnostics_visible = true
+        vim.lsp.handlers["textDocument/publishDiagnostics"] =
+            vim.lsp.with(
+            vim.lsp.diagnostic.on_publish_diagnostics,
+            {
+                virtual_text = true,
+                signs = true,
+                underline = true,
+                update_in_insert = false
+            }
+        )
+    end
+end

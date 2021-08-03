@@ -33,6 +33,7 @@ vim.schedule(
                     "indent-blankline.nvim",
                     "nvim-colorizer.lua",
                     "plenary.nvim",
+                    "popup.nvim",
                     "gitsigns.nvim",
                     "conflict-marker.vim",
                     "vim-sleuth",

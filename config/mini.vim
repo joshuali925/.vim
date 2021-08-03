@@ -6,3 +6,8 @@ set lazyredraw
 set noswapfile
 set nobackup
 set nowritebackup
+
+noremap , ;
+noremap ;, ,
+nnoremap ;w :update<CR>
+nnoremap ;q :quit<CR>

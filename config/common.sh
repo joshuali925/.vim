@@ -327,8 +327,12 @@ t() {  # create or switch tmux session
 }
 
 manf() {
-  local FZFTEMP
-  FZFTEMP=$(man -k . 2>/dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind 'tab:down,btab:up' -q "$1" --prompt='man> ' --preview $'echo {} | xargs -r man') && man "$(echo "$FZFTEMP" | awk -F' |,' '{print $1}')"
+  if [ -z "$1" ]; then
+    local FZFTEMP
+    FZFTEMP=$(man -k . 2>/dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind 'tab:down,btab:up' --prompt='man> ' --preview $'echo {} | xargs -r man') && nvim +"Man $(echo "$FZFTEMP" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> d <C-d>' +'nnoremap <buffer> u <C-u>'
+  else
+    nvim +"Man $@" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
+  fi
 }
 
 envf() {

@@ -46,7 +46,8 @@ function! funcs#quit(buffer_mode, force) abort
     else
       tabclose
     endif
-  elseif (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && len(getbufinfo({'buflisted':1})) > 1
+  " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; two windows but the other one is file tree
+  elseif (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1 || winnr('$') == 2 && getbufvar(winbufnr(3 - winnr()), "&filetype") == "NvimTree") && len(getbufinfo({'buflisted':1})) > 1
     bprevious
     if len(getbufinfo({'buflisted':1})) > 1
       try
