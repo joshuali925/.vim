@@ -69,9 +69,10 @@ cmd vim !$EDITOR "$@"
 cmd rg !clear && rg "$@"
 cmd code %code .
 cmd tail $tail -n 100 -f "$f"
+cmd file !file "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
-cmd gdu $$HOME/.zinit/polaris/bin/gdu
+cmd gdu $[ -x $HOME/.zinit/polaris/bin/gdu ] && $HOME/.zinit/polaris/bin/gdu || $HOME/.vim/bin/gdu
 cmd md5 !md5sum "$f"
 cmd selected-dir-size %du -h --max-depth=0 "$f"
 cmd cwd-size %du -h --max-depth=0 .

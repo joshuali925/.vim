@@ -78,6 +78,7 @@ function M.setup_vim_sandwich()
 end
 
 function M.quick_scope()
+    -- g.qs_lazy_highlight = 1
     g.qs_filetype_blacklist = {"qf", "startify", "TelescopePrompt", "Trouble", "LspSagaCodeAction"}
     g.qs_buftype_blacklist = {"terminal"}
     vim.cmd("highlight QuickScopePrimary guifg='#ffe9c2'")

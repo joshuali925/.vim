@@ -1489,3 +1489,6 @@ map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').lsp_finder()<CR>")
         purple = "#B598E9",
         grey = "#6f737b"
     }
+" cd root with lspconfig
+    local cwd = require("lspconfig.util").root_pattern(".git")(vim.fn.expand("%:p"))
+    vim.cmd("cd " .. cwd)

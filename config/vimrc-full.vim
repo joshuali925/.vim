@@ -228,12 +228,6 @@ map gc <Plug>Commentary
 nmap gcc <Plug>CommentaryLine
 nmap [g <Plug>(GitGutterPrevHunk)
 nmap ]g <Plug>(GitGutterNextHunk)
-for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
-  execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
-  execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
-  execute 'xnoremap a'. char. ' :<C-u>normal! T'. char. 'vf'. char. '<CR>'
-  execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
-endfor
 omap ig <Plug>(GitGutterTextObjectInnerPending)
 xmap ig <Plug>(GitGutterTextObjectInnerVisual)
 omap ag <Plug>(GitGutterTextObjectOuterPending)
@@ -255,6 +249,12 @@ nmap cs <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)
 nmap css <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
 xmap s <Plug>(operator-sandwich-add)
 xmap s< <Plug>(operator-sandwich-add)t
+for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
+  execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
+  execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
+  execute 'xnoremap a'. char. ' :<C-u>normal! T'. char. 'vf'. char. '<CR>'
+  execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
+endfor
 xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$

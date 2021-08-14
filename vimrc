@@ -1,3 +1,5 @@
+let &t_SI .= "\<Esc>[6 q"  " cursor shape
+let &t_EI .= "\<Esc>[2 q"
 set background=dark
 syntax enable
 filetype plugin indent on
@@ -56,7 +58,7 @@ set undodir=$HOME/.cache/vim/undo
 set viminfo+=n~/.cache/vim/viminfo
 set path=.,,**5
 set list
-set listchars=tab:»\ ,nbsp:␣,trail:•
+set listchars=tab:»\ ,nbsp:␣
 set fillchars=vert:│
 set encoding=utf-8
 set timeout
@@ -79,6 +81,17 @@ nnoremap [\ :tabedit<CR>
 nnoremap ]\ :enew<CR>
 noremap , ;
 noremap ;, ,
+for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
+  execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
+  execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
+  execute 'xnoremap a'. char. ' :<C-u>normal! T'. char. 'vf'. char. '<CR>'
+  execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
+endfor
+xnoremap il ^og_
+onoremap <silent> il :normal vil<CR>
+xnoremap al 0o$
+onoremap <silent> al :normal val<CR>
+noremap <expr> 0 col('.') - 1 == match(getline('.'), '\S') ? '0' : '^'
 noremap ^ 0
 noremap - $
 xnoremap - g_

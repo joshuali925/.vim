@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/install-from-github.sh
+TAR_FLAGS=(--strip-components=1 --wildcards "hyperfine*/hyperfine")
+install-from-github hyperfine sharkdp/hyperfine x86_64-unknown-linux-musl arm-unknown-linux-musl $TAR_FLAGS "$@"
+
