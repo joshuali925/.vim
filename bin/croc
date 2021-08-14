@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/install-from-github.sh
+TAR_FLAGS=(croc)
+install-from-github croc schollz/croc Linux-64bit.tar.gz Linux-ARM64.tar.gz $TAR_FLAGS "$@"
+

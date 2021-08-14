@@ -172,10 +172,11 @@ return require("packer").startup(
             }
             use {"MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log"}
             use {
-                "ahmedkhalf/lsp-rooter.nvim",
+                "ahmedkhalf/project.nvim",
                 after = "nvim-lspconfig",
+                cmd = "ProjectRoot",
                 config = function()
-                    require("lsp-rooter").setup()
+                    require("project_nvim").setup()
                 end
             }
             use {"udalov/kotlin-vim", ft = "kotlin"}

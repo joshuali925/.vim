@@ -51,9 +51,10 @@ vim.schedule(
                 local plugins = {
                     "nvim-lspconfig", -- load after lspinstall so activates automatically
                     "nvim-ts-context-commentstring",
-                    "lsp-rooter.nvim"
+                    "project.nvim"
                 }
                 loader(table.concat(plugins, " "))
+                vim.cmd("ProjectRoot") -- run again in case no lsp active
             end,
             200
         )

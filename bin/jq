@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+if [ ! -f $HOME/.local/bin/jq ]; then
+  if [ $(uname -s) == 'Darwin' ]; then
+    URL=$(curl -s https://api.github.com/repos/stedolan/jq/releases/latest | grep "browser_download_url.*jq-osx-amd64" | cut -d '"' -f 4)
+  else
+    URL=$(curl -s https://api.github.com/repos/stedolan/jq/releases/latest | grep "browser_download_url.*jq-linux64" | cut -d '"' -f 4)
+  fi
+
+  echo "Installing jq from $URL" >&2
+  curl -sL -o $HOME/.local/bin/jq $URL
+  chmod +x $HOME/.local/bin/jq
+fi
+$HOME/.local/bin/jq "$@"
+

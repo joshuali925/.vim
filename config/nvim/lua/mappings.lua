@@ -46,11 +46,7 @@ map("n", "Z[", "<Cmd>BufferLineCloseLeft<CR>")
 map("n", "Z]", "<Cmd>BufferLineCloseRight<CR>")
 map("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
 map("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
-map(
-    "n",
-    "<C-c>",
-    "<Cmd>execute 'ColorizerAttachToBuffer' | nohlsearch <bar> silent! AsyncStop!<CR><Cmd>lua require('gitsigns').refresh()<CR>:echo<CR>"
-)
+map("n", "<C-c>", "<Cmd>execute 'ColorizerAttachToBuffer' | nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
 map("i", "<C-c>", "<Esc>")
 map("x", "<C-c>", "<Esc>")
 map("n", "<C-w><C-c>", "<Esc>")
@@ -312,6 +308,7 @@ map("n", "<leader>f/", "<Cmd>lua require('telescope.builtin').current_buffer_fuz
 map("n", "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>")
 map("n", "<leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>")
 map("n", "<leader>fy", "<Cmd>lua require('telescope').extensions.yank.history()<CR>")
+map("n", "<leader>fM", "<Cmd>lua require('telescope').extensions.projects.projects()<CR>")
 
 -- lsp
 map(
