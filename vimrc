@@ -56,6 +56,7 @@ set undolevels=1000
 set undoreload=10000
 set undodir=$HOME/.cache/vim/undo
 set viminfo+=n~/.cache/vim/viminfo
+set isfname-==
 set path=.,,**5
 set list
 set listchars=tab:»\ ,nbsp:␣
@@ -157,7 +158,7 @@ augroup AutoCommands
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
 augroup END
 command! -complete=shellcmd -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | execute 'read !'. <q-args> | 1d
-command! W write !sudo tee %
+command! W write !sudo tee % > /dev/null
 
 let g:netrw_dirhistmax = 0
 let g:netrw_banner = 0

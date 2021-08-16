@@ -163,6 +163,7 @@ set history=1000
 set undofile
 set undolevels=1000
 set undoreload=10000
+set isfname-==
 set path=.,,**5
 set list
 set listchars=tab:»\ ,nbsp:␣,trail:•
@@ -759,7 +760,7 @@ command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>  " :SetArgs <args...><CR>, all execution will use args
 command! -complete=shellcmd -nargs=* -range S execute 'botright new | setlocal filetype='. &filetype. ' buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | resize '. min([15, &lines * 2/5]). '| if <line1> < <line2> | put =getbufline('. bufnr(). ', <line1>, <line2>) | endif | read !'. <q-args> | 1d
 command! -complete=command -nargs=* C execute "botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | put =execute('". <q-args>. "')"
-command! W write !sudo tee %
+command! W write !sudo tee % > /dev/null
 " }}}
 
 " =================== Other plugins ===================== {{{

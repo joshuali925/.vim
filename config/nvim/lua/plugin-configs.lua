@@ -19,6 +19,12 @@ function M.auto_pairs()
     vim.fn.AutoPairsTryInit()
 end
 
+function M.vim_matchup()
+    g.matchup_matchparen_deferred = 1
+    g.matchup_matchparen_deferred_hide_delay = 300
+    g.matchup_motion_override_Npercent = 0
+end
+
 function M.nvim_tree()
     local tree_cb = require("nvim-tree.config").nvim_tree_callback
     g.nvim_tree_highlight_opened_files = 1
