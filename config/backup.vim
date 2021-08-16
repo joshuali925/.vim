@@ -1456,6 +1456,9 @@ alias gsts='git stash show --text'
 cc() {
   gcc $1.c -o $1 -g && ./$@;
 }
+" install.sh
+  pip3 install --user pynvim
+  log "Installed pynvim for neovim"
 
 " =======================================================
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(

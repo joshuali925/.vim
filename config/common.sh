@@ -44,7 +44,7 @@ alias bell='echo -n -e "\a"'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
-alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" -c "edit \$MYVIMRC"'
+alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" ~/.vim/config/nvim/init.lua'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias btop='bpytop -b "cpu proc"'
@@ -223,6 +223,7 @@ x() {
       *.tbz2)      tar xvjf $1    ;;
       *.tgz)       tar xvzf $1    ;;
       *.zip)       unzip $1       ;;
+      *.xz)        unxz $1        ;;
       *.Z)         uncompress $1  ;;
       *.7z)        7z x $1        ;;
       *)           echo "Unable to extract '$1'" ;;

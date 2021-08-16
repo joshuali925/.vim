@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/install-from-github.sh
-TAR_FLAGS=(--transform 's!^gdu.*!gdu!')
+TAR_FLAGS=(--transform="s/^gdu.*/gdu/")
 install-from-github gdu dundee/gdu linux_amd64 linux_arm64 $TAR_FLAGS "$@"
 

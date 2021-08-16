@@ -1,7 +1,11 @@
 # Dot Files
 ## Install script
 ```bash
+# install configs
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh)"
+
+# run bash with environment
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"
 ```
 
 ## Windows

@@ -171,6 +171,9 @@ map("", "q", "<Cmd>HopWord<CR>")
 map("", "<leader>j", "<Cmd>HopLine<CR>")
 map("", "<leader>k", "<Cmd>HopLine<CR>")
 
+-- vim-matchup
+map("n", "<leader>c", "<Cmd>MatchupWhereAmI<CR>", {})
+
 -- fanfingtastic
 map("", "f", "<Plug>fanfingtastic_f", {})
 map("", "F", "<Plug>fanfingtastic_F", {})

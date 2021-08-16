@@ -16,6 +16,9 @@ NC='\033[0m'
 
 unameOut="$(uname -s)"
 architecture="$(uname -m)"
+if [ $architecture == 'amd64' ]; then
+  architecture='x86_64'
+fi
 case "${unameOut}" in
   Linux*)
     if [ -x "$(command -v yum)" ]; then
@@ -36,7 +39,7 @@ log() {
 
 usage() {
   echo "usage: bash install.sh [install <package>,...]"
-  echo "  package list: devtools, dotfiles, docker, java, python, node, neovim, tmux, ssh-key"
+  echo "  package list: devtools, dotfiles, docker, java, python, node, tmux, neovim, ssh-key"
 }
 
 backup() {
@@ -97,19 +100,27 @@ install_docker() {
 }
 
 install_java() {
+  # https://github.com/shyiko/jabba/blob/3bb7cca8389753072e9f6fbb9fee6fdfa85ca57f/index.json#L833
   if [[ $platform == Linux* ]]; then
-    curl -L -o- https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz | tar -xz -C $HOME/.local
-    echo 'export PATH=$HOME/.local/jdk-14.0.1/bin:$PATH' >> ~/.zshrc
-    echo 'export JAVA_HOME=$HOME/.local/jdk-14.0.1' >> ~/.zshrc
+    if [ $architecture == 'x86_64' ]; then
+      curl -L -o- https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz | tar -xz -C $HOME/.local
+      jdk_version=jdk-14.0.1
+    else
+      curl -L -o- https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jdk_aarch64_linux_hotspot_16.0.1_9.tar.gz | tar -xz -C $HOME/.local
+      jdk_version=jdk-16.0.1+9
+    fi
+    echo "export PATH=\$HOME/.local/$jdk_version/bin:\$PATH" >> ~/.zshrc
+    echo "export JAVA_HOME=\$HOME/.local/$jdk_version" >> ~/.zshrc
   elif [ $platform == 'MacOS' ]; then
     brew tap AdoptOpenJDK/openjdk
     brew install --cask adoptopenjdk14
+    jdk_version=jdk-14
     echo "export JAVA_HOME=$(/usr/libexec/java_home)" >> ~/.zshrc
   else
     echo "Unknown distro.."
     exit 1
   fi
-  log "Installed openjdk14, exported JAVA_HOME to ~/.zshrc, restart your shell"
+  log "Installed $jdk_version, exported JAVA_HOME to ~/.zshrc, restart your shell"
 }
 
 install_python() {
@@ -123,8 +134,6 @@ install_python() {
     exit 1
   fi
   log "Installed python3 and pip3"
-  pip3 install --user pynvim
-  log "Installed pynvim for neovim"
   python3 -m venv ~/.local/python-packages
   source ~/.local/python-packages/bin/activate && pip install bpytop && deactivate
   echo -e "color_theme=\"dracula\"\nshow_init=False" >> ~/.config/bpytop/bpytop.conf
@@ -167,23 +176,32 @@ install_dotfiles() {
 }
 
 install_tmux() {
-  if [ $platform == 'MacOS' ]; then
+  log "Installing tmux.."
+  if [[ $platform == Linux* ]]; then
+    if [ $architecture == 'x86_64' ]; then
+      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-x86_64.tar.gz | tar xz -C $HOME/.local/bin tmux
+    else
+      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-arm64.tar.gz | tar xz -C $HOME/.local/bin tmux
+    fi
+  elif [ $platform == 'MacOS' ]; then
     brew install tmux --HEAD
+  else
+    echo "Unknown distro.."
+    exit 1
   fi
   log "Installing tmux plugins.."
   backup "$HOME/.tmux"
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth 1
   ~/.tmux/plugins/tpm/bin/install_plugins || true
   if [[ -a "$HOME/.tmux/plugins/tmux-thumbs" ]]; then
+    log "Installing tmux-thumbs binaries.."
     if [[ $platform == Linux* ]]; then
-      log "Installing tmux-thumbs binaries.."
       if [ $architecture == 'x86_64' ]; then
         curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-x86_64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
       else
         curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-arm64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
       fi
     elif [ $platform == 'MacOS' ]; then
-      log "Installing tmux-thumbs binaries.."
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-darwin-x86_64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
     fi
   fi
@@ -219,13 +237,16 @@ install_neovim() {
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
       mv squashfs-root ~/.local/nvim && ln -sf ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
     else
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local
+      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local nvim
       ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
     fi
   elif [ $platform == 'MacOS' ]; then
     backup "$HOME/.local/nvim-osx64"
     curl -L -o- https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz | tar xz -C ~/.local
     ln -sf ~/.local/nvim-osx64/bin/nvim ~/.local/bin/nvim
+  else
+    echo "Unknown distro.."
+    exit 1
   fi
   log "Installed neovim, installing plugins.."
   # https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
@@ -261,10 +282,10 @@ install() {
         install_python ;;
       node )
         install_node ;;
-      neovim )
-        install_neovim ;;
       tmux )
         install_tmux ;;
+      neovim )
+        install_neovim ;;
       ssh-key )
         setup_ssh_key ;;
       * )
@@ -295,7 +316,8 @@ install_tmux
 install_neovim
 
 log "\nInstalling zsh plugins.."
-zsh
+zsh  # auto exit makes installing binaries to fail for some reason
+zsh -c "source $HOME/.zinit/plugins/zdharma---fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh && fast-theme clean"
 log "\nRun one of these commands to set default shell to zsh:"
 log "${YELLOW}sudo chsh -s \$(which zsh) \$(whoami)"
 log "${YELLOW}sed -i -e '1i[ -t 1 ] && exec zsh\' ~/.bashrc  ${BLACK}# run zsh when bash starts"

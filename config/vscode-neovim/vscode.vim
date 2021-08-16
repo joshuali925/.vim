@@ -157,6 +157,7 @@ nnoremap gr :call VSCodeNotify('references-view.find')<CR>
 nnoremap Ku :call VSCodeNotify('git.revertSelectedRanges')<CR>
 nnoremap Ka :call VSCodeNotify('git.stageSelectedRanges')<CR>
 nmap Kd gh
+nnoremap Kr :call VSCodeNotify('openInGithub.openInGitHubFile')<CR>
 nnoremap <leader>a :call VSCodeNotify('editor.action.quickFix')<CR>
 nnoremap <leader>R :call VSCodeNotify('editor.action.rename')<CR>
 nnoremap <leader>d :call VSCodeNotify('references-view.findImplementations')<CR>

@@ -3,6 +3,8 @@ local opt = vim.opt
 
 g.did_load_filetypes = 1
 vim.cmd("syntax off")
+g.loaded_matchparen = 1
+g.loaded_matchit = 1
 g.loaded_2html_plugin = 1
 g.loaded_remote_plugins = 1
 g.loaded_tutor_mode_plugin = 1
@@ -59,6 +61,7 @@ opt.undofile = true
 opt.undodir = os.getenv("HOME") .. "/.cache/nvim/undo"
 opt.undolevels = 1000
 opt.undoreload = 10000
+opt.isfname = opt.isfname - {"="}
 opt.path = {".", "", "**5"}
 opt.list = true
 opt.listchars = {tab = "» ", nbsp = "␣", trail = "•"}

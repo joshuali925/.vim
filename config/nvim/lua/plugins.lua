@@ -234,6 +234,12 @@ return require("packer").startup(
                 }
             }
             use {"jdhao/better-escape.vim", event = "InsertEnter"}
+            use {
+                "andymass/vim-matchup",
+                event = "CursorMoved",
+                cmd = "MatchupWhereAmI",
+                config = get_config("vim_matchup")
+            }
             use {"ojroques/vim-oscyank", cmd = {"OSCYank", "OSCYankReg"}}
             use {
                 "bfredl/nvim-miniyank",
