@@ -703,13 +703,13 @@ function M.vim_quickui()
             {"--", ""},
             {"Align using = (delimiter fixed)", [[Tabularize /=\zs]], [[Tabularize /=\zs]]},
             {"Align using , (delimiter fixed)", [[Tabularize /,\zs]], [[Tabularize /,\zs]]},
-            {"Align using # (delimiter fixed)", [[Tabularize /#\zs]], [[Tabularize /#\zs]]},
+            {"Align using # (delimiter fixed)", [[Tabularize /\#\zs]], [[Tabularize /\#\zs]]},
             {"Align using : (delimiter fixed)", [[Tabularize /:\zs]], [[Tabularize /:\zs]]},
             {"--", ""},
-            {"Align using = (delimiter centered)", [[Tabularize /=]], "Tabularize /="},
-            {"Align using , (delimiter centered)", [[Tabularize /,]], "Tabularize /,"},
-            {"Align using # (delimiter centered)", [[Tabularize /#]], "Tabularize /#"},
-            {"Align using : (delimiter centered)", [[Tabularize /:]], "Tabularize /:"}
+            {"Align using = (delimiter aligned)", [[Tabularize /=]], "Tabularize /="},
+            {"Align using , (delimiter aligned)", [[Tabularize /,]], "Tabularize /,"},
+            {"Align using # (delimiter aligned)", [[Tabularize /\#]], "Tabularize /\\#"},
+            {"Align using : (delimiter aligned)", [[Tabularize /:]], "Tabularize /:"}
         }
     )
     vim.fn["quickui#menu#install"](
@@ -783,13 +783,13 @@ function M.vim_quickui()
             {"--", ""},
             {"Align using = (delimiter fixed)", [['<,'>Tabularize /=\zs]], "'<,'>Tabularize /=\\zs"},
             {"Align using , (delimiter fixed)", [['<,'>Tabularize /,\zs]], "'<,'>Tabularize /,\\zs"},
-            {"Align using # (delimiter fixed)", [['<,'>Tabularize /#\zs]], "'<,'>Tabularize /#\\zs"},
+            {"Align using # (delimiter fixed)", [['<,'>Tabularize /\#\zs]], "'<,'>Tabularize /\\#\\zs"},
             {"Align using : (delimiter fixed)", [['<,'>Tabularize /:\zs]], "'<,'>Tabularize /:\\zs"},
             {"--", ""},
-            {"Align using = (delimiter centered)", [['<,'>Tabularize /=]], "'<,'>Tabularize /="},
-            {"Align using , (delimiter centered)", [['<,'>Tabularize /,]], "'<,'>Tabularize /,"},
-            {"Align using # (delimiter centered)", [['<,'>Tabularize /#]], "'<,'>Tabularize /#"},
-            {"Align using : (delimiter centered)", [['<,'>Tabularize /:]], "'<,'>Tabularize /:"},
+            {"Align using = (delimiter aligned)", [['<,'>Tabularize /=]], "'<,'>Tabularize /="},
+            {"Align using , (delimiter aligned)", [['<,'>Tabularize /,]], "'<,'>Tabularize /,"},
+            {"Align using # (delimiter aligned)", [['<,'>Tabularize /\#]], "'<,'>Tabularize /\\#"},
+            {"Align using : (delimiter aligned)", [['<,'>Tabularize /:]], "'<,'>Tabularize /:"},
             {"--", ""},
             {"Sort asc", [['<,'>sort]], "Sort in ascending order (sort)"},
             {"Sort desc", [['<,'>sort!]], "Sort in descending order (sort!)"},

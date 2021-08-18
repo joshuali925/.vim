@@ -11,7 +11,7 @@ export FZF_COMPLETION_TRIGGER='\'
 export FZF_DEFAULT_OPTS='--layout=reverse --height 40% --bind change:top'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
-export FZF_ALT_C_COMMAND='ls -1A 2> /dev/null'
+export FZF_ALT_C_COMMAND='command ls -1A 2> /dev/null'
 export FZF_ALT_C_OPTS='--bind "tab:down,btab:up"'
 export FZF_PREVIEW_COMMAND='bat --style=numbers --color=always --theme=OneHalfDark --line-range :50 {}'
 
