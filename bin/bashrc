@@ -1,8 +1,70 @@
 #!/usr/bin/env bash
+if [ -n "$GET_BASHRC" ]; then
+  unset GET_BASHRC
+  export EDITOR=vim
+  # https://zhuanlan.zhihu.com/p/51008087
+  _fish_collapsed_pwd() {
+    local pwd="$1"
+    local home="$HOME"
+    local size=${#home}
+    [[ $# == 0 ]] && pwd="$PWD"
+    [[ -z "$pwd" ]] && return
+    if [[ "$pwd" == "/" ]]; then
+      echo "/"
+      return
+    elif [[ "$pwd" == "$home" ]]; then
+      echo "~"
+      return
+    fi
+    [[ "$pwd" == "$home/"* ]] && pwd="~${pwd:$size}"
+    if [[ -n "$BASH_VERSION" ]]; then
+      local IFS="/"
+      local elements=($pwd)
+      local length=${#elements[@]}
+      for ((i=0;i<length-1;i++)); do
+        local elem=${elements[$i]}
+        if [[ ${#elem} -gt 1 ]]; then
+          elements[$i]=${elem:0:1}
+        fi
+      done
+    else
+      local elements=("${(s:/:)pwd}")
+      local length=${#elements}
+      for i in {1..$((length-1))}; do
+        local elem=${elements[$i]}
+        if [[ ${#elem} > 1 ]]; then
+          elements[$i]=${elem[1]}
+        fi
+      done
+    fi
+    local IFS="/"
+    echo "${elements[*]}"
+  }
+  PS1='\[\e[38;5;178m\]\u@\h:\[\e[38;5;208m\] $(_fish_collapsed_pwd) \[\e[38;5;141m\]$ \[\e[0m\]'
+
+  clear-env() {
+    local config_files=(~/.vim ~/.tmux ~/.tmux.conf ~/.zinit ~/.local/{bin,share/lf} ~/.config/{lf,lazygit})
+    echo "This will delete the following directories and files:"
+    for i in "${config_files[@]}"; do
+      find "$i" -maxdepth 1 2> /dev/null
+    done
+    read -p "Confirm delete? (y/n) " -n 1;
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      rm -rf "${config_files[@]}"
+    fi
+  }
+  return 0
+fi
+
 if [ ! -f $HOME/.vim/config/.bashrc ]; then
+  if [ -d $HOME/.vim ] && [ -n "$(command ls -A $HOME/.vim)" ]; then
+    echo "~/.vim already exists and is not empty, exiting.." >&2
+    exit 1
+  fi
   mkdir -pv $HOME/.vim
   curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C $HOME/.vim --strip-components=1
 fi
 
-bash --rcfile $HOME/.vim/config/.bashrc
+GET_BASHRC=1 bash --rcfile <(cat $HOME/.vim/config/.bashrc $HOME/.vim/bin/bashrc) "$@"
 

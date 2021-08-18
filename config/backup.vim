@@ -1459,6 +1459,19 @@ cc() {
 " install.sh
   pip3 install --user pynvim
   log "Installed pynvim for neovim"
+" .bashrc, tab to fzf cd or complete doesn't work
+# https://stackoverflow.com/questions/994563/integrate-readlines-kill-ring-and-the-x11-clipboard
+# https://stackoverflow.com/questions/4726695/bash-and-readline-tab-completion-in-a-user-input-loop
+# https://unix.stackexchange.com/questions/52578/execute-a-readline-function-without-keybinding
+_tab_complete_or_cd() {
+  if [ -n "$READLINE_LINE" ] && [ "$READLINE_LINE" != "" ]; then
+    bind menu-complete
+  else
+    __fzf_cd__
+  fi
+}
+bind -x '"\C-i": _tab_complete_or_cd'
+
 
 " =======================================================
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(

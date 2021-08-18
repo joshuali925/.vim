@@ -4,7 +4,7 @@
 # install configs
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh)"
 
-# run bash with environment
+# run one-time bash with configs
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"
 ```
 
