@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/install-from-github.sh
-TAR_FLAGS=(imgcat)
-install-from-github imgcat danielgatis/imgcat Linux_x86_64 Linux_arm64 $TAR_FLAGS "$@"
+install-from-github imgcat danielgatis/imgcat Linux_x86_64 Linux_arm64 imgcat "$@"
 

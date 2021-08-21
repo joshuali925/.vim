@@ -1,6 +1,6 @@
 " forked from https://github.com/kevinhwang91/dotfiles/blob/main/nvim/colors/one.vim
 
-if v:vim_did_enter
+if get(v:, 'vim_did_enter', 1)
     highlight clear
     syntax reset
 endif
@@ -22,8 +22,8 @@ endfun
 
 " color definition
 let s:none = ['NONE', 'NONE']
-let s:black_1 = ['#292c33', '16']
-let s:black_2 = ['#2d323b', '236']
+let s:black_1 = ['#292c33', '235']
+let s:black_2 = ['#2d323b', '237']
 let s:red_1 = ['#e06c75', '168']
 let s:red_2 = ['#be5046', '130']
 let s:red_3 = ['#450a15', '52']
@@ -67,8 +67,8 @@ call <sid>X('Italic', '', '', 'italic')
 call <sid>X('ModeMsg', s:white_1, '', '')
 call <sid>X('MoreMsg', s:white_1, '', '')
 call <sid>X('NonText', s:mono_1, '', 'none')
-call <sid>X('PMenu', '', s:mono_4, '')
-call <sid>X('PMenuSel', '', s:mono_2, '')
+call <sid>X('PMenu', s:white_1, s:mono_4, '')
+call <sid>X('PMenuSel', s:white_1, s:mono_2, '')
 call <sid>X('PMenuSbar', '', s:black_1, '')
 call <sid>X('PMenuThumb', '', s:white_1, '')
 call <sid>X('Question', s:blue_1, '', '')

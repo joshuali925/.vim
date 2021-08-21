@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/install-from-github.sh
-TAR_FLAGS=(lazydocker)
-install-from-github lazydocker jesseduffield/lazydocker Linux_x86_64 Linux_arm64 $TAR_FLAGS "$@"
+install-from-github lazydocker jesseduffield/lazydocker Linux_x86_64 Linux_arm64 lazydocker "$@"
 

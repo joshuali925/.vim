@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/install-from-github.sh
-TAR_FLAGS=(btm)
-install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux $TAR_FLAGS "$@"
+install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux btm "$@"
 

@@ -1,10 +1,34 @@
-" TODO use matchfuzzy when this is merged https://github.com/neovim/neovim/pull/12995
+" TODO use matchfuzzy if available when this is merged https://github.com/neovim/neovim/pull/12995
 function! funcs#complete_word(findstart, base)
   if a:findstart
     return match(getline('.'), '\S\+\%'. col('.'). 'c')
   else
     let l:words = map(split(join(getline(1, '$'), "\n")), '{"word": v:val, "kind": "[WORD]"}')
     return len(a:base) ? filter(l:words, 'match(v:val.word, "\\V". a:base) != -1') : l:words
+  endif
+endfunction
+
+function! funcs#simple_complete()
+  if pumvisible()
+    return "\<C-n>"
+  endif
+  let column = col('.')
+  let line = getline('.')
+  if !(column>1 && strpart(line, column-2, 3)=~'^\w')
+    let pre_char = line[column-2]
+    if pre_char == '.'
+      return "\<C-x>\<C-o>\<C-p>"
+    elseif pre_char == '/'
+      return "\<C-x>\<C-f>\<C-p>"
+    else
+      return "\<Tab>"
+    endif
+  endif
+  let substr = matchstr(strpart(line, -1, column+1), "[^ \t]*$")
+  if match(substr, '\/') != -1
+    return "\<C-x>\<C-f>"
+  else
+    return "\<C-n>"
   endif
 endfunction
 

@@ -1,3 +1,7 @@
+" call plug#begin(expand('<sfile>:p:h'). '/plugged')
+" Plug ''
+" call plug#end()
+
 let &t_SI .= "\<Esc>[6 q"  " cursor shape
 let &t_EI .= "\<Esc>[2 q"
 set background=dark
@@ -92,7 +96,7 @@ xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
-noremap <expr> 0 col('.') - 1 == match(getline('.'), '\S') ? '0' : '^'
+noremap <expr> 0 funcs#home()
 noremap ^ 0
 noremap - $
 xnoremap - g_
@@ -114,8 +118,8 @@ xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
-xnoremap gx :<C-u>call netrw#BrowseX(expand(<SID>GetVisualSelection()), netrw#CheckIfRemote())<CR>
-nnoremap cr :call <SID>EditRegister()<CR>
+xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>
+nnoremap cr :call funcs#edit_register()<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
 nnoremap <C-c> :nohlsearch<CR>:echo<CR>
@@ -130,35 +134,36 @@ nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
 nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
-nnoremap <C-o> :call <SID>Lf()<CR>
-nnoremap <leader>y "+y
-nnoremap <leader>yy V:w !~/.vim/bin/oscyank<CR>
-xnoremap <leader>y :w !~/.vim/bin/oscyank<CR>
+nnoremap <C-o> :call <SID>EditCallback('lf', 0)<CR>
 noremap <leader>p "0p
 nnoremap <leader>P :registers<CR>:normal! "p<Left>
 xnoremap <leader>P "0P
-nnoremap <C-p> :call <SID>Fzf('rg --files', 1)<CR>
+nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi', 1)<CR>
 nnoremap <leader>fs :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>Fzf('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| xargs ls -1 2>/dev/null', 0)<CR>
+nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| xargs ls -1 2>/dev/null \| fzf --multi', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>
 nnoremap <leader>fg :Grt<CR>:silent grep! "" <bar> redraw! <bar> copen<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
-xnoremap <leader>fg :<C-u>Grt<CR>:silent grep! "<C-r>=<SID>GetVisualSelection()<CR>" <bar> redraw! <bar> copen<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
+xnoremap <leader>fg :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
 nnoremap <leader>fj :Grt<CR>:silent grep! "\b<C-r><C-w>\b" <bar> redraw! <bar> copen<CR>
-xnoremap <leader>fj :<C-u>Grt<CR>:silent grep! "<C-r>=<SID>GetVisualSelection()<CR>" <bar> redraw! <bar> copen<CR>
+xnoremap <leader>fj :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<CR>
 nnoremap <leader>b :Vexplore<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
 xnoremap <leader>s "xy:%s/<C-r>x/<C-r>x/gc<Left><Left><Left>
+nnoremap <leader>l :call funcs#print_curr_vars(0, 0)<CR>
+xnoremap <leader>l :<C-u>call funcs#print_curr_vars(1, 0)<CR>
+nnoremap <leader>L :call funcs#print_curr_vars(0, 1)<CR>
+xnoremap <leader>L :<C-u>call funcs#print_curr_vars(1, 1)<CR>
 inoremap <leader>w <Esc>:update<CR>
 " do not use <leader> for sudo to work
 nnoremap ;w :update<CR>
 nnoremap <leader>W :wall<CR>
 nnoremap ;q :quit<CR>
-nnoremap <leader>Q :quit!<CR>
-nnoremap <leader>x :bdelete<CR>
-nnoremap <leader>X :bdelete!<CR>
+nnoremap <leader>Q :call funcs#quit(0, 1)<CR>
+nnoremap <leader>x :call funcs#quit(1, 0)<CR>
+nnoremap <leader>X :call funcs#quit(0, 1)<CR>
 nnoremap yoq :call <SID>ToggleQuickfix()<CR>
 nnoremap <expr> yol empty(filter(getwininfo(), 'v:val.loclist')) ? ':lopen<CR>' : ':lclose<CR>'
 cnoremap <expr> <Tab> '/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'
@@ -171,13 +176,14 @@ augroup AutoCommands
   autocmd!
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif  " restore last edit position
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
+  autocmd FileType * setlocal formatoptions=jql
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>
 augroup END
 command! -complete=shellcmd -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | execute 'read !'. <q-args> | 1d
 command! W write !sudo tee % > /dev/null
 command! -nargs=? -bang Ggrep call s:GitGrep(<f-args>)
-command! -bar Grt execute 'cd' fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
+command! -bar Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
 
 let g:netrw_dirhistmax = 0
 let g:netrw_banner = 0
@@ -185,39 +191,27 @@ let g:netrw_browse_split = 4
 let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
 
-function! s:Lf() abort
+function! s:EditCallback(cmd, cd_git_root) abort
+  if a:cd_git_root == 1
+    let l:git_root = fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
+    execute 'cd '. l:git_root
+  endif
   let l:tempfile = tempname()
-  execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. shellescape(l:tempfile). ' "'. expand('%'). '"'
+  if a:cmd == 'lf'
+    execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. fnameescape(l:tempfile). ' "'. expand('%'). '"'
+  else
+    execute 'silent !'. a:cmd. ' > '. fnameescape(l:tempfile)
+  endif
   try
     if filereadable(l:tempfile)
       for l:filename in readfile(l:tempfile)
-        execute 'edit '. l:filename
+        execute 'edit '. (a:cd_git_root == 1 ? l:git_root. '/' : '') . l:filename
       endfor
     endif
     redraw!
   finally
     call delete(l:tempfile)
   endtry
-endfunction
-function! s:Fzf(src_cmd, cd_git_root) abort
-  if a:cd_git_root == 1
-    let l:git_root = fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
-    execute 'cd '. l:git_root
-  endif
-  let l:tempfile = tempname()
-  execute 'silent !'. a:src_cmd. ' | fzf --multi > '. fnameescape(l:tempfile)
-  try
-    for l:filename in readfile(l:tempfile)
-      execute 'edit '. (a:cd_git_root == 1 ? l:git_root. '/' : '') . l:filename
-    endfor
-    redraw!
-  finally
-    call delete(l:tempfile)
-  endtry
-endfunction
-function! s:EditRegister() abort
-  let l:r = nr2char(getchar())
-  call feedkeys('q:ilet @'. l:r. " = \<C-r>\<C-r>=string(@". l:r. ")\<CR>\<Esc>0f'", 'n')
 endfunction
 function! s:ToggleQuickfix()
   for i in range(1, winnr('$'))
@@ -240,52 +234,10 @@ function! s:GitGrep(...)
   redraw!
   copen
 endfun
-function! s:GetVisualSelection()
-  let [l:line_start, l:column_start] = getpos("'<")[1:2]
-  let [l:line_end, l:column_end] = getpos("'>")[1:2]
-  let l:lines = getline(l:line_start, l:line_end)
-  if len(l:lines) == 0
-    return ''
-  endif
-  let l:lines[-1] = l:lines[-1][: l:column_end - (&selection == 'inclusive' ? 1 : 2)]
-  let l:lines[0] = l:lines[0][l:column_start - 1:]
-  return join(l:lines, "\n")
-endfunction
-function! CompleteWORD(findstart, base)
-  if a:findstart
-    return match(getline('.'), '\S\+\%'. col('.'). 'c')
-  else
-    let l:words = map(split(join(getline(1, '$'), "\n")), '{"word": v:val, "kind": "[WORD]"}')
-    return len(a:base) ? filter(l:words, 'match(v:val.word, "\\V". a:base) != -1') : l:words
-  endif
-endfunction
-function! s:SimpleComplete()
-  if pumvisible()
-    return "\<C-n>"
-  endif
-  let column = col('.')
-  let line = getline('.')
-  if !(column>1 && strpart(line, column-2, 3)=~'^\w')
-    let pre_char = line[column-2]
-    if pre_char == '.'
-      return "\<C-x>\<C-o>\<C-p>"
-    elseif pre_char == '/'
-      return "\<C-x>\<C-f>\<C-p>"
-    else
-      return "\<Tab>"
-    endif
-  endif
-  let substr = matchstr(strpart(line, -1, column+1), "[^ \t]*$")
-  if match(substr, '\/') != -1
-    return "\<C-x>\<C-f>"
-  else
-    return "\<C-n>"
-  endif
-endfunction
-" call fpc#init()
+call fpc#init()
 set omnifunc=syntaxcomplete#Complete
-set completefunc=CompleteWORD
-inoremap <expr> <Tab> pumvisible() ? '<C-n>' : <SID>SimpleComplete()
+set completefunc=funcs#complete_word
+inoremap <expr> <Tab> pumvisible() ? '<C-n>' : funcs#simple_complete()
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 inoremap <expr> <Down> pumvisible() ? '<C-n>' : '<C-o>gj'
 inoremap <expr> <Up> pumvisible() ? '<C-p>' : '<C-o>gk'
@@ -314,3 +266,20 @@ nnoremap [L :lfirst<CR>
 nnoremap ]L :llast<CR>
 nnoremap [<C-l> :lpfile<CR>
 nnoremap ]<C-l> :lnfile<CR>
+
+nnoremap <expr> gc plugins#commentary#go()
+nnoremap <expr> gcc plugins#commentary#go(). '_'
+xnoremap <expr> gc plugins#commentary#go()
+onoremap <silent> gc :<C-U>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>
+onoremap <silent> aI :<C-u>cal plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+onoremap <silent> iI :<C-u>cal plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> aI :<C-u>cal plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+xnoremap <silent> iI :<C-u>cal plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> ai :<C-u>cal plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+onoremap <silent> ii :<C-u>cal plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> ai :<C-u>cal plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+xnoremap <silent> ii :<C-u>cal plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+nnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
+nmap <leader>yy V<leader>y
+nmap <leader>Y <leader>y$
+xnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
