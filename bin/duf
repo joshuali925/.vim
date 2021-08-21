@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/install-from-github.sh
-TAR_FLAGS=(duf)
-install-from-github duf muesli/duf linux_x86_64.tar.gz linux_arm64.tar.gz $TAR_FLAGS "$@"
+install-from-github duf muesli/duf linux_x86_64.tar.gz linux_arm64.tar.gz duf "$@"
 

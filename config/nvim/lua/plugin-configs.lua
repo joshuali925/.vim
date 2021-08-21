@@ -20,6 +20,7 @@ function M.auto_pairs()
 end
 
 function M.vim_matchup()
+    g.matchup_matchparen_offscreen = {}
     g.matchup_matchparen_deferred = 1
     g.matchup_matchparen_deferred_hide_delay = 300
     g.matchup_motion_override_Npercent = 0

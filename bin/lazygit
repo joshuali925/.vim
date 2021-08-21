@@ -5,6 +5,5 @@ if [ ! -f $HOME/.config/lazygit/config.yml ]; then
 fi
 
 source ~/.vim/bin/install-from-github.sh
-TAR_FLAGS=(lazygit)
-install-from-github lazygit jesseduffield/lazygit Linux_x86_64 Linux_arm64 $TAR_FLAGS "$@"
+install-from-github lazygit jesseduffield/lazygit Linux_x86_64 Linux_arm64 lazygit "$@"
 

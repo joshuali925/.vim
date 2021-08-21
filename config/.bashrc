@@ -25,7 +25,7 @@ stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
 
-HISTCONTROL="ignorespace"
+HISTCONTROL=ignoreboth:erasedups:ignorespace
 
 bind 'set show-all-if-ambiguous on'
 bind 'set completion-ignore-case on'
@@ -43,31 +43,33 @@ bind -x '"\C-o":"lf"'
 # same as in zsh, 'C-x a' expands aliases
 bind '"\C-xa": shell-expand-line'
 
+stty werase undef # unbind werase to C-w
+bind '\C-w:unix-filename-rubout'
+
 if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
   # bash >= 4.0 needed for $READLINE_LINE
   # NOTE this breaks multi-line prompt on bash 4.0
   BINDED_COMPLETION=0
   _check_tab_complete() {
     if [ -n "$READLINE_LINE" ]; then
-      bind '"\e%": menu-complete'
+      bind '"\301": menu-complete'
       bind 'TAB: menu-complete'
       BINDED_COMPLETION=1
     fi
   }
   _reset_tab() {
-    echo
     if [ $BINDED_COMPLETION != 0 ]; then
-      bind '"\e%": "\ec"'
-      bind 'TAB: "\e$\e%"'
+      bind '"\301": "\ec"'
+      bind 'TAB: "\300\301"'
       BINDED_COMPLETION=0
     fi
   }
-  bind -x '"\e$": _check_tab_complete' # \e$: set tab action based on user input
-  bind '"\e%": "\ec"'                  # \e%: trigger tab action (fzf or completion), will rebind tab to completion if in completion
-  bind 'TAB: "\e$\e%"'                 # TAB: detects and runs __fzf_cd__ if no input, otherwise runs builtin command completion
-  bind '"\e(": accept-line'            # \e(: previously bound to <CR>
-  bind -x '"\e)": _reset_tab'          # \e): reset tab binding, triggered on <CR>
-  bind '"\C-m": "\e(\e)"'              # <CR>: reset tab binding and accept-line
+  bind -x '"\300": _check_tab_complete' # \300: set tab action based on user input
+  bind '"\301": "\ec"'                  # \301: trigger tab action (fzf or completion), will rebind tab to completion if in completion
+  bind 'TAB: "\300\301"'                # TAB: detects and runs __fzf_cd__ if no input, otherwise runs builtin command completion
+  bind -x '"\365": _reset_tab'          # \365: reset tab binding, triggered on <CR>
+  bind '"\366": accept-line'            # \366: previously bound to <CR>
+  bind '"\C-m": "\365\366"'             # <CR>: reset tab binding and accept-line
 fi
 
 cd() {

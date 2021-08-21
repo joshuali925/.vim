@@ -2,6 +2,7 @@
 if [ -n "$GET_BASHRC" ]; then
   unset GET_BASHRC
   export EDITOR=vim
+  alias vimm='$EDITOR ~/.vim/vimrc'
   # https://zhuanlan.zhihu.com/p/51008087
   _fish_collapsed_pwd() {
     local pwd="$1"
@@ -40,10 +41,11 @@ if [ -n "$GET_BASHRC" ]; then
     local IFS="/"
     echo "${elements[*]}"
   }
-  PS1='\[\e[38;5;178m\]\u@\h:\[\e[38;5;208m\] $(_fish_collapsed_pwd) \[\e[38;5;141m\]$ \[\e[0m\]'
+  PS1='\[\e[38;5;178m\]\u@\h:\[\e[38;5;208m\]$(_fish_collapsed_pwd) \[\e[38;5;141m\]$ \[\e[0m\]'
 
   clear-env() {
-    local config_files=(~/.vim ~/.tmux ~/.tmux.conf ~/.zinit ~/.local/{bin,share/lf} ~/.config/{lf,lazygit})
+    local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/{bin,share/lf} ~/.config/{lf,lazygit})
+    [ $(readlink -f $HOME/.tmux.conf) == "$HOME/.vim/config/.tmux.conf" ] && config_files+=(~/.tmux.conf)
     echo "This will delete the following directories and files:"
     for i in "${config_files[@]}"; do
       find "$i" -maxdepth 1 2> /dev/null

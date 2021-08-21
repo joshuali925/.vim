@@ -7,21 +7,32 @@ function! fpc#init() abort
   let g:fpc_use_all_buffers = get(g:, 'fpc_use_all_buffers', 1)
   let g:fpc_use_cache = get(g:, 'fpc_use_cache', 1)
   let g:fpc_force_refresh_menu = get(g:, 'fpc_force_refresh_menu', 1)
+  let g:fpc_select_first_match = get(g:, 'fpc_select_first_match', 1)  " use noinsert instead of noselect if available
   let g:fpc_omni_enabled_ft = get(g:, 'fpc_omni_enabled_ft', {'python': 1, 'javascript': 1})
 
   let s:FuzzyFunc = g:fpc_custom_matcher || !exists('*matchfuzzy') ? function('s:FuzzyMatch') : function('s:VimFuzzyMatch')
   let s:disable_once = 0
   let s:omni_info = {'on': 0}  " builtin omni or path completion information
+  let s:has_noselect = has('patch-7.4.775')
+  let s:noinsert = s:has_noselect && g:fpc_select_first_match
 
-  set omnifunc=syntaxcomplete#Complete
-  set completeopt=menuone
-  set shortmess+=c
   inoremap <expr> <Tab> pumvisible() ? '<C-n>' : '<Tab>'
   inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
   inoremap <expr> <CR> pumvisible() ? fpc#accept() : '<CR>'
   inoremap <expr> <BS> pumvisible() ? '<C-y><BS>' : '<BS>'
   inoremap <expr> <C-@> fpc#refresh()
   inoremap <expr> <C-Space> fpc#refresh()
+
+  if s:noinsert
+    set completeopt=menuone,noinsert
+    inoremap <expr> <BS> pumvisible() ? '<C-e><BS>' : '<BS>'
+  elseif s:has_noselect
+    set completeopt=menuone,noselect
+  else
+    set completeopt=menuone
+  endif
+  set omnifunc=syntaxcomplete#Complete
+  set shortmess+=c
 
   augroup FpcInit
     autocmd!
@@ -76,7 +87,7 @@ function! fpc#refresh()
   for bufnr in filter(range(1, bufnr('$')), 'buflisted(v:val) && bufloaded(v:val)')
     call s:RefreshBufWords({'type': 2, 'bufnr': bufnr})
   endfor
-  return pumvisible() ? "\<C-y>" : " \<BS>"
+  return pumvisible() ? s:noinsert ? "\<C-e>" : "\<C-y>" : " \<BS>"
 endfunction
 
 function! s:DoCompletion() abort
@@ -120,7 +131,9 @@ function! s:DoCompletion() abort
   let s:match_list = s:FuzzyFunc(base)
   if len(s:match_list) > 0
     call complete(base_start + 1, s:match_list)
-    call feedkeys("\<C-p>", 'in')
+    if !s:has_noselect
+      call feedkeys("\<C-p>", 'in')
+    endif
   endif
 endfunction
 

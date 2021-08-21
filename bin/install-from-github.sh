@@ -1,6 +1,6 @@
 install-from-github() {
   if [ "$#" -lt 4 ]; then
-    echo "Usage: install-from-github <executable> <repo> <linux-x64-package-name> <linux-arm-package-name> <tar-flags-array> [<args>]"
+    echo "Usage: install-from-github <executable> <repo> <linux-x64-package-name> <linux-arm-package-name> <tar-flags> [<args>]"
     return 0
   fi
 
@@ -27,7 +27,7 @@ install-from-github() {
   mkdir -p $HOME/.local/bin
   URL=$(curl -s https://api.github.com/repos/$REPO/releases/latest | grep "browser_download_url.*$PACKAGE" | cut -d '"' -f 4)
   echo "Installing $EXECUTABLE from $URL" >&2
-  curl -sL -o- $URL | tar xz -C $HOME/.local/bin "${TAR_FLAGS[@]}"
+  curl -sL -o- $URL | tar xz -C $HOME/.local/bin $(echo "$TAR_FLAGS")
 
   $HOME/.local/bin/$EXECUTABLE "$@"
 }
