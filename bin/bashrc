@@ -2,7 +2,7 @@
 if [ -n "$GET_BASHRC" ]; then
   unset GET_BASHRC
   export EDITOR=vim
-  alias vimm='$EDITOR ~/.vim/vimrc'
+  alias vimm='$EDITOR +"cd ~/.vim" ~/.vim/vimrc'
   # https://zhuanlan.zhihu.com/p/51008087
   _fish_collapsed_pwd() {
     local pwd="$1"
@@ -69,4 +69,3 @@ if [ ! -f $HOME/.vim/config/.bashrc ]; then
 fi
 
 GET_BASHRC=1 bash --rcfile <(cat $HOME/.vim/config/.bashrc $HOME/.vim/bin/bashrc) "$@"
-

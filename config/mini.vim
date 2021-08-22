@@ -11,3 +11,7 @@ noremap , ;
 noremap ;, ,
 nnoremap ;w :update<CR>
 nnoremap ;q :quit<CR>
+
+autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
+
+command! W write !sudo tee % > /dev/null

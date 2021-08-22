@@ -28,7 +28,6 @@ opt.showmatch = true
 opt.showmode = false
 opt.title = true
 opt.showtabline = 2
-opt.wildmode = "longest:full,full"
 opt.diffopt = opt.diffopt + {"vertical", "indent-heuristic", "algorithm:patience"}
 opt.splitright = true
 opt.splitbelow = true

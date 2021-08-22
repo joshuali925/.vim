@@ -43,7 +43,6 @@ map('L', 'D'); // forward in history
 map(';fi', 'oi'); // open incognito
 map(';fm', 'ox'); // open from recently closed tab
 map(';fh', 'oh'); // open from history
-map("'", 'om'); // open mark, c-d to delete
 map('o', 't'); // open url
 map('t', 'T'); // goto tab
 map('s', 'f'); // open in current tab
@@ -86,6 +85,9 @@ mapkey(';vs', 'split vertically', function() { document.write('<html><head></hea
 mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + location.href + '><frame src=' + location.href + '></frameset></html>'); })
 mapkey(';vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
 mapkey('<Ctrl-r>', 'Hard reload', function() { location.reload(); });
+mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
+    Front.openOmnibar({type: "VIMarks", tabbed: false});
+});
 mapkey('p', '#0enter ephemeral PassThrough mode to temporarily suppress SurfingKeys', function() {
     Normal.passThrough(1500);
 });

@@ -15,7 +15,6 @@ Plug 'machakann/vim-sandwich'
 Plug 'joshuali925/vim-indent-object'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
-Plug 'dhruvasagar/vim-table-mode'
 Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 call plug#end()
@@ -226,9 +225,3 @@ let g:operator_sandwich_no_default_key_mappings = 1
 let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_smartcase = 1
 let g:highlightedyank_highlight_duration = 500
-let g:table_mode_tableize_map = ''
-let g:table_mode_motion_left_map = '<leader>th'
-let g:table_mode_motion_up_map = '<leader>tk'
-let g:table_mode_motion_down_map = '<leader>tj'
-let g:table_mode_motion_right_map = '<leader>tl'
-let g:table_mode_corner = '|'  " markdown compatible tablemode
