@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ ! -f $HOME/.local/bin/jq ]; then
+if [ ! -x $HOME/.local/bin/jq ]; then
   mkdir -p $HOME/.local/bin
   if [ $(uname -s) == 'Darwin' ]; then
     URL=$(curl -s https://api.github.com/repos/stedolan/jq/releases/latest | grep "browser_download_url.*jq-osx-amd64" | cut -d '"' -f 4)
@@ -12,4 +12,3 @@ if [ ! -f $HOME/.local/bin/jq ]; then
   chmod +x $HOME/.local/bin/jq
 fi
 $HOME/.local/bin/jq "$@"
-

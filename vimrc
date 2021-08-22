@@ -11,7 +11,9 @@ colorscheme gruvbox_material
 
 set backspace=eol,start,indent
 set whichwrap+=<,>,[,]
-set mouse=a
+if has('mouse')
+  set mouse=a
+endif
 set cursorline
 set numberwidth=2
 set number
@@ -25,7 +27,6 @@ set ruler
 set showtabline=2
 set laststatus=2
 set wildmenu
-set wildmode=longest:full,full
 set splitright
 set splitbelow
 set hlsearch
@@ -157,7 +158,7 @@ xnoremap <leader>l :<C-u>call funcs#print_curr_vars(1, 0)<CR>
 nnoremap <leader>L :call funcs#print_curr_vars(0, 1)<CR>
 xnoremap <leader>L :<C-u>call funcs#print_curr_vars(1, 1)<CR>
 inoremap <leader>w <Esc>:update<CR>
-" do not use <leader> for sudo to work
+" do not use <leader> for sudoedit to work
 nnoremap ;w :update<CR>
 nnoremap <leader>W :wall<CR>
 nnoremap ;q :quit<CR>
@@ -176,6 +177,7 @@ augroup AutoCommands
   autocmd!
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif  " restore last edit position
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
+  autocmd BufNewFile,BufRead *.log set filetype=messages
   autocmd FileType * setlocal formatoptions=jql
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>

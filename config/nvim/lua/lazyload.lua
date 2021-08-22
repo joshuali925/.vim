@@ -54,7 +54,7 @@ vim.schedule(
                     "project.nvim"
                 }
                 loader(table.concat(plugins, " "))
-                vim.cmd("ProjectRoot") -- run again in case no lsp active
+                vim.cmd("silent! ProjectRoot") -- run again in case no lsp active
             end,
             200
         )

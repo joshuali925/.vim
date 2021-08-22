@@ -62,7 +62,8 @@ alias ga='git add'
 alias gau='git add -u'
 alias gaa='git add --all'
 alias gb='git branch'
-alias gba='git branch -a -vv'
+alias gba='git branch -a -vv --sort=-committerdate'
+alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(HEAD)%(color:yellow)%(refname:short)|%(color:green)%(committerdate:relative)|%(color:red)%(objectname:short)%(color:reset) - %(subject) %(color:bold blue)<%(authorname)>%(color:reset)" --color=always | column -ts"|"'
 alias gc='git commit -m'
 alias gc!='git commit -v --amend'
 alias gca='git commit -v -a'
@@ -136,6 +137,7 @@ alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\n
 alias gunwip='git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
 alias gup='git pull --rebase'
 alias gvt='git verify-tag'
+alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD'
 alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
 
@@ -157,6 +159,16 @@ gdd() {
 
 gdg() {
   git diff "$@" | delta --line-numbers --navigate --side-by-side
+}
+
+sudorun() {
+  local CMD=$1
+  shift
+  case $CMD in
+    v|vi|vim) sudo $(/usr/bin/which vim) -u "$HOME/.vim/config/mini.vim" "$@" ;;
+    lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E $(/usr/bin/which lf) -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
+    *) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E $(/usr/bin/which $CMD) "$@" ;;
+  esac
 }
 
 print-ascii() {

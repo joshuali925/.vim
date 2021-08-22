@@ -11,6 +11,7 @@ function M.init()
             "css",
             "bash",
             "lua",
+            "vim",
             "json",
             "yaml",
             "python"

@@ -6,4 +6,3 @@ fi
 
 source ~/.vim/bin/install-from-github.sh
 install-from-github lazygit jesseduffield/lazygit Linux_x86_64 Linux_arm64 lazygit "$@"
-

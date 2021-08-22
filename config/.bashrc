@@ -48,8 +48,8 @@ bind '\C-w:unix-filename-rubout'
 
 if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
   # bash >= 4.0 needed for $READLINE_LINE
-  # NOTE this breaks multi-line prompt on bash 4.0
-  BINDED_COMPLETION=0
+  # NOTE this breaks multi-line prompt on bash 4.0 and output without \n
+  BINDED_COMPLETION=-1
   _check_tab_complete() {
     if [ -n "$READLINE_LINE" ]; then
       bind '"\301": menu-complete'
@@ -64,9 +64,8 @@ if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
       BINDED_COMPLETION=0
     fi
   }
-  bind -x '"\300": _check_tab_complete' # \300: set tab action based on user input
-  bind '"\301": "\ec"'                  # \301: trigger tab action (fzf or completion), will rebind tab to completion if in completion
-  bind 'TAB: "\300\301"'                # TAB: detects and runs __fzf_cd__ if no input, otherwise runs builtin command completion
+  _reset_tab
+  bind -x '"\300": _check_tab_complete' # \300: set tab action based on user input, \301 triggers the action, TAB runs them together
   bind -x '"\365": _reset_tab'          # \365: reset tab binding, triggered on <CR>
   bind '"\366": accept-line'            # \366: previously bound to <CR>
   bind '"\C-m": "\365\366"'             # <CR>: reset tab binding and accept-line

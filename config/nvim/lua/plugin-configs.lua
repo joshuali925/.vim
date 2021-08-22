@@ -85,7 +85,6 @@ function M.setup_vim_sandwich()
 end
 
 function M.quick_scope()
-    -- g.qs_lazy_highlight = 1
     g.qs_filetype_blacklist = {"qf", "startify", "TelescopePrompt", "Trouble", "LspSagaCodeAction"}
     g.qs_buftype_blacklist = {"terminal"}
     vim.cmd("highlight QuickScopePrimary guifg='#ffe9c2'")
@@ -612,17 +611,17 @@ function M.vim_quickui()
             {"Git l&og", [[Flog]], "Show git logs with vim-flog"},
             {
                 "Git search &all",
-                [[call feedkeys(":Git log -p --all -S \"\"\<Left>", "n")]],
-                "Search a string in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>"
+                [[call feedkeys(":Git log --all --full-history --name-status -S \"\"\<Left>", "n")]],
+                "Search a string in all committed versions of files, command: git log -p --all -S \"<pattern>\" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>"
             },
             {
                 "Git gre&p all",
-                [[call feedkeys(":Git log -p --all -i -G \"\"\<Left>", "n")]],
-                "Search a regex in all committed versions of files, flags: --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>"
+                [[call feedkeys(":Git log --all --full-history --name-status -i -G \"\"\<Left>", "n")]],
+                "Search a regex in all committed versions of files, command: git log -p --all -i -G \"<pattern>\" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>"
             },
             {
                 "Git fi&nd files all",
-                [[call feedkeys(":Git log --all --full-history --name-only -- \"**\"\<Left>\<Left>", "n")]],
+                [[call feedkeys(":Git log --all --full-history --name-status -- \"**\"\<Left>\<Left>", "n")]],
                 "Grep file names in all commits"
             },
             {"--", ""},
