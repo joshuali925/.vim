@@ -2092,6 +2092,7 @@ function cd() {
 " =======================================================
 nnoremap <leader>fs :vertical sfind \c*
 xnoremap <leader>n "xy/\V<C-r>=substitute(escape(@x, '/\'), '\n', '\\n', 'g')<CR><CR>N
+xnoremap <leader>n "xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/=substitute(escape(@x, "\\/.*'$^~[]"), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 let s:RelativeNumber = 0
   if s:RelativeNumber == 1
@@ -2512,19 +2513,14 @@ cc() {
 " install.sh
   pip3 install --user pynvim
   log "Installed pynvim for neovim"
-" .bashrc, tab to fzf cd or complete doesn't work
+" .bashrc, tab to fzf cd or complete (_check_tab_complete, _reset_tab) references
 # https://stackoverflow.com/questions/994563/integrate-readlines-kill-ring-and-the-x11-clipboard
 # https://stackoverflow.com/questions/4726695/bash-and-readline-tab-completion-in-a-user-input-loop
 # https://unix.stackexchange.com/questions/52578/execute-a-readline-function-without-keybinding
 # https://stackoverflow.com/questions/40417695/refreshing-bash-prompt-after-invocation-of-a-readline-bound-command \300\301 \365-\367 \370-\377 unused key code ranges
-_tab_complete_or_cd() {
-  if [ -n "$READLINE_LINE" ] && [ "$READLINE_LINE" != "" ]; then
-    bind menu-complete
-  else
-    __fzf_cd__
-  fi
-}
-bind -x '"\C-i": _tab_complete_or_cd'
+# https://github.com/rcaloras/bash-preexec/blob/master/bash-preexec.sh
+# https://unix.stackexchange.com/questions/250713/modify-all-bash-commands-through-a-program-before-executing-them
+(trap '_reset_tab' DEBUG) replaced by (PROMPT_COMMAND='_reset_tab')
 
 
 " =======================================================

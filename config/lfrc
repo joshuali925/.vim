@@ -91,7 +91,7 @@ cmd follow-symlink ${{
 }}
 
 cmd locate-file-cwd ${{
-  res="$(ls -1A 2> /dev/null | fzf --bind 'tab:down,btab:up')"
+  res="$(command ls -1Ap 2> /dev/null | fzf --bind 'tab:down,btab:up')"
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then

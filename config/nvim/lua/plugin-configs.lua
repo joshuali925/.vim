@@ -15,8 +15,12 @@ function M.auto_pairs()
     g.AutoPairsShortcutJump = ""
     g.AutoPairsShortcutBackInsert = ""
     g.AutoPairsMapCh = 0
-    g.AutoPairsMapCR = 0
     vim.fn.AutoPairsTryInit()
+end
+
+function M.luasnip()
+    require("luasnip/loaders/from_vscode").load()
+    require("luasnip/loaders/from_vscode").load({paths = {"~/.config/snippets"}})
 end
 
 function M.vim_matchup()
@@ -612,12 +616,12 @@ function M.vim_quickui()
             {
                 "Git search &all",
                 [[call feedkeys(":Git log --all --full-history --name-status -S \"\"\<Left>", "n")]],
-                "Search a string in all committed versions of files, command: git log -p --all -S \"<pattern>\" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>"
+                'Search a string in all committed versions of files, command: git log -p --all -S "<pattern>" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'
             },
             {
                 "Git gre&p all",
                 [[call feedkeys(":Git log --all --full-history --name-status -i -G \"\"\<Left>", "n")]],
-                "Search a regex in all committed versions of files, command: git log -p --all -i -G \"<pattern>\" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>"
+                'Search a regex in all committed versions of files, command: git log -p --all -i -G "<pattern>" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>'
             },
             {
                 "Git fi&nd files all",

@@ -29,6 +29,8 @@ map("", "<Home>", "g^")
 map("", "<End>", "g$")
 map("", "<Down>", "gj")
 map("", "<Up>", "gk")
+map("i", "<Down>", "pumvisible() ? '<C-n>' : '<C-o>gj'", {expr = true, noremap = true})
+map("i", "<Up>", "pumvisible() ? '<C-p>' : '<C-o>gk'", {expr = true, noremap = true})
 map("i", "<Home>", "<C-o>g^")
 map("i", "<End>", "<C-o>g$")
 map("i", "<C-_>", "<C-o>u")
@@ -66,7 +68,7 @@ map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], {nore
 map(
     "x",
     "<leader>n",
-    [["xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>]],
+    [["xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]],
     {noremap = true, silent = true}
 )
 map("n", "<leader>u", "<Cmd>MundoToggle<CR>")
@@ -319,6 +321,7 @@ map(
     "gd",
     "<Cmd>lua if next(vim.lsp.buf_get_clients()) == nil then vim.cmd('normal! gd') else vim.lsp.buf.definition() end<CR>"
 )
+map("n", "gD", "<Cmd>lua vim.lsp.buf.type_definition()<CR>")
 map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').preview_definition()<CR>")
 map("n", "gR", "<Cmd>lua vim.lsp.buf.references()<CR>")
 map("n", "gr", "<Cmd>TroubleToggle lsp_references<CR>")

@@ -31,9 +31,7 @@ vim.schedule(
             function()
                 local plugins = {
                     "indent-blankline.nvim",
-                    "nvim-colorizer.lua",
                     "plenary.nvim",
-                    "popup.nvim",
                     "gitsigns.nvim",
                     "conflict-marker.vim",
                     "vim-sleuth",

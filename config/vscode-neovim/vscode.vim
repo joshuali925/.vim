@@ -119,7 +119,7 @@ nnoremap <leader>fA :call VSCodeNotify('workbench.action.focusActivityBar')<CR>
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>b :call VSCodeNotify('workbench.view.explorer')<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
-xnoremap <leader>n "xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>
+xnoremap <leader>n "xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 nnoremap <leader>l :call <SID>PrintCurrVars(0, 0)<CR>
@@ -152,6 +152,7 @@ nnoremap ]<Space> mxo<Esc>`x
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 
+nnoremap gD :call VSCodeNotify('editor.action.peekTypeDefinition')<CR>
 nnoremap gr :call VSCodeNotify('references-view.find')<CR>
 nnoremap Ku :call VSCodeNotify('git.revertSelectedRanges')<CR>
 nnoremap Ka :call VSCodeNotify('git.stageSelectedRanges')<CR>
