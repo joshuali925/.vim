@@ -20,6 +20,7 @@ vmap(';,', ',');
 vmap(',', '<Ctrl-q>');
 vmap(';n', '*');
 
+aceVimMap(',', ';', 'normal');
 aceVimMap('-', '$', 'normal');
 aceVimMap('-', '$', 'visual');
 aceVimMap('<Up>', 'gk', 'normal');
@@ -56,7 +57,7 @@ map('e', 'cs'); // switch scroll target
 map('E', 'cS'); // reset scroll target
 map(';fj', ';fs'); // choose scroll target
 map('gv', 'V'); // restore visual mode
-// map('c', 'v'); // enter caret mode
+map('C', 'v'); // enter caret mode
 map('v', 'zv'); // visual select element
 map('ys', 'ya'); // select url to copy
 map('J', 'W'); // move tab to window

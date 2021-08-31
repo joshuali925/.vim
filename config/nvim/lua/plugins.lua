@@ -24,19 +24,13 @@ return require("packer").startup(
             use {"wbthomason/packer.nvim"}
 
             -- appearance
-            use {
-                "folke/tokyonight.nvim",
-                event = "VimEnter",
-                config = get_config("tokyonight")
-            }
+            use {"folke/tokyonight.nvim", event = "VimEnter", config = get_config("tokyonight")}
             use {"akinsho/nvim-bufferline.lua", event = "VimEnter", config = get_config("nvim_bufferline")}
             use {"glepnir/galaxyline.nvim", event = "VimEnter", config = get_config("galaxyline")}
-            use {
-                "lukas-reineke/indent-blankline.nvim",
-                setup = get_config("setup_indent_blankline")
-            }
+            use {"lukas-reineke/indent-blankline.nvim", setup = get_config("setup_indent_blankline")}
             use {
                 "norcalli/nvim-colorizer.lua",
+                cmd = "ColorizerAttachToBuffer",
                 config = function()
                     require("colorizer").setup({}, {rgb_fn = true})
                 end
@@ -73,13 +67,17 @@ return require("packer").startup(
             }
             use {
                 "nvim-telescope/telescope.nvim",
-                requires = {{"nvim-lua/popup.nvim"}, {"nvim-lua/plenary.nvim"}},
+                requires = {
+                    {"nvim-lua/popup.nvim"},
+                    {"nvim-lua/plenary.nvim"},
+                    {"nvim-telescope/telescope-fzf-native.nvim", run = "make"},
+                    {"nvim-telescope/telescope-github.nvim"}
+                },
+                wants = {"popup.nvim", "plenary.nvim", "telescope-github.nvim", "telescope-fzf-native.nvim"},
                 module = "telescope",
                 cmd = "Telescope",
                 config = get_config("telescope")
             }
-            use {"nvim-telescope/telescope-github.nvim", opt = false}
-            use {"nvim-telescope/telescope-fzf-native.nvim", opt = false, run = "make"}
 
             -- git
             use {
@@ -100,15 +98,8 @@ return require("packer").startup(
             }
             use {"tpope/vim-rhubarb", cmd = "GBrowse"}
             use {"rbong/vim-flog", cmd = {"Flog", "Flogsplit"}}
-            use {
-                "lewis6991/gitsigns.nvim",
-                requires = {"nvim-lua/plenary.nvim"},
-                config = get_config("gitsigns")
-            }
-            use {
-                "rhysd/conflict-marker.vim",
-                config = get_config("conflict_marker")
-            }
+            use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}, config = get_config("gitsigns")}
+            use {"rhysd/conflict-marker.vim", config = get_config("conflict_marker")}
             use {"sindrets/diffview.nvim", cmd = "DiffviewOpen"}
 
             -- lang
@@ -126,28 +117,23 @@ return require("packer").startup(
                     require("lsp")
                 end
             }
-            use {
-                "glepnir/lspsaga.nvim",
-                module = "lspsaga",
-                config = get_config("lspsaga")
-            }
+            use {"glepnir/lspsaga.nvim", module = "lspsaga", config = get_config("lspsaga")}
             use {"ray-x/lsp_signature.nvim"}
+            use {"onsails/lspkind-nvim", event = "InsertEnter"}
             use {
-                "onsails/lspkind-nvim",
-                event = "InsertEnter",
-                config = function()
-                    require("lspkind").init({symbol_map = {Enum = "", Field = ""}})
-                end
-            }
-            use {
-                "hrsh7th/nvim-compe",
+                "hrsh7th/nvim-cmp",
                 event = "InsertEnter",
                 config = function()
                     require("completion")
                 end
             }
-            use {"hrsh7th/vim-vsnip", event = "InsertEnter"}
-            use {"rafamadriz/friendly-snippets", event = "InsertEnter"}
+            use {"hrsh7th/cmp-buffer", after = "nvim-cmp"}
+            use {"hrsh7th/cmp-path", after = "nvim-cmp"}
+            use {"hrsh7th/cmp-nvim-lua", after = "nvim-cmp"}
+            use {"hrsh7th/cmp-nvim-lsp", after = "nvim-cmp"}
+            use {"saadparwaiz1/cmp_luasnip", after = "nvim-cmp"}
+            use {"rafamadriz/friendly-snippets", after = "nvim-cmp"}
+            use {"L3MON4D3/LuaSnip", after = "friendly-snippets", config = get_config("luasnip")}
             use {
                 "folke/trouble.nvim",
                 cmd = "TroubleToggle",

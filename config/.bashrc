@@ -20,7 +20,7 @@ source ~/.vim/config/fzf/key-bindings.bash
 source ~/.vim/config/common.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
-PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
+PS1='\[\e[38;5;208m\]\W\[\e[38;5;130m\]$(_get_git_branch) \[\e[38;5;141m\]$ \[\e[0m\]'
 stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
@@ -48,7 +48,6 @@ bind '\C-w:unix-filename-rubout'
 
 if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
   # bash >= 4.0 needed for $READLINE_LINE
-  # NOTE this breaks multi-line prompt on bash 4.0 and output without \n
   BINDED_COMPLETION=-1
   _check_tab_complete() {
     if [ -n "$READLINE_LINE" ]; then
@@ -64,11 +63,8 @@ if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
       BINDED_COMPLETION=0
     fi
   }
-  _reset_tab
-  bind -x '"\300": _check_tab_complete' # \300: set tab action based on user input, \301 triggers the action, TAB runs them together
-  bind -x '"\365": _reset_tab'          # \365: reset tab binding, triggered on <CR>
-  bind '"\366": accept-line'            # \366: previously bound to <CR>
-  bind '"\C-m": "\365\366"'             # <CR>: reset tab binding and accept-line
+  bind -x '"\300": _check_tab_complete'
+  PROMPT_COMMAND="_reset_tab; $PROMPT_COMMAND"
 fi
 
 cd() {
@@ -87,6 +83,31 @@ cd() {
   ls -ACF --color=auto
 }
 complete -d cd
+
+# https://gist.github.com/bingzhangdai/dd4e283a14290c079a76c4ba17f19d69
+_get_git_branch() {
+  local _head_file _head _dir="$PWD"
+  while [[ -n "$_dir" ]]; do
+    _head_file="$_dir/.git/HEAD"
+    if [[ -f "$_dir/.git" ]]; then
+      read -r _head_file < "$_dir/.git" && _head_file="${_head_file#gitdir: }/HEAD"
+      [[ ! -e "$_head_file" ]] && _head_file="$_dir/$_head_file" || break
+    fi
+    [[ -e "$_head_file" ]] && break
+    _dir="${_dir%/*}"
+  done
+  if [[ -e "$_head_file" ]]; then
+    read -r _head < "$_head_file" || return
+    case "$_head" in
+      ref:*) printf " (${_head#ref: refs/heads/})" ;;
+      "") ;;
+      # HEAD detached
+      *) printf " (${_head:0:9})" ;;
+    esac
+    return 0
+  fi
+  return 1
+}
 
 # WSL specific
 alias cmd='/mnt/c/Windows/System32/cmd.exe /k'

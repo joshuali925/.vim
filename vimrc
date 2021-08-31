@@ -142,7 +142,7 @@ xnoremap <leader>P "0P
 nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi', 1)<CR>
 nnoremap <leader>fs :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| xargs ls -1 2>/dev/null \| fzf --multi', 0)<CR>
+nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| grep -v "/vim/.*/doc/.*.txt" \| xargs ls -1 2>/dev/null \| fzf --multi', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>
 nnoremap <leader>fg :Grt<CR>:silent grep! "" <bar> redraw! <bar> copen<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
 xnoremap <leader>fg :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
@@ -150,7 +150,7 @@ nnoremap <leader>fj :Grt<CR>:silent grep! "\b<C-r><C-w>\b" <bar> redraw! <bar> c
 xnoremap <leader>fj :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<CR>
 nnoremap <leader>b :Vexplore<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
-xnoremap <leader>n "xy:let @/='\V'. substitute(escape(@x, '\'), '\n', '\\n', 'g') <bar> set hlsearch<CR>
+xnoremap <leader>n "xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
 xnoremap <leader>s "xy:%s/<C-r>x/<C-r>x/gc<Left><Left><Left>
 nnoremap <leader>l :call funcs#print_curr_vars(0, 0)<CR>
@@ -164,7 +164,7 @@ nnoremap <leader>W :wall<CR>
 nnoremap ;q :quit<CR>
 nnoremap <leader>Q :call funcs#quit(0, 1)<CR>
 nnoremap <leader>x :call funcs#quit(1, 0)<CR>
-nnoremap <leader>X :call funcs#quit(0, 1)<CR>
+nnoremap <leader>X :call funcs#quit(1, 1)<CR>
 nnoremap yoq :call <SID>ToggleQuickfix()<CR>
 nnoremap <expr> yol empty(filter(getwininfo(), 'v:val.loclist')) ? ':lopen<CR>' : ':lclose<CR>'
 cnoremap <expr> <Tab> '/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'
@@ -272,15 +272,15 @@ nnoremap ]<C-l> :lnfile<CR>
 nnoremap <expr> gc plugins#commentary#go()
 nnoremap <expr> gcc plugins#commentary#go(). '_'
 xnoremap <expr> gc plugins#commentary#go()
-onoremap <silent> gc :<C-U>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>
-onoremap <silent> aI :<C-u>cal plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
-onoremap <silent> iI :<C-u>cal plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> aI :<C-u>cal plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-xnoremap <silent> iI :<C-u>cal plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> ai :<C-u>cal plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
-onoremap <silent> ii :<C-u>cal plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> ai :<C-u>cal plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-xnoremap <silent> ii :<C-u>cal plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> gc :<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>
+onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+onoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+xnoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 nnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
 nmap <leader>yy V<leader>y
 nmap <leader>Y <leader>y$

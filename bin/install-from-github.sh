@@ -1,3 +1,22 @@
+download-script-from-github() {
+  if [ "$#" -lt 2 ]; then
+    echo "Usage: download-script-from-github <repo> <script-path> [<args>]"
+    return 0
+  fi
+
+  local repo=$1 script_path=$2
+  local executable=$(basename "$script_path")
+  shift 2
+
+  if [ ! -x $HOME/.local/bin/$executable ]; then
+    mkdir -p $HOME/.local/bin
+    echo "Installing $executable from https://raw.githubusercontent.com/$repo/HEAD/$script_path" >&2
+    curl -sL -o $HOME/.local/bin/$executable https://raw.githubusercontent.com/$repo/HEAD/$script_path
+    chmod +x $HOME/.local/bin/$executable
+  fi
+  $HOME/.local/bin/$executable "$@"
+}
+
 install-from-github() {
   if [ "$#" -lt 4 ]; then
     echo "Usage: install-from-github <executable> <repo> <linux-x64-package-name> <linux-arm-package-name> <extract-command-flags> [<args>]"

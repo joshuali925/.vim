@@ -166,7 +166,7 @@ install_dotfiles() {
     mkdir -p ~/Library/Application\ Support/lazygit
     ln -sf ~/Library/Application\ Support ~/Library/ApplicationSupport
     link_file $HOME/.vim/config/lazygit_config.yml $HOME/Library/ApplicationSupport/lazygit/config.yml
-    link_file $HOME/Library/ApplicationSupport/Code/User/snippets $HOME/.vsnip  # use vscode snipets for neovim vsnip plugin
+    link_file $HOME/Library/ApplicationSupport/Code/User/snippets $HOME/.config/snippets  # use vscode snipets for neovim
     # link_file $HOME/.zshrc $HOME/.zprofile  # link .zshrc for MacVim
     mkdir -p ~/.config/karabiner/assets/complex_modifications
     cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
@@ -250,10 +250,14 @@ install_neovim() {
   fi
   log "Installed neovim, installing plugins.."
   # https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
-  sh -c 'sleep 120 && killall nvim && echo "Timeout, killed neovim"' &
-  local pid1=$!
+  sh -c 'sleep 120 && pkill nvim && echo "Timeout, killed neovim"' &
+  local pid=$!
   ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').install()" || true
-  kill $pid1 > /dev/null 2>&1 || true
+  kill $pid > /dev/null 2>&1 || true
+  sh -c 'sleep 30 && pkill nvim && echo "Timeout, killed neovim"' &
+  pid=$!
+  ~/.local/bin/nvim --headless +"lua vim.defer_fn(function() vim.cmd('quitall') end, 27000)" || true
+  kill $pid > /dev/null 2>&1 || true
   log "\nInstalled neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"
   log "Run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
   echo

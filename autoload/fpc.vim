@@ -206,7 +206,7 @@ function! s:FuzzyMatch(base) abort
   let result = map(curr_buf_words, '{"word": v:val, "kind": "[ID]", "r": matchend(v:val, r)}')
   call extend(result, map(other_buf_words, '{"word": v:val, "kind": "[Buffer]", "r": 2 * matchend(v:val, r)}'))
   " return sort(result, {i1, i2 -> i1.r > i2.r ? 1 : -1})[:g:fpc_max_matches]  " lambda compare in this order is faster than Funcref
-  return sort(result, function('s:CompareTo'))[:g:fpc_max_matches]
+  return sort(result, 's:CompareTo')[:g:fpc_max_matches]
 endfunction
 
 function! s:CompareTo(i1, i2)
