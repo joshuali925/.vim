@@ -74,7 +74,7 @@ map(
 map("n", "<leader>u", "<Cmd>MundoToggle<CR>")
 map("n", "<leader>v", "<Cmd>SymbolsOutline<CR>")
 map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
-map("x", "<leader>s", [["xy:%s/<C-r>x/<C-r>x/gc<Left><Left><Left>]])
+map("x", "<leader>s", [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>]])
 map("n", "<leader>l", "<Cmd>call funcs#print_curr_vars(0, 0)<CR>")
 map("x", "<leader>l", "<Cmd>call funcs#print_curr_vars(1, 0)<CR>")
 map("n", "<leader>L", "<Cmd>call funcs#print_curr_vars(0, 1)<CR>")

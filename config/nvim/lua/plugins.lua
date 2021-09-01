@@ -83,6 +83,7 @@ return require("packer").startup(
             use {
                 "tpope/vim-fugitive",
                 fn = "fugitive#*",
+                requires = {"tpope/vim-rhubarb"},
                 cmd = {
                     "Git",
                     "Gcd",
@@ -96,11 +97,10 @@ return require("packer").startup(
                     "Gclog"
                 }
             }
-            use {"tpope/vim-rhubarb", cmd = "GBrowse"}
             use {"rbong/vim-flog", cmd = {"Flog", "Flogsplit"}}
             use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}, config = get_config("gitsigns")}
             use {"rhysd/conflict-marker.vim", config = get_config("conflict_marker")}
-            use {"sindrets/diffview.nvim", cmd = "DiffviewOpen"}
+            use {"sindrets/diffview.nvim", cmd = {"DiffviewOpen", "DiffviewFileHistory"}}
 
             -- lang
             use {
@@ -131,9 +131,9 @@ return require("packer").startup(
             use {"hrsh7th/cmp-path", after = "nvim-cmp"}
             use {"hrsh7th/cmp-nvim-lua", after = "nvim-cmp"}
             use {"hrsh7th/cmp-nvim-lsp", after = "nvim-cmp"}
-            use {"saadparwaiz1/cmp_luasnip", after = "nvim-cmp"}
+            use {"hrsh7th/cmp-vsnip", after = "nvim-cmp"}
             use {"rafamadriz/friendly-snippets", after = "nvim-cmp"}
-            use {"L3MON4D3/LuaSnip", after = "friendly-snippets", config = get_config("luasnip")}
+            use {"hrsh7th/vim-vsnip", after = "friendly-snippets"}
             use {
                 "folke/trouble.nvim",
                 cmd = "TroubleToggle",

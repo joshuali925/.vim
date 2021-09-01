@@ -29,8 +29,8 @@ case "${unameOut}" in
       platform=Linux
     fi
     ;;
-  Darwin*)    platform=MacOS;;
-  *)          platform="UNKNOWN:${unameOut}"
+  Darwin*)   platform=MacOS;;
+  *)         platform="UNKNOWN:${unameOut}"
 esac
 
 log() {
@@ -38,7 +38,7 @@ log() {
 }
 
 usage() {
-  echo "usage: bash install.sh [install <package>,...]"
+  echo "usage: bash $0 [install <package>,...]"
   echo "  package list: devtools, dotfiles, docker, java, python, node, tmux, neovim, ssh-key"
 }
 
@@ -125,7 +125,7 @@ install_java() {
 
 install_python() {
   if [ $platform == 'Linux:yum' ]; then
-    sudo yum install -y python3
+    sudo yum install -y python3-devel
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
   elif [ $platform == 'Linux:apt' ]; then
     sudo apt update && sudo apt install -y python3-dev python3-pip python3-venv
@@ -166,7 +166,7 @@ install_dotfiles() {
     mkdir -p ~/Library/Application\ Support/lazygit
     ln -sf ~/Library/Application\ Support ~/Library/ApplicationSupport
     link_file $HOME/.vim/config/lazygit_config.yml $HOME/Library/ApplicationSupport/lazygit/config.yml
-    link_file $HOME/Library/ApplicationSupport/Code/User/snippets $HOME/.config/snippets  # use vscode snipets for neovim
+    link_file $HOME/Library/ApplicationSupport/Code/User/snippets $HOME/.vsnip  # use vscode snipets for neovim vsnip plugin
     # link_file $HOME/.zshrc $HOME/.zprofile  # link .zshrc for MacVim
     mkdir -p ~/.config/karabiner/assets/complex_modifications
     cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
@@ -271,29 +271,19 @@ setup_ssh_key() {
 }
 
 install() {
-  [ -z "$1" ] && log "No name provided, exiting.."
+  [ -z "$1" ] && usage
   for package in $@; do
     case "$package" in
-      devtools )
-        install_development_tools ;;
-      dotfiles )
-        install_dotfiles ;;
-      docker )
-        install_docker ;;
-      java )
-        install_java ;;
-      python )
-        install_python ;;
-      node )
-        install_node ;;
-      tmux )
-        install_tmux ;;
-      neovim )
-        install_neovim ;;
-      ssh-key )
-        setup_ssh_key ;;
-      * )
-        log "Unknown package $package, skipping.." ;;
+      devtools)   install_development_tools ;;
+      dotfiles)   install_dotfiles ;;
+      docker)     install_docker ;;
+      java)       install_java ;;
+      python)     install_python ;;
+      node)       install_node ;;
+      tmux)       install_tmux ;;
+      neovim)     install_neovim ;;
+      ssh-key)    setup_ssh_key ;;
+      *)          log "Unknown package \"$package\", skipping.." ;;
     esac
   done
 }
@@ -302,10 +292,8 @@ if [ -n "$1" ]; then
   command="$1"
   shift 1
   case "$command" in
-    install )
-      install "$@" ;;
-    * )
-      usage ;;
+    install)   install "$@" ;;
+    *)         usage ;;
   esac
   exit
 fi

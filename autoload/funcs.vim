@@ -71,9 +71,9 @@ function! funcs#quit(buffer_mode, force) abort
       tabclose
     endif
   " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; two windows but the other one is file tree
-  elseif (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1 || winnr('$') == 2 && getbufvar(winbufnr(3 - winnr()), "&filetype") == "NvimTree") && len(getbufinfo({'buflisted':1})) > 1
+  elseif (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1 || winnr('$') == 2 && getbufvar(winbufnr(3 - winnr()), "&filetype") == "NvimTree") && len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
     bprevious
-    if len(getbufinfo({'buflisted':1})) > 1
+    if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
       try
         execute 'bdelete'. (a:force ? '!' : ''). ' #'
       catch
@@ -106,7 +106,7 @@ function! funcs#print_curr_vars(visual, printAbove) abort
   let l:print['typescriptreact'] = l:print['javascript']
   let l:print['java'] = 'System.out.println('. join(map(copy(l:vars), "'\"'. v:val. ': \" + '. v:val"), ' + " | " + '). ');'
   let l:print['vim'] = 'echomsg '. join(map(copy(l:vars), "\"'\". v:val. \": '. \". v:val"), ". ' | '. ")
-  let l:print['lua'] = 'print('. join(map(copy(l:vars), "\"'\" .. v:val. \": ' .. \". v:val"), " .. ' | ' .. "). ')'
+  let l:print['lua'] = 'print('. join(map(copy(l:vars), "\"'\". v:val. \": ' .. \". v:val"), " .. ' | ' .. "). ')'
   if has_key(l:print, &filetype)
     let l:pos = getcurpos()
     execute l:new_line

@@ -44,7 +44,7 @@ bind -x '"\C-o":"lf"'
 bind '"\C-xa": shell-expand-line'
 
 stty werase undef # unbind werase to C-w
-bind '\C-w:unix-filename-rubout'
+bind '"\C-w": unix-filename-rubout'
 
 if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
   # bash >= 4.0 needed for $READLINE_LINE
@@ -65,6 +65,29 @@ if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
   }
   bind -x '"\300": _check_tab_complete'
   PROMPT_COMMAND="_reset_tab; $PROMPT_COMMAND"
+
+  # bind -x breaks stdout without \n and multi-line prompt on some bash versions
+  READLINE_LINE_TEMP=()
+  READLINE_POINT_TEMP=()
+  _push_line() {
+    READLINE_LINE_TEMP+=("$READLINE_LINE")
+    READLINE_POINT_TEMP+=("$READLINE_POINT")
+    READLINE_LINE=
+    bind '"\C-m": "\365\366"'
+  }
+  _restore_pushed_line() {
+    READLINE_LINE="${READLINE_LINE_TEMP[@]: -1}"
+    READLINE_POINT="${READLINE_POINT_TEMP[@]: -1}"
+    unset 'READLINE_LINE_TEMP[${#READLINE_LINE_TEMP[@]}-1]'
+    unset 'READLINE_POINT_TEMP[${#READLINE_POINT_TEMP[@]}-1]'
+    if [ "${#READLINE_LINE_TEMP[@]}" -eq 0 ]; then
+      bind '"\C-m": accept-line'
+    fi
+  }
+  bind '"\365": accept-line'
+  bind -x '"\366": _restore_pushed_line'
+  bind -x '"\eq": _push_line'
+  bind -x '"\C-q": _push_line'
 fi
 
 cd() {

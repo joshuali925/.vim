@@ -18,11 +18,6 @@ function M.auto_pairs()
     vim.fn.AutoPairsTryInit()
 end
 
-function M.luasnip()
-    require("luasnip/loaders/from_vscode").load()
-    require("luasnip/loaders/from_vscode").load({paths = {"~/.config/snippets"}})
-end
-
 function M.vim_matchup()
     g.matchup_matchparen_offscreen = {}
     g.matchup_matchparen_deferred = 1
@@ -35,6 +30,8 @@ function M.nvim_tree()
     g.nvim_tree_highlight_opened_files = 1
     g.nvim_tree_lsp_diagnostics = 1
     g.nvim_tree_bindings = {
+        {key = {"r"}, cb = tree_cb("refresh")},
+        {key = {"R"}, cb = tree_cb("rename")},
         {key = {"?"}, cb = tree_cb("toggle_help")},
         {key = {"C"}, cb = tree_cb("cd")},
         {key = {"s"}, cb = tree_cb("split")},
@@ -467,8 +464,9 @@ function M.startify()
     g.startify_enable_special = 0
     g.startify_fortune_use_unicode = 1
     g.startify_commands = {
-        {["!"] = {"Git modified", ":args `Git ls-files --modified` | Git difftool"}},
-        {["*"] = {"Git diff HEAD", "DiffviewOpen"}},
+        {["!"] = {"Git diff unstaged", ":args `Git ls-files --modified` | Git difftool"}},
+        {["+"] = {"Git diff HEAD", "DiffviewOpen"}},
+        {["*"] = {"Git diff remote", "execute 'DiffviewOpen '. trim(system('git rev-parse --abbrev-ref --symbolic-full-name @{u}')). '..HEAD'"}},
         {o = {"Git log", "Flog"}},
         {["\\"] = {"Open quickui", "call quickui#menu#open('normal')"}},
         {f = {"Find files", "lua require('telescope.builtin').find_files({hidden = true})"}},
@@ -570,7 +568,7 @@ function M.vim_quickui()
             {
                 "&Diff unsaved",
                 [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"]],
-                "Diff current buffer with file on disk"
+                "Diff current buffer with file on disk (similar to DiffOrig command)"
             },
             {"--", ""},
             {"Move tab left &-", [[-tabmove]]},
@@ -604,6 +602,11 @@ function M.vim_quickui()
                 "Git &file history",
                 [[vsplit | execute "lua require('packer').loader('vim-fugitive')" | 0Gclog]],
                 "Browse previously committed versions of current file"
+            },
+            {
+                "Diffview file history",
+                [[DiffviewFileHistory -f -a]],
+                "Browse previously committed versions of current file with Diffview"
             },
             {"--", ""},
             {"Git &changes", [[Git! difftool]], "Load unstaged changes of files into quickfix"},
