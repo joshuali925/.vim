@@ -8,6 +8,7 @@ set background=dark
 syntax enable
 filetype plugin indent on
 colorscheme gruvbox_material
+let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS. ' --layout=default --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
 
 set backspace=eol,start,indent
 set whichwrap+=<,>,[,]
@@ -123,7 +124,7 @@ xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw
 nnoremap cr :call funcs#edit_register()<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
-nnoremap <C-c> :nohlsearch<CR>:echo<CR>
+nnoremap <C-c> :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> redraw!<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
 nnoremap <C-h> <C-w>h
@@ -139,20 +140,22 @@ nnoremap <C-o> :call <SID>EditCallback('lf', 0)<CR>
 noremap <leader>p "0p
 nnoremap <leader>P :registers<CR>:normal! "p<Left>
 xnoremap <leader>P "0P
-nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi', 1)<CR>
+nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 1)<CR>
 nnoremap <leader>fs :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| grep -v "/vim/.*/doc/.*.txt" \| xargs ls -1 2>/dev/null \| fzf --multi', 0)<CR>
+nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| xargs ls -1 2>/dev/null \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>
-nnoremap <leader>fg :Grt<CR>:silent grep! "" <bar> redraw! <bar> copen<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
-xnoremap <leader>fg :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
+nnoremap <leader>fg :Grt<CR>:silent grep! "" <bar> redraw! <bar> copen<Home><C-Right><C-Right><C-Right><Left>
+xnoremap <leader>fg :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<Home><C-Right><C-Right><C-Right><Left>
 nnoremap <leader>fj :Grt<CR>:silent grep! "\b<C-r><C-w>\b" <bar> redraw! <bar> copen<CR>
 xnoremap <leader>fj :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<CR>
+nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always ''''" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --color=always {1} --highlight-line {2}" --preview-window="+{2}+3/3,~3"', 1)<CR>
+nnoremap <leader>ft :call <SID>EditCallback('filetypes', 0)<CR>
 nnoremap <leader>b :Vexplore<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
-xnoremap <leader>s "xy:%s/<C-r>x/<C-r>x/gc<Left><Left><Left>
+xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
 nnoremap <leader>l :call funcs#print_curr_vars(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_curr_vars(1, 0)<CR>
 nnoremap <leader>L :call funcs#print_curr_vars(0, 1)<CR>
@@ -186,6 +189,7 @@ command! -complete=shellcmd -nargs=* -range -bang S execute 'botright new | setl
 command! W write !sudo tee % > /dev/null
 command! -nargs=? -bang Ggrep call s:GitGrep(<f-args>)
 command! -bar Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
+command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
 
 let g:netrw_dirhistmax = 0
 let g:netrw_banner = 0
@@ -193,28 +197,6 @@ let g:netrw_browse_split = 4
 let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
 
-function! s:EditCallback(cmd, cd_git_root) abort
-  if a:cd_git_root == 1
-    let l:git_root = fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
-    execute 'cd '. l:git_root
-  endif
-  let l:tempfile = tempname()
-  if a:cmd == 'lf'
-    execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. fnameescape(l:tempfile). ' "'. expand('%'). '"'
-  else
-    execute 'silent !'. a:cmd. ' > '. fnameescape(l:tempfile)
-  endif
-  try
-    if filereadable(l:tempfile)
-      for l:filename in readfile(l:tempfile)
-        execute 'edit '. (a:cd_git_root == 1 ? l:git_root. '/' : '') . l:filename
-      endfor
-    endif
-    redraw!
-  finally
-    call delete(l:tempfile)
-  endtry
-endfunction
 function! s:ToggleQuickfix()
   for i in range(1, winnr('$'))
     if getbufvar(winbufnr(i), '&buftype') == 'quickfix'
@@ -236,6 +218,39 @@ function! s:GitGrep(...)
   redraw!
   copen
 endfun
+function! s:EditCallback(cmd, cd_git_root) abort
+  if a:cd_git_root == 1
+    let l:git_root = fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
+    execute 'cd '. l:git_root
+  endif
+  let l:sink = 'edit '
+  let l:tempfile = tempname()
+  if a:cmd == 'lf'
+    execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. fnameescape(l:tempfile). ' "'. expand('%'). '"'
+  elseif a:cmd == 'filetypes'
+    let l:sink = 'set filetype='
+    let $FZFTEMP = join(sort(map(split(globpath(&rtp, 'syntax/*.vim'), '\n'), 'fnamemodify(v:val, ":t:r")')), '\n')
+    execute 'silent !echo -e $FZFTEMP | fzf > '. fnameescape(l:tempfile)
+    let $FZFTEMP = ''  " cannot unlet environment variables in 7.4
+  else
+    execute 'silent !'. a:cmd. ' > '. fnameescape(l:tempfile)
+  endif
+  try
+    if filereadable(l:tempfile)
+      for l:line in readfile(l:tempfile)
+        if l:sink == 'edit ' && l:line =~ ':\d'
+          let l:args = split(l:line, ':')
+          execute 'edit +'. l:args[1]. ' '. (a:cd_git_root == 1 ? l:git_root. '/' : ''). l:args[0]
+        else
+          execute l:sink. (a:cd_git_root == 1 ? l:git_root. '/' : ''). l:line
+        endif
+      endfor
+    endif
+    redraw!
+  finally
+    call delete(l:tempfile)
+  endtry
+endfunction
 call fpc#init()
 set omnifunc=syntaxcomplete#Complete
 set completefunc=funcs#complete_word
@@ -244,14 +259,16 @@ inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 inoremap <expr> <Down> pumvisible() ? '<C-n>' : '<C-o>gj'
 inoremap <expr> <Up> pumvisible() ? '<C-p>' : '<C-o>gk'
 
+nnoremap <leader>ac :edit $MYVIMRC<CR>
 nnoremap yow :setlocal wrap!<CR>
 nnoremap yos :setlocal spell!<CR>
-nnoremap <expr> yop &paste ? ':setlocal nopaste<CR>' : ':setlocal paste <bar> startinsert<CR>'
 nnoremap yon :setlocal number!<CR>
 nnoremap yor :setlocal relativenumber!<CR>
 nnoremap you :setlocal cursorline!<CR>
 nnoremap yoc :setlocal cursorcolumn!<CR>
 nnoremap yox :setlocal cursorline! cursorcolumn!<CR>
+nnoremap <expr> yod &diff ? ':diffoff<CR>' : ':diffthis<CR>'
+nnoremap <expr> yop &paste ? ':setlocal nopaste<CR>' : ':setlocal paste<CR>o'
 nnoremap [<Space> mxO<Esc>`x
 nnoremap ]<Space> mxo<Esc>`x
 nnoremap [p O<C-r>"<Esc>

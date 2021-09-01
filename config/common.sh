@@ -8,11 +8,11 @@ export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER='\'
-export FZF_DEFAULT_OPTS='--layout=reverse --height 40% --bind change:top'
+export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
 export FZF_ALT_C_COMMAND='command ls -1Ap 2> /dev/null'
-export FZF_ALT_C_OPTS='--bind "tab:down,btab:up"'
+export FZF_ALT_C_OPTS='--bind="tab:down,btab:up"'
 export FZF_PREVIEW_COMMAND='bat --style=numbers --color=always --theme=OneHalfDark --line-range :50 {}'
 
 alias -- -='cd -'
@@ -71,7 +71,6 @@ alias gca!='git commit -v -a --amend'
 alias gcs='git commit -s -m'
 alias gcs!='git commit -s --amend'
 alias gcv='git commit -v'
-alias gcb='git checkout -b'
 alias gcf='git config --list'
 alias gcl='git clone --recursive'
 alias gpristine='git reset --hard && git clean -fdx'
@@ -90,10 +89,11 @@ alias gdsst='git diff --stat --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
+alias ggl='git pull origin $(git symbolic-ref --short HEAD)'
 alias gpf='git push fork $(git symbolic-ref --short HEAD)'
 alias gpo='git push origin $(git symbolic-ref --short HEAD)'
 alias gpu='git push upstream $(git symbolic-ref --short HEAD)'
-alias gsup='FZFTEMP=$(git remote | fzf) && git branch --set-upstream-to=$FZFTEMP/$(git symbolic-ref --short HEAD) && unset FZFTEMP'
+alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gl='git pull'
@@ -122,12 +122,14 @@ alias gra='git remote add'
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
+alias greset-to-remote='git reset --hard $(git rev-parse --abbrev-ref --symbolic-full-name @{u})'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grup='git remote update'
 alias grv='git remote -v'
 alias gs='git status'
 alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \$(git symbolic-ref --short HEAD)\"\\033[0m\"; git status -s' \\;"
 alias gss='git status -sb'
+alias gsta='git stash push -m'
 alias gshow='git show --pretty=short --show-signature'
 alias gsu='git submodule update'
 alias gts='git tag -s'
@@ -137,7 +139,8 @@ alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\n
 alias gunwip='git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
 alias gup='git pull --rebase'
 alias gvt='git verify-tag'
-alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD'
+alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
+alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{u})..HEAD  # what will be pushed'
 alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
 
@@ -159,6 +162,28 @@ gdd() {
 
 gdg() {
   git diff "$@" | delta --line-numbers --navigate --side-by-side
+}
+
+glof() {
+  git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
+    fzf --height=50% --min-height=20 --ansi --no-sort --reverse --tiebreak=index --toggle-sort=\` --multi \
+    --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
+    --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show | delta --dark --paging=never' \
+    --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
+    --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tr "\n" " " | oscyank)+abort' \
+    --bind='enter:execute(echo {} | grep -o "[a-f0-9]\{7,\}" | xargs git show | delta --line-numbers --navigate)'
+}
+
+gcb() {
+  if [ -n "$1" ]; then
+    git checkout -b "$@"
+  else
+    local FZFTEMP=$(git branch --color=always --sort=-committerdate --all |
+      awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
+      fzf --height 50% --min-height=20 --ansi --no-sort --reverse --tiebreak=index --preview-window=60% \
+      --preview 'git log -n 50 --color=always --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
+    [ -n "$FZFTEMP" ] && git checkout "${FZFTEMP#remotes/[^\/]*/}"
+  fi
 }
 
 sudorun() {
@@ -277,9 +302,9 @@ gvf() {
 cdf() {
   local FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=$(rg --files | fzf --bind 'tab:down,btab:up') && cd "$(dirname $FZFTEMP)"
+    FZFTEMP=$(rg --files | fzf --bind='tab:down,btab:up') && cd "$(dirname $FZFTEMP)"
   else
-    FZFTEMP=$(rg --files | rg "$@" | fzf --bind 'tab:down,btab:up') && cd "$(dirname $FZFTEMP)"
+    FZFTEMP=$(rg --files | rg "$@" | fzf --bind='tab:down,btab:up') && cd "$(dirname $FZFTEMP)"
   fi
 }
 
@@ -297,42 +322,42 @@ vrg() {
 
 fif() {  # find in file
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
-  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview "rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute($EDITOR {+} -c \"/$1\" < /dev/tty)"
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute($EDITOR {+} -c \"/$1\" < /dev/tty)"
 }
 
-rf() {  # flygrep
+rf() {  # livegrep
   local RG_PREFIX="rg --column --line-number --no-heading --color=always "
   local INITIAL_QUERY="${*:-}"
   FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "$INITIAL_QUERY")" \
   fzf --ansi \
-      --disabled --query "$INITIAL_QUERY" \
-      --bind "change:reload:sleep 0.2; $RG_PREFIX {q} || true" \
-      --bind "enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
-      --bind 'tab:down,btab:up' \
-      --delimiter : \
-      --preview 'bat --color=always {1} --highlight-line {2}' \
-      --preview-window 'up,60%,border-bottom,+{2}+3/3,~3'
+      --disabled --query="$INITIAL_QUERY" \
+      --bind="change:reload:sleep 0.2; $RG_PREFIX {q} || true" \
+      --bind="enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
+      --bind='tab:down,btab:up' \
+      --delimiter=: \
+      --preview='bat --color=always {1} --highlight-line {2}' \
+      --preview-window='up,60%,border-bottom,+{2}+3/3,~3'
 }
 
 unalias z 2> /dev/null
 z() {
   local FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=$(_z -l 2>&1 | fzf --tac --bind 'tab:down,btab:up') && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+    FZFTEMP=$(_z -l 2>&1 | fzf --tac --bind='tab:down,btab:up') && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
   else
     _z 2>&1 "$@"
   fi
 }
 zc() {
   local FZFTEMP
-  FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind 'tab:down,btab:up' --query "$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+  FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
 }
 
 t() {  # create or switch tmux session
   local CHANGE CURRENT FZFTEMP
   [ -n "$TMUX" ] && CHANGE='switch-client' && CURRENT=$(tmux display-message -p '#{session_name}') || CHANGE='attach-session'
   if [ -z "$1" ]; then
-    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind 'tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP" || echo 'No tmux sessions, pass a string to create one.'
+    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP" || echo 'No tmux sessions, pass a string to create one.'
   else
     tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
   fi
@@ -341,7 +366,7 @@ t() {  # create or switch tmux session
 manf() {
   if [ -z "$1" ]; then
     local FZFTEMP
-    FZFTEMP=$(man -k . 2>/dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind 'tab:down,btab:up' --prompt='man> ' --preview $'echo {} | xargs -r man') && nvim +"Man $(echo "$FZFTEMP" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> d <C-d>' +'nnoremap <buffer> u <C-u>'
+    FZFTEMP=$(man -k . 2>/dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$FZFTEMP" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> d <C-d>' +'nnoremap <buffer> u <C-u>'
   else
     nvim +"Man $@" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
   fi
@@ -349,7 +374,7 @@ manf() {
 
 envf() {
   local FZFTEMP
-  FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind 'tab:down,btab:up' --query "$1" --preview 'printenv {}') && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
+  FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind='tab:down,btab:up' --query="$1" --preview='printenv {}') && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
 }
 
 react() {

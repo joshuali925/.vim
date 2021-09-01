@@ -164,8 +164,8 @@ function! s:RefreshBufWords(options) abort  " {'type': 0 = refresh current buffe
     let buf_string = join(lines, "\n")
   endif
 
-  for word in filter(split(buf_string, '\W\+\d*\|^\d'), 'len(v:val) > g:fpc_min_match_len && len(v:val) < g:fpc_max_keyword_len')
-    let words_dict[word] = 1
+  for word in split(buf_string, '\W\+\d*\|^\d')
+    silent! let words_dict[word] = 1
   endfor
   call setbufvar(bufnr, 'fpc_words_dict', words_dict)
 endfunction
@@ -178,7 +178,7 @@ function! s:GetWordsList(f) abort
 
   let s:curr_bwords_len = len(all_words)  " s:curr_bwords_len > 0 && all_words[:s:curr_bwords_len-1] will be words in current buffer
   let curr_buf = bufnr('%')
-  for bufnr in filter(range(1, bufnr('$')), 'bufloaded(v:val) && v:val != curr_buf')
+  for bufnr in filter(range(1, bufnr('$')), 'bufloaded(v:val) && v:val != '. curr_buf)
     let buf_words_dict = getbufvar(bufnr, 'fpc_words_dict', {})
     if len(buf_words_dict) > 0 && len(buf_words_dict) < 20000
       call extend(all_words, a:f != '' ? filter(keys(buf_words_dict), 'v:val =~ a:f') : keys(buf_words_dict))
@@ -205,8 +205,8 @@ function! s:FuzzyMatch(base) abort
 
   let result = map(curr_buf_words, '{"word": v:val, "kind": "[ID]", "r": matchend(v:val, r)}')
   call extend(result, map(other_buf_words, '{"word": v:val, "kind": "[Buffer]", "r": 2 * matchend(v:val, r)}'))
-  " return sort(result, {i1, i2 -> i1.r > i2.r ? 1 : -1})[:g:fpc_max_matches]  " lambda compare in this order is faster than Funcref
-  return sort(result, 's:CompareTo')[:g:fpc_max_matches]
+  " return filter(sort(result, {i1, i2 -> i1.r > i2.r ? 1 : -1})[:g:fpc_max_matches], 'len(v:val.word) < '. g:fpc_max_keyword_len)  " lambda compare in this order is faster than Funcref
+  return filter(sort(result, 's:CompareTo')[:g:fpc_max_matches], 'len(v:val.word) < '. g:fpc_max_keyword_len)
 endfunction
 
 function! s:CompareTo(i1, i2)
@@ -214,5 +214,5 @@ function! s:CompareTo(i1, i2)
 endfunction
 
 function! s:VimFuzzyMatch(base) abort
-  return map(matchfuzzy(s:GetWordsList(''), a:base)[:g:fpc_max_matches], '{"word": v:val, "kind": "[ID]"}')
+  return map(filter(matchfuzzy(s:GetWordsList(''), a:base)[:g:fpc_max_matches], 'len(v:val) < '. g:fpc_max_keyword_len), '{"word": v:val, "kind": "[ID]"}')
 endfunction

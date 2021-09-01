@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+if [ ! -x $HOME/.local/bin/diff-so-fancy ]; then
+  mkdir -p $HOME/.local/bin
+  url=$(curl -s https://api.github.com/repos/so-fancy/diff-so-fancy/releases/latest | grep "browser_download_url.*$package" | cut -d '"' -f 4)
+  echo "Installing diff-so-fancy from $url" >&2
+  curl -sL -o $HOME/.local/bin/diff-so-fancy $url
+  chmod +x $HOME/.local/bin/diff-so-fancy
+fi
+$HOME/.local/bin/diff-so-fancy "$@"

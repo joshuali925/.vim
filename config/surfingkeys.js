@@ -79,13 +79,13 @@ vunmap('gr');
 unmap('c'); // unmap z, x, c for Global Speed
 unmap('z');
 
-mapkey('g+', 'Increment url', function() { var e,s; IB=1; function isDigit(c) { return ('0' <= c && c <= '9') } L = location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; location.href = L.substring(0,s) + newNum + L.slice(e+1); });
-mapkey('g-', 'Decrement url', function() { var e,s; IB=-1; function isDigit(c) { return ('0' <= c && c <= '9') } L = location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; location.href = L.substring(0,s) + newNum + L.slice(e+1); });
+mapkey('g+', 'Increment url', function() { var e,s; IB=1; function isDigit(c) { return ('0' <= c && c <= '9') } L = window.location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; window.location.href = L.substring(0,s) + newNum + L.slice(e+1); });
+mapkey('g-', 'Decrement url', function() { var e,s; IB=-1; function isDigit(c) { return ('0' <= c && c <= '9') } L = window.location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; window.location.href = L.substring(0,s) + newNum + L.slice(e+1); });
 mapkey('gr', 'Go to referrer', function() { if(document.referrer) open(document.referrer); });
-mapkey(';vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + location.href + '><frame src=' + location.href + '></frameset></html>'); });
-mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + location.href + '><frame src=' + location.href + '></frameset></html>'); })
+mapkey(';vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
+mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
 mapkey(';vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
-mapkey('<Ctrl-r>', 'Hard reload', function() { location.reload(); });
+mapkey('<Ctrl-r>', 'Hard reload', function() { window.location.reload(); });
 mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
     Front.openOmnibar({type: "VIMarks", tabbed: false});
 });
@@ -139,20 +139,32 @@ mapkey('gp', 'DuckDuckGo first result', function() {
 map('yop', ';s'); // toggle pdf viewer
 mapkey('yoe', 'Toggle editable', function() { document.body.contentEditable = document.body.contentEditable === 'true' ? 'false' : 'true'; });
 mapkey('yof', 'Toggle full screen', function() {
-    if (location.hostname === 'www.bilibili.com')
-        if (location.pathname.startsWith('/bangumi')) {
+    if (window.location.hostname === 'www.bilibili.com')
+        if (window.location.pathname.startsWith('/bangumi')) {
             document.getElementsByClassName('squirtle-video-pagefullscreen')[0].click();
         } else {
             document.getElementsByClassName('bilibili-player-video-web-fullscreen')[0].click();
         }
-    else if (/age.?fans/.test(location.hostname))
+    else if (/age.?fans/.test(window.location.hostname))
         document.getElementsByClassName('fullscn')[0].click();
     else
         document.getElementById('playerControlBtn').click(); // https://greasyfork.org/en/scripts/4870-maximize-video, escape also works
 });
+mapkey('yor', 'Toggle github raw', function() {
+    if (window.location.hostname === 'github.com') {
+        var matches = window.location.href.match(/github.com\/([^/]+)\/([^/]+)\/blob\/(.*)/);
+        window.location.href = `https://raw.githubusercontent.com/${matches[1]}/${matches[2]}/${matches[3]}`;
+    } else {
+        var matches = window.location.href.match(/raw.githubusercontent.com\/([^/]+)\/([^/]+)\/(.*)/);
+        window.location.href = `https://github.com/${matches[1]}/${matches[2]}/blob/${matches[3]}`;
+    }
+}, {domain: /github.com|raw.githubusercontent.com/i});
 mapkey('yov', 'Toggle github vscode', function() {
-    open(window.location.href.replace(/github(1s)?.com/, function(match, p1) { return p1 ? 'github.com' : 'github1s.com' }));
-}, {domain: /github(1s)?\.com/i});
+    if (window.location.hostname === 'github.dev')
+        tabOpenLink(window.location.href.replace('github.dev', 'github.com'));
+    else
+        tabOpenLink(window.location.href.replace(/github(1s)?.com/, function(match, p1) { return p1 ? 'github.com' : 'github1s.com' }));
+}, {domain: /github(1s)?\.(com|dev)/i});
 mapkey('yod', 'Toggle bilibili danmaku', function() {
     document.getElementsByClassName('bui-switch-input')[0].click();
 }, {domain: /bilibili\.com/i});
