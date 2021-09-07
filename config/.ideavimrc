@@ -103,8 +103,8 @@ nmap [g <Action>(VcsShowPrevChangeMarker)
 nmap ]g <Action>(VcsShowNextChangeMarker)
 nmap [a <Action>(GotoPreviousError)
 nmap ]a <Action>(GotoNextError)
-nnoremap [<Space> O<Esc>
-nnoremap ]<Space> o<Esc>
+nnoremap [<Space> mxO<C-w><Esc>`x
+nnoremap ]<Space> mxo<C-w><Esc>`x
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 

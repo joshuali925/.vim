@@ -7,7 +7,7 @@ if [ -f /etc/bashrc ]; then
 fi
 
 [[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && \
-  . /usr/share/bash-completion/bash_completion
+  . /usr/share/bash-completion/bash_completion && alias get-completion='complete -F _longopt'
 
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=
@@ -103,7 +103,7 @@ cd() {
   else
     pushd "$@" > /dev/null
   fi
-  ls -ACF --color=auto
+  [ $(command ls | wc -l) -lt 200 ] && ls -ACF --color=auto
 }
 complete -d cd
 

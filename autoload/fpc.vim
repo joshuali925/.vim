@@ -3,11 +3,11 @@ function! fpc#init() abort
   let g:fpc_min_match_len = get(g:, 'fpc_min_match_len', 2)
   let g:fpc_max_keyword_len = get(g:, 'fpc_max_keyword_len', 100)
   let g:fpc_max_matches = get(g:, 'fpc_max_matches', 50)
-  let g:fpc_max_file_size = get(g:, 'fpc_max_file_size', 1000000)  " 1mb
+  let g:fpc_max_file_size = get(g:, 'fpc_max_file_size', 500000)  " 500kb
   let g:fpc_use_all_buffers = get(g:, 'fpc_use_all_buffers', 1)
   let g:fpc_use_cache = get(g:, 'fpc_use_cache', 1)
   let g:fpc_force_refresh_menu = get(g:, 'fpc_force_refresh_menu', 1)
-  let g:fpc_select_first_match = get(g:, 'fpc_select_first_match', 1)  " use noinsert instead of noselect if available
+  let g:fpc_select_first_match = get(g:, 'fpc_select_first_match', 0)  " use noinsert instead of noselect if available
   let g:fpc_omni_enabled_ft = get(g:, 'fpc_omni_enabled_ft', {'python': 1, 'javascript': 1})
 
   let s:FuzzyFunc = g:fpc_custom_matcher || !exists('*matchfuzzy') ? function('s:FuzzyMatch') : function('s:VimFuzzyMatch')

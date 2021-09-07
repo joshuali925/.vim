@@ -156,7 +156,8 @@ bindkey '^i' tab-complete-or-cd
 bindkey -s '^z' 'fg^m'
 
 alias history='history -f 0'
-chpwd() { emulate -L zsh; ls -ACF --color=auto; }
+alias get-completion='compdef _gnu_generic'
+chpwd() { emulate -L zsh; [ $(command ls | wc -l) -lt 200 ] && ls -ACF --color=auto; }
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/.p10k.zsh.
 [[ ! -f ~/.vim/config/.p10k.zsh ]] || source ~/.vim/config/.p10k.zsh

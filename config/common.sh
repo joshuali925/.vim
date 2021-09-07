@@ -3,7 +3,7 @@ source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 
 export PATH="$HOME/.local/bin:$HOME/.local/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
-export BAT_PAGER='less -R --ignore-case'
+export BAT_PAGER='less --RAW-CONTROL-CHARS --ignore-case'
 export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
@@ -45,6 +45,7 @@ alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" ~/.vim/config/nvim/init.lua'
+alias less='less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias btop='bpytop -b "cpu proc"'
@@ -97,6 +98,7 @@ alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch 
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gl='git pull'
+alias glr='git pull --rebase'
 alias glg='git log --stat'
 alias glgg='git log --graph'
 alias glgga='git log --graph --decorate --all'
@@ -133,16 +135,16 @@ alias gsta='git stash push -m'
 alias gshow='git show --pretty=short --show-signature'
 alias gsu='git submodule update'
 alias gts='git tag -s'
+alias gvt='git verify-tag'
 alias gtree='git ls-files | tree --fromfile'
 alias gunignore='git update-index --no-assume-unchanged'
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
-alias gunwip='git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
-alias gup='git pull --rebase'
-alias gvt='git verify-tag'
-alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
-alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{u})..HEAD  # what will be pushed'
-alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
+alias gunwip='git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
+alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{u})..HEAD  # what will be pushed'
+alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
+alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
+alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use git obliterate <file> to remove
 
 d() {
   if [ -n "$1" ]; then
@@ -180,8 +182,9 @@ gcb() {
   else
     local FZFTEMP=$(git branch --color=always --sort=-committerdate --all |
       awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
-      fzf --height 50% --min-height=20 --ansi --no-sort --reverse --tiebreak=index --preview-window=60% \
-      --preview 'git log -n 50 --color=always --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
+      fzf --height=50% --min-height=20 --ansi --no-sort --reverse --tiebreak=index --preview-window=60% --toggle-sort=\` \
+      --header='Press ` to toggle sort' \
+      --preview='git log -n 50 --color=always --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
     [ -n "$FZFTEMP" ] && git checkout "${FZFTEMP#remotes/[^\/]*/}"
   fi
 }
@@ -248,7 +251,7 @@ print-colors() {
 }
 
 x() {
-  if [ -f $1 ] ; then
+  if [ -f $1 ]; then
     case $1 in
       *.tar.bz2)   tar xvjf $1    ;;
       *.tar.xz)    tar xvJf $1    ;;
@@ -267,6 +270,20 @@ x() {
     esac
   else
     tar cvf $1.tar $1
+  fi
+}
+
+X() {  # extract to a directory / archive without top directory
+  if [ -f $1 ]; then
+    local dir="${1%.*}"
+    local filename="$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)_$1"
+    command mkdir -pv "$dir"
+    command mv -i "$1" "$dir/$filename"
+    (cd "$dir" > /dev/null && x "$filename")
+    command mv -n "$dir/$filename" "$1"
+  else
+    tar cvf $1.tar -C $1 .
+    return 0
   fi
 }
 
@@ -320,23 +337,24 @@ vrg() {
   fi
 }
 
+# https://github.com/junegunn/fzf/blob/3c804bcfec7c1f3cb69398f6d74f77a25286dbcb/ADVANCED.md#ripgrep-integration
 fif() {  # find in file
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
   rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute($EDITOR {+} -c \"/$1\" < /dev/tty)"
 }
-
 rf() {  # livegrep
+  # https://github.com/sharkdp/bat/issues/1699
   local RG_PREFIX="rg --column --line-number --no-heading --color=always "
   local INITIAL_QUERY="${*:-}"
   FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "$INITIAL_QUERY")" \
-  fzf --ansi \
-      --disabled --query="$INITIAL_QUERY" \
+  fzf --ansi --layout=default --height=100% --disabled --query="$INITIAL_QUERY" \
+      --bind="ctrl-s:unbind(change,ctrl-s)+change-prompt(2. fzf> )+enable-search+clear-query" \
       --bind="change:reload:sleep 0.2; $RG_PREFIX {q} || true" \
       --bind="enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
       --bind='tab:down,btab:up' \
-      --delimiter=: \
-      --preview='bat --color=always {1} --highlight-line {2}' \
-      --preview-window='up,60%,border-bottom,+{2}+3/3,~3'
+      --prompt='1. ripgrep> ' --delimiter=: \
+      --preview='bat --theme=Dracula --color=always {1} --highlight-line {2}' \
+      --preview-window='up,40%,border-bottom,+{2}+3/3,~3'
 }
 
 unalias z 2> /dev/null
@@ -357,7 +375,7 @@ t() {  # create or switch tmux session
   local CHANGE CURRENT FZFTEMP
   [ -n "$TMUX" ] && CHANGE='switch-client' && CURRENT=$(tmux display-message -p '#{session_name}') || CHANGE='attach-session'
   if [ -z "$1" ]; then
-    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP" || echo 'No tmux sessions, pass a string to create one.'
+    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP" || tmux
   else
     tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
   fi

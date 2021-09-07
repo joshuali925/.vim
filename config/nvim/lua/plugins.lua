@@ -55,11 +55,12 @@ return require("packer").startup(
             use {
                 "kyazdani42/nvim-tree.lua",
                 cmd = {"NvimTreeToggle", "NvimTreeFindFile"},
+                setup = [[vim.g.nvim_tree_disable_netrw = 0]],
                 config = get_config("nvim_tree")
             }
             use {
                 "mhinz/vim-startify",
-                cmd = "Startify",
+                cmd = {"Startify", "SSave", "SDelete"},
                 cond = function()
                     return vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1
                 end,

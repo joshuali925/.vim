@@ -31,6 +31,7 @@ map mR lf-bulk-rename
 map ms selected-dir-size
 map mS cwd-size
 map mc edit-config
+map my copy-path
 map md5 md5
 
 map v :toggle; down
@@ -55,8 +56,8 @@ map t locate-file
 map <c-p> locate-git-file
 map <c-o> $lazygit
 map <tab> locate-file-cwd
-map i $~/.vim/config/lf-preview.sh "$f" | bat --color=always --style='numbers,changes' --theme=OneHalfDark --paging=always
-map I $$PAGER "$f"
+map i $~/.vim/config/lf-preview.sh "$f" | bat --color=always --style=numbers --theme=OneHalfDark --paging=always
+map I $less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT "$f"
 
 cmap <up> cmd-history-prev
 cmap <down> cmd-history-next
@@ -80,6 +81,7 @@ cmd edit-config ${{ $EDITOR ~/.vim/config/lfrc }}
 cmd edit-selected ${{ echo "$fx" | xargs -d '\n' $EDITOR }}
 cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
+cmd copy-path %{{ realpath "$f" | oscyank; echo "copied: $(realpath "$f")" }}
 
 cmd follow-symlink ${{
   res=$(readlink -f $f || echo '.')
@@ -181,6 +183,38 @@ cmd x ${{
     esac
   else
     tar cvf "$filename.tar" "$filename"
+  fi
+}}
+
+cmd X ${{
+  set -f
+  selected="$(basename "$f")"
+  if [ -f "$selected" ] ; then
+    dir="${selected%.*}"
+    filename="$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)_$selected"
+    command mkdir -pv "$dir"
+    command mv -i "$selected" "$dir/$filename"
+    cd "$dir" > /dev/null
+    case "$filename" in
+      *.tar.bz2)   tar xvjf "$filename"    ;;
+      *.tar.xz)    tar xvJf "$filename"    ;;
+      *.tar.gz)    tar xvzf "$filename"    ;;
+      *.bz2)       bunzip2 "$filename"     ;;
+      *.rar)       unrar x "$filename"     ;;
+      *.gz)        gunzip "$filename"      ;;
+      *.tar)       tar xvf "$filename"     ;;
+      *.tbz2)      tar xvjf "$filename"    ;;
+      *.tgz)       tar xvzf "$filename"    ;;
+      *.zip)       unzip "$filename"       ;;
+      *.xz)        unxz "$filename"        ;;
+      *.Z)         uncompress "$filename"  ;;
+      *.7z)        7z x "$filename"        ;;
+      *)           echo "Unable to extract '$filename'" ;;
+    esac
+    cd .. > /dev/null
+    command mv -n "$dir/$filename" "$selected"
+  else
+    tar cvf "$selected.tar" -C "$selected" .
   fi
 }}
 
@@ -294,3 +328,4 @@ cmd lf-bulk-rename ${{
   fi
 }}
 
+# vim:ft=bash

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-source ~/.vim/bin/install-from-github.sh
+source ~/.vim/bin/_install_from_github.sh
 install-from-github tokei XAMPPRocky/tokei x86_64-unknown-linux-musl aarch64-unknown-linux "" "$@"
