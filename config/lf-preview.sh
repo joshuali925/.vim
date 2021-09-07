@@ -4,7 +4,7 @@ unset COLORTERM
 pager() {
     local FSIZE=$(wc -c < "$1")
     if [ $FSIZE -gt 2097152 ]; then  # 2MB
-        less "$1"
+        less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT "$1"
     else
         bat --color=always --theme=OneHalfDark --plain "$1"
     fi

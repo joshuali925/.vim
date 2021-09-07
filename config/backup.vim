@@ -2561,3 +2561,10 @@ map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').lsp_finder()<CR>")
 " use oscyank.vim
 nnoremap <leader>yy V:w !~/.vim/bin/oscyank<CR>
 xnoremap <leader>y :w !~/.vim/bin/oscyank<CR>
+
+" =======================================================
+" zsh generate completion from help, use _gnu_generic (https://unix.stackexchange.com/questions/417054/automatically-generate-zsh-bash-completion-files)
+zinit depth=1 wait"0" lucid light-mode for \
+  atinit"GENCOMPL_FPATH=$HOME/.zinit/completions" \
+  RobSis/zsh-completion-generator
+zstyle ':plugin:zsh-completion-generator' programs fzf

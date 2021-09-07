@@ -149,7 +149,7 @@ nnoremap <leader>fg :Grt<CR>:silent grep! "" <bar> redraw! <bar> copen<Home><C-R
 xnoremap <leader>fg :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<Home><C-Right><C-Right><C-Right><Left>
 nnoremap <leader>fj :Grt<CR>:silent grep! "\b<C-r><C-w>\b" <bar> redraw! <bar> copen<CR>
 xnoremap <leader>fj :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<CR>
-nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always ''''" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --color=always {1} --highlight-line {2}" --preview-window="+{2}+3/3,~3"', 1)<CR>
+nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=Dracula --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"', 1)<CR>
 nnoremap <leader>ft :call <SID>EditCallback('filetypes', 0)<CR>
 nnoremap <leader>b :Vexplore<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
@@ -180,7 +180,6 @@ augroup AutoCommands
   autocmd!
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif  " restore last edit position
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
-  autocmd BufNewFile,BufRead *.log set filetype=messages
   autocmd FileType * setlocal formatoptions=jql
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>
@@ -218,6 +217,24 @@ function! s:GitGrep(...)
   redraw!
   copen
 endfun
+let s:tail_on = 0
+function! s:ToggleTail()
+  if s:tail_on
+    let &updatetime = s:updatetime_bak
+    augroup TailAutoCommand
+      autocmd!
+    augroup END
+  else
+    let s:updatetime_bak = &updatetime
+    set updatetime=1000
+    augroup TailAutoCommand
+      autocmd!
+      autocmd CursorHold * checktime | call feedkeys('lh', 'n')
+    augroup END
+  endif
+  let s:tail_on = !s:tail_on
+  echo 'checktime loop '. (s:tail_on ? 'on' : 'off')
+endfunction
 function! s:EditCallback(cmd, cd_git_root) abort
   if a:cd_git_root == 1
     let l:git_root = fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
@@ -267,6 +284,7 @@ nnoremap yor :setlocal relativenumber!<CR>
 nnoremap you :setlocal cursorline!<CR>
 nnoremap yoc :setlocal cursorcolumn!<CR>
 nnoremap yox :setlocal cursorline! cursorcolumn!<CR>
+nnoremap yoF :call <SID>ToggleTail()<CR>
 nnoremap <expr> yod &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 nnoremap <expr> yop &paste ? ':setlocal nopaste<CR>' : ':setlocal paste<CR>o'
 nnoremap [<Space> mxO<Esc>`x

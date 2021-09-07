@@ -37,6 +37,7 @@ map('<Ctrl-q>', 'i'); // temp key holder
 map('i', 'gi'); // first input box
 map('gi', '<Ctrl-q>'); // select input box
 map('I', '<Alt-i>'); // disable surfingkeys
+map('<Alt-i>', '<Alt-s>'); // toggle surfingkeys permanently
 map('<Ctrl-o>', 'p'); // temporarily disable surfingkeys
 map('<Ctrl-t>', 'on'); // new tab
 map('H', 'S'); // back in history
@@ -53,21 +54,23 @@ map('Q', '<Ctrl-j>'); // unhover
 map('f', 'gf'); // open in background new tab
 map('F', 'cf'); // open multiple links in new tab
 map('gf', 'w'); // switch frames
-map('e', 'cs'); // switch scroll target
-map('E', 'cS'); // reset scroll target
+map('e', 'cS'); // reset scroll target
+map('E', 'cs'); // switch scroll target
 map(';fj', ';fs'); // choose scroll target
 map('gv', 'V'); // restore visual mode
 map('C', 'v'); // enter caret mode
 map('v', 'zv'); // visual select element
 map('ys', 'ya'); // select url to copy
+map('yt', 'yl'); // copy page title
 map('J', 'W'); // move tab to window
 map(';q', 'x'); // close tab
 map(';x', 'x'); // close tab
 map('ZZ', 'x'); // close tab
 map('ZQ', 'ZZ'); // save session and close
+map(';K', ';t'); // google translate selected text
+map(';tu', 'X'); // restore closed tab
 unmap('x');
 unmap(';t');
-map(';tu', 'X'); // restore closed tab
 map(';r', ';pm'); // preview markdown
 map(';b', 'ab'); // add bookmark
 map(';B', ';db'); // remove bookmark
@@ -86,9 +89,11 @@ mapkey(';vs', 'split vertically', function() { document.write('<html><head></hea
 mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
 mapkey(';vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
 mapkey('<Ctrl-r>', 'Hard reload', function() { window.location.reload(); });
+unmap("'");
 mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
     Front.openOmnibar({type: "VIMarks", tabbed: false});
 });
+unmap('p');
 mapkey('p', '#0enter ephemeral PassThrough mode to temporarily suppress SurfingKeys', function() {
     Normal.passThrough(1500);
 });
