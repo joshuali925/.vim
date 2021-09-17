@@ -114,13 +114,6 @@ require("lspinstall").post_install_hook = function()
     vim.cmd("bufdo edit")
 end
 
-vim.fn.sign_define("LspDiagnosticsSignError", {text = ""})
-vim.fn.sign_define("LspDiagnosticsSignWarning", {text = ""})
-vim.fn.sign_define("LspDiagnosticsSignInformation", {text = ""})
-vim.fn.sign_define("LspDiagnosticsSignHint", {text = ""})
-vim.fn.sign_define("LspDiagnosticsSignOther", {text = "﫠"})
-vim.cmd("highlight LspDiagnosticsVirtualTextHint guifg=#666666")
-
 -- https://github.com/neovim/neovim/issues/14825
 vim.g.diagnostics_visible = true
 function _G.toggle_diagnostics()
@@ -143,3 +136,14 @@ function _G.toggle_diagnostics()
         )
     end
 end
+
+-- 0.6.0 breaking: https://www.reddit.com/r/neovim/comments/pymf0t/neovim_not_displaying_custom_diagnostic_symbols/
+vim.fn.sign_define("LspDiagnosticsSignError", {text = ""})
+vim.fn.sign_define("LspDiagnosticsSignWarning", {text = ""})
+vim.fn.sign_define("LspDiagnosticsSignInformation", {text = ""})
+vim.fn.sign_define("LspDiagnosticsSignHint", {text = ""})
+vim.fn.sign_define("LspDiagnosticsSignOther", {text = "﫠"})
+vim.cmd("highlight LspDiagnosticsVirtualTextHint guifg=#666666")
+
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = "rounded"})
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {border = "rounded"})

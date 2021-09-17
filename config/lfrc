@@ -182,7 +182,7 @@ cmd x ${{
       *)           echo "Unable to extract '$filename'" ;;
     esac
   else
-    tar cvf "$filename.tar" "$filename"
+    tar czvf "$filename.tar.gz" "$filename"
   fi
 }}
 
@@ -214,7 +214,7 @@ cmd X ${{
     cd .. > /dev/null
     command mv -n "$dir/$filename" "$selected"
   else
-    tar cvf "$selected.tar" -C "$selected" .
+    tar czvf "$selected.tar.gz" -C "$selected" .
   fi
 }}
 

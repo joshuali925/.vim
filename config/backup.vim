@@ -2568,3 +2568,38 @@ zinit depth=1 wait"0" lucid light-mode for \
   atinit"GENCOMPL_FPATH=$HOME/.zinit/completions" \
   RobSis/zsh-completion-generator
 zstyle ':plugin:zsh-completion-generator' programs fzf
+
+" =======================================================
+" lspsaga
+            use {"tami5/lspsaga.nvim", module = "lspsaga", config = get_config("lspsaga")}
+map("n", "<leader>d", "<Cmd>lua require('lspsaga.provider').preview_definition()<CR>")
+map("n", "<leader>a", "<Cmd>lua require('lspsaga.codeaction').code_action()<CR>")
+map("x", "<leader>a", ":<C-u>lua require('lspsaga.codeaction').range_code_action()<CR>")
+map("n", "gh", "<Cmd>lua require('lspsaga.diagnostic').show_line_diagnostics()<CR>")
+map("n", "<leader>R", "<Cmd>lua require('lspsaga.rename').rename()<CR>")
+map("n", "[a", "<Cmd>lua require('lspsaga.diagnostic').lsp_jump_diagnostic_prev()<CR>")
+map("n", "]a", "<Cmd>lua require('lspsaga.diagnostic').lsp_jump_diagnostic_next()<CR>")
+        {"Docu&mentation", "lua require('lspsaga.hover').render_hover_doc()", "Show documentation with lspsaga"},
+        {
+            "Hover diagnostic",
+            "lua require('lspsaga.diagnostic').show_line_diagnostics()",
+            "Show diagnostic of current line with lspsaga"
+        },
+function M.lspsaga()
+    require("lspsaga").init_lsp_saga {
+        use_saga_diagnostic_sign = false,
+        finder_action_keys = {
+            open = "<CR>",
+            vsplit = "s",
+            split = "i",
+            quit = {"<Esc>", "q"},
+            scroll_down = "<NOP>",
+            scroll_up = "<NOP>"
+        },
+        code_action_keys = {
+            quit = {"<Esc>", "q"},
+            exec = "<CR>"
+        }
+    }
+end
+

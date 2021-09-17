@@ -35,6 +35,7 @@ if [ -n "$ZINIT_POST_INSTALL" ]; then
   # zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
   # zinit light-mode as"program" from"gh-r" for mv"hyperfine* -> hyperfine" sbin"hyperfine/hyperfine" @sharkdp/hyperfine
   # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
+  # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 
   zinit as"completion" for \
     https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
@@ -148,10 +149,14 @@ zle -N run-lf
 bindkey '^o' run-lf
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
+bindkey '^[[H' beginning-of-line              # after exiting vim or lf started by zle,
+bindkey '^[[F' end-of-line                    # ^[OA (defined in oh-my-zsh keybindings) becomes ^[[A
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+bindkey '^[[1;2A' up-line-or-local-history    # <S-Up>
+bindkey '^[[1;2B' down-line-or-local-history  # <S-Down>
 bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
-bindkey "^[[1;2A" up-line-or-local-history    # <S-Up>
-bindkey "^[[1;2B" down-line-or-local-history  # <S-Down>
 bindkey '^i' tab-complete-or-cd
 bindkey -s '^z' 'fg^m'
 

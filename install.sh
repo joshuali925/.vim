@@ -66,7 +66,7 @@ install_development_tools() {
   elif [ $platform == 'MacOS' ]; then
     mkdir -pv ~/.local/bin
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-    brew install coreutils
+    brew install coreutils openssh
     echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.zshrc
     echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.bashrc
     brew install gnu-sed && ln -s $(which gsed) ~/.local/bin/sed
@@ -230,10 +230,11 @@ install_node() {
 }
 
 install_neovim() {
+  local tag=$(curl -s https://github.com/neovim/neovim/releases/latest | sed 's#.*tag/\(.*\)\".*#\1#')
   if [[ $platform == Linux* ]]; then
     backup "$HOME/.local/nvim"
     if [ $architecture == 'x86_64' ]; then
-      curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
+      curl -LO https://github.com/neovim/neovim/releases/download/$tag/nvim.appimage
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
       mv squashfs-root ~/.local/nvim && ln -sf ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
     else
@@ -242,7 +243,7 @@ install_neovim() {
     fi
   elif [ $platform == 'MacOS' ]; then
     backup "$HOME/.local/nvim-osx64"
-    curl -L -o- https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz | tar xz -C ~/.local
+    curl -L -o- https://github.com/neovim/neovim/releases/download/$tag/nvim-macos.tar.gz | tar xz -C ~/.local
     ln -sf ~/.local/nvim-osx64/bin/nvim ~/.local/bin/nvim
   else
     echo "Unknown distro.."
@@ -265,7 +266,7 @@ install_neovim() {
 
 setup_ssh_key() {
   # ssh-keygen -t rsa -b 4096 -C ""
-  ssh-keygen -t ed25519 -C ""
+  ssh-keygen -t ed25519 -C "" -N "" -f $HOME/.ssh/id_ed25519
   cat ~/.ssh/id_ed25519.pub
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
 }
@@ -310,14 +311,11 @@ install_neovim
 log "\nInstalling zsh plugins.."
 zsh  # auto exit makes installing binaries to fail for some reason
 zsh -c "source $HOME/.zinit/plugins/zdharma---fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh && fast-theme clean"
-log "\nRun one of these commands to set default shell to zsh:"
-log "${YELLOW}sudo chsh -s \$(which zsh) \$(whoami)"
-log "${YELLOW}sed -i -e '1i[ -t 1 ] && exec zsh\' ~/.bashrc  ${BLACK}# run zsh when bash starts"
 
-read -p "Set up ssh key? (y/n) " -n 1;
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-  setup_ssh_key
-fi
+setup_ssh_key
+log "\nRun one of these commands to set default shell to zsh:"
+log "${YELLOW}"'sudo chsh -s $(which zsh) $(whoami)'
+log "${YELLOW}sed -i -e '1i[ -t 1 ] && exec zsh\' ~/.bashrc  ${BLACK}# run zsh when bash starts"
+log "${YELLOW}sudo vim /etc/passwd"
 
 log "\nFinished, exiting.."

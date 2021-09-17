@@ -13,6 +13,7 @@ return require("packer").startup(
         config = {
             auto_clean = false,
             opt_default = true,
+            max_jobs = 10,
             display = {
                 open_fn = require("packer.util").float
             },
@@ -25,14 +26,14 @@ return require("packer").startup(
 
             -- appearance
             use {"folke/tokyonight.nvim", event = "VimEnter", config = get_config("tokyonight")}
-            use {"akinsho/nvim-bufferline.lua", event = "VimEnter", config = get_config("nvim_bufferline")}
-            use {"glepnir/galaxyline.nvim", event = "VimEnter", config = get_config("galaxyline")}
+            use {"akinsho/nvim-bufferline.lua", after = "tokyonight.nvim", config = get_config("nvim_bufferline")}
+            use {"NTBBloodbath/galaxyline.nvim", event = "VimEnter", config = get_config("galaxyline")}
             use {"lukas-reineke/indent-blankline.nvim", setup = get_config("setup_indent_blankline")}
             use {
-                "norcalli/nvim-colorizer.lua",
+                "DarwinSenior/nvim-colorizer.lua",
                 cmd = "ColorizerAttachToBuffer",
                 config = function()
-                    require("colorizer").setup({}, {rgb_fn = true})
+                    require("colorizer").setup({}, {rgb_fn = true, mode = "virtualtext"})
                 end
             }
 
@@ -55,7 +56,6 @@ return require("packer").startup(
             use {
                 "kyazdani42/nvim-tree.lua",
                 cmd = {"NvimTreeToggle", "NvimTreeFindFile"},
-                setup = [[vim.g.nvim_tree_disable_netrw = 0]],
                 config = get_config("nvim_tree")
             }
             use {
@@ -118,7 +118,7 @@ return require("packer").startup(
                     require("lsp")
                 end
             }
-            use {"glepnir/lspsaga.nvim", module = "lspsaga", config = get_config("lspsaga")}
+            use {"weilbith/nvim-code-action-menu", cmd = "CodeActionMenu"}
             use {"ray-x/lsp_signature.nvim"}
             use {"onsails/lspkind-nvim", event = "InsertEnter"}
             use {
@@ -167,6 +167,11 @@ return require("packer").startup(
                 end
             }
             use {"udalov/kotlin-vim", ft = "kotlin"}
+            use {
+                "chrisbra/csv.vim",
+                setup = get_config("setup_csv_vim"),
+                cmd = {"CSVWhatColumn", "CSVArrangeColumn", "CSVTabularize"}
+            }
 
             -- editing
             use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}
