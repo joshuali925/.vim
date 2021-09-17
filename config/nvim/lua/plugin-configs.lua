@@ -26,18 +26,25 @@ function M.vim_matchup()
 end
 
 function M.nvim_tree()
-    local tree_cb = require("nvim-tree.config").nvim_tree_callback
     g.nvim_tree_highlight_opened_files = 1
-    g.nvim_tree_lsp_diagnostics = 1
-    g.nvim_tree_bindings = {
-        {key = {"r"}, cb = tree_cb("refresh")},
-        {key = {"R"}, cb = tree_cb("rename")},
-        {key = {"?"}, cb = tree_cb("toggle_help")},
-        {key = {"C"}, cb = tree_cb("cd")},
-        {key = {"s"}, cb = tree_cb("split")},
-        {key = {"yy"}, cb = tree_cb("copy_absolute_path")},
-        {key = {"l"}, cb = tree_cb("edit")},
-        {key = {"h"}, cb = tree_cb("close_node")}
+    local tree_cb = require("nvim-tree.config").nvim_tree_callback
+    require("nvim-tree").setup {
+        disable_netrw = false,
+        lsp_diagnostics = true,
+        view = {
+            mappings = {
+                list = {
+                    {key = {"r"}, cb = tree_cb("refresh")},
+                    {key = {"R"}, cb = tree_cb("rename")},
+                    {key = {"?"}, cb = tree_cb("toggle_help")},
+                    {key = {"C"}, cb = tree_cb("cd")},
+                    {key = {"s"}, cb = tree_cb("split")},
+                    {key = {"yy"}, cb = tree_cb("copy_absolute_path")},
+                    {key = {"l"}, cb = tree_cb("edit")},
+                    {key = {"h"}, cb = tree_cb("close_node")}
+                }
+            }
+        }
     }
 end
 
@@ -86,7 +93,7 @@ function M.setup_vim_sandwich()
 end
 
 function M.quick_scope()
-    g.qs_filetype_blacklist = {"qf", "startify", "TelescopePrompt", "Trouble", "LspSagaCodeAction"}
+    g.qs_filetype_blacklist = {"qf", "startify", "TelescopePrompt", "Trouble"}
     g.qs_buftype_blacklist = {"terminal"}
     vim.cmd("highlight QuickScopePrimary guifg='#ffe9c2'")
 end
@@ -101,6 +108,11 @@ function M.setup_neoterm()
     g.neoterm_autoinsert = 1
 end
 
+function M.setup_csv_vim()
+    g.csv_nomap_cr = 1
+    g.csv_nomap_bs = 1
+end
+
 function M.setup_indent_blankline()
     -- TODO remove when this is fixed https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
     vim.opt.colorcolumn = "99999"
@@ -108,24 +120,6 @@ function M.setup_indent_blankline()
     g.indent_blankline_show_first_indent_level = false
     g.indent_blankline_filetype_exclude = {"help", "man", "startify"}
     g.indent_blankline_buftype_exclude = {"terminal"}
-end
-
-function M.lspsaga()
-    require("lspsaga").init_lsp_saga {
-        use_saga_diagnostic_sign = false,
-        finder_action_keys = {
-            open = "<CR>",
-            vsplit = "s",
-            split = "i",
-            quit = {"<Esc>", "q"},
-            scroll_down = "<NOP>",
-            scroll_up = "<NOP>"
-        },
-        code_action_keys = {
-            quit = {"<Esc>", "q"},
-            exec = "<CR>"
-        }
-    }
 end
 
 function M.nvim_bufferline()
@@ -250,7 +244,7 @@ function M.galaxyline()
     local gl = require("galaxyline")
     local gls = gl.section
     local condition = require("galaxyline.condition")
-    local fileinfo = require("galaxyline.provider_fileinfo")
+    local fileinfo = require("galaxyline.providers.fileinfo")
     gl.short_line_list = {"NvimTree"}
     local colors = {
         bg = "#22262e",
@@ -466,7 +460,12 @@ function M.startify()
     g.startify_commands = {
         {["!"] = {"Git diff unstaged", ":args `Git ls-files --modified` | Git difftool"}},
         {["+"] = {"Git diff HEAD", "DiffviewOpen"}},
-        {["*"] = {"Git diff remote", "execute 'DiffviewOpen '. trim(system('git rev-parse --abbrev-ref --symbolic-full-name @{u}')). '..HEAD'"}},
+        {
+            ["*"] = {
+                "Git diff remote",
+                "execute 'DiffviewOpen '. trim(system('git rev-parse --abbrev-ref --symbolic-full-name @{u}')). '..HEAD'"
+            }
+        },
         {o = {"Git log", "Flog"}},
         {["\\"] = {"Open quickui", "call quickui#menu#open('normal')"}},
         {f = {"Find files", "lua require('telescope.builtin').find_files({hidden = true})"}},
@@ -485,7 +484,7 @@ end
 
 function _G.quickui_context_menu()
     local content = {
-        {"Docu&mentation", "lua require('lspsaga.hover').render_hover_doc()", "Show documentation with lspsaga"},
+        {"Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation"},
         {"&Preview references", "TroubleToggle lsp_references", "Preview references with Trouble"},
         {"Quick&fix references", "lua vim.lsp.buf.references()", "Use quickfix to navigate references"},
         {"--", ""},
@@ -494,8 +493,8 @@ function _G.quickui_context_menu()
         {"Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition"},
         {
             "Hover diagnostic",
-            "lua require('lspsaga.diagnostic').show_line_diagnostics()",
-            "Show diagnostic of current line with lspsaga"
+            "lua vim.lsp.diagnostic.show_line_diagnostics({focusable=false, close_events={'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost'}, border='rounded'})",
+            "Show diagnostic of current line"
         },
         {"--", ""},
         {"Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk"},
@@ -701,8 +700,8 @@ function M.vim_quickui()
             {"Table &mode", [[TableModeToggle]], "Toggle TableMode"},
             {"&Reformat table", [[TableModeRealign]], "Reformat table"},
             {"&Format to table", [[Tableize]], "Format to table, use <leader>T to set delimiter"},
-            {"&Delete row", [[execute "normal \<Plug>(table-mode-delete-row)"]], "Delete row"},
-            {"Delete &column", [[execute "normal \<Plug>(table-mode-delete-column)"]], "Delete column"},
+            {"Delete row", [[execute "normal \<Plug>(table-mode-delete-row)"]], "Delete row"},
+            {"Delete column", [[execute "normal \<Plug>(table-mode-delete-column)"]], "Delete column"},
             {"Show cell &position", [[execute "normal \<Plug>(table-mode-echo-cell)"]], "Show cell index number"},
             {"--", ""},
             {"&Add formula", [[TableAddFormula]], "Add formula to current cell, i.e. Sum(r1,c1:r2,c2)"},
@@ -716,7 +715,11 @@ function M.vim_quickui()
             {"Align using = (delimiter aligned)", [[Tabularize /=]], "Tabularize /="},
             {"Align using , (delimiter aligned)", [[Tabularize /,]], "Tabularize /,"},
             {"Align using # (delimiter aligned)", [[Tabularize /\#]], "Tabularize /\\#"},
-            {"Align using : (delimiter aligned)", [[Tabularize /:]], "Tabularize /:"}
+            {"Align using : (delimiter aligned)", [[Tabularize /:]], "Tabularize /:"},
+            {"--", ""},
+            {"&CSV show column", [[CSVWhatColumn!]], "Show column title under cursor"},
+            {"CSV arrange column", [[1,$CSVArrangeColumn!]], "Align csv columns"},
+            {"CSV to table", [[CSVTabularize]], "Convert csv to table"}
         }
     )
     vim.fn["quickui#menu#install"](

@@ -2,6 +2,7 @@
 " Plug ''
 " call plug#end()
 
+let &t_ut = ''  " https://github.com/microsoft/terminal/issues/832
 let &t_SI .= "\<Esc>[6 q"  " cursor shape
 let &t_EI .= "\<Esc>[2 q"
 set background=dark
@@ -64,9 +65,6 @@ set viminfo+=n~/.cache/vim/viminfo
 set isfname-==
 set path=.,,**5
 set wildignore+=*/tmp/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*
-set list
-set listchars=tab:»\ ,nbsp:␣
-set fillchars=vert:│
 set encoding=utf-8
 set timeout
 set timeoutlen=1500
@@ -116,6 +114,7 @@ xnoremap @@ :normal! @@<CR>
 nnoremap _ <C-o>
 nnoremap + <C-i>
 nnoremap Y y$
+nnoremap U :execute('earlier '. v:count1. 'f')<CR>
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
@@ -155,7 +154,7 @@ nnoremap <leader>b :Vexplore<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
-xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
+xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
 nnoremap <leader>l :call funcs#print_curr_vars(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_curr_vars(1, 0)<CR>
 nnoremap <leader>L :call funcs#print_curr_vars(0, 1)<CR>

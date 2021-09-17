@@ -10,6 +10,8 @@ set commentary
 set argtextobj
 set easymotion  " requires https://plugins.jetbrains.com/plugin/13360-ideavim-easymotion/
 set exchange
+set NERDTree
+set textobj-indent
 
 """ Plugin settings -------------------------
 let g:argtextobj_pairs="[:],(:),<:>,{:}"
@@ -29,9 +31,25 @@ set ideajoin
 set ideastatusicon=gray
 set idearefactormode=keep
 
+""" Plugin settings -------------------------
+let g:NERDTreeMapActivateNode = 'l'
+let g:NERDTreeMapCloseDir = 'h'
+
 """ Mappings --------------------------------
 nnoremap <BS> gT
 nnoremap \ gt
+noremap gw [w
+noremap gb [b
+noremap ge ]w
+nnoremap ciu ]b[wc]w
+nmap cau ciu
+nnoremap diu ]b[wd]w
+nmap dau diu
+" :normal and v:count not implemented
+nnoremap c2iu ]b[wc2]w
+nnoremap c3iu ]b[wc3]w
+nnoremap d2iu ]b[wd2]w
+nnoremap d3iu ]b[wd3]w
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)
 noremap , ;
@@ -50,8 +68,8 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
-nnoremap _ <C-o>
-nnoremap + <C-i>
+nmap _ <Action>(Back)
+nmap + <Action>(Forward)
 nnoremap Q q
 nnoremap Y y$
 xnoremap < <gv
@@ -83,10 +101,12 @@ xnoremap <leader>n y/\V<C-r>"<CR>N
 nmap <leader>tu <Action>(ReopenClosedTab)
 nmap <C-b> <Action>(ToggleDistractionFreeMode)
 nmap <leader>b <Action>(SelectInProjectView)
-inoremap <leader>w <Esc>:w<CR>
-nnoremap <leader>w :w<CR>
-nnoremap <leader>q :q<CR>
-nnoremap <leader>x :q<CR>
+nnoremap <C-h> :NERDTree<CR>
+imap <leader>w <Esc><leader>w
+nmap <leader>w <Action>(SaveAll)
+nmap <leader>W <Action>(SaveAll)
+nmap <leader>q <Action>(CloseEditor)
+nmap <leader>x <Action>(CloseEditor)
 map <C-n> <Action>(SelectNextOccurrence)
 map <leader><C-n> <Action>(SelectAllOccurrences)
 map <C-p> <Action>(UnselectPreviousOccurrence)
@@ -103,10 +123,11 @@ nmap [g <Action>(VcsShowPrevChangeMarker)
 nmap ]g <Action>(VcsShowNextChangeMarker)
 nmap [a <Action>(GotoPreviousError)
 nmap ]a <Action>(GotoNextError)
-nnoremap [<Space> mxO<C-w><Esc>`x
-nnoremap ]<Space> mxo<C-w><Esc>`x
+nnoremap [<Space> mxO<Esc>`x
+nnoremap ]<Space> mxo<Esc>`x
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
+nmap yoP <Action>(TogglePowerSave)
 
 nmap gr <Action>(FindUsages)
 nnoremap Km K
@@ -118,11 +139,18 @@ nmap Kr <Action>(Github.Open.In.Browser)
 nmap KR <Action>(Refactorings.QuickListPopupAction)
 nmap gh <Action>(ShowErrorDescription)
 nmap gd <Action>(GotoDeclaration)
+nmap gD <Action>(GotoTypeDeclaration)
 nmap <C-f> <Action>(ReformatCode)
 nmap <leader>a <Action>(ShowIntentionActions)
 nmap <leader>s <Action>(QuickActionPopup)
 nmap <leader>R <Action>(RenameElement)
 nmap <leader>d <Action>(QuickImplementations)
+
+" textobj-indent
+xmap ai <Plug>textobj-indent-aI
+omap ai <Plug>textobj-indent-aI
+xmap aI <Plug>textobj-indent-ai
+omap aI <Plug>textobj-indent-ai
 
 nnoremap <leader>l mx"xyiwoprintln(<C-r>x)<Esc>`x
 nnoremap <leader>L mx"xyiwOprintln(<C-r>x)<Esc>`x

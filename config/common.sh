@@ -40,6 +40,7 @@ alias ls='ls -CF --color=auto'
 alias l='exa -alF --git --color=always --color-scale --icons --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
+alias pscpu='TEMP_PS=$(ps aux --sort=-pcpu | head -n 11); echo "$TEMP_PS"; if [ ! -x "$(command -v pstree)" ]; then echo "pstree not found (e.g. yum install -y psmisc)."; else TEMP_PIDS=($(sed -n "2,4p" <<< "$TEMP_PS" | awk "{print \$2}")); for TEMP_PID in "${TEMP_PIDS[@]}"; do; TEMP_PSTREE=$(pstree -ps $TEMP_PID); [[ $TEMP_PSTREE =~ "\($TEMP_PID)" ]] && head -n 8 <<< "$TEMP_PSTREE" | grep --color -E "^|\($TEMP_PID)"; done; fi; unset TEMP_PS TEMP_PIDS TEMP_PID TEMP_PSTREE'
 alias bell='echo -n -e "\a"'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
@@ -48,6 +49,7 @@ alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" ~/.vi
 alias less='less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
+alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
 alias btop='bpytop -b "cpu proc"'
 alias croc='croc --curve p256'
 alias lg='lazygit'
@@ -95,8 +97,6 @@ alias gpf='git push fork $(git symbolic-ref --short HEAD)'
 alias gpo='git push origin $(git symbolic-ref --short HEAD)'
 alias gpu='git push upstream $(git symbolic-ref --short HEAD)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
-alias gignore='git update-index --assume-unchanged'
-alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gl='git pull'
 alias glr='git pull --rebase'
 alias glg='git log --stat'
@@ -108,8 +108,8 @@ alias gloo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
-alias gmlog='glo HEAD..'  # commits in target but not in HEAD (will be merged with git merge target)
-gmdiff() {
+alias gmerge-preview-log='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit HEAD..'  # commits in target but not in HEAD (will be merged with git merge target)
+gmerge-preivew-diff() {
   git diff HEAD..."$@"  # diff between target and the common ancestor of HEAD and target
 }
 alias gp='git push'
@@ -119,6 +119,7 @@ alias grba='git rebase --abort'
 alias grbc='git rebase --continue'
 alias grbs='git rebase --skip'
 alias grbi='git rebase -i'
+alias gref='git symbolic-ref --short HEAD'
 alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset" --date=iso'
 alias gra='git remote add'
 alias grmv='git remote rename'
@@ -131,12 +132,14 @@ alias grv='git remote -v'
 alias gs='git status'
 alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \$(git symbolic-ref --short HEAD)\"\\033[0m\"; git status -s' \\;"
 alias gss='git status -sb'
-alias gsta='git stash push -m'
+alias gstash='git stash'
 alias gshow='git show --pretty=short --show-signature'
 alias gsu='git submodule update'
 alias gts='git tag -s'
 alias gvt='git verify-tag'
 alias gtree='git ls-files | tree --fromfile'
+alias gignore='git update-index --assume-unchanged'
+alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gunignore='git update-index --no-assume-unchanged'
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
@@ -195,7 +198,8 @@ sudorun() {
   case $CMD in
     v|vi|vim) sudo $(/usr/bin/which vim) -u "$HOME/.vim/config/mini.vim" "$@" ;;
     lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E $(/usr/bin/which lf) -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
-    *) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E $(/usr/bin/which $CMD) "$@" ;;
+    btm) sudo -E $(/usr/bin/which btm) --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
+    *) EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E $(/usr/bin/which $CMD) "$@" ;;
   esac
 }
 
@@ -269,7 +273,7 @@ x() {
       *)           echo "Unable to extract '$1'" ;;
     esac
   else
-    tar cvf $1.tar $1
+    tar czvf $1.tar.gz $1
   fi
 }
 
@@ -401,20 +405,21 @@ react() {
   echo "Watching \"$1\", passing modified files to \"${@:2}\" command every 2 seconds."
   while true; do
     CHANGED=($(fd --base-directory $1 --absolute-path --type=f --changed-within 2s))
-    if [ $CHANGED ]; then
+    if [ ${#CHANGED[@]} -gt 0 ]; then
       eval "${${@:2}//\{\}/${CHANGED[@]}}"
     fi
     sleep 2
   done
 }
 
-try-until-success() {
+untildone() {
   local i=1
   while true; do
     echo "Try $i, $(date)."
     $* && break
     ((i+=1))
     echo
+    sleep 1
   done
 }
 

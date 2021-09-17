@@ -1,5 +1,11 @@
-// https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js
-chrome.storage.local.set({ "noPdfViewer": 1 }); // https://github.com/brookhong/Surfingkeys/issues/320
+/*
+https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js
+
+GlobalSpeed.json
+{"common":{"audioFx":{"delay":0,"eq":{"enabled":false,"factor":1,"values":[0,0,0,0,0,0,0,0,0,0]},"pitch":0,"volume":1},"backdropFx":{"filters":[{"name":"sepia","value":0},{"name":"hueRotate","value":0},{"name":"grayscale","value":0},{"name":"contrast","value":1},{"name":"brightness","value":1},{"name":"saturate","value":1},{"name":"invert","value":0},{"name":"blur","value":0},{"name":"opacity","value":1}],"transforms":[{"name":"scaleX","value":1},{"name":"scaleY","value":1},{"name":"translateX","value":0},{"name":"translateY","value":0},{"name":"rotateX","value":0},{"name":"rotateY","value":0},{"name":"rotateZ","value":0}]},"elementFx":{"filters":[{"name":"sepia","value":0},{"name":"hueRotate","value":0},{"name":"grayscale","value":0},{"name":"contrast","value":1},{"name":"brightness","value":1},{"name":"saturate","value":1},{"name":"invert","value":0},{"name":"blur","value":0},{"name":"opacity","value":1}],"transforms":[{"name":"scaleX","value":1},{"name":"scaleY","value":1},{"name":"translateX","value":0},{"name":"translateY","value":0},{"name":"rotateX","value":0},{"name":"rotateY","value":0},{"name":"rotateZ","value":0}]},"enabled":true,"lastSpeed":0.9,"speed":1},"firstUse":1627628559467,"keybinds":[{"adjustMode":2,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"2623896300","key":{"altKey":false,"code":"KeyX","ctrlKey":false,"metaKey":false,"shiftKey":false},"valueNumberAlt":-0.1},{"adjustMode":1,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"3565761808","key":{"altKey":false,"code":"KeyZ","ctrlKey":false,"metaKey":false,"shiftKey":false},"valueNumber":1},{"adjustMode":2,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"8445439043","key":{"altKey":false,"code":"KeyC","ctrlKey":false,"metaKey":false,"shiftKey":false},"spacing":1,"valueNumberAlt":0.1},{"command":"setState","enabled":true,"greedy":false,"id":"9280901153","key":{"ctrlKey":false,"altKey":false,"shiftKey":true,"metaKey":false,"code":"KeyI"},"spacing":2,"valueState":"toggle"},{"command":"seek","enabled":true,"greedy":true,"id":"3175808952","key":{"altKey":false,"code":"KeyH","ctrlKey":false,"metaKey":false,"shiftKey":false},"valueBool2":true,"valueNumber":-5},{"command":"seek","enabled":true,"greedy":true,"id":"7654966709","key":{"altKey":false,"code":"KeyL","ctrlKey":false,"metaKey":false,"shiftKey":false},"spacing":1,"valueBool2":true,"valueNumber":5},{"command":"seek","enabled":true,"greedy":true,"id":"3788998064","key":{"altKey":false,"code":"KeyH","ctrlKey":false,"metaKey":false,"shiftKey":true},"valueBool3":true,"valueNumber":-0.041},{"command":"seek","enabled":true,"greedy":true,"id":"3314411603","key":{"altKey":false,"code":"KeyL","ctrlKey":false,"metaKey":false,"shiftKey":true},"spacing":1,"valueBool3":true,"valueNumber":0.041},{"command":"fullscreen","enabled":true,"greedy":true,"id":"5553514632","key":{"code":"KeyF","shiftKey":true},"spacing":2,"valueBool":true}],"version":10}
+*/
+
+chrome.storage.local.set({ noPdfViewer: 1 }); // https://github.com/brookhong/Surfingkeys/issues/320
 settings.tabsThreshold = 0;
 settings.richHintsForKeystroke = 1500;
 settings.stealFocusOnLoad = false;
@@ -62,6 +68,7 @@ map('C', 'v'); // enter caret mode
 map('v', 'zv'); // visual select element
 map('ys', 'ya'); // select url to copy
 map('yt', 'yl'); // copy page title
+// yj to copy all settings as json, ;pj to restore
 map('J', 'W'); // move tab to window
 map(';q', 'x'); // close tab
 map(';x', 'x'); // close tab
@@ -77,13 +84,15 @@ map(';B', ';db'); // remove bookmark
 map(';c', ';e'); // edit configs
 map(';e', ';U'); // edit url
 unmap('r');
-unmap('gr');
-vunmap('gr');
+unmap('<Ctrl-h>');
+unmap('<Ctrl-j>');
 unmap('c'); // unmap z, x, c for Global Speed
 unmap('z');
 
 mapkey('g+', 'Increment url', function() { var e,s; IB=1; function isDigit(c) { return ('0' <= c && c <= '9') } L = window.location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; window.location.href = L.substring(0,s) + newNum + L.slice(e+1); });
 mapkey('g-', 'Decrement url', function() { var e,s; IB=-1; function isDigit(c) { return ('0' <= c && c <= '9') } L = window.location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; window.location.href = L.substring(0,s) + newNum + L.slice(e+1); });
+unmap('gr');
+vunmap('gr');
 mapkey('gr', 'Go to referrer', function() { if(document.referrer) open(document.referrer); });
 mapkey(';vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
 mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
@@ -164,6 +173,14 @@ mapkey('yor', 'Toggle github raw', function() {
         window.location.href = `https://github.com/${matches[1]}/${matches[2]}/blob/${matches[3]}`;
     }
 }, {domain: /github.com|raw.githubusercontent.com/i});
+mapkey('yraw', 'Copy github raw', function() {
+    var href = window.location.href;
+    if (window.location.hostname === 'github.com') {
+        var matches = window.location.href.match(/github.com\/([^/]+)\/([^/]+)\/blob\/(.*)/);
+        href = `https://raw.githubusercontent.com/${matches[1]}/${matches[2]}/${matches[3]}`;
+    }
+    fetch(href).then(response => response.text()).then((text) => Clipboard.write(text));
+}, {domain: /github.com|raw.githubusercontent.com/i});
 mapkey('yov', 'Toggle github vscode', function() {
     if (window.location.hostname === 'github.dev')
         tabOpenLink(window.location.href.replace('github.dev', 'github.com'));
@@ -179,14 +196,22 @@ unmap('gg');
 unmap('G');
 var scrollX, scrollY;
 mapkey('gg', 'Go to top', function() {
-    scrollX = document.scrollingElement.scrollLeft;
-    scrollY = document.scrollingElement.scrollTop;
-    Normal.scroll("top");
+    var tempX = document.scrollingElement.scrollLeft;
+    var tempY = document.scrollingElement.scrollTop;
+    Normal.scroll('top');
+    if (tempX !== document.scrollingElement.scrollLeft || tempY !== document.scrollingElement.scrollTop) {
+        scrollX = tempX;
+        scrollY = tempY;
+    }
 });
 mapkey('G', 'Go to bottom', function() {
-    scrollX = document.scrollingElement.scrollLeft;
-    scrollY = document.scrollingElement.scrollTop;
-    Normal.scroll("bottom");
+    var tempX = document.scrollingElement.scrollLeft;
+    var tempY = document.scrollingElement.scrollTop;
+    Normal.scroll('bottom');
+    if (tempX !== document.scrollingElement.scrollLeft || tempY !== document.scrollingElement.scrollTop) {
+        scrollX = tempX;
+        scrollY = tempY;
+    }
 });
 mapkey('``', 'Go to previous position', function() {
     var tempX = document.scrollingElement.scrollLeft;

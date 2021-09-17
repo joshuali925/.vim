@@ -15,7 +15,7 @@ end
 function M.telescope_grep(use_regex, pattern)
     vim.cmd("ProjectRoot")
     require("telescope.builtin").grep_string(
-        {path_display = {shorten = 5}, use_regex = use_regex, search = pattern}
+        {path_display = {"smart"}, use_regex = use_regex, search = pattern}
     )
 end
 
