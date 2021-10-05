@@ -10,10 +10,13 @@
 
 ## Windows
 ```bash
-# vim
-# download 64-bit gvim from https://github.com/vim/vim-win32-installer/releases/latest
-mkdir %USERPROFILE%\.cache\vim\undo
-git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\vimfiles
+# nvim
+mkdir %USERPROFILE%\.cache\nvim\undo
+git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\vimfiles --depth=1
+mv %USERPROFILE%\vimfiles\config\nvim %LOCALAPPDATA%
+rm %LOCALAPPDATA%\nvim\autoload
+mv %USERPROFILE%\vimfiles\autoload %LOCALAPPDATA%\nvim\autoload
+rm -rf %USERPROFILE%\vimfiles
 ```
 
 ## Mac OS

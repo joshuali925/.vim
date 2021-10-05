@@ -40,7 +40,6 @@ alias ls='ls -CF --color=auto'
 alias l='exa -alF --git --color=always --color-scale --icons --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
-alias pscpu='TEMP_PS=$(ps aux --sort=-pcpu | head -n 11); echo "$TEMP_PS"; if [ ! -x "$(command -v pstree)" ]; then echo "pstree not found (e.g. yum install -y psmisc)."; else TEMP_PIDS=($(sed -n "2,4p" <<< "$TEMP_PS" | awk "{print \$2}")); for TEMP_PID in "${TEMP_PIDS[@]}"; do; TEMP_PSTREE=$(pstree -ps $TEMP_PID); [[ $TEMP_PSTREE =~ "\($TEMP_PID)" ]] && head -n 8 <<< "$TEMP_PSTREE" | grep --color -E "^|\($TEMP_PID)"; done; fi; unset TEMP_PS TEMP_PIDS TEMP_PID TEMP_PSTREE'
 alias bell='echo -n -e "\a"'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
@@ -120,6 +119,7 @@ alias grbc='git rebase --continue'
 alias grbs='git rebase --skip'
 alias grbi='git rebase -i'
 alias gref='git symbolic-ref --short HEAD'
+alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{u}'  # remote ref
 alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset" --date=iso'
 alias gra='git remote add'
 alias grmv='git remote rename'
@@ -147,7 +147,7 @@ alias gunwip='git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{u})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
 alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
-alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use git obliterate <file> to remove
+alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove
 
 d() {
   if [ -n "$1" ]; then
@@ -181,7 +181,7 @@ glof() {
 
 gcb() {
   if [ -n "$1" ]; then
-    git checkout -b "$@"
+    git checkout -b "$@" || git checkout "$@"
   else
     local FZFTEMP=$(git branch --color=always --sort=-committerdate --all |
       awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
@@ -189,6 +189,27 @@ gcb() {
       --header='Press ` to toggle sort' \
       --preview='git log -n 50 --color=always --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
     [ -n "$FZFTEMP" ] && git checkout "${FZFTEMP#remotes/[^\/]*/}"
+  fi
+}
+
+pscpu() {
+  local ps_out pids pid pstree_flags pstree_out
+  if [ $(uname -s) == 'Darwin' ]; then
+    ps_out=$(ps -Ao user,pid,ppid,pcpu,pmem,time,command -r | head -n 11)
+    pstree_flags='-p'
+  else
+    ps_out=$(ps aux --sort=-pcpu | head -n 11)
+    pstree_flags='-Gps'
+  fi
+  echo "$ps_out"
+  if [ ! -x "$(command -v pstree)" ]; then
+    echo "pstree not found (e.g. yum install -y psmisc)."
+  else
+    pids=($(sed -n "2,4p" <<< "$ps_out" | awk "{print \$2}"))
+    for pid in "${pids[@]}"; do
+      pstree_out=$(pstree "$pstree_flags" "$pid")
+      [[ $pstree_out =~ "$pid" ]] && head -n 8 <<< "$pstree_out" | grep --color -E "^|$pid"
+    done
   fi
 }
 
@@ -286,7 +307,7 @@ X() {  # extract to a directory / archive without top directory
     (cd "$dir" > /dev/null && x "$filename")
     command mv -n "$dir/$filename" "$1"
   else
-    tar cvf $1.tar -C $1 .
+    tar czvf $1.tar.gz -C $1 .
     return 0
   fi
 }

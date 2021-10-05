@@ -1,6 +1,7 @@
-if has('win32')
-  set guifont=JetBrainsMono\ NF:h10
+if has('win32')  " nvim-qt.exe
+  GuiFont! JetBrainsMono\ NF:h10
 else
+  " check available fonts with :set guifont=* and :set guifont?
   set guifont=JetBrainsMono\ Nerd\ Font:h14
 endif
 

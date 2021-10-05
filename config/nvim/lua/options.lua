@@ -57,7 +57,7 @@ opt.foldlevelstart = 99
 opt.jumpoptions = "stack"
 opt.history = 5000
 opt.undofile = true
-opt.undodir = os.getenv("HOME") .. "/.cache/nvim/undo"
+opt.undodir = vim.env.HOME .. "/.cache/nvim/undo"
 opt.undolevels = 1000
 opt.undoreload = 10000
 opt.isfname = opt.isfname - {"="}
