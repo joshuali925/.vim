@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+if [ ! -f $HOME/.config/lf/lfrc ]; then
+  mkdir -p ~/.local/share/lf ~/.config/lf ~/.cache
+  ln -sv ~/.vim/config/lfrc ~/.config/lf/lfrc
+fi
+
+source ~/.vim/bin/_install_from_github.sh
+install-from-github lf gokcehan/lf linux-amd64 linux-arm64 "" "$@"

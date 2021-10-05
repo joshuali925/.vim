@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github bat sharkdp/bat x86_64-unknown-linux-musl aarch64-unknown-linux '--strip-components=1 --wildcards bat*/bat' "$@"

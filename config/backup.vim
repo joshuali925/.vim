@@ -2603,3 +2603,5 @@ function M.lspsaga()
     }
 end
 
+" =======================================================
+# download 64-bit gvim from https://github.com/vim/vim-win32-installer/releases/latest

@@ -1,3 +1,6 @@
+" vscode-neovim vimrc, to install plugins:
+" nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall
+
 set packpath=
 set runtimepath-=$HOME/.config/nvim
 set runtimepath+=$HOME/.vim/config/vscode-neovim
@@ -79,7 +82,7 @@ xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
-noremap <expr> 0 col('.') - 1 == match(getline('.'), '\S') ? '0' : '^'
+noremap <expr> 0 funcs#home()
 noremap ^ 0
 noremap - $
 xnoremap - g_
@@ -113,7 +116,7 @@ nnoremap <leader>f] :call VSCodeNotify('workbench.action.showAllSymbols')<CR>
 nnoremap <leader>fg :call VSCodeNotify('workbench.view.search')<CR>
 xnoremap <leader>fg <Cmd>call VSCodeNotifyRangePos('workbench.action.findInFiles', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1)<CR>
 nnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': expand('<cword>')})<CR>
-xnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': <SID>GetVisualSelection() })<CR>
+xnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': funcs#get_visual_selection() })<CR>
 nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
 nnoremap <leader>fA :call VSCodeNotify('workbench.action.focusActivityBar')<CR>
 nnoremap <leader>fy :registers<CR>
@@ -193,20 +196,9 @@ function! s:RunCode()
     call VSCodeNotify('code-runner.run')
   endif
 endfunction
-function! s:GetVisualSelection()
-  let [l:line_start, l:column_start] = getpos("'<")[1:2]
-  let [l:line_end, l:column_end] = getpos("'>")[1:2]
-  let l:lines = getline(l:line_start, l:line_end)
-  if len(l:lines) == 0
-    return ''
-  endif
-  let l:lines[-1] = l:lines[-1][: l:column_end - (&selection == 'inclusive' ? 1 : 2)]
-  let l:lines[0] = l:lines[0][l:column_start - 1:]
-  return join(l:lines, "\n")
-endfunction
 function! s:PrintCurrVars(visual, printAbove)
   let l:new_line = a:printAbove ? 'O' : 'o'
-  let l:word = a:visual ? <SID>GetVisualSelection() : expand('<cword>')
+  let l:word = a:visual ? funcs#get_visual_selection() : expand('<cword>')
   let l:print = {}
   let l:print['python'] = "print('". l:word. "', ". l:word. ')'
   let l:print['javascript'] = "console.log('". l:word. "', ". l:word. ');'

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github fzf junegunn/fzf linux_amd64 linux_arm64 "" "$@"
