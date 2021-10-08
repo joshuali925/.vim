@@ -338,3 +338,4 @@ map("n", "[a", "<Cmd>lua vim.lsp.diagnostic.goto_prev({popup_opts={border='round
 map("n", "]a", "<Cmd>lua vim.lsp.diagnostic.goto_next({popup_opts={border='rounded'}})<CR>")
 map("n", "<leader>tb", "<Cmd>TroubleToggle<CR>")
 map("n", "<leader>td", "<Cmd>TroubleToggle lsp_workspace_diagnostics<CR>")
+map("i", "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>")

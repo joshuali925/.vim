@@ -1,6 +1,6 @@
 local install_path = vim.fn.stdpath("data") .. "/site/pack/packer/opt/packer.nvim"
 if vim.fn.glob(install_path) == "" then
-    vim.cmd("silent !git clone https://github.com/wbthomason/packer.nvim " .. install_path)
+    vim.cmd("silent !git clone https://github.com/wbthomason/packer.nvim --depth=1 " .. install_path)
 end
 vim.cmd("packadd packer.nvim")
 
@@ -13,13 +13,15 @@ return require("packer").startup(
         config = {
             auto_clean = false,
             opt_default = true,
-            max_jobs = 10,
+            -- https://github.com/wbthomason/packer.nvim/issues/456
+            -- max_jobs = 10, -- this fixes above issue but breaks plugin installing in headless nvim
             display = {
                 open_fn = require("packer.util").float
             },
             profile = {
                 enable = false
-            }
+            },
+            compile_path = vim.fn.stdpath("config") .. "/lua/packer_compiled.lua" -- impatient.nvim
         },
         function(use)
             use {"wbthomason/packer.nvim"}
@@ -107,7 +109,8 @@ return require("packer").startup(
             use {
                 "nvim-treesitter/nvim-treesitter",
                 run = ":TSUpdate",
-                requires = {"nvim-treesitter/nvim-treesitter-textobjects"}
+                requires = {"nvim-treesitter/nvim-treesitter-textobjects"},
+                config = get_config("nvim_treesitter")
             }
             use {"nvim-treesitter/playground", cmd = {"TSPlaygroundToggle", "TSHighlightCapturesUnderCursor"}}
             use {"kabouzeid/nvim-lspinstall"}
@@ -153,6 +156,7 @@ return require("packer").startup(
             use {
                 "windwp/nvim-ts-autotag",
                 ft = {"html", "javascript", "javascriptreact", "typescriptreact", "svelte", "vue"},
+                wants = "nvim-treesitter",
                 config = function()
                     require("nvim-ts-autotag").setup()
                 end
@@ -225,10 +229,16 @@ return require("packer").startup(
                     {"n", "yo"}
                 }
             }
-            use {"jdhao/better-escape.vim", event = "InsertEnter"}
+            use {
+                "max397574/better-escape.nvim",
+                event = "InsertEnter",
+                config = function()
+                    require("better_escape").setup({mapping = {"jk", "kj"}})
+                end
+            }
+            use {"moll/vim-bbye", cmd = "Bdelete"}
             use {
                 "andymass/vim-matchup",
-                event = "CursorMoved",
                 cmd = "MatchupWhereAmI",
                 config = get_config("vim_matchup")
             }
@@ -244,6 +254,8 @@ return require("packer").startup(
             use {"kyazdani42/nvim-web-devicons", opt = false}
 
             -- tools
+            use {"nathom/filetype.nvim", opt = false, config = get_config("filetype_nvim")}
+            use {"lewis6991/impatient.nvim", opt = false}
             use {"tweekmonster/startuptime.vim", cmd = "StartupTime"}
             use {"will133/vim-dirdiff", cmd = "DirDiff"}
             use {

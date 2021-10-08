@@ -2,6 +2,7 @@
 unset COLORTERM
 
 pager() {
+    [ -d "$1" ] && echo "$1" && ls "$1" -AlhF --color=always && return
     local FSIZE=$(wc -c < "$1")
     if [ $FSIZE -gt 2097152 ]; then  # 2MB
         less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT "$1"

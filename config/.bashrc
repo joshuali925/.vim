@@ -103,7 +103,7 @@ cd() {
   else
     pushd "$@" > /dev/null
   fi
-  [ $(command ls | wc -l) -lt 200 ] && ls -ACF --color=auto
+  [ $(command ls | wc -l) -lt 200 ] && ls -AF --color=auto
 }
 complete -d cd
 
