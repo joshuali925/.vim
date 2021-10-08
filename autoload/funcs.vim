@@ -64,6 +64,7 @@ function! funcs#lf_edit_callback(code) abort
 endfunction
 
 function! funcs#quit(buffer_mode, force) abort
+  let l:buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   if a:buffer_mode == 0 && a:force == 1
     if tabpagenr('$') == 1
       quit
@@ -71,15 +72,23 @@ function! funcs#quit(buffer_mode, force) abort
       tabclose
     endif
   " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; two windows but the other one is file tree
-  elseif (a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1 || winnr('$') == 2 && getbufvar(winbufnr(3 - winnr()), "&filetype") == "NvimTree") && len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
-    bprevious
-    if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
+  elseif ((a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && l:buf_len > 1) || (winnr('$') == 2 && getbufvar(winbufnr(3 - winnr()), '&filetype') == 'NvimTree' && (l:buf_len > 1 || bufname('%') != ''))
+    if exists(':Bdelete')
       try
-        execute 'bdelete'. (a:force ? '!' : ''). ' #'
+        execute 'Bdelete'. (a:force ? '!' : '')
       catch
-        bnext
         throw 'Unsaved buffer'
       endtry
+    else
+      bprevious
+      if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1  " check number of buffers again after bprevious
+        try
+          execute 'bdelete'. (a:force ? '!' : ''). ' #'
+        catch
+          bnext
+          throw 'Unsaved buffer'
+        endtry
+      endif
     endif
   else
     execute 'quit'. (a:force ? '!' : '')

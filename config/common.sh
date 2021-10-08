@@ -36,7 +36,7 @@ alias cp='cp -riv'
 alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto'
 alias la='ls -AF --color=auto'
-alias ls='ls -CF --color=auto'
+alias ls='ls -F --color=auto'
 alias l='exa -alF --git --color=always --color-scale --icons --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
@@ -75,7 +75,7 @@ alias gcs!='git commit -s --amend'
 alias gcv='git commit -v'
 alias gcf='git config --list'
 alias gcl='git clone --recursive'
-alias gpristine='git reset --hard && git clean -fdx'
+alias gpristine='git stash push --include-untracked --message "gpristine temporary stash" && git reset --hard && git clean -fdx'
 alias gcm='git checkout main || git checkout master'
 alias gcd='git checkout develop || git checkout dev'
 alias gco='git checkout'
@@ -111,7 +111,6 @@ alias gmerge-preview-log='git log --color --graph --pretty=format:"%Cred%h%Crese
 gmerge-preivew-diff() {
   git diff HEAD..."$@"  # diff between target and the common ancestor of HEAD and target
 }
-alias gp='git push'
 alias gr='git remote'
 alias grb='git rebase'
 alias grba='git rebase --abort'
@@ -148,6 +147,7 @@ alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
 alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove
+alias gforest='git-foresta --style=10 --all | less -RSXF'
 
 d() {
   if [ -n "$1" ]; then

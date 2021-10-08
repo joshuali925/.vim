@@ -12,7 +12,7 @@ vim.cmd("command! LspInstallAll call v:lua.lsp_install_all()")
 local timer = vim.loop.new_timer()
 local function on_attach(client, bufnr)
     require("lsp_signature").on_attach({hint_enable = false}, bufnr)
-    vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+    -- vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
     if client.resolved_capabilities.document_highlight then
         function _G.lsp_document_highlight()

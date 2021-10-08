@@ -2605,3 +2605,45 @@ end
 
 " =======================================================
 # download 64-bit gvim from https://github.com/vim/vim-win32-installer/releases/latest
+
+" =======================================================
+" lazyload filetype.vim https://github.com/joshuali925/.vim/tree/ff1ef83c290bfd61cc964a27f17d98ea57adcd3a
+g.did_load_filetypes = 1
+vim.cmd("syntax off")
+        vim.defer_fn(
+            function()
+                -- https://github.com/kevinhwang91/dotfiles/blob/da97fbe354931d440b0ff12215de67a8233ce319/nvim/init.lua#L499
+                vim.cmd("syntax enable")
+                require("treesitter").init()
+                vim.cmd [[
+                    unlet g:did_load_filetypes
+                    autocmd! syntaxset
+                    autocmd syntaxset FileType * lua require('treesitter').hijack_synset()
+                    filetype on
+                    doautoall filetypedetect BufRead
+                    augroup FormatOptions
+                        autocmd!
+                        autocmd FileType * setlocal formatoptions=jql
+                    augroup END
+                ]]
+                loader("nvim-lspinstall lsp_signature.nvim")
+            end,
+            30
+        )
+    local present, treesitter = pcall(require, "nvim-treesitter.configs")
+    if present then
+        treesitter.setup(config)
+        local parsers = config.ensure_installed
+        local hl_disabled = config.highlight.disable
+        for _, lang in ipairs(parsers) do
+            if not vim.tbl_contains(hl_disabled, lang) then
+                treesitter_hl_enabled[lang] = true
+            end
+        end
+    end
+function M.hijack_synset()
+    local ft = vim.fn.expand("<amatch>")
+    if not treesitter_hl_enabled[ft] then
+        vim.opt.syntax = ft
+    end
+end

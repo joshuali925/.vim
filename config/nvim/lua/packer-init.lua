@@ -1,4 +1,4 @@
-if vim.fn.glob(vim.fn.stdpath("config") .. "/plugin/packer_compiled.lua") == "" then
+if vim.fn.glob(vim.fn.stdpath("config") .. "/lua/packer_compiled.lua") == "" then
     require("plugins").compile()
 else
     vim.cmd [[
@@ -9,4 +9,5 @@ else
         command! PackerCompile lua require('plugins').compile()
         command! PackerStatus lua require('plugins').status()
     ]]
+    require("packer_compiled")
 end

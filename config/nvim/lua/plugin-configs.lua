@@ -9,6 +9,16 @@ function M.tokyonight()
     vim.cmd("colorscheme tokyonight")
 end
 
+function M.filetype_nvim()
+    require("filetype").setup {
+        overrides = {
+            extensions = {
+                ejs = "html"
+            }
+        }
+    }
+end
+
 function M.auto_pairs()
     g.AutoPairsShortcutToggle = ""
     g.AutoPairsShortcutFastWrap = "<C-l>"
@@ -26,11 +36,12 @@ function M.vim_matchup()
 end
 
 function M.nvim_tree()
+    g.nvim_tree_git_hl = 1
     g.nvim_tree_highlight_opened_files = 1
     local tree_cb = require("nvim-tree.config").nvim_tree_callback
     require("nvim-tree").setup {
         disable_netrw = false,
-        lsp_diagnostics = true,
+        diagnostics = {enable = true},
         view = {
             mappings = {
                 list = {
@@ -217,11 +228,9 @@ function M.telescope()
                     preview_height = 0.3
                 }
             },
-            -- https://github.com/nvim-telescope/telescope.nvim/issues/917
             file_ignore_patterns = {".git", "node_modules", "venv"}
         },
         pickers = {
-            -- https://github.com/nvim-telescope/telescope.nvim/issues/938
             file_browser = {theme = "dropdown"},
             filetypes = {theme = "dropdown"},
             registers = {theme = "dropdown"},
@@ -238,6 +247,70 @@ function M.telescope()
         }
     }
     require("telescope").load_extension("fzf")
+    require("telescope").load_extension("projects")
+end
+
+function M.nvim_treesitter()
+    require("nvim-treesitter.configs").setup {
+        ensure_installed = {
+            "javascript",
+            "typescript",
+            "tsx",
+            "html",
+            "css",
+            "bash",
+            "lua",
+            "vim",
+            "json",
+            "yaml",
+            "python"
+        },
+        highlight = {
+            enable = true,
+            disable = {},
+            use_languagetree = true
+        },
+        textobjects = {
+            select = {
+                enable = true,
+                keymaps = {
+                    ["if"] = "@function.inner",
+                    ["af"] = "@function.outer",
+                    ["ic"] = "@class.inner",
+                    ["ac"] = "@class.outer"
+                }
+            },
+            move = {
+                enable = true,
+                set_jumps = true,
+                goto_next_start = {
+                    ["]]"] = "@function.outer"
+                },
+                goto_next_end = {
+                    ["]["] = "@function.outer"
+                },
+                goto_previous_start = {
+                    ["[["] = "@function.outer"
+                },
+                goto_previous_end = {
+                    ["[]"] = "@function.outer"
+                }
+            }
+        },
+        indent = {
+            enable = true,
+            disable = {"python"}
+        },
+        -- for nvim-ts-context-commentstring
+        context_commentstring = {
+            enable = true,
+            enable_autocmd = false
+        },
+        -- for vim-matchup
+        matchup = {
+            enable = true
+        }
+    }
 end
 
 function M.galaxyline()
@@ -485,6 +558,7 @@ end
 function _G.quickui_context_menu()
     local content = {
         {"Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation"},
+        {"&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help"},
         {"&Preview references", "TroubleToggle lsp_references", "Preview references with Trouble"},
         {"Quick&fix references", "lua vim.lsp.buf.references()", "Use quickfix to navigate references"},
         {"--", ""},

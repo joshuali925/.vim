@@ -2,7 +2,6 @@ local g = vim.g
 local opt = vim.opt
 
 g.did_load_filetypes = 1
-vim.cmd("syntax off")
 g.loaded_matchparen = 1
 g.loaded_matchit = 1
 g.loaded_2html_plugin = 1
@@ -10,7 +9,6 @@ g.loaded_remote_plugins = 1
 g.loaded_tutor_mode_plugin = 1
 
 g.mapleader = ";"
--- need this PR to replace netrw https://github.com/kyazdani42/nvim-tree.lua/pull/288
 g.netrw_dirhistmax = 0
 g.netrw_banner = 0
 g.netrw_liststyle = 3
@@ -45,6 +43,7 @@ opt.hidden = true
 opt.complete = {".", "w", "b", "u"}
 opt.completeopt = {"menuone", "noselect"}
 opt.completefunc = "funcs#complete_word"
+opt.pumblend = 8
 opt.shortmess = opt.shortmess + {c = true}
 opt.shortmess = opt.shortmess - {S = true}
 opt.scrolloff = 2

@@ -104,7 +104,7 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|
 zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -ACF --color=always -1 $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -AF --color=always -1 $realpath'
 zstyle ':fzf-tab:*' switch-group '[' ']'
 
 compdef _dirs d
@@ -162,7 +162,7 @@ bindkey -s '^z' 'fg^m'
 
 alias history='history -f 0'
 alias get-completion='compdef _gnu_generic'
-chpwd() { emulate -L zsh; [ $(command ls | wc -l) -lt 200 ] && ls -ACF --color=auto; }
+chpwd() { emulate -L zsh; [ $(command ls | wc -l) -lt 200 ] && ls -AF --color=auto; }
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/.p10k.zsh.
 [[ ! -f ~/.vim/config/.p10k.zsh ]] || source ~/.vim/config/.p10k.zsh
