@@ -2605,6 +2605,8 @@ end
 
 " =======================================================
 # download 64-bit gvim from https://github.com/vim/vim-win32-installer/releases/latest
+# WSL specific
+alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
 
 " =======================================================
 " lazyload filetype.vim https://github.com/joshuali925/.vim/tree/ff1ef83c290bfd61cc964a27f17d98ea57adcd3a
@@ -2647,3 +2649,12 @@ function M.hijack_synset()
         vim.opt.syntax = ft
     end
 end
+
+" =======================================================
+" lsp-signature, persistent text issue
+            use {
+                "neovim/nvim-lspconfig",
+                after = {"nvim-lsp-installer", "lsp_signature.nvim"},
+            use {"ray-x/lsp_signature.nvim"}
+local function on_attach(client, bufnr)
+    require("lsp_signature").on_attach({hint_enable = false}, bufnr)

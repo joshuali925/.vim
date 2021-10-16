@@ -1,4 +1,5 @@
 set hidden
+set incfilter
 set info size
 set dircounts
 set icons
@@ -40,6 +41,7 @@ map x delete
 map D delete
 map r reload
 map R rename
+map / filter
 map ~ cd
 map , find-next
 map ; find-prev

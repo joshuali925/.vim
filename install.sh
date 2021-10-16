@@ -231,20 +231,24 @@ install_node() {
 
 install_neovim() {
   local tag=$(curl -s https://github.com/neovim/neovim/releases/latest | sed 's#.*tag/\(.*\)\".*#\1#')
+  backup "$HOME/.local/nvim"
   if [[ $platform == Linux* ]]; then
-    backup "$HOME/.local/nvim"
     if [ $architecture == 'x86_64' ]; then
       curl -LO https://github.com/neovim/neovim/releases/download/$tag/nvim.appimage
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
       mv squashfs-root ~/.local/nvim && ln -sf ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
+
+      # curl -L -o- https://github.com/neovim/neovim/releases/download/$tag/nvim-linux64.tar.gz | tar xz -C ~/.local
+      # mv ~/.local/nvim-linux64 ~/.local/nvim
+      # ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
     else
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local nvim
       ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
     fi
   elif [ $platform == 'MacOS' ]; then
-    backup "$HOME/.local/nvim-osx64"
     curl -L -o- https://github.com/neovim/neovim/releases/download/$tag/nvim-macos.tar.gz | tar xz -C ~/.local
-    ln -sf ~/.local/nvim-osx64/bin/nvim ~/.local/bin/nvim
+    mv ~/.local/nvim-osx64 ~/.local/nvim
+    ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
   else
     echo "Unknown distro.."
     exit 1

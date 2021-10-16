@@ -1,17 +1,18 @@
 function _G.lsp_install_all()
-    local required_servers = {"lua", "vim", "json", "yaml", "html", "css", "typescript", "python"}
-    local installed_servers = require("lspinstall").installed_servers()
-    for _, server in pairs(required_servers) do
-        if not vim.tbl_contains(installed_servers, server) then
-            require("lspinstall").install_server(server)
+    local required_servers = {"sumneko_lua", "vimls", "jsonls", "yamlls", "html", "cssls", "tsserver", "pyright"}
+    local lsp_installer_servers = require("nvim-lsp-installer.servers")
+    for _, required_server in pairs(required_servers) do
+        local ok, server = lsp_installer_servers.get_server(required_server)
+        if ok and not server:is_installed() then
+            server:install()
         end
     end
+    vim.cmd("LspInstallInfo")
 end
 vim.cmd("command! LspInstallAll call v:lua.lsp_install_all()")
 
 local timer = vim.loop.new_timer()
 local function on_attach(client, bufnr)
-    require("lsp_signature").on_attach({hint_enable = false}, bufnr)
     -- vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
     if client.resolved_capabilities.document_highlight then
@@ -38,7 +39,7 @@ local function on_attach(client, bufnr)
 end
 
 local lsp_configs = {
-    lua = {
+    sumneko_lua = {
         settings = {
             Lua = {
                 runtime = {
@@ -57,7 +58,7 @@ local lsp_configs = {
             }
         }
     },
-    typescript = {
+    tsserver = {
         init_options = {
             preferences = {
                 importModuleSpecifierPreference = "relative"
@@ -92,27 +93,19 @@ local function make_config()
     }
 end
 
-local function setup_servers()
-    require("lspinstall").setup()
-    local servers = require("lspinstall").installed_servers()
-
-    for _, server in pairs(servers) do
+require("nvim-lsp-installer").on_server_ready(
+    function(server)
         local config = make_config()
-        if lsp_configs[server] ~= nil then
-            for k, v in pairs(lsp_configs[server]) do
+
+        if lsp_configs[server.name] ~= nil then
+            for k, v in pairs(lsp_configs[server.name]) do
                 config[k] = v
             end
         end
-        require("lspconfig")[server].setup(config)
+        server:setup(config)
+        vim.cmd("doautocmd User LspAttachBuffers")
     end
-end
-
-setup_servers()
-
-require("lspinstall").post_install_hook = function()
-    setup_servers()
-    vim.cmd("bufdo edit")
-end
+)
 
 -- https://github.com/neovim/neovim/issues/14825
 vim.g.diagnostics_visible = true
@@ -137,7 +130,29 @@ function _G.toggle_diagnostics()
     end
 end
 
--- 0.6.0 breaking: https://www.reddit.com/r/neovim/comments/pymf0t/neovim_not_displaying_custom_diagnostic_symbols/
+-- https://github.com/neovim/nvim-lspconfig/issues/69#issuecomment-789541466
+function _G.quickfix_all_diagnostics()
+    local diagnostics = vim.lsp.diagnostic.get_all()
+    local qflist = {}
+    for bufnr, diagnostic in pairs(diagnostics) do
+        for _, d in ipairs(diagnostic) do
+            table.insert(
+                qflist,
+                {
+                    bufnr = bufnr,
+                    lnum = d.range.start.line + 1,
+                    col = d.range.start.character + 1,
+                    text = d.message
+                }
+            )
+        end
+    end
+    vim.lsp.util.set_qflist(qflist)
+end
+
+-- 0.6.0 breaking:
+-- https://www.reddit.com/r/neovim/comments/pymf0t/neovim_not_displaying_custom_diagnostic_symbols/
+-- https://www.reddit.com/r/neovim/comments/qd3v4h/psa_vimdiagnostics_api_has_changed_a_little_bit/
 vim.fn.sign_define("LspDiagnosticsSignError", {text = ""})
 vim.fn.sign_define("LspDiagnosticsSignWarning", {text = ""})
 vim.fn.sign_define("LspDiagnosticsSignInformation", {text = ""})

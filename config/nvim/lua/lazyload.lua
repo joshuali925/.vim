@@ -12,8 +12,7 @@ vim.schedule(
                 local plugins = {
                     "nvim-treesitter",
                     "nvim-treesitter-textobjects",
-                    "nvim-lspinstall",
-                    "lsp_signature.nvim"
+                    "nvim-lsp-installer"
                 }
                 loader(table.concat(plugins, " "))
             end,
@@ -40,7 +39,7 @@ vim.schedule(
         vim.defer_fn(
             function()
                 local plugins = {
-                    "nvim-lspconfig", -- load after lspinstall so activates automatically
+                    "nvim-lspconfig", -- load after lsp-installer so it activates automatically
                     "nvim-ts-context-commentstring",
                     "project.nvim"
                 }
