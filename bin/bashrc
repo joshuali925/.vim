@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 if [ -n "$GET_BASHRC" ]; then
+  source $HOME/.vim/config/.bashrc
   unset GET_BASHRC
   export EDITOR=vim
   alias vimm='$EDITOR +"cd ~/.vim" ~/.vim/vimrc'
@@ -30,4 +31,4 @@ if [ ! -f $HOME/.vim/config/.bashrc ]; then
   curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C $HOME/.vim --strip-components=1
 fi
 
-GET_BASHRC=1 bash --rcfile <(cat $HOME/.vim/config/.bashrc $HOME/.vim/bin/bashrc) "$@"
+GET_BASHRC=1 bash --rcfile $HOME/.vim/bin/bashrc "$@"

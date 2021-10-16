@@ -51,7 +51,9 @@ zinit depth=1 wait"0" lucid light-mode for \
   as"program" pick"$ZPFX/bin/git-*" src"etc/git-extras-completion.zsh" make"PREFIX=$ZPFX" tj/git-extras \
   atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
   FAST_HIGHLIGHT[chroma-man]=" \
-  zdharma/fast-syntax-highlighting \
+  zdharma/fast-syntax-highlighting
+
+zinit depth=1 light-mode for \
   atload"!_zsh_autosuggest_start; \
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'; \
   ZSH_AUTOSUGGEST_STRATEGY=(history completion); \
@@ -165,4 +167,4 @@ alias get-completion='compdef _gnu_generic'
 chpwd() { emulate -L zsh; [ $(command ls | wc -l) -lt 200 ] && ls -AF --color=auto; }
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/.p10k.zsh.
-[[ ! -f ~/.vim/config/.p10k.zsh ]] || source ~/.vim/config/.p10k.zsh
+source ~/.vim/config/.p10k.zsh

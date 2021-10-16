@@ -11,7 +11,6 @@ end
 return require("packer").startup(
     {
         config = {
-            auto_clean = false,
             opt_default = true,
             -- https://github.com/wbthomason/packer.nvim/issues/456
             -- max_jobs = 10, -- this fixes above issue but breaks plugin installing in headless nvim
@@ -81,6 +80,7 @@ return require("packer").startup(
                 cmd = "Telescope",
                 config = get_config("telescope")
             }
+            use {"kevinhwang91/nvim-bqf", ft = "qf", config = get_config("nvim_bqf")}
 
             -- git
             use {
@@ -113,24 +113,17 @@ return require("packer").startup(
                 config = get_config("nvim_treesitter")
             }
             use {"nvim-treesitter/playground", cmd = {"TSPlaygroundToggle", "TSHighlightCapturesUnderCursor"}}
-            use {"kabouzeid/nvim-lspinstall"}
+            use {"williamboman/nvim-lsp-installer"}
             use {
                 "neovim/nvim-lspconfig",
-                after = {"nvim-lspinstall", "lsp_signature.nvim"},
+                after = "nvim-lsp-installer",
                 config = function()
                     require("lsp")
                 end
             }
             use {"weilbith/nvim-code-action-menu", cmd = "CodeActionMenu"}
-            use {"ray-x/lsp_signature.nvim"}
             use {"onsails/lspkind-nvim", event = "InsertEnter"}
-            use {
-                "hrsh7th/nvim-cmp",
-                event = "InsertEnter",
-                config = function()
-                    require("completion")
-                end
-            }
+            use {"hrsh7th/nvim-cmp", event = "InsertEnter", config = get_config("nvim_cmp")}
             use {"hrsh7th/cmp-buffer", after = "nvim-cmp"}
             use {"hrsh7th/cmp-path", after = "nvim-cmp"}
             use {"hrsh7th/cmp-nvim-lua", after = "nvim-cmp"}
@@ -138,13 +131,6 @@ return require("packer").startup(
             use {"hrsh7th/cmp-vsnip", after = "nvim-cmp"}
             use {"rafamadriz/friendly-snippets", after = "nvim-cmp"}
             use {"hrsh7th/vim-vsnip", after = "friendly-snippets"}
-            use {
-                "folke/trouble.nvim",
-                cmd = "TroubleToggle",
-                config = function()
-                    require("trouble").setup()
-                end
-            }
             use {"sbdchd/neoformat", cmd = "Neoformat"}
             use {
                 "b3nj5m1n/kommentary",
@@ -214,6 +200,8 @@ return require("packer").startup(
             use {"AndrewRadev/splitjoin.vim", keys = {{"n", "gS"}, {"n", "gJ"}}}
 
             -- misc
+            use {"lewis6991/impatient.nvim", opt = false}
+            use {"nathom/filetype.nvim", opt = false, config = get_config("filetype_nvim")}
             use {"tpope/vim-sleuth"}
             use {"tpope/vim-repeat", opt = false}
             use {
@@ -254,8 +242,6 @@ return require("packer").startup(
             use {"kyazdani42/nvim-web-devicons", opt = false}
 
             -- tools
-            use {"nathom/filetype.nvim", opt = false, config = get_config("filetype_nvim")}
-            use {"lewis6991/impatient.nvim", opt = false}
             use {"tweekmonster/startuptime.vim", cmd = "StartupTime"}
             use {"will133/vim-dirdiff", cmd = "DirDiff"}
             use {

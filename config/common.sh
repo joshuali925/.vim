@@ -195,10 +195,10 @@ gcb() {
 pscpu() {
   local ps_out pids pid pstree_flags pstree_out
   if [ $(uname -s) == 'Darwin' ]; then
-    ps_out=$(ps -Ao user,pid,ppid,pcpu,pmem,time,command -r | head -n 11)
+    ps_out=$(ps -Ao user,pid,ppid,pcpu,pmem,time,command -rww | head -n 11)
     pstree_flags='-p'
   else
-    ps_out=$(ps aux --sort=-pcpu | head -n 11)
+    ps_out=$(ps auxww --sort=-pcpu | head -n 11)
     pstree_flags='-Gps'
   fi
   echo "$ps_out"

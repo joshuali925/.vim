@@ -129,7 +129,7 @@ function M.setup_indent_blankline()
     vim.opt.colorcolumn = "99999"
     g.indent_blankline_char = "▏"
     g.indent_blankline_show_first_indent_level = false
-    g.indent_blankline_filetype_exclude = {"help", "man", "startify"}
+    g.indent_blankline_filetype_exclude = {"help", "man", "startify", "lsp-installer"}
     g.indent_blankline_buftype_exclude = {"terminal"}
 end
 
@@ -198,6 +198,22 @@ function M.setup_vim_visual_multi()
         ["Select Operator"] = "v",
         ["Case Conversion Menu"] = "s"
     }
+end
+
+function M.nvim_bqf()
+    require("bqf").setup(
+        {
+            auto_resize_height = false,
+            func_map = {
+                prevfile = "",
+                nextfile = "",
+                pscrolldown = "J",
+                pscrollup = "K",
+                ptoggleitem = "P",
+                ptoggleauto = "p"
+            }
+        }
+    )
 end
 
 function M.telescope()
@@ -555,19 +571,78 @@ function M.startify()
     }
 end
 
+function M.nvim_cmp()
+    local cmp = require("cmp")
+    cmp.setup {
+        snippet = {
+            expand = function(args)
+                vim.fn["vsnip#anonymous"](args.body)
+            end
+        },
+        formatting = {
+            format = function(entry, vim_item)
+                vim_item.kind = require("lspkind").presets.default[vim_item.kind] .. " " .. vim_item.kind
+                vim_item.menu =
+                    ({
+                    buffer = "[Buffer]",
+                    nvim_lua = "[Lua]",
+                    nvim_lsp = "[LSP]",
+                    vsnip = "[Vsnip]"
+                })[entry.source.name]
+                return vim_item
+            end
+        },
+        mapping = {
+            ["<C-d>"] = cmp.mapping.scroll_docs(-4),
+            ["<C-f>"] = cmp.mapping.scroll_docs(4),
+            ["<C-Space>"] = cmp.mapping.complete(),
+            ["<CR>"] = cmp.mapping.confirm(),
+            ["<C-e>"] = cmp.mapping.abort(),
+            ["<Tab>"] = cmp.mapping(
+                function(fallback)
+                    if cmp.visible() then
+                        cmp.select_next_item()
+                    elseif vim.fn.call("vsnip#jumpable", {1}) == 1 then
+                        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
+                    else
+                        fallback()
+                    end
+                end,
+                {"i", "s"}
+            ),
+            ["<S-Tab>"] = cmp.mapping(
+                function(fallback)
+                    if cmp.visible() then
+                        cmp.select_prev_item()
+                    elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
+                        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
+                    else
+                        fallback()
+                    end
+                end,
+                {"i", "s"}
+            )
+        },
+        sources = {
+            {name = "buffer"},
+            {name = "path"},
+            {name = "nvim_lua"},
+            {name = "nvim_lsp"},
+            {name = "vsnip"}
+        }
+    }
+end
+
 function _G.quickui_context_menu()
     local content = {
         {"Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation"},
         {"&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help"},
-        {"&Preview references", "TroubleToggle lsp_references", "Preview references with Trouble"},
-        {"Quick&fix references", "lua vim.lsp.buf.references()", "Use quickfix to navigate references"},
-        {"--", ""},
         {"Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation"},
         {"Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration"},
         {"Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition"},
         {
             "Hover diagnostic",
-            "lua vim.lsp.diagnostic.show_line_diagnostics({focusable=false, close_events={'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost'}, border='rounded'})",
+            "lua vim.lsp.diagnostic.show_line_diagnostics({border='rounded'})",
             "Show diagnostic of current line"
         },
         {"--", ""},
@@ -801,14 +876,15 @@ function M.vim_quickui()
         {
             {
                 "Workspace &diagnostics",
-                [[TroubleToggle lsp_workspace_diagnostics]],
-                "Show workspace diagnostics using Trouble"
+                [[call v:lua.quickfix_all_diagnostics() | copen]],
+                "Show workspace diagnostics in quickfix"
             },
             {
                 "Document diagnostics",
-                [[TroubleToggle lsp_document_diagnostics]],
-                "Show current file diagnostics using Trouble"
+                [[lua vim.lsp.diagnostic.set_loclist()]],
+                "Show current file diagnostics in quickfix"
             },
+            {"&Toggle diagnostics", [[call v:lua.toggle_diagnostics()]], "Toggle lsp diagnostics"},
             {"--", ""},
             {
                 "&Show folders in workspace",
@@ -824,14 +900,7 @@ function M.vim_quickui()
                 "Remove folder from workspace",
                 [[lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))]],
                 "Remove folder from workspace for LSP"
-            },
-            {"--", ""},
-            {
-                "Add diagnostics to locl&ist",
-                [[lua vim.lsp.diagnostic.set_loclist()]],
-                "Populate diagnostics to location list"
-            },
-            {"&Toggle diagnostics", [[call v:lua.toggle_diagnostics()]], "Toggle lsp diagnostics"}
+            }
         }
     )
     vim.fn["quickui#menu#switch"]("visual")

@@ -1,7 +1,7 @@
 if has('win32')  " nvim-qt.exe
   GuiFont! JetBrainsMono\ NF:h10
 else
-  " check available fonts with :set guifont=* and :set guifont?
+  " check available fonts with :set guifont=*<CR> and :set guifont?<CR>
   set guifont=JetBrainsMono\ Nerd\ Font:h14
 endif
 
@@ -67,9 +67,11 @@ elseif !has('gui_vimr')  " nvim-qt
   inoremap <S-Insert> <C-g>u<C-o>"+p
   nnoremap <S-Insert> "+p
   xnoremap <S-Insert> "+p
+  cnoremap <S-Insert> <C-r>+
   inoremap <D-v> <C-g>u<C-o>"+p
   nnoremap <D-v> "+p
   xnoremap <D-v> "+p
+  cnoremap <D-v> <C-r>+
   inoremap <D-z> <C-o>u
   nnoremap <D-z> u
   noremap <D-Left> <Home>

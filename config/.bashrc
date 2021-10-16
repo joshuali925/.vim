@@ -1,4 +1,3 @@
-# .bashrc
 # [ -t 1 ] && exec zsh
 
 # Source global definitions
@@ -8,11 +7,6 @@ fi
 
 [[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && \
   . /usr/share/bash-completion/bash_completion && alias get-completion='complete -F _longopt'
-
-# Uncomment the following line if you don't like systemctl's auto-paging feature:
-# export SYSTEMD_PAGER=
-
-# User specific aliases and functions
 
 source ~/.vim/config/fzf/completion.bash
 source ~/.vim/config/fzf/key-bindings.bash
@@ -131,6 +125,3 @@ _get_git_branch() {
   fi
   return 1
 }
-
-# WSL specific
-alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
