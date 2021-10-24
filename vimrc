@@ -140,7 +140,8 @@ noremap <leader>p "0p
 nnoremap <leader>P :registers<CR>:normal! "p<Left>
 xnoremap <leader>P "0P
 nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 1)<CR>
-nnoremap <leader>fs :vsplit **/*
+nmap <leader>fs <C-p>
+nnoremap <leader>ff :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
 nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| xargs ls -1 2>/dev/null \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>

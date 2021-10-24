@@ -1,3 +1,17 @@
 #!/usr/bin/env bash
-source ~/.vim/bin/_install_from_github.sh
-install-from-github fzf junegunn/fzf linux_amd64 linux_arm64 "" "$@"
+if [ ! -x $HOME/.local/bin/fzf ] && [ $(uname -s) == 'Darwin' ]; then
+  mkdir -p $HOME/.local/bin
+  if [ $(uname -m) == 'i386' ]; then
+    URL=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep "browser_download_url.*darwin_amd64" | cut -d '"' -f 4)
+  else
+    URL=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep "browser_download_url.*darwin_arm64" | cut -d '"' -f 4)
+  fi
+  echo "Installing fzf from $URL" >&2
+  curl -sL -o $HOME/.local/bin/fzf.zip $URL
+  unzip $HOME/.local/bin/fzf.zip -d $HOME/.local/bin >&2 && rm $HOME/.local/bin/fzf.zip
+  chmod +x $HOME/.local/bin/fzf
+  $HOME/.local/bin/fzf "$@"
+else
+  source ~/.vim/bin/_install_from_github.sh
+  install-from-github fzf junegunn/fzf linux_amd64 linux_arm64 '' '' '' "$@"
+fi

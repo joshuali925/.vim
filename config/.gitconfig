@@ -34,6 +34,5 @@
   stripLeadingSymbols = false
 
 [merge]
-  ; lazygit doesn't support this yet https://github.com/jesseduffield/lazygit/issues/940
-  ; conflictstyle = diff3
+  conflictstyle = diff3
   tool = vimdiff

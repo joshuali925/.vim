@@ -5,4 +5,4 @@ if [ ! -f $HOME/.config/lazygit/config.yml ]; then
 fi
 
 source ~/.vim/bin/_install_from_github.sh
-install-from-github lazygit jesseduffield/lazygit Linux_x86_64 Linux_arm64 lazygit "$@"
+install-from-github lazygit jesseduffield/lazygit Linux_x86_64 Linux_arm64 Darwin_x86_64 Darwin_arm64 lazygit "$@"

@@ -5,4 +5,4 @@ if [ ! -f $HOME/.config/lf/lfrc ]; then
 fi
 
 source ~/.vim/bin/_install_from_github.sh
-install-from-github lf gokcehan/lf linux-amd64 linux-arm64 "" "$@"
+install-from-github lf gokcehan/lf linux-amd64 linux-arm64 darwin-amd64 '' '' "$@"

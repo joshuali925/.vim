@@ -93,19 +93,22 @@ local function make_config()
     }
 end
 
-require("nvim-lsp-installer").on_server_ready(
-    function(server)
-        local config = make_config()
+local present, lsp_installer = pcall(require, "nvim-lsp-installer")
+if present then
+    lsp_installer.on_server_ready(
+        function(server)
+            local config = make_config()
 
-        if lsp_configs[server.name] ~= nil then
-            for k, v in pairs(lsp_configs[server.name]) do
-                config[k] = v
+            if lsp_configs[server.name] ~= nil then
+                for k, v in pairs(lsp_configs[server.name]) do
+                    config[k] = v
+                end
             end
+            server:setup(config)
+            vim.cmd("doautocmd User LspAttachBuffers")
         end
-        server:setup(config)
-        vim.cmd("doautocmd User LspAttachBuffers")
-    end
-)
+    )
+end
 
 -- https://github.com/neovim/neovim/issues/14825
 vim.g.diagnostics_visible = true

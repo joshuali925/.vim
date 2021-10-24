@@ -6,6 +6,7 @@ set lazyredraw
 set noswapfile
 set nobackup
 set nowritebackup
+set paste
 
 noremap , ;
 noremap ;, ,
