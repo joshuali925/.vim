@@ -2607,6 +2607,8 @@ end
 # download 64-bit gvim from https://github.com/vim/vim-win32-installer/releases/latest
 # WSL specific
 alias cmd='/mnt/c/Windows/System32/cmd.exe /k'
+# `zsh` doesn't work
+curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh | bash -s --
 
 " =======================================================
 " lazyload filetype.vim https://github.com/joshuali925/.vim/tree/ff1ef83c290bfd61cc964a27f17d98ea57adcd3a

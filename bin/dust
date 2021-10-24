@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-install-from-github dust bootandy/dust x86_64-unknown-linux-musl arm-unknown-linux '--strip-components=1 --wildcards dust*/dust' "$@"
+install-from-github dust bootandy/dust x86_64-unknown-linux-musl arm-unknown-linux x86_64-apple-darwin '' '--strip-components=1 --wildcards dust*/dust' "$@"

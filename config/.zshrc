@@ -7,11 +7,11 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-[[ ! -f ~/.zinit/bin/zinit.zsh ]] && command git clone https://github.com/zdharma/zinit --depth 1 ~/.zinit/bin && ZINIT_POST_INSTALL=1
+[[ ! -f ~/.zinit/bin/zinit.zsh ]] && command git clone https://github.com/zdharma-continuum/zinit --depth 1 ~/.zinit/bin && ZINIT_POST_INSTALL=1
 source ~/.zinit/bin/zinit.zsh
 
 if [ -n "$ZINIT_POST_INSTALL" ]; then
-  zinit depth=1 light-mode for zinit-zsh/z-a-bin-gem-node
+  zinit depth=1 light-mode for zdharma-continuum/z-a-bin-gem-node
   zinit light-mode as"program" from"gh-r" for \
     mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
     mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
@@ -51,7 +51,8 @@ zinit depth=1 wait"0" lucid light-mode for \
   as"program" pick"$ZPFX/bin/git-*" src"etc/git-extras-completion.zsh" make"PREFIX=$ZPFX" tj/git-extras \
   atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
   FAST_HIGHLIGHT[chroma-man]=" \
-  zdharma/fast-syntax-highlighting
+  atclone"zsh -c 'source $HOME/.zinit/plugins/zdharma-continuum---fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh && fast-theme clean'" \
+  zdharma-continuum/fast-syntax-highlighting
 
 zinit depth=1 light-mode for \
   atload"!_zsh_autosuggest_start; \

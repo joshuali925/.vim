@@ -64,6 +64,8 @@ opt.path = {".", "", "**5"}
 opt.list = true
 opt.listchars = {tab = "» ", nbsp = "␣", trail = "•"}
 opt.fillchars = {vert = "│"}
+opt.showbreak = '╰─➤'
+opt.cpoptions = opt.cpoptions + {n = true}
 opt.timeoutlen = 1500
 opt.ttimeoutlen = 40
 opt.updatetime = 300

@@ -175,6 +175,7 @@ map("x", "<C-n>", "<Plug>(VM-Find-Subword-Under)", {})
 -- hop
 map("", "'", "<Cmd>HopChar1<CR>")
 map("", "q", "<Cmd>HopWord<CR>")
+map("", "<leader>e", "<Cmd>HopWordCurrentLine<CR>")
 map("", "<leader>j", "<Cmd>HopLine<CR>")
 map("", "<leader>k", "<Cmd>HopLine<CR>")
 

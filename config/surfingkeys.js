@@ -14,8 +14,8 @@ settings.hintAlign = "left";
 settings.smoothScroll = false;
 settings.omnibarMaxResults = 20;
 settings.modeAfterYank = "Normal";
-settings.prevLinkRegex = /(上一封|上页|上一页|上一章|前一页|prev|previous|older|<|‹|←|«|≪|<<)/i;
-settings.nextLinkRegex = /(下一封|下页|下一页|下一章|后一页|next|newer|>|›|→|»|≫|>>)/i;
+settings.prevLinkRegex = /(上一封|上页|上一页|上一章|前一页|prev|previous|older|<|‹|←|«|≪|<<|◀)/i;
+settings.nextLinkRegex = /(下一封|下页|下一页|下一章|后一页|next|newer|>|›|→|»|≫|>>|▶)/i;
 settings.useNeovim = false;
 
 imap('<Ctrl-[>', '<Esc>');
@@ -67,6 +67,8 @@ map('gv', 'V'); // restore visual mode
 map('C', 'v'); // enter caret mode
 map('v', 'zv'); // visual select element
 map('ys', 'ya'); // select url to copy
+map('yP', 'yp'); // copy POST form data
+map('yp', 'yt'); // duplicate page
 map('yt', 'yl'); // copy page title
 // yj to copy all settings as json, ;pj to restore
 map('J', 'W'); // move tab to window
@@ -75,15 +77,15 @@ map(';x', 'x'); // close tab
 map('ZZ', 'x'); // close tab
 map('ZQ', 'ZZ'); // save session and close
 map(';K', ';t'); // google translate selected text
-map(';tu', 'X'); // restore closed tab
-unmap('x');
 unmap(';t');
+map(';tu', 'X'); // restore closed tab
 map(';r', ';pm'); // preview markdown
 map(';b', 'ab'); // add bookmark
 map(';B', ';db'); // remove bookmark
 map(';c', ';e'); // edit configs
 map(';e', ';U'); // edit url
 unmap('r');
+unmap('x');
 unmap('<Ctrl-h>');
 unmap('<Ctrl-j>');
 unmap('c'); // unmap z, x, c, . for Global Speed
@@ -95,6 +97,7 @@ mapkey('g-', 'Decrement url', function() { var e,s; IB=-1; function isDigit(c) {
 unmap('gr');
 vunmap('gr');
 mapkey('gr', 'Go to referrer', function() { if(document.referrer) open(document.referrer); });
+unmap('ga');
 mapkey('ga', '#12Open Chrome Apps', function() { tabOpenLink('chrome://apps/'); });
 mapkey(';vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
 mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })

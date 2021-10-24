@@ -6,6 +6,7 @@ git:
     pager: delta --dark --paging=never --24-bit-color=never
 gui:
   showCommandLog: false
+  showFileTree: false
   theme:
     lightTheme: false
     activeBorderColor:
@@ -42,22 +43,26 @@ keybinding:
       nextBlock: '<right>' # goto the next block / panel
       prevBlock-alt: 'h' # goto the previous block / panel
       nextBlock-alt: 'l' # goto the next block / panel
+      jumpToBlock: ["0", "1", "2", "3", "4"] # goto the Nth block / panel
       nextMatch: 'n'
       prevMatch: 'N'
       optionMenu: 'x' # show help menu
       optionMenu-alt1: '?' # show help menu
       select: '<space>'
       goInto: '<enter>'
+      openRecentRepos: '<c-r>'
+      confirm: '<enter>'
+      confirm-alt1: 'y'
       remove: 'd'
       new: 'n'
       edit: 'e'
       openFile: 'o'
-      scrollUpMain: '<pgup>' # main panel scrool up
-      scrollDownMain: '<pgdown>' # main panel scrool down
-      scrollUpMain-alt1: 'K' # main panel scrool up
-      scrollDownMain-alt1: 'J' # main panel scrool down
-      scrollUpMain-alt2: '.' # main panel scrool up
-      scrollDownMain-alt2: ',' # main panel scrool down
+      scrollUpMain: '<pgup>' # main panel scroll up
+      scrollDownMain: '<pgdown>' # main panel scroll down
+      scrollUpMain-alt1: 'K' # main panel scroll up
+      scrollDownMain-alt1: 'J' # main panel scroll down
+      scrollUpMain-alt2: '.' # main panel scroll up
+      scrollDownMain-alt2: ',' # main panel scroll down
       executeCustomCommand: ':'
       createRebaseOptionsMenu: 'm'
       pushFiles: 'P'
@@ -72,7 +77,12 @@ keybinding:
       redo: '<c-u>'
       filteringMenu: '<c-s>'
       diffingMenu: '<c-e>'
+      diffingMenu-alt: 'W' # deprecated
       copyToClipboard: '<c-o>'
+      submitEditorText: '<enter>'
+      appendNewline: '<a-enter>'
+      extrasMenu: '@'
+      toggleWhitespaceInDiffView: '<c-w>'
     status:
       checkForUpdate: 'u'
       recentRepos: '<enter>'
@@ -88,8 +98,10 @@ keybinding:
       toggleStagedAll: 'a' # stage/unstage all
       viewResetOptions: 'D'
       fetch: 'f'
+      toggleTreeView: '`'
     branches:
       createPullRequest: 'o'
+      viewPullRequestOptions: 'O'
       checkoutBranchByName: 'c'
       forceCheckoutBranch: 'F'
       rebaseBranch: 'r'
@@ -118,6 +130,7 @@ keybinding:
       tagCommit: 'T'
       checkoutCommit: '<space>'
       resetCherryPick: 'Z'
+      copyCommitMessageToClipboard: '<c-y>'
     stash:
       popStash: 'g'
     commitFiles:
@@ -127,3 +140,8 @@ keybinding:
       toggleDragSelect-alt: 'V'
       toggleSelectHunk: 'a'
       pickBothHunks: 'b'
+    submodules:
+      init: 'i'
+      update: 'u'
+      bulkMenu: 'b'
+

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-install-from-github lazydocker jesseduffield/lazydocker Linux_x86_64 Linux_arm64 lazydocker "$@"
+install-from-github lazydocker jesseduffield/lazydocker Linux_x86_64 Linux_arm64 Darwin_x86_64 '' lazydocker "$@"

@@ -54,14 +54,9 @@ return require("packer").startup(
             use {"skywind3000/asyncrun.vim", cmd = "AsyncRun", config = [[vim.g.asyncrun_open = 12]]}
             use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = get_config("setup_symbols_outline")}
             use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = get_config("mundo")}
-            use {
-                "kyazdani42/nvim-tree.lua",
-                cmd = {"NvimTreeToggle", "NvimTreeFindFile"},
-                config = get_config("nvim_tree")
-            }
+            use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = get_config("nvim_tree")}
             use {
                 "mhinz/vim-startify",
-                cmd = {"Startify", "SSave", "SDelete"},
                 cond = function()
                     return vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1
                 end,
@@ -121,9 +116,17 @@ return require("packer").startup(
                     require("lsp")
                 end
             }
+            use {
+                "ahmedkhalf/project.nvim",
+                after = "nvim-lspconfig",
+                cmd = "ProjectRoot",
+                config = function()
+                    require("project_nvim").setup()
+                end
+            }
             use {"weilbith/nvim-code-action-menu", cmd = "CodeActionMenu"}
             use {"onsails/lspkind-nvim", event = "InsertEnter"}
-            use {"hrsh7th/nvim-cmp", event = "InsertEnter", config = get_config("nvim_cmp")}
+            use {"hrsh7th/nvim-cmp", after = "lspkind-nvim", config = get_config("nvim_cmp")}
             use {"hrsh7th/cmp-buffer", after = "nvim-cmp"}
             use {"hrsh7th/cmp-path", after = "nvim-cmp"}
             use {"hrsh7th/cmp-nvim-lua", after = "nvim-cmp"}
@@ -148,14 +151,6 @@ return require("packer").startup(
                 end
             }
             use {"MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log"}
-            use {
-                "ahmedkhalf/project.nvim",
-                after = "nvim-lspconfig",
-                cmd = "ProjectRoot",
-                config = function()
-                    require("project_nvim").setup()
-                end
-            }
             use {"udalov/kotlin-vim", ft = "kotlin"}
             use {
                 "chrisbra/csv.vim",
@@ -187,7 +182,7 @@ return require("packer").startup(
             }
             use {
                 "phaazon/hop.nvim",
-                cmd = {"HopWord", "HopChar1", "HopLine"},
+                cmd = {"HopWord", "HopChar1", "HopLine", "HopWordCurrentLine"},
                 config = function()
                     require("hop").setup({})
                 end

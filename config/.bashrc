@@ -14,7 +14,7 @@ source ~/.vim/config/fzf/key-bindings.bash
 source ~/.vim/config/common.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
-PS1='\[\e[38;5;208m\]\W\[\e[38;5;130m\]$(_get_git_branch) \[\e[38;5;141m\]$ \[\e[0m\]'
+PS1='\[\e[38;5;208m\]\W\[\e[38;5;130m\]$(_get_prompt_tail " ")'
 stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
@@ -97,13 +97,16 @@ cd() {
   else
     pushd "$@" > /dev/null
   fi
-  [ $(command ls | wc -l) -lt 200 ] && ls -AF --color=auto
+  [ "$?" == 0 ] && [ $(command ls | wc -l) -lt 200 ] && ls -AF --color=auto
 }
 complete -d cd
 
-# https://gist.github.com/bingzhangdai/dd4e283a14290c079a76c4ba17f19d69
-_get_git_branch() {
-  local _head_file _head _dir="$PWD"
+_get_prompt_tail() {
+  # https://gist.github.com/bingzhangdai/dd4e283a14290c079a76c4ba17f19d69
+  # git branch with prompt sign colored by exit code
+  # takes one argument as separator between those two
+  local _head_file _head _dir="$PWD" _tail _exit="$?"
+  [ $_exit != 0 ] && _tail="$1\e[38;5;9m$\e[0m " || _tail="$1\e[38;5;141m$\e[0m "
   while [[ -n "$_dir" ]]; do
     _head_file="$_dir/.git/HEAD"
     if [[ -f "$_dir/.git" ]]; then
@@ -116,12 +119,12 @@ _get_git_branch() {
   if [[ -e "$_head_file" ]]; then
     read -r _head < "$_head_file" || return
     case "$_head" in
-      ref:*) printf " (${_head#ref: refs/heads/})" ;;
+      ref:*) printf " (${_head#ref: refs/heads/})$_tail" ;;
       "") ;;
       # HEAD detached
-      *) printf " (${_head:0:9})" ;;
+      *) printf " (${_head:0:9})$_tail" ;;
     esac
-    return 0
+  else
+    printf "$_tail"
   fi
-  return 1
 }

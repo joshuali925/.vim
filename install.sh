@@ -72,6 +72,7 @@ install_development_tools() {
     brew install gnu-sed && ln -s $(which gsed) ~/.local/bin/sed
     brew install findutils && ln -s $(which gxargs) ~/.local/bin/xargs
     brew install gawk && ln -s $(which gawk) ~/.local/bin/awk
+    brew install gnu-tar
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
     log "Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc"
     defaults write -g ApplePressAndHoldEnabled -bool false  # enable key repeats
@@ -314,7 +315,6 @@ install_neovim
 
 log "\nInstalling zsh plugins.."
 zsh  # auto exit makes installing binaries to fail for some reason
-zsh -c "source $HOME/.zinit/plugins/zdharma---fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh && fast-theme clean"
 
 setup_ssh_key
 log "\nRun one of these commands to set default shell to zsh:"

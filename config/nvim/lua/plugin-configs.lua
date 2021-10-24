@@ -104,7 +104,7 @@ function M.setup_vim_sandwich()
 end
 
 function M.quick_scope()
-    g.qs_filetype_blacklist = {"qf", "startify", "TelescopePrompt", "Trouble"}
+    g.qs_filetype_blacklist = {"qf", "startify", "TelescopePrompt"}
     g.qs_buftype_blacklist = {"terminal"}
     vim.cmd("highlight QuickScopePrimary guifg='#ffe9c2'")
 end
@@ -244,7 +244,7 @@ function M.telescope()
                     preview_height = 0.3
                 }
             },
-            file_ignore_patterns = {".git", "node_modules", "venv"}
+            file_ignore_patterns = {".git/", "node_modules/", "venv/"}
         },
         pickers = {
             file_browser = {theme = "dropdown"},
@@ -543,6 +543,16 @@ function M.galaxyline()
 end
 
 function M.startify()
+    function _G.webDevIcons(path)
+        local filename = vim.fn.fnamemodify(path, ":t")
+        local extension = vim.fn.fnamemodify(path, ":e")
+        return require("nvim-web-devicons").get_icon(filename, extension, {default = true})
+    end
+    vim.cmd [[
+        function! StartifyEntryFormat() abort
+            return 'v:lua.webDevIcons(absolute_path). " ". entry_path'
+        endfunction
+    ]]
     g.startify_session_dir = "~/.cache/nvim/sessions"
     g.startify_enable_special = 0
     g.startify_fortune_use_unicode = 1
@@ -653,8 +663,8 @@ function _G.quickui_context_menu()
         {"Git &blame", "lua require('gitsigns').blame_line(true)", "Git blame of current line"},
         {
             "Git &remote",
-            [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | .GBrowse]],
-            "Open remote url in browser"
+            [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]],
+            "Open remote url in browser, or copy to clipboard if over ssh"
         },
         {"--", ""}
     }
@@ -727,9 +737,13 @@ function M.vim_quickui()
                 "Clear search and refresh screen"
             },
             {"--", ""},
-            {"Open &Startify", [[Startify]], "Open vim-startify"},
-            {"Save sessi&on", [[SSave!]], "Save as a new session using vim-startify"},
-            {"Delete session", [[SDelete!]], "Delete a session using vim-startify"},
+            {"Open &Startify", [[execute "PackerLoad! vim-startify" | Startify]], "Open vim-startify"},
+            {
+                "Save sessi&on",
+                [[execute "PackerLoad! vim-startify" | SSave!]],
+                "Save as a new session using vim-startify"
+            },
+            {"Delete session", [[execute "PackerLoad! vim-startify" | SDelete!]], "Delete a session using vim-startify"},
             {"--", ""},
             {"Edit Vimr&c", [[edit $MYVIMRC]]},
             {
@@ -836,11 +850,7 @@ function M.vim_quickui()
                 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}',
                 [[let &background = &background=="dark" ? "light" : "dark"]],
                 "Toggle background color"
-            },
-            {"--", ""},
-            {"Trouble: quick&fix", [[TroubleToggle quickfix]], "Show quickfix using Trouble"},
-            {"Trouble: location l&ist", [[TroubleToggle loclist]], "Show location list using Trouble"},
-            {"&Markdown preview", [[execute "normal \<Plug>MarkdownPreviewToggle"]], "Toggle markdown preview"}
+            }
         }
     )
     vim.fn["quickui#menu#install"](
@@ -923,7 +933,7 @@ function M.vim_quickui()
             {"--", ""},
             {
                 "Git open &remote",
-                [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | '<,'>GBrowse]],
+                [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "1" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]],
                 "Open remote url in browser"
             }
         }
