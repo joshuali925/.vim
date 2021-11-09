@@ -4,7 +4,7 @@ if [ -n "$GET_BASHRC" ]; then
   unset GET_BASHRC
   export EDITOR=vim
   alias vimm='$EDITOR +"cd ~/.vim" ~/.vim/vimrc'
-  PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\[\e[38;5;130m\]$(_get_prompt_tail "\n")'
+  PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
 
   clear-env() {
     local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/{bin,share/lf} ~/.config/{lf,lazygit})

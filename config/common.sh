@@ -147,7 +147,8 @@ alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
 alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove
-alias gforest='git-foresta --style=10 --all | less -RSXF'
+alias gforest='git-foresta --style=10 | less -RSXF'
+alias gforesta='git-foresta --style=10 --all | less -RSXF'
 
 d() {
   if [ -n "$1" ]; then
@@ -196,10 +197,10 @@ pscpu() {
   local ps_out pids pid pstree_flags pstree_out
   if [ $(uname -s) == 'Darwin' ]; then
     ps_out=$(ps -Ao user,pid,ppid,pcpu,pmem,time,command -rww | head -n 11)
-    pstree_flags='-p'
+    pstree_flags='-wp'
   else
     ps_out=$(ps auxww --sort=-pcpu | head -n 11)
-    pstree_flags='-Gps'
+    pstree_flags='-Glps'
   fi
   echo "$ps_out"
   if [ ! -x "$(command -v pstree)" ]; then
@@ -214,8 +215,14 @@ pscpu() {
 }
 
 sudorun() {
+  if [ "$#" -eq 0 ]; then echo 'Need a command to run.'; return 1; fi
   local CMD=$1
   shift
+  if [ ! -x "$(command -v $CMD)" ] && type "$CMD" | grep -q "$CMD is a \(shell \)\?function"; then
+    echo "Running as bash function..\n" >&2
+    sudo bash -c "$(declare -f $CMD); $CMD"
+    return 0
+  fi
   case $CMD in
     v|vi|vim) sudo $(/usr/bin/which vim) -u "$HOME/.vim/config/mini.vim" "$@" ;;
     lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E $(/usr/bin/which lf) -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
@@ -405,6 +412,10 @@ t() {  # create or switch tmux session
     tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
   fi
 }
+tmux-restore() {
+  FZFTEMP=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2>&1 | fzf --tac --bind='tab:down,btab:up' --preview='cat {}') && ln -sf $FZFTEMP ~/.tmux/resurrect/last
+  tmux new-session -d && tmux send-keys " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" Enter && tmux attach-session
+}
 
 manf() {
   if [ -z "$1" ]; then
@@ -436,10 +447,10 @@ react() {
 untildone() {
   local i=1
   while true; do
-    echo "Try $i, $(date)."
-    $* && break
+    echo "Try $i, $(date)." >&2
+    eval "$@" && break
     ((i+=1))
-    echo
+    echo >&2
     sleep 1
   done
 }

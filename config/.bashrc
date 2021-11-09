@@ -14,7 +14,7 @@ source ~/.vim/config/fzf/key-bindings.bash
 source ~/.vim/config/common.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
-PS1='\[\e[38;5;208m\]\W\[\e[38;5;130m\]$(_get_prompt_tail " ")'
+PS1='\[\e[38;5;208m\]\W$(_get_prompt_tail " ")'
 stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
@@ -106,7 +106,7 @@ _get_prompt_tail() {
   # git branch with prompt sign colored by exit code
   # takes one argument as separator between those two
   local _head_file _head _dir="$PWD" _tail _exit="$?"
-  [ $_exit != 0 ] && _tail="$1\e[38;5;9m$\e[0m " || _tail="$1\e[38;5;141m$\e[0m "
+  [ $_exit != 0 ] && _tail="$1"$'\001\e[38;5;9m\002$\001\e[0m\002 ' || _tail="$1"$'\001\e[38;5;141m\002$\001\e[0m\002 '
   while [[ -n "$_dir" ]]; do
     _head_file="$_dir/.git/HEAD"
     if [[ -f "$_dir/.git" ]]; then
@@ -119,10 +119,10 @@ _get_prompt_tail() {
   if [[ -e "$_head_file" ]]; then
     read -r _head < "$_head_file" || return
     case "$_head" in
-      ref:*) printf " (${_head#ref: refs/heads/})$_tail" ;;
+      ref:*) printf $'\001\e[38;5;130m\002'" (${_head#ref: refs/heads/})$_tail" ;;
       "") ;;
       # HEAD detached
-      *) printf " (${_head:0:9})$_tail" ;;
+      *) printf $'\001\e[38;5;130m\002'" (${_head:0:9})$_tail" ;;
     esac
   else
     printf "$_tail"

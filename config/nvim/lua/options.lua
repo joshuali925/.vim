@@ -55,6 +55,7 @@ opt.foldmethod = "indent"
 opt.foldlevelstart = 99
 opt.jumpoptions = "stack"
 opt.history = 5000
+opt.shada = [[!,'1000,<50,s10,/20,@20,h]]
 opt.undofile = true
 opt.undodir = vim.env.HOME .. "/.cache/nvim/undo"
 opt.undolevels = 1000
