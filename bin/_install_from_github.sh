@@ -32,16 +32,16 @@ install-from-github() {
   fi
 
   local package url architecture="$(uname -m)" os="$(uname -s)" extract_cmd tar_cmd='tar'
-  if [ $architecture == 'x86_64' ] || [ $architecture == 'amd64' ] || [ $architecture == 'i386' ]; then
-    [ $os == 'Linux' ] && package=$linux_x64 || package=$darwin_x64
+  if [ "$architecture" == 'x86_64' ] || [ "$architecture" == 'amd64' ] || [ "$architecture" == 'i386' ]; then
+    [ "$os" == 'Linux' ] && package=$linux_x64 || package=$darwin_x64
   else
-    if [ $os == 'Linux' ]; then
+    if [ "$os" == 'Linux' ]; then
       package=$linux_arm
     else
       [ -z "$darwin_arm" ] && package=$darwin_x64 || package=$darwin_arm
     fi
   fi
-  if [ $os == 'Darwin' ]; then
+  if [ "$os" == 'Darwin' ]; then
     if ! (builtin command -V gtar >/dev/null 2>&1); then
       echo 'gnu-tar not installed, trying with tar' >&2
     else

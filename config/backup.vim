@@ -2660,3 +2660,7 @@ end
             use {"ray-x/lsp_signature.nvim"}
 local function on_attach(client, bufnr)
     require("lsp_signature").on_attach({hint_enable = false}, bufnr)
+
+" =======================================================
+" karabiner
+"shell_command": "osascript -e 'tell app \"Terminal\" to do script \"$HOME/.local/bin/gvim\"' && sleep 1 && killall Terminal"

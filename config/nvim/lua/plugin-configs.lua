@@ -124,6 +124,11 @@ function M.setup_csv_vim()
     g.csv_nomap_bs = 1
 end
 
+function M.neomake()
+    g.neomake_typescript_enabled_makers = {"eslint", "tsc"}
+    g.neomake_typescriptreact_enabled_makers = {"eslint", "tsc"}
+end
+
 function M.setup_indent_blankline()
     -- TODO remove when this is fixed https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
     vim.opt.colorcolumn = "99999"

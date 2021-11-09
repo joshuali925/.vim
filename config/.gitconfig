@@ -2,6 +2,10 @@
   email = joshuali925@gmail.com
   name = Joshua Li
 
+[rerere]
+  enabled = true
+  autoupdate = true
+
 [color]
   ui = true
 
@@ -34,5 +38,5 @@
   stripLeadingSymbols = false
 
 [merge]
-  conflictstyle = diff3
+  ; conflictstyle = diff3
   tool = vimdiff

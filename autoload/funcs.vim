@@ -140,7 +140,7 @@ function! funcs#get_run_command() abort
   if get(b:, 'RunCommand', '') != ''
     return b:RunCommand
   endif
-  if expand('%') =~ 'test.[tj]sx\?'
+  if expand('%') =~ '.test.[tj]sx\?'
     if !exists('g:neoterm')
       lua require('packer').loader('neoterm')
     endif
@@ -157,7 +157,7 @@ function! funcs#get_run_command() abort
   let l:run_command['markdown'] = 'MarkdownPreview'
   let l:run_command['html'] = 'AsyncRun -silent open %'
   let l:run_command['xhtml'] = 'AsyncRun -silent open %'
-  return get(l:run_command, &filetype, ''). get(b:, 'args', '')
+  return get(l:run_command, &filetype, 'Neomake'). get(b:, 'args', '')
 endfunction
 
 function! funcs#get_visual_selection()

@@ -34,7 +34,7 @@ return require("packer").startup(
                 "DarwinSenior/nvim-colorizer.lua",
                 cmd = "ColorizerAttachToBuffer",
                 config = function()
-                    require("colorizer").setup({}, {rgb_fn = true, mode = "virtualtext"})
+                    require("colorizer").setup({}, {RGB = false, rgb_fn = true, mode = "virtualtext"})
                 end
             }
 
@@ -150,6 +150,7 @@ return require("packer").startup(
                     require("nvim-ts-autotag").setup()
                 end
             }
+            use {"neomake/neomake", cmd = "Neomake", config = get_config("neomake")}
             use {"MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log"}
             use {"udalov/kotlin-vim", ft = "kotlin"}
             use {

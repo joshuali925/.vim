@@ -26,8 +26,8 @@ augroup AutoCommands
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>| nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
-  autocmd BufEnter term://* startinsert
-  autocmd User FugitiveIndex nmap <silent><buffer> dt :Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>
+  autocmd BufEnter term://* if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif
+  autocmd User FugitiveIndex nmap <silent> <buffer> dt :Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>
 augroup END
 
 command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>

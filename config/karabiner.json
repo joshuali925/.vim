@@ -84,7 +84,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep Electron && open -a 'Visual Studio Code') || (ps p $(pgrep idea) | grep 'IDEA CE' && open -a 'IntelliJ IDEA CE') || (pgrep idea && open -a 'IntelliJ IDEA')"
+              "shell_command": "(pgrep Electron && open -a 'Visual Studio Code') || (ps p $(pgrep idea) | grep 'IDEA CE' && open -a 'IntelliJ IDEA CE') || (pgrep idea && open -a 'IntelliJ IDEA') || (ps p $(pgrep app_mode_loader) | grep 'code-server.app' && open -a 'code-server')"
             }
           ]
         },
