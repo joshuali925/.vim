@@ -104,7 +104,19 @@ function M.setup_vim_sandwich()
 end
 
 function M.quick_scope()
-    g.qs_filetype_blacklist = {"qf", "startify", "TelescopePrompt"}
+    g.qs_filetype_blacklist = {
+        "qf",
+        "netrw",
+        "startify",
+        "TelescopePrompt",
+        "Mundo",
+        "Outline",
+        "NvimTree",
+        "neoterm",
+        "DiffviewFileHistory",
+        "DiffviewFiles",
+        "floggraph"
+    }
     g.qs_buftype_blacklist = {"terminal"}
     vim.cmd("highlight QuickScopePrimary guifg='#ffe9c2'")
 end
@@ -711,6 +723,7 @@ function M.vim_quickui()
                 [[let g:temp = getcurpos() | Sleuth | execute "normal! gg=G" | call setpos('.', g:temp)]],
                 "Recalculate indent with Sleuth and reindent whole file"
             },
+            {"Ded&up lines", [[%!awk '\!x[$0]++']], "Remove duplicated lines and preserve order"},
             {
                 "Calculate line &=",
                 [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]],

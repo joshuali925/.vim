@@ -1,8 +1,3 @@
 #!/usr/bin/env bash
-if [ ! -x $HOME/.local/bin/iterm-imgcat ]; then
-  mkdir -p $HOME/.local/bin
-  echo "Installing iterm-imgcat from https://iterm2.com/utilities/imgcat" >&2
-  curl -sL -o $HOME/.local/bin/iterm-imgcat https://iterm2.com/utilities/imgcat
-  chmod +x $HOME/.local/bin/iterm-imgcat
-fi
-$HOME/.local/bin/iterm-imgcat "$@"
+source ~/.vim/bin/_install_from_github.sh
+install-from-url iterm-imgcat https://iterm2.com/utilities/imgcat "$@"

@@ -2664,3 +2664,12 @@ local function on_attach(client, bufnr)
 " =======================================================
 " karabiner
 "shell_command": "osascript -e 'tell app \"Terminal\" to do script \"$HOME/.local/bin/gvim\"' && sleep 1 && killall Terminal"
+
+" =======================================================
+# cron auto restore at reboot, env not complete sometimes breaks
+# @reboot EDITOR=nvim SHELL=/usr/bin/zsh PATH=$HOME/.local/bin:$PATH tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
+
+" =======================================================
+" relativenumber
+  autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if index(g:qs_filetype_blacklist, &ft) < 0 | set relativenumber | endif
+  autocmd BufLeave,FocusLost,InsertEnter,WinLeave * set norelativenumber

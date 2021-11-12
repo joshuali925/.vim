@@ -183,7 +183,7 @@ return require("packer").startup(
             }
             use {
                 "phaazon/hop.nvim",
-                cmd = {"HopWord", "HopChar1", "HopLine", "HopWordCurrentLine"},
+                cmd = {"HopWord", "HopChar1", "HopLineAC", "HopLineBC", "HopWordCurrentLine"},
                 config = function()
                     require("hop").setup({})
                 end

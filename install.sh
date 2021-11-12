@@ -14,24 +14,43 @@ YELLOW='\033[0;33m'
 BLACK="\033[1;30m"
 NC='\033[0m'
 
-unameOut="$(uname -s)"
-architecture="$(uname -m)"
-if [ "$architecture" == 'amd64' ]; then
-  architecture='x86_64'
-fi
-case "${unameOut}" in
-  Linux*)
-    if [ -x "$(command -v yum)" ]; then
-      platform=Linux:yum
-    elif [ -x "$(command -v apt)" ]; then
-      platform=Linux:apt
-    else
-      platform=Linux
-    fi
-    ;;
-  Darwin*)   platform=MacOS;;
-  *)         platform="UNKNOWN:${unameOut}"
-esac
+detect-env() {
+  case $(uname -m) in
+    # mac shows i386 for x86_64
+    i[36]86 | 'amd64' | x86_64)
+      ARCHITECTURE="x86_64" ;;
+    *armv6*)
+      ARCHITECTURE="arm6" ;;
+    *armv7*)
+      ARCHITECTURE="arm7" ;;
+    *aarch64* | *armv8* | arm64)
+      ARCHITECTURE="arm64" ;;
+    *)
+      echo "architecture not supported, exiting.." >&2
+      exit 1 ;;
+  esac
+  case $(uname | tr '[:upper:]' '[:lower:]') in
+    linux*)
+      PLATFORM=linux
+      if [ -x "$(command -v yum)" ]; then
+        PACKAGE_MANAGER=yum
+      elif [ -x "$(command -v apt)" ]; then
+        PACKAGE_MANAGER=apt
+      elif [ -x "$(command -v apt-get)" ]; then
+        PACKAGE_MANAGER=apt-get
+      else
+        PACKAGE_MANAGER=echo
+        echo "package manager not supported" >&2
+      fi
+      ;;
+    darwin*)
+      PLATFORM=darwin ;;
+    *)
+      echo "os not supported, exiting.." >&2
+      exit 1 ;;
+  esac
+}
+detect-env
 
 sudo() {
   [[ $EUID = 0 ]] || set -- command sudo "$@"
@@ -64,11 +83,11 @@ link_file() {
 
 install_development_tools() {
   log "\nInstalling development tools.."
-  if [ "$platform" == 'Linux:yum' ]; then
+  if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh
-  elif [ "$platform" == 'Linux:apt' ]; then
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt' ]; then
     sudo apt update && sudo apt install -y build-essential zsh
-  elif [ "$platform" == 'MacOS' ]; then
+  elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
     brew install coreutils openssh
@@ -87,9 +106,9 @@ install_development_tools() {
 }
 
 install_docker() {
-  if [ "$platform" == 'Linux:yum' ]; then
+  if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y docker
-  elif [ "$platform" == 'Linux:apt' ]; then
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt' ]; then
     curl -fsSL https://get.docker.com/ | sh
   else
     echo "Unknown distro.."
@@ -107,17 +126,17 @@ install_docker() {
 
 install_java() {
   # https://github.com/shyiko/jabba/blob/3bb7cca8389753072e9f6fbb9fee6fdfa85ca57f/index.json#L833
-  if [[ $platform == Linux* ]]; then
-    if [ "$architecture" == 'x86_64' ]; then
+  if [ "$PLATFORM" == 'linux' ]; then
+    if [ "$ARCHITECTURE" == 'x86_64' ]; then
       curl -L -o- https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz | tar -xz -C $HOME/.local
       jdk_version=jdk-14.0.1
     else
-      curl -L -o- https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jdk_aarch64_linux_hotspot_16.0.1_9.tar.gz | tar -xz -C $HOME/.local
-      jdk_version=jdk-16.0.1+9
+      curl -L -o- https://github.com/bell-sw/Liberica/releases/download/14.0.2+13/bellsoft-jdk14.0.2+13-linux-aarch64.tar.gz | tar -xz -C $HOME/.local
+      jdk_version=jdk-14.0.2
     fi
     echo "export PATH=\$HOME/.local/$jdk_version/bin:\$PATH" >> ~/.zshrc
     echo "export JAVA_HOME=\$HOME/.local/$jdk_version" >> ~/.zshrc
-  elif [ "$platform" == 'MacOS' ]; then
+  elif [ "$PLATFORM" == 'darwin' ]; then
     brew tap AdoptOpenJDK/openjdk
     brew install --cask adoptopenjdk14
     jdk_version=jdk-14
@@ -130,12 +149,12 @@ install_java() {
 }
 
 install_python() {
-  if [ "$platform" == 'Linux:yum' ]; then
+  if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y python3-devel
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
-  elif [ "$platform" == 'Linux:apt' ]; then
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt' ]; then
     sudo apt update && sudo apt install -y python3-dev python3-pip python3-venv
-  elif [ "$platform" != 'MacOS' ]; then
+  elif [ "$PLATFORM" != 'darwin' ]; then
     echo "Unknown distro.."
     exit 1
   fi
@@ -168,7 +187,7 @@ install_dotfiles() {
   link_file $HOME/.vim/config/nvim $HOME/.config/nvim
   link_file $HOME/.vim/config/lazygit_config.yml $HOME/.config/lazygit/config.yml
   link_file $HOME/.vim/config/.ideavimrc $HOME/.ideavimrc
-  if [ "$platform" == 'MacOS' ]; then
+  if [ "$PLATFORM" == 'darwin' ]; then
     mkdir -p ~/Library/Application\ Support/lazygit
     ln -sf ~/Library/Application\ Support ~/Library/ApplicationSupport
     link_file $HOME/.vim/config/lazygit_config.yml $HOME/Library/ApplicationSupport/lazygit/config.yml
@@ -183,13 +202,13 @@ install_dotfiles() {
 
 install_tmux() {
   log "Installing tmux.."
-  if [[ $platform == Linux* ]]; then
-    if [ "$architecture" == 'x86_64' ]; then
+  if [ "$PLATFORM" == 'linux' ]; then
+    if [ "$ARCHITECTURE" == 'x86_64' ]; then
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-x86_64.tar.gz | tar xz -C $HOME/.local/bin tmux
     else
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-arm64.tar.gz | tar xz -C $HOME/.local/bin tmux
     fi
-  elif [ "$platform" == 'MacOS' ]; then
+  elif [ "$PLATFORM" == 'darwin' ]; then
     brew install tmux --HEAD
   else
     echo "Unknown distro.."
@@ -201,13 +220,13 @@ install_tmux() {
   ~/.tmux/plugins/tpm/bin/install_plugins || true
   if [[ -a "$HOME/.tmux/plugins/tmux-thumbs" ]]; then
     log "Installing tmux-thumbs binaries.."
-    if [[ $platform == Linux* ]]; then
-      if [ "$architecture" == 'x86_64' ]; then
+    if [ "$PLATFORM" == 'linux' ]; then
+      if [ "$ARCHITECTURE" == 'x86_64' ]; then
         curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-x86_64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
       else
         curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-arm64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
       fi
-    elif [ "$platform" == 'MacOS' ]; then
+    elif [ "$PLATFORM" == 'darwin' ]; then
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-darwin-x86_64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
     fi
   fi
@@ -238,8 +257,8 @@ install_node() {
 install_neovim() {
   local tag=$(curl -s https://github.com/neovim/neovim/releases/latest | sed 's#.*tag/\(.*\)\".*#\1#')
   backup "$HOME/.local/nvim"
-  if [[ $platform == Linux* ]]; then
-    if [ "$architecture" == 'x86_64' ]; then
+  if [ "$PLATFORM" == 'linux' ]; then
+    if [ "$ARCHITECTURE" == 'x86_64' ]; then
       curl -LO https://github.com/neovim/neovim/releases/download/$tag/nvim.appimage
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
       mv squashfs-root ~/.local/nvim && ln -sf ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
@@ -251,7 +270,7 @@ install_neovim() {
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local nvim
       ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
     fi
-  elif [ "$platform" == 'MacOS' ]; then
+  elif [ "$PLATFORM" == 'darwin' ]; then
     curl -L -o- https://github.com/neovim/neovim/releases/download/$tag/nvim-macos.tar.gz | tar xz -C ~/.local
     mv ~/.local/nvim-osx64 ~/.local/nvim
     ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
@@ -309,7 +328,7 @@ if [ -n "$1" ]; then
   exit
 fi
 
-log "Installing for $platform"
+log "Installing for $PLATFORM"
 install_development_tools
 install_dotfiles
 install_java

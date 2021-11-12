@@ -17,12 +17,12 @@ if [ -n "$ZINIT_POST_INSTALL" ]; then
     mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
     mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
     mv"delta* -> delta" sbin"delta/delta" dandavison/delta \
-    sbin so-fancy/diff-so-fancy \
     sbin junegunn/fzf \
     sbin gokcehan/lf \
-    sbin jesseduffield/lazygit \
-    sbin jesseduffield/lazydocker
+    sbin jesseduffield/lazygit
 
+  # zinit light-mode as"program" from"gh-r" for sbin jesseduffield/lazydocker
+  # zinit light-mode as"program" from"gh-r" for sbin so-fancy/diff-so-fancy
   # zinit light-mode as"program" from"gh-r" for sbin schollz/croc
   # zinit light-mode as"program" from"gh-r" for sbin"bin/exa" ogham/exa
   # zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq

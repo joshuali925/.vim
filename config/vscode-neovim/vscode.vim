@@ -99,7 +99,6 @@ xnoremap > >gv
 nnoremap gp `[v`]
 nnoremap <C-c> :nohlsearch<CR>
 nnoremap <C-f> :call VSCodeCall('editor.action.organizeImports') <bar> sleep 500m <bar> call VSCodeCall('editor.action.formatDocument')<CR>
-nnoremap <leader><C-f> :call VSCodeNotify('editor.action.formatChanges')<CR>
 xnoremap <C-f> =
 nnoremap <leader>r :call <SID>RunCode()<CR>
 noremap <leader>y "+y

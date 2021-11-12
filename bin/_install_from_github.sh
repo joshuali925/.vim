@@ -1,24 +1,61 @@
-download-script-from-github() {
+detect-env() {
+  local sys_bit=$(uname -m)
+  case $sys_bit in
+    # mac shows i386 for x86_64
+    i[36]86 | 'amd64' | x86_64)
+      ARCHITECTURE="x86_64" ;;
+    *armv6*)
+      ARCHITECTURE="arm6" ;;
+    *armv7*)
+      ARCHITECTURE="arm7" ;;
+    *aarch64* | *armv8* | arm64)
+      ARCHITECTURE="arm64" ;;
+    *)
+      echo "$sys_bit not supported, exiting.." >&2
+      exit 1 ;;
+  esac
+  case $(uname | tr '[:upper:]' '[:lower:]') in
+    linux*)
+      PLATFORM=linux
+      if [ -x "$(command -v yum)" ]; then
+        PACKAGE_MANAGER=yum
+      elif [ -x "$(command -v apt)" ]; then
+        PACKAGE_MANAGER=apt
+      elif [ -x "$(command -v apt-get)" ]; then
+        PACKAGE_MANAGER=apt-get
+      else
+        PACKAGE_MANAGER=echo
+        echo "package manager not supported" >&2
+      fi
+      ;;
+    darwin*)
+      PLATFORM=darwin ;;
+    *)
+      echo "os not supported, exiting.." >&2
+      exit 1 ;;
+  esac
+}
+
+install-from-url() {
   if [ "$#" -lt 2 ]; then
-    echo "Usage: download-script-from-github <repo> <script-path> [<args>]"
+    echo "Usage: install-from-url <executable> <url> [<args>]"
     return 0
   fi
 
-  local repo=$1 script_path=$2
-  local executable=$(basename "$script_path")
+  local executable=$1 url=$2
   shift 2
 
   if [ ! -x $HOME/.local/bin/$executable ]; then
     mkdir -p $HOME/.local/bin
-    echo "Installing $executable from https://raw.githubusercontent.com/$repo/HEAD/$script_path" >&2
-    curl -sL -o $HOME/.local/bin/$executable https://raw.githubusercontent.com/$repo/HEAD/$script_path
+    echo "Installing $executable from $url" >&2
+    curl -sL -o $HOME/.local/bin/$executable $url
     chmod +x $HOME/.local/bin/$executable
   fi
   $HOME/.local/bin/$executable "$@"
 }
 
 install-from-github() {
-  if [ "$#" -lt 4 ]; then
+  if [ "$#" -lt 7 ]; then
     echo "Usage: install-from-github <executable> <repo> <linux-x64-package-name> <linux-arm-package-name> <macos-x64-package-name> <macos-arm-package-name> <extract-command-flags> [<args>]"
     return 0
   fi
