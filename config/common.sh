@@ -108,8 +108,8 @@ alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
 alias gmerge-preview-log='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit HEAD..'  # commits in target but not in HEAD (will be merged with git merge target)
-gmerge-preivew-diff() {
-  git diff HEAD..."$@"  # diff between target and the common ancestor of HEAD and target
+gmerge-preview-diff() {
+  git diff HEAD..."$*"  # diff between target and the common ancestor of HEAD and target
 }
 alias gr='git remote'
 alias grb='git rebase'
@@ -403,18 +403,30 @@ zc() {
   FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
 }
 
-t() {  # create or switch tmux session
-  local CHANGE CURRENT FZFTEMP
+t() {  # create, restore, or switch tmux session
+  local CHANGE CURRENT FZFTEMP SESSIONS
   [ -n "$TMUX" ] && CHANGE='switch-client' && CURRENT=$(tmux display-message -p '#{session_name}') || CHANGE='attach-session'
   if [ -z "$1" ]; then
-    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP" || tmux
+    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP"
+    if [ "$?" -ne 0 ]; then
+      SESSIONS=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2>/dev/null)
+      if [ -n "$SESSIONS" ]; then
+        echo -n "Restore tmux session? (Y/n) "
+        if [ -n "$ZSH_VERSION" ]; then
+          read -k REPLY
+        else
+          read -n 1  # bash
+        fi
+        if [[ $REPLY =~ ^[Yy$'\n']$ ]] || [ ${#REPLY} -eq 0 ]; then
+          FZFTEMP=$(echo "$SESSIONS" | fzf --bind='tab:down,btab:up' --tac --select-1 --preview='cat {}') && ln -sf $FZFTEMP ~/.tmux/resurrect/last && tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" && tmux attach-session
+          return 0
+        fi
+      fi
+      tmux
+    fi
   else
     tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
   fi
-}
-tmux-restore() {
-  FZFTEMP=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2>&1 | fzf --tac --bind='tab:down,btab:up' --preview='cat {}') && ln -sf $FZFTEMP ~/.tmux/resurrect/last
-  tmux new-session -d && tmux send-keys " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" Enter && tmux attach-session
 }
 
 manf() {
@@ -444,6 +456,8 @@ react() {
   done
 }
 
+# wget until complete: untildone wget -c <url>
+# git pull every hour: untildone 'git pull; sleep 3599; false'
 untildone() {
   local i=1
   while true; do
@@ -455,24 +469,29 @@ untildone() {
   done
 }
 
-nvm() {
-  unset -f nvm node yarn
+_load_nvm() {
+  unset -f _load_nvm nvm npx node yarn
   export NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+}
+
+nvm() {
+  _load_nvm
   nvm "$@"
 }
 
+npx() {
+  _load_nvm
+  npx "$@"
+}
+
 node() {
-  unset -f nvm node yarn
-  export NVM_DIR=~/.nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+  _load_nvm
   node "$@"
 }
 
 yarn() {
-  unset -f nvm node yarn
-  export NVM_DIR=~/.nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+  _load_nvm
   yarn "$@"
 }
 

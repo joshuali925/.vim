@@ -57,7 +57,7 @@ map("n", "<C-w><", "<C-w><<C-w>", {})
 map("n", "<C-w>>", "<C-w>><C-w>", {})
 map("n", "<C-w>+", "<C-w>+<C-w>", {})
 map("n", "<C-w>-", "<C-w>-<C-w>", {})
-map("n", "<C-f>", "<Cmd>Neoformat<CR>")
+map("n", "<C-f>", "<Cmd>silent! OrganizeImports<CR><Cmd>Neoformat<CR>")
 map("x", "<C-f>", "<Cmd>Neoformat<CR>")
 map("i", "<leader>r", "<Esc><leader>r", {})
 map("n", "<leader>r", "<Cmd>update <bar> execute funcs#get_run_command()<CR>")
@@ -78,7 +78,7 @@ map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
 map(
     "x",
     "<leader>s",
-    [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>]]
+    [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/gc<Left><Left><Left>]]
 )
 map("n", "<leader>l", "<Cmd>call funcs#print_curr_vars(0, 0)<CR>")
 map("x", "<leader>l", "<Cmd>call funcs#print_curr_vars(1, 0)<CR>")
@@ -129,7 +129,9 @@ map("n", "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", {})
 -- terminal
 map("n", "<C-b>", "<Cmd>execute 'Ttoggle resize='. min([10, &lines * 2/5])<CR>")
 map("n", "<leader>to", "<C-b>", {})
-map("n", "<leader>tt", "<Cmd>Tnew<CR>")
+map("n", "<leader>tt", "<Cmd>tab Tnew<CR>")
+map("n", "<leader>tO", "<Cmd>Tnew <bar> only<CR>")
+map("n", "<leader>t<C-l>", "<Cmd>Tclear!<CR>")
 map("n", "<leader>te", "<Plug>(neoterm-repl-send)", {})
 map("n", "<leader>tee", "<Plug>(neoterm-repl-send-line)", {})
 map("x", "<leader>te", "<Plug>(neoterm-repl-send)", {})
@@ -176,8 +178,8 @@ map("x", "<C-n>", "<Plug>(VM-Find-Subword-Under)", {})
 map("", "'", "<Cmd>HopChar1<CR>")
 map("", "q", "<Cmd>HopWord<CR>")
 map("", "<leader>e", "<Cmd>HopWordCurrentLine<CR>")
-map("", "<leader>j", "<Cmd>HopLine<CR>")
-map("", "<leader>k", "<Cmd>HopLine<CR>")
+map("", "<leader>j", "<Cmd>HopLineAC<CR>")
+map("", "<leader>k", "<Cmd>HopLineBC<CR>")
 
 -- vim-matchup
 map("n", "<leader>c", "<Cmd>MatchupWhereAmI<CR>", {})

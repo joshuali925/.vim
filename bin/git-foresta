@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-download-script-from-github takaaki-kasai/git-foresta git-foresta "$@"
+install-from-url git-foresta https://raw.githubusercontent.com/takaaki-kasai/git-foresta/HEAD/git-foresta "$@"

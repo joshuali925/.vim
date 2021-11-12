@@ -187,12 +187,16 @@ mapkey('yraw', 'Copy github raw', function() {
     }
     fetch(href).then(response => response.text()).then((text) => Clipboard.write(text));
 }, {domain: /github.com|raw.githubusercontent.com/i});
-mapkey('yov', 'Toggle github vscode', function() {
+mapkey('yov', 'Toggle sites', function() {
     if (window.location.hostname === 'github.dev')
         tabOpenLink(window.location.href.replace('github.dev', 'github.com'));
-    else
+    else if (/github(1s)?.com/.test(window.location.hostname))
         tabOpenLink(window.location.href.replace(/github(1s)?.com/, function(match, p1) { return p1 ? 'github.com' : 'github1s.com' }));
-}, {domain: /github(1s)?\.(com|dev)/i});
+    else if (window.location.hostname === 'www.baidu.com')
+        window.location.href = `https://www.google.com/search?q=${window.location.href.match(/[?&]wd=([^&]+)/)[1]}`;
+    else if (window.location.hostname === 'www.google.com')
+        window.location.href = `https://www.baidu.com/s?ie=UTF-8&wd=${window.location.href.match(/[?&]q=([^&]+)/)[1]}`;
+}, {domain: /(baidu|google|github|github1s)\.(com|dev)/i});
 mapkey('yod', 'Toggle bilibili danmaku', function() {
     document.getElementsByClassName('bui-switch-input')[0].click();
 }, {domain: /bilibili\.com/i});
