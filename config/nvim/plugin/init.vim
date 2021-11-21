@@ -15,6 +15,15 @@ function! s:AutoRestoreWinView()
   endif
 endfunction
 
+function! OrganizeImportsAndFormat()
+  if !exists(':OrganizeImports')
+    Neoformat
+  else
+    OrganizeImports
+    call timer_start(500, { tid -> execute('Neoformat') })
+  endif
+endfunction
+
 augroup AutoCommands
   autocmd!
   autocmd BufLeave * call s:AutoSaveWinView()

@@ -57,8 +57,10 @@ alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias rgf="rg --files | rg"
 alias rgd="rg --files --null | xargs -0 dirname | sort -u | rg"
-alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | grep -v \"./\" | column -c3 -s \" \" -t | sort -nr | nl | head -n 30"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
+alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
+alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
+alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
 
 alias ga='git add'
 alias gau='git add -u'
@@ -75,7 +77,7 @@ alias gcs!='git commit -s --amend'
 alias gcv='git commit -v'
 alias gcf='git config --list'
 alias gcl='git clone --recursive'
-alias gpristine='git stash push --include-untracked --message "gpristine temporary stash" && git reset --hard && git clean -fdx'
+alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gcm='git checkout main || git checkout master'
 alias gcd='git checkout develop || git checkout dev'
 alias gco='git checkout'
@@ -91,10 +93,8 @@ alias gdsst='git diff --stat --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
-alias ggl='git pull origin $(git symbolic-ref --short HEAD)'
-alias gpf='git push fork $(git symbolic-ref --short HEAD)'
-alias gpo='git push origin $(git symbolic-ref --short HEAD)'
-alias gpu='git push upstream $(git symbolic-ref --short HEAD)'
+alias ggl='git pull origin $(gref)'
+alias gpf='git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
 alias glr='git pull --rebase'
@@ -196,17 +196,21 @@ gcb() {
 pscpu() {
   local ps_out pids pid pstree_flags pstree_out
   if [ $(uname -s) == 'Darwin' ]; then
-    ps_out=$(ps -Ao user,pid,ppid,pcpu,pmem,time,command -rww | head -n 11)
+    ps_out=$(ps -Ao user,pid,ppid,pcpu,pmem,time,command -rww)
     pstree_flags='-wp'
   else
-    ps_out=$(ps auxww --sort=-pcpu | head -n 11)
+    ps_out=$(ps auxww --sort=-pcpu)
     pstree_flags='-Glps'
   fi
-  echo "$ps_out"
+  [ -z "$1" ] && echo "$ps_out" | head -n 11
   if [ ! -x "$(command -v pstree)" ]; then
-    echo "pstree not found (e.g. yum install -y psmisc)."
+    echo 'pstree not found (e.g. yum install -y psmisc).'
   else
-    pids=($(sed -n "2,4p" <<< "$ps_out" | awk "{print \$2}"))
+    if [ -n "$1" ]; then
+      pids=($(grep -i "$@" <<< "$ps_out" | awk '{print $2}'))
+    else
+      pids=($(sed -n '2,4p' <<< "$ps_out" | awk '{print $2}'))
+    fi
     for pid in "${pids[@]}"; do
       pstree_out=$(pstree "$pstree_flags" "$pid")
       [[ $pstree_out =~ "$pid" ]] && head -n 8 <<< "$pstree_out" | grep --color -E "^|$pid"
@@ -474,35 +478,18 @@ _load_nvm() {
   export NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 }
-
-nvm() {
-  _load_nvm
-  nvm "$@"
-}
-
-npx() {
-  _load_nvm
-  npx "$@"
-}
-
-node() {
-  _load_nvm
-  node "$@"
-}
-
-yarn() {
-  _load_nvm
-  yarn "$@"
-}
+nvm() { _load_nvm && nvm "$@"; }
+npx() { _load_nvm && npx "$@"; }
+node() { _load_nvm && node "$@"; }
+yarn() { _load_nvm && yarn "$@"; }
 
 docker-shell() {
-  local CONTAINERS
-  local SELECTED_ID
-  CONTAINERS=`docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}'`
-  SELECTED_ID=`echo $CONTAINERS | fzf --height=40% --no-sort --tiebreak=begin,index`
+  local CONTAINERS SELECTED_ID
+  CONTAINERS=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}')
+  SELECTED_ID=$(echo "$CONTAINERS" | fzf --height=40% --no-sort --tiebreak=begin,index)
   if [[ -n $SELECTED_ID ]]; then
-    printf "\n → $SELECTED_ID\n"
-    SELECTED_ID=`echo $SELECTED_ID | awk '{print $1}'`
-    docker exec -it $SELECTED_ID /bin/bash
+    printf "\n → %s\n" "$SELECTED_ID"
+    SELECTED_ID=$(echo "$SELECTED_ID" | awk '{print $1}')
+    docker exec -it "$SELECTED_ID" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)'
   fi
 }

@@ -29,6 +29,7 @@ vim.schedule(
                     "quick-scope",
                     "vim-wordmotion", -- motions/text objects sometimes don't work if loaded on keys
                     "vim-sandwich",
+                    "vim-indent-object",
                     "vim-fanfingtastic",
                     "vim-matchup"
                 }

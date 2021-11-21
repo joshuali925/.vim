@@ -2673,3 +2673,18 @@ local function on_attach(client, bufnr)
 " relativenumber
   autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if index(g:qs_filetype_blacklist, &ft) < 0 | set relativenumber | endif
   autocmd BufLeave,FocusLost,InsertEnter,WinLeave * set norelativenumber
+" line soft break
+opt.showbreak = "╰─➤"
+opt.cpoptions = opt.cpoptions + {n = true}
+" autopairs, lsp breaks undo
+            use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}
+function M.auto_pairs()
+    g.AutoPairsShortcutToggle = ""
+    g.AutoPairsShortcutFastWrap = "<C-l>"
+    g.AutoPairsShortcutJump = ""
+    g.AutoPairsShortcutBackInsert = ""
+    g.AutoPairsMapCh = 0
+    vim.fn.AutoPairsTryInit()
+end
+
+

@@ -2,7 +2,7 @@ detect-env() {
   local sys_bit=$(uname -m)
   case $sys_bit in
     # mac shows i386 for x86_64
-    i[36]86 | 'amd64' | x86_64)
+    i[36]86 | amd64 | x86_64)
       ARCHITECTURE="x86_64" ;;
     *armv6*)
       ARCHITECTURE="arm6" ;;
