@@ -19,13 +19,10 @@ function M.filetype_nvim()
     }
 end
 
-function M.auto_pairs()
-    g.AutoPairsShortcutToggle = ""
-    g.AutoPairsShortcutFastWrap = "<C-l>"
-    g.AutoPairsShortcutJump = ""
-    g.AutoPairsShortcutBackInsert = ""
-    g.AutoPairsMapCh = 0
-    vim.fn.AutoPairsTryInit()
+function M.nvim_autopairs()
+    require("nvim-autopairs").setup {
+        -- enable_moveright = false
+    }
 end
 
 function M.vim_matchup()
@@ -163,6 +160,8 @@ end
 function M.setup_symbols_outline()
     vim.g.symbols_outline = {
         auto_preview = false,
+        relative_width = false,
+        width = 30,
         keymaps = {
             close = "q",
             hover_symbol = "p",
@@ -677,7 +676,7 @@ function _G.quickui_context_menu()
         {"Git hunk &undo", "lua require('gitsigns').reset_hunk()", "Git undo hunk"},
         {"Git hunk &add", "lua require('gitsigns').stage_hunk()", "Git stage hunk"},
         {"Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk"},
-        {"Git &blame", "lua require('gitsigns').blame_line(true)", "Git blame of current line"},
+        {"Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line"},
         {
             "Git &remote",
             [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]],
@@ -909,7 +908,7 @@ function M.vim_quickui()
             },
             {
                 "Document diagnostics",
-                [[lua vim.lsp.diagnostic.set_loclist()]],
+                [[lua vim.lsp.diagnostic.setloclist()]],
                 "Show current file diagnostics in quickfix"
             },
             {"&Toggle diagnostics", [[call v:lua.toggle_diagnostics()]], "Toggle lsp diagnostics"},

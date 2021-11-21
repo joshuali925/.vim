@@ -160,20 +160,8 @@ return require("packer").startup(
             }
 
             -- editing
-            use {"Krasjet/auto.pairs", event = "InsertEnter", config = get_config("auto_pairs")}
-            use {
-                "joshuali925/vim-indent-object",
-                keys = {
-                    {"o", "ii"},
-                    {"o", "ai"},
-                    {"x", "ii"},
-                    {"x", "ai"},
-                    {"o", "iI"},
-                    {"o", "aI"},
-                    {"x", "iI"},
-                    {"x", "aI"}
-                }
-            }
+            use {"windwp/nvim-autopairs", event = "InsertEnter", config = get_config("nvim_autopairs")}
+            use {"joshuali925/vim-indent-object"}
             use {"terryma/vim-expand-region", keys = "<Plug>(expand_region_"}
             use {
                 "mg979/vim-visual-multi",

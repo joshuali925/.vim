@@ -83,7 +83,21 @@ local lsp_configs = {
 
 local function make_config()
     local capabilities = vim.lsp.protocol.make_client_capabilities()
+    capabilities.textDocument.completion.completionItem.documentationFormat = {"markdown", "plaintext"}
     capabilities.textDocument.completion.completionItem.snippetSupport = true
+    capabilities.textDocument.completion.completionItem.preselectSupport = true
+    capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
+    capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
+    capabilities.textDocument.completion.completionItem.deprecatedSupport = true
+    capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
+    capabilities.textDocument.completion.completionItem.tagSupport = {valueSet = {1}}
+    capabilities.textDocument.completion.completionItem.resolveSupport = {
+        properties = {
+            "documentation",
+            "detail",
+            "additionalTextEdits"
+        }
+    }
     return {
         capabilities = capabilities,
         flags = {
@@ -153,15 +167,12 @@ function _G.quickfix_all_diagnostics()
     vim.lsp.util.set_qflist(qflist)
 end
 
--- 0.6.0 breaking:
--- https://www.reddit.com/r/neovim/comments/pymf0t/neovim_not_displaying_custom_diagnostic_symbols/
--- https://www.reddit.com/r/neovim/comments/qd3v4h/psa_vimdiagnostics_api_has_changed_a_little_bit/
-vim.fn.sign_define("LspDiagnosticsSignError", {text = ""})
-vim.fn.sign_define("LspDiagnosticsSignWarning", {text = ""})
-vim.fn.sign_define("LspDiagnosticsSignInformation", {text = ""})
-vim.fn.sign_define("LspDiagnosticsSignHint", {text = ""})
-vim.fn.sign_define("LspDiagnosticsSignOther", {text = "﫠"})
-vim.cmd("highlight LspDiagnosticsVirtualTextHint guifg=#666666")
+vim.fn.sign_define("DiagnosticSignError", {text = "", texthl = "DiagnosticError", numhl = "DiagnosticError"})
+vim.fn.sign_define("DiagnosticSignWarn", {text = "", texthl = "DiagnosticWarn", numhl = "DiagnosticWarn"})
+vim.fn.sign_define("DiagnosticSignInfo", {text = "", texthl = "DiagnosticInfo", numhl = "DiagnosticInfo"})
+vim.fn.sign_define("DiagnosticSignHint", {text = "", texthl = "DiagnosticHint", numhl = "DiagnosticHint"})
+vim.fn.sign_define("DiagnosticSignOther", {text = "﫠", texthl = "DiagnosticOther", numhl = "DiagnosticOther"})
+vim.cmd("highlight DiagnosticVirtualTextHint guifg=#666666")
 
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = "rounded"})
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {border = "rounded"})

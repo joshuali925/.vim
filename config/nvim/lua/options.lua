@@ -31,21 +31,17 @@ opt.splitright = true
 opt.splitbelow = true
 opt.ignorecase = true
 opt.smartcase = true
-opt.autoindent = true
-opt.smarttab = true
 opt.expandtab = true
 opt.tabstop = 4
 opt.softtabstop = 2
 opt.shiftwidth = 2
 opt.shiftround = true
 opt.textwidth = 0
-opt.hidden = true
 opt.complete = {".", "w", "b", "u"}
 opt.completeopt = {"menuone", "noselect"}
 opt.completefunc = "funcs#complete_word"
 opt.pumblend = 8
 opt.shortmess = opt.shortmess + {c = true}
-opt.shortmess = opt.shortmess - {S = true}
 opt.scrolloff = 2
 opt.sidescrolloff = 5
 opt.signcolumn = "yes"
@@ -54,7 +50,6 @@ opt.previewheight = 7
 opt.foldmethod = "indent"
 opt.foldlevelstart = 99
 opt.jumpoptions = "stack"
-opt.history = 5000
 opt.shada = [[!,'1000,<50,s10,/20,@20,h]]
 opt.undofile = true
 opt.undodir = vim.env.HOME .. "/.cache/nvim/undo"
@@ -64,9 +59,6 @@ opt.isfname = opt.isfname - {"="}
 opt.path = {".", "", "**5"}
 opt.list = true
 opt.listchars = {tab = "» ", nbsp = "␣", trail = "•"}
-opt.fillchars = {vert = "│"}
-opt.showbreak = '╰─➤'
-opt.cpoptions = opt.cpoptions + {n = true}
 opt.timeoutlen = 1500
 opt.ttimeoutlen = 40
 opt.updatetime = 300

@@ -111,7 +111,7 @@ nnoremap <leader>fd :call VSCodeNotify('breadcrumbs.focus')<CR>
 nnoremap <leader>fm :call VSCodeNotify('workbench.action.openRecent')<CR>
 nnoremap <leader>fb :call VSCodeNotify('workbench.explorer.openEditorsView.toggleVisibility')<CR>
 nnoremap <leader>fu :call VSCodeNotify('workbench.action.gotoSymbol')<CR>
-nnoremap <leader>f] :call VSCodeNotify('workbench.action.showAllSymbols')<CR>
+nnoremap <leader>fU :call VSCodeNotify('workbench.action.showAllSymbols')<CR>
 nnoremap <leader>fg :call VSCodeNotify('workbench.view.search')<CR>
 xnoremap <leader>fg <Cmd>call VSCodeNotifyRangePos('workbench.action.findInFiles', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1)<CR>
 nnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': expand('<cword>')})<CR>

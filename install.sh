@@ -17,7 +17,7 @@ NC='\033[0m'
 detect-env() {
   case $(uname -m) in
     # mac shows i386 for x86_64
-    i[36]86 | 'amd64' | x86_64)
+    i[36]86 | amd64 | x86_64)
       ARCHITECTURE="x86_64" ;;
     *armv6*)
       ARCHITECTURE="arm6" ;;
@@ -125,6 +125,7 @@ install_docker() {
 }
 
 install_java() {
+  # https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
   # https://github.com/shyiko/jabba/blob/3bb7cca8389753072e9f6fbb9fee6fdfa85ca57f/index.json#L833
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
