@@ -157,6 +157,7 @@ function! funcs#get_run_command() abort
   let l:run_command['markdown'] = 'MarkdownPreview'
   let l:run_command['html'] = 'AsyncRun -silent open %'
   let l:run_command['xhtml'] = 'AsyncRun -silent open %'
+  let l:run_command['http'] = 'lua require("rest-nvim").run()'
   return get(l:run_command, &filetype, 'Neomake'). get(b:, 'args', '')
 endfunction
 

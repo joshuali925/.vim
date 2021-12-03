@@ -27,7 +27,13 @@ return require("packer").startup(
 
             -- appearance
             use {"folke/tokyonight.nvim", event = "VimEnter", config = get_config("tokyonight")}
-            use {"akinsho/nvim-bufferline.lua", after = "tokyonight.nvim", config = get_config("nvim_bufferline")}
+            use {
+                "akinsho/nvim-bufferline.lua",
+                after = "tokyonight.nvim",
+                config = function()
+                    require("bufferline").setup({highlights = {buffer_selected = {gui = "bold"}}})
+                end
+            }
             use {"NTBBloodbath/galaxyline.nvim", event = "VimEnter", config = get_config("galaxyline")}
             use {"lukas-reineke/indent-blankline.nvim", setup = get_config("setup_indent_blankline")}
             use {
@@ -160,7 +166,7 @@ return require("packer").startup(
             }
 
             -- editing
-            use {"windwp/nvim-autopairs", event = "InsertEnter", config = get_config("nvim_autopairs")}
+            use {"windwp/nvim-autopairs", after = "nvim-cmp", config = get_config("nvim_autopairs")}
             use {"joshuali925/vim-indent-object"}
             use {"terryma/vim-expand-region", keys = "<Plug>(expand_region_"}
             use {
@@ -226,7 +232,7 @@ return require("packer").startup(
             use {"kyazdani42/nvim-web-devicons", opt = false}
 
             -- tools
-            use {"tweekmonster/startuptime.vim", cmd = "StartupTime"}
+            use {"dstein64/vim-startuptime", cmd = "StartupTime"}
             use {"will133/vim-dirdiff", cmd = "DirDiff"}
             use {
                 "iamcco/markdown-preview.nvim",
@@ -239,6 +245,13 @@ return require("packer").startup(
                 "dhruvasagar/vim-table-mode",
                 cmd = {"TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine"},
                 setup = get_config("setup_vim_table_mode")
+            }
+            use {
+                "NTBBloodbath/rest.nvim",
+                module = "rest-nvim",
+                config = function()
+                    require("rest-nvim").setup({skip_ssl_verification = true})
+                end
             }
         end
     }

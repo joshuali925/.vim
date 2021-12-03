@@ -283,7 +283,7 @@ install_neovim() {
   # https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
   sh -c 'sleep 120 && pkill nvim && echo "Timeout, killed neovim"' &
   local pid=$!
-  ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').install()" || true
+  ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').sync()" || true
   kill $pid > /dev/null 2>&1 || true
   sh -c 'sleep 30 && pkill nvim && echo "Timeout, killed neovim"' &
   pid=$!

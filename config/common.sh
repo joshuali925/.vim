@@ -55,9 +55,10 @@ alias lg='lazygit'
 alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
-alias rgf="rg --files | rg"
-alias rgd="rg --files --null | xargs -0 dirname | sort -u | rg"
+alias rgf='rg --files | rg'
+alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
+alias xcp="rsync -aviHKhSPz --one-file-system --delete --filter=':- .gitignore'"
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
@@ -195,8 +196,8 @@ gcb() {
 
 pscpu() {
   local ps_out pids pid pstree_flags pstree_out
-  if [ $(uname -s) == 'Darwin' ]; then
-    ps_out=$(ps -Ao user,pid,ppid,pcpu,pmem,time,command -rww)
+  if [ "$(uname -s)" = Darwin ]; then
+    ps_out=$(ps -rwwAo user,pid,ppid,pcpu,pmem,time,command)
     pstree_flags='-wp'
   else
     ps_out=$(ps auxww --sort=-pcpu)
@@ -216,6 +217,16 @@ pscpu() {
       [[ $pstree_out =~ "$pid" ]] && head -n 8 <<< "$pstree_out" | grep --color -E "^|$pid"
     done
   fi
+}
+
+psmem() {
+  local ps_out
+  if [ "$(uname -s)" = Darwin ]; then
+    ps_out=$(ps -mwwAo pid,rss,command)
+  else
+    ps_out=$(ps axwwo pid,rss,args --sort -size)
+  fi
+  echo "$ps_out" | head -n 16 | awk '{ hr=$2/1024 ; printf("%7s %9.2f Mb\t",$1,hr) } { for ( x=3 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }'
 }
 
 sudorun() {
@@ -363,10 +374,10 @@ cdf() {
 
 vrg() {
   if [ "$#" -eq 0 ]; then
-    [[ ! $(fc -ln -1) =~ "^rg*" ]] && echo 'Need a string to search for.' || eval "v$(fc -ln -1)"
+    [[ ! $(fc -ln -1) =~ ^rg* ]] && echo 'Need a string to search for.' || eval "v$(fc -ln -1)"
     return 0
   fi
-  if [[ \ $*\  == *\ --fixed-strings\ * ]] || [[ \ $*\  == *\ -F\ * ]]; then
+  if [[ \ $*\  = *\ --fixed-strings\ * ]] || [[ \ $*\  = *\ -F\ * ]]; then
     $EDITOR -q <(rg "$@" --vimgrep) -c "/\V$1"  # use \V if rg is called with -F/--fixed-strings to search for string literal
   else
     $EDITOR -q <(rg "$@" --vimgrep) -c "/$1"
@@ -413,20 +424,12 @@ t() {  # create, restore, or switch tmux session
   if [ -z "$1" ]; then
     FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP"
     if [ "$?" -ne 0 ]; then
-      SESSIONS=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2>/dev/null)
-      if [ -n "$SESSIONS" ]; then
-        echo -n "Restore tmux session? (Y/n) "
-        if [ -n "$ZSH_VERSION" ]; then
-          read -k REPLY
-        else
-          read -n 1  # bash
-        fi
-        if [[ $REPLY =~ ^[Yy$'\n']$ ]] || [ ${#REPLY} -eq 0 ]; then
-          FZFTEMP=$(echo "$SESSIONS" | fzf --bind='tab:down,btab:up' --tac --select-1 --preview='cat {}') && ln -sf $FZFTEMP ~/.tmux/resurrect/last && tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" && tmux attach-session
-          return 0
-        fi
-      fi
-      tmux
+      SESSIONS=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
+      [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --bind='tab:down,btab:up' --tac --select-1 --preview='cat {}') && {
+        ln -sf $FZFTEMP ~/.tmux/resurrect/last
+        tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
+        tmux attach-session
+      } || tmux
     fi
   else
     tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
@@ -436,9 +439,9 @@ t() {  # create, restore, or switch tmux session
 manf() {
   if [ -z "$1" ]; then
     local FZFTEMP
-    FZFTEMP=$(man -k . 2>/dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$FZFTEMP" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> d <C-d>' +'nnoremap <buffer> u <C-u>'
+    FZFTEMP=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$FZFTEMP" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> d <C-d>' +'nnoremap <buffer> u <C-u>'
   else
-    nvim +"Man $@" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
+    nvim +"Man $*" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
   fi
 }
 
@@ -448,11 +451,11 @@ envf() {
 }
 
 react() {
-  if [ "$#" -lt 2 ]; then echo 'Usage: react <dir_to_watch> <command>, use {} as placeholder of modified files.'; return 1; fi
+  if [ "$#" -lt 2 ]; then echo "Usage: $0 <dir_to_watch> <command>, use {} as placeholder of modified files."; return 1; fi
   local CHANGED
-  echo "Watching \"$1\", passing modified files to \"${@:2}\" command every 2 seconds."
+  echo "Watching \"$1\", passing modified files to \"${*:2}\" command every 2 seconds."
   while true; do
-    CHANGED=($(fd --base-directory $1 --absolute-path --type=f --changed-within 2s))
+    CHANGED=($(fd --base-directory "$1" --absolute-path --type=f --changed-within 2s))
     if [ ${#CHANGED[@]} -gt 0 ]; then
       eval "${${@:2}//\{\}/${CHANGED[@]}}"
     fi
@@ -460,16 +463,31 @@ react() {
   done
 }
 
-# wget until complete: untildone wget -c <url>
-# git pull every hour: untildone 'git pull; sleep 3599; false'
 untildone() {
+  if [ "$#" -eq 0 ]; then
+    echo -e "Usage: $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour"
+    return 1
+  fi
   local i=1
   while true; do
     echo "Try $i, $(date)." >&2
     eval "$@" && break
     ((i+=1))
-    echo >&2
     sleep 1
+    echo >&2
+  done
+}
+
+linedo() {
+  if [ "$#" -eq 0 ]; then echo "Usage: <command> | $0 <command>, use {} as placeholder for each line, otherwise line is appended as args."; return 1; fi
+  local placeholder
+  [[ "$*" = *{}* ]] && placeholder=1
+  while read -r line; do
+    if [ -n "$placeholder" ]; then
+      eval "${@//\{\}/$line}"
+    else
+      eval "$@" "$line"
+    fi
   done
 }
 
@@ -492,4 +510,50 @@ docker-shell() {
     SELECTED_ID=$(echo "$SELECTED_ID" | awk '{print $1}')
     docker exec -it "$SELECTED_ID" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)'
   fi
+}
+
+ec2() {
+  local INSTANCES IDS VALUE
+  case $1 in
+    start) VALUE='stopped' ;;
+    stop) VALUE='running' ;;
+    refresh)
+      aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
+      return 0 ;;
+    *) echo "Usage: $0 {start|stop|refresh} [instance-tag]"; return 1;;
+  esac
+  INSTANCES=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$VALUE" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
+  if [ -n "$2" ]; then
+    IDS=$(echo $INSTANCES | grep -w "$2" | awk '{print $2}')
+  else
+    IDS=$(echo $INSTANCES | fzf --multi | awk '{print $2}')
+  fi
+  [ -z "$IDS" ] && return 1
+  if [ "$VALUE" = stopped ]; then
+    aws ec2 start-instances --instance-ids $(echo $IDS)
+  else
+    aws ec2 stop-instances --instance-ids $(echo $IDS)
+  fi
+}
+
+browser-history() {
+  [ "$(uname -s)" != Darwin ] && echo "Only supports MacOS, exiting.." && return 1
+  local COLS SEP FZFTEMP FZFPROMPT
+  COLS=$(( COLUMNS / 3 ))
+  SEP='{::}'
+  if [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
+    FZFPROMPT='Chrome> '
+    command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf-temp
+  elif [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
+    FZFPROMPT='Edge> '
+    command cp -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" /tmp/browser-history-fzf-temp
+  else
+    echo "Chrome and Edge histories not found, exiting.."
+    return 1
+  fi
+  FZFTEMP=$(sqlite3 -separator $SEP /tmp/browser-history-fzf-temp \
+    "select substr(title, 1, $COLS), url
+     from urls order by last_visit_time desc" |
+  awk -F $SEP '{printf "%-'$COLS's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+  fzf --prompt="$FZFPROMPT" --ansi --multi) && echo $FZFTEMP | sed 's#.*\(https*://\)#\1#' | xargs open
 }
