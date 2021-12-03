@@ -69,7 +69,6 @@ opt.writebackup = false
 opt.wildcharm = 26 -- <C-z>
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m,%f:%l:%m"
-opt.inccommand = "nosplit"
 opt.cedit = "<C-x>"
 
 vim.paste =

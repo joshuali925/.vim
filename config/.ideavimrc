@@ -1,5 +1,6 @@
 " set commands: https://github.com/JetBrains/ideavim/wiki/%22set%22-commands
 " actions (from :actionlist [pattern]): https://gist.github.com/zchee/9c78f91cc5ad771c1f5d
+" https://gist.githubusercontent.com/zchee/9c78f91cc5ad771c1f5d/raw/actionlist.vim
 
 let mapleader=";"
 

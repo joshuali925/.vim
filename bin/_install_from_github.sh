@@ -38,7 +38,7 @@ detect-env() {
 
 install-from-url() {
   if [ "$#" -lt 2 ]; then
-    echo "Usage: install-from-url <executable> <url> [<args>]"
+    echo "Usage: $0 <executable> <url> [<args>]"
     return 0
   fi
 
@@ -56,7 +56,7 @@ install-from-url() {
 
 install-from-github() {
   if [ "$#" -lt 7 ]; then
-    echo "Usage: install-from-github <executable> <repo> <linux-x64-package-name> <linux-arm-package-name> <macos-x64-package-name> <macos-arm-package-name> <extract-command-flags> [<args>]"
+    echo "Usage: $0 <executable> <repo> <linux-x64-package-name> <linux-arm-package-name> <macos-x64-package-name> <macos-arm-package-name> <extract-command-flags> [<args>]"
     return 0
   fi
 
@@ -91,7 +91,7 @@ install-from-github() {
   fi
 
   mkdir -p $HOME/.local/bin
-  url=$(curl -s https://api.github.com/repos/$repo/releases/latest | grep "browser_download_url.*$package" | cut -d '"' -f 4)
+  url=$(curl -s https://api.github.com/repos/$repo/releases/latest | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4)
   case $url in
     *.tar.bz2)  extract_cmd="$tar_cmd xj"      ;;
     *.tar.xz)   extract_cmd="$tar_cmd xJ"      ;;

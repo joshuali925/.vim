@@ -20,9 +20,13 @@ function M.filetype_nvim()
 end
 
 function M.nvim_autopairs()
-    require("nvim-autopairs").setup {
-        -- enable_moveright = false
+    local npairs = require("nvim-autopairs")
+    local cmp_npairs = require("nvim-autopairs.completion.cmp")
+    local cmp = require("cmp")
+    npairs.setup {
+        ignored_next_char = string.gsub([[ [%w%%%'%[%"%.%(%{] ]], "%s+", "")
     }
+    cmp.event:on("confirm_done", cmp_npairs.on_confirm_done())
 end
 
 function M.vim_matchup()
@@ -145,16 +149,6 @@ function M.setup_indent_blankline()
     g.indent_blankline_show_first_indent_level = false
     g.indent_blankline_filetype_exclude = {"help", "man", "startify", "lsp-installer"}
     g.indent_blankline_buftype_exclude = {"terminal"}
-end
-
-function M.nvim_bufferline()
-    require("bufferline").setup {
-        highlights = {
-            buffer_selected = {
-                gui = "bold"
-            }
-        }
-    }
 end
 
 function M.setup_symbols_outline()
@@ -295,6 +289,7 @@ function M.nvim_treesitter()
             "vim",
             "json",
             "yaml",
+            "http",
             "python"
         },
         highlight = {

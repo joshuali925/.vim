@@ -48,7 +48,7 @@ map("n", "Z[", "<Cmd>BufferLineCloseLeft<CR>")
 map("n", "Z]", "<Cmd>BufferLineCloseRight<CR>")
 map("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
 map("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
-map("n", "<C-c>", "<Cmd>execute 'ColorizerAttachToBuffer' | nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
+map("n", "<C-c>", "<Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
 map("i", "<C-c>", "<Esc>")
 map("x", "<C-c>", "<Esc>")
 map("n", "<C-w><C-c>", "<Esc>")
@@ -154,8 +154,7 @@ map(
 
 -- kommentary
 map("n", "gc", "<Plug>kommentary_motion_default", {})
--- map("n", "gcc", "<Plug>kommentary_line_default", {}) -- doesn't repeat https://github.com/b3nj5m1n/kommentary/issues/41
-map("n", "gcc", "<Plug>kommentary_motion_defaultl", {})
+map("n", "gcc", "<Plug>kommentary_line_default", {})
 map("x", "gc", "<Plug>kommentary_visual_default<Esc>", {})
 
 -- miniyank
@@ -278,7 +277,7 @@ map(
     "<Cmd>lua require('telescope.builtin').file_browser({cwd = vim.fn.expand('%:h'), hidden = true})<CR>"
 )
 map("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
-map("n", "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR>")
+map("n", "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR><Esc>")
 map(
     "n",
     "<leader>fu",
@@ -333,8 +332,8 @@ map("n", "<leader>d", "<Cmd>lua vim.lsp.buf.implementation()<CR>")
 map("n", "gr", "<Cmd>lua vim.lsp.buf.references()<CR>")
 map("n", "<leader>a", "<Cmd>CodeActionMenu<CR>")
 map("x", "<leader>a", ":<C-u>CodeActionMenu<CR>")
-map("n", "gh", "<Cmd>lua vim.diagnostic.open_float(0, {scope='line', border='rounded'})<CR>")
+map("n", "gh", "<Cmd>lua vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'})<CR>")
 map("n", "<leader>R", "<Cmd>lua vim.lsp.buf.rename()<CR>")
-map("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({float={border='rounded'}})<CR>")
-map("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({float={border='rounded'}})<CR>")
+map("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({float = {border = 'rounded'}})<CR>")
+map("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({float = {border = 'rounded'}})<CR>")
 map("i", "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>")
