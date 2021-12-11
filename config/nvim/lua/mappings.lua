@@ -29,6 +29,7 @@ map("", "<Home>", "g^")
 map("", "<End>", "g$")
 map("", "<Down>", "gj")
 map("", "<Up>", "gk")
+map("i", "<S-Del>", "<BS>")
 map("i", "<Down>", "pumvisible() ? '<C-n>' : '<C-o>gj'", {expr = true, noremap = true})
 map("i", "<Up>", "pumvisible() ? '<C-p>' : '<C-o>gk'", {expr = true, noremap = true})
 map("i", "<Home>", "<C-o>g^")
@@ -62,7 +63,11 @@ map("i", "<leader>r", "<Esc><leader>r", {})
 map("n", "<leader>r", "<Cmd>update <bar> execute funcs#get_run_command()<CR>")
 map("", "<leader>y", '"+y')
 map("n", "<leader>Y", '"+y$')
-map("n", "<leader>b", "<Cmd>lua require('packer').loader('nvim-tree.lua')<CR><Cmd>sleep 1m <bar> NvimTreeFindFile<CR>")
+map(
+    "n",
+    "<leader>b",
+    "<Cmd>if !get(g:, 'nvim_tree_git_hl', 0) <bar> execute 'lua require([[packer]]).loader([[nvim-tree.lua]])' <bar> sleep 100m <bar> endif <bar> NvimTreeFindFile<CR>"
+)
 map("n", "<leader>B", "<Cmd>NvimTreeToggle<CR>")
 map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], {noremap = true, silent = true})
 map(
@@ -284,13 +289,11 @@ map(
     "<Cmd>lua require('telescope.builtin')[next(vim.lsp.buf_get_clients()) == nil and 'treesitter' or 'lsp_document_symbols']()<CR>"
 )
 map("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
--- TODO visual grep pending on https://github.com/neovim/neovim/pull/13896, https://github.com/nvim-telescope/telescope.nvim/pull/494
-map("n", "<leader>fg", ":lua require('utils').telescope_grep(true, [[]])<Left><Left><Left>", {noremap = true})
+map("n", "<leader>fg", ":lua require('utils').telescope_grep(true, [[]])<Left><Left><Left>")
 map(
     "x",
     "<leader>fg",
-    ":<C-u>lua require('utils').telescope_grep(false, [[<C-r>=funcs#get_visual_selection()<CR>]])<Left><Left><Left>",
-    {noremap = true}
+    ":<C-u>lua require('utils').telescope_grep(false, [[<C-r>=funcs#get_visual_selection()<CR>]])<Left><Left><Left>"
 )
 map(
     "n",

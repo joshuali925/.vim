@@ -61,13 +61,7 @@ return require("packer").startup(
             use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = get_config("setup_symbols_outline")}
             use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = get_config("mundo")}
             use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = get_config("nvim_tree")}
-            use {
-                "mhinz/vim-startify",
-                cond = function()
-                    return vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1
-                end,
-                config = get_config("startify")
-            }
+            use {"goolord/alpha-nvim", event = "VimEnter", config = get_config("alpha_nvim")}
             use {
                 "nvim-telescope/telescope.nvim",
                 requires = {
@@ -82,6 +76,7 @@ return require("packer").startup(
                 config = get_config("telescope")
             }
             use {"kevinhwang91/nvim-bqf", ft = "qf", config = get_config("nvim_bqf")}
+            use {"rcarriga/nvim-notify"}
 
             -- git
             use {
@@ -122,14 +117,6 @@ return require("packer").startup(
                     require("lsp")
                 end
             }
-            use {
-                "ahmedkhalf/project.nvim",
-                after = "nvim-lspconfig",
-                cmd = "ProjectRoot",
-                config = function()
-                    require("project_nvim").setup()
-                end
-            }
             use {"weilbith/nvim-code-action-menu", cmd = "CodeActionMenu"}
             use {"onsails/lspkind-nvim", event = "InsertEnter"}
             use {"hrsh7th/nvim-cmp", after = "lspkind-nvim", config = get_config("nvim_cmp")}
@@ -143,7 +130,7 @@ return require("packer").startup(
             use {"sbdchd/neoformat", cmd = "Neoformat"}
             use {
                 "b3nj5m1n/kommentary",
-                requires = {"JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-lspconfig"},
+                requires = {"JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-treesitter"},
                 keys = "<Plug>kommentary_",
                 setup = [[vim.g.kommentary_create_default_mappings = false]],
                 config = get_config("kommentary")
@@ -192,6 +179,7 @@ return require("packer").startup(
             -- misc
             use {"lewis6991/impatient.nvim", opt = false}
             use {"nathom/filetype.nvim", opt = false, config = get_config("filetype_nvim")}
+            use {"ahmedkhalf/project.nvim", event = "VimEnter", config = get_config("project_nvim")}
             use {"tpope/vim-sleuth"}
             use {"tpope/vim-repeat", opt = false}
             use {

@@ -35,12 +35,12 @@ alias mv='mv -iv'
 alias cp='cp -riv'
 alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto'
-alias la='ls -AF --color=auto'
 alias ls='ls -F --color=auto'
 alias l='exa -alF --git --color=always --color-scale --icons --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
+alias title='printf "$([ -n "$TMUX" ] && printf "\033Ptmux;\033")\e]0;%s\e\\$([ -n "$TMUX" ] && printf "\033\\")"'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
@@ -49,7 +49,7 @@ alias less='less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
-alias btop='bpytop -b "cpu proc"'
+alias btop='btop -p 1'
 alias croc='croc --curve p256'
 alias lg='lazygit'
 alias lzd='lazydocker'
@@ -57,7 +57,6 @@ alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias rgf='rg --files | rg'
 alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
-alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
 alias xcp="rsync -aviHKhSPz --one-file-system --delete --filter=':- .gitignore'"
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
@@ -77,12 +76,10 @@ alias gcs='git commit -s -m'
 alias gcs!='git commit -s --amend'
 alias gcv='git commit -v'
 alias gcf='git config --list'
-alias gcl='git clone --recursive'
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gcm='git checkout main || git checkout master'
 alias gcd='git checkout develop || git checkout dev'
 alias gco='git checkout'
-alias gcount='git shortlog -sn'
 alias gcp='git cherry-pick'
 alias gcpa='git cherry-pick --abort'
 alias gcpc='git cherry-pick --continue'
@@ -130,13 +127,13 @@ alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grup='git remote update'
 alias grv='git remote -v'
 alias gs='git status'
-alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \$(git symbolic-ref --short HEAD)\"\\033[0m\"; git status -s' \\;"
+alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
 alias gss='git status -sb'
 alias gstash='git stash'
 alias gshow='git show --pretty=short --show-signature'
-alias gsu='git submodule update'
 alias gts='git tag -s'
 alias gvt='git verify-tag'
+alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
@@ -233,16 +230,16 @@ sudorun() {
   if [ "$#" -eq 0 ]; then echo 'Need a command to run.'; return 1; fi
   local CMD=$1
   shift
-  if [ ! -x "$(command -v $CMD)" ] && type "$CMD" | grep -q "$CMD is a \(shell \)\?function"; then
-    echo "Running as bash function..\n" >&2
-    sudo bash -c "$(declare -f $CMD); $CMD"
+  if [ ! -x "$(command -v "$CMD")" ] && type "$CMD" | grep -q "$CMD is a \(shell \)\?function"; then
+    echo -e "Running as bash function..\n" >&2
+    sudo bash -c "$(declare -f "$CMD"); $CMD"
     return 0
   fi
   case $CMD in
-    v|vi|vim) sudo $(/usr/bin/which vim) -u "$HOME/.vim/config/mini.vim" "$@" ;;
-    lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E $(/usr/bin/which lf) -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
-    btm) sudo -E $(/usr/bin/which btm) --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
-    *) EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E $(/usr/bin/which $CMD) "$@" ;;
+    v|vi|vim) sudo "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
+    lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
+    btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
+    *) XDG_CONFIG_HOME="$HOME/.config" EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
   esac
 }
 
@@ -278,9 +275,9 @@ print-colors() {
   echo -e ' \e[1;30mblack="\\e[1;30m" \e[1;31mred="\\e[1;31m"     \e[1;32mgreen="\\e[1;32m" \e[1;33myellow="\\e[1;33m"'
   echo -e ' \e[1;34mblue="\\e[1;34m"  \e[1;35mmagenta="\\e[1;35m" \e[1;36mcyan="\\e[1;36m"  \e[1;37mwhite="\\e[1;37m"\e[0m'
   printf '\nForeground 256 colors\n'
-  for i in {0..255}; do printf '\e[38;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
+  for i in {0..255}; do printf '\e[38;5;%dm%3d ' "$i" "$i"; (((i+3) % 18)) || printf '\e[0m\n'; done
   printf '\n\nBackground 256 colors\n'
-  for i in {0..255}; do printf '\e[48;5;%dm%3d ' $i $i; (((i+3) % 18)) || printf '\e[0m\n'; done
+  for i in {0..255}; do printf '\e[48;5;%dm%3d ' "$i" "$i"; (((i+3) % 18)) || printf '\e[0m\n'; done
   printf '\e[0m\n\n'
   awk -v term_cols="${width:-$(tput cols || echo 80)}" 'BEGIN{
     s="/\\";
@@ -298,30 +295,31 @@ print-colors() {
 }
 
 x() {
-  if [ -f $1 ]; then
+  if [ -f "$1" ]; then
     case $1 in
-      *.tar.bz2)   tar xvjf $1    ;;
-      *.tar.xz)    tar xvJf $1    ;;
-      *.tar.gz)    tar xvzf $1    ;;
-      *.bz2)       bunzip2 $1     ;;
-      *.rar)       unrar x $1     ;;
-      *.gz)        gunzip $1      ;;
-      *.tar)       tar xvf $1     ;;
-      *.tbz2)      tar xvjf $1    ;;
-      *.tgz)       tar xvzf $1    ;;
-      *.zip)       unzip $1       ;;
-      *.xz)        unxz $1        ;;
-      *.Z)         uncompress $1  ;;
-      *.7z)        7z x $1        ;;
+      *.tar.bz2)   tar xvjf "$1"    ;;
+      *.tar.xz)    tar xvJf "$1"    ;;
+      *.tar.gz)    tar xvzf "$1"    ;;
+      *.bz2)       bunzip2 "$1"     ;;
+      *.rar)       unrar x "$1"     ;;
+      *.gz)        gunzip "$1"      ;;
+      *.tar)       tar xvf "$1"     ;;
+      *.tbz)       tar xvjf "$1"    ;;
+      *.tbz2)      tar xvjf "$1"    ;;
+      *.tgz)       tar xvzf "$1"    ;;
+      *.zip)       unzip "$1"       ;;
+      *.xz)        unxz "$1"        ;;
+      *.Z)         uncompress "$1"  ;;
+      *.7z)        7z x "$1"        ;;
       *)           echo "Unable to extract '$1'" ;;
     esac
   else
-    tar czvf $1.tar.gz $1
+    tar czvf "$1.tar.gz" "$1"
   fi
 }
 
 X() {  # extract to a directory / archive without top directory
-  if [ -f $1 ]; then
+  if [ -f "$1" ]; then
     local dir="${1%.*}"
     local filename="$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)_$1"
     command mkdir -pv "$dir"
@@ -329,14 +327,14 @@ X() {  # extract to a directory / archive without top directory
     (cd "$dir" > /dev/null && x "$filename")
     command mv -n "$dir/$filename" "$1"
   else
-    tar czvf $1.tar.gz -C $1 .
+    tar czvf "$1.tar.gz" -C "$1" .
     return 0
   fi
 }
 
 path() {
   if [ -z "$1" ]; then
-    echo -e ${PATH//:/\\n}
+    echo -e "${PATH//:/\\n}"
   else
     type -a "$@"
     declare -f "$@" || true
@@ -366,9 +364,9 @@ gvf() {
 cdf() {
   local FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=$(rg --files | fzf --bind='tab:down,btab:up') && cd "$(dirname $FZFTEMP)"
+    FZFTEMP=$(rg --files | fzf --bind='tab:down,btab:up') && cd "$(dirname "$FZFTEMP")"
   else
-    FZFTEMP=$(rg --files | rg "$@" | fzf --bind='tab:down,btab:up') && cd "$(dirname $FZFTEMP)"
+    FZFTEMP=$(rg --files | rg "$@" | fzf --bind='tab:down,btab:up') && cd "$(dirname "$FZFTEMP")"
   fi
 }
 
@@ -408,14 +406,14 @@ unalias z 2> /dev/null
 z() {
   local FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=$(_z -l 2>&1 | fzf --tac --bind='tab:down,btab:up') && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+    FZFTEMP=$(_z -l 2>&1 | fzf --tac --bind='tab:down,btab:up') && cd "$(echo "$FZFTEMP" | sed 's/^[0-9,.]* *//')"
   else
     _z 2>&1 "$@"
   fi
 }
 zc() {
   local FZFTEMP
-  FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="$1") && cd "$(echo $FZFTEMP | sed 's/^[0-9,.]* *//')"
+  FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="$1") && cd "$(echo "$FZFTEMP" | sed 's/^[0-9,.]* *//')"
 }
 
 t() {  # create, restore, or switch tmux session
@@ -426,7 +424,7 @@ t() {  # create, restore, or switch tmux session
     if [ "$?" -ne 0 ]; then
       SESSIONS=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
       [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --bind='tab:down,btab:up' --tac --select-1 --preview='cat {}') && {
-        ln -sf $FZFTEMP ~/.tmux/resurrect/last
+        ln -sf "$FZFTEMP" ~/.tmux/resurrect/last
         tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
         tmux attach-session
       } || tmux
@@ -524,9 +522,9 @@ ec2() {
   esac
   INSTANCES=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$VALUE" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
   if [ -n "$2" ]; then
-    IDS=$(echo $INSTANCES | grep -w "$2" | awk '{print $2}')
+    IDS=$(echo "$INSTANCES" | grep -w "$2" | awk '{print $2}')
   else
-    IDS=$(echo $INSTANCES | fzf --multi | awk '{print $2}')
+    IDS=$(echo "$INSTANCES" | fzf --multi | awk '{print $2}')
   fi
   [ -z "$IDS" ] && return 1
   if [ "$VALUE" = stopped ]; then

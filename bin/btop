@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+if [ ! -f "$HOME/.config/btop/btop.conf" ]; then
+  mkdir -p ~/.config
+  cp -rf ~/.vim/config/btop ~/.config
+fi
+
+source ~/.vim/bin/_install_from_github.sh
+install-from-github btop aristocratos/btop x86_64-linux-musl aarch64-linux-musl x86_64-macos-bigsur arm64-macos-bigsur "--strip-components=1 bin/btop" "$@"

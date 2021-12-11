@@ -24,7 +24,6 @@ opt.wrap = true
 opt.linebreak = true
 opt.showmatch = true
 opt.showmode = false
-opt.title = true
 opt.showtabline = 2
 opt.diffopt = opt.diffopt + {"vertical", "indent-heuristic", "algorithm:patience"}
 opt.splitright = true
@@ -74,7 +73,7 @@ opt.cedit = "<C-x>"
 vim.paste =
     (function(overridden)
     return function(lines, phase)
-        if (phase == -1 or phase == 1) and vim.fn.mode() == "i" then
+        if (phase == -1 or phase == 1) and vim.fn.mode() == "i" and not vim.o.paste then
             vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
         end
         overridden(lines, phase)

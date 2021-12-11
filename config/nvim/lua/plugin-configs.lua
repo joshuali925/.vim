@@ -19,6 +19,13 @@ function M.filetype_nvim()
     }
 end
 
+function M.project_nvim()
+    require("project_nvim").setup {
+        detection_methods = {"pattern", "lsp"},
+        patterns = {".git", "gradlew", "Makefile", "package.json"}
+    }
+end
+
 function M.nvim_autopairs()
     local npairs = require("nvim-autopairs")
     local cmp_npairs = require("nvim-autopairs.completion.cmp")
@@ -108,7 +115,7 @@ function M.quick_scope()
     g.qs_filetype_blacklist = {
         "qf",
         "netrw",
-        "startify",
+        "alpha",
         "TelescopePrompt",
         "Mundo",
         "Outline",
@@ -138,8 +145,9 @@ function M.setup_csv_vim()
 end
 
 function M.neomake()
-    g.neomake_typescript_enabled_makers = {"eslint", "tsc"}
-    g.neomake_typescriptreact_enabled_makers = {"eslint", "tsc"}
+    g.neomake_info_sign = {text = "", texthl = "NeomakeInfoSign"}
+    g.neomake_typescript_enabled_makers = {"eslint"}
+    g.neomake_typescriptreact_enabled_makers = {"eslint"}
 end
 
 function M.setup_indent_blankline()
@@ -147,7 +155,7 @@ function M.setup_indent_blankline()
     vim.opt.colorcolumn = "99999"
     g.indent_blankline_char = "▏"
     g.indent_blankline_show_first_indent_level = false
-    g.indent_blankline_filetype_exclude = {"help", "man", "startify", "lsp-installer"}
+    g.indent_blankline_filetype_exclude = {"help", "man", "alpha", "lsp-installer"}
     g.indent_blankline_buftype_exclude = {"terminal"}
 end
 
@@ -224,6 +232,55 @@ function M.nvim_bqf()
             }
         }
     )
+end
+
+function M.alpha_nvim()
+    local alpha = require("alpha")
+    local theme = require("alpha.themes.startify")
+    theme.section.header.val = {
+        [[⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠛⣿⣿⣿⣿⣿⡿⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⣿⢧⣶⡉⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢹⣿⣿⣿⣿⠃ ⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⡏⣼⣿⣿⠄⠈⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⠘⠛⠛⠛⠛ ⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⠐⢋⣤⣤⢦⣤⡀   ⠈⠛⠛⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⢁⠤⡀    ⡠⡄⢹⣿⢿⣿⣿⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⠏⣰⡾⠉  ⢸⡇  ⣀⣀⣀  ⣀⣀⣉⡉⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣭⣿⠃ ⠈⠉     ⠈⠁ ⢩⣭⣭⣿⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿ ⣿⣇⡀ ⢀⣸⡇⣰⠿⠉⠉⠉⣷⡄⢹⣿⢟⣵⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠋   ⢀⣠⣤⣄⣤⣀⣀   ⠙⣿⣿⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⡄⠈⠻⢿⣶⡿⠋⢸⣿    ⣿⡇⢘⣯⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟  ⢠⡴⠚⢿⣿⢛⣉⣻⣿⢟⡛⢦⡀ ⠈⣿⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⣤⡀  ⢰⣦⠜⢿⣦⣤⣤⣾⠋⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟  ⣰⡯⠶⣿⠟⣛⢻⣿⣋⣙⣿⡿⠚⢿⣆ ⠘⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⣿⡿⠂ ⠈⠁  ⠉⠉⢉⣁⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢠⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿  ⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⡿⠁    ⠘⢶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿ ⢠⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⡇      ⠈⠛⠛⠛⠛⠙⢻⣿⣿⣿⢫⡒⡂⡠⠌⣽⣿⣿⣿⣿⣿⣿⣄⢸⣿⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠿⢿⣿⢀⣾⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⣷⣤⣤⣀⣀⣀⣠⣤⣤⣤⣤⣤⣤⣿⣿⣿⣿⣄⣀⣂⣑⣥⣿⣿⣿⣿⣿⣿⣿⣿⣾⠃   ⠙⣿⣿⣿⣿⣿⠃   ⢸⣾⣿⣿⣿⣿⣿⣿]],
+        [[⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠛⠛⠁⠄⠂⠄⠄⡿⠿⠿⠿⠇⠄⠂⠄⠄⠾⠿⠿⣿⣿⣿⣿⣿]]
+    }
+    theme.section.header.opts = {hl = "AlphaHeader"}
+    theme.section.top_buttons.val = {}
+    theme.section.bottom_buttons.val = {
+        theme.button("!", "Git diff unstaged", ":args `Git ls-files --modified` | Git difftool<CR>"),
+        theme.button("+", "Git diff HEAD", ":DiffviewOpen<CR>"),
+        theme.button(
+            "*",
+            "Git diff remote",
+            ":execute 'DiffviewOpen '. trim(system('git rev-parse --abbrev-ref --symbolic-full-name @{u}')). '..HEAD'<CR>"
+        ),
+        theme.button("o", "Git log", ":Flog<CR>"),
+        theme.button("\\", "Open quickui", ":call quickui#menu#open('normal')<CR>"),
+        theme.button("f", "Find files", ":lua require('telescope.builtin').find_files({hidden = true})<CR>"),
+        theme.button(
+            "m",
+            "Find MRU",
+            ":lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>"
+        ),
+        theme.button("c", "Edit vimrc", ":edit $MYVIMRC<CR>"),
+        theme.button("s", "Profile startup time", ":StartupTime<CR>"),
+        theme.button("e", "New file", ":enew<CR>"),
+        theme.button("i", "Insert", ":enew <bar> startinsert<CR>"),
+        theme.button("q", "Quit", ":qall<CR>")
+    }
+    theme.mru_opts.ignore = function(path, ext)
+        return string.find(path, "COMMIT_EDITMSG") or string.find(path, [[vim/.*/doc/.*%.txt]])
+    end
+    alpha.setup(theme.opts)
+    vim.cmd("highlight AlphaHeader guifg='#a0a0f0'")
 end
 
 function M.telescope()
@@ -381,8 +438,8 @@ function M.galaxyline()
                     t = colors.red
                 }
                 local color = mode_color[vim.fn.mode()] or colors.blue
-                vim.api.nvim_command("highlight GalaxyViMode guibg=" .. color)
-                vim.api.nvim_command("highlight GalaxyViModeSeparator guifg=" .. color)
+                vim.cmd("highlight GalaxyViMode guibg=" .. color)
+                vim.cmd("highlight GalaxyViModeSeparator guifg=" .. color)
                 return "   "
             end,
             highlight = {colors.lightbg, "GalaxyViMode"}
@@ -553,45 +610,6 @@ function M.galaxyline()
     gls.short_line_left[3] = gls.left[4]
 end
 
-function M.startify()
-    function _G.webDevIcons(path)
-        local filename = vim.fn.fnamemodify(path, ":t")
-        local extension = vim.fn.fnamemodify(path, ":e")
-        return require("nvim-web-devicons").get_icon(filename, extension, {default = true})
-    end
-    vim.cmd [[
-        function! StartifyEntryFormat() abort
-            return 'v:lua.webDevIcons(absolute_path). " ". entry_path'
-        endfunction
-    ]]
-    g.startify_session_dir = "~/.cache/nvim/sessions"
-    g.startify_enable_special = 0
-    g.startify_fortune_use_unicode = 1
-    g.startify_commands = {
-        {["!"] = {"Git diff unstaged", ":args `Git ls-files --modified` | Git difftool"}},
-        {["+"] = {"Git diff HEAD", "DiffviewOpen"}},
-        {
-            ["*"] = {
-                "Git diff remote",
-                "execute 'DiffviewOpen '. trim(system('git rev-parse --abbrev-ref --symbolic-full-name @{u}')). '..HEAD'"
-            }
-        },
-        {o = {"Git log", "Flog"}},
-        {["\\"] = {"Open quickui", "call quickui#menu#open('normal')"}},
-        {f = {"Find files", "lua require('telescope.builtin').find_files({hidden = true})"}},
-        {m = {"Find MRU", "lua require('telescope.builtin').oldfiles({include_current_session = true})"}},
-        {c = {"Edit vimrc", "edit $MYVIMRC"}},
-        {s = {"Profile startup time", "StartupTime"}},
-        {D = {"Delete session", "SDelete!"}}
-    }
-    g.startify_lists = {
-        {type = "files", header = {"   MRU"}},
-        {type = "dir", header = {"   MRU " .. vim.loop.cwd()}},
-        {type = "commands", header = {"   Commands"}},
-        {type = "sessions", header = {"   Sessions"}}
-    }
-end
-
 function M.nvim_cmp()
     local cmp = require("cmp")
     cmp.setup {
@@ -749,13 +767,9 @@ function M.vim_quickui()
                 "Clear search and refresh screen"
             },
             {"--", ""},
-            {"Open &Startify", [[execute "PackerLoad! vim-startify" | Startify]], "Open vim-startify"},
-            {
-                "Save sessi&on",
-                [[execute "PackerLoad! vim-startify" | SSave!]],
-                "Save as a new session using vim-startify"
-            },
-            {"Delete session", [[execute "PackerLoad! vim-startify" | SDelete!]], "Delete a session using vim-startify"},
+            {"Open &Alpha", [[Alpha]], "Open Alpha"},
+            {"Save session", [[SaveSession]], "Save session to .cache/nvim/session.vim, will overwrite"},
+            {"Load session", [[LoadSession]], "Load session from .cache/nvim/session.vim"},
             {"--", ""},
             {"Edit Vimr&c", [[edit $MYVIMRC]]},
             {

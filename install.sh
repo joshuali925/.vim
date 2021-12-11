@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-cd "$HOME"
-
 NVM_VERSION=0.38.0
 # NODE_VERSION=10.24.1
 NODE_VERSION=14.17.5
@@ -50,7 +47,6 @@ detect-env() {
       exit 1 ;;
   esac
 }
-detect-env
 
 sudo() {
   [[ $EUID = 0 ]] || set -- command sudo "$@"
@@ -58,19 +54,20 @@ sudo() {
 }
 
 log() {
-  echo -e "${CYAN}${@}${NC}"
+  echo -e "${CYAN}${*}${NC}"
 }
 
 usage() {
-  echo "usage: bash $0 [install <package>,...]"
+  echo "usage: bash $0 [install <package> ...]"
   echo "  package list: devtools, dotfiles, docker, java, python, node, tmux, neovim, ssh-key"
+  exit 1
 }
 
 backup() {
   if [[ -a "$1" ]]; then
     mkdir -p "$BACKUP_DIR"
-    # mv -v --backup=t "$1" "$BACKUP_DIR/$(basename ${1}).backup"
-    mv -v "$1" "$BACKUP_DIR/$(basename ${1}).backup"
+    # mv -v --backup=t "$1" "$BACKUP_DIR/$(basename "$1").backup"
+    mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup"
   fi
 }
 
@@ -93,15 +90,17 @@ install_development_tools() {
     brew install coreutils openssh
     echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.zshrc
     echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.bashrc
-    brew install gnu-sed && ln -s $(which gsed) ~/.local/bin/sed
-    brew install findutils && ln -s $(which gxargs) ~/.local/bin/xargs
-    brew install gawk && ln -s $(which gawk) ~/.local/bin/awk
+    brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
+    brew install findutils && ln -s "$(which gxargs)" ~/.local/bin/xargs
+    brew install gawk && ln -s "$(which gawk)" ~/.local/bin/awk
     brew install gnu-tar
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
     log "Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc"
     defaults write -g ApplePressAndHoldEnabled -bool false  # enable key repeats
     log "Disabled ApplePressAndHoldEnabled to support key repeats"
-    # brew install --cask iterm2 rectangle maccy karabiner-elements alt-tab visual-studio-code
+    # brew install --cask rectangle maccy karabiner-elements alt-tab visual-studio-code
+    # brew tap wez/wezterm
+    # brew install --cask wez/wezterm/wezterm
   fi
 }
 
@@ -116,7 +115,7 @@ install_docker() {
   fi
   log "Installed docker, adding permissions.."
   sudo groupadd docker || true
-  sudo usermod -aG docker $USER
+  sudo usermod -aG docker "$USER"
   sudo systemctl restart docker || sudo service docker restart
   log "Installing docker-compose.."
   sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -129,10 +128,10 @@ install_java() {
   # https://github.com/shyiko/jabba/blob/3bb7cca8389753072e9f6fbb9fee6fdfa85ca57f/index.json#L833
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      curl -L -o- https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz | tar -xz -C $HOME/.local
+      curl -L -o- https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz | tar -xz -C "$HOME/.local"
       jdk_version=jdk-14.0.1
     else
-      curl -L -o- https://github.com/bell-sw/Liberica/releases/download/14.0.2+13/bellsoft-jdk14.0.2+13-linux-aarch64.tar.gz | tar -xz -C $HOME/.local
+      curl -L -o- https://github.com/bell-sw/Liberica/releases/download/14.0.2+13/bellsoft-jdk14.0.2+13-linux-aarch64.tar.gz | tar -xz -C "$HOME/.local"
       jdk_version=jdk-14.0.2
     fi
     echo "export PATH=\$HOME/.local/$jdk_version/bin:\$PATH" >> ~/.zshrc
@@ -160,19 +159,12 @@ install_python() {
     exit 1
   fi
   log "Installed python3 and pip3"
-  python3 -m venv ~/.local/python-packages
-  source ~/.local/python-packages/bin/activate && pip install bpytop && deactivate
-  echo -e "color_theme=\"dracula\"\nshow_init=False" >> ~/.config/bpytop/bpytop.conf
-  ln -s ~/.local/python-packages/bin/bpytop ~/.local/bin/bpytop
-  git clone https://github.com/facebook/PathPicker.git ~/.local/python-packages/PathPicker --depth=1
-  ln -s ~/.local/python-packages/PathPicker/fpp ~/.local/bin/fpp
-  log "Installed bpytop, fpp"
 }
 
 install_dotfiles() {
   log "\nCloning dotfiles.."
   backup "$HOME/.vim"
-  git clone https://github.com/joshuali925/.vim.git $HOME/.vim --depth 1
+  git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth 1
   log "\nCreating directories.."
   mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,node-packages,share/lf} ~/.config/{lf,bpytop,lazygit}
   log "\nLinking configurations.."
@@ -182,17 +174,18 @@ install_dotfiles() {
   log "Appended 'source ~/.vim/config/.bashrc' to ~/.bashrc"
   log "Appended 'source ~/.vim/config/.zshrc' to ~/.zshrc"
   log "Appended 'skip_global_compinit=1' to ~/.zshenv"
-  link_file $HOME/.vim/config/.tmux.conf $HOME/.tmux.conf
-  link_file $HOME/.vim/config/.gitconfig $HOME/.gitconfig
-  link_file $HOME/.vim/config/lfrc $HOME/.config/lf/lfrc
-  link_file $HOME/.vim/config/nvim $HOME/.config/nvim
-  link_file $HOME/.vim/config/lazygit_config.yml $HOME/.config/lazygit/config.yml
-  link_file $HOME/.vim/config/.ideavimrc $HOME/.ideavimrc
+  link_file "$HOME/.vim/config/.tmux.conf" "$HOME/.tmux.conf"
+  link_file "$HOME/.vim/config/.gitconfig" "$HOME/.gitconfig"
+  link_file "$HOME/.vim/config/lfrc" "$HOME/.config/lf/lfrc"
+  link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
+  link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/.config/lazygit/config.yml"
+  link_file "$HOME/.vim/config/.ideavimrc" "$HOME/.ideavimrc"
   if [ "$PLATFORM" == 'darwin' ]; then
-    mkdir -p ~/Library/Application\ Support/lazygit
+    mkdir -p ~/Library/Application\ Support/lazygit "$HOME/.config/wezterm"
     ln -sf ~/Library/Application\ Support ~/Library/ApplicationSupport
-    link_file $HOME/.vim/config/lazygit_config.yml $HOME/Library/ApplicationSupport/lazygit/config.yml
-    link_file $HOME/Library/ApplicationSupport/Code/User/snippets $HOME/.vsnip  # use vscode snipets for neovim vsnip plugin
+    link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/Library/ApplicationSupport/lazygit/config.yml"
+    link_file "$HOME/.vim/config/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
+    link_file "$HOME/Library/ApplicationSupport/Code/User/snippets" "$HOME/.vsnip"  # use vscode snipets for neovim vsnip plugin
     # link_file $HOME/.zshrc $HOME/.zprofile  # link .zshrc for MacVim
     mkdir -p ~/.config/karabiner/assets/complex_modifications
     cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
@@ -205,9 +198,9 @@ install_tmux() {
   log "Installing tmux.."
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-x86_64.tar.gz | tar xz -C $HOME/.local/bin tmux
+      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-x86_64.tar.gz | tar xz -C "$HOME/.local/bin" tmux
     else
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-arm64.tar.gz | tar xz -C $HOME/.local/bin tmux
+      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-arm64.tar.gz | tar xz -C "$HOME/.local/bin" tmux
     fi
   elif [ "$PLATFORM" == 'darwin' ]; then
     brew install tmux --HEAD
@@ -223,12 +216,12 @@ install_tmux() {
     log "Installing tmux-thumbs binaries.."
     if [ "$PLATFORM" == 'linux' ]; then
       if [ "$ARCHITECTURE" == 'x86_64' ]; then
-        curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-x86_64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
+        curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
       else
-        curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-arm64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
+        curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-arm64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
       fi
     elif [ "$PLATFORM" == 'darwin' ]; then
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-darwin-x86_64.tar.gz | tar xz -C $HOME/.tmux/plugins/tmux-thumbs
+      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-darwin-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
     fi
   fi
   echo
@@ -242,7 +235,7 @@ install_node() {
   log "Installing node $NODE_VERSION.."
   nvm install "$NODE_VERSION"
   nvm alias default "$NODE_VERSION"
-  node --version && ln -sf $(which node) ~/.local/bin/node && ln -sf $(which npm) ~/.local/bin/npm
+  node --version && ln -sf "$(which node)" ~/.local/bin/node && ln -sf "$(which npm)" ~/.local/bin/npm
   log "Installing yarn.."
   curl -o- -L https://yarnpkg.com/install.sh | bash
   ln -sf ~/.yarn/bin/yarn ~/.local/bin/yarn
@@ -260,7 +253,7 @@ install_neovim() {
   backup "$HOME/.local/nvim"
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      curl -LO https://github.com/neovim/neovim/releases/download/$tag/nvim.appimage
+      curl -LO "https://github.com/neovim/neovim/releases/download/$tag/nvim.appimage"
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
       mv squashfs-root ~/.local/nvim && ln -sf ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
 
@@ -272,7 +265,7 @@ install_neovim() {
       ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
     fi
   elif [ "$PLATFORM" == 'darwin' ]; then
-    curl -L -o- https://github.com/neovim/neovim/releases/download/$tag/nvim-macos.tar.gz | tar xz -C ~/.local
+    curl -L -o- "https://github.com/neovim/neovim/releases/download/$tag/nvim-macos.tar.gz" | tar xz -C ~/.local
     mv ~/.local/nvim-osx64 ~/.local/nvim
     ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
   else
@@ -296,15 +289,17 @@ install_neovim() {
 
 setup_ssh_key() {
   # ssh-keygen -t rsa -b 4096 -C ""
-  ssh-keygen -t ed25519 -C "" -N "" -f $HOME/.ssh/id_ed25519
+  ssh-keygen -t ed25519 -C "" -N "" -f "$HOME/.ssh/id_ed25519"
   cat ~/.ssh/id_ed25519.pub
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
 }
 
 install() {
+  shift 1
   [ -z "$1" ] && usage
+  init
   for package in "$@"; do
-    case "$package" in
+    case $package in
       devtools)   install_development_tools ;;
       dotfiles)   install_dotfiles ;;
       docker)     install_docker ;;
@@ -319,32 +314,38 @@ install() {
   done
 }
 
-if [ -n "$1" ]; then
-  command="$1"
-  shift 1
-  case "$command" in
-    install)   install "$@" ;;
-    *)         usage ;;
-  esac
-  exit
-fi
+init() {
+  set -e
+  cd "$HOME"
+  detect-env
+}
 
-log "Installing for $PLATFORM"
-install_development_tools
-install_dotfiles
-install_java
-install_python
-install_node
-install_tmux
-install_neovim
+default-install() {
+  init
+  log "Installing for $PLATFORM"
+  install_development_tools
+  install_dotfiles
+  install_java
+  install_python
+  install_node
+  install_tmux
+  install_neovim
 
-log "\nInstalling zsh plugins.."
-zsh  # auto exit makes installing binaries to fail for some reason
+  log "\nInstalling zsh plugins.."
+  zsh  # auto exit makes installing binaries to fail for some reason
 
-setup_ssh_key
-log "\nRun one of these commands to set default shell to zsh:"
-log "${YELLOW}"'sudo chsh -s $(which zsh) $(whoami)'
-log "${YELLOW}sed -i -e '1i[ -t 1 ] && exec zsh\' ~/.bashrc  ${BLACK}# run zsh when bash starts"
-log "${YELLOW}sudo vim /etc/passwd"
+  setup_ssh_key
+  log "\nRun one of these commands to set default shell to zsh:"
+  log "${YELLOW}"'sudo chsh -s $(which zsh) $(whoami)'
+  log "${YELLOW}sed -i -e '1i[ -t 1 ] && exec zsh\' ~/.bashrc  ${BLACK}# run zsh when bash starts"
+  log "${YELLOW}sudo vim /etc/passwd"
 
-log "\nFinished, exiting.."
+  log "\nFinished, exiting.."
+}
+
+case $1 in
+  '')         default-install ;;
+  install)    install "$@" ;;
+  detect-env) detect-env ;;
+  *)          usage ;;
+esac

@@ -5,7 +5,7 @@ if [ "$PLATFORM" == 'darwin' ]; then
   install-from-url jq $(curl -s https://api.github.com/repos/stedolan/jq/releases/latest | grep "browser_download_url.*jq-osx-amd64" | cut -d '"' -f 4) "$@"
 else
   if [ "$ARCHITECTURE" != 'x86_64' ]; then
-    echo "architecture not supported, exiting.." >&2
+    echo "[installing $0] architecture not supported, exiting.." >&2
     exit 1
   fi
   install-from-url jq $(curl -s https://api.github.com/repos/stedolan/jq/releases/latest | grep "browser_download_url.*jq-linux64" | cut -d '"' -f 4) "$@"

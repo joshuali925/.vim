@@ -175,6 +175,7 @@ cmd x ${{
       *.rar)       unrar x "$filename"     ;;
       *.gz)        gunzip "$filename"      ;;
       *.tar)       tar xvf "$filename"     ;;
+      *.tbz)       tar xvjf "$filename"    ;;
       *.tbz2)      tar xvjf "$filename"    ;;
       *.tgz)       tar xvzf "$filename"    ;;
       *.zip)       unzip "$filename"       ;;
@@ -205,6 +206,7 @@ cmd X ${{
       *.rar)       unrar x "$filename"     ;;
       *.gz)        gunzip "$filename"      ;;
       *.tar)       tar xvf "$filename"     ;;
+      *.tbz)       tar xvjf "$filename"    ;;
       *.tbz2)      tar xvjf "$filename"    ;;
       *.tgz)       tar xvzf "$filename"    ;;
       *.zip)       unzip "$filename"       ;;
