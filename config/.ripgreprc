@@ -3,3 +3,4 @@
 --glob=!.git
 --smart-case
 --hidden
+--auto-hybrid-regex

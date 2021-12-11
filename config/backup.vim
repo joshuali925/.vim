@@ -2687,4 +2687,69 @@ function M.auto_pairs()
     vim.fn.AutoPairsTryInit()
 end
 
+" =======================================================
+" python packages
+  python3 -m venv ~/.local/python-packages
+  source ~/.local/python-packages/bin/activate && pip install bpytop && deactivate
+  echo -e "color_theme=\"dracula\"\nshow_init=False" >> ~/.config/bpytop/bpytop.conf
+  ln -s ~/.local/python-packages/bin/bpytop ~/.local/bin/bpytop
+  git clone https://github.com/facebook/PathPicker.git ~/.local/python-packages/PathPicker --depth=1
+  ln -s ~/.local/python-packages/PathPicker/fpp ~/.local/bin/fpp
+  log "Installed bpytop, fpp"
+alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
+
+" =======================================================
+" startify
+            use {
+                "mhinz/vim-startify",
+                cond = function()
+                    return vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1
+                end,
+                config = get_config("startify")
+            }
+            {"Open &Startify", [[execute "PackerLoad! vim-startify" | Startify]], "Open vim-startify"},
+            {
+                "Save sessi&on",
+                [[execute "PackerLoad! vim-startify" | SSave!]],
+                "Save as a new session using vim-startify"
+            },
+            {"Delete session", [[execute "PackerLoad! vim-startify" | SDelete!]], "Delete a session using vim-startify"},
+function M.startify()
+    function _G.webDevIcons(path)
+        local filename = vim.fn.fnamemodify(path, ":t")
+        local extension = vim.fn.fnamemodify(path, ":e")
+        return require("nvim-web-devicons").get_icon(filename, extension, {default = true})
+    end
+    vim.cmd [[
+        function! StartifyEntryFormat() abort
+            return 'v:lua.webDevIcons(absolute_path). " ". entry_path'
+        endfunction
+    ]]
+    g.startify_session_dir = "~/.cache/nvim/sessions"
+    g.startify_enable_special = 0
+    g.startify_fortune_use_unicode = 1
+    g.startify_commands = {
+        {["!"] = {"Git diff unstaged", ":args `Git ls-files --modified` | Git difftool"}},
+        {["+"] = {"Git diff HEAD", "DiffviewOpen"}},
+        {
+            ["*"] = {
+                "Git diff remote",
+                "execute 'DiffviewOpen '. trim(system('git rev-parse --abbrev-ref --symbolic-full-name @{u}')). '..HEAD'"
+            }
+        },
+        {o = {"Git log", "Flog"}},
+        {["\\"] = {"Open quickui", "call quickui#menu#open('normal')"}},
+        {f = {"Find files", "lua require('telescope.builtin').find_files({hidden = true})"}},
+        {m = {"Find MRU", "lua require('telescope.builtin').oldfiles({include_current_session = true})"}},
+        {c = {"Edit vimrc", "edit $MYVIMRC"}},
+        {s = {"Profile startup time", "StartupTime"}},
+        {D = {"Delete session", "SDelete!"}}
+    }
+    g.startify_lists = {
+        {type = "files", header = {"   MRU"}},
+        {type = "dir", header = {"   MRU " .. vim.loop.cwd()}},
+        {type = "commands", header = {"   Commands"}},
+        {type = "sessions", header = {"   Sessions"}}
+    }
+end
 

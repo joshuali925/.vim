@@ -65,6 +65,7 @@ endfunction
 
 function! funcs#quit(buffer_mode, force) abort
   let l:buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
+  let l:win_len = has('nvim') ? len(filter(nvim_list_wins(), {k, v -> nvim_win_get_config(v).relative == ''})) : winnr('$')  " exclude nvim floating windows
   if a:buffer_mode == 0 && a:force == 1
     if tabpagenr('$') == 1
       quit
@@ -72,7 +73,7 @@ function! funcs#quit(buffer_mode, force) abort
       tabclose
     endif
   " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; two windows but the other one is file tree
-  elseif ((a:buffer_mode == 1 || tabpagenr('$') == 1 && winnr('$') == 1) && l:buf_len > 1) || (winnr('$') == 2 && getbufvar(winbufnr(3 - winnr()), '&filetype') == 'NvimTree' && (l:buf_len > 1 || bufname('%') != ''))
+  elseif (l:buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && l:win_len == 1)) || (l:win_len == 2 && getbufvar(winbufnr(3 - winnr()), '&filetype') == 'NvimTree' && (l:buf_len > 1 || bufname('%') != ''))
     if exists(':Bdelete')
       try
         execute 'Bdelete'. (a:force ? '!' : '')
