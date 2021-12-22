@@ -55,6 +55,7 @@ map gs !clear && git status
 map gr cd-git-root
 map gl follow-symlink
 map t locate-file
+map T locate-file-no-ignore
 map <c-p> locate-git-file
 map <c-o> $lazygit
 map <tab> locate-file-cwd
@@ -105,6 +106,15 @@ cmd locate-file-cwd ${{
 
 cmd locate-file ${{
   res="$(rg --files | fzf --bind 'tab:down,btab:up')"
+  if [ -f "$res" ]; then
+    lf -remote "send $id select \"$res\""
+  elif [ -d "$res" ]; then
+    lf -remote "send $id cd \"$res\""
+  fi
+}}
+
+cmd locate-file-no-ignore ${{
+  res="$(rg --files --no-ignore | fzf --bind 'tab:down,btab:up')"
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then

@@ -27,6 +27,7 @@ local wezterm = require "wezterm"
 ) ]]
 return {
     use_ime = true,
+    font = wezterm.font_with_fallback({"JetBrains Mono", "JetBrainsMono Nerd Font", "JetBrainsMono NF"}),
     font_rules = {
         {
             italic = false,

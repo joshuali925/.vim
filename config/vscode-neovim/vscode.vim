@@ -124,10 +124,10 @@ nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
-nnoremap <leader>l :call <SID>PrintCurrVars(0, 0)<CR>
-xnoremap <leader>l :<C-u>call <SID>PrintCurrVars(1, 0)<CR>
-nnoremap <leader>L :call <SID>PrintCurrVars(0, 1)<CR>
-xnoremap <leader>L :<C-u>call <SID>PrintCurrVars(1, 1)<CR>
+nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
+xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
+nnoremap <leader>L :call funcs#print_variable(0, 1)<CR>
+xnoremap <leader>L :<C-u>call funcs#print_variable(1, 1)<CR>
 nnoremap <leader>tu :call VSCodeNotify('workbench.action.reopenClosedEditor')<CR>
 nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
 nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
@@ -194,21 +194,6 @@ function! s:RunCode()
   else
     call VSCodeNotify('code-runner.run')
   endif
-endfunction
-function! s:PrintCurrVars(visual, printAbove)
-  let l:new_line = a:printAbove ? 'O' : 'o'
-  let l:word = a:visual ? funcs#get_visual_selection() : expand('<cword>')
-  let l:print = {}
-  let l:print['python'] = "print('". l:word. "', ". l:word. ')'
-  let l:print['javascript'] = "console.log('". l:word. "', ". l:word. ');'
-  let l:print['javascriptreact'] = l:print['javascript']
-  let l:print['typescript'] = l:print['javascript']
-  let l:print['typescriptreact'] = l:print['javascript']
-  let l:print['java'] = 'System.out.println("'. l:word. '" + '. l:word. ');'
-  let l:print['vim'] = "echomsg '". l:word. "' ". l:word
-  let l:pos = getcurpos()
-  execute 'normal! '. l:new_line. get(l:print, &filetype, l:print['javascript'])
-  call setpos('.', l:pos)
 endfunction
 
 let g:wordmotion_nomap = 1

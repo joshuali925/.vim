@@ -8,7 +8,7 @@ else
         command! PackerClean lua require('plugins').clean()
         command! PackerCompile lua require('plugins').compile()
         command! PackerStatus lua require('plugins').status()
-        command! -bang -nargs=+ -complete=customlist,v:lua.require'packer'.loader_complete PackerLoad lua require('packer').loader(<f-args>, '<bang>' == '!')
+        command! -bang -nargs=+ -complete=customlist,v:lua.require('packer').loader_complete PackerLoad lua require('packer').loader(<f-args>, '<bang>' == '!')
     ]]
     require("packer_compiled")
 end

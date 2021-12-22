@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-if [ $(readlink -f $HOME/.tmux.conf) != "$HOME/.vim/config/.tmux.conf" ]; then
-  if [ -f $HOME/.tmux.conf ]; then
-    read -p "~/.tmux.conf exists, rename to ~/.tmux.conf.bak? (y/n) " -n 1;
+if [ "$(readlink -f "$HOME/.tmux.conf")" != "$HOME/.vim/config/.tmux.conf" ]; then
+  if [ -f "$HOME/.tmux.conf" ]; then
+    read -p '~/.tmux.conf exists, rename to ~/.tmux.conf.bak? (y/n) ' -n 1;
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       mv -iv ~/.tmux.conf ~/.tmux.conf.bak
@@ -10,7 +10,7 @@ if [ $(readlink -f $HOME/.tmux.conf) != "$HOME/.vim/config/.tmux.conf" ]; then
   ln -sv ~/.vim/config/.tmux.conf ~/.tmux.conf
 fi
 
-if [ ! -x $HOME/.local/bin/tmux ]; then
-  $HOME/.vim/install.sh install tmux
+if [ ! -x "$HOME/.local/bin/tmux" ]; then
+  "$HOME/.vim/install.sh" install tmux
 fi
-$HOME/.local/bin/tmux "$@"
+"$HOME/.local/bin/tmux" "$@"

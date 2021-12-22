@@ -50,11 +50,12 @@ alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
 alias btop='btop -p 1'
-alias croc='croc --curve p256'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
+alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
+alias rga='rg --text --no-ignore --search-zip'
 alias rgf='rg --files | rg'
 alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
 alias xcp="rsync -aviHKhSPz --one-file-system --delete --filter=':- .gitignore'"
@@ -423,7 +424,7 @@ t() {  # create, restore, or switch tmux session
     FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP"
     if [ "$?" -ne 0 ]; then
       SESSIONS=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
-      [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --bind='tab:down,btab:up' --tac --select-1 --preview='cat {}') && {
+      [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --bind='tab:down,btab:up' --tac --preview='cat {}') && {
         ln -sf "$FZFTEMP" ~/.tmux/resurrect/last
         tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
         tmux attach-session
@@ -489,6 +490,25 @@ linedo() {
   done
 }
 
+croc() {
+  local line phrase
+  if [ "$#" -eq 0 ]; then
+    command croc
+  elif grep -q '^[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$1"; then
+    command croc --curve p256 --yes "$@"
+  elif [ -e "$1" ] || [ "$1" = send ]; then
+    [ "$1" = send ] && shift 1
+    timeout 60 command croc send "$@" |& {
+      while read line; do
+        echo "$line"
+        [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$line") && echo -n "command croc --curve p256 --yes $phrase" | oscyank
+      done
+    }
+  else
+    command croc "$@"
+  fi
+}
+
 _load_nvm() {
   unset -f _load_nvm nvm npx node yarn
   export NVM_DIR=~/.nvm
@@ -534,6 +554,9 @@ ec2() {
   fi
 }
 
+# ====================== MacOS ==========================
+alias idea='open -na "IntelliJ IDEA.app" --args'
+alias ideace='open -na "IntelliJ IDEA CE.app" --args'
 browser-history() {
   [ "$(uname -s)" != Darwin ] && echo "Only supports MacOS, exiting.." && return 1
   local COLS SEP FZFTEMP FZFPROMPT

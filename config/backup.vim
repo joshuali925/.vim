@@ -2686,6 +2686,8 @@ function M.auto_pairs()
     g.AutoPairsMapCh = 0
     vim.fn.AutoPairsTryInit()
 end
+" .git root
+    <Cmd>lua require('telescope.builtin').find_files({hidden = true, cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p'))})<CR>
 
 " =======================================================
 " python packages
@@ -2753,3 +2755,33 @@ function M.startify()
     }
 end
 
+" =======================================================
+function! funcs#print_curr_vars(visual, printAbove) abort
+  let l:new_line = "normal! o\<Space>\<BS>"
+  if a:printAbove
+    let l:new_line = "normal! O\<Space>\<BS>"
+  endif
+  if a:visual  " print selection
+    let l:vars = [getline('.')[getpos("'<")[2] - 1:getpos("'>")[2] - 1]]
+  elseif getline('.') =~ '[^a-zA-Z0-9_,\[\]. ]\|[a-zA-Z0-9_\]]\s\+\w'  " print variable under cursor if line not comma separated
+    let l:vars = [expand('<cword>')]
+  else  " print variables on current line separated by commas
+    let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
+    let l:new_line = "normal! cc\<Space>\<BS>"
+  endif
+  let l:print = {}
+  let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
+  let l:print['javascript'] = 'console.log('. join(map(copy(l:vars), "\"'\". v:val. \":', \". v:val"), ", '|', "). ');'
+  let l:print['typescript'] = l:print['javascript']
+  let l:print['typescriptreact'] = l:print['javascript']
+  let l:print['java'] = 'System.out.println('. join(map(copy(l:vars), "'\"'. v:val. ': \" + '. v:val"), ' + " | " + '). ');'
+  let l:print['vim'] = 'echomsg '. join(map(copy(l:vars), "\"'\". v:val. \": '. \". v:val"), ". ' | '. ")
+  let l:print['lua'] = 'print('. join(map(copy(l:vars), "\"'\". v:val. \": ' .. \". v:val"), " .. ' | ' .. "). ')'
+  if has_key(l:print, &filetype)
+    let l:pos = getcurpos()
+    execute l:new_line
+    call append(line('.'), l:print[&filetype])
+    join
+    call setpos('.', l:pos)
+  endif
+endfunction

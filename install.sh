@@ -126,25 +126,33 @@ install_docker() {
 install_java() {
   # https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
   # https://github.com/shyiko/jabba/blob/3bb7cca8389753072e9f6fbb9fee6fdfa85ca57f/index.json#L833
+  local jdk_version jdk_url
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      curl -L -o- https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz | tar -xz -C "$HOME/.local"
+      jdk_url=https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz
       jdk_version=jdk-14.0.1
     else
-      curl -L -o- https://github.com/bell-sw/Liberica/releases/download/14.0.2+13/bellsoft-jdk14.0.2+13-linux-aarch64.tar.gz | tar -xz -C "$HOME/.local"
+      jdk_url=https://github.com/bell-sw/Liberica/releases/download/14.0.2+13/bellsoft-jdk14.0.2+13-linux-aarch64.tar.gz
       jdk_version=jdk-14.0.2
     fi
-    echo "export PATH=\$HOME/.local/$jdk_version/bin:\$PATH" >> ~/.zshrc
-    echo "export JAVA_HOME=\$HOME/.local/$jdk_version" >> ~/.zshrc
   elif [ "$PLATFORM" == 'darwin' ]; then
-    brew tap AdoptOpenJDK/openjdk
-    brew install --cask adoptopenjdk14
-    jdk_version=jdk-14
-    echo "export JAVA_HOME=$(/usr/libexec/java_home)" >> ~/.zshrc
+    if [ "$ARCHITECTURE" == 'x86_64' ]; then
+      # brew tap AdoptOpenJDK/openjdk && brew install --cask adoptopenjdk14
+      # echo "export JAVA_HOME=$(/usr/libexec/java_home)" >> ~/.zshrc
+      # return 0
+      jdk_url=https://cdn.azul.com/zulu/bin/zulu14.29.23-ca-jdk14.0.2-macosx_x64.tar.gz
+      jdk_version=zulu14.29.23-ca-jdk14.0.2-macosx_x64
+    else
+      jdk_url=https://cdn.azul.com/zulu/bin/zulu15.36.13-ca-jdk15.0.5-macosx_aarch64.tar.gz
+      jdk_version=zulu15.36.13-ca-jdk15.0.5-macosx_aarch64
+    fi
   else
     echo "Unknown distro.."
     exit 1
   fi
+  curl -L -o- "$jdk_url" | tar -xz -C "$HOME/.local"
+  echo "export PATH=\$HOME/.local/$jdk_version/bin:\$PATH" >> ~/.zshrc
+  echo "export JAVA_HOME=\$HOME/.local/$jdk_version" >> ~/.zshrc
   log "Installed $jdk_version, exported JAVA_HOME to ~/.zshrc, restart your shell"
 }
 
@@ -177,7 +185,6 @@ install_dotfiles() {
   link_file "$HOME/.vim/config/.tmux.conf" "$HOME/.tmux.conf"
   link_file "$HOME/.vim/config/.gitconfig" "$HOME/.gitconfig"
   link_file "$HOME/.vim/config/lfrc" "$HOME/.config/lf/lfrc"
-  link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
   link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/.config/lazygit/config.yml"
   link_file "$HOME/.vim/config/.ideavimrc" "$HOME/.ideavimrc"
   if [ "$PLATFORM" == 'darwin' ]; then
@@ -250,6 +257,7 @@ install_node() {
 
 install_neovim() {
   local tag=$(curl -s https://github.com/neovim/neovim/releases/latest | sed 's#.*tag/\(.*\)\".*#\1#')
+  link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
   backup "$HOME/.local/nvim"
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
