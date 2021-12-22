@@ -1,6 +1,8 @@
 local g = vim.g
 local opt = vim.opt
 
+require("current-theme")
+
 g.did_load_filetypes = 1
 g.loaded_matchparen = 1
 g.loaded_matchit = 1

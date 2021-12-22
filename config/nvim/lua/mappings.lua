@@ -66,7 +66,7 @@ map("n", "<leader>Y", '"+y$')
 map(
     "n",
     "<leader>b",
-    "<Cmd>if !get(g:, 'nvim_tree_git_hl', 0) <bar> execute 'lua require([[packer]]).loader([[nvim-tree.lua]])' <bar> sleep 100m <bar> endif <bar> NvimTreeFindFile<CR>"
+    [[<Cmd>if !get(g:, 'nvim_tree_git_hl', 0) <bar> execute 'lua require("packer").loader("nvim-tree.lua")' <bar> sleep 100m <bar> endif <bar> NvimTreeFindFile<CR>]]
 )
 map("n", "<leader>B", "<Cmd>NvimTreeToggle<CR>")
 map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], {noremap = true, silent = true})
@@ -84,10 +84,10 @@ map(
     "<leader>s",
     [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/gc<Left><Left><Left>]]
 )
-map("n", "<leader>l", "<Cmd>call funcs#print_curr_vars(0, 0)<CR>")
-map("x", "<leader>l", "<Cmd>call funcs#print_curr_vars(1, 0)<CR>")
-map("n", "<leader>L", "<Cmd>call funcs#print_curr_vars(0, 1)<CR>")
-map("x", "<leader>L", "<Cmd>call funcs#print_curr_vars(1, 1)<CR>")
+map("n", "<leader>l", "<Cmd>call funcs#print_variable(0, 0)<CR>")
+map("x", "<leader>l", ":<C-u>call funcs#print_variable(1, 0)<CR>")
+map("n", "<leader>L", "<Cmd>call funcs#print_variable(0, 1)<CR>")
+map("x", "<leader>L", ":<C-u>call funcs#print_variable(1, 1)<CR>")
 map("n", "<leader>tm", "<Cmd>TableModeToggle<CR>")
 map("i", "<leader>w", "<Esc><Cmd>update<CR>")
 map("n", "<leader>w", "<Cmd>update<CR>")
@@ -99,13 +99,13 @@ map("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
 map(
     "n",
     "yoq",
-    "empty(filter(getwininfo(), 'v:val.quickfix')) ? ':copen<CR>' : ':cclose<CR>'",
+    "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'",
     {expr = true, noremap = true}
 )
 map(
     "n",
     "yol",
-    "empty(filter(getwininfo(), 'v:val.loclist')) ? ':lopen<CR>' : ':lclose<CR>'",
+    "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'",
     {expr = true, noremap = true}
 )
 map(
@@ -114,6 +114,7 @@ map(
     "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <bar> -tabedit %<CR><Cmd>call winrestview(g:temp) <bar> let b:is_zoomed = 1<CR>' : get(b:, 'is_zoomed', 0) ? '<Cmd>tabclose<CR>' : ''",
     {expr = true, noremap = true}
 )
+map("c", "<S-Del>", "<BS>")
 map("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", {expr = true, noremap = true})
 map("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", {expr = true, noremap = true})
 map("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], {expr = true, noremap = true})
@@ -270,17 +271,8 @@ map("t", "<C-l>", "<Cmd>lua require('tmux').move_right()<CR>")
 
 -- telescope
 -- TODO multi select issue https://github.com/nvim-telescope/telescope.nvim/issues/416
-map(
-    "n",
-    "<C-p>",
-    "<Cmd>lua require('telescope.builtin').find_files({hidden = true, cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p'))})<CR>"
-)
+map("n", "<C-p>", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>")
 map("n", "<leader>fs", "<C-p>", {})
-map(
-    "n",
-    "<leader>fd",
-    "<Cmd>lua require('telescope.builtin').file_browser({cwd = vim.fn.expand('%:h'), hidden = true})<CR>"
-)
 map("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
 map("n", "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR><Esc>")
 map(
@@ -289,32 +281,13 @@ map(
     "<Cmd>lua require('telescope.builtin')[next(vim.lsp.buf_get_clients()) == nil and 'treesitter' or 'lsp_document_symbols']()<CR>"
 )
 map("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
-map("n", "<leader>fg", ":lua require('utils').telescope_grep(true, [[]])<Left><Left><Left>")
-map(
-    "x",
-    "<leader>fg",
-    ":<C-u>lua require('utils').telescope_grep(false, [[<C-r>=funcs#get_visual_selection()<CR>]])<Left><Left><Left>"
-)
-map(
-    "n",
-    "<leader>fj",
-    ":lua require('utils').telescope_grep(true, [[\\b<C-r>=expand('<cword>')<CR>\\b]])<CR>",
-    {noremap = true, silent = true}
-)
-map(
-    "x",
-    "<leader>fj",
-    ":lua require('utils').telescope_grep(false, [[<C-r>=funcs#get_visual_selection()<CR>]])<CR>",
-    {noremap = true, silent = true}
-)
+map("n", "<leader>fg", ":GrepRegex ")
+map("x", "<leader>fg", ":<C-u>GrepRegex <C-r>=funcs#get_visual_selection()<CR>")
+map("n", "<leader>fj", ":GrepRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>", {noremap = true, silent = true})
+map("x", "<leader>fj", ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>", {noremap = true, silent = true})
 map("n", "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
 map("n", "<leader>fl", "<Cmd>lua require('telescope.builtin').loclist()<CR>")
-map(
-    "n",
-    "<leader>fL",
-    "<Cmd>lua require('telescope.builtin').live_grep({cwd = require('lspconfig.util').root_pattern('.git')(vim.fn.expand('%:p'))})<CR>",
-    {noremap = true, silent = true}
-)
+map("n", "<leader>fL", "<Cmd>lua require('telescope.builtin').live_grep()<CR>")
 map("n", "<leader>fa", "<Cmd>lua require('telescope.builtin').commands()<CR>")
 map("n", "<leader>ft", "<Cmd>lua require('telescope.builtin').filetypes()<CR>")
 map("n", "<leader>ff", "<Cmd>lua require('telescope.builtin').builtin()<CR>")
@@ -335,7 +308,11 @@ map("n", "<leader>d", "<Cmd>lua vim.lsp.buf.implementation()<CR>")
 map("n", "gr", "<Cmd>lua vim.lsp.buf.references()<CR>")
 map("n", "<leader>a", "<Cmd>CodeActionMenu<CR>")
 map("x", "<leader>a", ":<C-u>CodeActionMenu<CR>")
-map("n", "gh", "<Cmd>lua vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'})<CR>")
+map(
+    "n",
+    "gh",
+    "<Cmd>lua if vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'}) == nil then vim.lsp.buf.hover() end<CR>"
+)
 map("n", "<leader>R", "<Cmd>lua vim.lsp.buf.rename()<CR>")
 map("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({float = {border = 'rounded'}})<CR>")
 map("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({float = {border = 'rounded'}})<CR>")

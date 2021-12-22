@@ -14,7 +14,6 @@ vim.cmd("command! LspInstallAll call v:lua.lsp_install_all()")
 local timer = vim.loop.new_timer()
 local function on_attach(client, bufnr)
     -- vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
-
     if client.resolved_capabilities.document_highlight then
         function _G.lsp_document_highlight()
             timer:start(
@@ -129,7 +128,7 @@ vim.g.diagnostics_visible = true
 function _G.toggle_diagnostics()
     if vim.g.diagnostics_visible then
         vim.g.diagnostics_visible = false
-        vim.lsp.diagnostic.clear(0)
+        vim.diagnostic.hide()
         vim.lsp.handlers["textDocument/publishDiagnostics"] = function()
         end
     else
@@ -148,20 +147,23 @@ function _G.toggle_diagnostics()
 end
 
 -- https://github.com/neovim/nvim-lspconfig/issues/69#issuecomment-789541466
-function _G.quickfix_all_diagnostics()
+function _G.quickfix_all_diagnostics(severity)
+    severity = severity or 99
     local diagnostics = vim.lsp.diagnostic.get_all()
     local qflist = {}
     for bufnr, diagnostic in pairs(diagnostics) do
         for _, d in ipairs(diagnostic) do
-            table.insert(
-                qflist,
-                {
-                    bufnr = bufnr,
-                    lnum = d.range.start.line + 1,
-                    col = d.range.start.character + 1,
-                    text = d.message
-                }
-            )
+            if d.severity <= severity then
+                table.insert(
+                    qflist,
+                    {
+                        bufnr = bufnr,
+                        lnum = d.range.start.line + 1,
+                        col = d.range.start.character + 1,
+                        text = d.message
+                    }
+                )
+            end
         end
     end
     vim.lsp.util.set_qflist(qflist)

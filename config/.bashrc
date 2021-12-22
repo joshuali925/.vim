@@ -32,6 +32,7 @@ bind '"\eOA": history-search-backward'
 bind '"\eOB": history-search-forward'
 bind '"\e[1;5D": backward-word'
 bind '"\e[1;5C": forward-word'
+bind '"\e[3;2~": backward-delete-char'
 bind -x '"\C-o":"lf"'
 
 # same as in zsh, 'C-x a' expands aliases

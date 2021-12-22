@@ -155,10 +155,10 @@ nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
 xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
-nnoremap <leader>l :call funcs#print_curr_vars(0, 0)<CR>
-xnoremap <leader>l :<C-u>call funcs#print_curr_vars(1, 0)<CR>
-nnoremap <leader>L :call funcs#print_curr_vars(0, 1)<CR>
-xnoremap <leader>L :<C-u>call funcs#print_curr_vars(1, 1)<CR>
+nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
+xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
+nnoremap <leader>L :call funcs#print_variable(0, 1)<CR>
+xnoremap <leader>L :<C-u>call funcs#print_variable(1, 1)<CR>
 inoremap <leader>w <Esc>:update<CR>
 " do not use <leader> for sudoedit to work
 nnoremap ;w :update<CR>

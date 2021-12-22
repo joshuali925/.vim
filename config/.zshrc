@@ -158,6 +158,7 @@ bindkey '^[[A' up-line-or-beginning-search
 bindkey '^[[B' down-line-or-beginning-search
 bindkey '^[[1;2A' up-line-or-local-history    # <S-Up>
 bindkey '^[[1;2B' down-line-or-local-history  # <S-Down>
+bindkey '^[[3;2~' backward-delete-char        # <S-Del>
 bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
 bindkey '^i' tab-complete-or-cd

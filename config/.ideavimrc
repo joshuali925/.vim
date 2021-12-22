@@ -154,7 +154,7 @@ omap ai <Plug>textobj-indent-aI
 xmap aI <Plug>textobj-indent-ai
 omap aI <Plug>textobj-indent-ai
 
-nnoremap <leader>l mx"xyiwoprintln(<C-r>x)<Esc>`x
-nnoremap <leader>L mx"xyiwOprintln(<C-r>x)<Esc>`x
-xnoremap <leader>l mx"xyoprintln(<C-r>x)<Esc>`x
-xnoremap <leader>L mx"xyOprintln(<C-r>x)<Esc>`x
+nnoremap <leader>l mx"xyiwoSystem.out.println("[" + getClass().getName() + "] DEBUGGING ❗<C-r>x: " + <C-r>x);<Esc>`x
+xnoremap <leader>l mx"xyoSystem.out.println("[" + getClass().getName() + "] DEBUGGING ❗<C-r>x: " + <C-r>x);<Esc>`x
+nnoremap <leader>L mx"xyiwOSystem.out.println("[" + getClass().getName() + "] DEBUGGING ❗<C-r>x: " + <C-r>x);<Esc>`x
+xnoremap <leader>L mx"xyOSystem.out.println("[" + getClass().getName() + "] DEBUGGING ❗<C-r>x: " + <C-r>x);<Esc>`x

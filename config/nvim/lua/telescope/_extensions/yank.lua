@@ -70,4 +70,4 @@ local search_yank = function(opts)
     ):find()
 end
 
-return require("telescope").register_extension {exports = {history = search_yank}}
+return require("telescope").register_extension({exports = {history = search_yank}})

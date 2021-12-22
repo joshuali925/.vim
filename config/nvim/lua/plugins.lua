@@ -14,27 +14,53 @@ return require("packer").startup(
             opt_default = true,
             -- https://github.com/wbthomason/packer.nvim/issues/456
             -- max_jobs = 10, -- this fixes above issue but breaks plugin installing in headless nvim
-            display = {
-                open_fn = require("packer.util").float
-            },
-            profile = {
-                enable = false
-            },
+            display = { open_fn = require("packer.util").float },
+            profile = { enable = false },
             compile_path = vim.fn.stdpath("config") .. "/lua/packer_compiled.lua" -- impatient.nvim
         },
         function(use)
             use {"wbthomason/packer.nvim"}
 
             -- appearance
-            use {"folke/tokyonight.nvim", event = "VimEnter", config = get_config("tokyonight")}
+            use {
+                "folke/tokyonight.nvim",
+                cond = "require('themes').theme == 'tokyonight.nvim'",
+                event = "BufEnter",
+                config = "require('themes').config()"
+            }
+            use {
+                "eddyekofo94/gruvbox-flat.nvim",
+                cond = "require('themes').theme == 'gruvbox-flat.nvim'",
+                event = "BufEnter",
+                config = "require('themes').config()"
+            }
+            use {
+                "projekt0n/github-nvim-theme",
+                cond = "require('themes').theme == 'github-nvim-theme'",
+                event = "BufEnter",
+                config = "require('themes').config()"
+            }
+            use {
+                "catppuccin/nvim",
+                as = "catppuccin",
+                cond = "require('themes').theme == 'catppuccin'",
+                event = "BufEnter",
+                config = "require('themes').config()"
+            }
+            use {
+                "Mofiqul/vscode.nvim",
+                cond = "require('themes').theme == 'vscode.nvim'",
+                event = "BufEnter",
+                config = "require('themes').config()"
+            }
             use {
                 "akinsho/nvim-bufferline.lua",
-                after = "tokyonight.nvim",
+                event = "VimEnter",
                 config = function()
                     require("bufferline").setup({highlights = {buffer_selected = {gui = "bold"}}})
                 end
             }
-            use {"NTBBloodbath/galaxyline.nvim", event = "VimEnter", config = get_config("galaxyline")}
+            use {"feline-nvim/feline.nvim", event = "VimEnter", config = get_config("feline_nvim")}
             use {"lukas-reineke/indent-blankline.nvim", setup = get_config("setup_indent_blankline")}
             use {
                 "DarwinSenior/nvim-colorizer.lua",
@@ -61,18 +87,23 @@ return require("packer").startup(
             use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = get_config("setup_symbols_outline")}
             use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = get_config("mundo")}
             use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = get_config("nvim_tree")}
-            use {"goolord/alpha-nvim", event = "VimEnter", config = get_config("alpha_nvim")}
+            use {
+                "goolord/alpha-nvim",
+                cond = function()
+                    return vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1
+                end,
+                event = "VimEnter",
+                config = get_config("alpha_nvim")
+            }
             use {
                 "nvim-telescope/telescope.nvim",
                 requires = {
                     {"nvim-lua/popup.nvim"},
                     {"nvim-lua/plenary.nvim"},
-                    {"nvim-telescope/telescope-fzf-native.nvim", run = "make"},
-                    {"nvim-telescope/telescope-github.nvim"}
+                    {"nvim-telescope/telescope-fzf-native.nvim", run = "make"}
                 },
-                wants = {"popup.nvim", "plenary.nvim", "telescope-github.nvim", "telescope-fzf-native.nvim"},
+                wants = {"popup.nvim", "plenary.nvim", "telescope-fzf-native.nvim"},
                 module = "telescope",
-                cmd = "Telescope",
                 config = get_config("telescope")
             }
             use {"kevinhwang91/nvim-bqf", ft = "qf", config = get_config("nvim_bqf")}
@@ -83,18 +114,7 @@ return require("packer").startup(
                 "tpope/vim-fugitive",
                 fn = "fugitive#*",
                 requires = {"tpope/vim-rhubarb"},
-                cmd = {
-                    "Git",
-                    "Gcd",
-                    "GBrowse",
-                    "Ggrep",
-                    "Glgrep",
-                    "Gdiffsplit",
-                    "Gread",
-                    "Gwrite",
-                    "Gedit",
-                    "Gclog"
-                }
+                cmd = {"Git", "Ggrep", "Glgrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog"}
             }
             use {"rbong/vim-flog", cmd = {"Flog", "Flogsplit"}}
             use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}, config = get_config("gitsigns")}
@@ -137,7 +157,7 @@ return require("packer").startup(
             }
             use {
                 "windwp/nvim-ts-autotag",
-                ft = {"html", "javascript", "javascriptreact", "typescriptreact", "svelte", "vue"},
+                ft = {"html", "javascript", "javascriptreact", "typescriptreact"},
                 wants = "nvim-treesitter",
                 config = function()
                     require("nvim-ts-autotag").setup()
@@ -146,11 +166,7 @@ return require("packer").startup(
             use {"neomake/neomake", cmd = "Neomake", config = get_config("neomake")}
             use {"MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log"}
             use {"udalov/kotlin-vim", ft = "kotlin"}
-            use {
-                "chrisbra/csv.vim",
-                setup = get_config("setup_csv_vim"),
-                cmd = {"CSVWhatColumn", "CSVArrangeColumn", "CSVTabularize"}
-            }
+            use {"chrisbra/csv.vim", setup = get_config("setup_csv_vim"), cmd = "CSVWhatColumn"}
 
             -- editing
             use {"windwp/nvim-autopairs", after = "nvim-cmp", config = get_config("nvim_autopairs")}
@@ -172,14 +188,20 @@ return require("packer").startup(
             use {"unblevable/quick-scope", config = get_config("quick_scope")}
             use {"dahu/vim-fanfingtastic"}
             use {"chaoren/vim-wordmotion", setup = [[vim.g.wordmotion_nomap = 1]]}
-            use {"machakann/vim-sandwich", setup = get_config("setup_vim_sandwich")}
+            use {"machakann/vim-sandwich", setup = [[vim.g.operator_sandwich_no_default_key_mappings = 1]]}
             use {"machakann/vim-swap", keys = "<Plug>(swap-"}
             use {"AndrewRadev/splitjoin.vim", keys = {{"n", "gS"}, {"n", "gJ"}}}
 
             -- misc
             use {"lewis6991/impatient.nvim", opt = false}
-            use {"nathom/filetype.nvim", opt = false, config = get_config("filetype_nvim")}
-            use {"ahmedkhalf/project.nvim", event = "VimEnter", config = get_config("project_nvim")}
+            use {
+                "nathom/filetype.nvim",
+                opt = false,
+                config = function()
+                    require("filetype").setup({overrides = {extensions = {ejs = "html"}}})
+                end
+            }
+            use {"ahmedkhalf/project.nvim", opt = false, config = get_config("project_nvim")}
             use {"tpope/vim-sleuth"}
             use {"tpope/vim-repeat", opt = false}
             use {
@@ -203,11 +225,7 @@ return require("packer").startup(
                 end
             }
             use {"moll/vim-bbye", cmd = "Bdelete"}
-            use {
-                "andymass/vim-matchup",
-                cmd = "MatchupWhereAmI",
-                config = get_config("vim_matchup")
-            }
+            use {"andymass/vim-matchup", cmd = "MatchupWhereAmI", config = get_config("vim_matchup")}
             use {"ojroques/vim-oscyank", cmd = {"OSCYank", "OSCYankReg"}}
             use {
                 "bfredl/nvim-miniyank",
@@ -216,7 +234,13 @@ return require("packer").startup(
                 keys = "<Plug>(miniyank-",
                 config = get_config("nvim_miniyank")
             }
-            use {"aserowy/tmux.nvim", module = "tmux", config = get_config("tmux_nvim")}
+            use {
+                "aserowy/tmux.nvim",
+                module = "tmux",
+                config = function()
+                    require("tmux").setup({navigation = {cycle_navigation = false}})
+                end
+            }
             use {"kyazdani42/nvim-web-devicons", opt = false}
 
             -- tools
@@ -234,13 +258,7 @@ return require("packer").startup(
                 cmd = {"TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine"},
                 setup = get_config("setup_vim_table_mode")
             }
-            use {
-                "NTBBloodbath/rest.nvim",
-                module = "rest-nvim",
-                config = function()
-                    require("rest-nvim").setup({skip_ssl_verification = true})
-                end
-            }
+            use {"NTBBloodbath/rest.nvim", module = "rest-nvim", config = get_config("rest_nvim")}
         end
     }
 )

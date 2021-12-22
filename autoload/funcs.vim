@@ -65,8 +65,11 @@ endfunction
 
 function! funcs#quit(buffer_mode, force) abort
   let l:buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
-  let l:win_len = has('nvim') ? len(filter(nvim_list_wins(), {k, v -> nvim_win_get_config(v).relative == ''})) : winnr('$')  " exclude nvim floating windows
-  if a:buffer_mode == 0 && a:force == 1
+  let l:has_nvim = has('nvim')
+  let l:win_len = l:has_nvim ? len(filter(nvim_list_wins(), {k, v -> nvim_win_get_config(v).relative == ''})) : winnr('$')  " exclude nvim floating windows
+  if l:has_nvim && l:win_len == 1 && nvim_win_get_config(win_getid()).relative != ''  " floating window focused
+    quit
+  elseif a:buffer_mode == 0 && a:force == 1
     if tabpagenr('$') == 1
       quit
     else
@@ -96,27 +99,21 @@ function! funcs#quit(buffer_mode, force) abort
   endif
 endfunction
 
-function! funcs#print_curr_vars(visual, printAbove) abort
+function! funcs#print_variable(visual, printAbove) abort
   let l:new_line = "normal! o\<Space>\<BS>"
   if a:printAbove
     let l:new_line = "normal! O\<Space>\<BS>"
   endif
-  if a:visual  " print selection
-    let l:vars = [getline('.')[getpos("'<")[2] - 1:getpos("'>")[2] - 1]]
-  elseif getline('.') =~ '[^a-zA-Z0-9_,\[\]. ]\|[a-zA-Z0-9_\]]\s\+\w'  " print variable under cursor if line not comma separated
-    let l:vars = [expand('<cword>')]
-  else  " print variables on current line separated by commas
-    let l:vars = split(substitute(getline('.'), ' ', '', 'ge'), ',')
-    let l:new_line = "normal! cc\<Space>\<BS>"
-  endif
+  let l:word = a:visual ? funcs#get_visual_selection() : expand('<cword>')
   let l:print = {}
-  let l:print['python'] = "print(f'". join(map(copy(l:vars), "v:val. ': {'. v:val. '}'"), ' | '). "')"
-  let l:print['javascript'] = 'console.log('. join(map(copy(l:vars), "\"'\". v:val. \":', \". v:val"), ", '|', "). ');'
+  let l:print['python'] = "print('❗". l:word. ":', ". l:word. ')'
+  let l:print['javascript'] = "console.log('DEBUGGING ❗". l:word. ":', ". l:word. ');'
   let l:print['typescript'] = l:print['javascript']
   let l:print['typescriptreact'] = l:print['javascript']
-  let l:print['java'] = 'System.out.println('. join(map(copy(l:vars), "'\"'. v:val. ': \" + '. v:val"), ' + " | " + '). ');'
-  let l:print['vim'] = 'echomsg '. join(map(copy(l:vars), "\"'\". v:val. \": '. \". v:val"), ". ' | '. ")
-  let l:print['lua'] = 'print('. join(map(copy(l:vars), "\"'\". v:val. \": ' .. \". v:val"), " .. ' | ' .. "). ')'
+  let l:print['java'] = 'System.out.println("[" + getClass().getName() + "] DEBUGGING ❗'. l:word. ': " + '. l:word. ');'
+  let l:print['kotlin'] = 'println("[${javaClass.simpleName}] DEBUGGING ❗'. l:word. ': " + '. l:word. ')'
+  let l:print['vim'] = "echomsg '❗". l:word. ":' ". l:word
+  let l:print['lua'] = 'print("❗'. l:word. ': " .. vim.inspect('. l:word. '))'
   if has_key(l:print, &filetype)
     let l:pos = getcurpos()
     execute l:new_line
@@ -141,7 +138,7 @@ function! funcs#get_run_command() abort
   if get(b:, 'RunCommand', '') != ''
     return b:RunCommand
   endif
-  if expand('%') =~ '.test.[tj]sx\?'
+  if expand('%') =~ '\.test\.[tj]sx\?'
     if !exists('g:neoterm')
       lua require('packer').loader('neoterm')
     endif

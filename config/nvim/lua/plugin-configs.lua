@@ -1,24 +1,6 @@
 local M = {}
 local g = vim.g
 
-function M.tokyonight()
-    g.tokyonight_italic_keywords = false
-    g.tokyonight_italic_comments = false
-    g.tokyonight_sidebars = {"qf", "terminal", "Outline", "Mundo"}
-    g.tokyonight_colors = {comment = "#717993"}
-    vim.cmd("colorscheme tokyonight")
-end
-
-function M.filetype_nvim()
-    require("filetype").setup {
-        overrides = {
-            extensions = {
-                ejs = "html"
-            }
-        }
-    }
-end
-
 function M.project_nvim()
     require("project_nvim").setup {
         detection_methods = {"pattern", "lsp"},
@@ -31,7 +13,7 @@ function M.nvim_autopairs()
     local cmp_npairs = require("nvim-autopairs.completion.cmp")
     local cmp = require("cmp")
     npairs.setup {
-        ignored_next_char = string.gsub([[ [%w%%%'%[%"%.%(%{] ]], "%s+", "")
+        ignored_next_char = string.gsub([[ [%w%%%'%[%"%.%(%{%/] ]], "%s+", "")
     }
     cmp.event:on("confirm_done", cmp_npairs.on_confirm_done())
 end
@@ -77,14 +59,10 @@ function M.gitsigns()
             changedelete = {text = "▒"}
         },
         keymaps = {
-            noremap = true,
-            ["n [g"] = {'<Cmd>lua require("gitsigns").prev_hunk()<CR>'},
-            ["n ]g"] = {'<Cmd>lua require("gitsigns").next_hunk()<CR>'},
+            ["n [g"] = '<Cmd>lua require("gitsigns").prev_hunk()<CR>',
+            ["n ]g"] = '<Cmd>lua require("gitsigns").next_hunk()<CR>',
             ["o ig"] = ':<C-u>lua require("gitsigns.actions").select_hunk()<CR>',
             ["x ig"] = ':<C-u>lua require("gitsigns.actions").select_hunk()<CR>'
-        },
-        watch_index = {
-            interval = 250
         },
         update_debounce = 150
     }
@@ -106,27 +84,31 @@ function M.nvim_miniyank()
     g.miniyank_filename = os.getenv("HOME") .. "/.cache/nvim/.miniyank.mpack"
 end
 
-function M.setup_vim_sandwich()
-    g.sandwich_no_default_key_mappings = 1
-    g.operator_sandwich_no_default_key_mappings = 1
+function M.rest_nvim()
+    require("rest-nvim").setup({skip_ssl_verification = true})
+    vim.cmd([[command! RestNvimPreviewCurl execute "normal \<Plug>RestNvimPreview" | sleep 100m | S 1,2messages]])
 end
 
+g.qs_filetype_blacklist = {
+    "help",
+    "man",
+    "qf",
+    "netrw",
+    "packer",
+    "alpha",
+    "lsp-installer",
+    "TelescopePrompt",
+    "Mundo",
+    "Outline",
+    "NvimTree",
+    "neoterm",
+    "DiffviewFileHistory",
+    "DiffviewFiles",
+    "floggraph"
+}
 function M.quick_scope()
-    g.qs_filetype_blacklist = {
-        "qf",
-        "netrw",
-        "alpha",
-        "TelescopePrompt",
-        "Mundo",
-        "Outline",
-        "NvimTree",
-        "neoterm",
-        "DiffviewFileHistory",
-        "DiffviewFiles",
-        "floggraph"
-    }
     g.qs_buftype_blacklist = {"terminal"}
-    vim.cmd("highlight QuickScopePrimary guifg='#ffe9c2'")
+    vim.cmd("highlight QuickScopePrimary guifg='" .. (g.theme_index < 0 and "#ffca6e" or "#bf8000") .. "'")
 end
 
 function M.mundo()
@@ -155,7 +137,7 @@ function M.setup_indent_blankline()
     vim.opt.colorcolumn = "99999"
     g.indent_blankline_char = "▏"
     g.indent_blankline_show_first_indent_level = false
-    g.indent_blankline_filetype_exclude = {"help", "man", "alpha", "lsp-installer"}
+    g.indent_blankline_filetype_exclude = g.qs_filetype_blacklist
     g.indent_blankline_buftype_exclude = {"terminal"}
 end
 
@@ -164,19 +146,7 @@ function M.setup_symbols_outline()
         auto_preview = false,
         relative_width = false,
         width = 30,
-        keymaps = {
-            close = "q",
-            hover_symbol = "p",
-            rename_symbol = "R"
-        }
-    }
-end
-
-function M.tmux_nvim()
-    require("tmux").setup {
-        navigation = {
-            cycle_navigation = false
-        }
+        keymaps = {close = "q", hover_symbol = "p", rename_symbol = "R"}
     }
 end
 
@@ -185,12 +155,21 @@ function M.conflict_marker()
     g.conflict_marker_begin = "^<<<<<<< .*$"
     g.conflict_marker_end = "^>>>>>>> .*$"
     g.conflict_marker_highlight_group = ""
-    vim.cmd [[
-        highlight ConflictMarkerBegin guibg=#427266
-        highlight ConflictMarkerOurs guibg=#364f49
-        highlight ConflictMarkerTheirs guibg=#3a4f67
-        highlight ConflictMarkerEnd guibg=#234a78
-    ]]
+    if g.theme_index < 0 then
+        vim.cmd [[
+            highlight ConflictMarkerBegin guibg=#427266
+            highlight ConflictMarkerOurs guibg=#364f49
+            highlight ConflictMarkerTheirs guibg=#3a4f67
+            highlight ConflictMarkerEnd guibg=#234a78
+        ]]
+    else
+        vim.cmd [[
+            highlight ConflictMarkerBegin guibg=#7ed9ae
+            highlight ConflictMarkerOurs guibg=#94ffcc
+            highlight ConflictMarkerTheirs guibg=#b9d1fa
+            highlight ConflictMarkerEnd guibg=#86abeb
+        ]]
+    end
 end
 
 function M.setup_vim_table_mode()
@@ -219,40 +198,48 @@ function M.setup_vim_visual_multi()
 end
 
 function M.nvim_bqf()
-    require("bqf").setup(
-        {
-            auto_resize_height = false,
-            func_map = {
-                prevfile = "",
-                nextfile = "",
-                pscrolldown = "J",
-                pscrollup = "K",
-                ptoggleitem = "P",
-                ptoggleauto = "p"
-            }
+    require("bqf").setup {
+        auto_resize_height = false,
+        func_map = {
+            prevfile = "",
+            nextfile = "",
+            pscrolldown = "J",
+            pscrollup = "K",
+            ptoggleitem = "P",
+            ptoggleauto = "p"
         }
-    )
+    }
 end
 
 function M.alpha_nvim()
     local alpha = require("alpha")
     local theme = require("alpha.themes.startify")
-    theme.section.header.val = {
-        [[⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠛⣿⣿⣿⣿⣿⡿⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⣿⢧⣶⡉⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢹⣿⣿⣿⣿⠃ ⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⡏⣼⣿⣿⠄⠈⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⠘⠛⠛⠛⠛ ⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⠐⢋⣤⣤⢦⣤⡀   ⠈⠛⠛⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⢁⠤⡀    ⡠⡄⢹⣿⢿⣿⣿⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⠏⣰⡾⠉  ⢸⡇  ⣀⣀⣀  ⣀⣀⣉⡉⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣭⣿⠃ ⠈⠉     ⠈⠁ ⢩⣭⣭⣿⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿ ⣿⣇⡀ ⢀⣸⡇⣰⠿⠉⠉⠉⣷⡄⢹⣿⢟⣵⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠋   ⢀⣠⣤⣄⣤⣀⣀   ⠙⣿⣿⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⡄⠈⠻⢿⣶⡿⠋⢸⣿    ⣿⡇⢘⣯⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟  ⢠⡴⠚⢿⣿⢛⣉⣻⣿⢟⡛⢦⡀ ⠈⣿⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⣤⡀  ⢰⣦⠜⢿⣦⣤⣤⣾⠋⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟  ⣰⡯⠶⣿⠟⣛⢻⣿⣋⣙⣿⡿⠚⢿⣆ ⠘⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⣿⡿⠂ ⠈⠁  ⠉⠉⢉⣁⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢠⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿  ⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⡿⠁    ⠘⢶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿ ⢠⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⡇      ⠈⠛⠛⠛⠛⠙⢻⣿⣿⣿⢫⡒⡂⡠⠌⣽⣿⣿⣿⣿⣿⣿⣄⢸⣿⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠿⢿⣿⢀⣾⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⣷⣤⣤⣀⣀⣀⣠⣤⣤⣤⣤⣤⣤⣿⣿⣿⣿⣄⣀⣂⣑⣥⣿⣿⣿⣿⣿⣿⣿⣿⣾⠃   ⠙⣿⣿⣿⣿⣿⠃   ⢸⣾⣿⣿⣿⣿⣿⣿]],
-        [[⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠛⠛⠁⠄⠂⠄⠄⡿⠿⠿⠿⠇⠄⠂⠄⠄⠾⠿⠿⣿⣿⣿⣿⣿]]
-    }
-    theme.section.header.opts = {hl = "AlphaHeader"}
+    if g.theme_index < 0 then
+        theme.section.header.val = {
+            [[⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠛⣿⣿⣿⣿⣿⡿⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⣿⢧⣶⡉⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢹⣿⣿⣿⣿⠃ ⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⡏⣼⣿⣿⠄⠈⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⠘⠛⠛⠛⠛ ⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⠐⢋⣤⣤⢦⣤⡀   ⠈⠛⠛⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⢁⠤⡀    ⡠⢄⢹⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⠏⣰⡾⠉  ⢸⡇  ⣀⣀⣀  ⣀⣀⣉⡉⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣭⣿⠃  ⠉     ⠈⠁ ⢩⣭⣭⣿⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿ ⣿⣇⡀ ⢀⣸⡇⣰⠿⠉⠉⠉⣷⡄⢹⣿⢟⣵⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠋   ⢀⣠⣤⣄⣤⣀⣀   ⠙⣿⣿⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⡄⠈⠻⢿⣶⡿⠋⢸⣿    ⣿⡇⢘⣯⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟  ⢠⡴⠚⢿⣿⢛⣉⣻⣿⢟⡛⢦⡀ ⠈⣿⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⣤⡀  ⢰⣦⠜⢿⣦⣤⣤⣾⠋⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟  ⣰⡯⠶⣿⠟⣛⢻⣿⣋⣙⣿⡿⠚⢿⣆ ⠘⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⣿⡿⠂ ⠈⠁  ⠉⠉⢉⣁⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢠⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿  ⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⡿⠁    ⠘⢶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿ ⢠⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⡇      ⠈⠛⠛⠛⠛⠙⢻⣿⣿⣿⢫⡒⡂⡠⠌⣽⣿⣿⣿⣿⣿⣿⣄⢸⣿⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠿⢿⣿⢀⣾⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⣷⣤⣤⣀⣀⣀⣠⣤⣤⣤⣤⣤⣤⣿⣿⣿⣿⣄⣀⣂⣑⣥⣿⣿⣿⣿⣿⣿⣿⣿⣾⠃   ⠙⣿⣿⣿⣿⣿⠃   ⢸⣾⣿⣿⣿⣿⣿⣿]],
+            [[⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠛⠛⠁⠄⠂⠄⠄⡿⠿⠿⠿⠇⠄⠂⠄⠄⠾⠿⠿⣿⣿⣿⣿⣿]]
+        }
+    else
+        theme.section.header.val = {
+            [[███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗]],
+            [[████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║]],
+            [[██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║]],
+            [[██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║]],
+            [[██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║]],
+            [[╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝]]
+        }
+    end
     theme.section.top_buttons.val = {}
     theme.section.bottom_buttons.val = {
         theme.button("!", "Git diff unstaged", ":args `Git ls-files --modified` | Git difftool<CR>"),
@@ -271,16 +258,18 @@ function M.alpha_nvim()
             ":lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>"
         ),
         theme.button("c", "Edit vimrc", ":edit $MYVIMRC<CR>"),
-        theme.button("s", "Profile startup time", ":StartupTime<CR>"),
-        theme.button("e", "New file", ":enew<CR>"),
-        theme.button("i", "Insert", ":enew <bar> startinsert<CR>"),
-        theme.button("q", "Quit", ":qall<CR>")
+        theme.button("s", "Profile startup time", ":StartupTime<CR>")
     }
     theme.mru_opts.ignore = function(path, ext)
         return string.find(path, "COMMIT_EDITMSG") or string.find(path, [[vim/.*/doc/.*%.txt]])
     end
     alpha.setup(theme.opts)
-    vim.cmd("highlight AlphaHeader guifg='#a0a0f0'")
+    -- https://github.com/goolord/alpha-nvim/issues/67
+    vim.cmd [[
+        augroup AlphaAutoCommands
+            autocmd FileType alpha nnoremap <buffer> v <Cmd>lua require('alpha').queue_press()<CR>| nnoremap <buffer> <expr> q len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'| nnoremap <buffer> e <Cmd>enew<CR>| nnoremap <buffer> i <Cmd>enew <bar> startinsert<CR>
+        augroup END
+    ]]
 end
 
 function M.telescope()
@@ -303,15 +292,12 @@ function M.telescope()
                 "--line-number",
                 "--column",
                 "--smart-case",
-                "--hidden"
+                "--hidden",
+                "--auto-hybrid-regex"
             },
             layout_strategy = "vertical",
-            layout_config = {
-                vertical = {
-                    preview_height = 0.3
-                }
-            },
-            file_ignore_patterns = {".git/", "node_modules/", "venv/"}
+            layout_config = {vertical = {preview_height = 0.3}},
+            file_ignore_patterns = {".git/", "node_modules/", "venv/", "vim/.*/doc/.*%.txt"}
         },
         pickers = {
             file_browser = {theme = "dropdown"},
@@ -321,12 +307,7 @@ function M.telescope()
             builtin = {theme = "dropdown"}
         },
         extensions = {
-            fzf = {
-                fuzzy = true,
-                override_generic_sorter = true,
-                override_file_sorter = true,
-                case_mode = "smart_case"
-            }
+            fzf = {fuzzy = true, override_generic_sorter = true, override_file_sorter = true, case_mode = "smart_case"}
         }
     }
     require("telescope").load_extension("fzf")
@@ -347,13 +328,10 @@ function M.nvim_treesitter()
             "json",
             "yaml",
             "http",
-            "python"
+            "python",
+            "java"
         },
-        highlight = {
-            enable = true,
-            disable = {},
-            use_languagetree = true
-        },
+        highlight = {enable = true, disable = {}, use_languagetree = true},
         textobjects = {
             select = {
                 enable = true,
@@ -367,247 +345,193 @@ function M.nvim_treesitter()
             move = {
                 enable = true,
                 set_jumps = true,
-                goto_next_start = {
-                    ["]]"] = "@function.outer"
-                },
-                goto_next_end = {
-                    ["]["] = "@function.outer"
-                },
-                goto_previous_start = {
-                    ["[["] = "@function.outer"
-                },
-                goto_previous_end = {
-                    ["[]"] = "@function.outer"
-                }
+                goto_next_start = {["]]"] = "@function.outer"},
+                goto_next_end = {["]["] = "@function.outer"},
+                goto_previous_start = {["[["] = "@function.outer"},
+                goto_previous_end = {["[]"] = "@function.outer"}
             }
         },
-        indent = {
-            enable = true,
-            disable = {"python"}
-        },
-        -- for nvim-ts-context-commentstring
-        context_commentstring = {
-            enable = true,
-            enable_autocmd = false
-        },
-        -- for vim-matchup
-        matchup = {
-            enable = true
-        }
+        indent = {enable = true, disable = {"python", "java"}},
+        context_commentstring = {enable = true, enable_autocmd = false}, -- for nvim-ts-context-commentstring
+        matchup = {enable = true} -- for vim-matchup
     }
 end
 
-function M.galaxyline()
-    local gl = require("galaxyline")
-    local gls = gl.section
-    local condition = require("galaxyline.condition")
-    local fileinfo = require("galaxyline.providers.fileinfo")
-    gl.short_line_list = {"NvimTree"}
-    local colors = {
-        bg = "#22262e",
-        fg = "#abb2bf",
-        green = "#9ece6a",
-        red = "#f7768e",
-        lightbg = "#2d3139",
-        lightbg2 = "#262a32",
-        blue = "#7aa2f7",
-        darkblue = "#46617a",
-        yellow = "#e0af68",
-        orange = "#ff9e64",
-        purple = "#9d7cd8",
-        grey = "#6f737b"
+function M.feline_nvim()
+    local lsp = require("feline.providers.lsp")
+    local colors = require("themes").colors()
+    local mode_colors = {
+        n = colors.primary,
+        i = colors.secondary,
+        v = colors.purple,
+        V = colors.purple,
+        [string.char(22)] = colors.purple, -- ^V
+        c = colors.yellow,
+        s = colors.orange,
+        S = colors.orange,
+        [string.char(19)] = colors.orange, -- ^S
+        R = colors.orange,
+        Rv = colors.orange,
+        t = colors.red
     }
-    local function checkwidth()
-        return vim.fn.winwidth(0) > 60
+    local function checkwidth(winid)
+        return vim.api.nvim_win_get_width(winid) > 60
     end
-    gls.left[1] = {
-        ViMode = {
-            provider = function()
-                local mode_color = {
-                    n = colors.blue,
-                    i = colors.green,
-                    v = colors.purple,
-                    V = colors.purple,
-                    [string.char(22)] = colors.purple, -- ^V
-                    c = colors.yellow,
-                    s = colors.orange,
-                    S = colors.orange,
-                    [string.char(19)] = colors.orange, -- ^S
-                    R = colors.orange,
-                    Rv = colors.orange,
-                    t = colors.red
-                }
-                local color = mode_color[vim.fn.mode()] or colors.blue
-                vim.cmd("highlight GalaxyViMode guibg=" .. color)
-                vim.cmd("highlight GalaxyViModeSeparator guifg=" .. color)
-                return "   "
-            end,
-            highlight = {colors.lightbg, "GalaxyViMode"}
+    local components = {active = {{}, {}, {}}, inactive = {{}}}
+    components.active[1][1] = {
+        provider = "  ",
+        hl = function()
+            return {fg = colors.lightbg, bg = mode_colors[vim.fn.mode()] or colors.primary}
+        end,
+        right_sep = {
+            str = " ",
+            hl = function()
+                return {fg = mode_colors[vim.fn.mode()] or colors.primary, bg = colors.lightbg}
+            end
         }
     }
-    gls.left[2] = {
-        ViModeSeparator = {
-            provider = function()
-                return "  "
-            end,
-            highlight = {"GalaxyViModeSeparator", colors.lightbg}
-        }
+    components.active[1][2] = {
+        provider = function()
+            return " " .. vim.fn.expand("%:~:.") .. " "
+        end,
+        icon = function()
+            local icon, color = require("nvim-web-devicons").get_icon_color(vim.fn.expand("%:t"), vim.fn.expand("%:e"))
+            return {str = icon or " ", hl = {fg = color or colors.primary}}
+        end,
+        hl = {fg = colors.fg, bg = colors.lightbg},
+        right_sep = {str = " ", hl = {fg = colors.lightbg, bg = colors.lightbg2}}
     }
-    gls.left[3] = {
-        FileIcon = {
-            provider = "FileIcon",
-            condition = condition.buffer_not_empty,
-            highlight = {fileinfo.get_file_icon_color, colors.lightbg}
-        }
+    components.active[1][3] = {
+        provider = function()
+            local dir_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+            return "  " .. dir_name .. " "
+        end,
+        hl = {fg = colors.grey, bg = colors.lightbg2},
+        right_sep = {str = " ", hi = {fg = colors.lightbg2}}
     }
-    gls.left[4] = {
-        FileName = {
-            -- TODO update when https://github.com/glepnir/galaxyline.nvim/pull/154 is merged
-            provider = function()
-                return vim.fn.fnamemodify(vim.fn.expand("%"), ":~:.") .. " "
-            end,
-            condition = condition.buffer_not_empty,
-            highlight = {colors.fg, colors.lightbg},
-            separator = " ",
-            separator_highlight = {colors.lightbg, colors.lightbg2}
-        }
+    components.active[1][4] = {
+        provider = function()
+            local flags = ""
+            if vim.o.readonly then
+                flags = flags .. "[RO]"
+            end
+            if vim.o.paste then
+                flags = flags .. "[paste]"
+            end
+            if #flags > 0 then
+                return " " .. flags .. " "
+            end
+            return ""
+        end,
+        hl = {fg = colors.grey}
     }
-    gls.left[5] = {
-        CurrentDir = {
-            provider = function()
-                local dir_name = vim.fn.fnamemodify(vim.loop.cwd(), ":t")
-                return "  " .. dir_name .. " "
-            end,
-            highlight = {colors.grey, colors.lightbg2},
-            separator = " ",
-            separator_highlight = {colors.lightbg2, colors.bg}
-        }
+    components.active[1][5] = {
+        provider = "git_diff_added",
+        enabled = checkwidth,
+        hl = {fg = colors.grey},
+        icon = "  "
     }
-    gls.left[6] = {
-        FileFlags = {
-            provider = function()
-                local flags = ""
-                if vim.o.readonly then
-                    flags = flags .. "[RO]"
+    components.active[1][6] = {
+        provider = "git_diff_changed",
+        enabled = checkwidth,
+        hl = {fg = colors.grey},
+        icon = "  "
+    }
+    components.active[1][7] = {
+        provider = "git_diff_removed",
+        enabled = checkwidth,
+        hl = {fg = colors.grey},
+        icon = "  "
+    }
+    components.active[1][8] = {
+        provider = "diagnostic_errors",
+        enabled = function()
+            return lsp.diagnostics_exist(vim.diagnostic.severity.ERROR)
+        end,
+        hl = {fg = colors.red},
+        icon = "  "
+    }
+    components.active[1][9] = {
+        provider = "diagnostic_warnings",
+        enabled = function()
+            return lsp.diagnostics_exist(vim.diagnostic.severity.WARN)
+        end,
+        hl = {fg = colors.yellow},
+        icon = "  "
+    }
+    components.active[1][10] = {
+        provider = "diagnostic_hints",
+        enabled = function()
+            return lsp.diagnostics_exist(vim.diagnostic.severity.HINT)
+        end,
+        hl = {fg = colors.grey},
+        icon = "  "
+    }
+    components.active[1][11] = {
+        provider = "diagnostic_info",
+        enabled = function()
+            return lsp.diagnostics_exist(vim.diagnostic.severity.INFO)
+        end,
+        hl = {fg = colors.secondary},
+        icon = "  "
+    }
+    components.active[2][1] = {
+        provider = function()
+            local lsp_progress = vim.lsp.util.get_progress_messages()[1]
+            if lsp_progress then
+                local msg = lsp_progress.message or ""
+                local percentage = lsp_progress.percentage or 0
+                local title = lsp_progress.title or ""
+                if percentage > 70 then
+                    return string.format(" %%<%s %s %s (%s%%%%) ", "", title, msg, percentage)
                 end
-                if vim.o.paste then
-                    flags = flags .. "[paste]"
-                end
-                if #flags > 0 then
-                    return " " .. flags .. " "
-                end
-                return ""
-            end,
-            highlight = {colors.grey, colors.bg}
+                local spinners = {"", "", "", ""}
+                local ms = math.floor(vim.loop.hrtime() / 120000000) -- 120ms
+                local frame = ms % #spinners
+                return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
+            end
+            return ""
+        end,
+        enabled = checkwidth,
+        hl = {fg = colors.secondary}
+    }
+    components.active[3][1] = {provider = "lsp_client_names", enabled = checkwidth, hl = {fg = colors.grey}}
+    components.active[3][2] = {provider = " ", hl = {fg = colors.lightbg}}
+    components.active[3][3] = {
+        provider = "git_branch",
+        enabled = checkwidth,
+        hl = {fg = colors.grey, bg = colors.lightbg},
+        icon = " "
+    }
+    components.active[3][4] = {provider = " ", hl = {fg = colors.primary, bg = colors.lightbg}}
+    components.active[3][5] = {provider = " ", hl = {fg = colors.lightbg, bg = colors.primary}}
+    components.active[3][6] = {
+        provider = function()
+            local col = vim.fn.col(".")
+            return (col < 10 and "  " or " ") .. col
+        end,
+        hl = {fg = colors.secondary, bg = colors.lightbg}
+    }
+    components.active[3][7] = {
+        provider = function()
+            return " " .. vim.fn.line(".") .. "/" .. vim.fn.line("$")
+        end,
+        hl = {fg = colors.primary, bg = colors.lightbg}
+    }
+    components.inactive[1][1] = {
+        provider = "  ",
+        hl = function()
+            return {fg = colors.lightbg, bg = colors.dim_primary}
+        end,
+        right_sep = {
+            str = " ",
+            hl = function()
+                return {fg = colors.dim_primary, bg = colors.lightbg}
+            end
         }
     }
-    gls.left[7] = {
-        DiffAdd = {
-            provider = "DiffAdd",
-            condition = checkwidth,
-            icon = "  ",
-            highlight = {colors.grey, colors.bg}
-        }
-    }
-    gls.left[8] = {
-        DiffModified = {
-            provider = "DiffModified",
-            condition = checkwidth,
-            icon = "  ",
-            highlight = {colors.grey, colors.bg}
-        }
-    }
-    gls.left[9] = {
-        DiffRemove = {
-            provider = "DiffRemove",
-            condition = checkwidth,
-            icon = "  ",
-            highlight = {colors.grey, colors.bg}
-        }
-    }
-    gls.left[10] = {
-        DiagnosticError = {
-            provider = "DiagnosticError",
-            icon = "  ",
-            highlight = {colors.red, colors.bg}
-        }
-    }
-    gls.left[11] = {
-        DiagnosticWarn = {
-            provider = "DiagnosticWarn",
-            icon = "  ",
-            highlight = {colors.yellow, colors.bg}
-        }
-    }
-    gls.right[1] = {
-        LspStatus = {
-            provider = function()
-                local clients = vim.lsp.buf_get_clients()
-                if next(clients) ~= nil then
-                    return "  " .. " active "
-                else
-                    return ""
-                end
-            end,
-            highlight = {colors.grey, colors.bg}
-        }
-    }
-    gls.right[2] = {
-        GitIcon = {
-            provider = function()
-                return " "
-            end,
-            highlight = {colors.grey, colors.lightbg},
-            separator = "",
-            separator_highlight = {colors.lightbg, colors.bg}
-        }
-    }
-    gls.right[3] = {
-        GitBranch = {
-            provider = "GitBranch",
-            highlight = {colors.grey, colors.lightbg}
-        }
-    }
-    gls.right[4] = {
-        PosIcon = {
-            provider = function()
-                return " "
-            end,
-            separator = " ",
-            separator_highlight = {colors.blue, colors.lightbg},
-            highlight = {colors.lightbg, colors.blue}
-        }
-    }
-    gls.right[5] = {
-        ColumnPos = {
-            provider = function()
-                local col = vim.fn.col(".")
-                local padding = col < 10 and " " or ""
-                return "  " .. padding .. col
-            end,
-            highlight = {colors.green, colors.lightbg}
-        }
-    }
-    gls.right[6] = {
-        LinePos = {
-            provider = function()
-                return "  " .. vim.fn.line(".") .. "/" .. vim.fn.line("$")
-            end,
-            highlight = {colors.blue, colors.lightbg}
-        }
-    }
-    gls.short_line_left[1] = {
-        Inactive = {
-            provider = function()
-                return "   "
-            end,
-            highlight = {colors.lightbg, colors.darkblue},
-            separator = "  ",
-            separator_highlight = {colors.darkblue, colors.lightbg}
-        }
-    }
-    gls.short_line_left[2] = gls.left[3]
-    gls.short_line_left[3] = gls.left[4]
+    components.inactive[1][2] = components.active[1][2]
+    require("feline").setup({theme = {fg = colors.fg, bg = colors.bg}, components = components})
 end
 
 function M.nvim_cmp()
@@ -662,13 +586,7 @@ function M.nvim_cmp()
                 {"i", "s"}
             )
         },
-        sources = {
-            {name = "buffer"},
-            {name = "path"},
-            {name = "nvim_lua"},
-            {name = "nvim_lsp"},
-            {name = "vsnip"}
-        }
+        sources = {{name = "buffer"}, {name = "path"}, {name = "nvim_lua"}, {name = "nvim_lsp"}, {name = "vsnip"}}
     }
 end
 
@@ -707,12 +625,12 @@ function _G.quickui_context_menu()
         table.insert(content, {"Git conflict remove", "ConflictMarkerNone", "Remove conflict"})
         table.insert(content, {"--", ""})
     end
-    table.insert(content, {"Built-in d&ocs", 'execute "normal! K"', "Vim built in help"})
+    table.insert(content, {"Built-in d&ocs", 'execute "normal! K"', "Open vim built in help"})
     vim.fn["quickui#context#open"](content, {index = vim.g["quickui#context#cursor"] or -1})
 end
 
 function M.setup_vim_quickui()
-    g.quickui_color_scheme = "papercol-dark"
+    g.quickui_color_scheme = g.theme_index < 0 and "papercol-dark" or "papercol-light"
     g.quickui_show_tip = 1
     g.quickui_border_style = 2
 end
@@ -764,10 +682,10 @@ function M.vim_quickui()
             {
                 "&Refresh screen",
                 [[execute "ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]],
-                "Clear search and refresh screen"
+                "Clear search, refresh screen and colorizer"
             },
             {"--", ""},
-            {"Open &Alpha", [[Alpha]], "Open Alpha"},
+            {"Open &Alpha", [[execute "lua require('packer').loader('alpha-nvim', true)" | Alpha]], "Open Alpha"},
             {"Save session", [[SaveSession]], "Save session to .cache/nvim/session.vim, will overwrite"},
             {"Load session", [[LoadSession]], "Load session from .cache/nvim/session.vim"},
             {"--", ""},
@@ -820,12 +738,7 @@ function M.vim_quickui()
                 "Grep file names in all commits"
             },
             {"--", ""},
-            {"Git &root", [[Gcd]], "Change current directory to git root"},
-            {
-                "GitHub &issues",
-                [[lua require('telescope').extensions.gh.issues()]],
-                "Fuzzy search issues with Telescope"
-            }
+            {"Git &root", [[Grt]], "Change current directory to git root"}
         }
     )
     vim.fn["quickui#menu#install"](
@@ -903,8 +816,8 @@ function M.vim_quickui()
             {"Align using : (delimiter aligned)", [[Tabularize /:]], "Tabularize /:"},
             {"--", ""},
             {"&CSV show column", [[CSVWhatColumn!]], "Show column title under cursor"},
-            {"CSV arrange column", [[1,$CSVArrangeColumn!]], "Align csv columns"},
-            {"CSV to table", [[CSVTabularize]], "Convert csv to table"}
+            {"CSV arrange column", [[execute "lua require('packer').loader('csv.vim')" | 1,$CSVArrangeColumn!]], "Align csv columns"},
+            {"CSV to table", [[execute "lua require('packer').loader('csv.vim')" | CSVTabularize]], "Convert csv to table"}
         }
     )
     vim.fn["quickui#menu#install"](
@@ -916,6 +829,11 @@ function M.vim_quickui()
                 "Show workspace diagnostics in quickfix"
             },
             {
+                "Workspace warnings and errors",
+                [[call v:lua.quickfix_all_diagnostics(2) | copen]],
+                "Show workspace diagnostics with severity >= 2 in quickfix"
+            },
+            {
                 "Document diagnostics",
                 [[lua vim.lsp.diagnostic.setloclist()]],
                 "Show current file diagnostics in quickfix"
@@ -924,21 +842,59 @@ function M.vim_quickui()
             {"--", ""},
             {
                 "&Show folders in workspace",
-                [[lua vim.lsp.buf.add_workspace_folder()]],
+                [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]],
                 "Show folders in workspace for LSP"
             },
             {
                 "Add folder to workspace",
-                [[lua vim.lsp.buf.remove_workspace_folder()]],
+                [[lua vim.lsp.buf.add_workspace_folder()]],
                 "Add folder to workspace for LSP"
             },
             {
                 "Remove folder from workspace",
-                [[lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))]],
+                [[lua vim.lsp.buf.remove_workspace_folder()]],
                 "Remove folder from workspace for LSP"
             }
         }
     )
+    local quickui_theme_list = {}
+    local used_chars = "hjklqg"
+    local category = "(Dark) "
+    local theme_list = require("themes").theme_list
+    local keys = {}
+    for index in pairs(theme_list) do
+        table.insert(keys, index)
+    end
+    table.sort(keys)
+    local len_negative = math.abs(keys[1])
+    for i = 1, len_negative / 2 do -- reverse negative keys
+        keys[i], keys[len_negative - i + 1] = keys[len_negative - i + 1], keys[i]
+    end
+    for _, index in ipairs(keys) do
+        local theme = theme_list[index]
+        if index == 0 then
+            table.insert(quickui_theme_list, {"--", ""})
+            category = "(Light) "
+        end
+        local hint_pos = vim.regex("\\c[^" .. used_chars .. "]"):match_str(theme)
+        local display = theme
+        if hint_pos ~= nil then
+            used_chars = used_chars .. theme:sub(hint_pos + 1, hint_pos + 1)
+            display = theme:sub(1, hint_pos) .. "&" .. theme:sub(hint_pos + 1)
+        end
+        table.insert(
+            quickui_theme_list,
+            {
+                category .. display,
+                ([[execute 'call writefile(["vim.g.theme_index = %s"], "%s/lua/current-theme.lua")' | lua vim.notify("Restart nvim to change to %s")]]):format(
+                    index,
+                    vim.fn.stdpath("config"),
+                    theme
+                )
+            }
+        )
+    end
+    vim.fn["quickui#menu#install"]("&Colors", quickui_theme_list)
     vim.fn["quickui#menu#switch"]("visual")
     vim.fn["quickui#menu#reset"]()
     vim.fn["quickui#menu#install"](

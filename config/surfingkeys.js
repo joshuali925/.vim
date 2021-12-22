@@ -5,6 +5,8 @@ GlobalSpeed.json
 {"common":{"audioFx":{"delay":0,"eq":{"enabled":false,"factor":1,"values":[0,0,0,0,0,0,0,0,0,0]},"pitch":0,"volume":1},"backdropFx":{"filters":[{"name":"sepia","value":0},{"name":"hueRotate","value":0},{"name":"grayscale","value":0},{"name":"contrast","value":1},{"name":"brightness","value":1},{"name":"saturate","value":1},{"name":"invert","value":0},{"name":"blur","value":0},{"name":"opacity","value":1}],"transforms":[{"name":"scaleX","value":1},{"name":"scaleY","value":1},{"name":"translateX","value":0},{"name":"translateY","value":0},{"name":"rotateX","value":0},{"name":"rotateY","value":0},{"name":"rotateZ","value":0}]},"elementFx":{"filters":[{"name":"sepia","value":0},{"name":"hueRotate","value":0},{"name":"grayscale","value":0},{"name":"contrast","value":1},{"name":"brightness","value":1},{"name":"saturate","value":1},{"name":"invert","value":0},{"name":"blur","value":0},{"name":"opacity","value":1}],"transforms":[{"name":"scaleX","value":1},{"name":"scaleY","value":1},{"name":"translateX","value":0},{"name":"translateY","value":0},{"name":"rotateX","value":0},{"name":"rotateY","value":0},{"name":"rotateZ","value":0}]},"enabled":true,"lastSpeed":1.1,"speed":1},"firstUse":1627628559467,"keybinds":[{"adjustMode":2,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"2623896300","key":{"altKey":false,"code":"KeyX","ctrlKey":false,"metaKey":false,"shiftKey":false},"valueNumberAlt":-0.1},{"adjustMode":1,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"3565761808","key":{"altKey":false,"code":"KeyZ","ctrlKey":false,"metaKey":false,"shiftKey":false},"valueNumber":1},{"adjustMode":2,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"8445439043","key":{"altKey":false,"code":"KeyC","ctrlKey":false,"metaKey":false,"shiftKey":false},"spacing":1,"valueNumberAlt":0.1},{"command":"setState","enabled":true,"greedy":false,"id":"9280901153","key":{"altKey":false,"code":"KeyI","ctrlKey":false,"metaKey":false,"shiftKey":true},"spacing":2,"valueState":"toggle"},{"command":"seek","enabled":true,"greedy":true,"id":"3175808952","key":{"ctrlKey":false,"altKey":false,"shiftKey":false,"metaKey":false,"code":"Comma"},"valueBool2":true,"valueNumber":-5},{"command":"seek","enabled":true,"greedy":true,"id":"7654966709","key":{"ctrlKey":false,"altKey":false,"shiftKey":false,"metaKey":false,"code":"Period"},"spacing":1,"valueBool2":true,"valueNumber":5},{"command":"seek","enabled":true,"greedy":true,"id":"3788998064","key":{"ctrlKey":true,"altKey":false,"shiftKey":false,"metaKey":false,"code":"Comma"},"valueBool3":true,"valueNumber":-0.041},{"command":"seek","enabled":true,"greedy":true,"id":"3314411603","key":{"ctrlKey":true,"altKey":false,"shiftKey":false,"metaKey":false,"code":"Period"},"spacing":1,"valueBool3":true,"valueNumber":0.041},{"command":"fullscreen","enabled":true,"greedy":true,"id":"5553514632","key":{"code":"KeyF","shiftKey":true},"spacing":2,"valueBool":true}],"version":10}
 */
 
+const { aceVimMap, mapkey, imap, imapkey, getClickableElements, vmapkey, map, vmap, unmap, vunmap, cmap, addSearchAlias, removeSearchAlias, tabOpenLink, readText, Clipboard, Front, Hints, Visual, RUNTIME } = api;
+
 chrome.storage.local.set({ noPdfViewer: 1 }); // https://github.com/brookhong/Surfingkeys/issues/320
 settings.tabsThreshold = 0;
 settings.richHintsForKeystroke = 1500;
@@ -85,11 +87,11 @@ map(';B', ';db'); // remove bookmark
 map(';c', ';e'); // edit configs
 map(';e', ';U'); // edit url
 unmap('r');
-unmap('x');
 unmap('<Ctrl-h>');
 unmap('<Ctrl-j>');
-unmap('c'); // unmap z, x, c, . for Global Speed
-unmap('z');
+unmap('z'); // unmap z, x, c, . for Global Speed
+unmap('x');
+unmap('c');
 unmap('.');
 
 mapkey('g+', 'Increment url', function() { var e,s; IB=1; function isDigit(c) { return ('0' <= c && c <= '9') } L = window.location.href; LL = L.length; for (e=LL-1; e>=0; --e) if (isDigit(L.charAt(e))) { for(s=e-1; s>=0; --s) if (!isDigit(L.charAt(s))) break; break; } ++s; if (e<0) return; oldNum = L.substring(s,e+1); newNum = '' + (parseInt(oldNum,10) + IB); while (newNum.length < oldNum.length) newNum = '0' + newNum; window.location.href = L.substring(0,s) + newNum + L.slice(e+1); });
@@ -106,13 +108,6 @@ mapkey('<Ctrl-r>', 'Hard reload', function() { window.location.reload(); });
 unmap("'");
 mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
     Front.openOmnibar({type: "VIMarks", tabbed: false});
-});
-unmap('p');
-mapkey('p', '#0enter ephemeral PassThrough mode to temporarily suppress SurfingKeys', function() {
-    Normal.passThrough(1500);
-});
-mapkey('K', '#8Open omnibar for word translation', function() {
-    Front.openOmniquery({query: Normal.getWordUnderCursor()});
 });
 mapkey(';V', 'Edit with web vim', function() {
     Clipboard.read(function(response) {
@@ -208,7 +203,7 @@ var scrollX, scrollY;
 mapkey('gg', 'Go to top', function() {
     var tempX = document.scrollingElement.scrollLeft;
     var tempY = document.scrollingElement.scrollTop;
-    Normal.scroll('top');
+    window.scrollTo(0, 0);
     if (tempX !== document.scrollingElement.scrollLeft || tempY !== document.scrollingElement.scrollTop) {
         scrollX = tempX;
         scrollY = tempY;
@@ -217,7 +212,7 @@ mapkey('gg', 'Go to top', function() {
 mapkey('G', 'Go to bottom', function() {
     var tempX = document.scrollingElement.scrollLeft;
     var tempY = document.scrollingElement.scrollTop;
-    Normal.scroll('bottom');
+    window.scrollTo(0, document.body.scrollHeight);
     if (tempX !== document.scrollingElement.scrollLeft || tempY !== document.scrollingElement.scrollTop) {
         scrollX = tempX;
         scrollY = tempY;
@@ -230,42 +225,6 @@ mapkey('``', 'Go to previous position', function() {
         window.scrollTo(scrollX, scrollY);
     scrollX = tempX;
     scrollY = tempY;
-});
-for (let i = 32; i < 127; ++i) { // don't use var to avoid closure referencing global
-    if (i === 96) continue; // backtick
-    let char = String.fromCharCode(i);
-    mapkey(`\`${char}`, `Jump mark ${char}`, function() {
-        Normal.jumpVIMark(char);
-    });
-}
-
-// https://github.com/brookhong/Surfingkeys/wiki/Register-inline-query
-Front.registerInlineQuery({
-    url: function(q) {
-        return `http://dict.youdao.com/w/eng/${q}/#keyfrom=dict2.index`;
-    },
-    parseResult: function(res) {
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(res.text, "text/html");
-        var collinsResult = doc.querySelector("#collinsResult");
-        var authTransToggle = doc.querySelector("#authTransToggle");
-        var examplesToggle = doc.querySelector("#examplesToggle");
-        if (collinsResult) {
-            collinsResult.querySelectorAll("div>span.collinsOrder").forEach(function(span) {
-                span.nextElementSibling.prepend(span);
-            });
-            collinsResult.querySelectorAll("div.examples").forEach(function(div) {
-                div.innerHTML = div.innerHTML.replace(/<p/gi, "<span").replace(/<\/p>/gi, "</span>");
-            });
-            var exp = collinsResult.innerHTML;
-            return exp;
-        } else if (authTransToggle) {
-            authTransToggle.querySelector("div.via.ar").remove();
-            return authTransToggle.innerHTML;
-        } else if (examplesToggle) {
-            return examplesToggle.innerHTML;
-        }
-    }
 });
 
 settings.theme = `
