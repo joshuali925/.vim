@@ -26,7 +26,6 @@ opt.wrap = true
 opt.linebreak = true
 opt.showmatch = true
 opt.showmode = false
-opt.showtabline = 2
 opt.diffopt = opt.diffopt + {"vertical", "indent-heuristic", "algorithm:patience"}
 opt.splitright = true
 opt.splitbelow = true
@@ -42,7 +41,7 @@ opt.complete = {".", "w", "b", "u"}
 opt.completeopt = {"menuone", "noselect"}
 opt.completefunc = "funcs#complete_word"
 opt.pumblend = 8
-opt.shortmess = opt.shortmess + {c = true}
+opt.shortmess = opt.shortmess + {c = true, A = true}
 opt.scrolloff = 2
 opt.sidescrolloff = 5
 opt.signcolumn = "yes"
@@ -53,22 +52,17 @@ opt.foldlevelstart = 99
 opt.jumpoptions = "stack"
 opt.shada = [[!,'1000,<50,s10,/20,@20,h]]
 opt.undofile = true
-opt.undodir = vim.env.HOME .. "/.cache/nvim/undo"
-opt.undolevels = 1000
-opt.undoreload = 10000
 opt.isfname = opt.isfname - {"="}
 opt.path = {".", "", "**5"}
 opt.list = true
 opt.listchars = {tab = "» ", nbsp = "␣", trail = "•"}
 opt.timeoutlen = 1500
 opt.ttimeoutlen = 40
-opt.updatetime = 300
 opt.synmaxcol = 1000
 opt.lazyredraw = true
-opt.swapfile = false
 opt.writebackup = false
 opt.wildcharm = 26 -- <C-z>
-opt.grepprg = "rg --vimgrep --smart-case --hidden"
+opt.grepprg = "rg --vimgrep --smart-case --hidden --auto-hybrid-regex"
 opt.grepformat = "%f:%l:%c:%m,%f:%l:%m"
 opt.cedit = "<C-x>"
 

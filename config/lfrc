@@ -53,6 +53,9 @@ map `` push ''
 map c :clear; unselect
 map gs !clear && git status
 map gr cd-git-root
+map gvi :cd ~/.vim
+map gvd :cd ~/.local/share/nvim
+map gvp :cd ~/.local/share/nvim/site/pack/packer
 map gl follow-symlink
 map t locate-file
 map T locate-file-no-ignore

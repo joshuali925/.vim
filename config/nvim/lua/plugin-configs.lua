@@ -79,11 +79,6 @@ function M.kommentary()
     )
 end
 
-function M.nvim_miniyank()
-    g.miniyank_maxitems = 200
-    g.miniyank_filename = os.getenv("HOME") .. "/.cache/nvim/.miniyank.mpack"
-end
-
 function M.rest_nvim()
     require("rest-nvim").setup({skip_ssl_verification = true})
     vim.cmd([[command! RestNvimPreviewCurl execute "normal \<Plug>RestNvimPreview" | sleep 100m | S 1,2messages]])
@@ -185,6 +180,7 @@ function M.setup_vim_visual_multi()
     g.VM_default_mappings = 0
     g.VM_exit_on_1_cursor_left = 1
     g.VM_maps = {
+        -- <C-Down/Up> to add cursor
         ["Select All"] = "<leader><C-n>",
         ["Find Under"] = "<C-n>",
         ["Find Subword Under"] = "<C-n>",
@@ -588,6 +584,9 @@ function M.nvim_cmp()
         },
         sources = {{name = "buffer"}, {name = "path"}, {name = "nvim_lua"}, {name = "nvim_lsp"}, {name = "vsnip"}}
     }
+    -- https://github.com/hrsh7th/cmp-cmdline/issues/22
+    cmp.setup.cmdline("/", {sources = {{name = "buffer"}}})
+    cmp.setup.cmdline(":", {sources = {{name = "cmdline"}}})
 end
 
 function _G.quickui_context_menu()
@@ -816,8 +815,16 @@ function M.vim_quickui()
             {"Align using : (delimiter aligned)", [[Tabularize /:]], "Tabularize /:"},
             {"--", ""},
             {"&CSV show column", [[CSVWhatColumn!]], "Show column title under cursor"},
-            {"CSV arrange column", [[execute "lua require('packer').loader('csv.vim')" | 1,$CSVArrangeColumn!]], "Align csv columns"},
-            {"CSV to table", [[execute "lua require('packer').loader('csv.vim')" | CSVTabularize]], "Convert csv to table"}
+            {
+                "CSV arrange column",
+                [[execute "lua require('packer').loader('csv.vim')" | 1,$CSVArrangeColumn!]],
+                "Align csv columns"
+            },
+            {
+                "CSV to table",
+                [[execute "lua require('packer').loader('csv.vim')" | CSVTabularize]],
+                "Convert csv to table"
+            }
         }
     )
     vim.fn["quickui#menu#install"](

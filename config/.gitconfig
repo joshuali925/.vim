@@ -1,9 +1,12 @@
+[init]
+  defaultBranch = main
+
 [user]
   email = joshuali925@gmail.com
   name = Joshua Li
 
 [pull]
-  rebase = false
+  rebase = true
 
 [merge]
   ; conflictstyle = diff3

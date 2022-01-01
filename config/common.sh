@@ -55,6 +55,7 @@ alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
+alias q-="up -c \"\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
 alias rga='rg --text --no-ignore --search-zip'
 alias rgf='rg --files | rg'
 alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
@@ -498,7 +499,7 @@ croc() {
     command croc --curve p256 --yes "$@"
   elif [ -e "$1" ] || [ "$1" = send ]; then
     [ "$1" = send ] && shift 1
-    timeout 60 command croc send "$@" |& {
+    timeout 60 croc send "$@" |& {
       while read line; do
         echo "$line"
         [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$line") && echo -n "command croc --curve p256 --yes $phrase" | oscyank

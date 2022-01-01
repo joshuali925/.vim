@@ -57,6 +57,7 @@ map('o', 't'); // open url
 map('t', 'T'); // goto tab
 map('s', 'f'); // open in current tab
 map('S', 'q'); // click icons
+map('K', 'Q'); // omnibar translate
 map('q', '<Ctrl-h>'); // hover
 map('Q', '<Ctrl-j>'); // unhover
 map('f', 'gf'); // open in background new tab
@@ -101,6 +102,7 @@ vunmap('gr');
 mapkey('gr', 'Go to referrer', function() { if(document.referrer) open(document.referrer); });
 unmap('ga');
 mapkey('ga', '#12Open Chrome Apps', function() { tabOpenLink('chrome://apps/'); });
+unmap(';v');
 mapkey(';vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
 mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
 mapkey(';vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
@@ -225,6 +227,36 @@ mapkey('``', 'Go to previous position', function() {
         window.scrollTo(scrollX, scrollY);
     scrollX = tempX;
     scrollY = tempY;
+});
+
+// https://github.com/brookhong/Surfingkeys/wiki/Register-inline-query
+Front.registerInlineQuery({
+    url: function(q) {
+        return `http://dict.youdao.com/w/eng/${q}/#keyfrom=dict2.index`;
+    },
+    parseResult: function(res) {
+        console.log(res)
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(res.text, "text/html");
+        var collinsResult = doc.querySelector("#collinsResult");
+        var authTransToggle = doc.querySelector("#authTransToggle");
+        var examplesToggle = doc.querySelector("#examplesToggle");
+        if (collinsResult) {
+            collinsResult.querySelectorAll("div>span.collinsOrder").forEach(function(span) {
+                span.nextElementSibling.prepend(span);
+            });
+            collinsResult.querySelectorAll("div.examples").forEach(function(div) {
+                div.innerHTML = div.innerHTML.replace(/<p/gi, "<span").replace(/<\/p>/gi, "</span>");
+            });
+            var exp = collinsResult.innerHTML;
+            return exp;
+        } else if (authTransToggle) {
+            authTransToggle.querySelector("div.via.ar").remove();
+            return authTransToggle.innerHTML;
+        } else if (examplesToggle) {
+            return examplesToggle.innerHTML;
+        }
+    }
 });
 
 settings.theme = `

@@ -248,6 +248,7 @@ install_node() {
   ln -sf ~/.yarn/bin/yarn ~/.local/bin/yarn
   log "Installing node packages.."
   pushd ~/.local/node-packages
+  ~/.yarn/bin/yarn add eslint || true
   ~/.yarn/bin/yarn add prettier || true
   ~/.yarn/bin/yarn add fixjson || true
   ~/.yarn/bin/yarn add lua-fmt || true
