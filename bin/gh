@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github gh cli/cli linux_amd64.tar.gz linux_arm64.tar.gz macOS_amd64.tar.gz '' '--strip-components=2 --wildcards gh_*/bin/gh' "$@"

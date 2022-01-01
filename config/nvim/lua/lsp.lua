@@ -41,13 +41,9 @@ local lsp_configs = {
     sumneko_lua = {
         settings = {
             Lua = {
-                runtime = {
-                    version = "LuaJIT",
-                    path = vim.split(package.path, ";")
-                },
-                diagnostics = {
-                    globals = {"vim"}
-                },
+                runtime = {version = "LuaJIT", path = vim.split(package.path, ";")},
+                diagnostics = {globals = {"vim"}},
+                IntelliSense = {traceLocalSet = true},
                 workspace = {
                     library = {
                         [vim.fn.expand("$VIMRUNTIME/lua")] = true,
@@ -58,21 +54,15 @@ local lsp_configs = {
         }
     },
     tsserver = {
-        init_options = {
-            preferences = {
-                importModuleSpecifierPreference = "relative"
-            }
-        },
+        init_options = {preferences = {importModuleSpecifierPreference = "relative"}},
         commands = {
             OrganizeImports = {
                 function()
-                    vim.lsp.buf.execute_command(
-                        {
-                            command = "_typescript.organizeImports",
-                            arguments = {vim.api.nvim_buf_get_name(0)},
-                            title = ""
-                        }
-                    )
+                    vim.lsp.buf.execute_command {
+                        command = "_typescript.organizeImports",
+                        arguments = {vim.api.nvim_buf_get_name(0)},
+                        title = ""
+                    }
                 end,
                 description = "Organize Imports"
             }
@@ -91,17 +81,11 @@ local function make_config()
     capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
     capabilities.textDocument.completion.completionItem.tagSupport = {valueSet = {1}}
     capabilities.textDocument.completion.completionItem.resolveSupport = {
-        properties = {
-            "documentation",
-            "detail",
-            "additionalTextEdits"
-        }
+        properties = {"documentation", "detail", "additionalTextEdits"}
     }
     return {
         capabilities = capabilities,
-        flags = {
-            debounce_text_changes = 150
-        },
+        flags = {debounce_text_changes = 150},
         on_attach = on_attach
     }
 end
@@ -136,12 +120,7 @@ function _G.toggle_diagnostics()
         vim.lsp.handlers["textDocument/publishDiagnostics"] =
             vim.lsp.with(
             vim.lsp.diagnostic.on_publish_diagnostics,
-            {
-                virtual_text = true,
-                signs = true,
-                underline = true,
-                update_in_insert = false
-            }
+            {virtual_text = true, signs = true, underline = true, update_in_insert = false}
         )
     end
 end
@@ -156,12 +135,7 @@ function _G.quickfix_all_diagnostics(severity)
             if d.severity <= severity then
                 table.insert(
                     qflist,
-                    {
-                        bufnr = bufnr,
-                        lnum = d.range.start.line + 1,
-                        col = d.range.start.character + 1,
-                        text = d.message
-                    }
+                    {bufnr = bufnr, lnum = d.range.start.line + 1, col = d.range.start.character + 1, text = d.message}
                 )
             end
         end

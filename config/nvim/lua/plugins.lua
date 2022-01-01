@@ -4,21 +4,20 @@ if vim.fn.glob(install_path) == "" then
 end
 vim.cmd("packadd packer.nvim")
 
-local function get_config(name)
-    return ("require('plugin-configs').%s()"):format(name)
-end
-
 return require("packer").startup(
     {
         config = {
             opt_default = true,
             -- https://github.com/wbthomason/packer.nvim/issues/456
             -- max_jobs = 10, -- this fixes above issue but breaks plugin installing in headless nvim
-            display = { open_fn = require("packer.util").float },
-            profile = { enable = false },
+            display = {open_fn = require("packer.util").float},
+            profile = {enable = false},
             compile_path = vim.fn.stdpath("config") .. "/lua/packer_compiled.lua" -- impatient.nvim
         },
         function(use)
+            local function conf(name)
+                return ("require('plugin-configs').%s()"):format(name)
+            end
             use {"wbthomason/packer.nvim"}
 
             -- appearance
@@ -60,8 +59,8 @@ return require("packer").startup(
                     require("bufferline").setup({highlights = {buffer_selected = {gui = "bold"}}})
                 end
             }
-            use {"feline-nvim/feline.nvim", event = "VimEnter", config = get_config("feline_nvim")}
-            use {"lukas-reineke/indent-blankline.nvim", setup = get_config("setup_indent_blankline")}
+            use {"feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim")}
+            use {"lukas-reineke/indent-blankline.nvim", setup = conf("setup_indent_blankline")}
             use {
                 "DarwinSenior/nvim-colorizer.lua",
                 cmd = "ColorizerAttachToBuffer",
@@ -75,25 +74,25 @@ return require("packer").startup(
                 "kassio/neoterm",
                 cmd = {"T", "Ttoggle", "Tnew"},
                 keys = "<Plug>(neoterm-repl-send",
-                setup = get_config("setup_neoterm")
+                setup = conf("setup_neoterm")
             }
             use {
                 "skywind3000/vim-quickui",
                 fn = "quickui#*",
-                setup = get_config("setup_vim_quickui"),
-                config = get_config("vim_quickui")
+                setup = conf("setup_vim_quickui"),
+                config = conf("vim_quickui")
             }
             use {"skywind3000/asyncrun.vim", cmd = "AsyncRun", config = [[vim.g.asyncrun_open = 12]]}
-            use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = get_config("setup_symbols_outline")}
-            use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = get_config("mundo")}
-            use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = get_config("nvim_tree")}
+            use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = conf("setup_symbols_outline")}
+            use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo")}
+            use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = conf("nvim_tree")}
             use {
                 "goolord/alpha-nvim",
                 cond = function()
                     return vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1
                 end,
                 event = "VimEnter",
-                config = get_config("alpha_nvim")
+                config = conf("alpha_nvim")
             }
             use {
                 "nvim-telescope/telescope.nvim",
@@ -104,9 +103,9 @@ return require("packer").startup(
                 },
                 wants = {"popup.nvim", "plenary.nvim", "telescope-fzf-native.nvim"},
                 module = "telescope",
-                config = get_config("telescope")
+                config = conf("telescope")
             }
-            use {"kevinhwang91/nvim-bqf", ft = "qf", config = get_config("nvim_bqf")}
+            use {"kevinhwang91/nvim-bqf", ft = "qf", config = conf("nvim_bqf")}
             use {"rcarriga/nvim-notify"}
 
             -- git
@@ -117,8 +116,8 @@ return require("packer").startup(
                 cmd = {"Git", "Ggrep", "Glgrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog"}
             }
             use {"rbong/vim-flog", cmd = {"Flog", "Flogsplit"}}
-            use {"lewis6991/gitsigns.nvim", requires = {"nvim-lua/plenary.nvim"}, config = get_config("gitsigns")}
-            use {"rhysd/conflict-marker.vim", config = get_config("conflict_marker")}
+            use {"lewis6991/gitsigns.nvim", config = conf("gitsigns")}
+            use {"rhysd/conflict-marker.vim", config = conf("conflict_marker")}
             use {"sindrets/diffview.nvim", cmd = {"DiffviewOpen", "DiffviewFileHistory"}}
 
             -- lang
@@ -126,7 +125,7 @@ return require("packer").startup(
                 "nvim-treesitter/nvim-treesitter",
                 run = ":TSUpdate",
                 requires = {"nvim-treesitter/nvim-treesitter-textobjects"},
-                config = get_config("nvim_treesitter")
+                config = conf("nvim_treesitter")
             }
             use {"nvim-treesitter/playground", cmd = {"TSPlaygroundToggle", "TSHighlightCapturesUnderCursor"}}
             use {"williamboman/nvim-lsp-installer"}
@@ -138,12 +137,13 @@ return require("packer").startup(
                 end
             }
             use {"weilbith/nvim-code-action-menu", cmd = "CodeActionMenu"}
-            use {"onsails/lspkind-nvim", event = "InsertEnter"}
-            use {"hrsh7th/nvim-cmp", after = "lspkind-nvim", config = get_config("nvim_cmp")}
+            use {"onsails/lspkind-nvim", event = {"InsertEnter", "CmdlineEnter"}}
+            use {"hrsh7th/nvim-cmp", after = "lspkind-nvim", config = conf("nvim_cmp")}
             use {"hrsh7th/cmp-buffer", after = "nvim-cmp"}
             use {"hrsh7th/cmp-path", after = "nvim-cmp"}
             use {"hrsh7th/cmp-nvim-lua", after = "nvim-cmp"}
             use {"hrsh7th/cmp-nvim-lsp", after = "nvim-cmp"}
+            use {"hrsh7th/cmp-cmdline", after = "nvim-cmp"}
             use {"hrsh7th/cmp-vsnip", after = "nvim-cmp"}
             use {"rafamadriz/friendly-snippets", after = "nvim-cmp"}
             use {"hrsh7th/vim-vsnip", after = "friendly-snippets"}
@@ -153,7 +153,7 @@ return require("packer").startup(
                 requires = {"JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-treesitter"},
                 keys = "<Plug>kommentary_",
                 setup = [[vim.g.kommentary_create_default_mappings = false]],
-                config = get_config("kommentary")
+                config = conf("kommentary")
             }
             use {
                 "windwp/nvim-ts-autotag",
@@ -163,20 +163,20 @@ return require("packer").startup(
                     require("nvim-ts-autotag").setup()
                 end
             }
-            use {"neomake/neomake", cmd = "Neomake", config = get_config("neomake")}
+            use {"neomake/neomake", cmd = "Neomake", config = conf("neomake")}
             use {"MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log"}
             use {"udalov/kotlin-vim", ft = "kotlin"}
-            use {"chrisbra/csv.vim", setup = get_config("setup_csv_vim"), cmd = "CSVWhatColumn"}
+            use {"chrisbra/csv.vim", setup = conf("setup_csv_vim"), cmd = "CSVWhatColumn"}
 
             -- editing
-            use {"windwp/nvim-autopairs", after = "nvim-cmp", config = get_config("nvim_autopairs")}
+            use {"windwp/nvim-autopairs", after = "nvim-cmp", config = conf("nvim_autopairs")}
             use {"joshuali925/vim-indent-object"}
             use {"terryma/vim-expand-region", keys = "<Plug>(expand_region_"}
             use {
                 "mg979/vim-visual-multi",
                 fn = "vm#*",
                 keys = {"<Plug>(VM-", {"n", "<leader><C-n>"}},
-                setup = get_config("setup_vim_visual_multi")
+                setup = conf("setup_vim_visual_multi")
             }
             use {
                 "phaazon/hop.nvim",
@@ -185,7 +185,7 @@ return require("packer").startup(
                     require("hop").setup({})
                 end
             }
-            use {"unblevable/quick-scope", config = get_config("quick_scope")}
+            use {"unblevable/quick-scope", config = conf("quick_scope")}
             use {"dahu/vim-fanfingtastic"}
             use {"chaoren/vim-wordmotion", setup = [[vim.g.wordmotion_nomap = 1]]}
             use {"machakann/vim-sandwich", setup = [[vim.g.operator_sandwich_no_default_key_mappings = 1]]}
@@ -201,7 +201,7 @@ return require("packer").startup(
                     require("filetype").setup({overrides = {extensions = {ejs = "html"}}})
                 end
             }
-            use {"ahmedkhalf/project.nvim", opt = false, config = get_config("project_nvim")}
+            use {"ahmedkhalf/project.nvim", opt = false, config = conf("project_nvim")}
             use {"tpope/vim-sleuth"}
             use {"tpope/vim-repeat", opt = false}
             use {
@@ -225,14 +225,14 @@ return require("packer").startup(
                 end
             }
             use {"moll/vim-bbye", cmd = "Bdelete"}
-            use {"andymass/vim-matchup", cmd = "MatchupWhereAmI", config = get_config("vim_matchup")}
+            use {"andymass/vim-matchup", cmd = "MatchupWhereAmI", config = conf("vim_matchup")}
             use {"ojroques/vim-oscyank", cmd = {"OSCYank", "OSCYankReg"}}
             use {
                 "bfredl/nvim-miniyank",
                 event = "TextYankPost",
                 fn = "miniyank#*",
                 keys = "<Plug>(miniyank-",
-                config = get_config("nvim_miniyank")
+                config = [[vim.g.miniyank_maxitems = 200]]
             }
             use {
                 "aserowy/tmux.nvim",
@@ -256,9 +256,9 @@ return require("packer").startup(
             use {
                 "dhruvasagar/vim-table-mode",
                 cmd = {"TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine"},
-                setup = get_config("setup_vim_table_mode")
+                setup = conf("setup_vim_table_mode")
             }
-            use {"NTBBloodbath/rest.nvim", module = "rest-nvim", config = get_config("rest_nvim")}
+            use {"NTBBloodbath/rest.nvim", module = "rest-nvim", config = conf("rest_nvim")}
         end
     }
 )
