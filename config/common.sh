@@ -499,7 +499,7 @@ croc() {
     command croc --curve p256 --yes "$@"
   elif [ -e "$1" ] || [ "$1" = send ]; then
     [ "$1" = send ] && shift 1
-    timeout 60 croc send "$@" |& {
+    timeout 60 croc send "$@" 2>&1 | {
       while read line; do
         echo "$line"
         [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$line") && echo -n "command croc --curve p256 --yes $phrase" | oscyank

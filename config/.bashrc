@@ -23,9 +23,11 @@ HISTCONTROL=ignoreboth:erasedups:ignorespace
 
 bind 'set show-all-if-ambiguous on'
 bind 'set completion-ignore-case on'
+bind 'set enable-bracketed-paste on'
 bind 'TAB: menu-complete'
 bind '"\e[Z":menu-complete-backward'
 bind '"\C-x\C-e": edit-and-execute-command'
+bind '"\C-xa": shell-expand-line' # same as in zsh, 'C-x a' expands aliases
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
 bind '"\eOA": history-search-backward'
@@ -34,10 +36,6 @@ bind '"\e[1;5D": backward-word'
 bind '"\e[1;5C": forward-word'
 bind '"\e[3;2~": backward-delete-char'
 bind -x '"\C-o":"lf"'
-
-# same as in zsh, 'C-x a' expands aliases
-bind '"\C-xa": shell-expand-line'
-
 stty werase undef # unbind werase to C-w
 bind '"\C-w": unix-filename-rubout'
 
