@@ -31,8 +31,8 @@ augroup AutoCommands
   autocmd BufReadPost * if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif | let b:RestoredCursor = 1
   autocmd BufWritePost */lua/plugins.lua source <afile> | PackerCompile
   autocmd TextYankPost * silent! lua vim.highlight.on_yank({higroup = "IncSearch", timeout = 300})
+  autocmd BufNewFile,BufRead *.http set filetype=http commentstring=#\ %s
   autocmd FileType * setlocal formatoptions=jql
-  autocmd FileType http set commentstring=#\ %s
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>| nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
@@ -49,9 +49,3 @@ command! SaveSession mksession! ~/.cache/nvim/session.vim | lua vim.notify("Sess
 command! LoadSession source ~/.cache/nvim/session.vim | lua vim.notify("Loaded session from ~/.cache/nvim/session.vim")
 command! -nargs=* GrepRegex lua require("telescope.builtin").grep_string({path_display = {"smart"}, use_regex = true, search = <q-args>})
 command! -nargs=* GrepNoRegex lua require("telescope.builtin").grep_string({path_display = {"smart"}, search = <q-args>})
-
-if $SSH_CLIENT != ''  " ssh session
-  call funcs#map_copy_with_osc_yank()
-elseif !has('macunix')  " WSL Vim
-  call funcs#map_copy_to_win_clip()
-endif

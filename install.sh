@@ -83,7 +83,7 @@ install_development_tools() {
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt' ]; then
-    sudo apt update && sudo apt install -y build-essential zsh
+    sudo apt update && sudo apt install -y build-essential zsh unzip
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"

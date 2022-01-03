@@ -1,4 +1,4 @@
-" TODO use matchfuzzy if available when this is merged https://github.com/neovim/neovim/pull/12995
+" TODO use matchfuzzy if available when this is merged https://github.com/neovim/neovim/pull/16873
 function! funcs#complete_word(findstart, base)
   if a:findstart
     return match(getline('.'), '\S\+\%'. col('.'). 'c')
@@ -110,7 +110,7 @@ function! funcs#print_variable(visual, printAbove) abort
   let l:print['javascript'] = "console.log('DEBUGGING ❗". l:word. ":', ". l:word. ');'
   let l:print['typescript'] = l:print['javascript']
   let l:print['typescriptreact'] = l:print['javascript']
-  let l:print['java'] = 'System.out.println("[" + getClass().getName() + "] DEBUGGING ❗'. l:word. ': " + '. l:word. ');'
+  let l:print['java'] = 'System.out.println("[" + getClass().getSimpleName() + " " + ('. l:word. ').getClass().getSimpleName() + "] ❗'. l:word. ': " + '. l:word. ');'
   let l:print['kotlin'] = 'println("[${javaClass.simpleName}] DEBUGGING ❗'. l:word. ': " + '. l:word. ')'
   let l:print['vim'] = "echomsg '❗". l:word. ":' ". l:word
   let l:print['lua'] = 'print("❗'. l:word. ': " .. vim.inspect('. l:word. '))'
@@ -147,11 +147,11 @@ function! funcs#get_run_command() abort
   let l:run_command = {}
   let l:run_command['vim'] = 'source %'
   let l:run_command['lua'] = 'luafile %'
-  let l:run_command['python'] = 'AsyncRun python3 %'
-  let l:run_command['c'] = 'AsyncRun gcc % -o %< -g && ./%<'
-  let l:run_command['cpp'] = 'AsyncRun g++ % -o %< -g && ./%<'
-  let l:run_command['java'] = 'AsyncRun javac % && java %<'
-  let l:run_command['javascript'] = 'AsyncRun node %'
+  let l:run_command['python'] = 'AsyncRun -raw python3 %'
+  let l:run_command['c'] = 'AsyncRun -raw gcc % -o %< -g && ./%<'
+  let l:run_command['cpp'] = 'AsyncRun -raw g++ % -o %< -g && ./%<'
+  let l:run_command['java'] = 'AsyncRun -raw javac % && java %<'
+  let l:run_command['javascript'] = 'AsyncRun -raw node %'
   let l:run_command['markdown'] = 'MarkdownPreview'
   let l:run_command['html'] = 'AsyncRun -silent open %'
   let l:run_command['xhtml'] = 'AsyncRun -silent open %'

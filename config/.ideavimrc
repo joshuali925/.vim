@@ -52,6 +52,8 @@ nnoremap c2iu ]b[wc2]w
 nnoremap c3iu ]b[wc3]w
 nnoremap d2iu ]b[wd2]w
 nnoremap d3iu ]b[wd3]w
+xnoremap il ^og_
+xnoremap al 0o$
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)
 noremap , ;
@@ -154,7 +156,7 @@ omap ai <Plug>textobj-indent-aI
 xmap aI <Plug>textobj-indent-ai
 omap aI <Plug>textobj-indent-ai
 
-nnoremap <leader>l mx"xyiwoSystem.out.println("[" + getClass().getName() + "] DEBUGGING ❗<C-r>x: " + <C-r>x);<Esc>`x
-xnoremap <leader>l mx"xyoSystem.out.println("[" + getClass().getName() + "] DEBUGGING ❗<C-r>x: " + <C-r>x);<Esc>`x
-nnoremap <leader>L mx"xyiwOSystem.out.println("[" + getClass().getName() + "] DEBUGGING ❗<C-r>x: " + <C-r>x);<Esc>`x
-xnoremap <leader>L mx"xyOSystem.out.println("[" + getClass().getName() + "] DEBUGGING ❗<C-r>x: " + <C-r>x);<Esc>`x
+nnoremap <leader>l mx"xyiwoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+xnoremap <leader>l mx"xyoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+nnoremap <leader>L mx"xyiwOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+xnoremap <leader>L mx"xyOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x

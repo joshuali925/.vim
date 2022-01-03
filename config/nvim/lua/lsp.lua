@@ -1,7 +1,7 @@
 function _G.lsp_install_all()
     local required_servers = {"sumneko_lua", "vimls", "jsonls", "yamlls", "html", "cssls", "tsserver", "pyright"}
     local lsp_installer_servers = require("nvim-lsp-installer.servers")
-    for _, required_server in pairs(required_servers) do
+    for _, required_server in ipairs(required_servers) do
         local ok, server = lsp_installer_servers.get_server(required_server)
         if ok and not server:is_installed() then
             server:install()
@@ -11,27 +11,13 @@ function _G.lsp_install_all()
 end
 vim.cmd("command! LspInstallAll call v:lua.lsp_install_all()")
 
-local timer = vim.loop.new_timer()
 local function on_attach(client, bufnr)
-    -- vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
     if client.resolved_capabilities.document_highlight then
-        function _G.lsp_document_highlight()
-            timer:start(
-                50,
-                0,
-                vim.schedule_wrap(
-                    function()
-                        vim.cmd("silent! lua vim.lsp.buf.clear_references()")
-                        vim.cmd("silent! lua vim.lsp.buf.document_highlight()")
-                    end
-                )
-            )
-        end
         vim.cmd [[
             augroup lsp_document_highlight
                 autocmd! * <buffer>
-                autocmd CursorMoved <buffer> call v:lua.lsp_document_highlight()
-                autocmd CursorMovedI <buffer> call v:lua.lsp_document_highlight()
+                autocmd CursorMoved,CursorMovedI <buffer> lua vim.lsp.buf.document_highlight()
+                autocmd CursorMoved,CursorMovedI <buffer> lua vim.lsp.buf.clear_references()
             augroup END
         ]]
     end

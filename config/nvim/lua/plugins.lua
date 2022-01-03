@@ -107,6 +107,12 @@ return require("packer").startup(
             }
             use {"kevinhwang91/nvim-bqf", ft = "qf", config = conf("nvim_bqf")}
             use {"rcarriga/nvim-notify"}
+            use {
+                "gelguy/wilder.nvim",
+                requires = {"romgrk/fzy-lua-native"},
+                event = "CmdlineEnter",
+                config = conf("wilder_nvim")
+            }
 
             -- git
             use {
@@ -137,13 +143,12 @@ return require("packer").startup(
                 end
             }
             use {"weilbith/nvim-code-action-menu", cmd = "CodeActionMenu"}
-            use {"onsails/lspkind-nvim", event = {"InsertEnter", "CmdlineEnter"}}
+            use {"onsails/lspkind-nvim", event = "InsertEnter"}
             use {"hrsh7th/nvim-cmp", after = "lspkind-nvim", config = conf("nvim_cmp")}
             use {"hrsh7th/cmp-buffer", after = "nvim-cmp"}
             use {"hrsh7th/cmp-path", after = "nvim-cmp"}
             use {"hrsh7th/cmp-nvim-lua", after = "nvim-cmp"}
             use {"hrsh7th/cmp-nvim-lsp", after = "nvim-cmp"}
-            use {"hrsh7th/cmp-cmdline", after = "nvim-cmp"}
             use {"hrsh7th/cmp-vsnip", after = "nvim-cmp"}
             use {"rafamadriz/friendly-snippets", after = "nvim-cmp"}
             use {"hrsh7th/vim-vsnip", after = "friendly-snippets"}
@@ -170,7 +175,6 @@ return require("packer").startup(
 
             -- editing
             use {"windwp/nvim-autopairs", after = "nvim-cmp", config = conf("nvim_autopairs")}
-            use {"joshuali925/vim-indent-object"}
             use {"terryma/vim-expand-region", keys = "<Plug>(expand_region_"}
             use {
                 "mg979/vim-visual-multi",
@@ -181,9 +185,7 @@ return require("packer").startup(
             use {
                 "phaazon/hop.nvim",
                 cmd = {"HopWord", "HopChar1", "HopLineAC", "HopLineBC", "HopWordCurrentLine"},
-                config = function()
-                    require("hop").setup({})
-                end
+                config = conf("hop_nvim")
             }
             use {"unblevable/quick-scope", config = conf("quick_scope")}
             use {"dahu/vim-fanfingtastic"}
@@ -194,13 +196,6 @@ return require("packer").startup(
 
             -- misc
             use {"lewis6991/impatient.nvim", opt = false}
-            use {
-                "nathom/filetype.nvim",
-                opt = false,
-                config = function()
-                    require("filetype").setup({overrides = {extensions = {ejs = "html"}}})
-                end
-            }
             use {"ahmedkhalf/project.nvim", opt = false, config = conf("project_nvim")}
             use {"tpope/vim-sleuth"}
             use {"tpope/vim-repeat", opt = false}
@@ -216,13 +211,6 @@ return require("packer").startup(
                     {"n", "=p"},
                     {"n", "yo"}
                 }
-            }
-            use {
-                "max397574/better-escape.nvim",
-                event = "InsertEnter",
-                config = function()
-                    require("better_escape").setup({mapping = {"jk", "kj"}})
-                end
             }
             use {"moll/vim-bbye", cmd = "Bdelete"}
             use {"andymass/vim-matchup", cmd = "MatchupWhereAmI", config = conf("vim_matchup")}

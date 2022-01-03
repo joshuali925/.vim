@@ -6,7 +6,7 @@
   name = Joshua Li
 
 [pull]
-  rebase = true
+  rebase = false
 
 [merge]
   ; conflictstyle = diff3

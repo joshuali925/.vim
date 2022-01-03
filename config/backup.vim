@@ -2701,7 +2701,6 @@ end
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
 
 " =======================================================
-" startify
             use {
                 "mhinz/vim-startify",
                 cond = function()
@@ -2754,6 +2753,13 @@ function M.startify()
         {type = "sessions", header = {"   Sessions"}}
     }
 end
+            use {
+                "max397574/better-escape.nvim",
+                event = "InsertEnter",
+                config = function()
+                    require("better_escape").setup({mapping = {"jk", "kj"}})
+                end
+            }
 
 " =======================================================
 function! funcs#print_curr_vars(visual, printAbove) abort

@@ -1,5 +1,6 @@
 local M = {}
 local g = vim.g
+local fn = vim.fn
 
 function M.project_nvim()
     require("project_nvim").setup {
@@ -42,7 +43,8 @@ function M.nvim_tree()
                     {key = {"s"}, cb = tree_cb("split")},
                     {key = {"yy"}, cb = tree_cb("copy_absolute_path")},
                     {key = {"l"}, cb = tree_cb("edit")},
-                    {key = {"h"}, cb = tree_cb("close_node")}
+                    {key = {"h"}, cb = tree_cb("close_node")},
+                    {key = {"-"}, cb = "<Cmd>normal! $<CR>"}
                 }
             }
         }
@@ -97,6 +99,7 @@ g.qs_filetype_blacklist = {
     "Outline",
     "NvimTree",
     "neoterm",
+    "startuptime",
     "DiffviewFileHistory",
     "DiffviewFiles",
     "floggraph"
@@ -137,7 +140,7 @@ function M.setup_indent_blankline()
 end
 
 function M.setup_symbols_outline()
-    vim.g.symbols_outline = {
+    g.symbols_outline = {
         auto_preview = false,
         relative_width = false,
         width = 30,
@@ -207,6 +210,38 @@ function M.nvim_bqf()
     }
 end
 
+function M.hop_nvim()
+    require("hop").setup({})
+    vim.cmd("highlight! link HopNextKey HopNextKey1")
+    vim.cmd("highlight! link HopNextKey2 HopNextKey1")
+end
+
+function M.wilder_nvim()
+    -- https://github.com/gelguy/wilder.nvim/issues/52
+    vim.cmd [[
+        call wilder#setup({'modes': [':']})
+        call wilder#set_option('use_python_remote_plugin', 0)
+        call wilder#set_option('pipeline', [
+                \   wilder#branch(
+                \     wilder#cmdline_pipeline({ 'fuzzy': 1, 'fuzzy_filter': wilder#lua_fzy_filter(), 'debounce': 50 }),
+                \   ),
+                \ ])
+        call wilder#set_option('renderer', wilder#renderer_mux({
+                \ ':': wilder#popupmenu_renderer(wilder#popupmenu_border_theme({
+                \   'border': 'rounded',
+                \   'empty_message': 0,
+                \   'highlighter': wilder#lua_fzy_highlighter(),
+                \   'highlights': { 'accent': wilder#make_hl('WilderAccent', 'Pmenu', [{}, {}, {'foreground': '#f4468f'}]) },
+                \   'winblend': 8,
+                \   'left': [' ', wilder#popupmenu_devicons()],
+                \   'right': [' ', wilder#popupmenu_scrollbar()],
+                \   'apply_incsearch_fix': 0,
+                \ })),
+                \ 'substitute': 0
+                \ }))
+    ]]
+end
+
 function M.alpha_nvim()
     local alpha = require("alpha")
     local theme = require("alpha.themes.startify")
@@ -254,7 +289,8 @@ function M.alpha_nvim()
             ":lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>"
         ),
         theme.button("c", "Edit vimrc", ":edit $MYVIMRC<CR>"),
-        theme.button("s", "Profile startup time", ":StartupTime<CR>")
+        theme.button("s", "Profile startup time", ":StartupTime<CR>"),
+        theme.button("E", "Load from previous session", ":silent LoadSession<CR>")
     }
     theme.mru_opts.ignore = function(path, ext)
         return string.find(path, "COMMIT_EDITMSG") or string.find(path, [[vim/.*/doc/.*%.txt]])
@@ -377,21 +413,21 @@ function M.feline_nvim()
     components.active[1][1] = {
         provider = "  ",
         hl = function()
-            return {fg = colors.lightbg, bg = mode_colors[vim.fn.mode()] or colors.primary}
+            return {fg = colors.lightbg, bg = mode_colors[fn.mode()] or colors.primary}
         end,
         right_sep = {
             str = " ",
             hl = function()
-                return {fg = mode_colors[vim.fn.mode()] or colors.primary, bg = colors.lightbg}
+                return {fg = mode_colors[fn.mode()] or colors.primary, bg = colors.lightbg}
             end
         }
     }
     components.active[1][2] = {
         provider = function()
-            return " " .. vim.fn.expand("%:~:.") .. " "
+            return " " .. fn.expand("%:~:.") .. " "
         end,
         icon = function()
-            local icon, color = require("nvim-web-devicons").get_icon_color(vim.fn.expand("%:t"), vim.fn.expand("%:e"))
+            local icon, color = require("nvim-web-devicons").get_icon_color(fn.expand("%:t"), fn.expand("%:e"))
             return {str = icon or " ", hl = {fg = color or colors.primary}}
         end,
         hl = {fg = colors.fg, bg = colors.lightbg},
@@ -399,7 +435,7 @@ function M.feline_nvim()
     }
     components.active[1][3] = {
         provider = function()
-            local dir_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+            local dir_name = fn.fnamemodify(fn.getcwd(), ":t")
             return "  " .. dir_name .. " "
         end,
         hl = {fg = colors.grey, bg = colors.lightbg2},
@@ -475,9 +511,9 @@ function M.feline_nvim()
         provider = function()
             local lsp_progress = vim.lsp.util.get_progress_messages()[1]
             if lsp_progress then
-                local msg = lsp_progress.message or ""
-                local percentage = lsp_progress.percentage or 0
                 local title = lsp_progress.title or ""
+                local percentage = lsp_progress.percentage or 0
+                local msg = lsp_progress.message or ""
                 if percentage > 70 then
                     return string.format(" %%<%s %s %s (%s%%%%) ", "", title, msg, percentage)
                 end
@@ -500,31 +536,29 @@ function M.feline_nvim()
         icon = " "
     }
     components.active[3][4] = {provider = " ", hl = {fg = colors.primary, bg = colors.lightbg}}
-    components.active[3][5] = {provider = " ", hl = {fg = colors.lightbg, bg = colors.primary}}
+    components.active[3][5] = {
+        provider = function()
+            return g.untildone_count == 0 and " " or "ﯩ "
+        end,
+        hl = {fg = colors.lightbg, bg = colors.primary}
+    }
     components.active[3][6] = {
         provider = function()
-            local col = vim.fn.col(".")
+            local col = fn.col(".")
             return (col < 10 and "  " or " ") .. col
         end,
         hl = {fg = colors.secondary, bg = colors.lightbg}
     }
     components.active[3][7] = {
         provider = function()
-            return " " .. vim.fn.line(".") .. "/" .. vim.fn.line("$")
+            return string.format(" %s/%s", fn.line("."), fn.line("$"))
         end,
         hl = {fg = colors.primary, bg = colors.lightbg}
     }
     components.inactive[1][1] = {
         provider = "  ",
-        hl = function()
-            return {fg = colors.lightbg, bg = colors.dim_primary}
-        end,
-        right_sep = {
-            str = " ",
-            hl = function()
-                return {fg = colors.dim_primary, bg = colors.lightbg}
-            end
-        }
+        hl = {fg = colors.lightbg, bg = colors.dim_primary},
+        right_sep = {str = " ", hl = {fg = colors.dim_primary, bg = colors.lightbg}}
     }
     components.inactive[1][2] = components.active[1][2]
     require("feline").setup({theme = {fg = colors.fg, bg = colors.bg}, components = components})
@@ -535,7 +569,7 @@ function M.nvim_cmp()
     cmp.setup {
         snippet = {
             expand = function(args)
-                vim.fn["vsnip#anonymous"](args.body)
+                fn["vsnip#anonymous"](args.body)
             end
         },
         formatting = {
@@ -561,8 +595,8 @@ function M.nvim_cmp()
                 function(fallback)
                     if cmp.visible() then
                         cmp.select_next_item()
-                    elseif vim.fn.call("vsnip#jumpable", {1}) == 1 then
-                        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
+                    elseif fn.call("vsnip#jumpable", {1}) == 1 then
+                        fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
                     else
                         fallback()
                     end
@@ -573,8 +607,8 @@ function M.nvim_cmp()
                 function(fallback)
                     if cmp.visible() then
                         cmp.select_prev_item()
-                    elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
-                        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
+                    elseif fn.call("vsnip#jumpable", {-1}) == 1 then
+                        fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
                     else
                         fallback()
                     end
@@ -584,9 +618,6 @@ function M.nvim_cmp()
         },
         sources = {{name = "buffer"}, {name = "path"}, {name = "nvim_lua"}, {name = "nvim_lsp"}, {name = "vsnip"}}
     }
-    -- https://github.com/hrsh7th/cmp-cmdline/issues/22
-    cmp.setup.cmdline("/", {sources = {{name = "buffer"}}})
-    cmp.setup.cmdline(":", {sources = {{name = "cmdline"}}})
 end
 
 function _G.quickui_context_menu()
@@ -614,7 +645,7 @@ function _G.quickui_context_menu()
         },
         {"--", ""}
     }
-    local conflict_state = vim.fn["funcs#get_conflict_state"]()
+    local conflict_state = fn["funcs#get_conflict_state"]()
     if conflict_state ~= "" then
         table.insert(
             content,
@@ -625,7 +656,7 @@ function _G.quickui_context_menu()
         table.insert(content, {"--", ""})
     end
     table.insert(content, {"Built-in d&ocs", 'execute "normal! K"', "Open vim built in help"})
-    vim.fn["quickui#context#open"](content, {index = vim.g["quickui#context#cursor"] or -1})
+    fn["quickui#context#open"](content, {index = g["quickui#context#cursor"] or -1})
 end
 
 function M.setup_vim_quickui()
@@ -635,9 +666,9 @@ function M.setup_vim_quickui()
 end
 
 function M.vim_quickui()
-    vim.fn["quickui#menu#switch"]("normal")
-    vim.fn["quickui#menu#reset"]()
-    vim.fn["quickui#menu#install"](
+    fn["quickui#menu#switch"]("normal")
+    fn["quickui#menu#reset"]()
+    fn["quickui#menu#install"](
         "&Actions",
         {
             {
@@ -695,7 +726,7 @@ function M.vim_quickui()
             }
         }
     )
-    vim.fn["quickui#menu#install"](
+    fn["quickui#menu#install"](
         "&Git",
         {
             {"Git &status", [[Git]], "Git status"},
@@ -740,7 +771,7 @@ function M.vim_quickui()
             {"Git &root", [[Grt]], "Change current directory to git root"}
         }
     )
-    vim.fn["quickui#menu#install"](
+    fn["quickui#menu#install"](
         "&Toggle",
         {
             {
@@ -788,10 +819,12 @@ function M.vim_quickui()
                 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}',
                 [[let &background = &background=="dark" ? "light" : "dark"]],
                 "Toggle background color"
-            }
+            },
+            {"--", ""},
+            {"Toggle wilder", [[call wilder#toggle()]], "Toggle wilder.nvim command line completion"}
         }
     )
-    vim.fn["quickui#menu#install"](
+    fn["quickui#menu#install"](
         "Ta&bles",
         {
             {"Table &mode", [[TableModeToggle]], "Toggle TableMode"},
@@ -827,7 +860,7 @@ function M.vim_quickui()
             }
         }
     )
-    vim.fn["quickui#menu#install"](
+    fn["quickui#menu#install"](
         "L&SP",
         {
             {
@@ -895,22 +928,22 @@ function M.vim_quickui()
                 category .. display,
                 ([[execute 'call writefile(["vim.g.theme_index = %s"], "%s/lua/current-theme.lua")' | lua vim.notify("Restart nvim to change to %s")]]):format(
                     index,
-                    vim.fn.stdpath("config"),
+                    fn.stdpath("config"),
                     theme
                 )
             }
         )
     end
-    vim.fn["quickui#menu#install"]("&Colors", quickui_theme_list)
-    vim.fn["quickui#menu#switch"]("visual")
-    vim.fn["quickui#menu#reset"]()
-    vim.fn["quickui#menu#install"](
+    fn["quickui#menu#install"]("&Colors", quickui_theme_list)
+    fn["quickui#menu#switch"]("visual")
+    fn["quickui#menu#reset"]()
+    fn["quickui#menu#install"](
         "&Actions",
         {
             {"OSC &yank", [[OSCYank]], "Use ANSI OSC52 sequence to copy from remote SSH sessions"}
         }
     )
-    vim.fn["quickui#menu#install"](
+    fn["quickui#menu#install"](
         "&Git",
         {
             {"Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range"},
@@ -927,7 +960,7 @@ function M.vim_quickui()
             }
         }
     )
-    vim.fn["quickui#menu#install"](
+    fn["quickui#menu#install"](
         "Ta&bles",
         {
             {"Reformat table", [['<,'>TableModeRealign]], "Reformat table"},
