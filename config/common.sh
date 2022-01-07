@@ -30,7 +30,6 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
-alias ......='cd ../../../../..'
 alias mv='mv -iv'
 alias cp='cp -riv'
 alias mkdir='mkdir -pv'
@@ -48,8 +47,6 @@ alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" ~/.vi
 alias less='less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
-alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
-alias btop='btop -p 1'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
@@ -59,7 +56,7 @@ alias q-="up -c \"\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'
 alias rga='rg --text --no-ignore --search-zip'
 alias rgf='rg --files | rg'
 alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
-alias xcp="rsync -aviHKhSPz --one-file-system --delete --filter=':- .gitignore'"
+alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
@@ -112,11 +109,6 @@ gmerge-preview-diff() {
   git diff HEAD..."$*"  # diff between target and the common ancestor of HEAD and target
 }
 alias gr='git remote'
-alias grb='git rebase'
-alias grba='git rebase --abort'
-alias grbc='git rebase --continue'
-alias grbs='git rebase --skip'
-alias grbi='git rebase -i'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{u}'  # remote ref
 alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset" --date=iso'
@@ -126,7 +118,6 @@ alias grrm='git remote remove'
 alias grset='git remote set-url'
 alias greset-to-remote='git reset --hard $(git rev-parse --abbrev-ref --symbolic-full-name @{u})'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
-alias grup='git remote update'
 alias grv='git remote -v'
 alias gs='git status'
 alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
@@ -134,7 +125,6 @@ alias gss='git status -sb'
 alias gstash='git stash'
 alias gshow='git show --pretty=short --show-signature'
 alias gts='git tag -s'
-alias gvt='git verify-tag'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
 alias gignore='git update-index --assume-unchanged'
@@ -149,6 +139,7 @@ alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove
 alias gforest='git-foresta --style=10 | less -RSXF'
 alias gforesta='git-foresta --style=10 --all | less -RSXF'
+alias gpatch='vi +"syntax enable" +startinsert patch.diff && git apply patch.diff && rm patch.diff'
 
 d() {
   if [ -n "$1" ]; then
@@ -176,7 +167,7 @@ glof() {
     --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show | delta --dark --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
-    --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tr "\n" " " | oscyank)+abort' \
+    --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tr "\n" " " | y)+abort' \
     --bind='enter:execute(echo {} | grep -o "[a-f0-9]\{7,\}" | xargs git show | delta --line-numbers --navigate)'
 }
 
@@ -240,7 +231,6 @@ sudorun() {
   case $CMD in
     v|vi|vim) sudo "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
     lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
-    btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
     *) XDG_CONFIG_HOME="$HOME/.config" EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
   esac
 }
@@ -439,7 +429,7 @@ t() {  # create, restore, or switch tmux session
 manf() {
   if [ -z "$1" ]; then
     local FZFTEMP
-    FZFTEMP=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$FZFTEMP" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> d <C-d>' +'nnoremap <buffer> u <C-u>'
+    FZFTEMP=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$FZFTEMP" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
   else
     nvim +"Man $*" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
   fi
@@ -502,7 +492,7 @@ croc() {
     timeout 60 croc send "$@" 2>&1 | {
       while read line; do
         echo "$line"
-        [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$line") && echo -n "command croc --curve p256 --yes $phrase" | oscyank
+        [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$line") && echo -n "command croc --curve p256 --yes $phrase" | y
       done
     }
   else

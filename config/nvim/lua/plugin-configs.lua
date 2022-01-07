@@ -1,6 +1,4 @@
 local M = {}
-local g = vim.g
-local fn = vim.fn
 
 function M.project_nvim()
     require("project_nvim").setup {
@@ -20,15 +18,15 @@ function M.nvim_autopairs()
 end
 
 function M.vim_matchup()
-    g.matchup_matchparen_offscreen = {}
-    g.matchup_matchparen_deferred = 1
-    g.matchup_matchparen_deferred_hide_delay = 300
-    g.matchup_motion_override_Npercent = 0
+    vim.g.matchup_matchparen_offscreen = {}
+    vim.g.matchup_matchparen_deferred = 1
+    vim.g.matchup_matchparen_deferred_hide_delay = 300
+    vim.g.matchup_motion_override_Npercent = 0
 end
 
 function M.nvim_tree()
-    g.nvim_tree_git_hl = 1
-    g.nvim_tree_highlight_opened_files = 1
+    vim.g.nvim_tree_indent_markers = 1
+    vim.g.nvim_tree_highlight_opened_files = 1
     local tree_cb = require("nvim-tree.config").nvim_tree_callback
     require("nvim-tree").setup {
         disable_netrw = false,
@@ -60,6 +58,7 @@ function M.gitsigns()
             topdelete = {text = "▔"},
             changedelete = {text = "▒"}
         },
+        word_diff = true,
         keymaps = {
             ["n [g"] = '<Cmd>lua require("gitsigns").prev_hunk()<CR>',
             ["n ]g"] = '<Cmd>lua require("gitsigns").next_hunk()<CR>',
@@ -86,7 +85,7 @@ function M.rest_nvim()
     vim.cmd([[command! RestNvimPreviewCurl execute "normal \<Plug>RestNvimPreview" | sleep 100m | S 1,2messages]])
 end
 
-g.qs_filetype_blacklist = {
+vim.g.qs_filetype_blacklist = {
     "help",
     "man",
     "qf",
@@ -105,42 +104,42 @@ g.qs_filetype_blacklist = {
     "floggraph"
 }
 function M.quick_scope()
-    g.qs_buftype_blacklist = {"terminal"}
-    vim.cmd("highlight QuickScopePrimary guifg='" .. (g.theme_index < 0 and "#ffca6e" or "#bf8000") .. "'")
+    vim.g.qs_buftype_blacklist = {"terminal"}
+    vim.cmd("highlight QuickScopePrimary guifg='" .. (vim.g.theme_index < 0 and "#ffca6e" or "#bf8000") .. "'")
 end
 
 function M.mundo()
-    g.mundo_preview_bottom = 1
-    g.mundo_width = 30
+    vim.g.mundo_preview_bottom = 1
+    vim.g.mundo_width = 30
 end
 
 function M.setup_neoterm()
-    g.neoterm_default_mod = "belowright"
-    g.neoterm_autoinsert = 1
+    vim.g.neoterm_default_mod = "belowright"
+    vim.g.neoterm_autoinsert = 1
 end
 
 function M.setup_csv_vim()
-    g.csv_nomap_cr = 1
-    g.csv_nomap_bs = 1
+    vim.g.csv_nomap_cr = 1
+    vim.g.csv_nomap_bs = 1
 end
 
 function M.neomake()
-    g.neomake_info_sign = {text = "", texthl = "NeomakeInfoSign"}
-    g.neomake_typescript_enabled_makers = {"eslint"}
-    g.neomake_typescriptreact_enabled_makers = {"eslint"}
+    vim.g.neomake_info_sign = {text = "", texthl = "NeomakeInfoSign"}
+    vim.g.neomake_typescript_enabled_makers = {"eslint"}
+    vim.g.neomake_typescriptreact_enabled_makers = {"eslint"}
 end
 
 function M.setup_indent_blankline()
     -- TODO remove when this is fixed https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
     vim.opt.colorcolumn = "99999"
-    g.indent_blankline_char = "▏"
-    g.indent_blankline_show_first_indent_level = false
-    g.indent_blankline_filetype_exclude = g.qs_filetype_blacklist
-    g.indent_blankline_buftype_exclude = {"terminal"}
+    vim.g.indent_blankline_char = "▏"
+    vim.g.indent_blankline_show_first_indent_level = false
+    vim.g.indent_blankline_filetype_exclude = vim.g.qs_filetype_blacklist
+    vim.g.indent_blankline_buftype_exclude = {"terminal"}
 end
 
 function M.setup_symbols_outline()
-    g.symbols_outline = {
+    vim.g.symbols_outline = {
         auto_preview = false,
         relative_width = false,
         width = 30,
@@ -149,11 +148,11 @@ function M.setup_symbols_outline()
 end
 
 function M.conflict_marker()
-    g.conflict_marker_enable_mappings = 0
-    g.conflict_marker_begin = "^<<<<<<< .*$"
-    g.conflict_marker_end = "^>>>>>>> .*$"
-    g.conflict_marker_highlight_group = ""
-    if g.theme_index < 0 then
+    vim.g.conflict_marker_enable_mappings = 0
+    vim.g.conflict_marker_begin = "^<<<<<<< .*$"
+    vim.g.conflict_marker_end = "^>>>>>>> .*$"
+    vim.g.conflict_marker_highlight_group = ""
+    if vim.g.theme_index < 0 then
         vim.cmd [[
             highlight ConflictMarkerBegin guibg=#427266
             highlight ConflictMarkerOurs guibg=#364f49
@@ -171,18 +170,18 @@ function M.conflict_marker()
 end
 
 function M.setup_vim_table_mode()
-    g.table_mode_tableize_map = ""
-    g.table_mode_motion_left_map = "<leader>th"
-    g.table_mode_motion_up_map = "<leader>tk"
-    g.table_mode_motion_down_map = "<leader>tj"
-    g.table_mode_motion_right_map = "<leader>tl"
-    g.table_mode_corner = "|" -- markdown compatible tablemode
+    vim.g.table_mode_tableize_map = ""
+    vim.g.table_mode_motion_left_map = "<leader>th"
+    vim.g.table_mode_motion_up_map = "<leader>tk"
+    vim.g.table_mode_motion_down_map = "<leader>tj"
+    vim.g.table_mode_motion_right_map = "<leader>tl"
+    vim.g.table_mode_corner = "|" -- markdown compatible tablemode
 end
 
 function M.setup_vim_visual_multi()
-    g.VM_default_mappings = 0
-    g.VM_exit_on_1_cursor_left = 1
-    g.VM_maps = {
+    vim.g.VM_default_mappings = 0
+    vim.g.VM_exit_on_1_cursor_left = 1
+    vim.g.VM_maps = {
         -- <C-Down/Up> to add cursor
         ["Select All"] = "<leader><C-n>",
         ["Find Under"] = "<C-n>",
@@ -219,7 +218,7 @@ end
 function M.wilder_nvim()
     -- https://github.com/gelguy/wilder.nvim/issues/52
     vim.cmd [[
-        call wilder#setup({'modes': [':']})
+        call wilder#setup({'modes': [':'], 'next_key': '<F13>', 'previous_key': '<F13>'})
         call wilder#set_option('use_python_remote_plugin', 0)
         call wilder#set_option('pipeline', [
                 \   wilder#branch(
@@ -245,7 +244,7 @@ end
 function M.alpha_nvim()
     local alpha = require("alpha")
     local theme = require("alpha.themes.startify")
-    if g.theme_index < 0 then
+    if vim.g.theme_index < 0 then
         theme.section.header.val = {
             [[⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠛⣿⣿⣿⣿⣿⡿⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
             [[⣿⣿⣿⣿⣿⣿⢧⣶⡉⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢹⣿⣿⣿⣿⠃ ⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
@@ -290,7 +289,7 @@ function M.alpha_nvim()
         ),
         theme.button("c", "Edit vimrc", ":edit $MYVIMRC<CR>"),
         theme.button("s", "Profile startup time", ":StartupTime<CR>"),
-        theme.button("E", "Load from previous session", ":silent LoadSession<CR>")
+        theme.button("E", "Load from previous session", ":silent SessionLoad<CR>")
     }
     theme.mru_opts.ignore = function(path, ext)
         return string.find(path, "COMMIT_EDITMSG") or string.find(path, [[vim/.*/doc/.*%.txt]])
@@ -413,21 +412,21 @@ function M.feline_nvim()
     components.active[1][1] = {
         provider = "  ",
         hl = function()
-            return {fg = colors.lightbg, bg = mode_colors[fn.mode()] or colors.primary}
+            return {fg = colors.lightbg, bg = mode_colors[vim.fn.mode()] or colors.primary}
         end,
         right_sep = {
             str = " ",
             hl = function()
-                return {fg = mode_colors[fn.mode()] or colors.primary, bg = colors.lightbg}
+                return {fg = mode_colors[vim.fn.mode()] or colors.primary, bg = colors.lightbg}
             end
         }
     }
     components.active[1][2] = {
         provider = function()
-            return " " .. fn.expand("%:~:.") .. " "
+            return " " .. vim.fn.expand("%:~:.") .. " "
         end,
         icon = function()
-            local icon, color = require("nvim-web-devicons").get_icon_color(fn.expand("%:t"), fn.expand("%:e"))
+            local icon, color = require("nvim-web-devicons").get_icon_color(vim.fn.expand("%:t"), vim.fn.expand("%:e"))
             return {str = icon or " ", hl = {fg = color or colors.primary}}
         end,
         hl = {fg = colors.fg, bg = colors.lightbg},
@@ -435,7 +434,7 @@ function M.feline_nvim()
     }
     components.active[1][3] = {
         provider = function()
-            local dir_name = fn.fnamemodify(fn.getcwd(), ":t")
+            local dir_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
             return "  " .. dir_name .. " "
         end,
         hl = {fg = colors.grey, bg = colors.lightbg2},
@@ -538,20 +537,25 @@ function M.feline_nvim()
     components.active[3][4] = {provider = " ", hl = {fg = colors.primary, bg = colors.lightbg}}
     components.active[3][5] = {
         provider = function()
-            return g.untildone_count == 0 and " " or "ﯩ "
+            local untildone_count = require("states").untildone_count
+            if untildone_count > 0 then
+                return untildone_count == 1 and "ﯩ " or untildone_count .. " "
+            else
+                return " "
+            end
         end,
         hl = {fg = colors.lightbg, bg = colors.primary}
     }
     components.active[3][6] = {
         provider = function()
-            local col = fn.col(".")
+            local col = vim.fn.col(".")
             return (col < 10 and "  " or " ") .. col
         end,
         hl = {fg = colors.secondary, bg = colors.lightbg}
     }
     components.active[3][7] = {
         provider = function()
-            return string.format(" %s/%s", fn.line("."), fn.line("$"))
+            return string.format(" %s/%s", vim.fn.line("."), vim.fn.line("$"))
         end,
         hl = {fg = colors.primary, bg = colors.lightbg}
     }
@@ -569,7 +573,7 @@ function M.nvim_cmp()
     cmp.setup {
         snippet = {
             expand = function(args)
-                fn["vsnip#anonymous"](args.body)
+                vim.fn["vsnip#anonymous"](args.body)
             end
         },
         formatting = {
@@ -595,8 +599,8 @@ function M.nvim_cmp()
                 function(fallback)
                     if cmp.visible() then
                         cmp.select_next_item()
-                    elseif fn.call("vsnip#jumpable", {1}) == 1 then
-                        fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
+                    elseif vim.fn.call("vsnip#jumpable", {1}) == 1 then
+                        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
                     else
                         fallback()
                     end
@@ -607,8 +611,8 @@ function M.nvim_cmp()
                 function(fallback)
                     if cmp.visible() then
                         cmp.select_prev_item()
-                    elseif fn.call("vsnip#jumpable", {-1}) == 1 then
-                        fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
+                    elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
+                        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
                     else
                         fallback()
                     end
@@ -637,6 +641,7 @@ function _G.quickui_context_menu()
         {"Git hunk &undo", "lua require('gitsigns').reset_hunk()", "Git undo hunk"},
         {"Git hunk &add", "lua require('gitsigns').stage_hunk()", "Git stage hunk"},
         {"Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk"},
+        {"Git reset buffer", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index"},
         {"Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line"},
         {
             "Git &remote",
@@ -645,7 +650,7 @@ function _G.quickui_context_menu()
         },
         {"--", ""}
     }
-    local conflict_state = fn["funcs#get_conflict_state"]()
+    local conflict_state = vim.fn["funcs#get_conflict_state"]()
     if conflict_state ~= "" then
         table.insert(
             content,
@@ -656,19 +661,19 @@ function _G.quickui_context_menu()
         table.insert(content, {"--", ""})
     end
     table.insert(content, {"Built-in d&ocs", 'execute "normal! K"', "Open vim built in help"})
-    fn["quickui#context#open"](content, {index = g["quickui#context#cursor"] or -1})
+    vim.fn["quickui#context#open"](content, {index = vim.g["quickui#context#cursor"] or -1})
 end
 
 function M.setup_vim_quickui()
-    g.quickui_color_scheme = g.theme_index < 0 and "papercol-dark" or "papercol-light"
-    g.quickui_show_tip = 1
-    g.quickui_border_style = 2
+    vim.g.quickui_color_scheme = vim.g.theme_index < 0 and "papercol-dark" or "papercol-light"
+    vim.g.quickui_show_tip = 1
+    vim.g.quickui_border_style = 2
 end
 
 function M.vim_quickui()
-    fn["quickui#menu#switch"]("normal")
-    fn["quickui#menu#reset"]()
-    fn["quickui#menu#install"](
+    vim.fn["quickui#menu#switch"]("normal")
+    vim.fn["quickui#menu#reset"]()
+    vim.fn["quickui#menu#install"](
         "&Actions",
         {
             {
@@ -694,7 +699,7 @@ function M.vim_quickui()
             {
                 "Cou&nt occurrences",
                 [[keeppatterns %s///gn | silent! execute "normal! ``"]],
-                "Count occurrences of current search pattern"
+                "Count occurrences of current search pattern (:%s/pattern//gn)"
             },
             {
                 "Search in &buffers",
@@ -716,8 +721,8 @@ function M.vim_quickui()
             },
             {"--", ""},
             {"Open &Alpha", [[execute "lua require('packer').loader('alpha-nvim', true)" | Alpha]], "Open Alpha"},
-            {"Save session", [[SaveSession]], "Save session to .cache/nvim/session.vim, will overwrite"},
-            {"Load session", [[LoadSession]], "Load session from .cache/nvim/session.vim"},
+            {"Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite"},
+            {"Load session", [[SessionLoad]], "Load session from .cache/nvim/session.vim"},
             {"--", ""},
             {"Edit Vimr&c", [[edit $MYVIMRC]]},
             {
@@ -726,11 +731,11 @@ function M.vim_quickui()
             }
         }
     )
-    fn["quickui#menu#install"](
+    vim.fn["quickui#menu#install"](
         "&Git",
         {
             {"Git &status", [[Git]], "Git status"},
-            {"Git checko&ut file", [[Gread]], "Checkout current file and load as unsaved buffer"},
+            {"Git checko&ut file", [[Gread]], "Checkout current file and load as unsaved buffer (Gread)"},
             {"Git &blame", [[Git blame]], "Git blame of current file"},
             {"Git &diff", [[Gdiffsplit]], "Diff current file with last staged version"},
             {"Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version"},
@@ -771,7 +776,7 @@ function M.vim_quickui()
             {"Git &root", [[Grt]], "Change current directory to git root"}
         }
     )
-    fn["quickui#menu#install"](
+    vim.fn["quickui#menu#install"](
         "&Toggle",
         {
             {
@@ -824,7 +829,7 @@ function M.vim_quickui()
             {"Toggle wilder", [[call wilder#toggle()]], "Toggle wilder.nvim command line completion"}
         }
     )
-    fn["quickui#menu#install"](
+    vim.fn["quickui#menu#install"](
         "Ta&bles",
         {
             {"Table &mode", [[TableModeToggle]], "Toggle TableMode"},
@@ -860,7 +865,7 @@ function M.vim_quickui()
             }
         }
     )
-    fn["quickui#menu#install"](
+    vim.fn["quickui#menu#install"](
         "L&SP",
         {
             {
@@ -926,24 +931,25 @@ function M.vim_quickui()
             quickui_theme_list,
             {
                 category .. display,
-                ([[execute 'call writefile(["vim.g.theme_index = %s"], "%s/lua/current-theme.lua")' | lua vim.notify("Restart nvim to change to %s")]]):format(
+                ([[execute 'call writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")' | lua vim.notify("Restart nvim to change to %s")]]):format(
                     index,
-                    fn.stdpath("config"),
+                    vim.fn.stdpath("config") .. "/lua/states.lua",
+                    vim.fn.stdpath("config") .. "/lua/states.lua",
                     theme
                 )
             }
         )
     end
-    fn["quickui#menu#install"]("&Colors", quickui_theme_list)
-    fn["quickui#menu#switch"]("visual")
-    fn["quickui#menu#reset"]()
-    fn["quickui#menu#install"](
+    vim.fn["quickui#menu#install"]("&Colors", quickui_theme_list)
+    vim.fn["quickui#menu#switch"]("visual")
+    vim.fn["quickui#menu#reset"]()
+    vim.fn["quickui#menu#install"](
         "&Actions",
         {
             {"OSC &yank", [[OSCYank]], "Use ANSI OSC52 sequence to copy from remote SSH sessions"}
         }
     )
-    fn["quickui#menu#install"](
+    vim.fn["quickui#menu#install"](
         "&Git",
         {
             {"Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range"},
@@ -960,7 +966,7 @@ function M.vim_quickui()
             }
         }
     )
-    fn["quickui#menu#install"](
+    vim.fn["quickui#menu#install"](
         "Ta&bles",
         {
             {"Reformat table", [['<,'>TableModeRealign]], "Reformat table"},

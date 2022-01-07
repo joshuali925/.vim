@@ -175,7 +175,6 @@ return require("packer").startup(
 
             -- editing
             use {"windwp/nvim-autopairs", after = "nvim-cmp", config = conf("nvim_autopairs")}
-            use {"terryma/vim-expand-region", keys = "<Plug>(expand_region_"}
             use {
                 "mg979/vim-visual-multi",
                 fn = "vm#*",
@@ -213,7 +212,7 @@ return require("packer").startup(
                 }
             }
             use {"moll/vim-bbye", cmd = "Bdelete"}
-            use {"andymass/vim-matchup", cmd = "MatchupWhereAmI", config = conf("vim_matchup")}
+            use {"andymass/vim-matchup", config = conf("vim_matchup")}
             use {"ojroques/vim-oscyank", cmd = {"OSCYank", "OSCYankReg"}}
             use {
                 "bfredl/nvim-miniyank",

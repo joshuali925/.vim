@@ -15,6 +15,7 @@ set backspace=eol,start,indent
 set whichwrap=<,>,[,]
 if has('mouse')
   set mouse=a
+  set ttymouse=sgr
 endif
 set cursorline
 set numberwidth=2
@@ -74,9 +75,9 @@ set noswapfile
 set nobackup
 set nowritebackup
 set wildcharm=<C-z>
-set grepprg=rg\ --vimgrep\ --smart-case\ --hidden
+set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ --auto-hybrid-regex
 set grepformat=%f:%l:%c:%m,%f:%l:%m
-set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %F\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
+set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
 
 let mapleader=';'
 nnoremap <BS> :bprevious<CR>
@@ -113,12 +114,13 @@ xnoremap @@ :normal! @@<CR>
 nnoremap _ <C-o>
 nnoremap + <C-i>
 nnoremap Y y$
-nnoremap U :execute('earlier '. v:count1. 'f')<CR>
+nnoremap U :execute 'earlier '. v:count1. 'f'<CR>
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
 xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>
+nnoremap zm :%foldclose<CR>
 nnoremap cr :call funcs#edit_register()<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
@@ -134,6 +136,10 @@ nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
 nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
+nmap <C-w><BS> :-tabmove<CR><C-w>
+nmap <C-w>\ :+tabmove<CR><C-w>
+nmap <C-n> <leader>ncgn
+xmap <C-n> <leader>ncgn
 nnoremap <C-o> :call <SID>EditCallback('lf', 0)<CR>
 noremap <leader>p "0p
 nnoremap <leader>P :registers<CR>:normal! "p<Left>
@@ -142,12 +148,12 @@ nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:prev
 nmap <leader>fs <C-p>
 nnoremap <leader>ff :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| xargs ls -1 2>/dev/null \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
+nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| xargs -L 1 ls -1 2>/dev/null \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>
-nnoremap <leader>fg :Grt<CR>:silent grep! "" <bar> redraw! <bar> copen<Home><C-Right><C-Right><C-Right><Left>
-xnoremap <leader>fg :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<Home><C-Right><C-Right><C-Right><Left>
-nnoremap <leader>fj :Grt<CR>:silent grep! "\b<C-r><C-w>\b" <bar> redraw! <bar> copen<CR>
-xnoremap <leader>fj :<C-u>Grt<CR>:silent grep! "<C-r>=funcs#get_visual_selection()<CR>" <bar> redraw! <bar> copen<CR>
+nnoremap <leader>fg :GrepRegex<Space>
+xnoremap <leader>fg :<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>
+nnoremap <leader>fj :GrepRegex \b<C-r><C-w>\b<CR>
+xnoremap <leader>fj :<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>
 nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=Dracula --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"', 1)<CR>
 nnoremap <leader>ft :call <SID>EditCallback('filetypes', 0)<CR>
 nnoremap <leader>b :Vexplore<CR>
@@ -183,10 +189,13 @@ augroup AutoCommands
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>
 augroup END
-command! -complete=shellcmd -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | execute 'read !'. <q-args> | 1d
+command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
 command! W write !sudo tee % > /dev/null
-command! -nargs=? -bang Ggrep call s:GitGrep(<f-args>)
-command! -bar Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
+command! -nargs=+ GrepRegex call s:Grep(0, 1, <q-args>)
+command! -nargs=+ GrepNoRegex call s:Grep(0, 0, <q-args>)
+command! -nargs=+ Ggrep call s:Grep(1, 1, <q-args>)
+command! -nargs=+ GgrepNoRegex call s:Grep(1, 0, <q-args>)
+command! Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
 command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
 
 let g:netrw_dirhistmax = 0
@@ -204,18 +213,15 @@ function! s:ToggleQuickfix()
   endfor
   copen
 endfunction
-function! s:GitGrep(...)
+function! s:Grep(git_grep, use_regex, pattern)
+  Grt
   let l:saved_grepprg = &grepprg
-  set grepprg=git\ grep\ --ignore-case\ -n\ $*
-  let l:cmd = 'grep!'
-  for i in a:000
-    let l:cmd = l:cmd . ' ' . i
-  endfor
-  silent execute l:cmd
+  let &grepprg = (a:git_grep ? 'git grep -n --ignore-case' : l:saved_grepprg). (a:use_regex ? '' : ' --fixed-strings')
+  silent execute 'grep! -- "'. escape(a:pattern, '\#%$|"'). '"'
   let &grepprg = l:saved_grepprg
   redraw!
   copen
-endfun
+endfunction
 let s:tail_on = 0
 function! s:ToggleTail()
   if s:tail_on
@@ -236,8 +242,7 @@ function! s:ToggleTail()
 endfunction
 function! s:EditCallback(cmd, cd_git_root) abort
   if a:cd_git_root == 1
-    let l:git_root = fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
-    execute 'cd '. l:git_root
+    Grt
   endif
   let l:sink = 'edit '
   let l:tempfile = tempname()
@@ -256,9 +261,9 @@ function! s:EditCallback(cmd, cd_git_root) abort
       for l:line in readfile(l:tempfile)
         if l:sink == 'edit ' && l:line =~ ':\d'
           let l:args = split(l:line, ':')
-          execute 'edit +'. l:args[1]. ' '. (a:cd_git_root == 1 ? l:git_root. '/' : ''). l:args[0]
+          execute 'edit +'. l:args[1]. ' '. l:args[0]
         else
-          execute l:sink. (a:cd_git_root == 1 ? l:git_root. '/' : ''). l:line
+          execute l:sink. l:line
         endif
       endfor
     endif
@@ -276,18 +281,19 @@ inoremap <expr> <Down> pumvisible() ? '<C-n>' : '<C-o>gj'
 inoremap <expr> <Up> pumvisible() ? '<C-p>' : '<C-o>gk'
 
 nnoremap <leader>ac :edit $MYVIMRC<CR>
-nnoremap yow :setlocal wrap!<CR>
-nnoremap yos :setlocal spell!<CR>
-nnoremap yon :setlocal number!<CR>
-nnoremap yor :setlocal relativenumber!<CR>
-nnoremap you :setlocal cursorline!<CR>
-nnoremap yoc :setlocal cursorcolumn!<CR>
+nnoremap <expr> yow ':setlocal '. (&wrap ? 'no' : ''). 'wrap<CR>'
+nnoremap <expr> yos ':setlocal '. (&spell ? 'no' : ''). 'spell<CR>'
+nnoremap <expr> yon ':setlocal '. (&number ? 'no' : ''). 'number<CR>'
+nnoremap <expr> yor ':setlocal '. (&relativenumber ? 'no' : ''). 'relativenumber<CR>'
+nnoremap <expr> you ':setlocal '. (&cursorline ? 'no' : ''). 'cursorline<CR>'
+nnoremap <expr> yoc ':setlocal '. (&cursorcolumn ? 'no' : ''). 'cursorcolumn<CR>'
 nnoremap yox :setlocal cursorline! cursorcolumn!<CR>
-nnoremap yoF :call <SID>ToggleTail()<CR>
+nnoremap <expr> yov ':setlocal virtualedit='. (&virtualedit == 'block' ? 'all' : 'block'). '<CR>'
 nnoremap <expr> yod &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 nnoremap <expr> yop &paste ? ':setlocal nopaste<CR>' : ':setlocal paste<CR>o'
-nnoremap [<Space> mxO<Esc>`x
-nnoremap ]<Space> mxo<Esc>`x
+nnoremap yoF :call <SID>ToggleTail()<CR>
+nnoremap <expr> [<Space> 'mx'. v:count1. 'O<Esc>`x'
+nnoremap <expr> ]<Space> 'mx'. v:count1. 'o<Esc>`x'
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 nnoremap [q :cprevious<CR>
@@ -315,7 +321,28 @@ xnoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1,
 onoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
+xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 nnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
 nmap <leader>yy V<leader>y
 nmap <leader>Y <leader>y$
 xnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
+
+if has('terminal')
+  augroup VimTerminal
+    autocmd!
+    autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no
+  augroup END
+  tnoremap <C-u> <C-\><C-n>
+  tnoremap <C-h> <C-w>h
+  tnoremap <C-j> <C-w>j
+  tnoremap <C-k> <C-w>k
+  tnoremap <C-l> <C-w>l
+  nnoremap <leader>to :execute 'terminal ++close ++rows='. min([15, &lines * 2/5])<CR>
+  nmap <C-b> <leader>to
+  nnoremap <leader>tO :terminal ++curwin ++noclose<CR>
+  nnoremap <leader>th :terminal ++close<CR>
+  nnoremap <leader>tv :vertical terminal ++close<CR>
+  nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
+  call funcs#map_vim_send_terminal()
+endif

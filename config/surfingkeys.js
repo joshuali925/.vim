@@ -116,6 +116,7 @@ api.mapkey(';V', 'Edit with web vim', function() {
         }, 'textarea');
     });
 });
+api.unmap('P');
 api.mapkey('P', 'Open url or google', function() {
     function validURL(str) {
         var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
@@ -289,6 +290,9 @@ settings.theme = `
 }
 .sk_theme #sk_omnibarSearchResult ul li.focused {
     background: #3e4452;
+}
+#sk_omnibar {
+    opacity: 0.9 !important;
 }
 #sk_status, #sk_find {
     font-size: 12pt;

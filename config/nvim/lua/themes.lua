@@ -1,5 +1,4 @@
 local M = {}
-local g = vim.g
 
 M.theme_list = {
     [-1] = "tokyonight.nvim",
@@ -10,7 +9,7 @@ M.theme_list = {
     [0] = "github-nvim-theme",
     [1] = "tokyonight.nvim"
 }
-M.theme = M.theme_list[g.theme_index]
+M.theme = M.theme_list[vim.g.theme_index]
 
 local sidebars = {"qf", "terminal", "Outline", "Mundo"}
 local default_colors = {
@@ -34,12 +33,12 @@ local themes = {
             return default_colors
         end,
         config = function()
-            g.tokyonight_style = g.theme_index < 0 and "storm" or "day"
-            g.tokyonight_italic_keywords = false
-            g.tokyonight_italic_comments = false
-            g.tokyonight_sidebars = sidebars
-            g.tokyonight_colors = {comment = "#717993"}
-            if g.theme_index >= 0 then
+            vim.g.tokyonight_style = vim.g.theme_index < 0 and "storm" or "day"
+            vim.g.tokyonight_italic_keywords = false
+            vim.g.tokyonight_italic_comments = false
+            vim.g.tokyonight_sidebars = sidebars
+            vim.g.tokyonight_colors = {comment = "#717993"}
+            if vim.g.theme_index >= 0 then
                 default_colors.bg = "#cccccc"
                 default_colors.fg = "#484e54"
                 default_colors.lightbg = "#bbbbbb"
@@ -61,14 +60,14 @@ local themes = {
             return default_colors
         end,
         config = function()
-            g.gruvbox_flat_style = "dark"
-            g.gruvbox_sidebars = sidebars
+            vim.g.gruvbox_flat_style = "dark"
+            vim.g.gruvbox_sidebars = sidebars
             vim.cmd("colorscheme gruvbox-flat")
         end
     },
     ["github-nvim-theme"] = {
         colors = function()
-            if g.theme_index < 0 then
+            if vim.g.theme_index < 0 then
                 default_colors.primary = "#3b8eea"
                 default_colors.secondary = "#23d18b"
             else
@@ -86,7 +85,7 @@ local themes = {
         config = function()
             require("github-theme").setup {
                 sidebars = sidebars,
-                theme_style = g.theme_index < 0 and "dimmed" or "light_default"
+                theme_style = vim.g.theme_index < 0 and "dimmed" or "light_default"
             }
         end
     },
@@ -97,7 +96,7 @@ local themes = {
             return default_colors
         end,
         config = function()
-            g.vscode_style = "dark"
+            vim.g.vscode_style = "dark"
             vim.cmd("colorscheme vscode")
             vim.cmd("highlight IndentBlanklineChar gui=nocombine guifg=#353535")
         end

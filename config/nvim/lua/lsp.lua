@@ -93,22 +93,28 @@ if present then
     )
 end
 
--- https://github.com/neovim/neovim/issues/14825
-vim.g.diagnostics_visible = true
-function _G.toggle_diagnostics()
-    if vim.g.diagnostics_visible then
-        vim.g.diagnostics_visible = false
-        vim.diagnostic.hide()
-        vim.lsp.handlers["textDocument/publishDiagnostics"] = function()
-        end
+function _G.organize_imports_and_format()
+    if vim.fn.exists(":OrganizeImports") == 0 then
+        vim.cmd("Neoformat")
     else
-        vim.g.diagnostics_visible = true
-        vim.lsp.handlers["textDocument/publishDiagnostics"] =
-            vim.lsp.with(
-            vim.lsp.diagnostic.on_publish_diagnostics,
-            {virtual_text = true, signs = true, underline = true, update_in_insert = false}
+        vim.cmd("OrganizeImports")
+        vim.defer_fn(
+            function()
+                vim.cmd("Neoformat")
+            end,
+            500
         )
     end
+end
+
+local diagnostics_on = true
+function _G.toggle_diagnostics()
+    if diagnostics_on then
+        vim.diagnostic.disable()
+    else
+        vim.diagnostic.enable()
+    end
+    diagnostics_on = not diagnostics_on
 end
 
 -- https://github.com/neovim/nvim-lspconfig/issues/69#issuecomment-789541466
