@@ -2699,6 +2699,12 @@ end
   ln -s ~/.local/python-packages/PathPicker/fpp ~/.local/bin/fpp
   log "Installed bpytop, fpp"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
+" btm
+install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin '' btm "$@"
+  # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
+alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
+    btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
+
 
 " =======================================================
             use {

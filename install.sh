@@ -231,6 +231,11 @@ install_tmux() {
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-darwin-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
     fi
   fi
+  if [ ! -d "$HOME/.terminfo" ]; then
+    curl -LO https://invisible-island.net/datafiles/current/terminfo.src.gz && gunzip terminfo.src.gz
+    tic -xe tmux-256color terminfo.src && rm terminfo.src
+    log "Installed tmux-256colors terminfo to ~/.terminfo"
+  fi
   echo
 }
 

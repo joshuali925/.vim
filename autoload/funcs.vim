@@ -228,3 +228,19 @@ function! funcs#map_copy_to_win_clip()
   call <SID>MapAction('CopyToWinClip', '<leader>y')
   nmap <leader>Y <leader>y$
 endfunction
+
+function! funcs#map_vim_send_terminal()
+  function! s:SendToTerminal(str)
+    let l:buff_n = term_list()
+    if len(l:buff_n) > 0
+      let l:buff_n = l:buff_n[0]  " sends to most recently opened terminal
+      let l:lines = getline(getpos("'<")[1], getpos("'>")[1])
+      let l:indent = match(l:lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
+      for l:line in l:lines
+        call term_sendkeys(l:buff_n, (match(l:line, '[^ \t]') ? l:line[l:indent:] : l:line). "\<CR>")
+        sleep 10m
+      endfor
+    endif
+  endfunction
+  call <SID>MapAction('SendToTerminal', '<leader>te')
+endfunction

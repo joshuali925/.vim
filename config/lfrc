@@ -34,6 +34,7 @@ map mS cwd-size
 map mc edit-config
 map my copy-path
 map md5 md5
+map mvi edit-with-mini-vim
 
 map v :toggle; down
 map V invert
@@ -87,7 +88,8 @@ cmd edit-config ${{ $EDITOR ~/.vim/config/lfrc }}
 cmd edit-selected ${{ echo "$fx" | xargs -d '\n' $EDITOR }}
 cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
-cmd copy-path %{{ realpath "$f" | oscyank; echo "copied: $(realpath "$f")" }}
+cmd copy-path %{{ realpath "$f" | y; echo "copied: $(realpath "$f")" }}
+cmd edit-with-mini-vim !command vim -u ~/.vim/config/mini.vim -i NONE "$f"
 
 cmd follow-symlink ${{
   res=$(readlink -f $f || echo '.')
@@ -345,4 +347,4 @@ cmd lf-bulk-rename ${{
   fi
 }}
 
-# vim:ft=bash
+# vim: filetype=bash

@@ -13,9 +13,7 @@ Plug 'asvetliakov/vim-easymotion'
 Plug 'justinmk/vim-sneak'
 Plug 'machakann/vim-swap'
 Plug 'chaoren/vim-wordmotion'
-Plug 'terryma/vim-expand-region'
 Plug 'machakann/vim-sandwich'
-Plug 'joshuali925/vim-indent-object'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-repeat'
@@ -38,8 +36,16 @@ omap iu <Plug>WordMotion_iw
 xmap iu <Plug>WordMotion_iw
 omap au <Plug>WordMotion_aw
 xmap au <Plug>WordMotion_aw
-xmap v <Plug>(expand_region_expand)
-xmap <BS> <Plug>(expand_region_shrink)
+xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
+xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 map f <Plug>Sneak_f
 map F <Plug>Sneak_F
 nmap t <Plug>Sneak_s

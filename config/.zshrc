@@ -35,7 +35,6 @@ if [ -n "$ZINIT_POST_INSTALL" ]; then
   # zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
   # zinit light-mode as"program" from"gh-r" for mv"hyperfine* -> hyperfine" sbin"hyperfine/hyperfine" @sharkdp/hyperfine
   # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
-  # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 
   zinit as"completion" for \
     https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
