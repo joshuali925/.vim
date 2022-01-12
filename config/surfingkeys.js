@@ -109,6 +109,10 @@ api.unmap("'");
 api.mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
     api.Front.openOmnibar({type: "VIMarks", tabbed: false});
 });
+api.unmap('p');
+api.mapkey('p', '#0enter ephemeral PassThrough mode to temporarily suppress SurfingKeys', function() {
+    api.Normal.passThrough(1500);
+});
 api.mapkey(';V', 'Edit with web vim', function() {
     api.Clipboard.read(function(response) {
         api.Front.showEditor(response.data, function(data) {
@@ -227,6 +231,13 @@ api.mapkey('``', 'Go to previous position', function() {
     scrollX = tempX;
     scrollY = tempY;
 });
+for (let i = 32; i < 127; ++i) { // don't use var to avoid closure referencing global
+    if (i === 96) continue; // backtick
+    let char = String.fromCharCode(i);
+    api.mapkey(`\`${char}`, `Jump mark ${char}`, function() {
+        api.Normal.jumpVIMark(char);
+    });
+}
 
 // https://github.com/brookhong/Surfingkeys/wiki/Register-inline-query
 api.Front.registerInlineQuery({

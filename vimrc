@@ -61,7 +61,7 @@ set undofile
 set undolevels=1000
 set undoreload=10000
 set undodir=$HOME/.cache/vim/undo
-set viminfo+=n~/.cache/vim/viminfo
+set viminfo='1000,<50,s10,h,n~/.cache/vim/viminfo
 set isfname-==
 set path=.,,**5
 set wildignore+=*/tmp/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*
@@ -148,7 +148,7 @@ nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:prev
 nmap <leader>fs <C-p>
 nnoremap <leader>ff :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~,$HOME," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| xargs -L 1 ls -1 2>/dev/null \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
+nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| perl -ne ''chomp(); if (-e $_) {print "$_\n"}'' \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>
 nnoremap <leader>fg :GrepRegex<Space>
 xnoremap <leader>fg :<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>
@@ -166,10 +166,11 @@ xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
 nnoremap <leader>L :call funcs#print_variable(0, 1)<CR>
 xnoremap <leader>L :<C-u>call funcs#print_variable(1, 1)<CR>
 inoremap <leader>w <Esc>:update<CR>
-" do not use <leader> for sudoedit to work
 nnoremap ;w :update<CR>
 nnoremap <leader>W :wall<CR>
+" map ;q separately from <leader>q for sudoedit to work
 nnoremap ;q :quit<CR>
+nnoremap <leader>q :call funcs#quit(0, 0)<CR>
 nnoremap <leader>Q :call funcs#quit(0, 1)<CR>
 nnoremap <leader>x :call funcs#quit(1, 0)<CR>
 nnoremap <leader>X :call funcs#quit(1, 1)<CR>
@@ -183,10 +184,10 @@ cnoremap <expr> <BS> '/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()
 
 augroup AutoCommands
   autocmd!
-  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif  " restore last edit position
+  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
   autocmd FileType * setlocal formatoptions=jql
-  autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :bdelete<CR>
+  autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>
 augroup END
 command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
@@ -214,7 +215,8 @@ function! s:ToggleQuickfix()
   copen
 endfunction
 function! s:Grep(git_grep, use_regex, pattern)
-  Grt
+  " use execute so sudoedit will not complain
+  execute 'Grt'
   let l:saved_grepprg = &grepprg
   let &grepprg = (a:git_grep ? 'git grep -n --ignore-case' : l:saved_grepprg). (a:use_regex ? '' : ' --fixed-strings')
   silent execute 'grep! -- "'. escape(a:pattern, '\#%$|"'). '"'
@@ -242,7 +244,7 @@ function! s:ToggleTail()
 endfunction
 function! s:EditCallback(cmd, cd_git_root) abort
   if a:cd_git_root == 1
-    Grt
+    execute 'Grt'
   endif
   let l:sink = 'edit '
   let l:tempfile = tempname()
@@ -323,10 +325,7 @@ xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0,
 onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
 xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
-nnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
-nmap <leader>yy V<leader>y
-nmap <leader>Y <leader>y$
-xnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
+call funcs#map_copy_with_osc_yank_script()
 
 if has('terminal')
   augroup VimTerminal

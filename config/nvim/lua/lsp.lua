@@ -81,7 +81,6 @@ if present then
     lsp_installer.on_server_ready(
         function(server)
             local config = make_config()
-
             if lsp_configs[server.name] ~= nil then
                 for k, v in pairs(lsp_configs[server.name]) do
                     config[k] = v
@@ -140,7 +139,10 @@ vim.fn.sign_define("DiagnosticSignWarn", {text = "", texthl = "DiagnosticWarn
 vim.fn.sign_define("DiagnosticSignInfo", {text = "", texthl = "DiagnosticInfo", numhl = "DiagnosticInfo"})
 vim.fn.sign_define("DiagnosticSignHint", {text = "", texthl = "DiagnosticHint", numhl = "DiagnosticHint"})
 vim.fn.sign_define("DiagnosticSignOther", {text = "﫠", texthl = "DiagnosticOther", numhl = "DiagnosticOther"})
-vim.cmd("highlight DiagnosticVirtualTextHint guifg=#666666")
+vim.cmd(
+    "highlight DiagnosticVirtualTextHint guifg=#666666 guibg=" ..
+        vim.fn.printf("#%x", vim.api.nvim_get_hl_by_name("Normal", true).background)
+)
 
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = "rounded"})
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {border = "rounded"})

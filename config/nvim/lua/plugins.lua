@@ -82,7 +82,7 @@ return require("packer").startup(
                 setup = conf("setup_vim_quickui"),
                 config = conf("vim_quickui")
             }
-            use {"skywind3000/asyncrun.vim", cmd = "AsyncRun", config = [[vim.g.asyncrun_open = 12]]}
+            use {"skywind3000/asyncrun.vim", cmd = "AsyncRun", config = "vim.g.asyncrun_open = 12"}
             use {"simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = conf("setup_symbols_outline")}
             use {"simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo")}
             use {"kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = conf("nvim_tree")}
@@ -135,13 +135,7 @@ return require("packer").startup(
             }
             use {"nvim-treesitter/playground", cmd = {"TSPlaygroundToggle", "TSHighlightCapturesUnderCursor"}}
             use {"williamboman/nvim-lsp-installer"}
-            use {
-                "neovim/nvim-lspconfig",
-                after = "nvim-lsp-installer",
-                config = function()
-                    require("lsp")
-                end
-            }
+            use {"neovim/nvim-lspconfig", after = "nvim-lsp-installer", config = "require('lsp')"}
             use {"weilbith/nvim-code-action-menu", cmd = "CodeActionMenu"}
             use {"onsails/lspkind-nvim", event = "InsertEnter"}
             use {"hrsh7th/nvim-cmp", after = "lspkind-nvim", config = conf("nvim_cmp")}
@@ -157,16 +151,14 @@ return require("packer").startup(
                 "b3nj5m1n/kommentary",
                 requires = {"JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-treesitter"},
                 keys = "<Plug>kommentary_",
-                setup = [[vim.g.kommentary_create_default_mappings = false]],
+                setup = "vim.g.kommentary_create_default_mappings = false",
                 config = conf("kommentary")
             }
             use {
                 "windwp/nvim-ts-autotag",
                 ft = {"html", "javascript", "javascriptreact", "typescriptreact"},
                 wants = "nvim-treesitter",
-                config = function()
-                    require("nvim-ts-autotag").setup()
-                end
+                config = "require('nvim-ts-autotag').setup()"
             }
             use {"neomake/neomake", cmd = "Neomake", config = conf("neomake")}
             use {"MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log"}
@@ -188,8 +180,8 @@ return require("packer").startup(
             }
             use {"unblevable/quick-scope", config = conf("quick_scope")}
             use {"dahu/vim-fanfingtastic"}
-            use {"chaoren/vim-wordmotion", setup = [[vim.g.wordmotion_nomap = 1]]}
-            use {"machakann/vim-sandwich", setup = [[vim.g.operator_sandwich_no_default_key_mappings = 1]]}
+            use {"chaoren/vim-wordmotion", setup = "vim.g.wordmotion_nomap = 1"}
+            use {"machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1"}
             use {"machakann/vim-swap", keys = "<Plug>(swap-"}
             use {"AndrewRadev/splitjoin.vim", keys = {{"n", "gS"}, {"n", "gJ"}}}
 
@@ -219,7 +211,7 @@ return require("packer").startup(
                 event = "TextYankPost",
                 fn = "miniyank#*",
                 keys = "<Plug>(miniyank-",
-                config = [[vim.g.miniyank_maxitems = 200]]
+                config = "vim.g.miniyank_maxitems = 200"
             }
             use {
                 "aserowy/tmux.nvim",
@@ -237,7 +229,7 @@ return require("packer").startup(
                 "iamcco/markdown-preview.nvim",
                 run = "cd app && yarn install",
                 ft = "markdown",
-                setup = [[vim.g.mkdp_auto_close = 0]]
+                setup = "vim.g.mkdp_auto_close = 0"
             }
             use {"godlygeek/tabular", cmd = "Tabularize"}
             use {

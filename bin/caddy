@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github caddy caddyserver/caddy linux_amd64.tar.gz linux_arm64.tar.gz mac_amd64.tar.gz mac_arm64.tar.gz caddy "$@"

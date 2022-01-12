@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
 detect-env
-if [ "$PLATFORM" == 'darwin' ]; then
-  install-from-url sd $(curl -s https://api.github.com/repos/chmln/sd/releases/latest | grep "browser_download_url.*-x86_64-apple-darwin" | cut -d '"' -f 4) "$@"
+if [ "$PLATFORM" == 'linux' ] && [ "$ARCHITECTURE" == 'arm64' ]; then
+  install-from-url sd https://github.com/joshuali925/.vim/releases/download/binaries/sd-linux-arm64 "$@"
 else
-  if [ "$ARCHITECTURE" == 'x86_64' ]; then
-    install-from-url sd $(curl -s https://api.github.com/repos/chmln/sd/releases/latest | grep "browser_download_url.*-x86_64-unknown-linux-musl" | cut -d '"' -f 4) "$@"
-  else
-    install-from-url sd https://github.com/joshuali925/.vim/releases/download/binaries/sd-linux-arm64 "$@"
-  fi
+  install-from-github sd chmln/sd x86_64-unknown-linux-musl '' x86_64-apple '' '' "$@"
 fi

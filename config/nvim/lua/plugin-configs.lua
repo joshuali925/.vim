@@ -34,14 +34,24 @@ function M.nvim_tree()
         view = {
             mappings = {
                 list = {
+                    {key = {"?"}, cb = tree_cb("toggle_help")},
+                    {key = {"i"}, cb = tree_cb("toggle_ignored")},
                     {key = {"r"}, cb = tree_cb("refresh")},
                     {key = {"R"}, cb = tree_cb("rename")},
-                    {key = {"?"}, cb = tree_cb("toggle_help")},
+                    {key = {"x"}, cb = tree_cb("remove")},
+                    {key = {"d"}, cb = tree_cb("cut")},
+                    {key = {"y"}, cb = tree_cb("copy")},
+                    {key = {"yy"}, cb = tree_cb("copy_absolute_path")},
                     {key = {"C"}, cb = tree_cb("cd")},
                     {key = {"s"}, cb = tree_cb("split")},
-                    {key = {"yy"}, cb = tree_cb("copy_absolute_path")},
-                    {key = {"l"}, cb = tree_cb("edit")},
                     {key = {"h"}, cb = tree_cb("close_node")},
+                    {key = {"l"}, cb = tree_cb("edit")},
+                    {key = {"[g"}, cb = tree_cb("prev_git_item")},
+                    {key = {"]g"}, cb = tree_cb("next_git_item")},
+                    {key = {"q"}, cb = "<Cmd>execute 'NvimTreeResize '. winwidth(0) <bar> NvimTreeClose<CR>"},
+                    {key = {"<"}, cb = "<Cmd>normal! zh<CR>"},
+                    {key = {">"}, cb = "<Cmd>normal! zl<CR>"},
+                    {key = {"H"}, cb = "<Cmd>normal! H<CR>"},
                     {key = {"-"}, cb = "<Cmd>normal! $<CR>"}
                 }
             }
@@ -71,13 +81,14 @@ end
 
 function M.kommentary()
     require("kommentary.config").configure_language(
-        "typescriptreact",
+        "default",
         {
             hook_function = function()
                 require("ts_context_commentstring.internal").update_commentstring()
             end
         }
     )
+    require("kommentary.config").configure_language("lua", {prefer_single_line_comments = true})
 end
 
 function M.rest_nvim()
@@ -124,7 +135,9 @@ function M.setup_csv_vim()
 end
 
 function M.neomake()
-    vim.g.neomake_info_sign = {text = "", texthl = "NeomakeInfoSign"}
+    vim.g.neomake_error_sign = {text = ""}
+    vim.g.neomake_warning_sign = {text = ""}
+    vim.g.neomake_info_sign = {text = ""}
     vim.g.neomake_typescript_enabled_makers = {"eslint"}
     vim.g.neomake_typescriptreact_enabled_makers = {"eslint"}
 end
@@ -292,12 +305,12 @@ function M.alpha_nvim()
         theme.button("E", "Load from previous session", ":silent SessionLoad<CR>")
     }
     theme.mru_opts.ignore = function(path, ext)
-        return string.find(path, "COMMIT_EDITMSG") or string.find(path, [[vim/.*/doc/.*%.txt]])
+        return string.find(path, "vim/.*/doc/.*%.txt") or string.find(path, "/.git/")
     end
     alpha.setup(theme.opts)
-    -- https://github.com/goolord/alpha-nvim/issues/67
     vim.cmd [[
         augroup AlphaAutoCommands
+            autocmd!
             autocmd FileType alpha nnoremap <buffer> v <Cmd>lua require('alpha').queue_press()<CR>| nnoremap <buffer> <expr> q len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'| nnoremap <buffer> e <Cmd>enew<CR>| nnoremap <buffer> i <Cmd>enew <bar> startinsert<CR>
         augroup END
     ]]
@@ -308,6 +321,10 @@ function M.telescope()
     require("telescope").setup {
         defaults = {
             mappings = {
+                n = {
+                    [","] = actions.preview_scrolling_down,
+                    ["."] = actions.preview_scrolling_up
+                },
                 i = {
                     ["<Esc>"] = actions.close,
                     ["<C-u>"] = function()
@@ -620,7 +637,7 @@ function M.nvim_cmp()
                 {"i", "s"}
             )
         },
-        sources = {{name = "buffer"}, {name = "path"}, {name = "nvim_lua"}, {name = "nvim_lsp"}, {name = "vsnip"}}
+        sources = {{name = "nvim_lsp"}, {name = "vsnip"}, {name = "path"}, {name = "nvim_lua"}, {name = "buffer"}}
     }
 end
 
@@ -633,7 +650,7 @@ function _G.quickui_context_menu()
         {"Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition"},
         {
             "Hover diagnostic",
-            "lua vim.lsp.diagnostic.show_line_diagnostics({border='rounded'})",
+            "lua vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'})",
             "Show diagnostic of current line"
         },
         {"--", ""},
@@ -641,7 +658,7 @@ function _G.quickui_context_menu()
         {"Git hunk &undo", "lua require('gitsigns').reset_hunk()", "Git undo hunk"},
         {"Git hunk &add", "lua require('gitsigns').stage_hunk()", "Git stage hunk"},
         {"Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk"},
-        {"Git reset buffer", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index"},
+        {"Git buffer reset", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index"},
         {"Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line"},
         {
             "Git &remote",
@@ -738,6 +755,7 @@ function M.vim_quickui()
             {"Git checko&ut file", [[Gread]], "Checkout current file and load as unsaved buffer (Gread)"},
             {"Git &blame", [[Git blame]], "Git blame of current file"},
             {"Git &diff", [[Gdiffsplit]], "Diff current file with last staged version"},
+            {"Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns"},
             {"Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version"},
             {
                 "Git &file history",

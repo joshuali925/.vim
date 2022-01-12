@@ -75,7 +75,6 @@ alias gcs='git commit -s -m'
 alias gcs!='git commit -s --amend'
 alias gcv='git commit -v'
 alias gcf='git config --list'
-alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gcm='git checkout main || git checkout master'
 alias gcd='git checkout develop || git checkout dev'
 alias gco='git checkout'
@@ -105,18 +104,16 @@ alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
 alias gmerge-preview-log='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit HEAD..'  # commits in target but not in HEAD (will be merged with git merge target)
-gmerge-preview-diff() {
-  git diff HEAD..."$*"  # diff between target and the common ancestor of HEAD and target
-}
+gmerge-preview-diff() { git diff HEAD..."$*"; }  # diff between target and the common ancestor of HEAD and target
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
-alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{u}'  # remote ref
+alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
 alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset" --date=iso'
 alias gra='git remote add'
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
-alias greset-to-remote='git reset --hard $(git rev-parse --abbrev-ref --symbolic-full-name @{u})'
+alias greset-to-remote='git reset --hard @{upstream}'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grv='git remote -v'
 alias gs='git status'
@@ -130,15 +127,17 @@ alias gtree='git ls-files | tree --fromfile'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gunignore='git update-index --no-assume-unchanged'
+alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
-alias gunwip='git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1'
-alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{u})..HEAD  # what will be pushed'
+alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
+alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
 alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove
 alias gforest='git-foresta --style=10 | less -RSXF'
 alias gforesta='git-foresta --style=10 --all | less -RSXF'
+alias gls-files-all="git log --pretty=format: --name-only --all | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all -- {}' | xargs -I{} bash -c 'echo {}; git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all --max-count 10 -- {}'"
 alias gpatch='vi +"syntax enable" +startinsert patch.diff && git apply patch.diff && rm patch.diff'
 
 d() {
@@ -149,17 +148,9 @@ d() {
   fi
 }
 
-gdf() {
-  git diff --color "$@" | diff-so-fancy | less --tabs=4 -RFX
-}
-
-gdd() {
-  git diff "$@" | delta --line-numbers --navigate
-}
-
-gdg() {
-  git diff "$@" | delta --line-numbers --navigate --side-by-side
-}
+gdf() { git diff --color "$@" | diff-so-fancy | less --tabs=4 -RFX; }
+gdd() { git diff "$@" | delta --line-numbers --navigate; }
+gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
 
 glof() {
   git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
@@ -255,7 +246,7 @@ print-ascii() {
   echo ' 15 0F SI   31 1F US   47 2F /    63 3F ?  79 4F O  95 5F _  111 6F o  127 7F DEL'
 }
 
-print-colors() {
+print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
   printf 'Foreground 8 colors\n'
   echo "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
   printf '\nBackground 8 colors\n'
@@ -289,21 +280,17 @@ print-colors() {
 x() {
   if [ -f "$1" ]; then
     case $1 in
-      *.tar.bz2)   tar xvjf "$1"    ;;
-      *.tar.xz)    tar xvJf "$1"    ;;
-      *.tar.gz)    tar xvzf "$1"    ;;
-      *.bz2)       bunzip2 "$1"     ;;
-      *.rar)       unrar x "$1"     ;;
-      *.gz)        gunzip "$1"      ;;
-      *.tar)       tar xvf "$1"     ;;
-      *.tbz)       tar xvjf "$1"    ;;
-      *.tbz2)      tar xvjf "$1"    ;;
-      *.tgz)       tar xvzf "$1"    ;;
-      *.zip)       unzip "$1"       ;;
-      *.xz)        unxz "$1"        ;;
-      *.Z)         uncompress "$1"  ;;
-      *.7z)        7z x "$1"        ;;
-      *)           echo "Unable to extract '$1'" ;;
+      *.tar)                       tar xvf "$1"     ;;
+      *.tar.gz | *.tgz)            tar xvzf "$1"    ;;
+      *.tar.xz | *.xz)             tar xvJf "$1"    ;;
+      *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$1"    ;;
+      *.bz2)                       bunzip2 "$1"     ;;
+      *.gz)                        gunzip "$1"      ;;
+      *.zip)                       unzip "$1"       ;;
+      *.rar)                       unrar x "$1"     ;;
+      *.Z)                         uncompress "$1"  ;;
+      *.7z)                        7z x "$1"        ;;
+      *)                           echo "Unable to extract '$1'" ;;
     esac
   else
     tar czvf "$1.tar.gz" "$1"
@@ -379,14 +366,13 @@ fif() {  # find in file
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
   rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute($EDITOR {+} -c \"/$1\" < /dev/tty)"
 }
-rf() {  # livegrep
-  # https://github.com/sharkdp/bat/issues/1699
-  local RG_PREFIX="rg --column --line-number --no-heading --color=always "
-  local INITIAL_QUERY="${*:-}"
-  FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "$INITIAL_QUERY")" \
-  fzf --ansi --layout=default --height=100% --disabled --query="$INITIAL_QUERY" \
+rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to switch to fzf filter
+  [ "$#" -gt 0 ] && [[ "$1" != -* ]] && local INIT_QUERY="$1" && shift 1
+  local RG_PREFIX="rg --column --line-number --no-heading --color=always$([ "$#" -gt 0 ] && printf " %q" "$@")"
+  FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "${INIT_QUERY:-}")" \
+  fzf --ansi --layout=default --height=100% --disabled --query="${INIT_QUERY:-}" \
       --bind="ctrl-s:unbind(change,ctrl-s)+change-prompt(2. fzf> )+enable-search+clear-query" \
-      --bind="change:reload:sleep 0.2; $RG_PREFIX {q} || true" \
+      --bind="change:reload:sleep 0.2; $RG_PREFIX {q}" \
       --bind="enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
       --bind='tab:down,btab:up' \
       --prompt='1. ripgrep> ' --delimiter=: \

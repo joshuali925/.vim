@@ -1564,6 +1564,27 @@ zinit ice as="completion"
 zinit snippet 'https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/fd/_fd'
 zinit ice as="completion"
 zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'
+" unused binaries
+  # zinit light-mode as"program" from"gh-r" for sbin jesseduffield/lazydocker
+  # zinit light-mode as"program" from"gh-r" for sbin so-fancy/diff-so-fancy
+  # zinit light-mode as"program" from"gh-r" for sbin schollz/croc
+  # zinit light-mode as"program" from"gh-r" for sbin"bin/exa" ogham/exa
+  # zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq
+  # zinit light-mode as"program" from"gh-r" for mv"uni* -> uni" sbin arp242/uni
+  # zinit light-mode as"program" from"gh-r" for sbin pemistahl/grex
+  # zinit light-mode as"program" from"gh-r" for mv"up* -> up" sbin akavel/up
+  # zinit light-mode as"program" from"gh-r" for sbin XAMPPRocky/tokei
+  # zinit light-mode as"program" from"gh-r" for mv"dust* -> dust" sbin"dust/dust" bootandy/dust
+  # zinit light-mode as"program" from"gh-r" for sbin muesli/duf
+  # zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
+  # zinit light-mode as"program" from"gh-r" for mv"hyperfine* -> hyperfine" sbin"hyperfine/hyperfine" @sharkdp/hyperfine
+  # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
+install-from-url vimv https://raw.githubusercontent.com/thameera/vimv/HEAD/vimv "$@"
+install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin '' btm "$@"
+  # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
+alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
+    btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
+
 
 " =======================================================
 zinit light-mode for \
@@ -2699,11 +2720,6 @@ end
   ln -s ~/.local/python-packages/PathPicker/fpp ~/.local/bin/fpp
   log "Installed bpytop, fpp"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
-" btm
-install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin '' btm "$@"
-  # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
-alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
-    btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
 
 
 " =======================================================
@@ -2797,3 +2813,18 @@ function! funcs#print_curr_vars(visual, printAbove) abort
     call setpos('.', l:pos)
   endif
 endfunction
+nnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
+nmap <leader>yy V<leader>y
+nmap <leader>Y <leader>y$
+xnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
+
+" =======================================================
+" install all font family of JetBrainsMono Nerd Font
+    font = wezterm.font_with_fallback({"JetBrains Mono", "JetBrainsMono Nerd Font", "JetBrainsMono NF"}),
+    font_rules = {
+        {
+            italic = false,
+            intensity = "Normal",
+            font = wezterm.font_with_fallback({"JetBrainsMono Nerd Font", "JetBrainsMono NF"})
+        }
+    },

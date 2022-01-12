@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-url vidir https://raw.githubusercontent.com/trapd00r/vidir/HEAD/bin/vidir "$@"

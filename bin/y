@@ -4,34 +4,31 @@
 # https://sunaku.github.io/tmux-yank-osc52.html
 
 buf=$(cat "$@")
-buflen=$( printf %s "$buf" | wc -c )
+buflen=$(printf %s "$buf" | wc -c)
 maxlen=74994
-i=0
 
 while [ "$buflen" -gt 0 ]; do
-  if [ "$i" -gt 0 ]; then
-    printf "input is %d bytes too long, needs %d more copy" "$buflen" "$((buflen / maxlen + 1))" >&2
-    read -p ', continue? (Y/n) ' -n 1 < $otty
-    echo
-    [[ ! $REPLY =~ ^[Yy]?$ ]] && break
-  fi
-  esc="\033]52;c;$( printf %s "$buf" | tail -c "$buflen" | head -c "$maxlen" | base64 | tr -d '\r\n' )\a"
-  if [[ -n $SSH_TTY ]]; then
+  esc="\033]52;c;$(printf %s "$buf" | tail -c "$buflen" | head -c "$maxlen" | base64 | tr -d '\r\n')\a"
+  if [ -n "$SSH_TTY" ]; then
     otty=$SSH_TTY
-  elif [[ -n $TMUX ]]; then
+  elif [ -n "$TMUX" ]; then
     esc="\033Ptmux;\033$esc\033\\"
     otty=$(tmux list-panes -F "#{pane_active} #{pane_tty}" | awk '$1=="1" { print $2 }')
   else
     otty=$TTY
-    if [[ -z $otty ]]; then
+    if [ -z "$otty" ]; then
       otty="/dev/$(ps -p $PPID -o tty=)"
     fi
-    if [[ -z $otty ]]; then
-      echo -n "$buf"
-      exit 2
+    if [ -z "$otty" ]; then
+      otty="/dev/tty"
     fi
   fi
   printf "$esc" > $otty
   ((buflen-=maxlen))
-  ((i+=1))
+  if [ "$buflen" -gt 0 ]; then
+    printf "input is %d bytes too long, needs %d more time" "$buflen" "$((buflen / maxlen + 1))" >&2
+    read -p ', continue? (Y/n) ' -n 1 < $otty
+    echo
+    [[ ! $REPLY =~ ^[Yy]?$ ]] && break
+  fi
 done
