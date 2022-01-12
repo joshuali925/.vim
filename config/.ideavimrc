@@ -82,8 +82,8 @@ nnoremap gp `[v`]
 nnoremap <C-c> :nohlsearch<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
+nnoremap <C-h> :NERDTree<CR>
+nmap <C-j> <Action>(ActiveToolwindowGroup)
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 noremap <leader>y "+y
@@ -103,20 +103,20 @@ nnoremap <leader>fy :registers<CR>
 nnoremap <leader>n *N
 xnoremap <leader>n y/\V<C-r>"<CR>N
 nmap <leader>tu <Action>(ReopenClosedTab)
-nmap <C-b> <Action>(ToggleDistractionFreeMode)
 nmap <leader>b <Action>(SelectInProjectView)
-nnoremap <C-h> :NERDTree<CR>
 imap <leader>w <Esc><leader>w
 nmap <leader>w <Action>(SaveAll)
 nmap <leader>W <Action>(SaveAll)
 nmap <leader>q <Action>(CloseEditor)
 nmap <leader>x <Action>(CloseEditor)
+" <D-g> to skip current occurrence
 map <C-n> <Action>(SelectNextOccurrence)
 map <leader><C-n> <Action>(SelectAllOccurrences)
 map <C-p> <Action>(UnselectPreviousOccurrence)
 
 " nmap <leader>r <Action>(CompileDirty)
 nmap <leader>r <Action>(RunContextGroup)
+nmap <C-b> <Action>(ActivateRunToolWindow)
 nmap <leader>to <Action>(ActivateTerminalToolWindow)
 nmap <leader>tt <Action>(Terminal.OpenInTerminal)
 
@@ -137,6 +137,7 @@ nmap gr <Action>(FindUsages)
 nnoremap Km K
 nmap Ku <Action>(Vcs.RollbackChangedLines)
 nmap Kd <Action>(Vcs.Show.Local.Changes)
+nmap Kb <Action>(Annotate)
 nmap Kf <Action>(Vcs.ShowTabbedFileHistory)
 nmap Kg <Action>(Generate)
 nmap Kr <Action>(Github.Open.In.Browser)

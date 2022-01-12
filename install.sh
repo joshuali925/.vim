@@ -49,7 +49,7 @@ detect-env() {
 }
 
 sudo() {
-  [[ $EUID = 0 ]] || set -- command sudo "$@"
+  [ "$EUID" -ne 0 ] && set -- command sudo "$@"
   "$@"
 }
 
@@ -86,14 +86,16 @@ install_development_tools() {
     sudo apt update && sudo apt install -y build-essential zsh unzip
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-    brew install coreutils openssh
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    brew install coreutils
     echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.zshrc
     echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.bashrc
     brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
     brew install findutils && ln -s "$(which gxargs)" ~/.local/bin/xargs
     brew install gawk && ln -s "$(which gawk)" ~/.local/bin/awk
     brew install gnu-tar
+    brew tap homebrew/cask-fonts
+    brew install font-jetbrains-mono-nerd-font
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
     log "Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc"
     defaults write -g ApplePressAndHoldEnabled -bool false  # enable key repeats

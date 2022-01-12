@@ -39,11 +39,7 @@ install-from-github() {
   if [ "$ARCHITECTURE" == 'x86_64' ]; then
     [ "$PLATFORM" == 'linux' ] && package=$linux_x64 || package=$darwin_x64
   else
-    if [ "$PLATFORM" == 'linux' ]; then
-      package=$linux_arm
-    else
-      [ -z "$darwin_arm" ] && package=$darwin_x64 || package=$darwin_arm
-    fi
+    [ "$PLATFORM" == 'linux' ] && package=$linux_arm || package=${darwin_arm:-$darwin_x64}
   fi
   if [ "$PLATFORM" == 'darwin' ]; then
     if ! (builtin command -V gtar >/dev/null 2>&1); then
@@ -53,32 +49,28 @@ install-from-github() {
     fi
   fi
   if [ -z "$package" ]; then
-    echo 'package not found, exiting..' >&2
+    echo "package not found for '$executable' on $PLATFORM $ARCHITECTURE, exiting.." >&2
     return 1
   fi
 
   mkdir -p "$HOME/.local/bin"
   url=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4)
+  echo "Installing $executable from $url" >&2
   case $url in
-    *.tar.bz2)  extract_cmd="$tar_cmd xj"      ;;
-    *.tar.xz)   extract_cmd="$tar_cmd xJ"      ;;
-    *.tar.gz)   extract_cmd="$tar_cmd xz"      ;;
-    *.bz2)      extract_cmd="bunzip2"          ;;
-    *.rar)      extract_cmd="unrar x"          ;;
-    *.gz)       extract_cmd="gunzip"           ;;
-    *.tar)      extract_cmd="$tar_cmd x"       ;;
-    *.tbz)      extract_cmd="$tar_cmd xj"      ;;
-    *.tbz2)     extract_cmd="$tar_cmd xj"      ;;
-    *.tgz)      extract_cmd="$tar_cmd xz"      ;;
-    *.zip)      extract_cmd="unzip"            ;;
-    *.xz)       extract_cmd="unxz"             ;;
-    *.Z)        extract_cmd="uncompress"       ;;
-    *.7z)       extract_cmd="7z x"             ;;
-    *)          extract_cmd="$tar_cmd xz"      ;;
+    # *.rar)                       extract_cmd="unrar x" ;;
+    # *.7z)                        extract_cmd="7z x"    ;;
+    *.tar)                       extract_cmd="$tar_cmd x -C $HOME/.local/bin"                ;;
+    *.tar.gz | *.tgz)            extract_cmd="$tar_cmd xz -C $HOME/.local/bin"               ;;
+    *.tar.xz | *.xz)             extract_cmd="$tar_cmd xJ -C $HOME/.local/bin"               ;;
+    *.tar.bz2 | *.tbz | *.tbz2)  extract_cmd="$tar_cmd xj -C $HOME/.local/bin"               ;;
+    *.bz2)                       extract_cmd="bunzip2 | tee $HOME/.local/bin/$executable"    ;;
+    *.gz)                        extract_cmd="gunzip | tee $HOME/.local/bin/$executable"     ;;
+    *.zip)                       extract_cmd="tee $HOME/.local/bin/${executable}.archive > /dev/null && unzip -j -d $HOME/.local/bin $HOME/.local/bin/${executable}.archive $extract_flags && rm $HOME/.local/bin/${executable}.archive; echo" ;;
+    *.Z)                         extract_cmd="uncompress | tee $HOME/.local/bin/$executable" ;;
+    *)                           extract_cmd="tee $HOME/.local/bin/$executable"              ;;
   esac
 
-  echo "Installing $executable from $url" >&2
-  curl -sL -o- "$url" | $extract_cmd -C "$HOME/.local/bin" $(echo "$extract_flags")
-
+  curl -sL -o- "$url" | eval "$extract_cmd $extract_flags" > /dev/null
+  chmod +x "$HOME/.local/bin/$executable"
   "$HOME/.local/bin/$executable" "$@"
 }

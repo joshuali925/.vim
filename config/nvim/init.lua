@@ -146,7 +146,7 @@ map("", "<Home>", "g^")
 map("", "<End>", "g$")
 map("", "<Down>", "gj")
 map("", "<Up>", "gk")
-map("i", "<S-Del>", "<BS>")
+map("!", "<S-Del>", "<BS>")
 map("i", "<Down>", "pumvisible() ? '<C-n>' : '<C-o>gj'", {expr = true, noremap = true})
 map("i", "<Up>", "pumvisible() ? '<C-p>' : '<C-o>gk'", {expr = true, noremap = true})
 map("i", "<Home>", "<C-o>g^")
@@ -232,7 +232,6 @@ map(
     "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <bar> -tabedit %<CR><Cmd>call winrestview(g:temp) <bar> let b:is_zoomed = 1<CR>' : get(b:, 'is_zoomed', 0) ? '<Cmd>tabclose<CR>' : ''",
     {expr = true, noremap = true}
 )
-map("c", "<S-Del>", "<BS>")
 map("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], {expr = true, noremap = true})
 map(
     "c",
@@ -281,7 +280,7 @@ map(
 map(
     "n",
     "<C-o>",
-    [[<Cmd>let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('sh -c "lf -last-dir-path=\"$HOME/.cache/lf_dir\" -selection-path='. fnameescape(g:lf_selection_path). ' \"'. expand('%'). '\""', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': 'funcs#lf_edit_callback'})<CR>]]
+    [[<Cmd>let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('sh -c "lf -last-dir-path=\"$HOME/.cache/lf_dir\" -selection-path='. fnameescape(g:lf_selection_path). ' \"'. expand('%'). '\""', {'h': &lines - 7, 'w': &columns * 9/10, 'line': 3, 'callback': 'funcs#lf_edit_callback'})<CR>]]
 )
 -- kommentary {{{2
 map("n", "gc", "<Plug>kommentary_motion_default", {})
@@ -422,7 +421,7 @@ map("x", "<leader>a", ":<C-u>CodeActionMenu<CR>")
 map(
     "n",
     "gh",
-    "<Cmd>lua if vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'}) == nil then vim.lsp.buf.hover() end<CR>"
+    "<Cmd>lua if vim.diagnostic.open_float(0, {scope = 'cursor', border = 'rounded'}) == nil then vim.lsp.buf.hover() end<CR>"
 )
 map("n", "<leader>R", "<Cmd>lua vim.lsp.buf.rename()<CR>")
 map("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({float = {border = 'rounded'}})<CR>")

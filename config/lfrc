@@ -183,21 +183,17 @@ cmd x ${{
   filename="$(basename "$f")"
   if [ -f "$filename" ] ; then
     case "$filename" in
-      *.tar.bz2)   tar xvjf "$filename"    ;;
-      *.tar.xz)    tar xvJf "$filename"    ;;
-      *.tar.gz)    tar xvzf "$filename"    ;;
-      *.bz2)       bunzip2 "$filename"     ;;
-      *.rar)       unrar x "$filename"     ;;
-      *.gz)        gunzip "$filename"      ;;
-      *.tar)       tar xvf "$filename"     ;;
-      *.tbz)       tar xvjf "$filename"    ;;
-      *.tbz2)      tar xvjf "$filename"    ;;
-      *.tgz)       tar xvzf "$filename"    ;;
-      *.zip)       unzip "$filename"       ;;
-      *.xz)        unxz "$filename"        ;;
-      *.Z)         uncompress "$filename"  ;;
-      *.7z)        7z x "$filename"        ;;
-      *)           echo "Unable to extract '$filename'" ;;
+      *.tar)                       tar xvf "$filename"     ;;
+      *.tar.gz | *.tgz)            tar xvzf "$filename"    ;;
+      *.tar.xz | *.xz)             tar xvJf "$filename"    ;;
+      *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$filename"    ;;
+      *.bz2)                       bunzip2 "$filename"     ;;
+      *.gz)                        gunzip "$filename"      ;;
+      *.zip)                       unzip "$filename"       ;;
+      *.rar)                       unrar x "$filename"     ;;
+      *.Z)                         uncompress "$filename"  ;;
+      *.7z)                        7z x "$filename"        ;;
+      *)                           echo "Unable to extract '$filename'" ;;
     esac
   else
     tar czvf "$filename.tar.gz" "$filename"

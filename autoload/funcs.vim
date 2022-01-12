@@ -66,7 +66,7 @@ endfunction
 function! funcs#quit(buffer_mode, force) abort
   let l:buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let l:has_nvim = has('nvim')
-  let l:win_len = l:has_nvim ? len(filter(nvim_list_wins(), {k, v -> nvim_win_get_config(v).relative == ''})) : winnr('$')  " exclude nvim floating windows
+  let l:win_len = l:has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
   if l:has_nvim && l:win_len == 1 && nvim_win_get_config(win_getid()).relative != ''  " floating window focused
     quit
   elseif a:buffer_mode == 0 && a:force == 1
@@ -99,6 +99,19 @@ function! funcs#quit(buffer_mode, force) abort
   endif
 endfunction
 
+function! funcs#quit_netrw_and_dirs()
+  for i in range(1, bufnr('$'))
+    if buflisted(i)
+      if getbufvar(i, '&filetype') == 'netrw' || isdirectory(bufname(i)) == 1
+        execute 'bdelete '. i
+      endif
+    endif
+  endfor
+  if &filetype == 'netrw'
+    bdelete
+  endif
+endfunction
+
 function! funcs#print_variable(visual, printAbove) abort
   let l:new_line = "normal! o\<Space>\<BS>"
   if a:printAbove
@@ -114,6 +127,9 @@ function! funcs#print_variable(visual, printAbove) abort
   let l:print['kotlin'] = 'println("[${javaClass.simpleName}] DEBUGGING ❗'. l:word. ': " + '. l:word. ')'
   let l:print['vim'] = "echomsg '❗". l:word. ":' ". l:word
   let l:print['lua'] = 'print("❗'. l:word. ': " .. vim.inspect('. l:word. '))'
+  let l:print['sh'] = 'echo "❗'. l:word. ': ${'. l:word. '}"'
+  let l:print['bash'] = l:print['sh']
+  let l:print['zsh'] = l:print['sh']
   if has_key(l:print, &filetype)
     let l:pos = getcurpos()
     execute l:new_line
@@ -218,6 +234,23 @@ function! funcs#map_copy_with_osc_yank()
     OSCYankReg "
   endfunction
   call <SID>MapAction('CopyWithOSCYank', '<leader>y')
+  nmap <leader>Y <leader>y$
+endfunction
+
+function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
+  function! s:CopyWithOSCYankScript(str)
+    let l:buflen = len(a:str)
+    let l:copied = 0
+    while l:buflen > l:copied
+      if l:copied > 0 && input('Total: '. l:buflen. ', copied: '. l:copied. ', continue? [Y/n] ') =~ '^[Nn]$'
+        break
+      endif
+      call system('echo "'. escape(escape(a:str[l:copied:l:copied + 74993], '\'), '\$"`'). '" | y')
+      let l:copied += 74994
+    endwhile
+    echomsg 'Copied '. min([l:buflen, l:copied]). ' characters'
+  endfunction
+  call <SID>MapAction('CopyWithOSCYankScript', '<leader>y')
   nmap <leader>Y <leader>y$
 endfunction
 

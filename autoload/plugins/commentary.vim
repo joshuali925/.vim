@@ -3,10 +3,10 @@
 " Version:      1.3
 " GetLatestVimScripts: 3695 1 :AutoInstall: commentary.vim
 
-if exists("g:loaded_commentary") || v:version < 700
+if exists("g:loaded_custom_commentary") || v:version < 700
   finish
 endif
-let g:loaded_commentary = 1
+let g:loaded_custom_commentary = 1
 
 function! s:surroundings() abort
   return split(get(b:, 'commentary_format', substitute(substitute(substitute(

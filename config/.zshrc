@@ -21,21 +21,6 @@ if [ -n "$ZINIT_POST_INSTALL" ]; then
     sbin gokcehan/lf \
     sbin jesseduffield/lazygit
 
-  # zinit light-mode as"program" from"gh-r" for sbin jesseduffield/lazydocker
-  # zinit light-mode as"program" from"gh-r" for sbin so-fancy/diff-so-fancy
-  # zinit light-mode as"program" from"gh-r" for sbin schollz/croc
-  # zinit light-mode as"program" from"gh-r" for sbin"bin/exa" ogham/exa
-  # zinit light-mode as"program" from"gh-r" for mv"jq* -> jq" sbin stedolan/jq
-  # zinit light-mode as"program" from"gh-r" for mv"uni* -> uni" sbin arp242/uni
-  # zinit light-mode as"program" from"gh-r" for sbin pemistahl/grex
-  # zinit light-mode as"program" from"gh-r" for mv"up* -> up" sbin akavel/up
-  # zinit light-mode as"program" from"gh-r" for sbin XAMPPRocky/tokei
-  # zinit light-mode as"program" from"gh-r" for mv"dust* -> dust" sbin"dust/dust" bootandy/dust
-  # zinit light-mode as"program" from"gh-r" for sbin muesli/duf
-  # zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
-  # zinit light-mode as"program" from"gh-r" for mv"hyperfine* -> hyperfine" sbin"hyperfine/hyperfine" @sharkdp/hyperfine
-  # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
-
   zinit as"completion" for \
     https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
     https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \

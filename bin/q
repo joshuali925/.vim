@@ -1,12 +1,3 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-detect-env
-if [ "$PLATFORM" == 'darwin' ]; then
-  install-from-url q https://github.com/harelba/q/releases/download/latest/macos-q "$@"
-else
-  if [ "$ARCHITECTURE" != 'x86_64' ]; then
-    echo "[installing $0] architecture not supported, exiting.." >&2
-    exit 1
-  fi
-  install-from-url q https://github.com/harelba/q/releases/download/latest/linux-q "$@"
-fi
+install-from-github q harelba/q linux-q '' macos-q '' '' "$@"
