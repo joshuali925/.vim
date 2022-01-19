@@ -148,7 +148,7 @@ nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:prev
 nmap <leader>fs <C-p>
 nnoremap <leader>ff :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>EditCallback('cat $HOME/.cache/vim/viminfo \| awk ''$1 == ">" {print $2}'' \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| perl -ne ''chomp(); if (-e $_) {print "$_\n"}'' \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
+nnoremap <leader>fm :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' $HOME/.cache/vim/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| perl -ne ''chomp(); if (-e $_) {print "$_\n"}'' \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>
 nnoremap <leader>fg :GrepRegex<Space>
 xnoremap <leader>fg :<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>
@@ -217,10 +217,10 @@ endfunction
 function! s:Grep(git_grep, use_regex, pattern)
   " use execute so sudoedit will not complain
   execute 'Grt'
-  let l:saved_grepprg = &grepprg
-  let &grepprg = (a:git_grep ? 'git grep -n --ignore-case' : l:saved_grepprg). (a:use_regex ? '' : ' --fixed-strings')
+  let saved_grepprg = &grepprg
+  let &grepprg = (a:git_grep ? 'git grep -n --ignore-case' : saved_grepprg). (a:use_regex ? '' : ' --fixed-strings')
   silent execute 'grep! -- "'. escape(a:pattern, '\#%$|"'). '"'
-  let &grepprg = l:saved_grepprg
+  let &grepprg = saved_grepprg
   redraw!
   copen
 endfunction
@@ -246,32 +246,32 @@ function! s:EditCallback(cmd, cd_git_root) abort
   if a:cd_git_root == 1
     execute 'Grt'
   endif
-  let l:sink = 'edit '
-  let l:tempfile = tempname()
+  let sink = 'edit '
+  let tempfile = tempname()
   if a:cmd == 'lf'
-    execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. fnameescape(l:tempfile). ' "'. expand('%'). '"'
+    execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. fnameescape(tempfile). ' "'. expand('%'). '"'
   elseif a:cmd == 'filetypes'
-    let l:sink = 'set filetype='
+    let sink = 'set filetype='
     let $FZFTEMP = join(sort(map(split(globpath(&rtp, 'syntax/*.vim'), '\n'), 'fnamemodify(v:val, ":t:r")')), '\n')
-    execute 'silent !echo -e $FZFTEMP | fzf > '. fnameescape(l:tempfile)
+    execute 'silent !echo -e $FZFTEMP | fzf > '. fnameescape(tempfile)
     let $FZFTEMP = ''  " cannot unlet environment variables in 7.4
   else
-    execute 'silent !'. a:cmd. ' > '. fnameescape(l:tempfile)
+    execute 'silent !'. a:cmd. ' > '. fnameescape(tempfile)
   endif
   try
-    if filereadable(l:tempfile)
-      for l:line in readfile(l:tempfile)
-        if l:sink == 'edit ' && l:line =~ ':\d'
-          let l:args = split(l:line, ':')
-          execute 'edit +'. l:args[1]. ' '. l:args[0]
+    if filereadable(tempfile)
+      for line in readfile(tempfile)
+        if sink == 'edit ' && line =~ ':\d'
+          let args = split(line, ':')
+          execute 'edit +'. args[1]. ' '. args[0]
         else
-          execute l:sink. l:line
+          execute sink. line
         endif
       endfor
     endif
     redraw!
   finally
-    call delete(l:tempfile)
+    call delete(tempfile)
   endtry
 endfunction
 call fpc#init()

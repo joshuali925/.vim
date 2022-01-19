@@ -2828,3 +2828,68 @@ xnoremap <silent> <expr> <leader>y plugins#oscyank#OSCYankOperator('')
             font = wezterm.font_with_fallback({"JetBrainsMono Nerd Font", "JetBrainsMono NF"})
         }
     },
+
+" =======================================================
+" just use xargs
+linedo() {
+  if [ "$#" -eq 0 ]; then echo "Usage: <command> | $0 <command>, use {} as placeholder for each line, otherwise line is appended as args."; return 1; fi
+  local placeholder
+  [[ "$*" = *{}* ]] && placeholder=1
+  while read -r line; do
+    if [ -n "$placeholder" ]; then
+      eval "${@//\{\}/$line}"
+    else
+      eval "$@" "$line"
+    fi
+  done
+}
+" get latest tag from github
+curl -s https://github.com/neovim/neovim/releases/latest | sed 's#.*tag/\(.*\)\".*#\1#'
+
+" =======================================================
+" dap, buggy
+        use({ "mfussenegger/nvim-dap", event = "VimEnter" })
+        use({
+            "rcarriga/nvim-dap-ui",
+            after = "nvim-dap",
+            config = function()
+                require("dapui").setup()
+            end,
+        })
+        use({
+            "theHamsta/nvim-dap-virtual-text",
+            after = "nvim-dap",
+            config = function()
+                require("nvim-dap-virtual-text").setup()
+            end,
+        })
+" lsp.lua
+    jdtls = {
+        initializationOptions = {
+            bundles = {
+                -- https://repo1.maven.org/maven2/com/microsoft/java/com.microsoft.java.debug.plugin/0.34.0/com.microsoft.java.debug.plugin-0.34.0.jar
+                vim.loop.os_homedir() .. "/.vim/com.microsoft.java.debug.plugin-0.34.0.jar",
+            },
+        },
+    },
+require("dap").configurations.java = {
+    {
+        type = "java",
+        request = "attach",
+        name = "Debug (Attach) - Remote",
+        hostName = "127.0.0.1",
+        port = 5005,
+    },
+}
+require("dap").adapters.java = function(callback, config)
+    vim.lsp.buf_request(
+        0,
+        "workspace/executeCommand",
+        { command = "vscode.java.startDebugSession" },
+        function(err, ret, res)
+            if ret ~= nil then
+                callback({ type = "server", host = "127.0.0.1", port = ret })
+            end
+        end
+    )
+end

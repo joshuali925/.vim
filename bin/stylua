@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github stylua JohnnyMorganz/StyLua linux '' macos '' '' "$@"

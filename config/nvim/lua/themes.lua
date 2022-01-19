@@ -7,11 +7,11 @@ M.theme_list = {
     [-4] = "vscode.nvim",
     [-5] = "catppuccin",
     [0] = "github-nvim-theme",
-    [1] = "tokyonight.nvim"
+    [1] = "tokyonight.nvim",
 }
 M.theme = M.theme_list[vim.g.theme_index]
 
-local sidebars = {"qf", "terminal", "Outline", "Mundo"}
+local sidebars = { "qf", "terminal", "Outline", "Mundo" }
 local default_colors = {
     bg = "#22262e",
     fg = "#abb2bf",
@@ -24,7 +24,7 @@ local default_colors = {
     yellow = "#e0af68",
     orange = "#ff9e64",
     purple = "#9d7cd8",
-    grey = "#6f737b"
+    grey = "#6f737b",
 }
 
 local themes = {
@@ -37,7 +37,7 @@ local themes = {
             vim.g.tokyonight_italic_keywords = false
             vim.g.tokyonight_italic_comments = false
             vim.g.tokyonight_sidebars = sidebars
-            vim.g.tokyonight_colors = {comment = "#717993"}
+            vim.g.tokyonight_colors = { comment = "#717993" }
             if vim.g.theme_index >= 0 then
                 default_colors.bg = "#cccccc"
                 default_colors.fg = "#484e54"
@@ -49,7 +49,7 @@ local themes = {
                 default_colors.orange = "#d18616"
             end
             vim.cmd("colorscheme tokyonight")
-        end
+        end,
     },
     ["gruvbox-flat.nvim"] = {
         colors = function()
@@ -63,7 +63,7 @@ local themes = {
             vim.g.gruvbox_flat_style = "dark"
             vim.g.gruvbox_sidebars = sidebars
             vim.cmd("colorscheme gruvbox-flat")
-        end
+        end,
     },
     ["github-nvim-theme"] = {
         colors = function()
@@ -83,11 +83,11 @@ local themes = {
             return default_colors
         end,
         config = function()
-            require("github-theme").setup {
+            require("github-theme").setup({
                 sidebars = sidebars,
-                theme_style = vim.g.theme_index < 0 and "dimmed" or "light_default"
-            }
-        end
+                theme_style = vim.g.theme_index < 0 and "dimmed" or "light_default",
+            })
+        end,
     },
     ["vscode.nvim"] = {
         colors = function()
@@ -99,7 +99,7 @@ local themes = {
             vim.g.vscode_style = "dark"
             vim.cmd("colorscheme vscode")
             vim.cmd("highlight IndentBlanklineChar gui=nocombine guifg=#353535")
-        end
+        end,
     },
     ["catppuccin"] = {
         colors = function()
@@ -108,26 +108,26 @@ local themes = {
             return default_colors
         end,
         config = function()
-            require("catppuccin").setup {
+            require("catppuccin").setup({
                 term_colors = true,
                 integrations = {
                     treesitter = true,
                     native_lsp = {
                         enabled = true,
-                        virtual_text = {errors = "NONE", hints = "NONE", warnings = "NONE", information = "NONE"}
+                        virtual_text = { errors = "NONE", hints = "NONE", warnings = "NONE", information = "NONE" },
                     },
                     gitsigns = true,
                     telescope = true,
-                    nvimtree = {enabled = true, show_root = true},
-                    indent_blankline = {enabled = true, colored_indent_levels = true},
+                    nvimtree = { enabled = true, show_root = true },
+                    indent_blankline = { enabled = true, colored_indent_levels = true },
                     bufferline = true,
                     markdown = false,
-                    hop = true
-                }
-            }
+                    hop = true,
+                },
+            })
             vim.cmd("colorscheme catppuccin")
-        end
-    }
+        end,
+    },
 }
 
 function M.config()

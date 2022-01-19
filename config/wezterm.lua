@@ -28,7 +28,7 @@ return {
     font = wezterm.font("JetBrainsMono Nerd Font"),
     font_size = 14,
     use_fancy_tab_bar = false,
-    harfbuzz_features = {"calt=0", "clig=0", "liga=0"}, -- disable ligatures
+    harfbuzz_features = { "calt=0", "clig=0", "liga=0" }, -- disable ligatures
     warn_about_missing_glyphs = false,
     window_decorations = "RESIZE",
     text_blink_rate = 0,
@@ -39,7 +39,7 @@ return {
     status_update_interval = 10000,
     audible_bell = "Disabled",
     exit_behavior = "Close",
-    window_padding = {left = 0, right = 0, top = 0, bottom = 0},
+    window_padding = { left = 0, right = 0, top = 0, bottom = 0 },
     -- color_scheme = "AtomOneLight",
     colors = {
         -- derived from OneHalfDark
@@ -50,24 +50,33 @@ return {
         cursor_fg = "#dcdfe4",
         selection_bg = "#474e5d",
         selection_fg = "#dcdfe4",
-        ansi = {"#000000", "#e06c75", "#98c379", "#e5c07b", "#61afef", "#c678dd", "#56b6c2", "#dcdfe4"},
-        brights = {"#7a7a7a", "#e06c75", "#98c379", "#e5c07b", "#61afef", "#c678dd", "#56b6c2", "#dcdfe4"},
+        ansi = { "#000000", "#e06c75", "#98c379", "#e5c07b", "#61afef", "#c678dd", "#56b6c2", "#dcdfe4" },
+        brights = { "#7a7a7a", "#e06c75", "#98c379", "#e5c07b", "#61afef", "#c678dd", "#56b6c2", "#dcdfe4" },
         tab_bar = {
             background = "#0b0022",
-            active_tab = {bg_color = "#202022", fg_color = "#c0c0c0"},
-            inactive_tab = {bg_color = "#101012", fg_color = "#808080"},
-            inactive_tab_hover = {bg_color = "#1b1032", fg_color = "#808080"},
-            new_tab = {bg_color = "#1b1032", fg_color = "#808080"},
-            new_tab_hover = {bg_color = "#1b1032", fg_color = "#808080"}
-        }
+            active_tab = { bg_color = "#202022", fg_color = "#c0c0c0" },
+            inactive_tab = { bg_color = "#101012", fg_color = "#808080" },
+            inactive_tab_hover = { bg_color = "#1b1032", fg_color = "#808080" },
+            new_tab = { bg_color = "#1b1032", fg_color = "#808080" },
+            new_tab_hover = { bg_color = "#1b1032", fg_color = "#808080" },
+        },
     },
     keys = {
-        {key = "t", mods = "CMD", action = wezterm.action {SpawnTab = {DomainName = "local"}}},
-        {key = "d", mods = "CMD", action = wezterm.action {SplitHorizontal = {domain = "CurrentPaneDomain"}}},
-        {key = "k", mods = "CMD", action = wezterm.action {ClearScrollback = "ScrollbackAndViewport"}},
-        {key = "f", mods = "CMD", action = wezterm.action {Search = {CaseInSensitiveString = ""}}},
-        {key = "[", mods = "CMD", action = wezterm.action {MoveTabRelative = -1}},
-        {key = "]", mods = "CMD", action = wezterm.action {MoveTabRelative = 1}},
-        {key = "Enter", mods = "CMD", action = "ToggleFullScreen"}
-    }
+        { key = "1", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "2", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "3", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "4", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "5", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "6", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "7", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "8", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "9", mods = "ALT", action = "DisableDefaultAssignment" },
+        { key = "t", mods = "CMD", action = wezterm.action({ SpawnTab = { DomainName = "local" } }) },
+        { key = "d", mods = "CMD", action = wezterm.action({ SplitHorizontal = { domain = "CurrentPaneDomain" } }) },
+        { key = "k", mods = "CMD", action = wezterm.action({ ClearScrollback = "ScrollbackAndViewport" }) },
+        { key = "f", mods = "CMD", action = wezterm.action({ Search = { CaseInSensitiveString = "" } }) },
+        { key = "[", mods = "CMD", action = wezterm.action({ MoveTabRelative = -1 }) },
+        { key = "]", mods = "CMD", action = wezterm.action({ MoveTabRelative = 1 }) },
+        { key = "Enter", mods = "CMD", action = "ToggleFullScreen" },
+    },
 }

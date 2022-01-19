@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 if [ "$(readlink -f "$HOME/.tmux.conf")" != "$HOME/.vim/config/.tmux.conf" ]; then
   if [ -f "$HOME/.tmux.conf" ]; then
-    read -p '~/.tmux.conf exists, rename to ~/.tmux.conf.bak? (y/n) ' -n 1;
+    read -p '~/.tmux.conf exists, rename to ~/.tmux.conf.bak? (y/n) ' -n 1
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       mv -iv ~/.tmux.conf ~/.tmux.conf.bak

@@ -13,7 +13,7 @@ if [ -n "$GET_BASHRC" ]; then
     for i in "${config_files[@]}"; do
       find "$i" -maxdepth 1 2> /dev/null
     done
-    read -p "Confirm delete? (y/n) " -n 1;
+    read -p "Confirm delete? (y/n) " -n 1
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       rm -rf "${config_files[@]}"

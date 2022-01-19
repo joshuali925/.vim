@@ -24,7 +24,7 @@ while [ "$buflen" -gt 0 ]; do
     fi
   fi
   printf "$esc" > $otty
-  ((buflen-=maxlen))
+  ((buflen -= maxlen))
   if [ "$buflen" -gt 0 ]; then
     printf "input is %d bytes too long, needs %d more time" "$buflen" "$((buflen / maxlen + 1))" >&2
     read -p ', continue? (Y/n) ' -n 1 < $otty

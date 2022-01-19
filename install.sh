@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-NVM_VERSION=0.38.0
-# NODE_VERSION=10.24.1
-NODE_VERSION=14.17.5
-DOCKER_COMPOSE_VERSION=1.29.2
+NODE_VERSION=14.18.2
 BACKUP_DIR=$HOME/config-backup
 
 CYAN='\033[0;36m'
@@ -64,7 +61,7 @@ usage() {
 }
 
 backup() {
-  if [[ -a "$1" ]]; then
+  if [ -e "$1" ]; then
     mkdir -p "$BACKUP_DIR"
     # mv -v --backup=t "$1" "$BACKUP_DIR/$(basename "$1").backup"
     mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup"
@@ -100,9 +97,8 @@ install_development_tools() {
     log "Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc"
     defaults write -g ApplePressAndHoldEnabled -bool false  # enable key repeats
     log "Disabled ApplePressAndHoldEnabled to support key repeats"
-    # brew install --cask rectangle maccy karabiner-elements alt-tab visual-studio-code
     # brew tap wez/wezterm
-    # brew install --cask wez/wezterm/wezterm
+    # brew install --cask wez/wezterm/wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code
   fi
 }
 
@@ -120,14 +116,13 @@ install_docker() {
   sudo usermod -aG docker "$USER"
   sudo systemctl restart docker || sudo service docker restart
   log "Installing docker-compose.."
-  sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
   log "Installed, re-login and run ${YELLOW}docker info${CYAN} for status"
 }
 
 install_java() {
   # https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
-  # https://github.com/shyiko/jabba/blob/3bb7cca8389753072e9f6fbb9fee6fdfa85ca57f/index.json#L833
   local jdk_version jdk_url
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
@@ -195,7 +190,6 @@ install_dotfiles() {
     link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/Library/ApplicationSupport/lazygit/config.yml"
     link_file "$HOME/.vim/config/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
     link_file "$HOME/Library/ApplicationSupport/Code/User/snippets" "$HOME/.vsnip"  # use vscode snipets for neovim vsnip plugin
-    # link_file $HOME/.zshrc $HOME/.zprofile  # link .zshrc for MacVim
     mkdir -p ~/.config/karabiner/assets/complex_modifications
     cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
     log "Linked configs for MacOS"
@@ -221,7 +215,7 @@ install_tmux() {
   backup "$HOME/.tmux"
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth 1
   ~/.tmux/plugins/tpm/bin/install_plugins || true
-  if [[ -a "$HOME/.tmux/plugins/tmux-thumbs" ]]; then
+  if [ -e "$HOME/.tmux/plugins/tmux-thumbs" ]; then
     log "Installing tmux-thumbs binaries.."
     if [ "$PLATFORM" == 'linux' ]; then
       if [ "$ARCHITECTURE" == 'x86_64' ]; then
@@ -243,13 +237,15 @@ install_tmux() {
 
 install_node() {
   log "\nInstalling nvm.."
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v$NVM_VERSION/install.sh | bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
   NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
   log "Installing node $NODE_VERSION.."
   nvm install "$NODE_VERSION"
-  nvm alias default "$NODE_VERSION"
-  node --version && ln -sf "$(which node)" ~/.local/bin/node && ln -sf "$(which npm)" ~/.local/bin/npm
+  nvm alias default "$NODE_VERSION" && node --version
+  ln -sf "$(which node)" ~/.local/bin/node
+  ln -sf "$(which npm)" ~/.local/bin/npm
+  ln -sf "$(which npx)" ~/.local/bin/npx
   log "Installing yarn.."
   curl -o- -L https://yarnpkg.com/install.sh | bash
   ln -sf ~/.yarn/bin/yarn ~/.local/bin/yarn
@@ -257,23 +253,20 @@ install_node() {
   pushd ~/.local/node-packages
   ~/.yarn/bin/yarn add eslint || true
   ~/.yarn/bin/yarn add prettier || true
-  ~/.yarn/bin/yarn add fixjson || true
-  ~/.yarn/bin/yarn add lua-fmt || true
   popd
   echo
 }
 
 install_neovim() {
-  local tag=$(curl -s https://github.com/neovim/neovim/releases/latest | sed 's#.*tag/\(.*\)\".*#\1#')
   link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
   backup "$HOME/.local/nvim"
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      curl -LO "https://github.com/neovim/neovim/releases/download/$tag/nvim.appimage"
+      curl -LO "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
       mv squashfs-root ~/.local/nvim && ln -sf ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
 
-      # curl -L -o- https://github.com/neovim/neovim/releases/download/$tag/nvim-linux64.tar.gz | tar xz -C ~/.local
+      # curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C ~/.local
       # mv ~/.local/nvim-linux64 ~/.local/nvim
       # ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
     else
@@ -281,7 +274,7 @@ install_neovim() {
       ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
     fi
   elif [ "$PLATFORM" == 'darwin' ]; then
-    curl -L -o- "https://github.com/neovim/neovim/releases/download/$tag/nvim-macos.tar.gz" | tar xz -C ~/.local
+    curl -L -o- "https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz" | tar xz -C ~/.local
     mv ~/.local/nvim-osx64 ~/.local/nvim
     ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
   else
@@ -304,7 +297,7 @@ install_neovim() {
 }
 
 setup_ssh_key() {
-  # ssh-keygen -t rsa -b 4096 -C ""
+  # ssh-keygen -t rsa -b 4096 -C "" -N "" -f "$HOME/.ssh/id_rsa"
   ssh-keygen -t ed25519 -C "" -N "" -f "$HOME/.ssh/id_ed25519"
   cat ~/.ssh/id_ed25519.pub
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"

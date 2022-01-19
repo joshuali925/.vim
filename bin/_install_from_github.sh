@@ -22,7 +22,7 @@ install-from-url() {
 
 install-from-github() {
   if [ "$#" -lt 7 ]; then
-    echo "Usage: $0 <executable> <repo> <linux-x64-package-name> <linux-arm-package-name> <macos-x64-package-name> <macos-arm-package-name> <extract-command-flags> [<args>]"
+    echo "Usage: $0 <executable> <repo> <linux-x64-package-name> <linux-arm64-package-name> <macos-x64-package-name> <macos-arm64-package-name> <extract-command-flags> [<args>]"
     return 0
   fi
 
@@ -42,7 +42,7 @@ install-from-github() {
     [ "$PLATFORM" == 'linux' ] && package=$linux_arm || package=${darwin_arm:-$darwin_x64}
   fi
   if [ "$PLATFORM" == 'darwin' ]; then
-    if ! (builtin command -V gtar >/dev/null 2>&1); then
+    if ! (builtin command -V gtar > /dev/null 2>&1); then
       echo 'gnu-tar not installed, trying with tar' >&2
     else
       tar_cmd='gtar'
@@ -55,6 +55,7 @@ install-from-github() {
 
   mkdir -p "$HOME/.local/bin"
   url=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4)
+  [ -z "$url" ] && echo "Unable to get $repo url for $package" >&2 && return 1
   echo "Installing $executable from $url" >&2
   case $url in
     # *.rar)                       extract_cmd="unrar x" ;;
