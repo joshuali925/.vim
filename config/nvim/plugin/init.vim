@@ -5,13 +5,13 @@ function! s:AutoSaveWinView()
   let w:SavedBufView[bufnr('%')] = winsaveview()
 endfunction
 function! s:AutoRestoreWinView()
-  let l:buf = bufnr('%')
-  if exists('w:SavedBufView') && has_key(w:SavedBufView, l:buf)
-    let l:view = winsaveview()
-    if l:view.lnum == 1 && l:view.col == 0 && !&diff
-      call winrestview(w:SavedBufView[l:buf])
+  let buf = bufnr('%')
+  if exists('w:SavedBufView') && has_key(w:SavedBufView, buf)
+    let view = winsaveview()
+    if view.lnum == 1 && view.col == 0 && !&diff
+      call winrestview(w:SavedBufView[buf])
     endif
-    unlet w:SavedBufView[l:buf]
+    unlet w:SavedBufView[buf]
   endif
 endfunction
 
@@ -32,6 +32,7 @@ augroup AutoCommands
   autocmd User FugitiveIndex nmap <silent> <buffer> dt :Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>
 augroup END
 
+cnoreabbrev print lua print(vim.inspect(
 command! -complete=file -nargs=* SetRunCommand let b:RunCommand = <q-args>
 command! -complete=file -nargs=* SetArgs let b:args = <q-args> == '' ? '' : ' '. <q-args>
 command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr(). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | else | execute "put =execute('". <q-args>. "')" | endif | 1d

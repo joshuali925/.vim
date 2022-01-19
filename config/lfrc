@@ -56,15 +56,26 @@ map gs !clear && git status
 map gr cd-git-root
 map gvi :cd ~/.vim
 map gvd :cd ~/.local/share/nvim
-map gvp :cd ~/.local/share/nvim/site/pack/packer
+map gvp :cd ~/.local/share/nvim/site/pack/packer/opt
 map gl follow-symlink
 map t locate-file
 map T locate-file-no-ignore
 map <c-p> locate-git-file
 map <c-o> $lazygit
 map <tab> locate-file-cwd
-map i $~/.vim/config/lf-preview.sh "$f" | bat --color=always --style=numbers --theme=OneHalfDark --paging=always
 map I $less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT "$f"
+map i ${{
+  if [[ "$(file -Lb --mime-type -- "$f")" = image/* ]]; then
+    if [ -n "$TMUX" ]; then
+      printf 'Press enter to copy print image command and detach tmux'; read; echo
+      echo " iterm-imgcat $(realpath "$f"); printf 'Press enter to continue'; read; echo; tmux attach" | y && tmux detach
+    else
+      iterm-imgcat "$f"; printf 'Press enter to continue'; read; echo
+    fi
+  else
+    ~/.vim/config/lf-preview.sh "$f" | bat --color=always --style=numbers --theme=OneHalfDark --paging=always
+  fi
+}}
 
 cmap <up> cmd-history-prev
 cmap <down> cmd-history-next
@@ -80,7 +91,7 @@ cmd tail $tail -n 100 -f "$f"
 cmd file !file "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
-cmd gdu $[ -x $HOME/.zinit/polaris/bin/gdu ] && $HOME/.zinit/polaris/bin/gdu || $HOME/.vim/bin/gdu
+cmd gdu $"$HOME/.vim/bin/gdu"
 cmd md5 !md5sum "$f"
 cmd selected-dir-size %du -h --max-depth=0 "$f"
 cmd cwd-size %du -h --max-depth=0 .
@@ -92,7 +103,7 @@ cmd copy-path %{{ realpath "$f" | y; echo "copied: $(realpath "$f")" }}
 cmd edit-with-mini-vim !command vim -u ~/.vim/config/mini.vim -i NONE "$f"
 
 cmd follow-symlink ${{
-  res=$(readlink -f $f || echo '.')
+  res="$(readlink -f "$f" || echo '.')"
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then

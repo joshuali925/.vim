@@ -5,8 +5,8 @@ if [ -f /etc/bashrc ]; then
   . /etc/bashrc
 fi
 
-[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && \
-  . /usr/share/bash-completion/bash_completion && alias get-completion='complete -F _longopt'
+[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] \
+  && . /usr/share/bash-completion/bash_completion && alias get-completion='complete -F _longopt'
 
 source ~/.vim/config/fzf/completion.bash
 source ~/.vim/config/fzf/key-bindings.bash
@@ -112,10 +112,10 @@ _get_prompt_tail() {
       read -r _head_file < "$_dir/.git" && _head_file="${_head_file#gitdir: }/HEAD"
       [[ ! -e "$_head_file" ]] && _head_file="$_dir/$_head_file" || break
     fi
-    [[ -e "$_head_file" ]] && break
+    [ -e "$_head_file" ] && break
     _dir="${_dir%/*}"
   done
-  if [[ -e "$_head_file" ]]; then
+  if [ -e "$_head_file" ]; then
     read -r _head < "$_head_file" || return
     case "$_head" in
       ref:*) printf $'\001\e[38;5;130m\002'" (${_head#ref: refs/heads/})$_tail" ;;

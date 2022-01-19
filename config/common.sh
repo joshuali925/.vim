@@ -110,6 +110,7 @@ alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
 alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset" --date=iso'
 alias gra='git remote add'
+alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,\(https://\|git@\)github.com[:/][^/]\+/\([^/]\+\)/\?$,git@github.com:joshuali925/\2,')\"; git remote -v"
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
@@ -401,7 +402,7 @@ t() {  # create, restore, or switch tmux session
     FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP"
     if [ "$?" -ne 0 ]; then
       SESSIONS=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
-      [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --bind='tab:down,btab:up' --tac --preview='cat {}') && {
+      [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --bind='ctrl-d:execute(mv {} {}.bak)' --bind='tab:down,btab:up' --tac --preview='cat {}') && {
         ln -sf "$FZFTEMP" ~/.tmux/resurrect/last
         tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
         tmux attach-session
@@ -451,19 +452,6 @@ untildone() {
     ((i+=1))
     sleep 1
     echo >&2
-  done
-}
-
-linedo() {
-  if [ "$#" -eq 0 ]; then echo "Usage: <command> | $0 <command>, use {} as placeholder for each line, otherwise line is appended as args."; return 1; fi
-  local placeholder
-  [[ "$*" = *{}* ]] && placeholder=1
-  while read -r line; do
-    if [ -n "$placeholder" ]; then
-      eval "${@//\{\}/$line}"
-    else
-      eval "$@" "$line"
-    fi
   done
 }
 

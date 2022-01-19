@@ -9,7 +9,7 @@ vim.g.mapleader = ";" --               ginit.vim
 vim.g.netrw_dirhistmax = 0 --          plugin/init.vim
 vim.g.netrw_banner = 0 --              autoload/funcs.vim
 vim.g.netrw_liststyle = 3
-vim.g.markdown_fenced_languages = {"javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh"}
+vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
 vim.opt.whichwrap = "<,>,[,]"
 vim.opt.termguicolors = true
 vim.opt.mouse = "a"
@@ -20,7 +20,7 @@ vim.opt.wrap = true
 vim.opt.linebreak = true
 vim.opt.showmatch = true
 vim.opt.showmode = false
-vim.opt.diffopt = vim.opt.diffopt + {"vertical", "indent-heuristic", "algorithm:patience"}
+vim.opt.diffopt = vim.opt.diffopt + { "vertical", "indent-heuristic", "algorithm:patience" }
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 vim.opt.ignorecase = true
@@ -31,11 +31,11 @@ vim.opt.softtabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.shiftround = true
 vim.opt.textwidth = 0
-vim.opt.complete = {".", "w", "b", "u"}
-vim.opt.completeopt = {"menuone", "noselect"}
+vim.opt.complete = { ".", "w", "b", "u" }
+vim.opt.completeopt = { "menuone", "noselect" }
 vim.opt.completefunc = "funcs#complete_word"
 vim.opt.pumblend = 8
-vim.opt.shortmess = vim.opt.shortmess + {c = true, A = true}
+vim.opt.shortmess = vim.opt.shortmess + { c = true, A = true }
 vim.opt.scrolloff = 2
 vim.opt.sidescrolloff = 5
 vim.opt.signcolumn = "yes"
@@ -46,10 +46,10 @@ vim.opt.foldlevelstart = 99
 vim.opt.jumpoptions = "stack"
 vim.opt.shada = [[!,'1000,<50,s10,/20,@20,h]]
 vim.opt.undofile = true
-vim.opt.isfname = vim.opt.isfname - {"="}
-vim.opt.path = {".", "", "**5"}
+vim.opt.isfname = vim.opt.isfname - { "=" }
+vim.opt.path = { ".", "", "**5" }
 vim.opt.list = true
-vim.opt.listchars = {tab = "» ", nbsp = "␣", trail = "•"}
+vim.opt.listchars = { tab = "» ", nbsp = "␣", trail = "•" }
 vim.opt.timeoutlen = 1500
 vim.opt.ttimeoutlen = 40
 vim.opt.synmaxcol = 1000
@@ -62,7 +62,7 @@ vim.opt.cedit = "<C-x>"
 
 -- mappings {{{1
 local function map(mode, lhs, rhs, opts)
-    opts = opts or {noremap = true}
+    opts = opts or { noremap = true }
     if mode == "" then -- to not map select mode for snippets
         vim.api.nvim_set_keymap("n", lhs, rhs, opts)
         vim.api.nvim_set_keymap("x", lhs, rhs, opts)
@@ -72,12 +72,12 @@ local function map(mode, lhs, rhs, opts)
     end
 end
 -- text objects {{{2
-local text_objects = {"<Space>", "_", ".", ":", ",", ";", "<bar>", "/", "<bslash>", "*", "+", "-", "#", "=", "&"}
+local text_objects = { "<Space>", "_", ".", ":", ",", ";", "<bar>", "/", "<bslash>", "*", "+", "-", "#", "=", "&" }
 for _, char in ipairs(text_objects) do
-    map("x", "i" .. char, ":<C-u>normal! T" .. char .. "vt" .. char .. "<CR>", {noremap = true, silent = true})
-    map("o", "i" .. char, "<Cmd>normal vi" .. char .. "<CR>", {noremap = true, silent = true})
-    map("x", "a" .. char, ":<C-u>normal! T" .. char .. "vf" .. char .. "<CR>", {noremap = true, silent = true})
-    map("o", "a" .. char, "<Cmd>normal va" .. char .. "<CR>", {noremap = true, silent = true})
+    map("x", "i" .. char, ":<C-u>normal! T" .. char .. "vt" .. char .. "<CR>", { noremap = true, silent = true })
+    map("o", "i" .. char, "<Cmd>normal vi" .. char .. "<CR>", { noremap = true, silent = true })
+    map("x", "a" .. char, ":<C-u>normal! T" .. char .. "vf" .. char .. "<CR>", { noremap = true, silent = true })
+    map("o", "a" .. char, "<Cmd>normal va" .. char .. "<CR>", { noremap = true, silent = true })
 end
 map("x", "il", "^og_")
 map("o", "il", "<Cmd>normal vil<CR>")
@@ -87,56 +87,56 @@ map(
     "x",
     "ii",
     [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
 map(
     "o",
     "ii",
     [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
 map(
     "x",
     "ai",
     [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
 map(
     "o",
     "ai",
     [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
 map(
     "x",
     "iI",
     [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
 map(
     "o",
     "iI",
     [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
 map(
     "x",
     "aI",
     [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
 map(
     "o",
     "aI",
     [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
-map("x", "v", ":<C-u>call plugins#expand_region#next('v', '+')<CR>", {noremap = true, silent = true})
-map("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>", {noremap = true, silent = true})
+map("x", "v", ":<C-u>call plugins#expand_region#next('v', '+')<CR>", { noremap = true, silent = true })
+map("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>", { noremap = true, silent = true })
 -- general {{{2
 map("n", "[\\", "<Cmd>tabedit<CR>")
 map("n", "]\\", "<Cmd>enew<CR>")
-map("", "0", "funcs#home()", {expr = true, noremap = true})
+map("", "0", "funcs#home()", { expr = true, noremap = true })
 map("", "^", "0")
 map("n", "-", "$") -- $ in normal mode will always put cursor at last column when scrolling, g_ will not
 map("o", "-", "$")
@@ -147,8 +147,8 @@ map("", "<End>", "g$")
 map("", "<Down>", "gj")
 map("", "<Up>", "gk")
 map("!", "<S-Del>", "<BS>")
-map("i", "<Down>", "pumvisible() ? '<C-n>' : '<C-o>gj'", {expr = true, noremap = true})
-map("i", "<Up>", "pumvisible() ? '<C-p>' : '<C-o>gk'", {expr = true, noremap = true})
+map("i", "<Down>", "pumvisible() ? '<C-n>' : '<C-o>gj'", { expr = true, noremap = true })
+map("i", "<Up>", "pumvisible() ? '<C-p>' : '<C-o>gk'", { expr = true, noremap = true })
 map("i", "<Home>", "<C-o>g^")
 map("i", "<End>", "<C-o>g$")
 map("i", "<C-_>", "<C-o>u")
@@ -176,7 +176,7 @@ map("n", "<C-w>>", "<C-w>><C-w>", {})
 map("n", "<C-w>+", "<C-w>+<C-w>", {})
 map("n", "<C-w>-", "<C-w>-<C-w>", {})
 map("n", "<C-f>", "<Cmd>call v:lua.organize_imports_and_format()<CR>")
-map("x", "<C-f>", "<Cmd>Neoformat<CR>")
+map("x", "<C-f>", "<Cmd>lua vim.lsp.buf.range_formatting()<CR>")
 map("i", "<leader>r", "<Esc><leader>r", {})
 map("n", "<leader>r", "<Cmd>update <bar> execute funcs#get_run_command()<CR>")
 map("", "<leader>y", '"+y')
@@ -187,12 +187,12 @@ map(
     [[<Cmd>if !get(g:, 'nvim_tree_indent_markers', 0) <bar> execute 'lua require("packer").loader("nvim-tree.lua")' <bar> sleep 100m <bar> endif <bar> NvimTreeFindFile<CR>]]
 )
 map("n", "<leader>B", "<Cmd>NvimTreeToggle<CR>")
-map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], {noremap = true, silent = true})
+map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { noremap = true, silent = true })
 map(
     "x",
     "<leader>n",
     [["xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]],
-    {noremap = true, silent = true}
+    { noremap = true, silent = true }
 )
 map("n", "<leader>u", "<Cmd>MundoToggle<CR>")
 map("n", "<leader>v", "<Cmd>SymbolsOutline<CR>")
@@ -218,39 +218,39 @@ map(
     "n",
     "yoq",
     "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'",
-    {expr = true, noremap = true}
+    { expr = true, noremap = true }
 )
 map(
     "n",
     "yol",
     "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'",
-    {expr = true, noremap = true}
+    { expr = true, noremap = true }
 )
 map(
     "n",
     "yof",
     "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <bar> -tabedit %<CR><Cmd>call winrestview(g:temp) <bar> let b:is_zoomed = 1<CR>' : get(b:, 'is_zoomed', 0) ? '<Cmd>tabclose<CR>' : ''",
-    {expr = true, noremap = true}
+    { expr = true, noremap = true }
 )
-map("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], {expr = true, noremap = true})
+map("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true, noremap = true })
 map(
     "c",
     "<BS>",
     [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']],
-    {expr = true, noremap = true}
+    { expr = true, noremap = true }
 )
 -- wilder.nvim {{{2
 map(
     "c",
     "<Tab>",
     "'/?' =~ getcmdtype() ? '<C-g>' : wilder#in_context() ? wilder#next() : '<C-z>'", -- <C-z> is 'wildcharm'
-    {expr = true, noremap = true}
+    { expr = true, noremap = true }
 )
 map(
     "c",
     "<S-Tab>",
     "'/?' =~ getcmdtype() ? '<C-t>' : wilder#in_context() ? wilder#previous() : '<S-Tab>'",
-    {expr = true, noremap = true}
+    { expr = true, noremap = true }
 )
 -- nvim_bufferline {{{2
 map("n", "<BS>", "<Cmd>BufferLineCyclePrev<CR>")
@@ -381,7 +381,6 @@ map("t", "<C-j>", "<Cmd>lua require('tmux').move_bottom()<CR>")
 map("t", "<C-k>", "<Cmd>lua require('tmux').move_top()<CR>")
 map("t", "<C-l>", "<Cmd>lua require('tmux').move_right()<CR>")
 -- telescope {{{2
--- TODO multi select issue https://github.com/nvim-telescope/telescope.nvim/issues/416
 map("n", "<C-p>", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>")
 map("n", "<leader>fs", "<C-p>", {})
 map("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
@@ -394,8 +393,14 @@ map(
 map("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
 map("n", "<leader>fg", ":GrepRegex ")
 map("x", "<leader>fg", ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>")
-map("n", "<leader>fj", ":GrepRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>", {noremap = true, silent = true})
-map("x", "<leader>fj", ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>", {noremap = true, silent = true})
+map("n", "<leader>fG", "<Cmd>lua require('telescope.builtin').resume()<CR>")
+map("n", "<leader>fj", ":GrepRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>", { noremap = true, silent = true })
+map(
+    "x",
+    "<leader>fj",
+    ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>",
+    { noremap = true, silent = true }
+)
 map("n", "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
 map("n", "<leader>fl", "<Cmd>lua require('telescope.builtin').loclist()<CR>")
 map("n", "<leader>fL", "<Cmd>lua require('telescope.builtin').live_grep()<CR>")
@@ -432,7 +437,7 @@ map("i", "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>")
 if vim.fn.glob(vim.fn.stdpath("config") .. "/lua/packer_compiled.lua") == "" then
     require("plugins").compile()
 else
-    vim.cmd [[
+    vim.cmd([[
         command! PackerInstall lua require('plugins').install()
         command! PackerUpdate lua require('plugins').update()
         command! PackerSync lua require('plugins').sync()
@@ -440,7 +445,7 @@ else
         command! PackerCompile lua require('plugins').compile()
         command! PackerStatus lua require('plugins').status()
         command! -bang -nargs=+ -complete=customlist,v:lua.require('packer').loader_complete PackerLoad lua require('packer').loader(<f-args>, '<bang>' == '!')
-    ]]
+    ]])
     require("packer_compiled")
 end
 vim.notify = function(...)
@@ -448,8 +453,7 @@ vim.notify = function(...)
     vim.notify = require("notify")
     vim.notify(...)
 end
-vim.paste =
-    (function(overridden)
+vim.paste = (function(overridden)
     return function(lines, phase)
         if (phase == -1 or phase == 1) and vim.fn.mode() == "i" and not vim.o.paste then
             vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
@@ -466,38 +470,30 @@ end
 -- delayed plugins {{{1
 local fsize = vim.fn.getfsize(vim.fn.expand("%:p:f"))
 if fsize == nil or fsize < 1048576 then -- 1MB
-    vim.schedule(
-        function()
-            vim.defer_fn(
-                function()
-                    local plugins = {
-                        "nvim-treesitter",
-                        "nvim-treesitter-textobjects",
-                        "nvim-lsp-installer"
-                    }
-                    require("packer").loader(table.concat(plugins, " "))
-                end,
-                30
-            )
-            vim.defer_fn(
-                function()
-                    local plugins = {
-                        "indent-blankline.nvim",
-                        "plenary.nvim",
-                        "gitsigns.nvim",
-                        "conflict-marker.vim",
-                        "vim-sleuth",
-                        "quick-scope",
-                        "vim-wordmotion", -- motions/text objects sometimes don't work if loaded on keys
-                        "vim-sandwich",
-                        "vim-fanfingtastic",
-                        "vim-matchup"
-                    }
-                    require("packer").loader(table.concat(plugins, " "))
-                end,
-                100
-            )
-        end
-    )
+    vim.schedule(function()
+        vim.defer_fn(function()
+            local plugins = {
+                "nvim-treesitter",
+                "nvim-treesitter-textobjects",
+                "plenary.nvim",
+                "nvim-lsp-installer",
+            }
+            require("packer").loader(table.concat(plugins, " "))
+        end, 30)
+        vim.defer_fn(function()
+            local plugins = {
+                "indent-blankline.nvim",
+                "gitsigns.nvim",
+                "conflict-marker.vim",
+                "vim-sleuth",
+                "quick-scope",
+                "vim-wordmotion", -- motions/text objects sometimes don't work if loaded on keys
+                "vim-sandwich",
+                "vim-fanfingtastic",
+                "vim-matchup",
+            }
+            require("packer").loader(table.concat(plugins, " "))
+        end, 100)
+    end)
 end
 -- vim:foldmethod=marker
