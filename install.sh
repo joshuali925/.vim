@@ -64,7 +64,7 @@ backup() {
   if [ -e "$1" ]; then
     mkdir -p "$BACKUP_DIR"
     # mv -v --backup=t "$1" "$BACKUP_DIR/$(basename "$1").backup"
-    mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup"
+    mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$RANDOM"
   fi
 }
 

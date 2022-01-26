@@ -5,10 +5,10 @@ vim.g.loaded_matchit = 1 --            lua/themes.lua
 vim.g.loaded_2html_plugin = 1 --       lua/plugins.lua
 vim.g.loaded_remote_plugins = 1 --     lua/plugin-configs.lua
 vim.g.loaded_tutor_mode_plugin = 1 --  lua/lsp.lua
-vim.g.mapleader = ";" --               ginit.vim
-vim.g.netrw_dirhistmax = 0 --          plugin/init.vim
-vim.g.netrw_banner = 0 --              autoload/funcs.vim
-vim.g.netrw_liststyle = 3
+vim.g.mapleader = ";" --               lua/rooter.lua
+vim.g.netrw_dirhistmax = 0 --          ginit.vim
+vim.g.netrw_banner = 0 --              plugin/init.vim
+vim.g.netrw_liststyle = 3 --           autoload/funcs.vim
 vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
 vim.opt.whichwrap = "<,>,[,]"
 vim.opt.termguicolors = true
@@ -36,6 +36,7 @@ vim.opt.completeopt = { "menuone", "noselect" }
 vim.opt.completefunc = "funcs#complete_word"
 vim.opt.pumblend = 8
 vim.opt.shortmess = vim.opt.shortmess + { c = true, A = true }
+vim.opt.spellsuggest = vim.opt.spellsuggest + { 10 }
 vim.opt.scrolloff = 2
 vim.opt.sidescrolloff = 5
 vim.opt.signcolumn = "yes"
@@ -175,7 +176,7 @@ map("n", "<C-w><", "<C-w><<C-w>", {})
 map("n", "<C-w>>", "<C-w>><C-w>", {})
 map("n", "<C-w>+", "<C-w>+<C-w>", {})
 map("n", "<C-w>-", "<C-w>-<C-w>", {})
-map("n", "<C-f>", "<Cmd>call v:lua.organize_imports_and_format()<CR>")
+map("n", "<C-f>", "<Cmd>lua require('lsp').organize_imports_and_format()<CR>")
 map("x", "<C-f>", "<Cmd>lua vim.lsp.buf.range_formatting()<CR>")
 map("i", "<leader>r", "<Esc><leader>r", {})
 map("n", "<leader>r", "<Cmd>update <bar> execute funcs#get_run_command()<CR>")
@@ -195,7 +196,7 @@ map(
     { noremap = true, silent = true }
 )
 map("n", "<leader>u", "<Cmd>MundoToggle<CR>")
-map("n", "<leader>v", "<Cmd>SymbolsOutline<CR>")
+map("n", "<leader>v", "<Cmd>AerialToggle<CR>")
 map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
 map(
     "x",
@@ -269,7 +270,7 @@ map("x", "<leader>te", "<Plug>(neoterm-repl-send)", {})
 map("t", "<C-u>", "<C-\\><C-n>")
 map("t", "<C-b>", "<Cmd>Ttoggle<CR>")
 -- quickui {{{2
-map("n", "K", "<Cmd>call v:lua.quickui_context_menu()<CR>")
+map("n", "K", "<Cmd>lua require('plugin-configs').open_quickui_context_menu()<CR>")
 map("n", "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>")
 map("x", "<CR>", "<Esc><Cmd>call quickui#menu#open('visual')<CR>")
 map(
@@ -384,21 +385,22 @@ map("t", "<C-l>", "<Cmd>lua require('tmux').move_right()<CR>")
 map("n", "<C-p>", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>")
 map("n", "<leader>fs", "<C-p>", {})
 map("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
+map("n", "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplist()<CR><Esc>")
 map("n", "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers()<CR><Esc>")
 map(
     "n",
     "<leader>fu",
-    "<Cmd>lua require('telescope.builtin')[next(vim.lsp.buf_get_clients()) == nil and 'treesitter' or 'lsp_document_symbols']()<CR>"
+    "<Cmd>lua require('telescope.builtin')[require('lsp').is_active() and 'lsp_document_symbols' or 'treesitter']()<CR>"
 )
 map("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
 map("n", "<leader>fg", ":GrepRegex ")
 map("x", "<leader>fg", ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>")
 map("n", "<leader>fG", "<Cmd>lua require('telescope.builtin').resume()<CR>")
-map("n", "<leader>fj", ":GrepRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>", { noremap = true, silent = true })
+map("n", "<leader>fj", ":GrepRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR><Esc>", { noremap = true, silent = true })
 map(
     "x",
     "<leader>fj",
-    ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>",
+    ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR><Esc>",
     { noremap = true, silent = true }
 )
 map("n", "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
@@ -411,12 +413,11 @@ map("n", "<leader>f/", "<Cmd>lua require('telescope.builtin').current_buffer_fuz
 map("n", "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>")
 map("n", "<leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>")
 map("n", "<leader>fy", "<Cmd>lua require('telescope').extensions.yank.history()<CR>")
-map("n", "<leader>fM", "<Cmd>lua require('telescope').extensions.projects.projects()<CR>")
 -- lsp {{{2
 map(
     "n",
     "gd",
-    "<Cmd>lua if next(vim.lsp.buf_get_clients()) == nil then vim.cmd('normal! gd') else vim.lsp.buf.definition() end<CR>"
+    "<Cmd>lua if require('lsp').is_active() then vim.lsp.buf.definition() else vim.cmd('normal! gd') end<CR>"
 )
 map("n", "gD", "<Cmd>lua vim.lsp.buf.type_definition()<CR>")
 map("n", "<leader>d", "<Cmd>lua vim.lsp.buf.implementation()<CR>")

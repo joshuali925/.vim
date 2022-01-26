@@ -221,7 +221,7 @@ sudorun() {
     return 0
   fi
   case $CMD in
-    v|vi|vim) sudo "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
+    v|vi|vim) sudo "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" +'syntax enable' "$@" ;;
     lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
     *) XDG_CONFIG_HOME="$HOME/.config" EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
   esac
