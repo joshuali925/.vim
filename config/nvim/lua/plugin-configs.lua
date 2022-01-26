@@ -1,12 +1,5 @@
 local M = {}
 
-function M.project_nvim()
-    require("project_nvim").setup({
-        detection_methods = { "pattern", "lsp" },
-        patterns = { ".git", "gradlew", "Makefile", "package.json" },
-    })
-end
-
 function M.nvim_autopairs()
     require("nvim-autopairs").setup({ ignored_next_char = string.gsub([[ [%w%%%'%[%"%.%(%{%/] ]], "%s+", "") })
     require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
@@ -63,7 +56,6 @@ function M.gitsigns()
             topdelete = { text = "▔" },
             changedelete = { text = "▒" },
         },
-        word_diff = true,
         keymaps = {
             ["n [g"] = '<Cmd>lua require("gitsigns").prev_hunk()<CR>',
             ["n ]g"] = '<Cmd>lua require("gitsigns").next_hunk()<CR>',
@@ -88,7 +80,7 @@ function M.rest_nvim()
     vim.cmd([[command! RestNvimPreviewCurl execute "normal \<Plug>RestNvimPreview" | sleep 100m | S 1,2messages]])
 end
 
-vim.g.qs_filetype_blacklist = {
+vim.g.qs_filetype_blacklist = { -- will only run on first require
     "help",
     "man",
     "qf",
@@ -98,16 +90,15 @@ vim.g.qs_filetype_blacklist = {
     "lsp-installer",
     "TelescopePrompt",
     "Mundo",
-    "Outline",
+    "aerial",
     "NvimTree",
-    "neoterm",
     "startuptime",
     "DiffviewFileHistory",
     "DiffviewFiles",
     "floggraph",
 }
+vim.g.qs_buftype_blacklist = { "terminal" }
 function M.quick_scope()
-    vim.g.qs_buftype_blacklist = { "terminal" }
     vim.cmd("highlight QuickScopePrimary guifg='" .. (vim.g.theme_index < 0 and "#ffca6e" or "#bf8000") .. "'")
 end
 
@@ -126,22 +117,31 @@ function M.setup_csv_vim()
     vim.g.csv_nomap_bs = 1
 end
 
-function M.setup_indent_blankline()
+function M.indent_blankline()
+    require("indent_blankline").setup({
+        char = "▏",
+        show_first_indent_level = false,
+        filetype_exclude = vim.g.qs_filetype_blacklist,
+        buftype_exclude = vim.g.qs_buftype_blacklist,
+    })
     -- TODO remove when this is fixed https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
     vim.opt.colorcolumn = "99999"
-    vim.g.indent_blankline_char = "▏"
-    vim.g.indent_blankline_show_first_indent_level = false
-    vim.g.indent_blankline_filetype_exclude = vim.g.qs_filetype_blacklist
-    vim.g.indent_blankline_buftype_exclude = { "terminal" }
 end
 
-function M.setup_symbols_outline()
-    vim.g.symbols_outline = {
-        auto_preview = false,
-        relative_width = false,
-        width = 30,
-        keymaps = { close = "q", hover_symbol = "p", rename_symbol = "R" },
-    }
+function M.aerial_nvim()
+    require("aerial").setup({
+        filter_kind = {
+            "Class",
+            "Constant",
+            "Constructor",
+            "Enum",
+            "Function",
+            "Interface",
+            "Module",
+            "Method",
+            "Struct",
+        },
+    })
 end
 
 function M.conflict_marker()
@@ -190,6 +190,12 @@ function M.setup_vim_visual_multi()
         ["Select Operator"] = "v",
         ["Case Conversion Menu"] = "s",
     }
+    vim.cmd([[
+        augroup VisualMultiRemapBS
+            autocmd!
+            autocmd User visual_multi_exit execute 'inoremap <buffer> <expr> <BS> v:lua.MPairs.autopairs_bs('. bufnr(). ')'
+        augroup END
+    ]]) -- for nvim_autopairs: https://github.com/mg979/vim-visual-multi/issues/172
 end
 
 function M.nvim_bqf()
@@ -198,8 +204,8 @@ function M.nvim_bqf()
         func_map = {
             prevfile = "",
             nextfile = "",
-            pscrolldown = "J",
-            pscrollup = "K",
+            pscrolldown = ",",
+            pscrollup = ".",
             ptoggleitem = "P",
             ptoggleauto = "p",
         },
@@ -287,7 +293,7 @@ function M.alpha_nvim()
     theme.mru_opts.ignore = function(path, ext)
         return string.find(path, "vim/.*/doc/.*%.txt") or string.find(path, "/.git/")
     end
-    alpha.setup(theme.opts)
+    alpha.setup(theme.config)
     vim.cmd([[
         augroup AlphaAutoCommands
             autocmd!
@@ -306,6 +312,7 @@ function M.telescope()
                     ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
                     [","] = actions.preview_scrolling_down,
                     ["."] = actions.preview_scrolling_up,
+                    ["q"] = actions.close,
                 },
                 i = {
                     ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
@@ -326,9 +333,12 @@ function M.telescope()
                 "--hidden",
                 "--auto-hybrid-regex",
             },
+            prompt_prefix = "   ",
+            selection_caret = "  ",
             layout_strategy = "vertical",
             layout_config = { vertical = { preview_height = 0.3 } },
             file_ignore_patterns = { ".git/", "node_modules/", "venv/", "vim/.*/doc/.*%.txt" },
+            dynamic_preview_title = true,
         },
         pickers = {
             filetypes = { theme = "dropdown" },
@@ -344,7 +354,6 @@ function M.telescope()
         },
     })
     require("telescope").load_extension("fzf")
-    require("telescope").load_extension("projects")
 end
 
 function M.nvim_treesitter()
@@ -626,7 +635,7 @@ function M.nvim_cmp()
     })
 end
 
-function _G.quickui_context_menu()
+function M.open_quickui_context_menu()
     local content = {
         { "Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation" },
         { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
@@ -738,9 +747,9 @@ function M.vim_quickui()
             "Checkout current file from HEAD and load as unsaved buffer (Gread HEAD:%)",
         },
         { "Git &blame", [[Git blame]], "Git blame of current file" },
-        { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version" },
         { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
-        { "Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version" },
+        { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
+        { "Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version (Gdiffsplit HEAD)" },
         {
             "Git &file history",
             [[vsplit | execute "lua require('packer').loader('vim-fugitive')" | 0Gclog]],
@@ -749,11 +758,12 @@ function M.vim_quickui()
         {
             "Diffview file history",
             [[DiffviewFileHistory -f -a]],
-            "Browse previously committed versions of current file with :DiffviewFileHistory -f -a",
+            "Browse previously committed versions of current file (DiffviewFileHistory -f -a)",
         },
         { "--", "" },
         { "Git &status", [[Git]], "Git status" },
-        { "Git unstaged &changes", [[Git! difftool]], "Load unstaged changes of files into quickfix" },
+        { "Git unstaged &changes", [[Git! difftool]], "Load unstaged changes into quickfix (Git! difftool)" },
+        { "Git HEAD changes", [[Git! difftool HEAD]], "Load changes from HEAD into quickfix (Git! difftool HEAD)" },
         {
             "Diff&view HEAD",
             [[DiffviewOpen]],
@@ -869,20 +879,15 @@ function M.vim_quickui()
     vim.fn["quickui#menu#install"]("L&SP", {
         {
             "Workspace &diagnostics",
-            [[call v:lua.quickfix_all_diagnostics() | copen]],
+            [[lua require("lsp").quickfix_all_diagnostics()]],
             "Show workspace diagnostics in quickfix",
         },
         {
             "Workspace warnings and errors",
-            [[call v:lua.quickfix_all_diagnostics(v:true) | copen]],
+            [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]],
             "Show workspace warnings and errors in quickfix",
         },
-        {
-            "Document diagnostics",
-            [[lua vim.lsp.diagnostic.setloclist()]],
-            "Show current file diagnostics in quickfix",
-        },
-        { "&Toggle diagnostics", [[call v:lua.toggle_diagnostics()]], "Toggle lsp diagnostics" },
+        { "&Toggle diagnostics", [[lua require("lsp").toggle_diagnostics()]], "Toggle lsp diagnostics" },
         { "--", "" },
         {
             "&Show folders in workspace",
@@ -913,6 +918,7 @@ function M.vim_quickui()
     for i = 1, len_negative / 2 do -- reverse negative keys
         keys[i], keys[len_negative - i + 1] = keys[len_negative - i + 1], keys[i]
     end
+    local states_file = vim.fn.stdpath("config") .. "/lua/states.lua"
     for _, index in ipairs(keys) do
         local theme = theme_list[index]
         if index == 0 then
@@ -927,12 +933,11 @@ function M.vim_quickui()
         end
         table.insert(quickui_theme_list, {
             category .. display,
-            (
-                [[execute 'call writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")' | lua vim.notify("Restart nvim to change to %s")]]
-            ):format(
+            string.format(
+                [[execute 'call writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")' | lua vim.notify("Restart nvim to change to %s")]],
                 index,
-                vim.fn.stdpath("config") .. "/lua/states.lua",
-                vim.fn.stdpath("config") .. "/lua/states.lua",
+                states_file,
+                states_file,
                 theme
             ),
         })

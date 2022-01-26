@@ -59,7 +59,7 @@ return require("packer").startup({
             end,
         })
         use({ "feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim") })
-        use({ "lukas-reineke/indent-blankline.nvim", setup = conf("setup_indent_blankline") })
+        use({ "lukas-reineke/indent-blankline.nvim", config = conf("indent_blankline") })
         use({
             "DarwinSenior/nvim-colorizer.lua",
             cmd = "ColorizerAttachToBuffer",
@@ -82,7 +82,7 @@ return require("packer").startup({
             config = conf("vim_quickui"),
         })
         use({ "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = "vim.g.asyncrun_open = 12" })
-        use({ "simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = conf("setup_symbols_outline") })
+        use({ "stevearc/aerial.nvim", module = "aerial", cmd = "AerialToggle", config = conf("aerial_nvim") })
         use({ "simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo") })
         use({ "kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = conf("nvim_tree") })
         use({
@@ -106,12 +106,6 @@ return require("packer").startup({
         })
         use({ "kevinhwang91/nvim-bqf", ft = "qf", config = conf("nvim_bqf") })
         use({ "rcarriga/nvim-notify" })
-        use({
-            "gelguy/wilder.nvim",
-            requires = { "romgrk/fzy-lua-native" },
-            event = "CmdlineEnter",
-            config = conf("wilder_nvim"),
-        })
 
         -- git
         use({
@@ -136,17 +130,8 @@ return require("packer").startup({
         use({ "nvim-treesitter/playground", cmd = { "TSPlaygroundToggle", "TSHighlightCapturesUnderCursor" } })
         use({ "williamboman/nvim-lsp-installer" })
         use({ "neovim/nvim-lspconfig", after = "nvim-lsp-installer" })
-        use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp')" })
+        use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
         use({ "weilbith/nvim-code-action-menu", cmd = "CodeActionMenu" })
-        use({ "onsails/lspkind-nvim", event = "InsertEnter" })
-        use({ "hrsh7th/nvim-cmp", after = "lspkind-nvim", config = conf("nvim_cmp") })
-        use({ "hrsh7th/cmp-buffer", after = "nvim-cmp" })
-        use({ "hrsh7th/cmp-path", after = "nvim-cmp" })
-        use({ "hrsh7th/cmp-nvim-lua", after = "nvim-cmp" })
-        use({ "hrsh7th/cmp-nvim-lsp", after = "nvim-cmp" })
-        use({ "hrsh7th/cmp-vsnip", after = "nvim-cmp" })
-        use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" })
-        use({ "hrsh7th/vim-vsnip", after = "friendly-snippets" })
         use({
             "b3nj5m1n/kommentary",
             requires = { "JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-treesitter" },
@@ -164,8 +149,25 @@ return require("packer").startup({
         use({ "udalov/kotlin-vim", ft = "kotlin" })
         use({ "chrisbra/csv.vim", setup = conf("setup_csv_vim"), cmd = "CSVWhatColumn" })
 
-        -- editing
+        -- completion
+        use({ "onsails/lspkind-nvim", event = "InsertEnter" })
+        use({ "hrsh7th/nvim-cmp", after = "lspkind-nvim", config = conf("nvim_cmp") })
+        use({ "hrsh7th/cmp-buffer", after = "nvim-cmp" })
+        use({ "hrsh7th/cmp-path", after = "nvim-cmp" })
+        use({ "hrsh7th/cmp-nvim-lua", after = "nvim-cmp" })
+        use({ "hrsh7th/cmp-nvim-lsp", after = "nvim-cmp" })
+        use({ "hrsh7th/cmp-vsnip", after = "nvim-cmp" })
+        use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" })
+        use({ "hrsh7th/vim-vsnip", after = "friendly-snippets" })
         use({ "windwp/nvim-autopairs", after = "nvim-cmp", config = conf("nvim_autopairs") })
+        use({
+            "gelguy/wilder.nvim",
+            requires = { "romgrk/fzy-lua-native" },
+            event = "CmdlineEnter",
+            config = conf("wilder_nvim"),
+        })
+
+        -- editing
         use({
             "mg979/vim-visual-multi",
             fn = "vm#*",
@@ -185,23 +187,11 @@ return require("packer").startup({
         use({ "AndrewRadev/splitjoin.vim", keys = { { "n", "gS" }, { "n", "gJ" } } })
 
         -- misc
+        use({ "kyazdani42/nvim-web-devicons", opt = false })
         use({ "lewis6991/impatient.nvim", opt = false })
-        use({ "ahmedkhalf/project.nvim", opt = false, config = conf("project_nvim") })
-        use({ "tpope/vim-sleuth" })
         use({ "tpope/vim-repeat", opt = false })
-        use({
-            "tpope/vim-unimpaired",
-            keys = {
-                { "n", "[" },
-                { "x", "[" },
-                { "o", "[" },
-                { "n", "]" },
-                { "x", "]" },
-                { "o", "]" },
-                { "n", "=p" },
-                { "n", "yo" },
-            },
-        })
+        use({ "tpope/vim-sleuth" })
+        use({ "tpope/vim-unimpaired", keys = { { "", "[" }, { "", "]" }, { "n", "=p" }, { "n", "yo" } } })
         use({ "moll/vim-bbye", cmd = "Bdelete" })
         use({ "andymass/vim-matchup", config = conf("vim_matchup") })
         use({ "ojroques/vim-oscyank", cmd = { "OSCYank", "OSCYankReg" } })
@@ -219,11 +209,9 @@ return require("packer").startup({
                 require("tmux").setup({ navigation = { cycle_navigation = false } })
             end,
         })
-        use({ "kyazdani42/nvim-web-devicons", opt = false })
 
         -- tools
         use({ "dstein64/vim-startuptime", cmd = "StartupTime" })
-        use({ "will133/vim-dirdiff", cmd = "DirDiff" })
         use({
             "iamcco/markdown-preview.nvim",
             run = "cd app && yarn install",

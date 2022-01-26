@@ -6,7 +6,7 @@ new_window() {
     local win_id
     win_id=$(tmux show -gqv '@fzf_pane_id')
     [[ -n $win_id ]] && tmux kill-pane -t $win_id >/dev/null 2>&1
-    tmux new-window "bash $0 do_action" >/dev/null 2>&1
+    tmux display-popup -w 95% -h 90% "bash $0 do_action" >/dev/null 2>&1 || true
 }
 
 # invoked by pane-focus-in event
@@ -43,8 +43,8 @@ do_action() {
     selected=$(FZF_DEFAULT_COMMAND=$cmd SHELL=$(command -v bash) fzf -m --preview="$preview_cmd" \
         --preview-window=$preview_win --height=100% --reverse --info=inline --header-lines=1 \
         --delimiter='\s{2,}' --with-nth=2..-1 --nth=1,2,8,9 --cycle --exact \
-        --bind="alt-p:toggle-preview" \
-        --bind="alt-n:execute(tmux new-window)+abort" \
+        --bind="ctrl-p:toggle-preview" \
+        --bind="ctrl-n:execute(tmux new-window)+abort" \
         --bind="ctrl-r:reload($cmd)" \
         --bind="ctrl-x:execute-silent(tmux kill-pane -t {1})+reload($cmd)" \
         --bind="ctrl-v:execute(tmux move-pane -h -t ! -s {1})+accept" \
@@ -103,6 +103,7 @@ do_action() {
         tmux_cmd+="switch-client -t$id0 \; select-layout -t$id0 $layout \; "
         eval $tmux_cmd
     fi
+    tmux display-popup -C
 }
 
 _print_src_line() {
@@ -151,7 +152,7 @@ panes_src() {
     fi
     local cur_id="$1"
     printf "%-6s  %-9s  %6s  %8s  %4s  %4s  %4s  %-8s  %-7s  %s\t\t%s\n" \
-        'PANEID' 'SESSION' 'PANE' 'PID' '%CPU' '%MEM' 'NLWP' 'TIME' 'TTY' 'CMD' 'M-p:preview M-n:new window C-r:reload C-x:kill C-v:join vert C-s:join C-t:swap'
+        'PANEID' 'SESSION' 'PANE' 'PID' '%CPU' '%MEM' 'NLWP' 'TIME' 'TTY' 'CMD' 'C-p:preview C-n:new window C-r:reload C-x:kill C-v:join vert C-s:join C-t:swap'
     panes_info=$(tmux list-panes -aF \
         '#D #{s| |_|:session_name} #I.#P #{?window_zoomed_flag,⬢,❄} #{pane_tty} #{pane_current_path} #T' |
         sed -E "/^$cur_id /d")

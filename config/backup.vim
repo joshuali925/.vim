@@ -2893,3 +2893,25 @@ require("dap").adapters.java = function(callback, config)
         end
     )
 end
+" project.nvim slow
+        use({ "ahmedkhalf/project.nvim", opt = false, config = conf("project_nvim") })
+function M.project_nvim()
+    require("project_nvim").setup({
+        detection_methods = { "pattern", "lsp" },
+        patterns = { ".git", "gradlew", "Makefile", "package.json" },
+    })
+end
+    require("telescope").load_extension("projects")
+map("n", "<leader>fM", "<Cmd>lua require('telescope').extensions.projects.projects()<CR>")
+" symbols-outline.nvim
+        use({ "simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", setup = conf("setup_symbols_outline") })
+function M.setup_symbols_outline()
+    vim.g.symbols_outline = {
+        auto_preview = false,
+        relative_width = false,
+        width = 30,
+        keymaps = { close = "q", hover_symbol = "p", rename_symbol = "R" },
+    }
+end
+" dirdiff
+        use({ "will133/vim-dirdiff", cmd = "DirDiff" })

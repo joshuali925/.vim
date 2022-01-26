@@ -96,7 +96,7 @@ cd() {
   else
     pushd "$@" > /dev/null
   fi
-  [ "$?" == 0 ] && [ $(command ls | wc -l) -lt 200 ] && ls -AF --color=auto
+  [ "$?" == 0 ] && [ "$(command ls | wc -l)" -lt 200 ] && ls -AF --color=auto || true
 }
 complete -d cd
 
@@ -106,11 +106,11 @@ _get_prompt_tail() {
   # takes one argument as separator between those two
   local _head_file _head _dir="$PWD" _tail _exit="$?"
   [ $_exit != 0 ] && _tail="$1"$'\001\e[38;5;9m\002$\001\e[0m\002 ' || _tail="$1"$'\001\e[38;5;141m\002$\001\e[0m\002 '
-  while [[ -n "$_dir" ]]; do
+  while [ -n "$_dir" ]; do
     _head_file="$_dir/.git/HEAD"
-    if [[ -f "$_dir/.git" ]]; then
+    if [ -f "$_dir/.git" ]; then
       read -r _head_file < "$_dir/.git" && _head_file="${_head_file#gitdir: }/HEAD"
-      [[ ! -e "$_head_file" ]] && _head_file="$_dir/$_head_file" || break
+      [ ! -e "$_head_file" ] && _head_file="$_dir/$_head_file" || break
     fi
     [ -e "$_head_file" ] && break
     _dir="${_dir%/*}"
