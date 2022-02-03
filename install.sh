@@ -171,7 +171,7 @@ install_dotfiles() {
   backup "$HOME/.vim"
   git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth 1
   log "\nCreating directories.."
-  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,node-packages,share/lf} ~/.config/{lf,bpytop,lazygit}
+  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib/node-packages,share/lf} ~/.config/{lf,lazygit}
   log "\nLinking configurations.."
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
   echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc
@@ -250,7 +250,7 @@ install_node() {
   curl -o- -L https://yarnpkg.com/install.sh | bash
   ln -sf ~/.yarn/bin/yarn ~/.local/bin/yarn
   log "Installing node packages.."
-  pushd ~/.local/node-packages
+  pushd ~/.local/lib/node-packages
   ~/.yarn/bin/yarn add eslint || true
   ~/.yarn/bin/yarn add prettier || true
   popd
@@ -259,24 +259,24 @@ install_node() {
 
 install_neovim() {
   link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
-  backup "$HOME/.local/nvim"
+  backup "$HOME/.local/lib/nvim"
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
       curl -LO "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
-      mv squashfs-root ~/.local/nvim && ln -sf ~/.local/nvim/usr/bin/nvim ~/.local/bin/nvim
+      mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
 
-      # curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C ~/.local
-      # mv ~/.local/nvim-linux64 ~/.local/nvim
-      # ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
+      # curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C ~/.local/lib
+      # mv ~/.local/lib/nvim-linux64 ~/.local/lib/nvim
+      # ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
     else
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local nvim
-      ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
+      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local/lib nvim
+      ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
     fi
   elif [ "$PLATFORM" == 'darwin' ]; then
-    curl -L -o- "https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz" | tar xz -C ~/.local
-    mv ~/.local/nvim-osx64 ~/.local/nvim
-    ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim
+    curl -L -o- "https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz" | tar xz -C ~/.local/lib
+    mv ~/.local/lib/nvim-osx64 ~/.local/lib/nvim
+    ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
   else
     echo "Unknown distro.."
     exit 1

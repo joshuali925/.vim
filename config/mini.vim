@@ -15,4 +15,4 @@ nnoremap ;q :quit<CR>
 
 autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
 
-command! W write !sudo tee % > /dev/null
+command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null

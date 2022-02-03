@@ -1,28 +1,26 @@
 local wezterm = require("wezterm")
 
---[[ wezterm.on(
-    "update-right-status",
-    function(window, pane)
-        local date = wezterm.strftime("%a %m/%d %I:%M %p")
-        local battery = ""
-        for _, b in ipairs(wezterm.battery_info()) do
-            local icon
-            if b.state_of_charge > 0.90 then
-                icon = "  "
-            elseif b.state_of_charge > 0.75 then
-                icon = "  "
-            elseif b.state_of_charge > 0.5 then
-                icon = "  "
-            elseif b.state_of_charge > 0.25 then
-                icon = "  "
-            elseif b.state_of_charge > 0.05 then
-                icon = "  "
-            end
-            battery = string.format("%.0f%%", b.state_of_charge * 100) .. icon
-        end
-        window:set_right_status(wezterm.format({{Text = battery .. "   " .. date}}))
-    end
-) ]]
+-- wezterm.on("update-right-status", function(window, pane)
+--     local date = wezterm.strftime("%a %m/%d %I:%M %p")
+--     local battery = ""
+--     for _, b in ipairs(wezterm.battery_info()) do
+--         local icon
+--         if b.state_of_charge > 0.90 then
+--             icon = "  "
+--         elseif b.state_of_charge > 0.75 then
+--             icon = "  "
+--         elseif b.state_of_charge > 0.5 then
+--             icon = "  "
+--         elseif b.state_of_charge > 0.25 then
+--             icon = "  "
+--         elseif b.state_of_charge > 0.05 then
+--             icon = "  "
+--         end
+--         battery = string.format("%.0f%%", b.state_of_charge * 100) .. icon
+--     end
+--     window:set_right_status(wezterm.format({ { Text = battery .. "   " .. date } }))
+-- end)
+
 return {
     use_ime = true,
     font = wezterm.font("JetBrainsMono Nerd Font"),

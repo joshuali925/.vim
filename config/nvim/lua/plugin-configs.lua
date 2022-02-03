@@ -12,38 +12,10 @@ function M.vim_matchup()
     vim.g.matchup_motion_override_Npercent = 0
 end
 
-function M.nvim_tree()
-    vim.g.nvim_tree_indent_markers = 1
-    vim.g.nvim_tree_highlight_opened_files = 1
-    local tree_cb = require("nvim-tree.config").nvim_tree_callback
-    require("nvim-tree").setup({
-        disable_netrw = false,
-        diagnostics = { enable = true },
-        view = {
-            mappings = {
-                list = {
-                    { key = { "?" }, cb = tree_cb("toggle_help") },
-                    { key = { "i" }, cb = tree_cb("toggle_ignored") },
-                    { key = { "r" }, cb = tree_cb("refresh") },
-                    { key = { "R" }, cb = tree_cb("rename") },
-                    { key = { "x" }, cb = tree_cb("remove") },
-                    { key = { "d" }, cb = tree_cb("cut") },
-                    { key = { "y" }, cb = tree_cb("copy") },
-                    { key = { "yy" }, cb = tree_cb("copy_absolute_path") },
-                    { key = { "C" }, cb = tree_cb("cd") },
-                    { key = { "s" }, cb = tree_cb("split") },
-                    { key = { "h" }, cb = tree_cb("close_node") },
-                    { key = { "l" }, cb = tree_cb("edit") },
-                    { key = { "[g" }, cb = tree_cb("prev_git_item") },
-                    { key = { "]g" }, cb = tree_cb("next_git_item") },
-                    { key = { "q" }, cb = "<Cmd>execute 'NvimTreeResize '. winwidth(0) <bar> NvimTreeClose<CR>" },
-                    { key = { "<Left>" }, cb = "<Cmd>normal! zh<CR>" },
-                    { key = { "<Right>" }, cb = "<Cmd>normal! zl<CR>" },
-                    { key = { "H" }, cb = "<Cmd>normal! H<CR>" },
-                    { key = { "-" }, cb = "<Cmd>normal! $<CR>" },
-                },
-            },
-        },
+function M.bufferline_nvim()
+    require("bufferline").setup({
+        options = { offsets = { { filetype = "neo-tree", text = "File Explorer", highlight = "Directory" } } },
+        highlights = { buffer_selected = { gui = "bold" } },
     })
 end
 
@@ -91,7 +63,7 @@ vim.g.qs_filetype_blacklist = { -- will only run on first require
     "TelescopePrompt",
     "Mundo",
     "aerial",
-    "NvimTree",
+    "neo-tree",
     "startuptime",
     "DiffviewFileHistory",
     "DiffviewFiles",
@@ -245,7 +217,6 @@ function M.wilder_nvim()
 end
 
 function M.alpha_nvim()
-    local alpha = require("alpha")
     local theme = require("alpha.themes.startify")
     if vim.g.theme_index < 0 then
         theme.section.header.val = {
@@ -293,13 +264,122 @@ function M.alpha_nvim()
     theme.mru_opts.ignore = function(path, ext)
         return string.find(path, "vim/.*/doc/.*%.txt") or string.find(path, "/.git/")
     end
-    alpha.setup(theme.config)
+    require("alpha").setup(theme.config)
     vim.cmd([[
         augroup AlphaAutoCommands
             autocmd!
             autocmd FileType alpha nnoremap <buffer> v <Cmd>lua require('alpha').queue_press()<CR>| nnoremap <buffer> <expr> q len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'| nnoremap <buffer> e <Cmd>enew<CR>| nnoremap <buffer> i <Cmd>enew <bar> startinsert<CR>
         augroup END
     ]])
+end
+
+function M.neo_tree()
+    local defaults = {
+        ["h"] = "close_node",
+        ["l"] = "open",
+        ["s"] = "open_split",
+        ["v"] = "open_vsplit",
+        ["R"] = "rename",
+        ["r"] = function(state)
+            state.filters.respect_gitignore = false
+            require("neo-tree.sources.filesystem.commands").clear_filter(state)
+            require("neo-tree.sources.buffers.commands").refresh()
+        end,
+        ["o"] = function(state)
+            require("neo-tree.sources.common.commands").open(state)
+            require("neo-tree").focus()
+        end,
+        ["q"] = function(state)
+            require("neo-tree.ui.renderer").close(state)
+        end,
+        ["<Left>"] = function()
+            vim.cmd("normal! zh")
+        end,
+        ["<Right>"] = function()
+            vim.cmd("normal! zl")
+        end,
+    }
+    local function with_default_mappings(custom)
+        for k, v in pairs(defaults) do
+            if not custom[k] then
+                custom[k] = v
+            end
+        end
+        return custom
+    end
+    local function focus(type)
+        return function()
+            require("neo-tree").focus(type)
+        end
+    end
+    require("neo-tree").setup({
+        enable_diagnostics = false,
+        default_component_configs = {
+            indent = { padding = 2, with_markers = true },
+            icon = { folder_closed = "", folder_open = "", default = "" },
+        },
+        filesystem = {
+            search_limit = 500,
+            filters = { show_hidden = true, respect_gitignore = false },
+            window = {
+                width = 35,
+                mappings = with_default_mappings({
+                    ["-"] = "navigate_up",
+                    ["C"] = "set_root",
+                    ["x"] = "delete",
+                    ["y"] = "copy_to_clipboard",
+                    ["d"] = "cut_to_clipboard",
+                    ["p"] = "paste_from_clipboard",
+                    ["zM"] = "close_all_nodes",
+                    ["z"] = "none",
+                    ["H"] = "none",
+                    ["f"] = function(state)
+                        state.filters.respect_gitignore = true
+                        require("neo-tree.sources.filesystem.commands").filter_on_submit(state)
+                    end,
+                    ["t"] = function(state)
+                        state.filters.respect_gitignore = true
+                        require("neo-tree.sources.filesystem.commands").filter_as_you_type(state)
+                    end,
+                    ["T"] = function(state)
+                        require("neo-tree.sources.filesystem.commands").filter_on_submit(state)
+                    end,
+                    ["/"] = function(state)
+                        state.filters.respect_gitignore = true
+                        require("neo-tree.sources.filesystem.commands").filter_as_you_type(state)
+                    end,
+                    ["<BS>"] = focus("git_status"),
+                    ["\\"] = focus("buffers"),
+                }),
+            },
+        },
+        buffers = {
+            show_unloaded = true,
+            window = {
+                width = 35,
+                mappings = with_default_mappings({
+                    ["d"] = "buffer_delete",
+                    ["<BS>"] = focus("filesystem"),
+                    ["\\"] = focus("git_status"),
+                }),
+            },
+        },
+        git_status = {
+            window = {
+                width = 35,
+                mappings = with_default_mappings({ ["<BS>"] = focus("buffers"), ["\\"] = focus("filesystem") }),
+            },
+        },
+    })
+    vim.cmd([[
+        highlight link NeoTreeNormal NormalSB
+        highlight link NeoTreeNormalNC NormalSB
+        highlight link NeoTreeGitModified Directory
+        augroup NeoTreeNoSignColumn
+            autocmd!
+            autocmd FileType neo-tree call feedkeys("\<Cmd>setlocal signcolumn=no\<CR>", "n")
+        augroup END
+    ]]) -- neo-tree resets winhighlight on BufEnter
 end
 
 function M.telescope()
@@ -611,6 +691,11 @@ function M.nvim_cmp()
                     cmp.select_next_item()
                 elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
                     vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
+                elseif require("neogen").jumpable() then
+                    vim.fn.feedkeys(
+                        vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_next()<CR>", true, true, true),
+                        ""
+                    )
                 else
                     fallback()
                 end
@@ -620,6 +705,11 @@ function M.nvim_cmp()
                     cmp.select_prev_item()
                 elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
                     vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
+                elseif require("neogen").jumpable(-1) then
+                    vim.fn.feedkeys(
+                        vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_prev()<CR>", true, true, true),
+                        ""
+                    )
                 else
                     fallback()
                 end
@@ -647,6 +737,7 @@ function M.open_quickui_context_menu()
             "lua vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'})",
             "Show diagnostic of current line",
         },
+        { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
         { "--", "" },
         { "Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk" },
         { "Git hunk &undo", "lua require('gitsigns').reset_hunk()", "Git undo hunk" },
@@ -786,7 +877,7 @@ function M.vim_quickui()
             [[call feedkeys(":Git log --all --full-history --name-status -- \"**\"\<Left>\<Left>", "n")]],
             "Grep file names in all commits",
         },
-        { "Git &root", [[Grt]], "Change current directory to git root" },
+        { "Git root", [[Grt]], "Change current directory to git root" },
         {
             "Cd current file",
             [[if expand("%") == '' | cd $PWD | else | cd %:p:h | endif]],

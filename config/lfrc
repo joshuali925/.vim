@@ -63,9 +63,9 @@ map T locate-file-no-ignore
 map <c-p> locate-git-file
 map <c-o> $lazygit
 map <tab> locate-file-cwd
-map I $less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT "$f"
+map I $less "$f"
 map i ${{
-  if [[ "$(file -Lb --mime-type -- "$f")" = image/* ]]; then
+  if [ "$(file -Lb --mime-type -- "$f" | cut -d/ -f1)" = image ]; then
     if [ -n "$TMUX" ]; then
       printf 'Press enter to copy print image command and detach tmux'; read; echo
       echo " iterm-imgcat $(realpath "$f"); printf 'Press enter to continue'; read; echo; tmux attach" | y && tmux detach

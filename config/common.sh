@@ -1,9 +1,10 @@
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 
-export PATH="$HOME/.local/bin:$HOME/.local/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
+export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
-export BAT_PAGER='less --RAW-CONTROL-CHARS --ignore-case'
+export LESS='-RiM'  # default -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen
+export BAT_PAGER="less $LESS"
 export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
@@ -13,7 +14,7 @@ export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
 export FZF_ALT_C_COMMAND='command ls -1Ap 2> /dev/null'
 export FZF_ALT_C_OPTS='--bind="tab:down,btab:up"'
-export FZF_PREVIEW_COMMAND='bat --style=numbers --color=always --theme=OneHalfDark --line-range :50 {}'
+export FZF_PREVIEW_COMMAND='bat --color=always --style=numbers --theme=OneHalfDark --line-range :50 {}'
 
 alias -- -='cd -'
 alias 1='cd -1'
@@ -44,7 +45,6 @@ alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" ~/.vim/config/nvim/init.lua'
-alias less='less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
@@ -57,6 +57,7 @@ alias rga='rg --text --no-ignore --search-zip'
 alias rgf='rg --files | rg'
 alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
+alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
@@ -89,10 +90,10 @@ alias gdsst='git diff --stat --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
-alias ggl='git pull origin $(gref)'
+alias ggl='git pull --autostash origin $(gref)'
 alias gpf='git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
-alias gl='git pull'
+alias gl='git pull --autostash'
 alias glr='git pull --rebase'
 alias glg='git log --stat'
 alias glgg='git log --graph'
@@ -110,7 +111,7 @@ alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
 alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset" --date=iso'
 alias gra='git remote add'
-alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,\(https://\|git@\)github.com[:/][^/]\+/\([^/]\+\)/\?$,git@github.com:joshuali925/\2,')\"; git remote -v"
+alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,\(https://\|git@\)\([^:/]\+\)[:/][^/]\+/\([^/]\+\)/\?$,git@\2:joshuali925/\3,')\"; git remote -v"
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
@@ -136,22 +137,16 @@ alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
 alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove
-alias gforest='git-foresta --style=10 | less -RSXF'
-alias gforesta='git-foresta --style=10 --all | less -RSXF'
+alias gforest='git-foresta --style=10 | less -XF'
+alias gforesta='git-foresta --style=10 --all | less -XF'
 alias gls-files-all="git log --pretty=format: --name-only --all | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all -- {}' | xargs -I{} bash -c 'echo {}; git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all --max-count 10 -- {}'"
 alias gpatch='vi +"syntax enable" +startinsert patch.diff && git apply patch.diff && rm patch.diff'
 
-d() {
-  if [ -n "$1" ]; then
-    dirs "$@"
-  else
-    dirs -v | head -10
-  fi
-}
-
-gdf() { git diff --color "$@" | diff-so-fancy | less --tabs=4 -RFX; }
+d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
+gdf() { git diff --color "$@" | diff-so-fancy | less --tabs=4 -XF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
+grg() { git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | less -XF --pattern="$*"; }
 
 glof() {
   git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
@@ -399,10 +394,10 @@ t() {  # create, restore, or switch tmux session
   local CHANGE CURRENT FZFTEMP SESSIONS
   [ -n "$TMUX" ] && CHANGE='switch-client' && CURRENT=$(tmux display-message -p '#{session_name}') || CHANGE='attach-session'
   if [ -z "$1" ]; then
-    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP"
+    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --prompt='attach> ' --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP"
     if [ "$?" -ne 0 ]; then
       SESSIONS=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
-      [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --bind='ctrl-d:execute(mv {} {}.bak)' --bind='tab:down,btab:up' --tac --preview='cat {}') && {
+      [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --prompt='restore> ' --bind='ctrl-d:execute(mv {} {}.bak)' --bind='tab:down,btab:up' --tac --preview='cat {}') && {
         ln -sf "$FZFTEMP" ~/.tmux/resurrect/last
         tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
         tmux attach-session
@@ -496,23 +491,23 @@ docker-shell() {
 }
 
 ec2() {
-  local INSTANCES IDS VALUE
+  local INSTANCES IDS CURR_STATE
   case $1 in
-    start) VALUE='stopped' ;;
-    stop) VALUE='running' ;;
+    start) CURR_STATE='stopped' ;;
+    stop) CURR_STATE='running' ;;
     refresh)
       aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
       return 0 ;;
-    *) echo "Usage: $0 {start|stop|refresh} [instance-tag]"; return 1;;
+    *) echo "Usage: $0 {start|stop|refresh} [instance-tag]"; return 1 ;;
   esac
-  INSTANCES=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$VALUE" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
+  INSTANCES=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$CURR_STATE" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
   if [ -n "$2" ]; then
     IDS=$(echo "$INSTANCES" | grep -w "$2" | awk '{print $2}')
   else
     IDS=$(echo "$INSTANCES" | fzf --multi | awk '{print $2}')
   fi
   [ -z "$IDS" ] && return 1
-  if [ "$VALUE" = stopped ]; then
+  if [ "$CURR_STATE" = stopped ]; then
     aws ec2 start-instances --instance-ids $(echo $IDS)
   else
     aws ec2 stop-instances --instance-ids $(echo $IDS)

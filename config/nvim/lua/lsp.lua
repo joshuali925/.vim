@@ -35,6 +35,7 @@ function M.init()
             ]])
         end
         -- use null-ls for formatting
+        -- TODO https://github.com/sumneko/lua-language-server/pull/915
         client.resolved_capabilities.document_formatting = false
         client.resolved_capabilities.document_range_formatting = false
         require("aerial").on_attach(client, bufnr)
@@ -68,6 +69,7 @@ function M.init()
                     diagnostics = { globals = { "vim" } },
                     IntelliSense = { traceLocalSet = true },
                     workspace = {
+                        -- library = vim.api.nvim_get_runtime_file("", true), -- index library files
                         library = {
                             [vim.fn.expand("$VIMRUNTIME/lua")] = true,
                             [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
@@ -154,8 +156,20 @@ function M.init()
 end
 
 function M.organize_imports_and_format()
-    vim.cmd("silent! OrganizeImports")
-    vim.lsp.buf.formatting_sync({}, 3000)
+    if next(vim.lsp.buf_get_clients()) ~= nil then
+        vim.cmd("silent! OrganizeImports")
+        vim.lsp.buf.formatting_sync({}, 3000)
+    else
+        local formatted = vim.fn.system(
+            "prettier --parser " .. vim.bo.filetype,
+            vim.api.nvim_buf_get_lines(0, 0, -1, false)
+        )
+        if vim.api.nvim_get_vvar("shell_error") == 0 then
+            vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(formatted, "\n"))
+        else
+            vim.notify(formatted, "ERROR", { title = "Prettier failed" })
+        end
+    end
 end
 
 local diagnostics_on = true

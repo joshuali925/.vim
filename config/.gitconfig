@@ -5,6 +5,9 @@
   email = joshuali925@gmail.com
   name = Joshua Li
 
+[core]
+  pager = less -XF
+
 [pull]
   rebase = false
 

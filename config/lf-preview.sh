@@ -4,7 +4,7 @@ unset COLORTERM
 pager() {
   [ -d "$1" ] && echo "$1" && ls "$1" -AlhF --color=always && return
   if [ "$(wc -c < "$1")" -gt 2097152 ]; then # 2MB
-    less --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT "$1"
+    less "$1"
   else
     bat --color=always --theme=OneHalfDark --plain "$1"
   fi

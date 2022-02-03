@@ -2915,3 +2915,45 @@ function M.setup_symbols_outline()
 end
 " dirdiff
         use({ "will133/vim-dirdiff", cmd = "DirDiff" })
+" nvim-tree
+        use({ "kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = conf("nvim_tree") })
+map(
+    "n",
+    "<leader>b",
+    [[<Cmd>if !get(g:, 'nvim_tree_indent_markers', 0) <bar> execute 'lua require("packer").loader("nvim-tree.lua")' <bar> sleep 100m <bar> endif <bar> NvimTreeFindFile<CR>]]
+)
+map("n", "<leader>B", "<Cmd>NvimTreeToggle<CR>")
+function M.nvim_tree()
+    vim.g.nvim_tree_indent_markers = 1
+    vim.g.nvim_tree_highlight_opened_files = 1
+    local tree_cb = require("nvim-tree.config").nvim_tree_callback
+    require("nvim-tree").setup({
+        disable_netrw = false,
+        diagnostics = { enable = true },
+        view = {
+            mappings = {
+                list = {
+                    { key = { "?" }, cb = tree_cb("toggle_help") },
+                    { key = { "i" }, cb = tree_cb("toggle_ignored") },
+                    { key = { "r" }, cb = tree_cb("refresh") },
+                    { key = { "R" }, cb = tree_cb("rename") },
+                    { key = { "x" }, cb = tree_cb("remove") },
+                    { key = { "d" }, cb = tree_cb("cut") },
+                    { key = { "y" }, cb = tree_cb("copy") },
+                    { key = { "yy" }, cb = tree_cb("copy_absolute_path") },
+                    { key = { "C" }, cb = tree_cb("cd") },
+                    { key = { "s" }, cb = tree_cb("split") },
+                    { key = { "h" }, cb = tree_cb("close_node") },
+                    { key = { "l" }, cb = tree_cb("edit") },
+                    { key = { "[g" }, cb = tree_cb("prev_git_item") },
+                    { key = { "]g" }, cb = tree_cb("next_git_item") },
+                    { key = { "q" }, cb = "<Cmd>execute 'NvimTreeResize '. winwidth(0) <bar> NvimTreeClose<CR>" },
+                    { key = { "<Left>" }, cb = "<Cmd>normal! zh<CR>" },
+                    { key = { "<Right>" }, cb = "<Cmd>normal! zl<CR>" },
+                    { key = { "H" }, cb = "<Cmd>normal! H<CR>" },
+                    { key = { "-" }, cb = "<Cmd>normal! $<CR>" },
+                },
+            },
+        },
+    })
+end
