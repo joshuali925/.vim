@@ -182,12 +182,8 @@ map("i", "<leader>r", "<Esc><leader>r", {})
 map("n", "<leader>r", "<Cmd>update <bar> execute funcs#get_run_command()<CR>")
 map("", "<leader>y", '"+y')
 map("n", "<leader>Y", '"+y$')
-map(
-    "n",
-    "<leader>b",
-    [[<Cmd>if !get(g:, 'nvim_tree_indent_markers', 0) <bar> execute 'lua require("packer").loader("nvim-tree.lua")' <bar> sleep 100m <bar> endif <bar> NvimTreeFindFile<CR>]]
-)
-map("n", "<leader>B", "<Cmd>NvimTreeToggle<CR>")
+map("n", "<leader>b", "<Cmd>NeoTreeReveal<CR>")
+map("n", "<leader>B", "<Cmd>NeoTreeFocusToggle git_status<CR>")
 map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { noremap = true, silent = true })
 map(
     "x",

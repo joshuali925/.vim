@@ -56,6 +56,8 @@ set nostartofline
 set display=lastline
 set virtualedit+=block
 set previewheight=7
+set foldmethod=indent
+set foldlevelstart=99
 set history=1000
 set undofile
 set undolevels=1000
@@ -191,7 +193,7 @@ augroup AutoCommands
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>
 augroup END
 command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
-command! W write !sudo tee % > /dev/null
+command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
 command! -nargs=+ GrepRegex call s:Grep(0, 1, <q-args>)
 command! -nargs=+ GrepNoRegex call s:Grep(0, 0, <q-args>)
 command! -nargs=+ Ggrep call s:Grep(1, 1, <q-args>)

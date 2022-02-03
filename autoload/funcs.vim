@@ -76,7 +76,7 @@ function! funcs#quit(buffer_mode, force) abort
       tabclose
     endif
   " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; two windows but the other one is file tree
-  elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (win_len == 2 && getbufvar(winbufnr(3 - winnr()), '&filetype') == 'NvimTree' && (buf_len > 1 || bufname('%') != ''))
+  elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (win_len == 2 && getbufvar(winbufnr(3 - winnr()), '&filetype') == 'neo-tree' && (buf_len > 1 || bufname('%') != ''))
     if exists(':Bdelete')
       try
         execute 'Bdelete'. (a:force ? '!' : '')

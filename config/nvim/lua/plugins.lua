@@ -51,13 +51,7 @@ return require("packer").startup({
             event = "BufEnter",
             config = "require('themes').config()",
         })
-        use({
-            "akinsho/nvim-bufferline.lua",
-            event = "VimEnter",
-            config = function()
-                require("bufferline").setup({ highlights = { buffer_selected = { gui = "bold" } } })
-            end,
-        })
+        use({ "akinsho/bufferline.nvim", event = "VimEnter", config = conf("bufferline_nvim") })
         use({ "feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim") })
         use({ "lukas-reineke/indent-blankline.nvim", config = conf("indent_blankline") })
         use({
@@ -84,7 +78,6 @@ return require("packer").startup({
         use({ "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = "vim.g.asyncrun_open = 12" })
         use({ "stevearc/aerial.nvim", module = "aerial", cmd = "AerialToggle", config = conf("aerial_nvim") })
         use({ "simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo") })
-        use({ "kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = conf("nvim_tree") })
         use({
             "goolord/alpha-nvim",
             cond = function()
@@ -106,6 +99,14 @@ return require("packer").startup({
         })
         use({ "kevinhwang91/nvim-bqf", ft = "qf", config = conf("nvim_bqf") })
         use({ "rcarriga/nvim-notify" })
+        use({
+            "nvim-neo-tree/neo-tree.nvim",
+            branch = "v1.x",
+            requires = "MunifTanjim/nui.nvim",
+            wants = "nui.nvim",
+            cmd = { "NeoTreeReveal", "NeoTreeFocusToggle" },
+            config = conf("neo_tree"),
+        })
 
         -- git
         use({
@@ -145,6 +146,7 @@ return require("packer").startup({
             wants = "nvim-treesitter",
             config = "require('nvim-ts-autotag').setup()",
         })
+        use({ "danymat/neogen", module = "neogen", config = "require('neogen').setup({})" })
         use({ "MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log" })
         use({ "udalov/kotlin-vim", ft = "kotlin" })
         use({ "chrisbra/csv.vim", setup = conf("setup_csv_vim"), cmd = "CSVWhatColumn" })

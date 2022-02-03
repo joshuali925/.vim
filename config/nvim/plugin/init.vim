@@ -21,6 +21,7 @@ augroup AutoCommands
   autocmd BufEnter * call s:AutoRestoreWinView()
   autocmd BufReadPost * if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif | let b:RestoredCursor = 1
   autocmd BufWritePost */lua/plugins.lua source <afile> | PackerCompile
+  autocmd User PackerCompileDone PackerInstall
   autocmd TextYankPost * silent! lua vim.highlight.on_yank({higroup = "IncSearch", timeout = 300})
   autocmd BufNewFile,BufRead *.http set filetype=http commentstring=#\ %s
   " https://github.com/neovim/neovim/pull/17040

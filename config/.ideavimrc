@@ -149,7 +149,8 @@ nmap <C-f> <Action>(OptimizeImports)<Action>(ReformatCode)
 nmap <leader>a <Action>(ShowIntentionActions)
 nmap <leader>s <Action>(QuickActionPopup)
 nmap <leader>R <Action>(RenameElement)
-nmap <leader>d <Action>(QuickImplementations)
+nmap <leader>d <Action>(GotoImplementation)
+nmap <leader>D <Action>(GotoSuperMethod)
 
 " textobj-indent, this loads before plugin so need to :source ~/.ideavimrc again
 xmap ai <Plug>textobj-indent-aI

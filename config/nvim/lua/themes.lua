@@ -11,7 +11,7 @@ M.theme_list = {
 }
 M.theme = M.theme_list[vim.g.theme_index]
 
-local sidebars = { "qf", "terminal", "Outline", "Mundo" }
+local sidebars = { "qf", "terminal", "aerial", "Mundo" }
 local default_colors = {
     bg = "#22262e",
     fg = "#abb2bf",
