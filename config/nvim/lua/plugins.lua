@@ -17,82 +17,35 @@ return require("packer").startup({
         local function conf(name)
             return ("require('plugin-configs').%s()"):format(name)
         end
+
         use({ "wbthomason/packer.nvim" })
 
         -- appearance
-        use({
-            "folke/tokyonight.nvim",
-            cond = "require('themes').theme == 'tokyonight.nvim'",
-            event = "BufEnter",
-            config = "require('themes').config()",
-        })
-        use({
-            "eddyekofo94/gruvbox-flat.nvim",
-            cond = "require('themes').theme == 'gruvbox-flat.nvim'",
-            event = "BufEnter",
-            config = "require('themes').config()",
-        })
-        use({
-            "projekt0n/github-nvim-theme",
-            cond = "require('themes').theme == 'github-nvim-theme'",
-            event = "BufEnter",
-            config = "require('themes').config()",
-        })
-        use({
-            "catppuccin/nvim",
-            as = "catppuccin",
-            cond = "require('themes').theme == 'catppuccin'",
-            event = "BufEnter",
-            config = "require('themes').config()",
-        })
-        use({
-            "Mofiqul/vscode.nvim",
-            cond = "require('themes').theme == 'vscode.nvim'",
-            event = "BufEnter",
-            config = "require('themes').config()",
-        })
+        use({ "folke/tokyonight.nvim", cond = "require('themes').theme == 'tokyonight.nvim'", config = "require('themes').config()" })
+        use({ "eddyekofo94/gruvbox-flat.nvim", cond = "require('themes').theme == 'gruvbox-flat.nvim'", config = "require('themes').config()" })
+        use({ "projekt0n/github-nvim-theme", cond = "require('themes').theme == 'github-nvim-theme'", config = "require('themes').config()" })
+        use({ "catppuccin/nvim", as = "catppuccin", cond = "require('themes').theme == 'catppuccin'", config = "require('themes').config()" })
+        use({ "Mofiqul/vscode.nvim", cond = "require('themes').theme == 'vscode.nvim'", config = "require('themes').config()" })
+        use({ "EdenEast/nightfox.nvim", cond = "require('themes').theme == 'nightfox.nvim'", config = "require('themes').config()" })
         use({ "akinsho/bufferline.nvim", event = "VimEnter", config = conf("bufferline_nvim") })
         use({ "feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim") })
         use({ "lukas-reineke/indent-blankline.nvim", config = conf("indent_blankline") })
         use({
             "DarwinSenior/nvim-colorizer.lua",
             cmd = "ColorizerAttachToBuffer",
-            config = function()
-                require("colorizer").setup({}, { RGB = false, rgb_fn = true, mode = "virtualtext" })
-            end,
+            config = function() require("colorizer").setup({}, { RGB = false, rgb_fn = true, mode = "virtualtext" }) end,
         })
 
         -- ui
-        use({
-            "kassio/neoterm",
-            cmd = { "T", "Ttoggle", "Tnew" },
-            keys = "<Plug>(neoterm-repl-send",
-            setup = conf("setup_neoterm"),
-        })
-        use({
-            "skywind3000/vim-quickui",
-            fn = "quickui#*",
-            setup = conf("setup_vim_quickui"),
-            config = conf("vim_quickui"),
-        })
+        use({ "kassio/neoterm", cmd = { "T", "Ttoggle", "Tnew" }, keys = "<Plug>(neoterm-repl-send", setup = conf("setup_neoterm") })
+        use({ "skywind3000/vim-quickui", fn = "quickui#*", setup = conf("setup_vim_quickui"), config = conf("vim_quickui") })
         use({ "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = "vim.g.asyncrun_open = 12" })
         use({ "stevearc/aerial.nvim", module = "aerial", cmd = "AerialToggle", config = conf("aerial_nvim") })
         use({ "simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo") })
-        use({
-            "goolord/alpha-nvim",
-            cond = function()
-                return vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1
-            end,
-            event = "VimEnter",
-            config = conf("alpha_nvim"),
-        })
+        use({ "goolord/alpha-nvim", cond = "vim.fn.argc() == 0 and vim.fn.line2byte('$') == -1", event = "VimEnter", config = conf("alpha_nvim") })
         use({
             "nvim-telescope/telescope.nvim",
-            requires = {
-                { "nvim-lua/popup.nvim" },
-                { "nvim-lua/plenary.nvim" },
-                { "nvim-telescope/telescope-fzf-native.nvim", run = "make" },
-            },
+            requires = { { "nvim-lua/popup.nvim" }, { "nvim-lua/plenary.nvim" }, { "nvim-telescope/telescope-fzf-native.nvim", run = "make" } },
             wants = { "popup.nvim", "plenary.nvim", "telescope-fzf-native.nvim" },
             module = "telescope",
             config = conf("telescope"),
@@ -146,6 +99,7 @@ return require("packer").startup({
             wants = "nvim-treesitter",
             config = "require('nvim-ts-autotag').setup()",
         })
+        use({ "RRethy/vim-illuminate", config = "vim.g.Illuminate_ftblacklist = vim.g.qs_filetype_blacklist" })
         use({ "danymat/neogen", module = "neogen", config = "require('neogen').setup({})" })
         use({ "MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log" })
         use({ "udalov/kotlin-vim", ft = "kotlin" })
@@ -162,25 +116,11 @@ return require("packer").startup({
         use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" })
         use({ "hrsh7th/vim-vsnip", after = "friendly-snippets" })
         use({ "windwp/nvim-autopairs", after = "nvim-cmp", config = conf("nvim_autopairs") })
-        use({
-            "gelguy/wilder.nvim",
-            requires = { "romgrk/fzy-lua-native" },
-            event = "CmdlineEnter",
-            config = conf("wilder_nvim"),
-        })
+        use({ "gelguy/wilder.nvim", requires = { "romgrk/fzy-lua-native" }, event = "CmdlineEnter", config = conf("wilder_nvim") })
 
         -- editing
-        use({
-            "mg979/vim-visual-multi",
-            fn = "vm#*",
-            keys = { "<Plug>(VM-", { "n", "<leader><C-n>" } },
-            setup = conf("setup_vim_visual_multi"),
-        })
-        use({
-            "phaazon/hop.nvim",
-            cmd = { "HopWord", "HopChar1", "HopLineAC", "HopLineBC", "HopWordCurrentLine" },
-            config = conf("hop_nvim"),
-        })
+        use({ "mg979/vim-visual-multi", fn = "vm#*", keys = { "<Plug>(VM-", { "n", "<leader><C-n>" } }, setup = conf("setup_vim_visual_multi") })
+        use({ "phaazon/hop.nvim", cmd = { "HopWord", "HopChar1", "HopLineAC", "HopLineBC", "HopWordCurrentLine" }, config = conf("hop_nvim") })
         use({ "unblevable/quick-scope", config = conf("quick_scope") })
         use({ "dahu/vim-fanfingtastic" })
         use({ "chaoren/vim-wordmotion", setup = "vim.g.wordmotion_nomap = 1" })
@@ -197,29 +137,12 @@ return require("packer").startup({
         use({ "moll/vim-bbye", cmd = "Bdelete" })
         use({ "andymass/vim-matchup", config = conf("vim_matchup") })
         use({ "ojroques/vim-oscyank", cmd = { "OSCYank", "OSCYankReg" } })
-        use({
-            "bfredl/nvim-miniyank",
-            event = "TextYankPost",
-            fn = "miniyank#*",
-            keys = "<Plug>(miniyank-",
-            config = "vim.g.miniyank_maxitems = 200",
-        })
-        use({
-            "aserowy/tmux.nvim",
-            module = "tmux",
-            config = function()
-                require("tmux").setup({ navigation = { cycle_navigation = false } })
-            end,
-        })
+        use({ "AckslD/nvim-neoclip.lua", event = "TextYankPost", config = conf("nvim_neoclip_lua") })
+        use({ "aserowy/tmux.nvim", module = "tmux", config = function() require("tmux").setup({ navigation = { cycle_navigation = false } }) end })
 
         -- tools
         use({ "dstein64/vim-startuptime", cmd = "StartupTime" })
-        use({
-            "iamcco/markdown-preview.nvim",
-            run = "cd app && yarn install",
-            ft = "markdown",
-            setup = "vim.g.mkdp_auto_close = 0",
-        })
+        use({ "iamcco/markdown-preview.nvim", run = "cd app && yarn install", ft = "markdown", setup = "vim.g.mkdp_auto_close = 0" })
         use({ "godlygeek/tabular", cmd = "Tabularize" })
         use({
             "dhruvasagar/vim-table-mode",
@@ -227,5 +150,7 @@ return require("packer").startup({
             setup = conf("setup_vim_table_mode"),
         })
         use({ "NTBBloodbath/rest.nvim", module = "rest-nvim", config = conf("rest_nvim") })
+        use({ "will133/vim-dirdiff", cmd = "DirDiff" })
     end,
 })
+

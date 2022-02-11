@@ -1581,6 +1581,7 @@ zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'
   # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
 install-from-url vimv https://raw.githubusercontent.com/thameera/vimv/HEAD/vimv "$@"
 install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin '' btm "$@"
+install-from-github stylua JohnnyMorganz/StyLua linux '' macos '' '' "$@"
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
     btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
@@ -2913,8 +2914,6 @@ function M.setup_symbols_outline()
         keymaps = { close = "q", hover_symbol = "p", rename_symbol = "R" },
     }
 end
-" dirdiff
-        use({ "will133/vim-dirdiff", cmd = "DirDiff" })
 " nvim-tree
         use({ "kyazdani42/nvim-tree.lua", cmd = "NvimTreeToggle", config = conf("nvim_tree") })
 map(
@@ -2957,3 +2956,56 @@ function M.nvim_tree()
         },
     })
 end
+" miniyank
+" telescope plugin path: config/nvim/lua/telescope/_extensions/yank.lua
+        use({
+            "bfredl/nvim-miniyank",
+            event = "TextYankPost",
+            fn = "miniyank#*",
+            keys = "<Plug>(miniyank-",
+            config = "vim.g.miniyank_maxitems = 200",
+        })
+-- miniyank {{{2
+map("", "p", "<Plug>(miniyank-autoput)", {})
+map("", "P", "<Plug>(miniyank-autoPut)", {})
+map("n", "<leader>p", "<Plug>(miniyank-cycle)", {})
+map("x", "<leader>p", '"0p')
+map("n", "<leader>P", "<Plug>(miniyank-cycleback)", {})
+map("x", "<leader>P", '"0P')
+map("n", "=v", "<Plug>(miniyank-tochar)", {})
+map("n", "=V", "<Plug>(miniyank-toline)", {})
+map("n", "=<C-v>", "<Plug>(miniyank-toblock)", {})
+
+" =======================================================
+" lsp highlight
+"debounced
+    local timer = vim.loop.new_timer()
+        function _G.lsp_document_highlight()
+            timer:start(
+                50,
+                0,
+                vim.schedule_wrap(
+                    function()
+                        vim.cmd("silent! lua vim.lsp.buf.clear_references()")
+                        vim.cmd("silent! lua vim.lsp.buf.document_highlight()")
+                    end
+                )
+            )
+        end
+        vim.cmd [[
+            augroup lsp_document_highlight
+                autocmd! * <buffer>
+                autocmd CursorMoved <buffer> call v:lua.lsp_document_highlight()
+                autocmd CursorMovedI <buffer> call v:lua.lsp_document_highlight()
+            augroup END
+        ]]
+      " not debounced
+        if client.resolved_capabilities.document_highlight then
+            vim.cmd([[
+                augroup lsp_document_highlight
+                    autocmd! * <buffer>
+                    autocmd CursorMoved,CursorMovedI <buffer> lua vim.lsp.buf.document_highlight()
+                    autocmd CursorMoved,CursorMovedI <buffer> lua vim.lsp.buf.clear_references()
+                augroup END
+            ]])
+        end

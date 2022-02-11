@@ -165,7 +165,7 @@ function! funcs#get_run_command() abort
   let run_command['cpp'] = 'AsyncRun -raw g++ % -o %< -g && ./%<'
   let run_command['java'] = 'AsyncRun -raw javac % && java %<'
   let run_command['javascript'] = 'AsyncRun -raw node %'
-  let run_command['markdown'] = 'MarkdownPreview'
+  let run_command['markdown'] = $SSH_CLIENT != '' ? 'execute "terminal glow %" | nnoremap <buffer> u <C-u>| nnoremap <nowait> <buffer> d <C-d>' : 'MarkdownPreview'
   let run_command['html'] = 'AsyncRun -silent open %'
   let run_command['xhtml'] = 'AsyncRun -silent open %'
   let run_command['http'] = 'lua require("rest-nvim").run()'

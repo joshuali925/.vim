@@ -78,3 +78,4 @@ return {
         { key = "Enter", mods = "CMD", action = "ToggleFullScreen" },
     },
 }
+

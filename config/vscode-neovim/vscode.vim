@@ -68,7 +68,7 @@ nmap gcc <Plug>VSCodeCommentaryLine
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
   execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
   execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
-  execute 'xnoremap a'. char. ' :<C-u>normal! T'. char. 'vf'. char. '<CR>'
+  execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vt'. char. '<CR>'
   execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
 endfor
 omap ia <Plug>(swap-textobject-i)

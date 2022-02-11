@@ -6,8 +6,10 @@ M.theme_list = {
     [-3] = "github-nvim-theme",
     [-4] = "vscode.nvim",
     [-5] = "catppuccin",
+    [-6] = "nightfox.nvim",
     [0] = "github-nvim-theme",
     [1] = "tokyonight.nvim",
+    [2] = "nightfox.nvim",
 }
 M.theme = M.theme_list[vim.g.theme_index]
 
@@ -30,14 +32,6 @@ local default_colors = {
 local themes = {
     ["tokyonight.nvim"] = {
         colors = function()
-            return default_colors
-        end,
-        config = function()
-            vim.g.tokyonight_style = vim.g.theme_index < 0 and "storm" or "day"
-            vim.g.tokyonight_italic_keywords = false
-            vim.g.tokyonight_italic_comments = false
-            vim.g.tokyonight_sidebars = sidebars
-            vim.g.tokyonight_colors = { comment = "#717993" }
             if vim.g.theme_index >= 0 then
                 default_colors.bg = "#cccccc"
                 default_colors.fg = "#484e54"
@@ -48,6 +42,14 @@ local themes = {
                 default_colors.yellow = "#b08800"
                 default_colors.orange = "#d18616"
             end
+            return default_colors
+        end,
+        config = function()
+            vim.g.tokyonight_style = vim.g.theme_index < 0 and "storm" or "day"
+            vim.g.tokyonight_italic_keywords = false
+            vim.g.tokyonight_italic_comments = false
+            vim.g.tokyonight_sidebars = sidebars
+            vim.g.tokyonight_colors = { comment = "#717993" }
             vim.cmd("colorscheme tokyonight")
         end,
     },
@@ -128,6 +130,26 @@ local themes = {
             vim.cmd("colorscheme catppuccin")
         end,
     },
+    ["nightfox.nvim"] = {
+        colors = function()
+            default_colors.secondary = "#8bb19c"
+            if vim.g.theme_index < 0 then
+                default_colors.primary = "#7a9bd1"
+            else
+                default_colors.bg = "#ede8e2"
+                default_colors.fg = "#484e54"
+                default_colors.lightbg = "#cccccc"
+                default_colors.lightbg2 = "#dddddd"
+                default_colors.primary = "#65929d"
+                default_colors.yellow = "#b08800"
+                default_colors.orange = "#d18616"
+            end
+            return default_colors
+        end,
+        config = function()
+            require("nightfox").load(vim.g.theme_index < 0 and "nordfox" or "dawnfox")
+        end,
+    },
 }
 
 function M.config()
@@ -139,3 +161,4 @@ function M.colors()
 end
 
 return M
+

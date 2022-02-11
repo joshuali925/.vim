@@ -47,12 +47,17 @@ nnoremap ciu ]b[wc]w
 nmap cau ciu
 nnoremap diu ]b[wd]w
 nmap dau diu
-" :normal and v:count not implemented
+" cannot :omap (:normal and v:count not implemented)
 nnoremap c2iu ]b[wc2]w
 nnoremap c3iu ]b[wc3]w
 nnoremap d2iu ]b[wd2]w
 nnoremap d3iu ]b[wd3]w
 xnoremap il ^og_
+nnoremap vil v^og_
+nnoremap dil v^og_d
+nnoremap cil v^og_c
+nnoremap yil v^og_y
+nnoremap <leader>yil v^og_"+y
 xnoremap al 0o$
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)
@@ -146,6 +151,7 @@ nmap gh <Action>(ShowErrorDescription)
 nmap gd <Action>(GotoDeclaration)
 nmap gD <Action>(GotoTypeDeclaration)
 nmap <C-f> <Action>(OptimizeImports)<Action>(ReformatCode)
+nmap <C-t> <Action>(GotoTest)
 nmap <leader>a <Action>(ShowIntentionActions)
 nmap <leader>s <Action>(QuickActionPopup)
 nmap <leader>R <Action>(RenameElement)

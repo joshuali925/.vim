@@ -6,7 +6,7 @@
   name = Joshua Li
 
 [core]
-  pager = less -XF
+  pager = less -RiMXF
 
 [pull]
   rebase = false
@@ -22,12 +22,6 @@
 [color]
   ui = true
 
-[color "diff-highlight"]
-  oldNormal = red bold
-  oldHighlight = red bold 52
-  newNormal = green bold
-  newHighlight = green bold 22
-
 [color "diff"]
   meta = 11
   frag = magenta bold
@@ -35,6 +29,15 @@
   old = red bold
   new = green bold
   whitespace = red reverse
+
+[color "diff-highlight"]
+  oldNormal = red bold
+  oldHighlight = red bold 52
+  newNormal = green bold
+  newHighlight = green bold 22
+
+[diff-so-fancy]
+  stripLeadingSymbols = false
 
 [delta]
   syntax-theme = TwoDark
@@ -46,6 +49,3 @@
   line-numbers-zero-style = "#4b5263"
   line-numbers-left-format = "{nm:^4} "
   line-numbers-right-format = "{np:^4} "
-
-[diff-so-fancy]
-  stripLeadingSymbols = false

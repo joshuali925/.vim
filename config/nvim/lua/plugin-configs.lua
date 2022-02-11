@@ -52,7 +52,7 @@ function M.rest_nvim()
     vim.cmd([[command! RestNvimPreviewCurl execute "normal \<Plug>RestNvimPreview" | sleep 100m | S 1,2messages]])
 end
 
-vim.g.qs_filetype_blacklist = { -- will only run on first require
+vim.g.qs_filetype_blacklist = {
     "help",
     "man",
     "qf",
@@ -68,7 +68,7 @@ vim.g.qs_filetype_blacklist = { -- will only run on first require
     "DiffviewFileHistory",
     "DiffviewFiles",
     "floggraph",
-}
+} -- will only run on first require
 vim.g.qs_buftype_blacklist = { "terminal" }
 function M.quick_scope()
     vim.cmd("highlight QuickScopePrimary guifg='" .. (vim.g.theme_index < 0 and "#ffca6e" or "#bf8000") .. "'")
@@ -172,7 +172,6 @@ end
 
 function M.nvim_bqf()
     require("bqf").setup({
-        auto_resize_height = false,
         func_map = {
             prevfile = "",
             nextfile = "",
@@ -188,6 +187,17 @@ function M.hop_nvim()
     require("hop").setup({})
     vim.cmd("highlight! link HopNextKey HopNextKey1")
     vim.cmd("highlight! link HopNextKey2 HopNextKey1")
+end
+
+function M.nvim_neoclip_lua()
+    -- persistent history needs libsqlite3
+    --     requires = { "tami5/sqlite.lua", module = "sqlite" },
+    require("neoclip").setup({
+        -- enable_persistent_history = true,
+        content_spec_column = true,
+        on_paste = { set_reg = true },
+        keys = { telescope = { n = { select = "y", paste = "<CR>", replay = "Q" } } },
+    })
 end
 
 function M.wilder_nvim()
@@ -252,11 +262,7 @@ function M.alpha_nvim()
         theme.button("o", "Git log", ":Flog<CR>"),
         theme.button("\\", "Open quickui", ":call quickui#menu#open('normal')<CR>"),
         theme.button("f", "Find files", ":lua require('telescope.builtin').find_files({hidden = true})<CR>"),
-        theme.button(
-            "m",
-            "Find MRU",
-            ":lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>"
-        ),
+        theme.button("m", "Find MRU", ":lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>"),
         theme.button("c", "Edit vimrc", ":edit $MYVIMRC<CR>"),
         theme.button("s", "Profile startup time", ":StartupTime<CR>"),
         theme.button("E", "Load from previous session", ":silent SessionLoad<CR>"),
@@ -307,11 +313,13 @@ function M.neo_tree()
         end
         return custom
     end
+
     local function focus(type)
         return function()
             require("neo-tree").focus(type)
         end
     end
+
     require("neo-tree").setup({
         enable_diagnostics = false,
         default_component_configs = {
@@ -397,9 +405,7 @@ function M.telescope()
                 i = {
                     ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
                     ["<Esc>"] = actions.close,
-                    ["<C-u>"] = function()
-                        vim.cmd("stopinsert")
-                    end,
+                    ["<C-u>"] = function() vim.cmd("stopinsert") end,
                 },
             },
             vimgrep_arguments = {
@@ -446,7 +452,7 @@ function M.nvim_treesitter()
             "markdown",
             "bash",
             "http",
-            "html",
+            -- "html", -- https://github.com/nvim-treesitter/nvim-treesitter/issues/1788
             "css",
             "javascript",
             "typescript",
@@ -454,7 +460,7 @@ function M.nvim_treesitter()
             "python",
             "java",
         },
-        highlight = { enable = true, disable = {}, use_languagetree = true },
+        highlight = { enable = true, disable = {} },
         textobjects = {
             select = {
                 enable = true,
@@ -497,26 +503,16 @@ function M.feline_nvim()
         Rv = colors.orange,
         t = colors.red,
     }
-    local function checkwidth(winid)
-        return vim.api.nvim_win_get_width(winid) > 60
-    end
+    local function checkwidth(winid) return vim.api.nvim_win_get_width(winid) > 60 end
+
     local components = { active = { {}, {}, {} }, inactive = { {} } }
     components.active[1][1] = {
         provider = "  ",
-        hl = function()
-            return { fg = colors.lightbg, bg = mode_colors[vim.fn.mode()] or colors.primary }
-        end,
-        right_sep = {
-            str = " ",
-            hl = function()
-                return { fg = mode_colors[vim.fn.mode()] or colors.primary, bg = colors.lightbg }
-            end,
-        },
+        hl = function() return { fg = colors.lightbg, bg = mode_colors[vim.fn.mode()] or colors.primary } end,
+        right_sep = { str = " ", hl = function() return { fg = mode_colors[vim.fn.mode()] or colors.primary, bg = colors.lightbg } end },
     }
     components.active[1][2] = {
-        provider = function()
-            return " " .. vim.fn.expand("%:~:.") .. " "
-        end,
+        provider = function() return " " .. vim.fn.expand("%:~:.") .. " " end,
         icon = function()
             local icon, color = require("nvim-web-devicons").get_icon_color(vim.fn.expand("%:t"), vim.fn.expand("%:e"))
             return { str = icon or " ", hl = { fg = color or colors.primary } }
@@ -525,10 +521,7 @@ function M.feline_nvim()
         right_sep = { str = " ", hl = { fg = colors.lightbg, bg = colors.lightbg2 } },
     }
     components.active[1][3] = {
-        provider = function()
-            local dir_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-            return "  " .. dir_name .. " "
-        end,
+        provider = function() return "  " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") .. " " end,
         hl = { fg = colors.grey, bg = colors.lightbg2 },
         right_sep = { str = " ", hi = { fg = colors.lightbg2 } },
     }
@@ -568,33 +561,25 @@ function M.feline_nvim()
     }
     components.active[1][8] = {
         provider = "diagnostic_errors",
-        enabled = function()
-            return lsp.diagnostics_exist(vim.diagnostic.severity.ERROR)
-        end,
+        enabled = function() return lsp.diagnostics_exist(vim.diagnostic.severity.ERROR) end,
         hl = { fg = colors.red },
         icon = "  ",
     }
     components.active[1][9] = {
         provider = "diagnostic_warnings",
-        enabled = function()
-            return lsp.diagnostics_exist(vim.diagnostic.severity.WARN)
-        end,
+        enabled = function() return lsp.diagnostics_exist(vim.diagnostic.severity.WARN) end,
         hl = { fg = colors.yellow },
         icon = "  ",
     }
     components.active[1][10] = {
         provider = "diagnostic_hints",
-        enabled = function()
-            return lsp.diagnostics_exist(vim.diagnostic.severity.HINT)
-        end,
+        enabled = function() return lsp.diagnostics_exist(vim.diagnostic.severity.HINT) end,
         hl = { fg = colors.grey },
         icon = "  ",
     }
     components.active[1][11] = {
         provider = "diagnostic_info",
-        enabled = function()
-            return lsp.diagnostics_exist(vim.diagnostic.severity.INFO)
-        end,
+        enabled = function() return lsp.diagnostics_exist(vim.diagnostic.severity.INFO) end,
         hl = { fg = colors.secondary },
         icon = "  ",
     }
@@ -646,9 +631,7 @@ function M.feline_nvim()
         hl = { fg = colors.secondary, bg = colors.lightbg },
     }
     components.active[3][7] = {
-        provider = function()
-            return string.format(" %s/%s", vim.fn.line("."), vim.fn.line("$"))
-        end,
+        provider = function() return string.format(" %s/%s", vim.fn.line("."), vim.fn.line("$")) end,
         hl = { fg = colors.primary, bg = colors.lightbg },
     }
     components.inactive[1][1] = {
@@ -664,19 +647,12 @@ function M.nvim_cmp()
     local cmp = require("cmp")
     cmp.setup({
         snippet = {
-            expand = function(args)
-                vim.fn["vsnip#anonymous"](args.body)
-            end,
+            expand = function(args) vim.fn["vsnip#anonymous"](args.body) end,
         },
         formatting = {
             format = function(entry, vim_item)
                 vim_item.kind = require("lspkind").presets.default[vim_item.kind] .. " " .. vim_item.kind
-                vim_item.menu = ({
-                    buffer = "[Buffer]",
-                    nvim_lua = "[Lua]",
-                    nvim_lsp = "[LSP]",
-                    vsnip = "[Vsnip]",
-                })[entry.source.name]
+                vim_item.menu = ({ buffer = "[Buffer]", nvim_lua = "[Lua]", nvim_lsp = "[LSP]", vsnip = "[Vsnip]" })[entry.source.name]
                 return vim_item
             end,
         },
@@ -686,16 +662,22 @@ function M.nvim_cmp()
             ["<C-Space>"] = cmp.mapping.complete(),
             ["<CR>"] = cmp.mapping.confirm(),
             ["<C-e>"] = cmp.mapping.abort(),
+            ["<C-k>"] = cmp.mapping(function(fallback)
+                if vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
+                    vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
+                elseif require("neogen").jumpable() then
+                    vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_next()<CR>", true, true, true), "")
+                else
+                    fallback()
+                end
+            end, { "i", "s" }),
             ["<Tab>"] = cmp.mapping(function(fallback)
                 if cmp.visible() then
                     cmp.select_next_item()
                 elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
                     vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
                 elseif require("neogen").jumpable() then
-                    vim.fn.feedkeys(
-                        vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_next()<CR>", true, true, true),
-                        ""
-                    )
+                    vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_next()<CR>", true, true, true), "")
                 else
                     fallback()
                 end
@@ -706,10 +688,7 @@ function M.nvim_cmp()
                 elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
                     vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
                 elseif require("neogen").jumpable(-1) then
-                    vim.fn.feedkeys(
-                        vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_prev()<CR>", true, true, true),
-                        ""
-                    )
+                    vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_prev()<CR>", true, true, true), "")
                 else
                     fallback()
                 end
@@ -732,11 +711,7 @@ function M.open_quickui_context_menu()
         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
         { "Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition" },
-        {
-            "Hover diagnostic",
-            "lua vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'})",
-            "Show diagnostic of current line",
-        },
+        { "Hover diagnostic", "lua vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'})", "Show diagnostic of current line" },
         { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
         { "--", "" },
         { "Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk" },
@@ -745,19 +720,12 @@ function M.open_quickui_context_menu()
         { "Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk" },
         { "Git buffer reset", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index" },
         { "Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line" },
-        {
-            "Git &remote",
-            [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]],
-            "Open remote url in browser, or copy to clipboard if over ssh",
-        },
+        { "Git &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
         { "--", "" },
     }
     local conflict_state = vim.fn["funcs#get_conflict_state"]()
     if conflict_state ~= "" then
-        table.insert(
-            content,
-            { "Git &conflict get", "ConflictMarker" .. conflict_state, "Get change from " .. conflict_state }
-        )
+        table.insert(content, { "Git &conflict get", "ConflictMarker" .. conflict_state, "Get change from " .. conflict_state })
         table.insert(content, { "Git conflict get all", "ConflictMarkerBoth", "Get change from both" })
         table.insert(content, { "Git conflict remove", "ConflictMarkerNone", "Remove conflict" })
         table.insert(content, { "--", "" })
@@ -776,161 +744,64 @@ function M.vim_quickui()
     vim.fn["quickui#menu#switch"]("normal")
     vim.fn["quickui#menu#reset"]()
     vim.fn["quickui#menu#install"]("&Actions", {
-        {
-            "Insert line",
-            [[execute "lua require('packer').loader('kommentary')" | execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]],
-            "Insert a dividing line",
-        },
+        { "Insert line", [[execute "lua require('packer').loader('kommentary')" | execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]], "Insert a dividing line" },
         { "Insert time", [[put=strftime('%x %X')]], "Insert MM/dd/yyyy hh:mm:ss tt" },
         { "&Trim spaces", [[keeppatterns %s/\s\+$//e | silent! execute "normal! ``"]], "Remove trailing spaces" },
-        {
-            "Re&indent",
-            [[let g:temp = getcurpos() | Sleuth | execute "normal! gg=G" | call setpos('.', g:temp)]],
-            "Recalculate indent with Sleuth and reindent whole file",
-        },
+        { "Re&indent", [[let g:temp = getcurpos() | Sleuth | execute "normal! gg=G" | call setpos('.', g:temp)]], "Recalculate indent with Sleuth and reindent whole file" },
         { "Ded&up lines", [[%!awk '\!x[$0]++']], "Remove duplicated lines and preserve order" },
-        {
-            "Calculate line &=",
-            [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]],
-            'Calculate expression from previous "=" or current line',
-        },
+        { "Calculate line &=", [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]], 'Calculate expression from previous "=" or current line' },
         { "--", "" },
         { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
-        {
-            "Cou&nt occurrences",
-            [[keeppatterns %s///gn | silent! execute "normal! ``"]],
-            "Count occurrences of current search pattern (:%s/pattern//gn)",
-        },
-        {
-            "Search in &buffers",
-            [[execute "cexpr [] | bufdo vimgrepadd //g %" | copen]],
-            "Grep current search pattern in all buffers, add to quickfix",
-        },
-        {
-            "&Diff unsaved",
-            [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"]],
-            "Diff current buffer with file on disk (similar to DiffOrig command)",
-        },
+        { "Cou&nt occurrences", [[keeppatterns %s///gn | silent! execute "normal! ``"]], "Count occurrences of current search pattern (:%s/pattern//gn)" },
+        { "Search in &buffers", [[execute "cexpr [] | bufdo vimgrepadd //g %" | copen]], "Grep current search pattern in all buffers, add to quickfix" },
+        { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
         { "--", "" },
         { "Move tab left &-", [[-tabmove]] },
         { "Move tab right &+", [[+tabmove]] },
-        {
-            "&Refresh screen",
-            [[execute "ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]],
-            "Clear search, refresh screen and colorizer",
-        },
+        { "&Refresh screen", [[execute "ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen and colorizer" },
         { "--", "" },
         { "Open &Alpha", [[execute "lua require('packer').loader('alpha-nvim', true)" | Alpha]], "Open Alpha" },
         { "Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },
         { "Load session", [[SessionLoad]], "Load session from .cache/nvim/session.vim" },
         { "--", "" },
         { "Edit Vimr&c", [[edit $MYVIMRC]] },
-        {
-            "Open in &VSCode",
-            [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]],
-        },
+        { "Open in &VSCode", [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]] },
     })
     vim.fn["quickui#menu#install"]("&Git", {
         { "Git checko&ut", [[Gread]], "Checkout current file from index and load as unsaved buffer (Gread)" },
-        {
-            "Git checkout HEAD",
-            [[Gread HEAD:%]],
-            "Checkout current file from HEAD and load as unsaved buffer (Gread HEAD:%)",
-        },
+        { "Git checkout HEAD", [[Gread HEAD:%]], "Checkout current file from HEAD and load as unsaved buffer (Gread HEAD:%)" },
         { "Git &blame", [[Git blame]], "Git blame of current file" },
         { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
         { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
         { "Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version (Gdiffsplit HEAD)" },
-        {
-            "Git &file history",
-            [[vsplit | execute "lua require('packer').loader('vim-fugitive')" | 0Gclog]],
-            "Browse previously committed versions of current file",
-        },
-        {
-            "Diffview file history",
-            [[DiffviewFileHistory -f -a]],
-            "Browse previously committed versions of current file (DiffviewFileHistory -f -a)",
-        },
+        { "Git &file history", [[vsplit | execute "lua require('packer').loader('vim-fugitive')" | 0Gclog]], "Browse previously committed versions of current file" },
+        { "Diffview file history", [[DiffviewFileHistory -f -a]], "Browse previously committed versions of current file (DiffviewFileHistory -f -a)" },
         { "--", "" },
         { "Git &status", [[Git]], "Git status" },
         { "Git unstaged &changes", [[Git! difftool]], "Load unstaged changes into quickfix (Git! difftool)" },
         { "Git HEAD changes", [[Git! difftool HEAD]], "Load changes from HEAD into quickfix (Git! difftool HEAD)" },
-        {
-            "Diff&view HEAD",
-            [[DiffviewOpen]],
-            "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits",
-        },
+        { "Diff&view HEAD", [[DiffviewOpen]], "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits" },
         { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
         { "--", "" },
-        {
-            "Git search &all",
-            [[call feedkeys(":Git log --all --full-history --name-status -S \"\"\<Left>", "n")]],
-            'Search a string in all committed versions of files, command: git log -p --all -S "<pattern>" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>',
-        },
-        {
-            "Git gre&p all",
-            [[call feedkeys(":Git log --all --full-history --name-status -i -G \"\"\<Left>", "n")]],
-            'Search a regex in all committed versions of files, command: git log -p --all -i -G "<pattern>" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>',
-        },
-        {
-            "Git fi&nd files all",
-            [[call feedkeys(":Git log --all --full-history --name-status -- \"**\"\<Left>\<Left>", "n")]],
-            "Grep file names in all commits",
-        },
+        { "Git search &all", [[call feedkeys(":Git log --all --full-history --name-status -S \"\"\<Left>", "n")]], 'Search a string in all committed versions of files, command: git log -p --all -S "<pattern>" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>' },
+        { "Git gre&p all", [[call feedkeys(":Git log --all --full-history --name-status -i -G \"\"\<Left>", "n")]], 'Search a regex in all committed versions of files, command: git log -p --all -i -G "<pattern>" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>' },
+        { "Git fi&nd files all", [[call feedkeys(":Git log --all --full-history --name-status -- \"**\"\<Left>\<Left>", "n")]], "Grep file names in all commits" },
         { "Git root", [[Grt]], "Change current directory to git root" },
-        {
-            "Cd current file",
-            [[if expand("%") == '' | cd $PWD | else | cd %:p:h | endif]],
-            "Change current directory to current file",
-        },
+        { "Cd current file", [[if expand("%") == '' | cd $PWD | else | cd %:p:h | endif]], "Change current directory to current file" },
     })
     vim.fn["quickui#menu#install"]("&Toggle", {
-        {
-            'Quickfix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}',
-            [[execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"]],
-        },
-        {
-            'Location list        %{empty(filter(getwininfo(), "v:val.loclist")) ? "[ ]" : "[x]"}',
-            [[execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"]],
-        },
-        {
-            'Set &diff             %{&diff ? "[x]" : "[ ]"}',
-            [[execute &diff ? "windo diffoff" : "windo diffthis"]],
-            "Toggle diff in current window",
-        },
-        {
-            'Set scr&ollbind       %{&scrollbind ? "[x]" : "[ ]"}',
-            [[execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"]],
-            "Toggle scrollbind in current window",
-        },
+        { 'Quickfix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', [[execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"]] },
+        { 'Location list        %{empty(filter(getwininfo(), "v:val.loclist")) ? "[ ]" : "[x]"}', [[execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"]] },
+        { 'Set &diff             %{&diff ? "[x]" : "[ ]"}', [[execute &diff ? "windo diffoff" : "windo diffthis"]], "Toggle diff in current window" },
+        { 'Set scr&ollbind       %{&scrollbind ? "[x]" : "[ ]"}', [[execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"]], "Toggle scrollbind in current window" },
         { 'Set &wrap             %{&wrap ? "[x]" : "[ ]"}', [[set wrap!]], "Toggle wrap lines" },
-        {
-            'Set &paste            %{&paste ? "[x]" : "[ ]"}',
-            [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]],
-            "Toggle paste mode (shift alt drag to select and copy)",
-        },
-        {
-            'Set &spelling         %{&spell ? "[x]" : "[ ]"}',
-            [[set spell!]],
-            "Toggle spell checker (z= to auto correct current word)",
-        },
-        {
-            'Set &virtualedit      %{&virtualedit=~#"all" ? "[x]" : "[ ]"}',
-            [[execute &virtualedit=~#"all" ? "set virtualedit-=all" : "set virtualedit+=all"]],
-            "Toggle virtualedit",
-        },
-        {
-            'Set previ&ew          %{&completeopt=~"preview" ? "[x]" : "[ ]"}',
-            [[execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"]],
-            "Toggle function preview",
-        },
+        { 'Set &paste            %{&paste ? "[x]" : "[ ]"}', [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]], "Toggle paste mode (shift alt drag to select and copy)" },
+        { 'Set &spelling         %{&spell ? "[x]" : "[ ]"}', [[set spell!]], "Toggle spell checker (z= to auto correct current word)" },
+        { 'Set &virtualedit      %{&virtualedit=~#"all" ? "[x]" : "[ ]"}', [[execute &virtualedit=~#"all" ? "set virtualedit-=all" : "set virtualedit+=all"]], "Toggle virtualedit" },
+        { 'Set previ&ew          %{&completeopt=~"preview" ? "[x]" : "[ ]"}', [[execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"]], "Toggle function preview" },
         { 'Set &cursorline       %{&cursorline ? "[x]" : "[ ]"}', [[set cursorline!]], "Toggle cursorline" },
         { 'Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', [[set cursorcolumn!]], "Toggle cursorcolumn" },
-        {
-            'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}',
-            [[let &background = &background=="dark" ? "light" : "dark"]],
-            "Toggle background color",
-        },
+        { 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}', [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
         { "--", "" },
         { "Toggle wilder", [[call wilder#toggle()]], "Toggle wilder.nvim command line completion" },
     })
@@ -956,45 +827,17 @@ function M.vim_quickui()
         { "Align using : (delimiter aligned)", [[Tabularize /:]], "Tabularize /:" },
         { "--", "" },
         { "&CSV show column", [[CSVWhatColumn!]], "Show column title under cursor" },
-        {
-            "CSV arrange column",
-            [[execute "lua require('packer').loader('csv.vim')" | 1,$CSVArrangeColumn!]],
-            "Align csv columns",
-        },
-        {
-            "CSV to table",
-            [[execute "lua require('packer').loader('csv.vim')" | CSVTabularize]],
-            "Convert csv to table",
-        },
+        { "CSV arrange column", [[execute "lua require('packer').loader('csv.vim')" | 1,$CSVArrangeColumn!]], "Align csv columns" },
+        { "CSV to table", [[execute "lua require('packer').loader('csv.vim')" | CSVTabularize]], "Convert csv to table" },
     })
     vim.fn["quickui#menu#install"]("L&SP", {
-        {
-            "Workspace &diagnostics",
-            [[lua require("lsp").quickfix_all_diagnostics()]],
-            "Show workspace diagnostics in quickfix",
-        },
-        {
-            "Workspace warnings and errors",
-            [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]],
-            "Show workspace warnings and errors in quickfix",
-        },
+        { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix" },
+        { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
         { "&Toggle diagnostics", [[lua require("lsp").toggle_diagnostics()]], "Toggle lsp diagnostics" },
         { "--", "" },
-        {
-            "&Show folders in workspace",
-            [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]],
-            "Show folders in workspace for LSP",
-        },
-        {
-            "Add folder to workspace",
-            [[lua vim.lsp.buf.add_workspace_folder()]],
-            "Add folder to workspace for LSP",
-        },
-        {
-            "Remove folder from workspace",
-            [[lua vim.lsp.buf.remove_workspace_folder()]],
-            "Remove folder from workspace for LSP",
-        },
+        { "&Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
+        { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
+        { "Remove folder from workspace", [[lua vim.lsp.buf.remove_workspace_folder()]], "Remove folder from workspace for LSP" },
     })
     local quickui_theme_list = {}
     local used_chars = "hjklqg"
@@ -1024,13 +867,7 @@ function M.vim_quickui()
         end
         table.insert(quickui_theme_list, {
             category .. display,
-            string.format(
-                [[execute 'call writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")' | lua vim.notify("Restart nvim to change to %s")]],
-                index,
-                states_file,
-                states_file,
-                theme
-            ),
+            string.format([[execute 'call writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")' | lua vim.notify("Restart nvim to change to %s")]], index, states_file, states_file, theme),
         })
     end
     vim.fn["quickui#menu#install"]("&Colors", quickui_theme_list)
@@ -1038,30 +875,14 @@ function M.vim_quickui()
     vim.fn["quickui#menu#reset"]()
     vim.fn["quickui#menu#install"]("&Actions", {
         { "OSC &yank", [[OSCYank]], "Use ANSI OSC52 sequence to copy from remote SSH sessions" },
-        {
-            "Base64 &encode",
-            [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | S put x]],
-            "Use base64 to encode selected text",
-        },
-        {
-            "Base64 &decode",
-            [[let @x = system('base64 --decode', funcs#get_visual_selection()) | S put x]],
-            "Use base64 to decode selected text",
-        },
+        { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | S put x]], "Use base64 to encode selected text" },
+        { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | S put x]], "Use base64 to decode selected text" },
     })
     vim.fn["quickui#menu#install"]("&Git", {
         { "Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
-        {
-            "Git l&og",
-            [[execute "lua require('packer').loader('vim-flog')" | '<,'>Flogsplit]],
-            "Show git log of selected range with vim-flog",
-        },
+        { "Git l&og", [[execute "lua require('packer').loader('vim-flog')" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
         { "--", "" },
-        {
-            "Git open &remote",
-            [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "1" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]],
-            "Open remote url in browser",
-        },
+        { "Git open &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "1" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]], "Open remote url in browser" },
     })
     vim.fn["quickui#menu#install"]("Ta&bles", {
         { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },
@@ -1085,3 +906,4 @@ function M.vim_quickui()
 end
 
 return M
+

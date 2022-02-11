@@ -16,7 +16,6 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bi
 
 ```bash
 # nvim
-mkdir %USERPROFILE%\.cache\nvim\undo
 git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\vimfiles --depth=1
 mv %USERPROFILE%\vimfiles\config\nvim %LOCALAPPDATA%
 rm %LOCALAPPDATA%\nvim\autoload
