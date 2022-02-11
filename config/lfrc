@@ -63,7 +63,7 @@ map T locate-file-no-ignore
 map <c-p> locate-git-file
 map <c-o> $lazygit
 map <tab> locate-file-cwd
-map I $less "$f"
+map I $less -RiM "$f"
 map i ${{
   if [ "$(file -Lb --mime-type -- "$f" | cut -d/ -f1)" = image ]; then
     if [ -n "$TMUX" ]; then

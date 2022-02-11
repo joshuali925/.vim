@@ -1,3 +1,4 @@
+syntax enable
 set nocompatible
 set backspace=eol,start,indent
 set display=lastline

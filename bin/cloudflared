@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-install-from-github cloudflared cloudflare/cloudflared linux-amd64 linux-arm64 darwin-amd64.tgz '' '' "$@"
+install-from-github cloudflared cloudflare/cloudflared cloudflared-linux-amd64 cloudflared-linux-arm64 darwin-amd64.tgz '' '' "$@"

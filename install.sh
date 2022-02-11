@@ -64,7 +64,7 @@ backup() {
   if [ -e "$1" ]; then
     mkdir -p "$BACKUP_DIR"
     # mv -v --backup=t "$1" "$BACKUP_DIR/$(basename "$1").backup"
-    mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$RANDOM"
+    mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"
   fi
 }
 
@@ -78,9 +78,9 @@ link_file() {
 install_development_tools() {
   log "\nInstalling development tools.."
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
-    sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh
+    sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh git
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt' ]; then
-    sudo apt update && sudo apt install -y build-essential zsh unzip
+    sudo apt update && sudo apt install -y build-essential zsh git curl unzip
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
@@ -169,7 +169,7 @@ install_python() {
 install_dotfiles() {
   log "\nCloning dotfiles.."
   backup "$HOME/.vim"
-  git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth 1
+  git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth=1
   log "\nCreating directories.."
   mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib/node-packages,share/lf} ~/.config/{lf,lazygit}
   log "\nLinking configurations.."
@@ -213,7 +213,7 @@ install_tmux() {
   fi
   log "Installing tmux plugins.."
   backup "$HOME/.tmux"
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth 1
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth=1
   ~/.tmux/plugins/tpm/bin/install_plugins || true
   if [ -e "$HOME/.tmux/plugins/tmux-thumbs" ]; then
     log "Installing tmux-thumbs binaries.."
@@ -326,6 +326,7 @@ install() {
 init() {
   set -e
   cd "$HOME"
+  export PATH="$HOME/.local/bin:$PATH"
   detect-env
 }
 

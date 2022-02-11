@@ -3,8 +3,7 @@ source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
-export LESS='-RiM'  # default -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen
-export BAT_PAGER="less $LESS"
+export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen
 export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
@@ -45,6 +44,7 @@ alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" ~/.vim/config/nvim/init.lua'
+alias less='less -RiM'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
@@ -52,7 +52,7 @@ alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
-alias q-="up -c \"\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
+alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
 alias rga='rg --text --no-ignore --search-zip'
 alias rgf='rg --files | rg'
 alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
@@ -83,17 +83,16 @@ alias gcp='git cherry-pick'
 alias gcpa='git cherry-pick --abort'
 alias gcpc='git cherry-pick --continue'
 alias gd='git diff'
-alias gdca='git diff --cached'
 alias gds='git diff --stat'
 alias gdst='git diff --staged'
 alias gdsst='git diff --stat --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
-alias ggl='git pull --autostash origin $(gref)'
+alias ggl='git pull origin $(gref)'
 alias gpf='git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
-alias gl='git pull --autostash'
+alias gl='git pull'
 alias glr='git pull --rebase'
 alias glg='git log --stat'
 alias glgg='git log --graph'
@@ -135,18 +134,18 @@ alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
-alias gwhere='git describe --tags --abbrev=0; git branch -a --contains HEAD'
+alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)"; echo "Branches containing HEAD$(git branch --color=always -a --contains HEAD)"'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove
-alias gforest='git-foresta --style=10 | less -XF'
-alias gforesta='git-foresta --style=10 --all | less -XF'
+alias gforest='git-foresta --style=10 | less -RiMXF'
+alias gforesta='git-foresta --style=10 --all | less -RiMXF'
 alias gls-files-all="git log --pretty=format: --name-only --all | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all -- {}' | xargs -I{} bash -c 'echo {}; git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all --max-count 10 -- {}'"
-alias gpatch='vi +"syntax enable" +startinsert patch.diff && git apply patch.diff && rm patch.diff'
+alias gpatch='vi +startinsert patch.diff && git apply patch.diff && rm patch.diff'
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
-gdf() { git diff --color "$@" | diff-so-fancy | less --tabs=4 -XF; }
+gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
-grg() { git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | less -XF --pattern="$*"; }
+grg() { git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | \less -RiMXF --pattern="$*"; }
 
 glof() {
   git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
@@ -216,7 +215,7 @@ sudorun() {
     return 0
   fi
   case $CMD in
-    v|vi|vim) sudo "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" +'syntax enable' "$@" ;;
+    v|vi|vim) sudo "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
     lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
     *) XDG_CONFIG_HOME="$HOME/.config" EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
   esac
@@ -296,7 +295,7 @@ x() {
 X() {  # extract to a directory / archive without top directory
   if [ -f "$1" ]; then
     local dir="${1%.*}"
-    local filename="$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)_$1"
+    local filename="$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)_$1"
     command mkdir -pv "$dir"
     command mv -i "$1" "$dir/$filename"
     (cd "$dir" > /dev/null && x "$filename")
@@ -339,9 +338,11 @@ gvf() {
 cdf() {
   local FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=$(rg --files | fzf --bind='tab:down,btab:up') && cd "$(dirname "$FZFTEMP")"
+    FZFTEMP=$(rg --files --no-ignore | fzf --bind='tab:down,btab:up') && cd "$(dirname "$FZFTEMP")"
+  elif [ -d "$(dirname "$1" 2> /dev/null)" ]; then
+    cd "$(dirname "$1")"
   else
-    FZFTEMP=$(rg --files | rg "$@" | fzf --bind='tab:down,btab:up') && cd "$(dirname "$FZFTEMP")"
+    FZFTEMP=$(rg --files --no-ignore | rg "$@" | fzf --bind='tab:down,btab:up') && cd "$(dirname "$FZFTEMP")"
   fi
 }
 
@@ -461,7 +462,7 @@ croc() {
     timeout 60 croc send "$@" 2>&1 | {
       while read line; do
         echo "$line"
-        [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$line") && echo -n "command croc --curve p256 --yes $phrase" | y
+        [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$line") && echo -n " command croc --curve p256 --yes $phrase" | y
       done
     }
   else

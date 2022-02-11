@@ -25,19 +25,12 @@ end
 
 function M.init()
     local function on_attach(client, bufnr)
-        if client.resolved_capabilities.document_highlight then
-            vim.cmd([[
-                augroup lsp_document_highlight
-                    autocmd! * <buffer>
-                    autocmd CursorMoved,CursorMovedI <buffer> lua vim.lsp.buf.document_highlight()
-                    autocmd CursorMoved,CursorMovedI <buffer> lua vim.lsp.buf.clear_references()
-                augroup END
-            ]])
+        -- use null-ls for formatting except on lua
+        if (client.name ~= 'sumneko_lua') then
+            client.resolved_capabilities.document_formatting = false
+            client.resolved_capabilities.document_range_formatting = false
         end
-        -- use null-ls for formatting
-        -- TODO https://github.com/sumneko/lua-language-server/pull/915
-        client.resolved_capabilities.document_formatting = false
-        client.resolved_capabilities.document_range_formatting = false
+        require("illuminate").on_attach(client)
         require("aerial").on_attach(client, bufnr)
     end
 
@@ -77,6 +70,8 @@ function M.init()
                     },
                 },
             },
+            -- TODO https://github.com/sumneko/lua-language-server/issues/960
+            cmd = { "lua-language-server", "--preview" },
         },
         tsserver = {
             init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
@@ -135,7 +130,6 @@ function M.init()
                 },
             }),
             null_ls.builtins.formatting.black,
-            null_ls.builtins.formatting.stylua.with({ extra_args = { "--indent-type", "Spaces" } }),
             null_ls.builtins.formatting.sqlformat.with({ extra_args = { "-rsk", "upper" } }),
         },
     })
@@ -145,10 +139,7 @@ function M.init()
     vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticInfo", numhl = "DiagnosticInfo" })
     vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint", numhl = "DiagnosticHint" })
     vim.fn.sign_define("DiagnosticSignOther", { text = "﫠", texthl = "DiagnosticOther", numhl = "DiagnosticOther" })
-    vim.cmd(
-        "highlight! link DiagnosticVirtualTextInfo DiagnosticVirtualTextHint | highlight DiagnosticVirtualTextHint guifg=#666666 guibg="
-            .. vim.fn.printf("#%x", vim.api.nvim_get_hl_by_name("Normal", true).background)
-    )
+    vim.cmd("highlight! link DiagnosticVirtualTextInfo DiagnosticVirtualTextHint | highlight DiagnosticVirtualTextHint guifg=#666666 guibg=" .. vim.fn.printf("#%x", vim.api.nvim_get_hl_by_name("Normal", true).background))
     vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
         border = "rounded",
@@ -160,10 +151,7 @@ function M.organize_imports_and_format()
         vim.cmd("silent! OrganizeImports")
         vim.lsp.buf.formatting_sync({}, 3000)
     else
-        local formatted = vim.fn.system(
-            "prettier --parser " .. vim.bo.filetype,
-            vim.api.nvim_buf_get_lines(0, 0, -1, false)
-        )
+        local formatted = vim.fn.system("prettier --parser " .. vim.bo.filetype, vim.api.nvim_buf_get_lines(0, 0, -1, false))
         if vim.api.nvim_get_vvar("shell_error") == 0 then
             vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(formatted, "\n"))
         else
@@ -208,3 +196,4 @@ function M.quickfix_all_diagnostics(filter)
 end
 
 return M
+
