@@ -239,7 +239,7 @@ install_node() {
   log "\nInstalling nvm.."
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
   NVM_DIR=~/.nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
   log "Installing node $NODE_VERSION.."
   nvm install "$NODE_VERSION"
   nvm alias default "$NODE_VERSION" && node --version

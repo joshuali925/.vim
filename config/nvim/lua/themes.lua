@@ -147,7 +147,7 @@ local themes = {
             return default_colors
         end,
         config = function()
-            require("nightfox").load(vim.g.theme_index < 0 and "nordfox" or "dawnfox")
+            vim.cmd("colorscheme " .. (vim.g.theme_index < 0 and "nordfox" or "dawnfox"))
         end,
     },
 }

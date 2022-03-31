@@ -328,7 +328,7 @@ function M.neo_tree()
         },
         filesystem = {
             search_limit = 500,
-            filters = { show_hidden = true, respect_gitignore = false },
+            filtered_items = { hide_dotfiles = false, hide_gitignored = false },
             window = {
                 width = 35,
                 mappings = with_default_mappings({

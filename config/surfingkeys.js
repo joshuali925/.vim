@@ -35,6 +35,9 @@ api.aceVimMap('<Down>', 'gj', 'normal');
 api.aceVimMap('<Down>', 'gj', 'visual');
 api.aceVimMap(';w', '<Esc>', 'insert');
 
+// default keys
+// https://github.com/brookhong/Surfingkeys/blob/7626d9515ce6fec36e14499e1e1a4e49a6d1b43a/src/content_scripts/common/api.js#L467
+// https://github.com/brookhong/Surfingkeys/blob/master/src/content_scripts/common/default.js
 api.map('h', 'E'); // tab left
 api.map('l', 'R'); // tab right
 api.map('Z[', 'gx0'); // close tabs to the left
@@ -100,6 +103,8 @@ api.vunmap('gr');
 api.mapkey('gr', 'Go to referrer', function() { if(document.referrer) open(document.referrer); });
 api.unmap('ga');
 api.mapkey('ga', '#12Open Chrome Apps', function() { api.tabOpenLink('chrome://apps/'); });
+api.mapkey('<Ctrl-,>', 'Open Chrome Settings', function() { api.tabOpenLink('chrome://settings/'); });
+api.mapkey('<Ctrl-Alt-,>', 'Open ChromeOS Settings', function() { api.tabOpenLink('chrome://os-settings/'); });
 api.unmap(';v');
 api.mapkey(';vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
 api.mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })

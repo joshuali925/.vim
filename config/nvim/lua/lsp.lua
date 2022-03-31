@@ -59,7 +59,11 @@ function M.init()
             settings = {
                 Lua = {
                     runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
-                    diagnostics = { globals = { "vim" } },
+                    diagnostics = {
+                        globals = { "vim" },
+                        -- neededFileStatus = { ["codestyle-check"] = "Any" }, -- styles lint
+                    },
+                    telemetry = { enable = false },
                     IntelliSense = { traceLocalSet = true },
                     workspace = {
                         -- library = vim.api.nvim_get_runtime_file("", true), -- index library files
@@ -68,6 +72,7 @@ function M.init()
                             [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
                         },
                     },
+                    format = { enable = true, defaultConfig = { indent_style = "space", indent_size = "4" } },
                 },
             },
             -- TODO https://github.com/sumneko/lua-language-server/issues/960

@@ -146,6 +146,8 @@ nnoremap <C-o> :call <SID>EditCallback('lf', 0)<CR>
 noremap <leader>p "0p
 nnoremap <leader>P :registers<CR>:normal! "p<Left>
 xnoremap <leader>P "0P
+imap <leader>r <Esc><leader>r
+nnoremap <leader>r :execute funcs#get_run_command()<CR>
 nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 1)<CR>
 nmap <leader>fs <C-p>
 nnoremap <leader>ff :vsplit **/*

@@ -11,7 +11,7 @@ export FZF_COMPLETION_TRIGGER='\'
 export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='rg --files'
-export FZF_ALT_C_COMMAND='command ls -1Ap 2> /dev/null'
+export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS='--bind="tab:down,btab:up"'
 export FZF_PREVIEW_COMMAND='bat --color=always --style=numbers --theme=OneHalfDark --line-range :50 {}'
 
@@ -405,7 +405,7 @@ t() {  # create, restore, or switch tmux session
       } || tmux
     fi
   else
-    tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
+    [ "$1" == a ] && tmux attach || tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
   fi
 }
 

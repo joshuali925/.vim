@@ -54,10 +54,10 @@ return require("packer").startup({
         use({ "rcarriga/nvim-notify" })
         use({
             "nvim-neo-tree/neo-tree.nvim",
-            branch = "v1.x",
+            branch = "v2.x",
             requires = "MunifTanjim/nui.nvim",
             wants = "nui.nvim",
-            cmd = { "NeoTreeReveal", "NeoTreeFocusToggle" },
+            cmd = "Neotree",
             config = conf("neo_tree"),
         })
 
@@ -106,7 +106,7 @@ return require("packer").startup({
         use({ "chrisbra/csv.vim", setup = conf("setup_csv_vim"), cmd = "CSVWhatColumn" })
 
         -- completion
-        use({ "onsails/lspkind-nvim", event = "InsertEnter" })
+        use({ "onsails/lspkind-nvim", event = "InsertEnter", cond = "require('states').small_file" })
         use({ "hrsh7th/nvim-cmp", after = "lspkind-nvim", config = conf("nvim_cmp") })
         use({ "hrsh7th/cmp-buffer", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-path", after = "nvim-cmp" })

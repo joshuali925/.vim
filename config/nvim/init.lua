@@ -17,7 +17,6 @@ vim.opt.mouse = "a"
 vim.opt.cursorline = true
 vim.opt.numberwidth = 2
 vim.opt.number = true
-vim.opt.wrap = true
 vim.opt.linebreak = true
 vim.opt.showmatch = true
 vim.opt.showmode = false
@@ -143,11 +142,11 @@ map("x", "<C-f>", "<Cmd>lua vim.lsp.buf.range_formatting()<CR>")
 map("", "<leader>p", '"0p')
 map("", "<leader>P", '"0P')
 map("i", "<leader>r", "<Esc><leader>r", {})
-map("n", "<leader>r", "<Cmd>update <bar> execute funcs#get_run_command()<CR>")
+map("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
 map("", "<leader>y", '"+y')
 map("n", "<leader>Y", '"+y$')
-map("n", "<leader>b", "<Cmd>NeoTreeReveal<CR>")
-map("n", "<leader>B", "<Cmd>NeoTreeFocusToggle git_status<CR>")
+map("n", "<leader>b", "<Cmd>Neotree reveal<CR>")
+map("n", "<leader>B", "<Cmd>Neotree git_status<CR>")
 map("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { noremap = true, silent = true })
 map("x", "<leader>n", [["xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { noremap = true, silent = true })
 map("n", "<leader>u", "<Cmd>MundoToggle<CR>")
@@ -338,8 +337,7 @@ elseif vim.fn.has("macunix") ~= 1 then -- WSL Vim
 end
 
 -- delayed plugins {{{1
-local fsize = vim.fn.getfsize(vim.fn.expand("%:p:f"))
-if fsize == nil or fsize < 1048576 then -- 1MB
+if require("states").small_file then
     vim.schedule(function()
         vim.defer_fn(function()
             local plugins = {
