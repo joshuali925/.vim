@@ -31,10 +31,11 @@ map mr vidir-bulk-rename
 map mR lf-bulk-rename
 map ms selected-dir-size
 map mS cwd-size
+map mt tail
 map mc edit-config
 map my copy-path
 map md5 md5
-map mvi edit-with-mini-vim
+map mvi vi
 
 map v :toggle; down
 map V invert
@@ -82,12 +83,14 @@ cmap <down> cmd-history-next
 
 cmd mkdir %mkdir -p "$@"
 cmd touch %touch "$@"
-cmd chmod %chmod "$@" "$f"
+cmd chmod %{{ chmod "$@" "$f"; lf -remote "send $id reload" }}
 cmd chmod? %stat --printf "%a %n \n" "$f"
-cmd vim !$EDITOR "$@"
+cmd vi $command vim -u ~/.vim/config/mini.vim -i NONE "$f"
+cmd vim $$EDITOR "$@"
 cmd rg !clear && rg "$@"
 cmd code %code .
-cmd tail $tail -n 100 -f "$f"
+cmd tail $less -RiM +F "$f"
+cmd sudoedit $sudo vim -u ~/.vim/config/mini.vim "$f"
 cmd file !file "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
@@ -100,7 +103,6 @@ cmd edit-selected ${{ echo "$fx" | xargs -d '\n' $EDITOR }}
 cmd vidir-bulk-rename ${{ printf "%s\n" $fx | vidir - }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
 cmd copy-path %{{ realpath "$f" | y; echo "copied: $(realpath "$f")" }}
-cmd edit-with-mini-vim !command vim -u ~/.vim/config/mini.vim -i NONE "$f"
 
 cmd follow-symlink ${{
   res="$(readlink -f "$f" || echo '.')"
@@ -112,7 +114,7 @@ cmd follow-symlink ${{
 }}
 
 cmd locate-file-cwd ${{
-  res="$(command ls -1Ap 2> /dev/null | fzf --bind 'tab:down,btab:up')"
+  res="$(command ls -1Ap --color=always 2> /dev/null | fzf --ansi --bind 'tab:down,btab:up')"
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then

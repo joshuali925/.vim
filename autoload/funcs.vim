@@ -148,6 +148,11 @@ function! funcs#jest_context() abort
 endfunction
 
 function! funcs#get_run_command() abort
+  if expand('%') =~ '\.class'
+    call funcs#decompile_java_class()
+    return
+  endif
+  update  " write buffer unless it's a java class file, which will be modified when vim-sleuth loads
   if get(b:, 'RunCommand', '') != ''
     return b:RunCommand
   endif
@@ -273,4 +278,12 @@ function! funcs#map_vim_send_terminal()
     endif
   endfunction
   call <SID>MapAction('SendToTerminal', '<leader>te')
+endfunction
+
+function! funcs#decompile_java_class() abort
+  if !filereadable(expand('~/.local/lib/cfr.jar'))
+    call system('curl -L -o ~/.local/lib/cfr.jar https://github.com/leibnitz27/cfr/releases/download/0.152/cfr-0.152.jar')
+  endif
+  silent %!java -jar ~/.local/lib/cfr.jar %
+  set nomodified readonly filetype=java
 endfunction

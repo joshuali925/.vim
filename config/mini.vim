@@ -8,11 +8,18 @@ set noswapfile
 set nobackup
 set nowritebackup
 set paste
+set hlsearch
+set ignorecase
+set smartcase
+set expandtab
+set softtabstop=2
+set shiftwidth=2
 
 noremap , ;
 noremap ;, ,
 nnoremap ;w :update<CR>
 nnoremap ;q :quit<CR>
+nnoremap <C-c> :nohlsearch<CR>
 
 autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
 
