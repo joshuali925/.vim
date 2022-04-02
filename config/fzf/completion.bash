@@ -1,3 +1,4 @@
+# https://raw.githubusercontent.com/junegunn/fzf/HEAD/shell/completion.bash
 #     ____      ____
 #    / __/___  / __/
 #   / /_/_  / / /_
@@ -32,7 +33,7 @@ fi
 ###########################################################
 
 # To redraw line after fzf closes (printf '\e[5n')
-bind '"\e[0n": redraw-current-line'
+bind '"\e[0n": redraw-current-line' 2> /dev/null
 
 __fzf_comprun() {
   if [[ "$(type -t _fzf_comprun 2>&1)" = function ]]; then

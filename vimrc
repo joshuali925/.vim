@@ -46,7 +46,7 @@ set textwidth=0
 set autoread
 set hidden
 set complete=.,w,b,u
-set completeopt=menuone
+set completeopt=menuone,noinsert
 set shortmess+=c
 set shortmess-=S
 set nrformats-=octal
@@ -152,7 +152,7 @@ nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:prev
 nmap <leader>fs <C-p>
 nnoremap <leader>ff :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' $HOME/.cache/vim/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG" \| perl -ne ''chomp(); if (-e $_) {print "$_\n"}'' \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
+nnoremap <leader>fm :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' $HOME/.cache/vim/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^'. expand('%:p'). '$" \| perl -ne ''chomp(); if (-e $_) {print "$_\n"}'' \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>
 nnoremap <leader>fg :GrepRegex<Space>
 xnoremap <leader>fg :<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>
@@ -330,6 +330,9 @@ onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0,
 xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
 xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 call funcs#map_copy_with_osc_yank_script()
+if $SSH_CLIENT != ''
+  nnoremap gx :call system('y', expand('<cfile>'))<CR>
+endif
 
 if has('terminal')
   augroup VimTerminal

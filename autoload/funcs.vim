@@ -193,24 +193,24 @@ function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text
   let sel_save = &selection
   let cb_save = &clipboard
   set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
-  let reg_save = @@
+  let reg_save = @x
   if a:type =~ '^\d\+$'
-    silent execute 'normal! V'. a:type. '$y'
+    silent execute 'normal! V'. a:type. '$"xy'
   elseif a:type =~ '^.$'
-    silent execute "normal! `<". a:type. "`>y"
+    silent execute "normal! `<". a:type. '`>"xy'
   elseif a:type == 'line'
-    silent execute "normal! '[V']y"
+    silent execute "normal! '[V']\"xy"
   elseif a:type == 'block'
-    silent execute "normal! `[\<C-V>`]y"
+    silent execute "normal! `[\<C-v>`]\"xy"
   else
-    silent execute "normal! `[v`]y"
+    silent execute 'normal! `[v`]"xy'
   endif
-  let repl = s:{a:algorithm}(@@)
+  let repl = s:{a:algorithm}(@x)
   if type(repl) == 1
-    call setreg('@', repl, getregtype('@'))
+    call setreg('x', repl, getregtype('x'))
     normal! gvp
   endif
-  let @@ = reg_save
+  let @x = reg_save
   let &selection = sel_save
   let &clipboard = cb_save
 endfunction
@@ -241,6 +241,7 @@ endfunction
 
 function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
   function! s:CopyWithOSCYankScript(str)
+    let @" = a:str
     let buflen = len(a:str)
     let copied = 0
     while buflen > copied
@@ -258,6 +259,7 @@ endfunction
 
 function! funcs#map_copy_to_win_clip()
   function! s:CopyToWinClip(str)
+    let @" = a:str
     call system('clip.exe', a:str)
   endfunction
   call <SID>MapAction('CopyToWinClip', '<leader>y')

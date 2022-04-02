@@ -1,3 +1,4 @@
+# https://raw.githubusercontent.com/junegunn/fzf/HEAD/shell/key-bindings.zsh
 #     ____      ____
 #    / __/___  / __/
 #   / /_/_  / / /_
@@ -65,8 +66,10 @@ fzf-file-widget() {
   zle reset-prompt
   return $ret
 }
-zle     -N   fzf-file-widget
-bindkey '^P' fzf-file-widget  # modified shortcut to ^P
+zle     -N            fzf-file-widget
+bindkey -M emacs '^P' fzf-file-widget
+bindkey -M vicmd '^P' fzf-file-widget
+bindkey -M viins '^P' fzf-file-widget
 
 # =======================================================
 # Ensure precmds are run after cd
@@ -103,15 +106,17 @@ fzf-cd-widget() {
   zle fzf-redraw-prompt  # use fzf-redraw-prompt instead of reset-prompt
   return $ret
 }
-zle     -N    fzf-cd-widget
-bindkey '\ec' fzf-cd-widget
+zle     -N             fzf-cd-widget
+bindkey -M emacs '\ec' fzf-cd-widget
+bindkey -M vicmd '\ec' fzf-cd-widget
+bindkey -M viins '\ec' fzf-cd-widget
 
 # CTRL-R - Paste the selected command from history into the command line
 fzf-history-widget() {
   local selected num
   setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2> /dev/null
   selected=( $(fc -rl 1 | perl -ne 'print if !$seen{(/^\s*[0-9]+\**\s+(.*)/, $1)}++' |
-    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --tiebreak=index --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m" $(__fzfcmd)) )
+    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --tiebreak=index --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --theme=OneHalfDark --color=always --plain' --preview-window='right,40%,wrap'" $(__fzfcmd)) )
   local ret=$?
   if [ -n "$selected" ]; then
     num=$selected[1]
@@ -122,8 +127,10 @@ fzf-history-widget() {
   zle reset-prompt
   return $ret
 }
-zle     -N   fzf-history-widget
-bindkey '^R' fzf-history-widget
+zle     -N            fzf-history-widget
+bindkey -M emacs '^R' fzf-history-widget
+bindkey -M vicmd '^R' fzf-history-widget
+bindkey -M viins '^R' fzf-history-widget
 
 } always {
   eval $__fzf_key_bindings_options

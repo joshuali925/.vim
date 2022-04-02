@@ -161,4 +161,3 @@ function M.colors()
 end
 
 return M
-

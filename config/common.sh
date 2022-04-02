@@ -4,7 +4,7 @@ source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
 export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen
-export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
+export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER='\'
@@ -39,6 +39,7 @@ alias l='exa -alF --git --color=always --color-scale --icons --group-directories
 alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
+alias sudo='sudo '
 alias title='printf "$([ -n "$TMUX" ] && printf "\033Ptmux;\033")\e]0;%s\e\\$([ -n "$TMUX" ] && printf "\033\\")"'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
@@ -211,7 +212,7 @@ sudorun() {
   shift
   if [ ! -x "$(command -v "$CMD")" ] && type "$CMD" | grep -q "$CMD is a \(shell \)\?function"; then
     echo -e "Running as bash function..\n" >&2
-    sudo bash -c "$(declare -f "$CMD"); $CMD"
+    sudo bash -c "$(declare -f "$CMD"); $CMD $*"
     return 0
   fi
   case $CMD in
@@ -358,7 +359,7 @@ vrg() {
   fi
 }
 
-# https://github.com/junegunn/fzf/blob/3c804bcfec7c1f3cb69398f6d74f77a25286dbcb/ADVANCED.md#ripgrep-integration
+# https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration
 fif() {  # find in file
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
   rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute($EDITOR {+} -c \"/$1\" < /dev/tty)"
@@ -368,7 +369,9 @@ rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to
   local RG_PREFIX="rg --column --line-number --no-heading --color=always$([ "$#" -gt 0 ] && printf " %q" "$@")"
   FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "${INIT_QUERY:-}")" \
   fzf --ansi --layout=default --height=100% --disabled --query="${INIT_QUERY:-}" \
-      --bind="ctrl-s:unbind(change,ctrl-s)+change-prompt(2. fzf> )+enable-search+clear-query" \
+      --header='╱ <C-s> (fzf mode) ╱ <C-r> (Reset ripgrep) ╱' \
+      --bind="ctrl-s:unbind(change,ctrl-s)+change-prompt(2. fzf> )+enable-search+clear-query+rebind(ctrl-r)" \
+      --bind="ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-s)" \
       --bind="change:reload:sleep 0.2; $RG_PREFIX {q}" \
       --bind="enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
       --bind='tab:down,btab:up' \
@@ -487,7 +490,7 @@ docker-shell() {
   if [[ -n $SELECTED_ID ]]; then
     printf "\n → %s\n" "$SELECTED_ID"
     SELECTED_ID=$(echo "$SELECTED_ID" | awk '{print $1}')
-    docker exec -it "$SELECTED_ID" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)'
+    docker exec -it "$SELECTED_ID" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)' || docker exec -it "$SELECTED_ID" sh
   fi
 }
 

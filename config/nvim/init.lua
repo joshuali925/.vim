@@ -32,7 +32,7 @@ vim.opt.shiftwidth = 2
 vim.opt.shiftround = true
 vim.opt.textwidth = 0
 vim.opt.complete = { ".", "w", "b", "u" }
-vim.opt.completeopt = { "menuone", "noselect" }
+vim.opt.completeopt = { "menuone", "noinsert" }
 vim.opt.completefunc = "funcs#complete_word"
 vim.opt.pumblend = 8
 vim.opt.shortmess = vim.opt.shortmess + { c = true, A = true }
@@ -117,8 +117,8 @@ map("i", "<C-_>", "<C-o>u")
 map("n", "_", "<C-o>")
 map("n", "+", "<C-i>")
 map("n", "Q", "q")
-map("x", "@q", "<Cmd>normal! @q<CR>")
-map("x", "@@", "<Cmd>normal! @@<CR>")
+map("x", "@q", ":normal! @q<CR>")
+map("x", "@@", ":normal! @@<CR>")
 map("n", "U", "<Cmd>execute 'earlier '. v:count1. 'f'<CR>")
 map("x", "<", "<gv")
 map("x", ">", ">gv")
@@ -323,7 +323,7 @@ vim.notify = function(...)
     vim.notify(...)
 end
 vim.paste = (function(overridden)
-    return function(lines, phase)
+    return function(lines, phase) -- break undo before pasting in insert mode
         if (phase == -1 or phase == 1) and vim.fn.mode() == "i" and not vim.o.paste then
             vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
         end
@@ -332,6 +332,7 @@ vim.paste = (function(overridden)
 end)(vim.paste)
 if vim.env.SSH_CLIENT ~= nil then -- ssh session
     vim.fn["funcs#map_copy_with_osc_yank"]()
+    map("n", "gx", "<Cmd>let @x = expand('<cfile>') <bar> OSCYankReg x<CR>")
 elseif vim.fn.has("macunix") ~= 1 then -- WSL Vim
     vim.fn["funcs#map_copy_to_win_clip"]()
 end
