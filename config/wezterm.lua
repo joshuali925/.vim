@@ -1,3 +1,4 @@
+-- icon: https://github.com/DinkDonk/kitty-icon
 local wezterm = require("wezterm")
 
 -- wezterm.on("update-right-status", function(window, pane)
@@ -24,7 +25,7 @@ local wezterm = require("wezterm")
 return {
     use_ime = true,
     font = wezterm.font("JetBrainsMono Nerd Font"),
-    font_size = 14,
+    font_size = 13.9,
     use_fancy_tab_bar = false,
     harfbuzz_features = { "calt=0", "clig=0", "liga=0" }, -- disable ligatures
     warn_about_missing_glyphs = false,
@@ -60,7 +61,7 @@ return {
         },
     },
     keys = {
-        { key = "t", mods = "CMD", action = wezterm.action({ SpawnCommandInNewTab = {cwd = ""} }) },
+        { key = "t", mods = "CMD", action = wezterm.action({ SpawnCommandInNewTab = { cwd = "" } }) },
         { key = "d", mods = "CMD", action = wezterm.action({ SplitHorizontal = { domain = "CurrentPaneDomain" } }) },
         { key = "k", mods = "CMD", action = wezterm.action({ ClearScrollback = "ScrollbackAndViewport" }) },
         { key = "f", mods = "CMD", action = wezterm.action({ Search = { CaseInSensitiveString = "" } }) },
@@ -69,4 +70,3 @@ return {
         { key = "Enter", mods = "CMD", action = "ToggleFullScreen" },
     },
 }
-

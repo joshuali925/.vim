@@ -147,9 +147,9 @@ install_java() {
     echo "Unknown distro.."
     exit 1
   fi
-  curl -L -o- "$jdk_url" | tar -xz -C "$HOME/.local"
-  echo "export PATH=\$HOME/.local/$jdk_version/bin:\$PATH" >> ~/.zshrc
-  echo "export JAVA_HOME=\$HOME/.local/$jdk_version" >> ~/.zshrc
+  curl -L -o- "$jdk_url" | tar -xz -C "$HOME/.local/lib"
+  echo "export PATH=\$HOME/.local/lib/$jdk_version/bin:\$PATH" >> ~/.zshrc
+  echo "export JAVA_HOME=\$HOME/.local/lib/$jdk_version" >> ~/.zshrc
   log "Installed $jdk_version, exported JAVA_HOME to ~/.zshrc, restart your shell"
 }
 

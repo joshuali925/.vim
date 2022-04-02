@@ -153,4 +153,3 @@ return require("packer").startup({
         use({ "will133/vim-dirdiff", cmd = "DirDiff" })
     end,
 })
-

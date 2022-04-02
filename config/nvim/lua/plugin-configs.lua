@@ -81,6 +81,7 @@ end
 
 function M.setup_neoterm()
     vim.g.neoterm_default_mod = "belowright"
+    vim.g.neoterm_automap_keys = ";tT"
     vim.g.neoterm_autoinsert = 1
 end
 
@@ -321,11 +322,7 @@ function M.neo_tree()
     end
 
     require("neo-tree").setup({
-        enable_diagnostics = false,
-        default_component_configs = {
-            indent = { padding = 2, with_markers = true },
-            icon = { folder_closed = "", folder_open = "", default = "" },
-        },
+        default_component_configs = { icon = { default = "" } },
         filesystem = {
             search_limit = 500,
             filtered_items = { hide_dotfiles = false, hide_gitignored = false },
@@ -378,16 +375,22 @@ function M.neo_tree()
                 mappings = with_default_mappings({ ["<BS>"] = focus("buffers"), ["\\"] = focus("filesystem") }),
             },
         },
+        event_handlers = {
+            {
+                event = "vim_buffer_enter",
+                handler = function(arg)
+                    if vim.bo.filetype == "neo-tree" then
+                        vim.wo.signcolumn = "no" -- hide instead of overriding highlights, neo-tree resets winhighlight on BufEnter
+                    end
+                end
+            }
+        }
     })
     vim.cmd([[
         highlight link NeoTreeNormal NormalSB
         highlight link NeoTreeNormalNC NormalSB
-        highlight link NeoTreeGitModified Directory
-        augroup NeoTreeNoSignColumn
-            autocmd!
-            autocmd FileType neo-tree call feedkeys("\<Cmd>setlocal signcolumn=no\<CR>", "n")
-        augroup END
-    ]]) -- neo-tree resets winhighlight on BufEnter
+        highlight link NeoTreeGitModified DiagnosticWarn
+    ]])
 end
 
 function M.telescope()
@@ -400,6 +403,7 @@ function M.telescope()
                     ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
                     [","] = actions.preview_scrolling_down,
                     ["."] = actions.preview_scrolling_up,
+                    ["o"] = actions.select_default,
                     ["q"] = actions.close,
                 },
                 i = {
@@ -534,6 +538,12 @@ function M.feline_nvim()
             if vim.o.paste then
                 flags = flags .. "[paste]"
             end
+            if vim.bo.fileencoding ~= "utf-8" then
+                flags = flags .. "[fenc: " .. vim.bo.fileencoding .. "]"
+            end
+            if vim.bo.fileformat ~= "unix" then
+                flags = flags .. "[ff: " .. vim.bo.fileformat .. "]"
+            end
             if #flags > 0 then
                 return " " .. flags .. " "
             end
@@ -646,9 +656,9 @@ end
 function M.nvim_cmp()
     local cmp = require("cmp")
     cmp.setup({
-        snippet = {
-            expand = function(args) vim.fn["vsnip#anonymous"](args.body) end,
-        },
+        completion = { completeopt = "menuone,noinsert" },
+        snippet = { expand = function(args) vim.fn["vsnip#anonymous"](args.body) end },
+        window = { documentation = cmp.config.window.bordered() },
         formatting = {
             format = function(entry, vim_item)
                 vim_item.kind = require("lspkind").presets.default[vim_item.kind] .. " " .. vim_item.kind
@@ -906,4 +916,3 @@ function M.vim_quickui()
 end
 
 return M
-

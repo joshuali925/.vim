@@ -75,8 +75,6 @@ function M.init()
                     format = { enable = true, defaultConfig = { indent_style = "space", indent_size = "4" } },
                 },
             },
-            -- TODO https://github.com/sumneko/lua-language-server/issues/960
-            cmd = { "lua-language-server", "--preview" },
         },
         tsserver = {
             init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
@@ -112,7 +110,9 @@ function M.init()
     null_ls.setup({
         sources = {
             null_ls.builtins.code_actions.gitrebase,
+            null_ls.builtins.code_actions.shellcheck,
             null_ls.builtins.diagnostics.shellcheck,
+            null_ls.builtins.diagnostics.zsh,
             null_ls.builtins.formatting.prettier.with({
                 filetypes = {
                     "javascript",
@@ -201,4 +201,3 @@ function M.quickfix_all_diagnostics(filter)
 end
 
 return M
-

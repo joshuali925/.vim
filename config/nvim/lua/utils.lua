@@ -69,4 +69,3 @@ function M.command_without_quickscope(command)
 end
 
 return M
-

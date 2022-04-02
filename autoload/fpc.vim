@@ -7,7 +7,7 @@ function! fpc#init() abort
   let g:fpc_use_all_buffers = get(g:, 'fpc_use_all_buffers', 1)
   let g:fpc_use_cache = get(g:, 'fpc_use_cache', 1)
   let g:fpc_force_refresh_menu = get(g:, 'fpc_force_refresh_menu', 1)
-  let g:fpc_select_first_match = get(g:, 'fpc_select_first_match', 0)  " use noinsert instead of noselect if available
+  let g:fpc_select_first_match = get(g:, 'fpc_select_first_match', 1)  " use noinsert instead of noselect if available
   let g:fpc_omni_enabled_ft = get(g:, 'fpc_omni_enabled_ft', {'python': 1, 'javascript': 1})
 
   let s:FuzzyFunc = g:fpc_custom_matcher || !exists('*matchfuzzy') ? function('s:FuzzyMatch') : function('s:VimFuzzyMatch')

@@ -40,7 +40,9 @@ do_action() {
     else
         preview_win='down:80%'
     fi
-    selected=$(FZF_DEFAULT_COMMAND=$cmd SHELL=$(command -v bash) fzf -m --preview="$preview_cmd" \
+    selected=$(FZF_DEFAULT_COMMAND=$cmd SHELL=$(command -v bash) fzf \
+        --header 'C-p:preview   C-n:new window   C-r:reload   C-x:kill   C-v:join vert   C-s:join   C-t:swap' \
+        --multi --preview="$preview_cmd" \
         --preview-window=$preview_win --height=100% --reverse --info=inline --header-lines=1 \
         --delimiter='\s{2,}' --with-nth=2..-1 --nth=1,2,8,9 --cycle --exact \
         --bind="ctrl-p:toggle-preview" \
@@ -151,8 +153,8 @@ panes_src() {
         nlwp='wq'
     fi
     local cur_id="$1"
-    printf "%-6s  %-9s  %6s  %8s  %4s  %4s  %4s  %-8s  %-7s  %s\t\t%s\n" \
-        'PANEID' 'SESSION' 'PANE' 'PID' '%CPU' '%MEM' 'NLWP' 'TIME' 'TTY' 'CMD' 'C-p:preview C-n:new window C-r:reload C-x:kill C-v:join vert C-s:join C-t:swap'
+    printf "%-6s  %-9s  %6s  %8s  %4s  %4s  %4s  %-8s  %-7s  %s\n" \
+        'PANEID' 'SESSION' 'PANE' 'PID' '%CPU' '%MEM' 'NLWP' 'TIME' 'TTY' 'CMD'
     panes_info=$(tmux list-panes -aF \
         '#D #{s| |_|:session_name} #I.#P #{?window_zoomed_flag,⬢,❄} #{pane_tty} #{pane_current_path} #T' |
         sed -E "/^$cur_id /d")
@@ -208,7 +210,6 @@ _match_in_args() {
 
 select_last_pane() {
     local m_ids=($(tmux show -gqv '@mru_pane_ids'))
-    local ids_str
     local cur_info=($(tmux display-message -p '#D #S'))
     local cur_id=${cur_info[0]}
     local cur_session=${cur_info[*]:1}
