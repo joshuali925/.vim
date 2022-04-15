@@ -25,10 +25,11 @@ local wezterm = require("wezterm")
 return {
     use_ime = true,
     font = wezterm.font("JetBrainsMono Nerd Font"),
-    font_size = 13.9,
+    font_size = 14,
     use_fancy_tab_bar = false,
     harfbuzz_features = { "calt=0", "clig=0", "liga=0" }, -- disable ligatures
     warn_about_missing_glyphs = false,
+    -- custom_block_glyphs = false,
     window_decorations = "RESIZE",
     text_blink_rate = 0,
     cursor_blink_rate = 0,

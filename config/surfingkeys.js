@@ -163,7 +163,9 @@ api.mapkey('gp', 'DuckDuckGo first result', function() {
 api.map('yop', ';s'); // toggle pdf viewer
 api.mapkey('yoe', 'Toggle editable', function() { document.body.contentEditable = document.body.contentEditable === 'true' ? 'false' : 'true'; });
 api.mapkey('yof', 'Toggle full screen', function() {
-    if (/age.?fans/.test(window.location.hostname))
+    if (window.location.hostname === 'www.bilibili.com' && window.location.pathname.startsWith('/bangumi'))
+        document.getElementsByClassName('squirtle-video-pagefullscreen')[0].click();
+    else if (/age.?fans/.test(window.location.hostname))
         document.getElementsByClassName('fullscn')[0].click();
     else
         document.getElementById('playerControlBtn').click(); // https://greasyfork.org/en/scripts/4870-maximize-video, escape also works
@@ -200,14 +202,13 @@ api.mapkey('yod', 'Toggle bilibili danmaku', function() {
     document.getElementsByClassName('bui-switch-input')[0].click();
 }, {domain: /bilibili\.com/i});
 
-// https://github.com/brookhong/Surfingkeys/issues/1110, https://github.com/brookhong/Surfingkeys/issues/1379
 api.unmap('gg');
 api.unmap('G');
 var scrollX, scrollY;
 api.mapkey('gg', 'Go to top', function() {
     var tempX = document.scrollingElement.scrollLeft;
     var tempY = document.scrollingElement.scrollTop;
-    window.scrollTo(0, 0);
+    api.Normal.scroll('top');
     if (tempX !== document.scrollingElement.scrollLeft || tempY !== document.scrollingElement.scrollTop) {
         scrollX = tempX;
         scrollY = tempY;
@@ -216,7 +217,7 @@ api.mapkey('gg', 'Go to top', function() {
 api.mapkey('G', 'Go to bottom', function() {
     var tempX = document.scrollingElement.scrollLeft;
     var tempY = document.scrollingElement.scrollTop;
-    window.scrollTo(0, document.body.scrollHeight);
+    api.Normal.scroll('bottom');
     if (tempX !== document.scrollingElement.scrollLeft || tempY !== document.scrollingElement.scrollTop) {
         scrollX = tempX;
         scrollY = tempY;

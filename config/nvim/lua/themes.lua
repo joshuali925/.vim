@@ -100,7 +100,7 @@ local themes = {
         config = function()
             vim.g.vscode_style = "dark"
             vim.cmd("colorscheme vscode")
-            vim.cmd("highlight IndentBlanklineChar gui=nocombine guifg=#353535")
+            vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
         end,
     },
     ["catppuccin"] = {

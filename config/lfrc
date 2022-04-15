@@ -69,7 +69,7 @@ map i ${{
   if [ "$(file -Lb --mime-type -- "$f" | cut -d/ -f1)" = image ]; then
     if [ -n "$TMUX" ]; then
       printf 'Press enter to copy print image command and detach tmux'; read; echo
-      echo " iterm-imgcat $(realpath "$f"); printf 'Press enter to continue'; read; echo; tmux attach" | y && tmux detach
+      echo " iterm-imgcat '$(realpath "$f")'; printf 'Press enter to continue'; read; echo; tmux attach" | y && tmux detach
     else
       iterm-imgcat "$f"; printf 'Press enter to continue'; read; echo
     fi
@@ -95,7 +95,7 @@ cmd file !file "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
 cmd gdu $"$HOME/.vim/bin/gdu"
-cmd md5 !md5sum "$f"
+cmd md5 !echo "$fx" | xargs -d '\n' md5sum
 cmd selected-dir-size %du -h --max-depth=0 "$f"
 cmd cwd-size %du -h --max-depth=0 .
 cmd edit-config ${{ $EDITOR ~/.vim/config/lfrc }}

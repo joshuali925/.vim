@@ -49,7 +49,7 @@ end
 
 function M.rest_nvim()
     require("rest-nvim").setup({ skip_ssl_verification = true })
-    vim.cmd([[command! RestNvimPreviewCurl execute "normal \<Plug>RestNvimPreview" | sleep 100m | S 1,2messages]])
+    vim.api.nvim_create_user_command("RestNvimPreviewCurl", [[execute "normal \<Plug>RestNvimPreview" | sleep 100m | S 1,2messages]], {})
 end
 
 vim.g.qs_filetype_blacklist = {
@@ -71,7 +71,7 @@ vim.g.qs_filetype_blacklist = {
 } -- will only run on first require
 vim.g.qs_buftype_blacklist = { "terminal" }
 function M.quick_scope()
-    vim.cmd("highlight QuickScopePrimary guifg='" .. (vim.g.theme_index < 0 and "#ffca6e" or "#bf8000") .. "'")
+    vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = vim.g.theme_index < 0 and "#ffca6e" or "#bf8000" })
 end
 
 function M.mundo()
@@ -123,19 +123,15 @@ function M.conflict_marker()
     vim.g.conflict_marker_end = "^>>>>>>> .*$"
     vim.g.conflict_marker_highlight_group = ""
     if vim.g.theme_index < 0 then
-        vim.cmd([[
-            highlight ConflictMarkerBegin guibg=#427266
-            highlight ConflictMarkerOurs guibg=#364f49
-            highlight ConflictMarkerTheirs guibg=#3a4f67
-            highlight ConflictMarkerEnd guibg=#234a78
-        ]])
+        vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#427266" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#364f49" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#3a4f67" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#234a78" })
     else
-        vim.cmd([[
-            highlight ConflictMarkerBegin guibg=#7ed9ae
-            highlight ConflictMarkerOurs guibg=#94ffcc
-            highlight ConflictMarkerTheirs guibg=#b9d1fa
-            highlight ConflictMarkerEnd guibg=#86abeb
-        ]])
+        vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#7ed9ae" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#94ffcc" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#b9d1fa" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#86abeb" })
     end
 end
 
@@ -163,12 +159,12 @@ function M.setup_vim_visual_multi()
         ["Select Operator"] = "v",
         ["Case Conversion Menu"] = "s",
     }
-    vim.cmd([[
-        augroup VisualMultiRemapBS
-            autocmd!
-            autocmd User visual_multi_exit execute 'inoremap <buffer> <expr> <BS> v:lua.MPairs.autopairs_bs('. bufnr(). ')'
-        augroup END
-    ]]) -- for nvim_autopairs: https://github.com/mg979/vim-visual-multi/issues/172
+    vim.api.nvim_create_augroup("VisualMultiRemapBS", {}) -- for nvim_autopairs: https://github.com/mg979/vim-visual-multi/issues/172
+    vim.api.nvim_create_autocmd("User", {
+        pattern = "visual_multi_exit",
+        group = "VisualMultiRemapBS",
+        callback = function() vim.keymap.set("i", "<BS>", "v:lua.MPairs.autopairs_bs(" .. vim.fn.bufnr() .. ")", { buffer = true, expr = true }) end,
+    })
 end
 
 function M.nvim_bqf()
@@ -186,8 +182,8 @@ end
 
 function M.hop_nvim()
     require("hop").setup({})
-    vim.cmd("highlight! link HopNextKey HopNextKey1")
-    vim.cmd("highlight! link HopNextKey2 HopNextKey1")
+    vim.api.nvim_set_hl(0, "HopNextKey", { link = "HopNextKey1" })
+    vim.api.nvim_set_hl(0, "HopNextKey2", { link = "HopNextKey1" })
 end
 
 function M.nvim_neoclip_lua()
@@ -229,32 +225,16 @@ end
 
 function M.alpha_nvim()
     local theme = require("alpha.themes.startify")
-    if vim.g.theme_index < 0 then
-        theme.section.header.val = {
-            [[⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠛⣿⣿⣿⣿⣿⡿⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⣿⢧⣶⡉⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢹⣿⣿⣿⣿⠃ ⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⡏⣼⣿⣿⠄⠈⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⠘⠛⠛⠛⠛ ⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⠐⢋⣤⣤⢦⣤⡀   ⠈⠛⠛⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⢁⠤⡀    ⡠⢄⢹⣿⣿⣿⣿⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⠏⣰⡾⠉  ⢸⡇  ⣀⣀⣀  ⣀⣀⣉⡉⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣭⣿⠃  ⠉     ⠈⠁ ⢩⣭⣭⣿⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿ ⣿⣇⡀ ⢀⣸⡇⣰⠿⠉⠉⠉⣷⡄⢹⣿⢟⣵⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠋   ⢀⣠⣤⣄⣤⣀⣀   ⠙⣿⣿⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⡄⠈⠻⢿⣶⡿⠋⢸⣿    ⣿⡇⢘⣯⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟  ⢠⡴⠚⢿⣿⢛⣉⣻⣿⢟⡛⢦⡀ ⠈⣿⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⣤⡀  ⢰⣦⠜⢿⣦⣤⣤⣾⠋⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟  ⣰⡯⠶⣿⠟⣛⢻⣿⣋⣙⣿⡿⠚⢿⣆ ⠘⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⣿⡿⠂ ⠈⠁  ⠉⠉⢉⣁⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢠⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿  ⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⡿⠁    ⠘⢶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⡇ ⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿ ⢠⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⡇      ⠈⠛⠛⠛⠛⠙⢻⣿⣿⣿⢫⡒⡂⡠⠌⣽⣿⣿⣿⣿⣿⣿⣄⢸⣿⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠿⢿⣿⢀⣾⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⣷⣤⣤⣀⣀⣀⣠⣤⣤⣤⣤⣤⣤⣿⣿⣿⣿⣄⣀⣂⣑⣥⣿⣿⣿⣿⣿⣿⣿⣿⣾⠃   ⠙⣿⣿⣿⣿⣿⠃   ⢸⣾⣿⣿⣿⣿⣿⣿]],
-            [[⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠛⠛⠁⠄⠂⠄⠄⡿⠿⠿⠿⠇⠄⠂⠄⠄⠾⠿⠿⣿⣿⣿⣿⣿]],
-        }
-    else
-        theme.section.header.val = {
-            [[███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗]],
-            [[████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║]],
-            [[██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║]],
-            [[██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║]],
-            [[██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║]],
-            [[╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝]],
-        }
-    end
+    theme.section.header.val = {
+        [[      ⢀⣀⣀⡀          ⣀⣀⣀                       ⢀⣀⣀⡀                      ⣤⣤      ]],
+        [[      ⣿⣿⣿⣿⣷⣄      ⣰⣿⠟⠛⢿⣷⡄                    ⣼⣿⠟⠛⠟                      ⣿⣿      ]],
+        [[  ⢠   ⠙⠻⠿⢿⣿⣿⡆    ⢰⣿⡏   ⣿⣷⢸⣿⣴⠿⣿⣧ ⢠⣾⠟⢿⣦⡀⢸⣷⡼⠿⣿⣦ ⢿⣿⣄   ⣴⣿⠿⣿⣦ ⠰⠿⠿⢿⣷⡀⣿⣧⡾⠿⢠⣾⡿⠿⠇⣿⣿⡾⠿⣿⣦  ]],
+        [[  ⣿⣶⣄⡀    ⠈⠻⡇ ⣶  ⢸⣿⡇   ⣿⣿⢸⣿⡇ ⢸⣿⡇⣿⣿⣤⣬⣿⡇⢸⣿⠁ ⢹⣿ ⠈⠛⢿⣷⣆⢰⣿⣧⣤⣼⣿⡇⢀⣤⣤⣼⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿  ]],
+        [[  ⠸⣿⣿⣿⣿⣷⣦    ⢀⡏  ⠈⣿⣧  ⢀⣿⡏⢸⣿⡇ ⢸⣿⡇⣿⣿⠉⠉⠉⠁⢸⣿  ⢸⣿    ⣻⣿⠸⣿⣏⠉⠉⠉⢱⣿⡟⠁⢸⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿  ]],
+        [[   ⠈⠻⢿⣿⡿⠏   ⣠⠟    ⠘⠿⣿⣾⡿⠟⠁⢸⣿⡟⢶⣿⠟ ⠘⠿⣷⣶⡾ ⠸⠿  ⠸⠿ ⠿⣷⣾⡿⠏ ⠙⢿⣶⣶⠾⠈⢿⣿⡶⠛⠿⠇⠿⠿  ⠘⠿⣷⣶⠇⠿⠿  ⠿⠿  ]],
+        [[       ⣀⣀⣠⡴⠞⠁            ⢸⣿⡇                                                    ]],
+        [[       ⠉⠁                ⠘⠛⠃                                                    ]],
+    }
     theme.section.top_buttons.val = {}
     theme.section.bottom_buttons.val = {
         theme.button("!", "Git diff staged", ":args `Git ls-files --modified` | Git difftool<CR>"),
@@ -272,12 +252,17 @@ function M.alpha_nvim()
         return string.find(path, "vim/.*/doc/.*%.txt") or string.find(path, "/.git/")
     end
     require("alpha").setup(theme.config)
-    vim.cmd([[
-        augroup AlphaAutoCommands
-            autocmd!
-            autocmd FileType alpha nnoremap <buffer> v <Cmd>lua require('alpha').queue_press()<CR>| nnoremap <buffer> <expr> q len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'| nnoremap <buffer> e <Cmd>enew<CR>| nnoremap <buffer> i <Cmd>enew <bar> startinsert<CR>
-        augroup END
-    ]])
+    vim.api.nvim_create_augroup("AlphaAutoCommands", {})
+    vim.api.nvim_create_autocmd("FileType", {
+        pattern = "alpha",
+        group = "AlphaAutoCommands",
+        callback = function()
+            vim.keymap.set("n", "v", require("alpha").queue_press, { buffer = true }) -- https://github.com/goolord/alpha-nvim/issues/92
+            vim.keymap.set("n", "q", "len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'", { buffer = true, expr = true })
+            vim.keymap.set("n", "e", "<Cmd>enew<CR>", { buffer = true })
+            vim.keymap.set("n", "i", "<Cmd>enew <bar> startinsert<CR>", { buffer = true })
+        end,
+    })
 end
 
 function M.neo_tree()
@@ -349,10 +334,6 @@ function M.neo_tree()
                     ["T"] = function(state)
                         require("neo-tree.sources.filesystem.commands").filter_on_submit(state)
                     end,
-                    ["/"] = function(state)
-                        state.filters.respect_gitignore = true
-                        require("neo-tree.sources.filesystem.commands").filter_as_you_type(state)
-                    end,
                     ["<BS>"] = focus("git_status"),
                     ["\\"] = focus("buffers"),
                 }),
@@ -386,11 +367,9 @@ function M.neo_tree()
             }
         }
     })
-    vim.cmd([[
-        highlight link NeoTreeNormal NormalSB
-        highlight link NeoTreeNormalNC NormalSB
-        highlight link NeoTreeGitModified DiagnosticWarn
-    ]])
+    vim.api.nvim_set_hl(0, "NeoTreeNormal", { link = "NormalSB" })
+    vim.api.nvim_set_hl(0, "NeoTreeNormalNC", { link = "NormalSB" })
+    vim.api.nvim_set_hl(0, "NeoTreeGitModified", { link = "DiagnosticWarn" })
 end
 
 function M.telescope()
@@ -507,7 +486,7 @@ function M.feline_nvim()
         Rv = colors.orange,
         t = colors.red,
     }
-    local function checkwidth(winid) return vim.api.nvim_win_get_width(winid) > 60 end
+    local function checkwidth() return vim.api.nvim_win_get_width(0) > 60 end
 
     local components = { active = { {}, {}, {} }, inactive = { {} } }
     components.active[1][1] = {
@@ -538,7 +517,7 @@ function M.feline_nvim()
             if vim.o.paste then
                 flags = flags .. "[paste]"
             end
-            if vim.bo.fileencoding ~= "utf-8" then
+            if vim.bo.fileencoding ~= "" and vim.bo.fileencoding ~= "utf-8" then
                 flags = flags .. "[fenc: " .. vim.bo.fileencoding .. "]"
             end
             if vim.bo.fileformat ~= "unix" then
@@ -681,6 +660,8 @@ function M.nvim_cmp()
                     fallback()
                 end
             end, { "i", "s" }),
+            ["<Down>"] = cmp.mapping.select_next_item({ behavior = require("cmp.types").cmp.SelectBehavior.Select }),
+            ["<Up>"] = cmp.mapping.select_prev_item({ behavior = require("cmp.types").cmp.SelectBehavior.Select }),
             ["<Tab>"] = cmp.mapping(function(fallback)
                 if cmp.visible() then
                     cmp.select_next_item()
@@ -709,7 +690,20 @@ function M.nvim_cmp()
             { name = "vsnip" },
             { name = "path" },
             { name = "nvim_lua" },
-            { name = "buffer" },
+            {
+                name = "buffer",
+                option = {
+                    get_bufnrs = function()
+                        local buffers = {}
+                        for _, win in ipairs(vim.api.nvim_list_wins()) do
+                            buffers[vim.api.nvim_win_get_buf(win)] = true -- visible buffers only
+                        end
+                        return vim.tbl_filter(function(buffer)
+                            return vim.api.nvim_buf_get_offset(buffer, vim.api.nvim_buf_line_count(buffer)) < 1048576 -- 1MB
+                        end, vim.tbl_keys(buffers))
+                    end
+                }
+            },
         },
     })
 end
@@ -768,7 +762,7 @@ function M.vim_quickui()
         { "--", "" },
         { "Move tab left &-", [[-tabmove]] },
         { "Move tab right &+", [[+tabmove]] },
-        { "&Refresh screen", [[execute "ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen and colorizer" },
+        { "&Refresh screen", [[execute "ScrollViewRefresh | ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
         { "--", "" },
         { "Open &Alpha", [[execute "lua require('packer').loader('alpha-nvim', true)" | Alpha]], "Open Alpha" },
         { "Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },

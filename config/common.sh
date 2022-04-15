@@ -136,7 +136,7 @@ alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
 alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)"; echo "Branches containing HEAD$(git branch --color=always -a --contains HEAD)"'
-alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove
+alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git-foresta --style=10 | less -RiMXF'
 alias gforesta='git-foresta --style=10 --all | less -RiMXF'
 alias gls-files-all="git log --pretty=format: --name-only --all | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all -- {}' | xargs -I{} bash -c 'echo {}; git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all --max-count 10 -- {}'"
@@ -146,7 +146,7 @@ d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
-grg() { git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | \less -RiMXF --pattern="$*"; }
+grg() { git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | \less -RiMXF --pattern="$1"; }
 
 glof() {
   git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
@@ -338,13 +338,11 @@ gvf() {
 
 cdf() {
   local FZFTEMP
-  if [ -z "$1" ]; then
-    FZFTEMP=$(rg --files --no-ignore | fzf --bind='tab:down,btab:up') && cd "$(dirname "$FZFTEMP")"
-  elif [ -d "$(dirname "$1" 2> /dev/null)" ]; then
-    cd "$(dirname "$1")"
-  else
-    FZFTEMP=$(rg --files --no-ignore | rg "$@" | fzf --bind='tab:down,btab:up') && cd "$(dirname "$FZFTEMP")"
-  fi
+  FZFTEMP=$(fd --no-ignore | fzf --bind='tab:down,btab:up' --query="${1:-}") && {
+    [ -d "$FZFTEMP" ] && cd "$FZFTEMP" || {
+      [ -d "$(dirname "$FZFTEMP" 2> /dev/null)" ] && cd "$(dirname "$FZFTEMP")"
+    }
+  }
 }
 
 vrg() {

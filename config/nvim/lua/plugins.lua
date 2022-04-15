@@ -30,6 +30,8 @@ return require("packer").startup({
         use({ "akinsho/bufferline.nvim", event = "VimEnter", config = conf("bufferline_nvim") })
         use({ "feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim") })
         use({ "lukas-reineke/indent-blankline.nvim", config = conf("indent_blankline") })
+        -- try petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
+        use({ "dstein64/nvim-scrollview", config = "require('scrollview').setup()" })
         use({
             "DarwinSenior/nvim-colorizer.lua",
             cmd = "ColorizerAttachToBuffer",
@@ -42,7 +44,7 @@ return require("packer").startup({
         use({ "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = "vim.g.asyncrun_open = 12" })
         use({ "stevearc/aerial.nvim", module = "aerial", cmd = "AerialToggle", config = conf("aerial_nvim") })
         use({ "simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo") })
-        use({ "goolord/alpha-nvim", cond = "vim.fn.argc() == 0 and vim.fn.line2byte('$') == -1", event = "VimEnter", config = conf("alpha_nvim") })
+        use({ "goolord/alpha-nvim", cond = "vim.fn.argc() == 0 and vim.fn.line2byte('$') == -1", config = conf("alpha_nvim") })
         use({
             "nvim-telescope/telescope.nvim",
             requires = { { "nvim-lua/popup.nvim" }, { "nvim-lua/plenary.nvim" }, { "nvim-telescope/telescope-fzf-native.nvim", run = "make" } },
