@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NODE_VERSION=14.18.2
+NODE_VERSION=14.19.1
 BACKUP_DIR=$HOME/config-backup
 
 CYAN='\033[0;36m'

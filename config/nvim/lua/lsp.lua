@@ -23,6 +23,7 @@ function M.lsp_install_all()
     vim.cmd("LspInstallInfo")
 end
 
+-- https://www.reddit.com/r/neovim/comments/u5si2w/breaking_changes_inbound_next_few_weeks_for/
 function M.init()
     local function on_attach(client, bufnr)
         -- use null-ls for formatting except on lua
@@ -144,7 +145,8 @@ function M.init()
     vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticInfo", numhl = "DiagnosticInfo" })
     vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint", numhl = "DiagnosticHint" })
     vim.fn.sign_define("DiagnosticSignOther", { text = "﫠", texthl = "DiagnosticOther", numhl = "DiagnosticOther" })
-    vim.cmd("highlight! link DiagnosticVirtualTextInfo DiagnosticVirtualTextHint | highlight DiagnosticVirtualTextHint guifg=#666666 guibg=" .. vim.fn.printf("#%x", vim.api.nvim_get_hl_by_name("Normal", true).background))
+    vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#666666", bg = vim.api.nvim_get_hl_by_name("Normal", true).background })
+    vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "DiagnosticVirtualTextHint" })
     vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
         border = "rounded",
