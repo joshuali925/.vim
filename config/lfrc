@@ -65,18 +65,7 @@ map <c-p> locate-git-file
 map <c-o> $lazygit
 map <tab> locate-file-cwd
 map I $less -RiM "$f"
-map i ${{
-  if [ "$(file -Lb --mime-type -- "$f" | cut -d/ -f1)" = image ]; then
-    if [ -n "$TMUX" ]; then
-      printf 'Press enter to copy print image command and detach tmux'; read; echo
-      echo " iterm-imgcat '$(realpath "$f")'; printf 'Press enter to continue'; read; echo; tmux attach" | y && tmux detach
-    else
-      iterm-imgcat "$f"; printf 'Press enter to continue'; read; echo
-    fi
-  else
-    ~/.vim/config/lf-preview.sh "$f" | bat --color=always --style=numbers --theme=OneHalfDark --paging=always
-  fi
-}}
+map i $FULL_PREVIEW=1 ~/.vim/config/lf-preview.sh "$f"
 
 cmap <up> cmd-history-prev
 cmap <down> cmd-history-next

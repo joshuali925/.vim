@@ -85,6 +85,8 @@ keybinding:
     appendNewline: "<a-enter>"
     extrasMenu: "@"
     toggleWhitespaceInDiffView: "<c-w>"
+    increaseContextInDiffView: "}"
+    decreaseContextInDiffView: "{"
   status:
     checkForUpdate: "u"
     recentRepos: "<enter>"
@@ -133,6 +135,8 @@ keybinding:
     checkoutCommit: "<space>"
     resetCherryPick: "Z"
     copyCommitMessageToClipboard: "<c-y>"
+    openLogMenu: "<c-l>"
+    viewBisectOptions: "b"
   stash:
     popStash: "g"
   commitFiles:

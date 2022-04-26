@@ -84,7 +84,7 @@ set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\
 let mapleader=';'
 nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
-nnoremap [\ :tabedit<CR>
+nnoremap [\ :execute 'tabedit +'. line('.'). ' %'<CR>
 nnoremap ]\ :enew<CR>
 noremap , ;
 noremap ;, ,

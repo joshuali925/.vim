@@ -163,7 +163,8 @@ install_python() {
     echo "Unknown distro.."
     exit 1
   fi
-  log "Installed python3 and pip3"
+  pip3 install --user pynvim
+  log "Installed pynvim, python3 and pip3"
 }
 
 install_dotfiles() {
@@ -191,7 +192,7 @@ install_dotfiles() {
     link_file "$HOME/.vim/config/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
     link_file "$HOME/Library/ApplicationSupport/Code/User/snippets" "$HOME/.vsnip"  # use vscode snipets for neovim vsnip plugin
     mkdir -p ~/.config/karabiner/assets/complex_modifications
-    cp ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
+    link_file "$HOME/.vim/config/karabiner.json" "$HOME/.config/karabiner/assets/complex_modifications/karabiner.json"
     log "Linked configs for MacOS"
   fi
   echo

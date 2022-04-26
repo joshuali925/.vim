@@ -58,7 +58,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep firefox && open -a 'Firefox')"
+              "shell_command": "(pgrep firefox && open -a 'Firefox') || (pgrep 'Microsoft Outlook' && open -a 'Microsoft Outlook')"
             }
           ]
         },

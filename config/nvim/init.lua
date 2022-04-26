@@ -88,7 +88,7 @@ vim.keymap.set("o", "aI", [[<Cmd>call plugins#indent_object#HandleTextObjectMapp
 vim.keymap.set("x", "v", ":<C-u>call plugins#expand_region#next('v', '+')<CR>", { silent = true })
 vim.keymap.set("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>", { silent = true })
 -- general {{{2
-vim.keymap.set("n", "[\\", "<Cmd>tabedit<CR>")
+vim.keymap.set("n", "[\\", "<Cmd>execute 'tabedit +'. line('.'). ' %'<CR>")
 vim.keymap.set("n", "]\\", "<Cmd>enew<CR>")
 vim.keymap.set({ "n", "x", "o" }, "0", "funcs#home()", { expr = true })
 vim.keymap.set({ "n", "x", "o" }, "^", "0")
@@ -260,8 +260,9 @@ vim.keymap.set("t", "<C-k>", "<Cmd>lua require('tmux').move_top()<CR>")
 vim.keymap.set("t", "<C-l>", "<Cmd>lua require('tmux').move_right()<CR>")
 -- telescope {{{2
 vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>")
+vim.keymap.set("x", "<C-p>", [["xy<Cmd>lua require('telescope.builtin').find_files({initial_mode = 'normal'})<CR>i<C-r>x<Esc>]]) -- https://github.com/nvim-telescope/telescope.nvim/issues/1923
 vim.keymap.set("n", "<leader>fs", "<C-p>", { remap = true })
-vim.keymap.set("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>")
+vim.keymap.set("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>")
 vim.keymap.set("n", "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>")
 vim.keymap.set("n", "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers({initial_mode = 'normal'})<CR>")
 vim.keymap.set("n", "<leader>fu", "<Cmd>lua require('telescope.builtin')[require('lsp').is_active() and 'lsp_document_symbols' or 'treesitter']()<CR>")
@@ -314,8 +315,8 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 vim.api.nvim_create_autocmd("BufWritePost", { pattern = "*/lua/plugins.lua", group = "AutoCommands", command = "source <afile> | PackerCompile" })
 vim.api.nvim_create_autocmd("User", { pattern = "PackerCompileDone", group = "AutoCommands", command = "PackerInstall" })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
-vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, { pattern = "*.http", group = "AutoCommands", command = "set filetype=http commentstring=#\\ %s" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=jql" })
+vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "netrw",
     group = "AutoCommands",
@@ -371,7 +372,7 @@ else
     vim.api.nvim_create_user_command("PackerClean", function() require("plugins").clean() end, {})
     vim.api.nvim_create_user_command("PackerCompile", function() require("plugins").compile() end, {})
     vim.api.nvim_create_user_command("PackerStatus", function() require("plugins").status() end, {})
-    vim.api.nvim_create_user_command("PackerLoad", function(args) require('plugins').loader(args.fargs, args.bang) end, {
+    vim.api.nvim_create_user_command("PackerLoad", function(args) require("plugins").loader(args.args, args.bang) end, {
         bang = true,
         nargs = "+",
         complete = "customlist,v:lua.require'packer'.loader_complete",
@@ -391,6 +392,12 @@ vim.paste = (function(overridden)
         overridden(lines, phase)
     end
 end)(vim.paste)
+vim.filetype.add({
+    extension = {
+        csv = "csv",
+        http = "http",
+    },
+})
 if vim.env.SSH_CLIENT ~= nil then -- ssh session
     vim.fn["funcs#map_copy_with_osc_yank"]()
     vim.keymap.set("n", "gx", "<Cmd>let @x = expand('<cfile>') <bar> OSCYankReg x<CR>")
