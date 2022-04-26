@@ -331,5 +331,4 @@ settings.theme = `
     background: var(--theme-ace-select) !important;
 }
 `;
-// click `Save` button to make above settings to take effect.</ctrl-i></ctrl-y>
 

@@ -1,5 +1,10 @@
 local M = {}
 
+local disabled_servers = {
+    -- "tsserver",
+    -- "jdtls",
+    -- "kotlin_language_server",
+}
 function M.lsp_install_all()
     local required_servers = {
         "sumneko_lua",
@@ -27,7 +32,7 @@ end
 function M.init()
     local function on_attach(client, bufnr)
         -- use null-ls for formatting except on lua
-        if (client.name ~= 'sumneko_lua') then
+        if (client.name ~= "sumneko_lua") then
             client.resolved_capabilities.document_formatting = false
             client.resolved_capabilities.document_range_formatting = false
         end
@@ -62,7 +67,7 @@ function M.init()
                     runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
                     diagnostics = {
                         globals = { "vim" },
-                        -- neededFileStatus = { ["codestyle-check"] = "Any" }, -- styles lint
+                        neededFileStatus = { ["codestyle-check"] = "Any" },
                     },
                     telemetry = { enable = false },
                     IntelliSense = { traceLocalSet = true },
@@ -73,7 +78,7 @@ function M.init()
                             [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
                         },
                     },
-                    format = { enable = true, defaultConfig = { indent_style = "space", indent_size = "4" } },
+                    format = { enable = true, defaultConfig = { quote_style = "double", max_line_length = "unset" } },
                 },
             },
         },
@@ -93,18 +98,26 @@ function M.init()
             },
         },
     }
+
     local present, lsp_installer = pcall(require, "nvim-lsp-installer")
-    if present then
-        lsp_installer.on_server_ready(function(server)
-            local config = make_config()
-            if lsp_configs[server.name] ~= nil then
-                for k, v in pairs(lsp_configs[server.name]) do
-                    config[k] = v
-                end
+    if not present then
+        return
+    end
+
+    lsp_installer.setup()
+    local lspconfig = require("lspconfig")
+    local servers = vim.tbl_filter(function(server)
+        return not vim.tbl_contains(disabled_servers, server)
+    end, require("nvim-lsp-installer.servers").get_installed_server_names())
+    for _, server in ipairs(servers) do
+        local config = make_config()
+        if lsp_configs[server] ~= nil then
+            for k, v in pairs(lsp_configs[server]) do
+                config[k] = v
             end
-            server:setup(config)
-            vim.cmd("doautocmd User LspAttachBuffers")
-        end)
+        end
+        lspconfig[server].setup(config)
+        vim.cmd("doautocmd User LspAttachBuffers")
     end
 
     local null_ls = require("null-ls")
@@ -148,9 +161,7 @@ function M.init()
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#666666", bg = vim.api.nvim_get_hl_by_name("Normal", true).background })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "DiagnosticVirtualTextHint" })
     vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
-    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-        border = "rounded",
-    })
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
 end
 
 function M.organize_imports_and_format()

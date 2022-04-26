@@ -10,37 +10,44 @@ M.theme_list = {
     [0] = "github-nvim-theme",
     [1] = "tokyonight.nvim",
     [2] = "nightfox.nvim",
+    [3] = "vscode.nvim",
 }
 M.theme = M.theme_list[vim.g.theme_index]
 
 local sidebars = { "qf", "terminal", "aerial", "Mundo" }
 local default_colors = {
-    bg = "#22262e",
-    fg = "#abb2bf",
-    lightbg = "#2d3139",
-    lightbg2 = "#262a32",
-    primary = "#7aa2f7",
-    secondary = "#9ece6a",
     dim_primary = "#46617a",
     red = "#f7768e",
-    yellow = "#e0af68",
-    orange = "#ff9e64",
     purple = "#9d7cd8",
     grey = "#6f737b",
 }
+if vim.g.theme_index < 0 then
+    default_colors.bg = "#22262e"
+    default_colors.fg = "#abb2bf"
+    default_colors.lightbg = "#2d3139"
+    default_colors.lightbg2 = "#262a32"
+    default_colors.primary = "#7aa2f7"
+    default_colors.secondary = "#9ece6a"
+    default_colors.yellow = "#e0af68"
+    default_colors.orange = "#ff9e64"
+else
+    default_colors.bg = "#eeeeee"
+    default_colors.fg = "#484e54"
+    default_colors.lightbg = "#cccccc"
+    default_colors.lightbg2 = "#dddddd"
+    default_colors.primary = "#0366d6"
+    default_colors.secondary = "#22863a"
+    default_colors.yellow = "#b08800"
+    default_colors.orange = "#d18616"
+end
 
 local themes = {
     ["tokyonight.nvim"] = {
         colors = function()
             if vim.g.theme_index >= 0 then
                 default_colors.bg = "#cccccc"
-                default_colors.fg = "#484e54"
                 default_colors.lightbg = "#bbbbbb"
                 default_colors.lightbg2 = "#c3c3c3"
-                default_colors.primary = "#0366d6"
-                default_colors.secondary = "#22863a"
-                default_colors.yellow = "#b08800"
-                default_colors.orange = "#d18616"
             end
             return default_colors
         end,
@@ -72,15 +79,6 @@ local themes = {
             if vim.g.theme_index < 0 then
                 default_colors.primary = "#3b8eea"
                 default_colors.secondary = "#23d18b"
-            else
-                default_colors.bg = "#eeeeee"
-                default_colors.fg = "#484e54"
-                default_colors.lightbg = "#cccccc"
-                default_colors.lightbg2 = "#dddddd"
-                default_colors.primary = "#0366d6"
-                default_colors.secondary = "#22863a"
-                default_colors.yellow = "#b08800"
-                default_colors.orange = "#d18616"
             end
             return default_colors
         end,
@@ -93,14 +91,18 @@ local themes = {
     },
     ["vscode.nvim"] = {
         colors = function()
-            default_colors.primary = "#3b8eea"
-            default_colors.secondary = "#23d18b"
+            if vim.g.theme_index < 0 then
+                default_colors.primary = "#3b8eea"
+                default_colors.secondary = "#23d18b"
+            end
             return default_colors
         end,
         config = function()
-            vim.g.vscode_style = "dark"
+            vim.g.vscode_style = (vim.g.theme_index < 0 and "dark" or "light")
             vim.cmd("colorscheme vscode")
-            vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
+            if vim.g.theme_index < 0 then
+                vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
+            end
         end,
     },
     ["catppuccin"] = {
@@ -137,12 +139,7 @@ local themes = {
                 default_colors.primary = "#7a9bd1"
             else
                 default_colors.bg = "#ede8e2"
-                default_colors.fg = "#484e54"
-                default_colors.lightbg = "#cccccc"
-                default_colors.lightbg2 = "#dddddd"
                 default_colors.primary = "#65929d"
-                default_colors.yellow = "#b08800"
-                default_colors.orange = "#d18616"
             end
             return default_colors
         end,

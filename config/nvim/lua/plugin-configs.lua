@@ -29,10 +29,10 @@ function M.gitsigns()
             changedelete = { text = "▒" },
         },
         keymaps = {
-            ["n [g"] = '<Cmd>lua require("gitsigns").prev_hunk()<CR>',
-            ["n ]g"] = '<Cmd>lua require("gitsigns").next_hunk()<CR>',
-            ["o ig"] = ':<C-u>lua require("gitsigns.actions").select_hunk()<CR>',
-            ["x ig"] = ':<C-u>lua require("gitsigns.actions").select_hunk()<CR>',
+            ["n [g"] = "<Cmd>lua require('gitsigns').prev_hunk()<CR>",
+            ["n ]g"] = "<Cmd>lua require('gitsigns').next_hunk()<CR>",
+            ["o ig"] = ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>",
+            ["x ig"] = ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>",
         },
         update_debounce = 250,
     })
@@ -83,6 +83,7 @@ function M.setup_neoterm()
     vim.g.neoterm_default_mod = "belowright"
     vim.g.neoterm_automap_keys = ";tT"
     vim.g.neoterm_autoinsert = 1
+    vim.g.neoterm_repl_command = {} -- bug?
 end
 
 function M.setup_csv_vim()
@@ -97,8 +98,6 @@ function M.indent_blankline()
         filetype_exclude = vim.g.qs_filetype_blacklist,
         buftype_exclude = vim.g.qs_buftype_blacklist,
     })
-    -- TODO remove when this is fixed https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
-    vim.opt.colorcolumn = "99999"
 end
 
 function M.aerial_nvim()
@@ -243,7 +242,7 @@ function M.alpha_nvim()
         theme.button("o", "Git log", ":Flog<CR>"),
         theme.button("\\", "Open quickui", ":call quickui#menu#open('normal')<CR>"),
         theme.button("f", "Find files", ":lua require('telescope.builtin').find_files({hidden = true})<CR>"),
-        theme.button("m", "Find MRU", ":lua require('telescope.builtin').oldfiles({include_current_session = true})<CR>"),
+        theme.button("m", "Find MRU", ":lua require('telescope.builtin').oldfiles()<CR>"),
         theme.button("c", "Edit vimrc", ":edit $MYVIMRC<CR>"),
         theme.button("s", "Profile startup time", ":StartupTime<CR>"),
         theme.button("E", "Load from previous session", ":silent SessionLoad<CR>"),
@@ -257,6 +256,7 @@ function M.alpha_nvim()
         pattern = "alpha",
         group = "AlphaAutoCommands",
         callback = function()
+            vim.b.RestoredCursor = 1 -- do not restore cursor position
             vim.keymap.set("n", "v", require("alpha").queue_press, { buffer = true }) -- https://github.com/goolord/alpha-nvim/issues/92
             vim.keymap.set("n", "q", "len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'", { buffer = true, expr = true })
             vim.keymap.set("n", "e", "<Cmd>enew<CR>", { buffer = true })
@@ -272,10 +272,15 @@ function M.neo_tree()
         ["s"] = "open_split",
         ["v"] = "open_vsplit",
         ["R"] = "rename",
+        ["zM"] = "close_all_nodes",
+        ["z"] = "none",
+        ["H"] = "none",
+        ["/"] = "none",
         ["r"] = function(state)
-            state.filters.respect_gitignore = false
+            local node = state.tree:get_node()
             require("neo-tree.sources.filesystem.commands").clear_filter(state)
             require("neo-tree.sources.buffers.commands").refresh()
+            require("neo-tree.sources.filesystem").navigate(state, state.path, node:get_id())
         end,
         ["o"] = function(state)
             require("neo-tree.sources.common.commands").open(state)
@@ -307,10 +312,30 @@ function M.neo_tree()
     end
 
     require("neo-tree").setup({
-        default_component_configs = { icon = { default = "" } },
+        renderers = { -- https://github.com/nvim-neo-tree/neo-tree.nvim/issues/348
+            directory = {
+                { "indent" },
+                { "icon" },
+                { "current_filter" },
+                { "name" },
+                { "clipboard" },
+                { "diagnostics", errors_only = true },
+            },
+            file = {
+                { "indent" },
+                { "icon" },
+                { "name", use_git_status_colors = true, zindex = 10 },
+                { "clipboard" },
+                { "bufnr" },
+                { "modified" },
+                { "diagnostics" },
+                { "git_status" },
+            },
+        },
+        default_component_configs = { icon = { default = "" }, modified = { symbol = "פֿ" } },
         filesystem = {
             search_limit = 500,
-            filtered_items = { hide_dotfiles = false, hide_gitignored = false },
+            filtered_items = { visible = true, hide_dotfiles = false, never_show = { ".git" } },
             window = {
                 width = 35,
                 mappings = with_default_mappings({
@@ -320,20 +345,8 @@ function M.neo_tree()
                     ["y"] = "copy_to_clipboard",
                     ["d"] = "cut_to_clipboard",
                     ["p"] = "paste_from_clipboard",
-                    ["zM"] = "close_all_nodes",
-                    ["z"] = "none",
-                    ["H"] = "none",
-                    ["f"] = function(state)
-                        state.filters.respect_gitignore = true
-                        require("neo-tree.sources.filesystem.commands").filter_on_submit(state)
-                    end,
-                    ["t"] = function(state)
-                        state.filters.respect_gitignore = true
-                        require("neo-tree.sources.filesystem.commands").filter_as_you_type(state)
-                    end,
-                    ["T"] = function(state)
-                        require("neo-tree.sources.filesystem.commands").filter_on_submit(state)
-                    end,
+                    ["f"] = "filter_on_submit",
+                    ["t"] = "filter_as_you_type",
                     ["<BS>"] = focus("git_status"),
                     ["\\"] = focus("buffers"),
                 }),
@@ -343,11 +356,7 @@ function M.neo_tree()
             show_unloaded = true,
             window = {
                 width = 35,
-                mappings = with_default_mappings({
-                    ["d"] = "buffer_delete",
-                    ["<BS>"] = focus("filesystem"),
-                    ["\\"] = focus("git_status"),
-                }),
+                mappings = with_default_mappings({ ["d"] = "buffer_delete", ["<BS>"] = focus("filesystem"), ["\\"] = focus("git_status") }),
             },
         },
         git_status = {
@@ -488,7 +497,7 @@ function M.feline_nvim()
     }
     local function checkwidth() return vim.api.nvim_win_get_width(0) > 60 end
 
-    local components = { active = { {}, {}, {} }, inactive = { {} } }
+    local components = { active = { {}, {}, {} }, inactive = { {}, {}, {} } }
     components.active[1][1] = {
         provider = "  ",
         hl = function() return { fg = colors.lightbg, bg = mode_colors[vim.fn.mode()] or colors.primary } end,
@@ -629,6 +638,10 @@ function M.feline_nvim()
         right_sep = { str = " ", hl = { fg = colors.dim_primary, bg = colors.lightbg } },
     }
     components.inactive[1][2] = components.active[1][2]
+    components.inactive[3][1] = {
+        provider = function() return string.format("%s/%s", vim.fn.line("."), vim.fn.line("$")) end,
+        hl = { fg = colors.dim_primary },
+    }
     require("feline").setup({ theme = { fg = colors.fg, bg = colors.bg }, components = components })
 end
 
