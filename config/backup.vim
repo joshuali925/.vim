@@ -3058,3 +3058,68 @@ augroup SavedBufView
   autocmd BufLeave * call s:AutoSaveWinView()
   autocmd BufEnter * call s:AutoRestoreWinView()
 augroup END
+
+" =======================================================
+" wilder.nvim
+        use({ "gelguy/wilder.nvim", requires = { "romgrk/fzy-lua-native" }, event = "CmdlineEnter", config = conf("wilder_nvim") })
+-- wilder.nvim {{{2
+vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : wilder#in_context() ? wilder#next() : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
+vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : wilder#in_context() ? wilder#previous() : '<S-Tab>'", { expr = true })
+function M.wilder_nvim()
+    -- https://github.com/gelguy/wilder.nvim/issues/52
+    vim.cmd([[
+        call wilder#setup({'modes': [':'], 'next_key': '<F13>', 'previous_key': '<F13>'})
+        call wilder#set_option('use_python_remote_plugin', 0)
+        call wilder#set_option('pipeline', [
+                \     wilder#branch(
+                \     wilder#cmdline_pipeline({ 'fuzzy': 1, 'fuzzy_filter': wilder#lua_fzy_filter(), 'debounce': 50 }),
+                \     ),
+                \ ])
+        call wilder#set_option('renderer', wilder#renderer_mux({
+                \ ':': wilder#popupmenu_renderer(wilder#popupmenu_border_theme({
+                \     'border': 'rounded',
+                \     'empty_message': 0,
+                \     'highlighter': wilder#lua_fzy_highlighter(),
+                \     'highlights': { 'accent': wilder#make_hl('WilderAccent', 'Pmenu', [{}, {}, {'foreground': '#f4468f'}]) },
+                \     'winblend': 8,
+                \     'left': [' ', wilder#popupmenu_devicons()],
+                \     'right': [' ', wilder#popupmenu_scrollbar()],
+                \     'apply_incsearch_fix': 0,
+                \ })),
+                \ 'substitute': 0
+                \ }))
+    ]])
+end
+
+" =======================================================
+    -- local cmp_kinds = { -- needs codicons https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
+    --     Text = " ", -- doesn't work well with :set pumblend=8
+    --     Method = " ",
+    --     Function = " ",
+    --     Constructor = " ",
+    --     Field = " ",
+    --     Variable = " ",
+    --     Class = " ",
+    --     Interface = " ",
+    --     Module = " ",
+    --     Property = " ",
+    --     Unit = " ",
+    --     Value = " ",
+    --     Enum = " ",
+    --     Keyword = " ",
+    --     Snippet = " ",
+    --     Color = " ",
+    --     File = " ",
+    --     Reference = " ",
+    --     Folder = " ",
+    --     EnumMember = " ",
+    --     Constant = " ",
+    --     Struct = " ",
+    --     Event = " ",
+    --     Operator = " ",
+    --     TypeParameter = " ",
+    -- }
+
+" =======================================================
+" doesn't work for .class files opened in jar
+    call setline(1, systemlist('java -jar ~/.local/lib/cfr.jar /dev/stdin', join(getline(1, '$'), "\n")))

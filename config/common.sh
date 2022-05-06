@@ -86,7 +86,7 @@ alias gcpc='git cherry-pick --continue'
 alias gd='git diff'
 alias gds='git diff --stat'
 alias gdst='git diff --staged'
-alias gdsst='git diff --stat --staged'
+alias gdsts='git diff --stat --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
@@ -139,7 +139,6 @@ alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)"; echo
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git-foresta --style=10 | \less -RiMXF'
 alias gforesta='git-foresta --style=10 --all | \less -RiMXF'
-alias gls-files-all="git log --pretty=format: --name-only --all | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all -- {}' | xargs -I{} bash -c 'echo {}; git log --color=always --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --all --max-count 10 -- {}'"
 alias gpatch='vi +startinsert patch.diff && git apply patch.diff && rm patch.diff'
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
@@ -147,6 +146,7 @@ gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
 grg() { git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | DELTA_PAGER="$BAT_PAGER --pattern='$1'" delta --line-numbers; }
+gls-files-all() { git log --pretty=format: --name-only --all | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --query="${*:-}" --preview='git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}' | xargs -I{} bash -c 'echo -e "\033[0;35mgit show <SHA>:{}\033[0m"; git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --max-count 10 -- {}; echo'; }
 
 glof() {
   git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |

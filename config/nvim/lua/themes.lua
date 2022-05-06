@@ -113,20 +113,9 @@ local themes = {
         end,
         config = function()
             require("catppuccin").setup({
-                term_colors = true,
+                styles = { comments = "italic", functions = "italic", keywords = "NONE", strings = "NONE", variables = "NONE" },
                 integrations = {
-                    treesitter = true,
-                    native_lsp = {
-                        enabled = true,
-                        virtual_text = { errors = "NONE", hints = "NONE", warnings = "NONE", information = "NONE" },
-                    },
-                    gitsigns = true,
-                    telescope = true,
-                    nvimtree = { enabled = true, show_root = true },
-                    indent_blankline = { enabled = true, colored_indent_levels = true },
-                    bufferline = true,
-                    markdown = false,
-                    hop = true,
+                    native_lsp = { enabled = true, virtual_text = { errors = "NONE", hints = "NONE", warnings = "NONE", information = "NONE" } },
                 },
             })
             vim.cmd("colorscheme catppuccin")
@@ -154,7 +143,7 @@ function M.config()
 end
 
 function M.colors()
-    return themes[M.theme].colors()
+    return themes[M.theme].colors and themes[M.theme].colors() or default_colors
 end
 
 return M

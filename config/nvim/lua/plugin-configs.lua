@@ -72,6 +72,7 @@ vim.g.qs_filetype_blacklist = {
 vim.g.qs_buftype_blacklist = { "terminal" }
 function M.quick_scope()
     vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = vim.g.theme_index < 0 and "#ffca6e" or "#bf8000" })
+    vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = vim.g.theme_index < 0 and "#6eb9e6" or "#005e7d" })
 end
 
 function M.mundo()
@@ -196,43 +197,17 @@ function M.nvim_neoclip_lua()
     })
 end
 
-function M.wilder_nvim()
-    -- https://github.com/gelguy/wilder.nvim/issues/52
-    vim.cmd([[
-        call wilder#setup({'modes': [':'], 'next_key': '<F13>', 'previous_key': '<F13>'})
-        call wilder#set_option('use_python_remote_plugin', 0)
-        call wilder#set_option('pipeline', [
-                \     wilder#branch(
-                \     wilder#cmdline_pipeline({ 'fuzzy': 1, 'fuzzy_filter': wilder#lua_fzy_filter(), 'debounce': 50 }),
-                \     ),
-                \ ])
-        call wilder#set_option('renderer', wilder#renderer_mux({
-                \ ':': wilder#popupmenu_renderer(wilder#popupmenu_border_theme({
-                \     'border': 'rounded',
-                \     'empty_message': 0,
-                \     'highlighter': wilder#lua_fzy_highlighter(),
-                \     'highlights': { 'accent': wilder#make_hl('WilderAccent', 'Pmenu', [{}, {}, {'foreground': '#f4468f'}]) },
-                \     'winblend': 8,
-                \     'left': [' ', wilder#popupmenu_devicons()],
-                \     'right': [' ', wilder#popupmenu_scrollbar()],
-                \     'apply_incsearch_fix': 0,
-                \ })),
-                \ 'substitute': 0
-                \ }))
-    ]])
-end
-
 function M.alpha_nvim()
     local theme = require("alpha.themes.startify")
     theme.section.header.val = {
-        [[      ⢀⣀⣀⡀          ⣀⣀⣀                       ⢀⣀⣀⡀                      ⣤⣤      ]],
-        [[      ⣿⣿⣿⣿⣷⣄      ⣰⣿⠟⠛⢿⣷⡄                    ⣼⣿⠟⠛⠟                      ⣿⣿      ]],
-        [[  ⢠   ⠙⠻⠿⢿⣿⣿⡆    ⢰⣿⡏   ⣿⣷⢸⣿⣴⠿⣿⣧ ⢠⣾⠟⢿⣦⡀⢸⣷⡼⠿⣿⣦ ⢿⣿⣄   ⣴⣿⠿⣿⣦ ⠰⠿⠿⢿⣷⡀⣿⣧⡾⠿⢠⣾⡿⠿⠇⣿⣿⡾⠿⣿⣦  ]],
-        [[  ⣿⣶⣄⡀    ⠈⠻⡇ ⣶  ⢸⣿⡇   ⣿⣿⢸⣿⡇ ⢸⣿⡇⣿⣿⣤⣬⣿⡇⢸⣿⠁ ⢹⣿ ⠈⠛⢿⣷⣆⢰⣿⣧⣤⣼⣿⡇⢀⣤⣤⣼⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿  ]],
-        [[  ⠸⣿⣿⣿⣿⣷⣦    ⢀⡏  ⠈⣿⣧  ⢀⣿⡏⢸⣿⡇ ⢸⣿⡇⣿⣿⠉⠉⠉⠁⢸⣿  ⢸⣿    ⣻⣿⠸⣿⣏⠉⠉⠉⢱⣿⡟⠁⢸⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿  ]],
-        [[   ⠈⠻⢿⣿⡿⠏   ⣠⠟    ⠘⠿⣿⣾⡿⠟⠁⢸⣿⡟⢶⣿⠟ ⠘⠿⣷⣶⡾ ⠸⠿  ⠸⠿ ⠿⣷⣾⡿⠏ ⠙⢿⣶⣶⠾⠈⢿⣿⡶⠛⠿⠇⠿⠿  ⠘⠿⣷⣶⠇⠿⠿  ⠿⠿  ]],
-        [[       ⣀⣀⣠⡴⠞⠁            ⢸⣿⡇                                                    ]],
-        [[       ⠉⠁                ⠘⠛⠃                                                    ]],
+        [[    ⢀⣀⣀⡀          ⣀⣀⣀                       ⢀⣀⣀⡀                      ⣤⣤    ]],
+        [[    ⣿⣿⣿⣿⣷⣄      ⣰⣿⠟⠛⢿⣷⡄                    ⣼⣿⠟⠛⠟                      ⣿⣿    ]],
+        [[⢠   ⠙⠻⠿⢿⣿⣿⡆    ⢰⣿⡏   ⣿⣷⢸⣿⣴⠿⣿⣧ ⢠⣾⠟⢿⣦⡀⢸⣷⡼⠿⣿⣦ ⢿⣿⣄   ⣴⣿⠿⣿⣦ ⠰⠿⠿⢿⣷⡀⣿⣧⡾⠿⢠⣾⡿⠿⠇⣿⣿⡾⠿⣿⣦]],
+        [[⣿⣶⣄⡀    ⠈⠻⡇ ⣶  ⢸⣿⡇   ⣿⣿⢸⣿⡇ ⢸⣿⡇⣿⣿⣤⣬⣿⡇⢸⣿⠁ ⢹⣿ ⠈⠛⢿⣷⣆⢰⣿⣧⣤⣼⣿⡇⢀⣤⣤⣼⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿]],
+        [[⠸⣿⣿⣿⣿⣷⣦    ⢀⡏  ⠈⣿⣧  ⢀⣿⡏⢸⣿⡇ ⢸⣿⡇⣿⣿⠉⠉⠉⠁⢸⣿  ⢸⣿    ⣻⣿⠸⣿⣏⠉⠉⠉⢱⣿⡟⠁⢸⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿]],
+        [[ ⠈⠻⢿⣿⡿⠏   ⣠⠟    ⠘⠿⣿⣾⡿⠟⠁⢸⣿⡟⢶⣿⠟ ⠘⠿⣷⣶⡾ ⠸⠿  ⠸⠿ ⠿⣷⣾⡿⠏ ⠙⢿⣶⣶⠾⠈⢿⣿⡶⠛⠿⠇⠿⠿  ⠘⠿⣷⣶⠇⠿⠿  ⠿⠿]],
+        [[     ⣀⣀⣠⡴⠞⠁            ⢸⣿⡇                                                  ]],
+        [[     ⠉⠁                ⠘⠛⠃                                                  ]],
     }
     theme.section.top_buttons.val = {}
     theme.section.bottom_buttons.val = {
@@ -647,14 +622,42 @@ end
 
 function M.nvim_cmp()
     local cmp = require("cmp")
+    local cmp_kinds = {
+        Text = "",
+        Method = "",
+        Function = "",
+        Constructor = "",
+        Field = "ﰠ",
+        Variable = "",
+        Class = "ﴯ",
+        Interface = "",
+        Module = "",
+        Property = "ﰠ",
+        Unit = "塞",
+        Value = "",
+        Enum = "",
+        Keyword = "",
+        Snippet = "",
+        Color = "",
+        File = "",
+        Reference = "",
+        Folder = "",
+        EnumMember = "",
+        Constant = "",
+        Struct = "פּ",
+        Event = "",
+        Operator = "",
+        TypeParameter = "",
+    }
     cmp.setup({
-        completion = { completeopt = "menuone,noinsert" },
+        completion = { completeopt = "menuone,noselect" },
         snippet = { expand = function(args) vim.fn["vsnip#anonymous"](args.body) end },
-        window = { documentation = cmp.config.window.bordered() },
+        window = { completion = cmp.config.window.bordered({ border = "single" }), documentation = cmp.config.window.bordered({ border = "single" }) },
         formatting = {
-            format = function(entry, vim_item)
-                vim_item.kind = require("lspkind").presets.default[vim_item.kind] .. " " .. vim_item.kind
-                vim_item.menu = ({ buffer = "[Buffer]", nvim_lua = "[Lua]", nvim_lsp = "[LSP]", vsnip = "[Vsnip]" })[entry.source.name]
+            fields = { "kind", "abbr", "menu" },
+            format = function(_, vim_item)
+                vim_item.menu = vim_item.kind
+                vim_item.kind = cmp_kinds[vim_item.kind] or ""
                 return vim_item
             end,
         },
@@ -719,6 +722,10 @@ function M.nvim_cmp()
             },
         },
     })
+    cmp.setup.cmdline(":", {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = cmp.config.sources({ { name = "path" } }, { { name = "cmdline" } })
+    })
 end
 
 function M.open_quickui_context_menu()
@@ -728,7 +735,7 @@ function M.open_quickui_context_menu()
         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
         { "Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition" },
-        { "Hover diagnostic", "lua vim.diagnostic.open_float(0, {scope = 'line', border = 'rounded'})", "Show diagnostic of current line" },
+        { "Hover diagnostic", "lua vim.diagnostic.open_float(0, {scope = 'line', border = 'single'})", "Show diagnostic of current line" },
         { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
         { "--", "" },
         { "Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk" },

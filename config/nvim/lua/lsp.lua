@@ -50,14 +50,8 @@ function M.init()
         capabilities.textDocument.completion.completionItem.deprecatedSupport = true
         capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
         capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
-        capabilities.textDocument.completion.completionItem.resolveSupport = {
-            properties = { "documentation", "detail", "additionalTextEdits" },
-        }
-        return {
-            capabilities = capabilities,
-            flags = { debounce_text_changes = 250 },
-            on_attach = on_attach,
-        }
+        capabilities.textDocument.completion.completionItem.resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } }
+        return { capabilities = capabilities, flags = { debounce_text_changes = 250 }, on_attach = on_attach }
     end
 
     local lsp_configs = {
@@ -65,18 +59,12 @@ function M.init()
             settings = {
                 Lua = {
                     runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
-                    diagnostics = {
-                        globals = { "vim" },
-                        neededFileStatus = { ["codestyle-check"] = "Any" },
-                    },
+                    diagnostics = { globals = { "vim" }, neededFileStatus = { ["codestyle-check"] = "Any" } },
                     telemetry = { enable = false },
                     IntelliSense = { traceLocalSet = true },
                     workspace = {
                         -- library = vim.api.nvim_get_runtime_file("", true), -- index library files
-                        library = {
-                            [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-                            [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
-                        },
+                        library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true, [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
                     },
                     format = { enable = true, defaultConfig = { quote_style = "double", max_line_length = "unset" } },
                 },
@@ -160,8 +148,8 @@ function M.init()
     vim.fn.sign_define("DiagnosticSignOther", { text = "﫠", texthl = "DiagnosticOther", numhl = "DiagnosticOther" })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#666666", bg = vim.api.nvim_get_hl_by_name("Normal", true).background })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "DiagnosticVirtualTextHint" })
-    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
-    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
 end
 
 function M.organize_imports_and_format()

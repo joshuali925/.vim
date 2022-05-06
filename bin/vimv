@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-url vimv https://raw.githubusercontent.com/thameera/vimv/HEAD/vimv "$@"
