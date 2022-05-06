@@ -35,7 +35,7 @@ vim.opt.shiftwidth = 2
 vim.opt.shiftround = true
 vim.opt.textwidth = 0
 vim.opt.complete = { ".", "w", "b", "u" }
-vim.opt.completeopt = { "menuone", "noinsert" }
+vim.opt.completeopt = { "menuone", "noselect" }
 vim.opt.completefunc = "funcs#complete_word"
 vim.opt.pumblend = 8
 vim.opt.shortmess = vim.opt.shortmess + { c = true, A = true }
@@ -88,7 +88,7 @@ vim.keymap.set("o", "aI", [[<Cmd>call plugins#indent_object#HandleTextObjectMapp
 vim.keymap.set("x", "v", ":<C-u>call plugins#expand_region#next('v', '+')<CR>", { silent = true })
 vim.keymap.set("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>", { silent = true })
 -- general {{{2
-vim.keymap.set("n", "[\\", "<Cmd>execute 'tabedit +'. line('.'). ' %'<CR>")
+vim.keymap.set("n", "[\\", "<Cmd>tab sbuffer<CR>")
 vim.keymap.set("n", "]\\", "<Cmd>enew<CR>")
 vim.keymap.set({ "n", "x", "o" }, "0", "funcs#home()", { expr = true })
 vim.keymap.set({ "n", "x", "o" }, "^", "0")
@@ -161,10 +161,9 @@ vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd
 vim.keymap.set("n", "yof", "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <bar> -tabedit %<CR><Cmd>call winrestview(g:temp) <bar> let b:is_zoomed = 1<CR>' : get(b:, 'is_zoomed', 0) ? '<Cmd>tabclose<CR>' : ''", { expr = true })
 vim.keymap.set("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true })
 vim.keymap.set("c", "<BS>", [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true })
+vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
+vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { expr = true })
 vim.cmd("cnoreabbrev print <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua =( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua =( )' ? setcmdpos(7)[-1] : '')<CR>") -- vim.pretty_print
--- wilder.nvim {{{2
-vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : wilder#in_context() ? wilder#next() : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
-vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : wilder#in_context() ? wilder#previous() : '<S-Tab>'", { expr = true })
 -- nvim_bufferline {{{2
 vim.keymap.set("n", "<BS>", "<Cmd>BufferLineCyclePrev<CR>")
 vim.keymap.set("n", "\\", "<Cmd>BufferLineCycleNext<CR>")
@@ -289,10 +288,10 @@ vim.keymap.set("n", "<leader>d", vim.lsp.buf.implementation)
 vim.keymap.set("n", "gr", vim.lsp.buf.references)
 vim.keymap.set("n", "<leader>a", "<Cmd>CodeActionMenu<CR>")
 vim.keymap.set("x", "<leader>a", ":<C-u>CodeActionMenu<CR>")
-vim.keymap.set("n", "gh", "<Cmd>lua if vim.diagnostic.open_float(0, {scope = 'cursor', border = 'rounded'}) == nil then vim.lsp.buf.hover() end<CR>")
+vim.keymap.set("n", "gh", "<Cmd>lua if vim.diagnostic.open_float(0, {scope = 'cursor', border = 'single'}) == nil then vim.lsp.buf.hover() end<CR>")
 vim.keymap.set("n", "<leader>R", vim.lsp.buf.rename)
-vim.keymap.set("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({float = {border = 'rounded'}})<CR>")
-vim.keymap.set("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({float = {border = 'rounded'}})<CR>")
+vim.keymap.set("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({float = {border = 'single'}})<CR>")
+vim.keymap.set("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({float = {border = 'single'}})<CR>")
 vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help)
 
 -- autocmds {{{1

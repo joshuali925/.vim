@@ -46,7 +46,8 @@ set textwidth=0
 set autoread
 set hidden
 set complete=.,w,b,u
-set completeopt=menuone,noinsert
+" do not set noselect or noinsert for 7.4 compatibility
+set completeopt=menuone
 set shortmess+=c
 set shortmess-=S
 set nrformats-=octal
@@ -66,7 +67,7 @@ set undodir=$HOME/.cache/vim/undo
 set viminfo='1000,<50,s10,h,n~/.cache/vim/viminfo
 set isfname-==
 set path=.,,**5
-set wildignore+=*/tmp/*,*/\.git/*,*/node_modules/*,*/venv/*,*/\.env/*
+set wildignore+=*/tmp/*,*/\.git/*,*/node_modules/*,*/venv/*
 set encoding=utf-8
 set timeout
 set timeoutlen=1500
@@ -84,7 +85,7 @@ set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\
 let mapleader=';'
 nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
-nnoremap [\ :execute 'tabedit +'. line('.'). ' %'<CR>
+nnoremap [\ :tab sbuffer<CR>
 nnoremap ]\ :enew<CR>
 noremap , ;
 noremap ;, ,
@@ -160,6 +161,7 @@ nnoremap <leader>fj :GrepRegex \b<C-r><C-w>\b<CR>
 xnoremap <leader>fj :<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>
 nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=Dracula --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"', 1)<CR>
 nnoremap <leader>ft :call <SID>EditCallback('filetypes', 0)<CR>
+" Vexplore instead of Lexplore for 7.4 compatibility
 nnoremap <leader>b :Vexplore<CR>
 nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>

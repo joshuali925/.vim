@@ -286,6 +286,12 @@ function! funcs#decompile_java_class() abort
   if !filereadable(expand('~/.local/lib/cfr.jar'))
     call system('curl -L -o ~/.local/lib/cfr.jar https://github.com/leibnitz27/cfr/releases/download/0.152/cfr-0.152.jar')
   endif
-  silent %!java -jar ~/.local/lib/cfr.jar %
+  if glob('%') != ''
+    silent %!java -jar ~/.local/lib/cfr.jar %
+  else
+    write! ~/.cache/vim/cfr-temp.class
+    silent %!java -jar ~/.local/lib/cfr.jar ~/.cache/vim/cfr-temp.class
+    call system('rm -f ~/.cache/vim/cfr-temp.class')
+  endif
   set nomodified readonly filetype=java
 endfunction

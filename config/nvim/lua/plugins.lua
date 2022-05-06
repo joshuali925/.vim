@@ -108,17 +108,16 @@ return require("packer").startup({
         use({ "chrisbra/csv.vim", setup = conf("setup_csv_vim"), cmd = "CSVWhatColumn" })
 
         -- completion
-        use({ "onsails/lspkind-nvim", event = "InsertEnter", cond = "require('states').small_file" })
-        use({ "hrsh7th/nvim-cmp", after = "lspkind-nvim", config = conf("nvim_cmp") })
+        use({ "hrsh7th/nvim-cmp", event = { "InsertEnter", "CmdlineEnter" }, cond = "require('states').small_file", config = conf("nvim_cmp") })
         use({ "hrsh7th/cmp-buffer", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-path", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-nvim-lua", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-nvim-lsp", after = "nvim-cmp" })
+        use({ "hrsh7th/cmp-cmdline", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-vsnip", after = "nvim-cmp" })
         use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" })
         use({ "hrsh7th/vim-vsnip", after = "friendly-snippets" })
         use({ "windwp/nvim-autopairs", after = "nvim-cmp", config = conf("nvim_autopairs") })
-        use({ "gelguy/wilder.nvim", requires = { "romgrk/fzy-lua-native" }, event = "CmdlineEnter", config = conf("wilder_nvim") })
 
         -- editing
         use({ "mg979/vim-visual-multi", fn = "vm#*", keys = { "<Plug>(VM-", { "n", "<leader><C-n>" } }, setup = conf("setup_vim_visual_multi") })
