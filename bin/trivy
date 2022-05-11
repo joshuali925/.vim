@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github trivy aquasecurity/trivy Linux-64bit.tar.gz Linux-ARM64.tar.gz macOS-64bit.tar.gz macOS-ARM64.tar.gz trivy "$@"

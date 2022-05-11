@@ -28,8 +28,6 @@ detect-env() {
       PLATFORM=linux
       if [ -x "$(command -v yum)" ]; then
         PACKAGE_MANAGER=yum
-      elif [ -x "$(command -v apt)" ]; then
-        PACKAGE_MANAGER=apt
       elif [ -x "$(command -v apt-get)" ]; then
         PACKAGE_MANAGER=apt-get
       else
@@ -79,8 +77,8 @@ install_development_tools() {
   log "\nInstalling development tools.."
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh git
-  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt' ]; then
-    sudo apt update && sudo apt install -y build-essential zsh git curl unzip
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
+    sudo apt-get update && sudo apt-get install -y build-essential zsh git curl unzip
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
@@ -99,19 +97,23 @@ install_development_tools() {
     log "Disabled ApplePressAndHoldEnabled to support key repeats"
     # brew tap wez/wezterm
     # brew install --cask wez/wezterm/wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code
+    # manually install https://github.com/xiaogdgenuine/Doll
   fi
+  log "\nInstalling asdf.."
+  git clone https://github.com/asdf-vm/asdf.git "$HOME/.asdf" --depth=1
+  [ -s "$HOME/.asdf/asdf.sh" ] && source "$HOME/.asdf/asdf.sh"
 }
 
 install_docker() {
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y docker
-  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt' ]; then
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
     curl -fsSL https://get.docker.com/ | sh
   else
     echo "Unknown distro.."
     exit 1
   fi
-  log "Installed docker, adding permissions.."
+  log "Installed docker, adding user to docker group.."
   sudo groupadd docker || true
   sudo usermod -aG docker "$USER"
   sudo systemctl restart docker || sudo service docker restart
@@ -119,6 +121,7 @@ install_docker() {
   sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
   log "Installed, re-login and run ${YELLOW}docker info${CYAN} for status"
+  log "Change socket permission for immediate access: ${YELLOW}sudo chmod 666 /var/run/docker.sock"
 }
 
 install_java() {
@@ -157,8 +160,8 @@ install_python() {
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y python3-devel
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
-  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt' ]; then
-    sudo apt update && sudo apt install -y python3-dev python3-pip python3-venv
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
+    sudo apt-get update && sudo apt-get install -y python3-dev python3-pip python3-venv
   elif [ "$PLATFORM" != 'darwin' ]; then
     echo "Unknown distro.."
     exit 1
@@ -169,8 +172,10 @@ install_python() {
 
 install_dotfiles() {
   log "\nCloning dotfiles.."
-  backup "$HOME/.vim"
-  git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth=1
+  if [ ! -f "$HOME/.vim/config/.bashrc" ]; then
+    backup "$HOME/.vim"
+    git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth=1
+  fi
   log "\nCreating directories.."
   mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib/node-packages,share/lf} ~/.config/{lf,lazygit}
   log "\nLinking configurations.."
@@ -237,23 +242,17 @@ install_tmux() {
 }
 
 install_node() {
-  log "\nInstalling nvm.."
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
-  NVM_DIR=~/.nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
   log "Installing node $NODE_VERSION.."
-  nvm install "$NODE_VERSION"
-  nvm alias default "$NODE_VERSION" && node --version
-  ln -sf "$(which node)" ~/.local/bin/node
-  ln -sf "$(which npm)" ~/.local/bin/npm
-  ln -sf "$(which npx)" ~/.local/bin/npx
-  log "Installing yarn.."
-  curl -o- -L https://yarnpkg.com/install.sh | bash
-  ln -sf ~/.yarn/bin/yarn ~/.local/bin/yarn
+  asdf plugin add nodejs
+  asdf install nodejs "$NODE_VERSION"
+  asdf global nodejs "$NODE_VERSION" && node --version
   log "Installing node packages.."
   pushd ~/.local/lib/node-packages
-  ~/.yarn/bin/yarn add eslint || true
-  ~/.yarn/bin/yarn add prettier || true
+  echo '{}' >> package.json
+  # curl -o- -L https://yarnpkg.com/install.sh | bash  # installs yarn to ~/.yarn
+  npm install yarn || true
+  npm install eslint || true
+  npm install prettier || true
   popd
   echo
 }

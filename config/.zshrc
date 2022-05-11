@@ -27,7 +27,8 @@ if [ -n "$ZINIT_POST_INSTALL" ]; then
     https://github.com/gradle/gradle-completion/blob/master/_gradle \
     https://github.com/gradle/gradle-completion/blob/master/gradle-completion.plugin.zsh \
     https://github.com/zsh-users/zsh-completions/blob/master/src/_yarn \
-    https://github.com/zsh-users/zsh-completions/blob/master/src/_supervisorctl
+    https://github.com/zsh-users/zsh-completions/blob/master/src/_supervisorctl \
+    https://github.com/asdf-vm/asdf/blob/master/completions/_asdf
 fi
 
 zinit depth=1 light-mode for romkatv/powerlevel10k

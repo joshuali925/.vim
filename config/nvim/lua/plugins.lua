@@ -54,14 +54,7 @@ return require("packer").startup({
         })
         use({ "kevinhwang91/nvim-bqf", ft = "qf", config = conf("nvim_bqf") })
         use({ "rcarriga/nvim-notify" })
-        use({
-            "nvim-neo-tree/neo-tree.nvim",
-            branch = "v2.x",
-            requires = "MunifTanjim/nui.nvim",
-            wants = "nui.nvim",
-            cmd = "Neotree",
-            config = conf("neo_tree"),
-        })
+        use({ "kyazdani42/nvim-tree.lua", cmd = { "NvimTreeFindFile", "NvimTreeOpen" }, config = conf("nvim_tree") })
 
         -- git
         use({

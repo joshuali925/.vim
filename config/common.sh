@@ -1,5 +1,6 @@
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
+[ -s "$HOME/.asdf/asdf.sh" ] && source "$HOME/.asdf/asdf.sh"
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
@@ -470,16 +471,6 @@ croc() {
     command croc "$@"
   fi
 }
-
-_load_nvm() {
-  unset -f _load_nvm nvm npx node yarn
-  export NVM_DIR=~/.nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-}
-nvm() { _load_nvm && nvm "$@"; }
-npx() { _load_nvm && npx "$@"; }
-node() { _load_nvm && node "$@"; }
-yarn() { _load_nvm && yarn "$@"; }
 
 docker-shell() {
   local CONTAINERS SELECTED_ID
