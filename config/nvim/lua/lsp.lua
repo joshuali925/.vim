@@ -157,12 +157,7 @@ function M.organize_imports_and_format()
         vim.cmd("silent! OrganizeImports")
         vim.lsp.buf.formatting_sync({}, 3000)
     else
-        local formatted = vim.fn.system("prettier --parser " .. vim.bo.filetype, vim.api.nvim_buf_get_lines(0, 0, -1, false))
-        if vim.api.nvim_get_vvar("shell_error") == 0 then
-            vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(formatted, "\n"))
-        else
-            vim.notify(formatted, "ERROR", { title = "Prettier failed" })
-        end
+        vim.cmd("Prettier")
     end
 end
 

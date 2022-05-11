@@ -3123,3 +3123,144 @@ end
 " =======================================================
 " doesn't work for .class files opened in jar
     call setline(1, systemlist('java -jar ~/.local/lib/cfr.jar /dev/stdin', join(getline(1, '$'), "\n")))
+
+" =======================================================
+" nvm replaced by asdf
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
+  NVM_DIR=~/.nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+_load_nvm() {
+  unset -f _load_nvm nvm npx node yarn
+  export NVM_DIR=~/.nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+}
+nvm() { _load_nvm && nvm "$@"; }
+npx() { _load_nvm && npx "$@"; }
+node() { _load_nvm && node "$@"; }
+yarn() { _load_nvm && yarn "$@"; }
+
+" =======================================================
+" neo-tree
+        use({
+            "nvim-neo-tree/neo-tree.nvim",
+            branch = "v2.x",
+            requires = "MunifTanjim/nui.nvim",
+            wants = "nui.nvim",
+            cmd = "Neotree",
+            config = conf("neo_tree"),
+        })
+function M.neo_tree()
+    local defaults = {
+        ["h"] = "close_node",
+        ["l"] = "open",
+        ["s"] = "open_split",
+        ["v"] = "open_vsplit",
+        ["R"] = "rename",
+        ["zM"] = "close_all_nodes",
+        ["z"] = "none",
+        ["H"] = "none",
+        ["/"] = "none",
+        ["r"] = function(state)
+            local node = state.tree:get_node()
+            require("neo-tree.sources.filesystem.commands").clear_filter(state)
+            require("neo-tree.sources.buffers.commands").refresh()
+            require("neo-tree.sources.filesystem").navigate(state, state.path, node:get_id())
+        end,
+        ["o"] = function(state)
+            require("neo-tree.sources.common.commands").open(state)
+            require("neo-tree").focus()
+        end,
+        ["q"] = function(state)
+            require("neo-tree.ui.renderer").close(state)
+        end,
+        ["<Left>"] = function()
+            vim.cmd("normal! zh")
+        end,
+        ["<Right>"] = function()
+            vim.cmd("normal! zl")
+        end,
+    }
+    local function with_default_mappings(custom)
+        for k, v in pairs(defaults) do
+            if not custom[k] then
+                custom[k] = v
+            end
+        end
+        return custom
+    end
+
+    local function focus(type)
+        return function()
+            require("neo-tree").focus(type)
+        end
+    end
+
+    require("neo-tree").setup({
+        renderers = { -- https://github.com/nvim-neo-tree/neo-tree.nvim/issues/348
+            directory = {
+                { "indent" },
+                { "icon" },
+                { "current_filter" },
+                { "name" },
+                { "clipboard" },
+                { "diagnostics", errors_only = true },
+            },
+            file = {
+                { "indent" },
+                { "icon" },
+                { "name", use_git_status_colors = true, zindex = 10 },
+                { "clipboard" },
+                { "bufnr" },
+                { "modified" },
+                { "diagnostics" },
+                { "git_status" },
+            },
+        },
+        default_component_configs = { icon = { default = "" }, modified = { symbol = "פֿ" } },
+        filesystem = {
+            search_limit = 500,
+            filtered_items = { visible = true, hide_dotfiles = false, never_show = { ".git" } },
+            window = {
+                width = 35,
+                mappings = with_default_mappings({
+                    ["-"] = "navigate_up",
+                    ["C"] = "set_root",
+                    ["x"] = "delete",
+                    ["y"] = "copy_to_clipboard",
+                    ["d"] = "cut_to_clipboard",
+                    ["p"] = "paste_from_clipboard",
+                    ["f"] = "filter_on_submit",
+                    ["t"] = "filter_as_you_type",
+                    ["<BS>"] = focus("git_status"),
+                    ["\\"] = focus("buffers"),
+                }),
+            },
+        },
+        buffers = {
+            show_unloaded = true,
+            window = {
+                width = 35,
+                mappings = with_default_mappings({ ["d"] = "buffer_delete", ["<BS>"] = focus("filesystem"), ["\\"] = focus("git_status") }),
+            },
+        },
+        git_status = {
+            window = {
+                width = 35,
+                mappings = with_default_mappings({ ["<BS>"] = focus("buffers"), ["\\"] = focus("filesystem") }),
+            },
+        },
+        event_handlers = {
+            {
+                event = "vim_buffer_enter",
+                handler = function(arg)
+                    if vim.bo.filetype == "neo-tree" then
+                        vim.wo.signcolumn = "no" -- hide instead of overriding highlights, neo-tree resets winhighlight on BufEnter
+                    end
+                end
+            }
+        }
+    })
+    vim.api.nvim_set_hl(0, "NeoTreeNormal", { link = "NormalSB" })
+    vim.api.nvim_set_hl(0, "NeoTreeNormalNC", { link = "NormalSB" })
+    vim.api.nvim_set_hl(0, "NeoTreeGitModified", { link = "DiagnosticWarn" })
+end

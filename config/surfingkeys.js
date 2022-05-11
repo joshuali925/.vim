@@ -91,6 +91,7 @@ api.map(';e', ';U'); // edit url
 api.unmap('r');
 api.unmap('<Ctrl-h>');
 api.unmap('<Ctrl-j>');
+api.unmap('<Ctrl-u>');
 api.unmap('z'); // api.unmap z, x, c, . for Global Speed
 api.unmap('x');
 api.unmap('c');

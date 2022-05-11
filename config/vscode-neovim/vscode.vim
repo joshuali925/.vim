@@ -126,8 +126,8 @@ nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
 nnoremap <leader>fA :call VSCodeNotify('workbench.action.focusActivityBar')<CR>
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>b :call VSCodeNotify('workbench.view.explorer')<CR>
-nnoremap <leader>n :let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>
-xnoremap <leader>n "xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
+nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
+xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>

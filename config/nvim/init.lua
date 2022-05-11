@@ -136,10 +136,9 @@ vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
 vim.keymap.set("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
 vim.keymap.set({ "n", "x", "o" }, "<leader>y", '"+y')
 vim.keymap.set("n", "<leader>Y", '"+y$')
-vim.keymap.set("n", "<leader>b", "<Cmd>Neotree reveal<CR>")
-vim.keymap.set("n", "<leader>B", "<Cmd>Neotree git_status<CR>")
-vim.keymap.set("n", "<leader>n", [[:let @/='\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
-vim.keymap.set("x", "<leader>n", [["xy:let @/=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
+vim.keymap.set("n", "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", { expr = true })
+vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
+vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("n", "<leader>u", "<Cmd>MundoToggle<CR>")
 vim.keymap.set("n", "<leader>v", "<Cmd>AerialToggle<CR>")
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
@@ -259,7 +258,7 @@ vim.keymap.set("t", "<C-k>", "<Cmd>lua require('tmux').move_top()<CR>")
 vim.keymap.set("t", "<C-l>", "<Cmd>lua require('tmux').move_right()<CR>")
 -- telescope {{{2
 vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>")
-vim.keymap.set("x", "<C-p>", [["xy<Cmd>lua require('telescope.builtin').find_files({initial_mode = 'normal'})<CR>i<C-r>x<Esc>]]) -- https://github.com/nvim-telescope/telescope.nvim/issues/1923
+vim.keymap.set("x", "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = vim.fn['funcs#get_visual_selection']()})<CR>", { silent = true })
 vim.keymap.set("n", "<leader>fs", "<C-p>", { remap = true })
 vim.keymap.set("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>")
 vim.keymap.set("n", "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>")
@@ -359,6 +358,16 @@ vim.api.nvim_create_user_command("GrepRegex", "lua require('telescope.builtin').
 vim.api.nvim_create_user_command("GrepNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("LspInstallAll", "lua require('lsp').lsp_install_all()", {})
+vim.api.nvim_create_user_command("Prettier", function(args)
+    local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
+    local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
+    local formatted = vim.fn.system("prettier --parser " .. parser, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+    if vim.api.nvim_get_vvar("shell_error") == 0 then
+        vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(formatted, "\n"))
+    else
+        vim.notify(formatted, "ERROR", { title = "Prettier failed" })
+    end
+end, { complete = "filetype", nargs = "*" })
 
 -- overrides {{{1
 if vim.fn.glob(vim.fn.stdpath("config") .. "/lua/packer_compiled.lua") == "" then
@@ -394,6 +403,7 @@ end)(vim.paste)
 vim.filetype.add({
     extension = {
         csv = "csv",
+        conf = "conf",
         http = "http",
     },
 })

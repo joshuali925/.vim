@@ -14,7 +14,7 @@ end
 
 function M.bufferline_nvim()
     require("bufferline").setup({
-        options = { offsets = { { filetype = "neo-tree", text = "File Explorer", highlight = "Directory" } } },
+        -- options = { offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } } }, -- taking too much space
         highlights = { buffer_selected = { gui = "bold" } },
     })
 end
@@ -63,7 +63,7 @@ vim.g.qs_filetype_blacklist = {
     "TelescopePrompt",
     "Mundo",
     "aerial",
-    "neo-tree",
+    "NvimTree",
     "startuptime",
     "DiffviewFileHistory",
     "DiffviewFiles",
@@ -240,120 +240,40 @@ function M.alpha_nvim()
     })
 end
 
-function M.neo_tree()
-    local defaults = {
-        ["h"] = "close_node",
-        ["l"] = "open",
-        ["s"] = "open_split",
-        ["v"] = "open_vsplit",
-        ["R"] = "rename",
-        ["zM"] = "close_all_nodes",
-        ["z"] = "none",
-        ["H"] = "none",
-        ["/"] = "none",
-        ["r"] = function(state)
-            local node = state.tree:get_node()
-            require("neo-tree.sources.filesystem.commands").clear_filter(state)
-            require("neo-tree.sources.buffers.commands").refresh()
-            require("neo-tree.sources.filesystem").navigate(state, state.path, node:get_id())
-        end,
-        ["o"] = function(state)
-            require("neo-tree.sources.common.commands").open(state)
-            require("neo-tree").focus()
-        end,
-        ["q"] = function(state)
-            require("neo-tree.ui.renderer").close(state)
-        end,
-        ["<Left>"] = function()
-            vim.cmd("normal! zh")
-        end,
-        ["<Right>"] = function()
-            vim.cmd("normal! zl")
-        end,
-    }
-    local function with_default_mappings(custom)
-        for k, v in pairs(defaults) do
-            if not custom[k] then
-                custom[k] = v
-            end
-        end
-        return custom
-    end
-
-    local function focus(type)
-        return function()
-            require("neo-tree").focus(type)
-        end
-    end
-
-    require("neo-tree").setup({
-        renderers = { -- https://github.com/nvim-neo-tree/neo-tree.nvim/issues/348
-            directory = {
-                { "indent" },
-                { "icon" },
-                { "current_filter" },
-                { "name" },
-                { "clipboard" },
-                { "diagnostics", errors_only = true },
-            },
-            file = {
-                { "indent" },
-                { "icon" },
-                { "name", use_git_status_colors = true, zindex = 10 },
-                { "clipboard" },
-                { "bufnr" },
-                { "modified" },
-                { "diagnostics" },
-                { "git_status" },
+function M.nvim_tree()
+    local tree_cb = require("nvim-tree.config").nvim_tree_callback
+    vim.g.nvim_tree_git_hl = 1
+    require("nvim-tree").setup({
+        hijack_cursor = true,
+        git = { ignore = false },
+        view = {
+            -- https://github.com/kyazdani42/nvim-tree.lua/issues/618
+            mappings = {
+                list = {
+                    { key = { "?" }, cb = tree_cb("toggle_help") },
+                    { key = { "i" }, cb = tree_cb("toggle_ignored") },
+                    { key = { "r" }, cb = tree_cb("refresh") },
+                    { key = { "R" }, cb = tree_cb("rename") },
+                    { key = { "x" }, cb = tree_cb("remove") },
+                    { key = { "d" }, cb = tree_cb("cut") },
+                    { key = { "y" }, cb = tree_cb("copy") },
+                    { key = { "yy" }, cb = tree_cb("copy_absolute_path") },
+                    { key = { "C" }, cb = tree_cb("cd") },
+                    { key = { "s" }, cb = tree_cb("split") },
+                    { key = { "h" }, cb = tree_cb("close_node") },
+                    { key = { "l" }, cb = tree_cb("edit") },
+                    { key = { "zM" }, cb = tree_cb("collapse_all") },
+                    { key = { "[g" }, cb = tree_cb("prev_git_item") },
+                    { key = { "]g" }, cb = tree_cb("next_git_item") },
+                    { key = { "q" }, cb = "<Cmd>execute 'NvimTreeResize '. winwidth(0) <bar> NvimTreeClose<CR>" },
+                    { key = { "<Left>" }, cb = "<Cmd>normal! zh<CR>" },
+                    { key = { "<Right>" }, cb = "<Cmd>normal! zl<CR>" },
+                    { key = { "H" }, cb = "<Cmd>normal! H<CR>" },
+                    { key = { "-" }, cb = "<Cmd>normal! $<CR>" },
+                },
             },
         },
-        default_component_configs = { icon = { default = "" }, modified = { symbol = "פֿ" } },
-        filesystem = {
-            search_limit = 500,
-            filtered_items = { visible = true, hide_dotfiles = false, never_show = { ".git" } },
-            window = {
-                width = 35,
-                mappings = with_default_mappings({
-                    ["-"] = "navigate_up",
-                    ["C"] = "set_root",
-                    ["x"] = "delete",
-                    ["y"] = "copy_to_clipboard",
-                    ["d"] = "cut_to_clipboard",
-                    ["p"] = "paste_from_clipboard",
-                    ["f"] = "filter_on_submit",
-                    ["t"] = "filter_as_you_type",
-                    ["<BS>"] = focus("git_status"),
-                    ["\\"] = focus("buffers"),
-                }),
-            },
-        },
-        buffers = {
-            show_unloaded = true,
-            window = {
-                width = 35,
-                mappings = with_default_mappings({ ["d"] = "buffer_delete", ["<BS>"] = focus("filesystem"), ["\\"] = focus("git_status") }),
-            },
-        },
-        git_status = {
-            window = {
-                width = 35,
-                mappings = with_default_mappings({ ["<BS>"] = focus("buffers"), ["\\"] = focus("filesystem") }),
-            },
-        },
-        event_handlers = {
-            {
-                event = "vim_buffer_enter",
-                handler = function(arg)
-                    if vim.bo.filetype == "neo-tree" then
-                        vim.wo.signcolumn = "no" -- hide instead of overriding highlights, neo-tree resets winhighlight on BufEnter
-                    end
-                end
-            }
-        }
     })
-    vim.api.nvim_set_hl(0, "NeoTreeNormal", { link = "NormalSB" })
-    vim.api.nvim_set_hl(0, "NeoTreeNormalNC", { link = "NormalSB" })
-    vim.api.nvim_set_hl(0, "NeoTreeGitModified", { link = "DiagnosticWarn" })
 end
 
 function M.telescope()
@@ -419,7 +339,7 @@ function M.nvim_treesitter()
             "markdown",
             "bash",
             "http",
-            -- "html", -- https://github.com/nvim-treesitter/nvim-treesitter/issues/1788
+            "html", -- https://github.com/nvim-treesitter/nvim-treesitter/issues/1788
             "css",
             "javascript",
             "typescript",
@@ -773,6 +693,7 @@ function M.vim_quickui()
         { "&Trim spaces", [[keeppatterns %s/\s\+$//e | silent! execute "normal! ``"]], "Remove trailing spaces" },
         { "Re&indent", [[let g:temp = getcurpos() | Sleuth | execute "normal! gg=G" | call setpos('.', g:temp)]], "Recalculate indent with Sleuth and reindent whole file" },
         { "Ded&up lines", [[%!awk '\!x[$0]++']], "Remove duplicated lines and preserve order" },
+        { "Du&plicated lines", [[sort | let @/ = '\C^\(.*\)$\n\1$' | set hlsearch]], "Sort and show duplicated lines" },
         { "Calculate line &=", [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]], 'Calculate expression from previous "=" or current line' },
         { "--", "" },
         { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
