@@ -1,16 +1,20 @@
 local M = {}
 
+-- check current highlights
+-- :S hi
+-- :source $VIMRUNTIME/syntax/hitest.vim
 M.theme_list = {
     [-1] = "tokyonight.nvim",
     [-2] = "gruvbox-flat.nvim",
     [-3] = "github-nvim-theme",
     [-4] = "vscode.nvim",
-    [-5] = "catppuccin",
+    [-5] = "neovim-ayu",
     [-6] = "nightfox.nvim",
     [0] = "github-nvim-theme",
     [1] = "tokyonight.nvim",
     [2] = "nightfox.nvim",
     [3] = "vscode.nvim",
+    [4] = "neovim-ayu",
 }
 M.theme = M.theme_list[vim.g.theme_index]
 
@@ -72,6 +76,18 @@ local themes = {
             vim.g.gruvbox_flat_style = "dark"
             vim.g.gruvbox_sidebars = sidebars
             vim.cmd("colorscheme gruvbox-flat")
+            -- https://github.com/eddyekofo94/gruvbox-flat.nvim/issues/21
+            vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", { fg = "#808080" })
+            vim.api.nvim_set_hl(0, "CmpItemMenu", { fg = "#7c6f64" })
+            vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", { fg = "#ea6962" })
+            vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", { fg = "#ea6962" })
+            vim.api.nvim_set_hl(0, "CmpItemKindVariable", { fg = "#9da85f" })
+            vim.api.nvim_set_hl(0, "CmpItemKindInterface", { fg = "#9da85f" })
+            vim.api.nvim_set_hl(0, "CmpItemKindText", { fg = "#9da85f" })
+            vim.api.nvim_set_hl(0, "CmpItemKindMethod", { fg = "#7daea3" })
+            vim.api.nvim_set_hl(0, "CmpItemKindKeyword", { fg = "#7daea3" })
+            vim.api.nvim_set_hl(0, "CmpItemKindProperty", { fg = "#d4d4d4" })
+            vim.api.nvim_set_hl(0, "CmpItemKindUnit", { fg = "#d4d4d4" })
         end,
     },
     ["github-nvim-theme"] = {
@@ -85,7 +101,7 @@ local themes = {
         config = function()
             require("github-theme").setup({
                 sidebars = sidebars,
-                theme_style = vim.g.theme_index < 0 and "dimmed" or "light_default",
+                theme_style = vim.g.theme_index < 0 and "dimmed" or "light",
             })
         end,
     },
@@ -105,22 +121,6 @@ local themes = {
             end
         end,
     },
-    ["catppuccin"] = {
-        colors = function()
-            default_colors.primary = "#a8b8eb"
-            default_colors.secondary = "#bbe2b2"
-            return default_colors
-        end,
-        config = function()
-            require("catppuccin").setup({
-                styles = { comments = "italic", functions = "italic", keywords = "NONE", strings = "NONE", variables = "NONE" },
-                integrations = {
-                    native_lsp = { enabled = true, virtual_text = { errors = "NONE", hints = "NONE", warnings = "NONE", information = "NONE" } },
-                },
-            })
-            vim.cmd("colorscheme catppuccin")
-        end,
-    },
     ["nightfox.nvim"] = {
         colors = function()
             default_colors.secondary = "#8bb19c"
@@ -136,6 +136,24 @@ local themes = {
             vim.cmd("colorscheme " .. (vim.g.theme_index < 0 and "nordfox" or "dawnfox"))
         end,
     },
+    ["neovim-ayu"] = {
+        colors = function()
+            default_colors.secondary = "#bae67e"
+            if vim.g.theme_index < 0 then
+                default_colors.primary = "#4cb9cf"
+            else
+                default_colors.primary = "#6ebfda"
+            end
+            return default_colors
+        end,
+        config = function()
+            require("ayu").setup({ overrides = { Comment = { fg = "#69737d" } } })
+            vim.cmd("colorscheme ayu-" .. (vim.g.theme_index < 0 and "mirage" or "light"))
+            vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#30364f" })
+            vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#30364f" })
+            vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#30364f" })
+        end,
+    },
 }
 
 function M.config()
@@ -144,6 +162,17 @@ end
 
 function M.colors()
     return themes[M.theme].colors and themes[M.theme].colors() or default_colors
+end
+
+function M.switch(index)
+    local states_file = vim.fn.stdpath("config") .. "/lua/states.lua"
+    vim.cmd(('call writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")'):format(index, states_file, states_file))
+    vim.g.theme_index = index
+    vim.opt.background = index < 0 and "dark" or "light"
+    vim.g.quickui_color_scheme = "papercol-" .. vim.o.background
+    M.theme = M.theme_list[index]
+    M.config()
+    vim.notify("Restart to change theme to " .. M.theme .. ".")
 end
 
 return M

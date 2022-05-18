@@ -1,0 +1,29 @@
+{
+  "Supervisord template": {
+    "prefix": "supervisordtemplate",
+    "body": [
+      "; vim:ft=dosini",
+      "",
+      "[inet_http_server]",
+      "port = 127.0.0.1:9001",
+      "",
+      "[supervisorctl]",
+      "serverurl = http://127.0.0.1:9001",
+      "",
+      "[supervisord]",
+      "nodaemon = false",
+      "logfile = ./logs/supervisord.log",
+      "",
+      "[rpcinterface:supervisor]",
+      "supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface",
+      "",
+      "[program:$0]",
+      "command=./$0",
+      "stderr_logfile = ./logs/$0.stderr.log",
+      "stdout_logfile = ./logs/$0.stdout.log",
+      "autostart = false",
+      "autorestart = true",
+      "stopasgroup = true"
+    ]
+  }
+}

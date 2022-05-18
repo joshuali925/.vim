@@ -9,6 +9,12 @@ set background=dark
 syntax enable
 filetype plugin indent on
 colorscheme gruvbox_material
+let g:netrw_dirhistmax = 0
+let g:netrw_banner = 0
+let g:netrw_browse_split = 4
+let g:netrw_winsize = 20
+let g:netrw_liststyle = 3
+let g:markdown_fenced_languages = [ "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" ]
 let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS. ' --layout=default --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
 
 set backspace=eol,start,indent
@@ -42,7 +48,6 @@ set tabstop=4
 set softtabstop=2
 set shiftwidth=2
 set shiftround
-set textwidth=0
 set autoread
 set hidden
 set complete=.,w,b,u
@@ -80,13 +85,15 @@ set nowritebackup
 set wildcharm=<C-z>
 set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ --auto-hybrid-regex
 set grepformat=%f:%l:%c:%m,%f:%l:%m
-set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%h%m%r%=%-14.(%c/%{len(getline('.'))}%)\ %l/%L\ %P
+set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
 
 let mapleader=';'
 nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
 nnoremap [\ :tab sbuffer<CR>
 nnoremap ]\ :enew<CR>
+nnoremap [<BS> :new<CR>
+nnoremap ]<BS> :vnew<CR>
 noremap , ;
 noremap ;, ,
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
@@ -153,7 +160,7 @@ nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:prev
 nmap <leader>fs <C-p>
 nnoremap <leader>ff :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' $HOME/.cache/vim/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^'. expand('%:p'). '$" \| perl -ne ''chomp(); if (-e $_) {print "$_\n"}'' \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
+nnoremap <leader>fm :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' $HOME/.cache/vim/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^'. expand('%:p'). '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 0)<CR>
 nnoremap <leader>fM :browse oldfiles<CR>
 nnoremap <leader>fg :GrepRegex<Space>
 xnoremap <leader>fg :<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>
@@ -167,6 +174,8 @@ nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
 xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
+nmap <leader>c <leader>ncgn
+xmap <leader>c <leader>ncgn
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
 nnoremap <leader>L :call funcs#print_variable(0, 1)<CR>
@@ -204,12 +213,7 @@ command! -nargs=+ Ggrep call s:Grep(1, 1, <q-args>)
 command! -nargs=+ GgrepNoRegex call s:Grep(1, 0, <q-args>)
 command! Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
 command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
-
-let g:netrw_dirhistmax = 0
-let g:netrw_banner = 0
-let g:netrw_browse_split = 4
-let g:netrw_winsize = 20
-let g:netrw_liststyle = 3
+command! -nargs=* Gdiff execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | file !git\ show\ <args>:'. expand('%:~:.'). ' | silent read !git show <args>:'. expand('%:~:.') | 0d_ | diffthis
 
 function! s:ToggleQuickfix()
   for i in range(1, winnr('$'))

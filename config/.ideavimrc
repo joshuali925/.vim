@@ -107,6 +107,8 @@ map <leader>fa <Action>(GotoAction)
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>n *N
 xnoremap <leader>n y/\V<C-r>"<CR>N
+nmap <leader>c <leader>ncgn
+xmap <leader>c <leader>ncgn
 nmap <leader>tu <Action>(ReopenClosedTab)
 nmap <leader>b <Action>(SelectInProjectView)
 imap <leader>w <Esc><leader>w

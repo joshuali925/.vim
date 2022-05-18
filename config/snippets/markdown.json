@@ -1,0 +1,38 @@
+{
+  "Expandable area": {
+    "prefix": "details",
+    "body": [
+      "<details>",
+      "  <summary>${1:Click for more details}</summary>",
+      "",
+      "  $0",
+      "</details>"
+    ]
+  },
+  "Opensearch release notes": {
+    "prefix": "releasenotes",
+    "body": [
+      "## Version $1 Release Notes",
+      "",
+      "Compatible with OpenSearch $1$0",
+      "",
+      "### Breaking Changes",
+      "* Title ([#1](https://github.com/opensearch-project/repo/pull/1))",
+      "",
+      "### Features",
+      "",
+      "### Enhancements",
+      "",
+      "### Bug Fixes",
+      "",
+      "### Infrastructure",
+      "",
+      "### Documentation",
+      "",
+      "### Maintenance",
+      "",
+      "### Refactoring",
+      ""
+    ]
+  }
+}

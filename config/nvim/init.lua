@@ -1,15 +1,13 @@
 -- options {{{
 pcall(require, "impatient") --         lua/states.lua
 require("states") --                   lua/utils.lua
-vim.g.loaded_matchparen = 1 --         lua/themes.lua
-vim.g.loaded_matchit = 1 --            lua/plugins.lua
-vim.g.loaded_2html_plugin = 1 --       lua/plugin-configs.lua
-vim.g.loaded_remote_plugins = 1 --     lua/lsp.lua
-vim.g.loaded_tutor_mode_plugin = 1 --  lua/rooter.lua
-vim.g.do_filetype_lua = 1 --           ginit.vim
-vim.g.did_load_filetypes = 0 --        autoload/funcs.vim
-vim.g.mapleader = ";"
-vim.g.maplocalleader = "|"
+vim.g.loaded_2html_plugin = 1 --       lua/themes.lua
+vim.g.loaded_remote_plugins = 1 --     lua/plugins.lua
+vim.g.loaded_tutor_mode_plugin = 1 --  lua/plugin-configs.lua
+vim.g.do_filetype_lua = 1 --           lua/lsp.lua
+vim.g.did_load_filetypes = 0 --        lua/rooter.lua
+vim.g.mapleader = ";" --               ginit.vim
+vim.g.maplocalleader = "|" --          autoload/funcs.vim
 vim.g.netrw_dirhistmax = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_liststyle = 3
@@ -33,11 +31,9 @@ vim.opt.tabstop = 4
 vim.opt.softtabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.shiftround = true
-vim.opt.textwidth = 0
 vim.opt.complete = { ".", "w", "b", "u" }
 vim.opt.completeopt = { "menuone", "noselect" }
 vim.opt.completefunc = "funcs#complete_word"
-vim.opt.pumblend = 8
 vim.opt.shortmess = vim.opt.shortmess + { c = true, A = true }
 vim.opt.spellsuggest = vim.opt.spellsuggest + { 10 }
 vim.opt.scrolloff = 2
@@ -90,6 +86,8 @@ vim.keymap.set("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>
 -- general {{{2
 vim.keymap.set("n", "[\\", "<Cmd>tab sbuffer<CR>")
 vim.keymap.set("n", "]\\", "<Cmd>enew<CR>")
+vim.keymap.set("n", "[<BS>", "<Cmd>new<CR>")
+vim.keymap.set("n", "]<BS>", "<Cmd>vnew<CR>")
 vim.keymap.set({ "n", "x", "o" }, "0", "funcs#home()", { expr = true })
 vim.keymap.set({ "n", "x", "o" }, "^", "0")
 vim.keymap.set({ "n", "o" }, "-", "$") -- $ in normal mode will always put cursor at last column when scrolling, g_ will not
@@ -116,8 +114,6 @@ vim.keymap.set("x", ">", ">gv")
 vim.keymap.set("n", "gp", "`[v`]")
 vim.keymap.set("n", "zm", "<Cmd>%foldclose<CR>")
 vim.keymap.set("n", "cr", "<Cmd>call funcs#edit_register()<CR>")
-vim.keymap.set("n", "Z[", "<Cmd>BufferLineCloseLeft<CR>")
-vim.keymap.set("n", "Z]", "<Cmd>BufferLineCloseRight<CR>")
 vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("n", "<C-c>", "<Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
@@ -139,14 +135,15 @@ vim.keymap.set("n", "<leader>Y", '"+y$')
 vim.keymap.set("n", "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", { expr = true })
 vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
-vim.keymap.set("n", "<leader>u", "<Cmd>MundoToggle<CR>")
-vim.keymap.set("n", "<leader>v", "<Cmd>AerialToggle<CR>")
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
 vim.keymap.set("x", "<leader>s", [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/gc<Left><Left><Left>]])
+vim.keymap.set({ "n", "x" }, "<leader>c", "<leader>ncgn", { remap = true })
 vim.keymap.set("n", "<leader>l", "<Cmd>call funcs#print_variable(0, 0)<CR>")
 vim.keymap.set("x", "<leader>l", ":<C-u>call funcs#print_variable(1, 0)<CR>")
 vim.keymap.set("n", "<leader>L", "<Cmd>call funcs#print_variable(0, 1)<CR>")
 vim.keymap.set("x", "<leader>L", ":<C-u>call funcs#print_variable(1, 1)<CR>")
+vim.keymap.set("n", "<leader>u", "<Cmd>MundoToggle<CR>")
+vim.keymap.set("n", "<leader>v", "<Cmd>AerialToggle<CR>")
 vim.keymap.set("n", "<leader>tm", "<Cmd>TableModeToggle<CR>")
 vim.keymap.set("i", "<leader>w", "<Esc><Cmd>update<CR>")
 vim.keymap.set("n", "<leader>w", "<Cmd>update<CR>")
@@ -157,7 +154,7 @@ vim.keymap.set("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>") -- close buff
 vim.keymap.set("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
 vim.keymap.set("n", "yoq", "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'", { expr = true })
 vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'", { expr = true })
-vim.keymap.set("n", "yof", "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <bar> -tabedit %<CR><Cmd>call winrestview(g:temp) <bar> let b:is_zoomed = 1<CR>' : get(b:, 'is_zoomed', 0) ? '<Cmd>tabclose<CR>' : ''", { expr = true })
+vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight<CR>")
 vim.keymap.set("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true })
 vim.keymap.set("c", "<BS>", [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true })
 vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
@@ -168,6 +165,8 @@ vim.keymap.set("n", "<BS>", "<Cmd>BufferLineCyclePrev<CR>")
 vim.keymap.set("n", "\\", "<Cmd>BufferLineCycleNext<CR>")
 vim.keymap.set("n", "<C-w><BS>", "<Cmd>BufferLineMovePrev<CR><C-w>", { remap = true })
 vim.keymap.set("n", "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", { remap = true })
+vim.keymap.set("n", "Z[", "<Cmd>BufferLineCloseLeft<CR>")
+vim.keymap.set("n", "Z]", "<Cmd>BufferLineCloseRight<CR>")
 -- terminal {{{2
 vim.keymap.set("n", "<C-b>", "<Cmd>execute 'Ttoggle resize='. min([10, &lines * 2/5])<CR>")
 vim.keymap.set("n", "<leader>to", "<Cmd>lua require('rooter').run_without_rooter('Ttoggle resize=' .. math.min(10, vim.o.lines))<CR>")
@@ -184,7 +183,7 @@ vim.keymap.set("n", "K", "<Cmd>lua require('plugin-configs').open_quickui_contex
 vim.keymap.set("n", "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>")
 vim.keymap.set("x", "<CR>", "<Esc><Cmd>call quickui#menu#open('visual')<CR>")
 vim.keymap.set("n", "<leader>tp", [[<Cmd>call quickui#terminal#open('zsh', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': ''})<CR>]])
-vim.keymap.set("n", "<C-o>", [[<Cmd>let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('sh -c "lf -last-dir-path=\"$HOME/.cache/lf_dir\" -selection-path='. fnameescape(g:lf_selection_path). ' \"'. expand('%'). '\""', {'h': &lines - 7, 'w': &columns * 9/10, 'line': 3, 'callback': 'funcs#lf_edit_callback'})<CR>]])
+vim.keymap.set("n", "<C-o>", [[<Cmd>let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. substitute(fnameescape(g:lf_selection_path), '\\', '\\\\\', 'g'). ' "'. expand('%'). '"', {'h': &lines - 7, 'w': &columns * 9/10, 'line': 3, 'callback': 'funcs#lf_edit_callback'})<CR>]])
 -- kommentary {{{2
 vim.keymap.set("n", "gc", "<Plug>kommentary_motion_default")
 vim.keymap.set("n", "gcc", "<Plug>kommentary_line_default")
@@ -199,8 +198,6 @@ vim.keymap.set({ "n", "x", "o" }, "q", "<Cmd>lua require('utils').command_withou
 vim.keymap.set({ "n", "x", "o" }, "<leader>e", "<Cmd>lua require('utils').command_without_quickscope('HopWordCurrentLine')<CR>")
 vim.keymap.set({ "n", "x", "o" }, "<leader>j", "<Cmd>lua require('utils').command_without_quickscope('HopLineAC')<CR>")
 vim.keymap.set({ "n", "x", "o" }, "<leader>k", "<Cmd>lua require('utils').command_without_quickscope('HopLineBC')<CR>")
--- vim-matchup {{{2
-vim.keymap.set("n", "<leader>c", "<Cmd>MatchupWhereAmI<CR>")
 -- fanfingtastic {{{2
 vim.keymap.set({ "n", "x", "o" }, "f", "<Plug>fanfingtastic_f")
 vim.keymap.set({ "n", "x", "o" }, "F", "<Plug>fanfingtastic_F")
@@ -358,6 +355,7 @@ vim.api.nvim_create_user_command("GrepRegex", "lua require('telescope.builtin').
 vim.api.nvim_create_user_command("GrepNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("LspInstallAll", "lua require('lsp').lsp_install_all()", {})
+vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | nnoremap <buffer> u <C-u>| nnoremap <nowait> <buffer> d <C-d>", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
@@ -403,7 +401,7 @@ end)(vim.paste)
 vim.filetype.add({
     extension = {
         csv = "csv",
-        conf = "conf",
+        conf = "config",
         http = "http",
     },
 })
@@ -438,7 +436,6 @@ if require("states").small_file then
                 "vim-wordmotion", -- motions/text objects sometimes don't work if loaded on keys
                 "vim-sandwich",
                 "vim-fanfingtastic",
-                "vim-matchup",
             }
             require("packer").loader(table.concat(plugins, " "))
         end, 100)

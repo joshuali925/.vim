@@ -1,0 +1,66 @@
+{
+  "Log": {
+    "prefix": "cl",
+    "body": ["console.log('DEBUGGING ❗$0:', $0);"]
+  },
+  "Log stringify": {
+    "prefix": "cls",
+    "body": [
+      "console.log('DEBUGGING ❗$0:');",
+      "console.log(JSON.stringify($0, null, 2);"
+    ]
+  },
+  "Logger": {
+    "prefix": "logger",
+    "body": [
+      "const log = (...args) => console.log(`[\\${new Date().toISOString()}]`, ...args);"
+    ]
+  },
+  "Random string": {
+    "prefix": "randomstring",
+    "body": [
+      "const randString = () => Math.random().toString(36).substring(2);"
+    ]
+  },
+  "Random integer": {
+    "prefix": "randomint",
+    "body": [
+      "const randint = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);"
+    ]
+  },
+  "Empty arrow function": {
+    "prefix": "arrow",
+    "body": ["() => { }"]
+  },
+  "Promise then": {
+    "prefix": "then",
+    "body": [
+      ".then((resp) => {",
+      "  $0",
+      "})",
+      ".catch((error) => {",
+      "  $0",
+      "})"
+    ]
+  },
+  "Promise then log": {
+    "prefix": "thenlog",
+    "body": [".then((resp) => {", "  console.log(resp);", "})"]
+  },
+  "Cypress delay": {
+    "prefix": "cydelay",
+    "body": ["cy.wait(delay);", "$0"]
+  },
+  "Cypress test id": {
+    "prefix": "cytestid",
+    "body": ["cy.get('[data-test-subj=\"$1\"]')$0"]
+  },
+  "Cypress click": {
+    "prefix": "cyclick",
+    "body": ["cy.contains('$0').click({ force: true });"]
+  },
+  "Cypress text exists": {
+    "prefix": "cyexists",
+    "body": ["cy.contains('$0').should('exist');"]
+  }
+}

@@ -24,8 +24,8 @@ return require("packer").startup({
         use({ "folke/tokyonight.nvim", cond = "require('themes').theme == 'tokyonight.nvim'", config = "require('themes').config()" })
         use({ "eddyekofo94/gruvbox-flat.nvim", cond = "require('themes').theme == 'gruvbox-flat.nvim'", config = "require('themes').config()" })
         use({ "projekt0n/github-nvim-theme", cond = "require('themes').theme == 'github-nvim-theme'", config = "require('themes').config()" })
-        use({ "catppuccin/nvim", as = "catppuccin", cond = "require('themes').theme == 'catppuccin'", config = "require('themes').config()" })
         use({ "Mofiqul/vscode.nvim", cond = "require('themes').theme == 'vscode.nvim'", config = "require('themes').config()" })
+        use({ "Shatur/neovim-ayu", cond = "require('themes').theme == 'neovim-ayu'", config = "require('themes').config()" })
         use({ "EdenEast/nightfox.nvim", cond = "require('themes').theme == 'nightfox.nvim'", config = "require('themes').config()" })
         use({ "akinsho/bufferline.nvim", event = "VimEnter", config = conf("bufferline_nvim") })
         use({ "feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim") })
@@ -76,7 +76,6 @@ return require("packer").startup({
             requires = { "nvim-treesitter/nvim-treesitter-textobjects" },
             config = conf("nvim_treesitter"),
         })
-        use({ "nvim-treesitter/playground", cmd = { "TSPlaygroundToggle", "TSHighlightCapturesUnderCursor" } })
         use({ "williamboman/nvim-lsp-installer" })
         use({ "neovim/nvim-lspconfig", after = "nvim-lsp-installer" })
         use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
@@ -108,8 +107,8 @@ return require("packer").startup({
         use({ "hrsh7th/cmp-nvim-lsp", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-cmdline", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-vsnip", after = "nvim-cmp" })
-        use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" })
-        use({ "hrsh7th/vim-vsnip", after = "friendly-snippets" })
+        use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" }) -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
+        use({ "hrsh7th/vim-vsnip", after = "friendly-snippets", setup = "vim.g.vsnip_snippet_dir = vim.fn.expand('~/.vim/config/snippets')" })
         use({ "windwp/nvim-autopairs", after = "nvim-cmp", config = conf("nvim_autopairs") })
 
         -- editing
@@ -129,14 +128,13 @@ return require("packer").startup({
         use({ "tpope/vim-sleuth" })
         use({ "tpope/vim-unimpaired", keys = { { "", "[" }, { "", "]" }, { "n", "=p" }, { "n", "yo" } } })
         use({ "moll/vim-bbye", cmd = "Bdelete" })
-        use({ "andymass/vim-matchup", config = conf("vim_matchup") })
         use({ "ojroques/vim-oscyank", cmd = { "OSCYank", "OSCYankReg" } })
         use({ "AckslD/nvim-neoclip.lua", event = "TextYankPost", config = conf("nvim_neoclip_lua") })
         use({ "aserowy/tmux.nvim", module = "tmux", config = function() require("tmux").setup({ navigation = { cycle_navigation = false } }) end })
 
         -- tools
         use({ "dstein64/vim-startuptime", cmd = "StartupTime" })
-        use({ "iamcco/markdown-preview.nvim", run = "cd app && yarn install", ft = "markdown", setup = "vim.g.mkdp_auto_close = 0" })
+        use({ "iamcco/markdown-preview.nvim", run = "cd app && yarn install", ft = "markdown", setup = conf("setup_markdown_preview_nvim") })
         use({ "godlygeek/tabular", cmd = "Tabularize" })
         use({
             "dhruvasagar/vim-table-mode",

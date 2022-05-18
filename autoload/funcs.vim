@@ -67,16 +67,17 @@ function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
+  let sidebars = ['help', 'man', 'qf', 'aerial', 'NvimTree', 'neoterm']
   if has_nvim && win_len == 1 && nvim_win_get_config(win_getid()).relative != ''  " floating window focused
     quit
-  elseif a:buffer_mode == 0 && a:force == 1
+  elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q
     if tabpagenr('$') == 1
-      quit
+      quitall
     else
       tabclose
     endif
-  " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; two windows but the other one is file tree
-  elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (win_len == 2 && getbufvar(winbufnr(3 - winnr()), '&filetype') == 'NvimTree' && (buf_len > 1 || bufname('%') != ''))
+  " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; multiple windows but the other ones are sidebars
+  elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (win_len > 1 && len(filter(range(1, win_len), 'v:val != winnr() && index(sidebars, getbufvar(winbufnr(v:val), "&filetype")) >= 0')) == win_len - 1 && (buf_len > 1 || bufname('%') != ''))
     if exists(':Bdelete')
       try
         execute 'Bdelete'. (a:force ? '!' : '')
@@ -170,7 +171,7 @@ function! funcs#get_run_command() abort
   let run_command['cpp'] = 'AsyncRun -raw g++ % -o %< -g && ./%<'
   let run_command['java'] = 'AsyncRun -raw javac % && java %<'
   let run_command['javascript'] = 'AsyncRun -raw node %'
-  let run_command['markdown'] = $SSH_CLIENT != '' ? 'execute "terminal glow %" | nnoremap <buffer> u <C-u>| nnoremap <nowait> <buffer> d <C-d>' : 'MarkdownPreview'
+  let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
   let run_command['html'] = 'AsyncRun -silent open %'
   let run_command['xhtml'] = 'AsyncRun -silent open %'
   let run_command['http'] = 'lua require("rest-nvim").run()'
