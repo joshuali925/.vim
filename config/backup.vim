@@ -2975,6 +2975,41 @@ map("x", "<leader>P", '"0P')
 map("n", "=v", "<Plug>(miniyank-tochar)", {})
 map("n", "=V", "<Plug>(miniyank-toline)", {})
 map("n", "=<C-v>", "<Plug>(miniyank-toblock)", {})
+" treesitter-playground
+        use({ "nvim-treesitter/playground", cmd = { "TSPlaygroundToggle", "TSHighlightCapturesUnderCursor" } })
+" vim-matchup
+        use({ "andymass/vim-matchup", config = conf("vim_matchup") })
+function M.vim_matchup()
+    vim.g.matchup_matchparen_offscreen = {}
+    vim.g.matchup_matchparen_deferred = 1
+    vim.g.matchup_matchparen_deferred_hide_delay = 300
+    vim.g.matchup_motion_override_Npercent = 0
+end
+vim.g.loaded_matchparen = 1
+vim.g.loaded_matchit = 1
+    require("nvim-treesitter.configs").setup({
+        matchup = { enable = true }, -- for vim-matchup
+-- vim-matchup {{{2
+vim.keymap.set("n", "<leader>c", "<Cmd>MatchupWhereAmI<CR>")
+" catppuccin/nvim
+        use({ "catppuccin/nvim", as = "catppuccin", cond = "require('themes').theme == 'catppuccin'", config = "require('themes').config()" })
+    [-5] = "catppuccin",
+    ["catppuccin"] = {
+        colors = function()
+            default_colors.primary = "#a8b8eb"
+            default_colors.secondary = "#bbe2b2"
+            return default_colors
+        end,
+        config = function()
+            require("catppuccin").setup({
+                styles = { comments = "italic", functions = "NONE", keywords = "NONE", strings = "NONE", variables = "NONE" },
+                integrations = {
+                    native_lsp = { enabled = true, virtual_text = { errors = "NONE", hints = "NONE", warnings = "NONE", information = "NONE" } },
+                },
+            })
+            vim.cmd("colorscheme catppuccin")
+        end,
+    },
 
 " =======================================================
 " lsp highlight
@@ -3092,33 +3127,8 @@ function M.wilder_nvim()
 end
 
 " =======================================================
-    -- local cmp_kinds = { -- needs codicons https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
-    --     Text = " ", -- doesn't work well with :set pumblend=8
-    --     Method = " ",
-    --     Function = " ",
-    --     Constructor = " ",
-    --     Field = " ",
-    --     Variable = " ",
-    --     Class = " ",
-    --     Interface = " ",
-    --     Module = " ",
-    --     Property = " ",
-    --     Unit = " ",
-    --     Value = " ",
-    --     Enum = " ",
-    --     Keyword = " ",
-    --     Snippet = " ",
-    --     Color = " ",
-    --     File = " ",
-    --     Reference = " ",
-    --     Folder = " ",
-    --     EnumMember = " ",
-    --     Constant = " ",
-    --     Struct = " ",
-    --     Event = " ",
-    --     Operator = " ",
-    --     TypeParameter = " ",
-    -- }
+" broken by scrollview
+vim.keymap.set("n", "yof", "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <bar> -tabedit %<CR><Cmd>call winrestview(g:temp) <bar> let b:is_zoomed = 1<CR>' : get(b:, 'is_zoomed', 0) ? '<Cmd>tabclose<CR>' : ''", { expr = true })
 
 " =======================================================
 " doesn't work for .class files opened in jar
@@ -3264,3 +3274,95 @@ function M.neo_tree()
     vim.api.nvim_set_hl(0, "NeoTreeNormalNC", { link = "NormalSB" })
     vim.api.nvim_set_hl(0, "NeoTreeGitModified", { link = "DiagnosticWarn" })
 end
+
+" =======================================================
+" auto colors
+local function get_color_fg(name, bg)
+    return string.format("#%x", vim.api.nvim_get_hl_by_name(name, true)[bg or "foreground"])
+end
+local function get_color_bg(name)
+    return string.format("#%x", vim.api.nvim_get_hl_by_name(name, true).background)
+end
+function M.colors()
+    return {
+        bg = get_color_bg("CursorLine"),
+        fg = get_color_fg("ModeMsg"),
+        lightbg = get_color_bg("Normal"),
+        lightbg2 = get_color_bg("NormalNC"),
+        primary = get_color_fg("Function"),
+        secondary = get_color_fg("String"),
+        dim_primary = get_color_bg("Visual"),
+        red = get_color_fg("Identifier"),
+        yellow = get_color_fg("Type"),
+        orange = get_color_fg("Constant"),
+        purple = get_color_fg("Statement"),
+        grey = get_color_fg("LineNr"),
+    }
+    -- return themes[M.theme].colors and themes[M.theme].colors() or default_colors
+end
+    require("lualine").setup {
+        options = {
+            component_separators = { left = "", right = "" },
+            section_separators = { left = "", right = "" },
+        },
+        sections = {
+            lualine_a = { function() return "" end },
+            lualine_b = { { "filetype", colored = true, icon_only = true }, { "filename", path = 1 } },
+            lualine_c = { function() return "  " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") .. " " end, "diff", "diagnostics" },
+            lualine_x = { "encoding", "fileformat", "filetype" },
+            lualine_y = { "branch" },
+            lualine_z = { "location" }
+        },
+        inactive_sections = {
+            lualine_a = {},
+            lualine_b = {},
+            lualine_c = { "filename" },
+            lualine_x = { "location" },
+            lualine_y = {},
+            lualine_z = {}
+        },
+        extensions = { "quickfix" }
+    }
+
+" =======================================================
+" feline update on event
+    local custom_providers = {
+        c_mode = function()
+            return " ", { str = "  ", hl = { fg = colors.lightbg, bg = mode_colors[vim.fn.mode()] or colors.primary } }
+        end,
+        c_file = function()
+            local icon, color = require("nvim-web-devicons").get_icon_color(vim.fn.expand("%:t"), vim.fn.expand("%:e"))
+            return " " .. vim.fn.expand("%:~:.") .. " ", { str = icon or " ", hl = { fg = color or colors.primary } }
+        end,
+        c_dir = function()
+            return "  " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") .. " "
+        end,
+        c_pos = function()
+            local col = vim.fn.col(".")
+            return string.format(" %s/%s", vim.fn.line("."), vim.fn.line("$")), { str = (col < 10 and "  " or " ") .. col, hl = { fg = colors.secondary, bg = colors.lightbg } }
+        end,
+    }
+    local components = { active = { {}, {}, {} }, inactive = { {}, {}, {} } }
+    components.active[1][1] = {
+        provider = { name = "c_mode", update = { "ModeChanged" } },
+        hl = { fg = colors.fg, bg = colors.lightbg },
+    }
+    components.active[1][2] = {
+        provider = { name = "c_file", update = { "BufEnter" } },
+        hl = { fg = colors.fg, bg = colors.lightbg },
+        right_sep = { str = " ", hl = { fg = colors.lightbg, bg = colors.lightbg2 } },
+    }
+    components.active[1][3] = {
+        provider = { name = "c_dir", update = { "BufEnter", "DirChanged" } },
+        hl = { fg = colors.grey, bg = colors.lightbg2 },
+        right_sep = { str = " ", hi = { fg = colors.lightbg2 } },
+    }
+    components.active[3][6] = {
+        provider = { name = "c_pos", update = { "CursorMoved", "CursorMovedI" } },
+        hl = { fg = colors.primary, bg = colors.lightbg },
+
+" =======================================================
+" bash check file existence for :oldfiles MRU (<leader>fm)
+| perl -ne 'chomp(); if (-e $_) {print "$_\n"}'
+| xargs -L 1 ls -1 2>/dev/null
+| while IFS= read -r file; do test -f "$file" && echo "$file"; done

@@ -5,13 +5,6 @@ function M.nvim_autopairs()
     require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
 end
 
-function M.vim_matchup()
-    vim.g.matchup_matchparen_offscreen = {}
-    vim.g.matchup_matchparen_deferred = 1
-    vim.g.matchup_matchparen_deferred_hide_delay = 300
-    vim.g.matchup_motion_override_Npercent = 0
-end
-
 function M.bufferline_nvim()
     require("bufferline").setup({
         -- options = { offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } } }, -- taking too much space
@@ -35,6 +28,7 @@ function M.gitsigns()
             ["x ig"] = ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>",
         },
         update_debounce = 250,
+        sign_priority = 11,
     })
 end
 
@@ -71,13 +65,25 @@ vim.g.qs_filetype_blacklist = {
 } -- will only run on first require
 vim.g.qs_buftype_blacklist = { "terminal" }
 function M.quick_scope()
-    vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = vim.g.theme_index < 0 and "#ffca6e" or "#bf8000" })
-    vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = vim.g.theme_index < 0 and "#6eb9e6" or "#005e7d" })
+    local function highlight_quickscope()
+        vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = vim.g.theme_index < 0 and "#ffbe6d" or "#bf8000" })
+        vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = vim.g.theme_index < 0 and "#6eb9e6" or "#005e7d" })
+    end
+
+    vim.g.qs_hi_priority = -1
+    vim.api.nvim_create_augroup("QuickScopeHighlight", {})
+    vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", group = "QuickScopeHighlight", callback = highlight_quickscope })
+    highlight_quickscope()
 end
 
 function M.mundo()
     vim.g.mundo_preview_bottom = 1
     vim.g.mundo_width = 30
+end
+
+function M.setup_markdown_preview_nvim()
+    vim.g.mkdp_auto_close = 0
+    vim.g.mkdp_preview_options = { disable_sync_scroll = 1 }
 end
 
 function M.setup_neoterm()
@@ -211,7 +217,7 @@ function M.alpha_nvim()
     }
     theme.section.top_buttons.val = {}
     theme.section.bottom_buttons.val = {
-        theme.button("!", "Git diff staged", ":args `Git ls-files --modified` | Git difftool<CR>"),
+        theme.button("!", "Git unstaged changes", ":args `Git ls-files --modified` | Git difftool<CR>"),
         theme.button("+", "Git diff HEAD", ":DiffviewOpen<CR>"),
         theme.button("*", "Git diff remote", ":execute 'DiffviewOpen @{upstream}..HEAD'<CR>"),
         theme.button("o", "Git log", ":Flog<CR>"),
@@ -245,9 +251,11 @@ function M.nvim_tree()
     vim.g.nvim_tree_git_hl = 1
     require("nvim-tree").setup({
         hijack_cursor = true,
+        hijack_netrw = false,
         git = { ignore = false },
+        actions = { open_file = { resize_window = false } },
         view = {
-            -- https://github.com/kyazdani42/nvim-tree.lua/issues/618
+            -- https://github.com/kyazdani42/nvim-tree.lua/issues/1289
             mappings = {
                 list = {
                     { key = { "?" }, cb = tree_cb("toggle_help") },
@@ -369,7 +377,6 @@ function M.nvim_treesitter()
         },
         indent = { enable = true, disable = { "python", "java" } },
         context_commentstring = { enable = true, enable_autocmd = false }, -- for nvim-ts-context-commentstring
-        matchup = { enable = true }, -- for vim-matchup
     })
 end
 
@@ -408,7 +415,7 @@ function M.feline_nvim()
         right_sep = { str = " ", hl = { fg = colors.lightbg, bg = colors.lightbg2 } },
     }
     components.active[1][3] = {
-        provider = function() return "  " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") .. " " end,
+        provider = function() return " " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") .. " " end,
         hl = { fg = colors.grey, bg = colors.lightbg2 },
         right_sep = { str = " ", hi = { fg = colors.lightbg2 } },
     }
@@ -542,32 +549,20 @@ end
 
 function M.nvim_cmp()
     local cmp = require("cmp")
-    local cmp_kinds = {
-        Text = "",
-        Method = "",
-        Function = "",
-        Constructor = "",
-        Field = "ﰠ",
-        Variable = "",
-        Class = "ﴯ",
-        Interface = "",
-        Module = "",
-        Property = "ﰠ",
-        Unit = "塞",
-        Value = "",
-        Enum = "",
-        Keyword = "",
-        Snippet = "",
-        Color = "",
-        File = "",
-        Reference = "",
-        Folder = "",
-        EnumMember = "",
-        Constant = "",
-        Struct = "פּ",
-        Event = "",
-        Operator = "",
-        TypeParameter = "",
+    -- vim.o.pumblend = 8
+    -- local cmp_kinds = {
+    --     Text = "", Method = "", Function = "", Constructor = "", Field = "ﰠ",
+    --     Variable = "", Class = "ﴯ", Interface = "", Module = "", Property = "ﰠ",
+    --     Unit = "塞", Value = "", Enum = "", Keyword = "", Snippet = "",
+    --     Color = "", File = "", Reference = "", Folder = "", EnumMember = "",
+    --     Constant = "", Struct = "פּ", Event = "", Operator = "", TypeParameter = "",
+    -- }
+    local cmp_kinds = { -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
+        Text = " ", Method = " ", Function = " ", Constructor = " ", Field = " ",
+        Variable = " ", Class = " ", Interface = " ", Module = " ", Property = " ",
+        Unit = " ", Value = " ", Enum = " ", Keyword = " ", Snippet = " ",
+        Color = " ", File = " ", Reference = " ", Folder = " ", EnumMember = " ",
+        Constant = " ", Struct = " ", Event = " ", Operator = " ", TypeParameter = " ",
     }
     cmp.setup({
         completion = { completeopt = "menuone,noselect" },
@@ -797,7 +792,6 @@ function M.vim_quickui()
     for i = 1, len_negative / 2 do -- reverse negative keys
         keys[i], keys[len_negative - i + 1] = keys[len_negative - i + 1], keys[i]
     end
-    local states_file = vim.fn.stdpath("config") .. "/lua/states.lua"
     for _, index in ipairs(keys) do
         local theme = theme_list[index]
         if index == 0 then
@@ -810,10 +804,7 @@ function M.vim_quickui()
             used_chars = used_chars .. theme:sub(hint_pos + 1, hint_pos + 1)
             display = theme:sub(1, hint_pos) .. "&" .. theme:sub(hint_pos + 1)
         end
-        table.insert(quickui_theme_list, {
-            category .. display,
-            string.format([[execute 'call writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")' | lua vim.notify("Restart nvim to change to %s")]], index, states_file, states_file, theme),
-        })
+        table.insert(quickui_theme_list, { category .. display, string.format("lua require('themes').switch(%s)", index) })
     end
     vim.fn["quickui#menu#install"]("&Colors", quickui_theme_list)
     vim.fn["quickui#menu#switch"]("visual")

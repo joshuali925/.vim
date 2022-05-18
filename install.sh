@@ -61,8 +61,8 @@ usage() {
 backup() {
   if [ -e "$1" ]; then
     mkdir -p "$BACKUP_DIR"
-    # mv -v --backup=t "$1" "$BACKUP_DIR/$(basename "$1").backup"
-    mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"
+    # \mv -v --backup=t "$1" "$BACKUP_DIR/$(basename "$1").backup"
+    \mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"
   fi
 }
 
@@ -83,8 +83,8 @@ install_development_tools() {
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
     brew install coreutils
-    echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.zshrc
-    echo "export PATH=$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH" >> ~/.bashrc
+    echo "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
+    echo "FPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" >> ~/.zshrc
     brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
     brew install findutils && ln -s "$(which gxargs)" ~/.local/bin/xargs
     brew install gawk && ln -s "$(which gawk)" ~/.local/bin/awk
@@ -154,6 +154,7 @@ install_java() {
   echo "export PATH=\$HOME/.local/lib/$jdk_version/bin:\$PATH" >> ~/.zshrc
   echo "export JAVA_HOME=\$HOME/.local/lib/$jdk_version" >> ~/.zshrc
   log "Installed $jdk_version, exported JAVA_HOME to ~/.zshrc, restart your shell"
+  # export JAVA_HOME installed by asdf: echo "export JAVA_HOME=$(asdf where java)" >> ~/.zshrc
 }
 
 install_python() {
@@ -195,7 +196,6 @@ install_dotfiles() {
     ln -sf ~/Library/Application\ Support ~/Library/ApplicationSupport
     link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/Library/ApplicationSupport/lazygit/config.yml"
     link_file "$HOME/.vim/config/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
-    link_file "$HOME/Library/ApplicationSupport/Code/User/snippets" "$HOME/.vsnip"  # use vscode snipets for neovim vsnip plugin
     mkdir -p ~/.config/karabiner/assets/complex_modifications
     link_file "$HOME/.vim/config/karabiner.json" "$HOME/.config/karabiner/assets/complex_modifications/karabiner.json"
     log "Linked configs for MacOS"
@@ -264,10 +264,10 @@ install_neovim() {
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
       curl -LO "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
-      mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
+      \mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
 
       # curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C ~/.local/lib
-      # mv ~/.local/lib/nvim-linux64 ~/.local/lib/nvim
+      # \mv ~/.local/lib/nvim-linux64 ~/.local/lib/nvim
       # ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
     else
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local/lib nvim
@@ -275,7 +275,7 @@ install_neovim() {
     fi
   elif [ "$PLATFORM" == 'darwin' ]; then
     curl -L -o- "https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz" | tar xz -C ~/.local/lib
-    mv ~/.local/lib/nvim-osx64 ~/.local/lib/nvim
+    \mv ~/.local/lib/nvim-osx64 ~/.local/lib/nvim
     ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
   else
     echo "Unknown distro.."
@@ -283,14 +283,8 @@ install_neovim() {
   fi
   log "Installed neovim, installing plugins.."
   # https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
-  sh -c 'sleep 120 && pkill nvim && echo "Timeout, killed neovim"' &
-  local pid=$!
-  ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').sync()" || true
-  kill $pid > /dev/null 2>&1 || true
-  sh -c 'sleep 30 && pkill nvim && echo "Timeout, killed neovim"' &
-  pid=$!
-  ~/.local/bin/nvim --headless +"lua vim.defer_fn(function() vim.cmd('quitall') end, 27000)" || true
-  kill $pid > /dev/null 2>&1 || true
+  timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').sync()" || true
+  timeout 30 ~/.local/bin/nvim --headless +"lua vim.defer_fn(function() vim.cmd('quitall') end, 27000)" || true
   log "\nInstalled neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"
   log "Run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
   echo
@@ -324,7 +318,7 @@ install() {
 }
 
 init() {
-  set -e
+  set -eo pipefail
   cd "$HOME"
   export PATH="$HOME/.local/bin:$PATH"
   detect-env

@@ -130,6 +130,8 @@ nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
+nmap <leader>c <leader>ncgn
+xmap <leader>c <leader>ncgn
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
 nnoremap <leader>L :call funcs#print_variable(0, 1)<CR>

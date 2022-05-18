@@ -52,6 +52,7 @@ alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
+alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # https://github.com/bcicen/ctop/issues/263
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
@@ -59,7 +60,7 @@ alias rga='rg --text --no-ignore --search-zip'
 alias rgf='rg --files | rg'
 alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
-alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
+alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
@@ -97,8 +98,8 @@ alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch 
 alias gl='git pull'
 alias glr='git pull --rebase'
 alias glg='git log --stat'
-alias glgg='git log --graph'
-alias glgga='git log --graph --decorate --all'
+alias glgg='git log --graph --pretty=fuller'
+alias glgga='git log --graph --decorate --all --pretty=fuller'
 alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 alias gloo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --max-count 10'
 alias glog='git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)" --all'
@@ -473,6 +474,24 @@ croc() {
 }
 
 docker-shell() {
+  if [ "$1" == vim ] || [ "$1" == vim-once ]; then
+    docker image ls | grep -q ubuntu_vim || {
+      docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim && echo -e "\n\nFinished building image. To commit new change: docker commit vim_container ubuntu_vim" || return 1
+    }
+    if [ "$1" == vim-once ]; then
+      echo 'Starting new container, will be removed after it exits..'; docker run --network host -it --name vim_container_temp --rm ubuntu_vim
+      return $?
+    fi
+    local CONTAINER_STAT=$(docker inspect -f '{{.State.Running}}' 'vim_container' 2> /dev/null)
+    if [ "$CONTAINER_STAT" == true ]; then
+      echo 'Starting shell in running container..'; docker exec -it vim_container zsh
+    elif [ "$CONTAINER_STAT" == false ]; then
+      echo 'Starting stopped container..'; docker start -ai vim_container
+    else
+      echo 'Starting new container..'; docker run --network host -it --name vim_container ubuntu_vim
+    fi
+    return $?
+  fi
   local CONTAINERS SELECTED_ID
   CONTAINERS=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}')
   SELECTED_ID=$(echo "$CONTAINERS" | fzf --height=40% --no-sort --tiebreak=begin,index)

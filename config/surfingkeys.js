@@ -119,6 +119,10 @@ api.unmap('p');
 api.mapkey('p', '#0enter ephemeral PassThrough mode to temporarily suppress SurfingKeys', function() {
     api.Normal.passThrough(1500);
 });
+api.mapkey(';Q', 'Close all tabs', function() {
+    api.RUNTIME('tabOnly');
+    api.RUNTIME('closeTab');
+});
 api.mapkey(';V', 'Edit with web vim', function() {
     api.Clipboard.read(function(response) {
         api.Front.showEditor(response.data, function(data) {
@@ -164,9 +168,11 @@ api.mapkey('gp', 'DuckDuckGo first result', function() {
 api.map('yop', ';s'); // toggle pdf viewer
 api.mapkey('yoe', 'Toggle editable', function() { document.body.contentEditable = document.body.contentEditable === 'true' ? 'false' : 'true'; });
 api.mapkey('yof', 'Toggle full screen', function() {
-    if (window.location.hostname === 'www.bilibili.com' && window.location.pathname.startsWith('/bangumi'))
-        document.getElementsByClassName('squirtle-video-pagefullscreen')[0].click();
-    else if (/age.?fans/.test(window.location.hostname))
+    if (window.location.hostname === 'www.bilibili.com') {
+        document.getElementsByClassName(window.location.pathname.startsWith('/bangumi') ? 'squirtle-video-pagefullscreen' : 'bilibili-player-video-web-fullscreen')[0].click();
+        document.getElementById('playerControlBtn').style.visibility = 'hidden'
+        document.getElementById('picinpicBtn').style.visibility = 'hidden'
+    } else if (/age.?fans/.test(window.location.hostname))
         document.getElementsByClassName('fullscn')[0].click();
     else
         document.getElementById('playerControlBtn').click(); // https://greasyfork.org/en/scripts/4870-maximize-video, escape also works

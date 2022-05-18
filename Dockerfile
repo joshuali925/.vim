@@ -1,21 +1,3 @@
-# build
-# docker build -t ubuntu_vim .
-
-# run once
-# docker run --network host -it --name vim_container --rm ubuntu_vim
-
-# run once and persistent
-# docker run --network host -it --name vim_container ubuntu_vim
-
-# run multiple shells
-# docker create --network host -it --name vim_container ubuntu_vim
-# docker start vim_container
-# docker exec -it vim_container zsh
-
-# clean up
-# docker container rm vim_container --force
-# docker image rm ubuntu_vim
-
 FROM ubuntu:20.04
 
 RUN apt-get update; apt-get install -y curl sudo
@@ -36,6 +18,9 @@ RUN ~/.vim/bin/lf --version; ~/.vim/bin/rg --version; ~/.vim/bin/fd --version; ~
 # # if only using bash
 # RUN sudo curl -L -o /usr/bin/bashrc https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc; \
 #       sudo chmod +x /usr/bin/bashrc; echo 'exec bashrc' >> ~/.bashrc && bash -ic 'exit'
+
+# use busybox wget if busybox runs (x86_64)
+RUN ~/.vim/bin/busybox && ln -sr ~/.vim/bin/busybox ~/.vim/bin/wget || true
 
 # # additional dependencies
 # RUN sudo apt-get install -y wget file

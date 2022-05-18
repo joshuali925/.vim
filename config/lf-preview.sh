@@ -1,9 +1,8 @@
-#!/bin/sh
-unset COLORTERM
+#!/usr/bin/env bash
 [ -z "$FULL_PREVIEW" ] && BAT_OPTS='--plain --line-range :150' || BAT_OPTS='--style=numbers --paging=always'
 
 pager() {
-  [ -d "$1" ] && echo "$1" && ls "$1" -AlhF --color=always && return
+  [ -d "$1" ] && { printf "%s\n\n" "$1"; ls "$1" -AlhF --color=always; } | bat && return
   if [ "$(wc -c < "$1")" -gt 2097152 ]; then # 2MB
     less -RiM "$1"
   else
