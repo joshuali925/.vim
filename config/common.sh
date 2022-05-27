@@ -11,9 +11,10 @@ export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER='\'
 export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top'
 export FZF_DEFAULT_COMMAND='rg --files'
-export FZF_CTRL_T_COMMAND='rg --files'
+export FZF_CTRL_T_COMMAND='fd --type=f --hidden --exclude=.git --color=always'
+export FZF_CTRL_T_OPTS="--ansi --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND --no-ignore || true)'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
-export FZF_ALT_C_OPTS='--bind="tab:down,btab:up"'
+export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)'"
 export FZF_PREVIEW_COMMAND='bat --color=always --style=numbers --theme=OneHalfDark --line-range :50 {}'
 
 alias -- -='cd -'
@@ -41,7 +42,6 @@ alias size='du -h --max-depth=1 | sort -hr'
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
 alias sudo='sudo '
-alias title='printf "$([ -n "$TMUX" ] && printf "\033Ptmux;\033")\e]0;%s\e\\$([ -n "$TMUX" ] && printf "\033\\")"'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
@@ -52,16 +52,15 @@ alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
-alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # https://github.com/bcicen/ctop/issues/263
+alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/ctop/issues/263
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
 alias rga='rg --text --no-ignore --search-zip'
-alias rgf='rg --files | rg'
-alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
+alias serve='miniserve --hidden --dirs-first --enable-zip --show-wget-footer --upload-files --color-scheme archlinux --port 8000 .'
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
 
@@ -78,6 +77,7 @@ alias gca!='git commit -v -a --amend'
 alias gcs='git commit -s -m'
 alias gcs!='git commit -s --amend'
 alias gcv='git commit -v'
+alias gcgpg='export GPG_TTY=$(tty) && git commit -S -s -m'
 alias gcf='git config --list'
 alias gcm='git checkout main || git checkout master'
 alias gcd='git checkout develop || git checkout dev'
@@ -321,9 +321,9 @@ path() {
 vf() {
   local IFS=$'\n' FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=($(rg --files | fzf --multi))
+    FZFTEMP=($(eval "$FZF_CTRL_T_COMMAND" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
   else
-    FZFTEMP=($(rg --files | rg "$@" | fzf --multi))
+    FZFTEMP=($(eval "$FZF_CTRL_T_COMMAND" "$@" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
   fi
   [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
 }
@@ -340,7 +340,7 @@ gvf() {
 
 cdf() {
   local FZFTEMP
-  FZFTEMP=$(fd --no-ignore | fzf --bind='tab:down,btab:up' --query="${1:-}") && {
+  FZFTEMP=$(fd --hidden --exclude=.git --no-ignore | fzf --bind='tab:down,btab:up' --query="${1:-}") && {
     [ -d "$FZFTEMP" ] && cd "$FZFTEMP" || {
       [ -d "$(dirname "$FZFTEMP" 2> /dev/null)" ] && cd "$(dirname "$FZFTEMP")"
     }
@@ -426,6 +426,14 @@ envf() {
   FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind='tab:down,btab:up' --query="$1" --preview='printenv {}') && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
 }
 
+jo() {  # basic implementation of https://github.com/jpmens/jo
+  local args=()
+  for arg in "$@"; do
+    args+=(--arg "$(cut -d '=' -f 1 <<< "$arg")" "$(cut -d '=' -f 2- <<< "$arg")")
+  done
+  jq -n "${args[@]}" '$ARGS.named'
+}
+
 react() {
   if [ "$#" -lt 2 ]; then echo "Usage: $0 <dir_to_watch> <command>, use {} as placeholder of modified files."; return 1; fi
   local CHANGED
@@ -458,14 +466,14 @@ croc() {
   local line phrase
   if [ "$#" -eq 0 ]; then
     command croc
-  elif grep -q '^[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$1"; then
+  elif grep -q '^[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<< "$1"; then
     command croc --curve p256 --yes "$@"
   elif [ -e "$1" ] || [ "$1" = send ]; then
     [ "$1" = send ] && shift 1
     timeout 60 croc send "$@" 2>&1 | {
-      while read line; do
+      while read -r line; do
         echo "$line"
-        [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<<"$line") && echo -n " command croc --curve p256 --yes $phrase" | y
+        [ -z "$phrase" ] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<< "$line") && echo -n " command croc --curve p256 --yes $phrase" | y
       done
     }
   else
@@ -488,7 +496,8 @@ docker-shell() {
     elif [ "$CONTAINER_STAT" == false ]; then
       echo 'Starting stopped container..'; docker start -ai vim_container
     else
-      echo 'Starting new container..'; docker run --network host -it --name vim_container ubuntu_vim
+      echo 'Starting new container with host network and docker socket mapped..'
+      docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -it --name vim_container ubuntu_vim
     fi
     return $?
   fi
@@ -527,26 +536,29 @@ ec2() {
 }
 
 # ====================== MacOS ==========================
-alias idea='open -na "IntelliJ IDEA.app" --args'
-alias ideace='open -na "IntelliJ IDEA CE.app" --args'
-browser-history() {
-  [ "$(uname -s)" != Darwin ] && echo "Only supports MacOS, exiting.." && return 1
-  local COLS SEP FZFTEMP FZFPROMPT
-  COLS=$(( COLUMNS / 3 ))
-  SEP='{::}'
-  if [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
-    FZFPROMPT='Chrome> '
-    command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf-temp
-  elif [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
-    FZFPROMPT='Edge> '
-    command cp -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" /tmp/browser-history-fzf-temp
-  else
-    echo "Chrome and Edge histories not found, exiting.."
-    return 1
-  fi
-  FZFTEMP=$(sqlite3 -separator $SEP /tmp/browser-history-fzf-temp \
-    "select substr(title, 1, $COLS), url
-     from urls order by last_visit_time desc" |
-  awk -F $SEP '{printf "%-'$COLS's  \x1b[36m%s\x1b[m\n", $1, $2}' |
-  fzf --prompt="$FZFPROMPT" --ansi --multi) && echo $FZFTEMP | sed 's#.*\(https*://\)#\1#' | xargs open
-}
+if [[ $OSTYPE = darwin* ]]; then
+  alias idea='open -na "IntelliJ IDEA.app" --args'
+  alias ideace='open -na "IntelliJ IDEA CE.app" --args'
+  alias clear-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
+  browser-history() {
+    [ "$(uname -s)" != Darwin ] && echo "Only supports MacOS, exiting.." && return 1
+    local COLS SEP FZFTEMP FZFPROMPT
+    COLS=$(( COLUMNS / 3 ))
+    SEP='{::}'
+    if [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
+      FZFPROMPT='Chrome> '
+      command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf-temp
+    elif [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
+      FZFPROMPT='Edge> '
+      command cp -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" /tmp/browser-history-fzf-temp
+    else
+      echo "Chrome and Edge histories not found, exiting.."
+      return 1
+    fi
+    FZFTEMP=$(sqlite3 -separator $SEP /tmp/browser-history-fzf-temp \
+      "select substr(title, 1, $COLS), url
+      from urls order by last_visit_time desc" |
+    awk -F $SEP '{printf "%-'$COLS's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+    fzf --prompt="$FZFPROMPT" --ansi --multi) && echo $FZFTEMP | sed 's#.*\(https*://\)#\1#' | xargs open
+  }
+fi

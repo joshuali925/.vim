@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 [ -z "$FULL_PREVIEW" ] && BAT_OPTS='--plain --line-range :150' || BAT_OPTS='--style=numbers --paging=always'
 
 pager() {
@@ -10,7 +10,7 @@ pager() {
   fi
 }
 
-if [ -n "$FULL_PREVIEW" ] && [ "$(file -Lb --mime-type -- "$1" | cut -d/ -f1)" = image ]; then
+if [ -n "$FULL_PREVIEW" ] && [ "$(file -Lb --mime-type -- "$1" | cut -d/ -f1)" = 'image' ]; then
   if [ -n "$TMUX" ]; then
     printf 'Press enter to copy print image command and detach tmux'; read; echo
     echo " iterm-imgcat '$(realpath "$1")'; printf 'Press enter to continue'; read; echo; tmux attach" | y && tmux detach
@@ -24,7 +24,7 @@ case "$1" in
   *.tar*|*.tgz|*.xz|*.tbz|*.tbz2) tar tf "$1" ;;
   *.zip) zipinfo -1 "$1" ;;
   *.rar) unrar l "$1" ;;
-  *.7z) 7z l "$1" ;;
+  *.7z) 7z l -p "$1" ;;
   # *.pdf) pdftotext "$1" -;;
   *) pager "$1" ;;
 esac

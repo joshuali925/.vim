@@ -1,6 +1,6 @@
 {
   "Supervisord template": {
-    "prefix": "supervisordtemplate",
+    "prefix": "supervisordTemplate",
     "body": [
       "; vim:ft=dosini",
       "",
@@ -24,6 +24,26 @@
       "autostart = false",
       "autorestart = true",
       "stopasgroup = true"
+    ]
+  },
+  "Caddy template": {
+    "prefix": "caddyTemplate",
+    "body": [
+      "# vim:ft=config:noet",
+      "",
+      ":80 {",
+      "\troot * ./www",
+      "\tencode gzip",
+      "\tfile_server",
+      "\tlog {",
+      "\t\tformat json",
+      "\t\toutput file ./logs/domain.log",
+      "\t}",
+      "}",
+      "",
+      "${1::1110} {",
+      "\treverse_proxy 127.0.0.1:${0:8080}",
+      "}"
     ]
   }
 }

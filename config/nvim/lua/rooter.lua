@@ -41,6 +41,7 @@ end
 
 function M.toggle()
     enabled = not enabled
+    M.root()
     vim.notify("Rooter is " .. (enabled and "enabled" or "disabled"), "INFO", { title = "Rooter", icon = "" })
 end
 

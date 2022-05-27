@@ -104,7 +104,7 @@ cmd follow-symlink ${{
 }}
 
 cmd locate-file-cwd ${{
-  res="$(command ls -1Ap --color=always 2> /dev/null | fzf --ansi --bind 'tab:down,btab:up')"
+  res="$(eval "$FZF_ALT_C_COMMAND" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" fzf)"
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then
@@ -113,7 +113,7 @@ cmd locate-file-cwd ${{
 }}
 
 cmd locate-file ${{
-  res="$(rg --files "$@" | fzf --bind 'tab:down,btab:up')"
+  res="$(eval "$FZF_CTRL_T_COMMAND $@" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --bind='tab:down,btab:up')"
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then
@@ -124,9 +124,9 @@ cmd locate-file ${{
 cmd locate-git-file ${{
   git_repo="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
   if [ "$git_repo" ]; then
-    res="$(git ls-files $(git rev-parse --show-toplevel) | fzf --bind 'tab:down,btab:up')"
+    res="$(git ls-files $(git rev-parse --show-toplevel) | fzf --bind='tab:down,btab:up')"
   else
-    res="$(rg --files | fzf --bind 'tab:down,btab:up')"
+    res="$(rg --files | fzf --bind='tab:down,btab:up')"
   fi
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
@@ -154,6 +154,14 @@ cmd paste-symlink %{{
     lf -remote 'send clear'
     lf -remote 'send load'
   fi
+}}
+
+cmd zip ${{
+  selected=()
+  while IFS= read -r line; do
+    selected+=("$(realpath --relative-to='.' "$line")")
+  done <<< "$fx"
+  zip -r "${selected[0]}.zip" "${selected[@]}"
 }}
 
 cmd x ${{

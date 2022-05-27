@@ -111,11 +111,11 @@ install_docker() {
     curl -fsSL https://get.docker.com/ | sh
   else
     echo "Unknown distro.."
-    exit 1
+    return 0
   fi
   log "Installed docker, adding user to docker group.."
   sudo groupadd docker || true
-  sudo usermod -aG docker "$USER"
+  sudo usermod -aG docker "$USER" || true
   sudo systemctl restart docker || sudo service docker restart
   log "Installing docker-compose.."
   sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -148,7 +148,7 @@ install_java() {
     fi
   else
     echo "Unknown distro.."
-    exit 1
+    return 0
   fi
   curl -L -o- "$jdk_url" | tar -xz -C "$HOME/.local/lib"
   echo "export PATH=\$HOME/.local/lib/$jdk_version/bin:\$PATH" >> ~/.zshrc
@@ -165,7 +165,7 @@ install_python() {
     sudo apt-get update && sudo apt-get install -y python3-dev python3-pip python3-venv
   elif [ "$PLATFORM" != 'darwin' ]; then
     echo "Unknown distro.."
-    exit 1
+    return 0
   fi
   pip3 install --user pynvim
   log "Installed pynvim, python3 and pip3"
@@ -215,7 +215,7 @@ install_tmux() {
     brew install tmux --HEAD
   else
     echo "Unknown distro.."
-    exit 1
+    return 0
   fi
   log "Installing tmux plugins.."
   backup "$HOME/.tmux"
@@ -279,10 +279,10 @@ install_neovim() {
     ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
   else
     echo "Unknown distro.."
-    exit 1
+    return 0
   fi
   log "Installed neovim, installing plugins.."
-  # https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
+  # TODO https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
   timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').sync()" || true
   timeout 30 ~/.local/bin/nvim --headless +"lua vim.defer_fn(function() vim.cmd('quitall') end, 27000)" || true
   log "\nInstalled neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"

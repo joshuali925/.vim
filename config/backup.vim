@@ -1060,6 +1060,7 @@ function! SendCommendToTerminal(command)
         call term_sendkeys(buff_n, a:command. "\<CR>")
     endif
 endfunction
+
 " =======================================================
 " glutentags - too slow, tagfile too large
 Plug 'ludovicchabant/vim-gutentags'
@@ -2991,25 +2992,6 @@ vim.g.loaded_matchit = 1
         matchup = { enable = true }, -- for vim-matchup
 -- vim-matchup {{{2
 vim.keymap.set("n", "<leader>c", "<Cmd>MatchupWhereAmI<CR>")
-" catppuccin/nvim
-        use({ "catppuccin/nvim", as = "catppuccin", cond = "require('themes').theme == 'catppuccin'", config = "require('themes').config()" })
-    [-5] = "catppuccin",
-    ["catppuccin"] = {
-        colors = function()
-            default_colors.primary = "#a8b8eb"
-            default_colors.secondary = "#bbe2b2"
-            return default_colors
-        end,
-        config = function()
-            require("catppuccin").setup({
-                styles = { comments = "italic", functions = "NONE", keywords = "NONE", strings = "NONE", variables = "NONE" },
-                integrations = {
-                    native_lsp = { enabled = true, virtual_text = { errors = "NONE", hints = "NONE", warnings = "NONE", information = "NONE" } },
-                },
-            })
-            vim.cmd("colorscheme catppuccin")
-        end,
-    },
 
 " =======================================================
 " lsp highlight
@@ -3366,3 +3348,44 @@ end
 | perl -ne 'chomp(); if (-e $_) {print "$_\n"}'
 | xargs -L 1 ls -1 2>/dev/null
 | while IFS= read -r file; do test -f "$file" && echo "$file"; done
+
+" =======================================================
+alias title='printf "$([ -n "$TMUX" ] && printf "\033Ptmux;\033")\e]0;%s\e\\$([ -n "$TMUX" ] && printf "\033\\")"'
+alias quote="awk -v q=\"'\" 'BEGIN{ for (i=1; i<ARGC; i++) { gsub(q, q \"\\\\\" q q, ARGV[i]); printf \"%s \", q ARGV[i] q; } print \"\" }'"
+export FZF_CTRL_T_COMMAND='rg --files'
+alias rgf='rg --files | rg'
+alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
+
+" =======================================================
+" doesn't work with gitignore
+install_unison() {
+  local releases url
+  releases=$(curl -s "https://api.github.com/repos/bcpierce00/unison/releases/latest")
+  # | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4)
+  if [ "$PLATFORM" == 'linux' ]; then
+    if [ "$ARCHITECTURE" == 'x86_64' ]; then
+      url=$(grep "browser_download_url.*x86_64.linux.static.tar.gz" <<< "$releases" | tail -n 1 | cut -d '"' -f 4)
+      curl -sL -o- "$url" | sudo tar xvz -C /usr/local/bin --strip-components=1 bin/unison bin/unison-fsmonitor
+      log "Installed unison, unison-fsmonitor"
+    else
+      echo "architecture not supported, skipping.."
+      return 0
+    fi
+  elif [ "$PLATFORM" == 'darwin' ]; then
+    url=$(grep "browser_download_url.*x86_64.macos-" <<< "$releases" | tail -n 1 | cut -d '"' -f 4)
+    curl -sL -o- "$url" | tar xvz -C ~/.local/bin --strip-components=1 bin/unison
+    log "Installed unison, installing unison-fsmonitor, unison-gitignore.."
+    git clone https://github.com/hnsl/unox ~/.local/lib/unison/unox --depth=1
+    python3 -m venv ~/.local/lib/unison && source ~/.local/lib/unison/bin/activate
+    pip install ~/.local/lib/unison/unox
+    pip install unison-gitignore
+    deactivate
+    ln -sf ~/.local/lib/unison/bin/unison-fsmonitor ~/.local/bin/unison-fsmonitor
+    ln -sf ~/.local/lib/unison/bin/unison-gitignore ~/.local/bin/unison-gitignore
+    log "Installed unison-fsmonitor, unison-gitignore"
+  else
+    echo "Unknown distro.."
+    return 0
+  fi
+}
+

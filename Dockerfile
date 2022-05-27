@@ -6,7 +6,7 @@ RUN useradd -s /bin/bash -d /home/docker -m -G sudo docker; passwd -d docker
 USER docker
 WORKDIR /home/docker
 
-ENV TERM='xterm-256color' SSH_CLIENT=1
+ENV TERM='xterm-256color' SSH_CLIENT=1 SHELL=/usr/bin/zsh USER=docker
 
 # outside context: comment COPY and replace $(cat ...) with $(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh)
 COPY --chown=docker . .vim

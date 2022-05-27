@@ -5,7 +5,7 @@
   },
   "if": {
     "prefix": "if",
-    "body": ["if [ ${1:\"\\$VAR\" = STRING} ]; then", "  $0", "fi"]
+    "body": ["if [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "  $0", "fi"]
   },
   "if command succeeds": {
     "prefix": "ifcommand",
@@ -26,9 +26,9 @@
   "case": {
     "prefix": "case",
     "body": [
-      "case $1 in",
-      "  $2) $3 ;;",
-      "  *) echo 'Unsupported, exiting..' >&2; exit 1 ;;",
+      "case ${1:\\$1} in",
+      "  ${2:help}) $0 ;;",
+      "  *) echo \"Unsupported argument ${1:\\$1}, exiting..\" >&2; exit 1 ;;",
       "esac"
     ]
   },

@@ -88,6 +88,8 @@ xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
+xnoremap ie GoggV
+onoremap <silent> ie :normal vie<CR>
 noremap <expr> 0 funcs#home()
 noremap ^ 0
 noremap - $

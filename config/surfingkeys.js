@@ -145,7 +145,7 @@ api.mapkey('P', 'Open url or google', function() {
         if (validURL(text)) {
             api.tabOpenLink(text);
         } else {
-            api.tabOpenLink(`https://www.google.com/search?q=${text.replace(/\n|\r/g, ' ')}`);
+            api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(text)}`);
         }
     }
     if (window.getSelection().toString()) {
@@ -156,7 +156,18 @@ api.mapkey('P', 'Open url or google', function() {
         });
     }
 });
-api.mapkey('gp', 'DuckDuckGo first result', function() {
+api.mapkey('gp', 'Google first result', function() {
+    // bypassing redirect using navclient doesn't always work: https://www.google.com/search?q=${encodeURIComponent(q)}&btnI=&sourceid=navclient&gfns=1
+    // current one needs https://greasyfork.org/en/scripts/390770-workaround-for-google-i-m-feeling-lucky-redirect
+    if (window.getSelection().toString()) {
+        api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(window.getSelection().toString())}&btnI`);
+    } else {
+        api.Clipboard.read(function(response) {
+            api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(response.data)}&btnI`);
+        });
+    }
+});
+api.mapkey('gP', 'DuckDuckGo first result', function() {
     if (window.getSelection().toString()) {
         api.tabOpenLink("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(window.getSelection().toString()));
     } else {
@@ -196,18 +207,17 @@ api.mapkey('yraw', 'Copy github raw', function() {
     fetch(href).then(response => response.text()).then((text) => api.Clipboard.write(text));
 }, {domain: /github.com|raw.githubusercontent.com/i});
 api.mapkey('yov', 'Toggle sites', function() {
-    if (window.location.hostname === 'github.dev')
-        api.tabOpenLink(window.location.href.replace('github.dev', 'github.com'));
-    else if (/github(1s)?.com/.test(window.location.hostname))
-        api.tabOpenLink(window.location.href.replace(/github(1s)?.com/, function(match, p1) { return p1 ? 'github.com' : 'github1s.com' }));
-    else if (window.location.hostname === 'www.baidu.com')
+    if (/github.(com|dev)/.test(window.location.hostname)) {
+        api.tabOpenLink(window.location.href.replace(/github.(com|dev)/, function(match, p1) { return p1 === 'com' ? 'github.dev' : 'github.com' }));
+    } else if (window.location.hostname === 'www.baidu.com') {
         window.location.href = `https://www.google.com/search?q=${window.location.href.match(/[?&]wd=([^&]+)/)[1]}`;
-    else if (window.location.hostname === 'www.google.com')
+    } else if (window.location.hostname === 'www.google.com') {
         window.location.href = `https://www.baidu.com/s?ie=UTF-8&wd=${window.location.href.match(/[?&]q=([^&]+)/)[1]}`;
-}, {domain: /(baidu|google|github|github1s)\.(com|dev)/i});
-api.mapkey('yod', 'Toggle bilibili danmaku', function() {
-    document.getElementsByClassName('bui-switch-input')[0].click();
-}, {domain: /bilibili\.com/i});
+    }
+}, {domain: /(baidu|google|github)\.(com|dev)/i});
+api.mapkey('yos', 'Toggle sourcegraph search', function() {
+    api.tabOpenLink('sourcegraph.com/search?q=context:global+repo:' + window.location.href.match(/(github.com\/[^/]+\/?[^/]+)/)[1] + '+');
+}, {domain: /github\.com/i});
 
 api.unmap('gg');
 api.unmap('G');
