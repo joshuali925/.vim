@@ -9,6 +9,10 @@
       "# }}}"
     ]
   },
+  "Content type JSON": {
+    "prefix": "contentType",
+    "body": ["Content-Type: application/json", "", "{", "  $0", "}"]
+  },
   "GET request": {
     "prefix": "getrequest",
     "body": ["GET {{BASE}}$0"]

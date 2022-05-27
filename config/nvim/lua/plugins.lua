@@ -7,7 +7,7 @@ vim.cmd("packadd packer.nvim")
 return require("packer").startup({
     config = {
         opt_default = true,
-        -- https://github.com/wbthomason/packer.nvim/issues/456
+        -- TODO https://github.com/wbthomason/packer.nvim/issues/456
         -- max_jobs = 10, -- this fixes above issue but breaks plugin installing in headless nvim
         display = { open_fn = require("packer.util").float },
         profile = { enable = false },
@@ -26,11 +26,12 @@ return require("packer").startup({
         use({ "projekt0n/github-nvim-theme", cond = "require('themes').theme == 'github-nvim-theme'", config = "require('themes').config()" })
         use({ "Mofiqul/vscode.nvim", cond = "require('themes').theme == 'vscode.nvim'", config = "require('themes').config()" })
         use({ "Shatur/neovim-ayu", cond = "require('themes').theme == 'neovim-ayu'", config = "require('themes').config()" })
+        use({ "catppuccin/nvim", as = "catppuccin", cond = "require('themes').theme == 'catppuccin'", config = "require('themes').config()" })
         use({ "EdenEast/nightfox.nvim", cond = "require('themes').theme == 'nightfox.nvim'", config = "require('themes').config()" })
         use({ "akinsho/bufferline.nvim", event = "VimEnter", config = conf("bufferline_nvim") })
         use({ "feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim") })
         use({ "lukas-reineke/indent-blankline.nvim", config = conf("indent_blankline") })
-        -- try petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
+        -- TODO try petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
         use({ "dstein64/nvim-scrollview", config = "require('scrollview').setup()" })
         use({
             "DarwinSenior/nvim-colorizer.lua",

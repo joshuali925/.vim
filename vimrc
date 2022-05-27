@@ -106,6 +106,8 @@ xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
+xnoremap ie GoggV
+onoremap <silent> ie :normal vie<CR>
 noremap <expr> 0 funcs#home()
 noremap ^ 0
 noremap - $
@@ -156,7 +158,7 @@ nnoremap <leader>P :registers<CR>:normal! "p<Left>
 xnoremap <leader>P "0P
 imap <leader>r <Esc><leader>r
 nnoremap <leader>r :execute funcs#get_run_command()<CR>
-nnoremap <C-p> :call <SID>EditCallback('rg --files \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 1)<CR>
+nnoremap <C-p> :call <SID>EditCallback($FZF_CTRL_T_COMMAND. ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"', 1)<CR>
 nmap <leader>fs <C-p>
 nnoremap <leader>ff :vsplit **/*
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
@@ -213,7 +215,7 @@ command! -nargs=+ Ggrep call s:Grep(1, 1, <q-args>)
 command! -nargs=+ GgrepNoRegex call s:Grep(1, 0, <q-args>)
 command! Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
 command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
-command! -nargs=* Gdiff execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | file !git\ show\ <args>:'. expand('%:~:.'). ' | silent read !git show <args>:'. expand('%:~:.') | 0d_ | diffthis
+command! -nargs=* Gdiff execute 'Grt' | execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | file !git\ show\ <args>:'. expand('%:~:.'). ' | silent read !git show <args>:'. expand('%:~:.') | 0d_ | diffthis
 
 function! s:ToggleQuickfix()
   for i in range(1, winnr('$'))

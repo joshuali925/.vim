@@ -1,7 +1,7 @@
 local M = {}
 
 function M.nvim_autopairs()
-    require("nvim-autopairs").setup({ ignored_next_char = string.gsub([[ [%w%%%'%[%"%.%(%{%/] ]], "%s+", "") })
+    require("nvim-autopairs").setup({ ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=] })
     require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
 end
 
@@ -62,6 +62,7 @@ vim.g.qs_filetype_blacklist = {
     "DiffviewFileHistory",
     "DiffviewFiles",
     "floggraph",
+    "fugitiveblame",
 } -- will only run on first require
 vim.g.qs_buftype_blacklist = { "terminal" }
 function M.quick_scope()
@@ -238,7 +239,7 @@ function M.alpha_nvim()
         group = "AlphaAutoCommands",
         callback = function()
             vim.b.RestoredCursor = 1 -- do not restore cursor position
-            vim.keymap.set("n", "v", require("alpha").queue_press, { buffer = true }) -- https://github.com/goolord/alpha-nvim/issues/92
+            vim.keymap.set("n", "v", require("alpha").queue_press, { buffer = true }) -- TODO https://github.com/goolord/alpha-nvim/issues/92
             vim.keymap.set("n", "q", "len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'", { buffer = true, expr = true })
             vim.keymap.set("n", "e", "<Cmd>enew<CR>", { buffer = true })
             vim.keymap.set("n", "i", "<Cmd>enew <bar> startinsert<CR>", { buffer = true })
@@ -248,14 +249,13 @@ end
 
 function M.nvim_tree()
     local tree_cb = require("nvim-tree.config").nvim_tree_callback
-    vim.g.nvim_tree_git_hl = 1
     require("nvim-tree").setup({
         hijack_cursor = true,
         hijack_netrw = false,
         git = { ignore = false },
         actions = { open_file = { resize_window = false } },
+        renderer = { highlight_git = true },
         view = {
-            -- https://github.com/kyazdani42/nvim-tree.lua/issues/1289
             mappings = {
                 list = {
                     { key = { "?" }, cb = tree_cb("toggle_help") },
@@ -271,6 +271,7 @@ function M.nvim_tree()
                     { key = { "h" }, cb = tree_cb("close_node") },
                     { key = { "l" }, cb = tree_cb("edit") },
                     { key = { "zM" }, cb = tree_cb("collapse_all") },
+                    { key = { "zR" }, cb = tree_cb("expand_all") },
                     { key = { "[g" }, cb = tree_cb("prev_git_item") },
                     { key = { "]g" }, cb = tree_cb("next_git_item") },
                     { key = { "q" }, cb = "<Cmd>execute 'NvimTreeResize '. winwidth(0) <bar> NvimTreeClose<CR>" },
@@ -286,7 +287,7 @@ end
 
 function M.telescope()
     local actions = require("telescope.actions")
-    -- https://github.com/nvim-telescope/telescope.nvim/issues/416
+    -- TODO https://github.com/nvim-telescope/telescope.nvim/issues/416
     require("telescope").setup({
         defaults = {
             mappings = {
@@ -347,7 +348,7 @@ function M.nvim_treesitter()
             "markdown",
             "bash",
             "http",
-            "html", -- https://github.com/nvim-treesitter/nvim-treesitter/issues/1788
+            "html", -- TODO https://github.com/nvim-treesitter/nvim-treesitter/issues/1788
             "css",
             "javascript",
             "typescript",
@@ -743,7 +744,7 @@ function M.vim_quickui()
         { 'Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', [[set cursorcolumn!]], "Toggle cursorcolumn" },
         { 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}', [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
         { "--", "" },
-        { "Toggle wilder", [[call wilder#toggle()]], "Toggle wilder.nvim command line completion" },
+        { "Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
     })
     vim.fn["quickui#menu#install"]("Ta&bles", {
         { "Table &mode", [[TableModeToggle]], "Toggle TableMode" },

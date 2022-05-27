@@ -53,12 +53,16 @@ nnoremap c3iu ]b[wc3]w
 nnoremap d2iu ]b[wd2]w
 nnoremap d3iu ]b[wd3]w
 xnoremap il ^og_
-nnoremap vil v^og_
-nnoremap dil v^og_d
 nnoremap cil v^og_c
+nnoremap dil v^og_d
 nnoremap yil v^og_y
 nnoremap <leader>yil v^og_"+y
 xnoremap al 0o$
+xnoremap ie GoggV
+nnoremap cie vGoggVc
+nnoremap die vGoggVd
+nnoremap yie vGoggVy
+nnoremap <leader>yie vGoggV"+y
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)
 noremap , ;
@@ -91,6 +95,8 @@ nnoremap <C-h> :NERDTree<CR>
 nmap <C-j> <Action>(ActiveToolwindowGroup)
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+nmap <C-w><BS> :tabmove -1<CR><C-w>
+nmap <C-w>\ :tabmove +1<CR><C-w>
 noremap <leader>y "+y
 nnoremap <leader>Y "+y$
 noremap <leader>p "0p

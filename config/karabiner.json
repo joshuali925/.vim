@@ -413,15 +413,15 @@
           },
           "to": [
             {
-              "key_code": "open_bracket",
-              "modifiers": ["right_command"]
+              "key_code": "grave_accent_and_tilde",
+              "modifiers": ["right_command", "right_option"]
             }
           ],
           "type": "basic",
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["^com\\.github\\.wez\\.wezterm$"]
+              "bundle_identifiers": ["^com\\.jetbrains\\.intellij"]
             }
           ]
         },
@@ -440,15 +440,15 @@
           },
           "to": [
             {
-              "key_code": "close_bracket",
-              "modifiers": ["right_command"]
+              "key_code": "grave_accent_and_tilde",
+              "modifiers": ["right_command", "right_option", "right_shift"]
             }
           ],
           "type": "basic",
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["^com\\.github\\.wez\\.wezterm$"]
+              "bundle_identifiers": ["^com\\.jetbrains\\.intellij"]
             }
           ]
         }

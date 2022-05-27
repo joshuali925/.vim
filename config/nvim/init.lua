@@ -73,6 +73,8 @@ vim.keymap.set("x", "il", "^og_")
 vim.keymap.set("o", "il", "<Cmd>normal vil<CR>")
 vim.keymap.set("x", "al", "0o$")
 vim.keymap.set("o", "al", "<Cmd>normal val<CR>")
+vim.keymap.set("x", "ie", "GoggV")
+vim.keymap.set("o", "ie", "<Cmd>normal vie<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
@@ -160,6 +162,7 @@ vim.keymap.set("c", "<BS>", [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[ge
 vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
 vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { expr = true })
 vim.cmd("cnoreabbrev print <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua =( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua =( )' ? setcmdpos(7)[-1] : '')<CR>") -- vim.pretty_print
+vim.cmd("cnoreabbrev git <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>") -- fugitive
 -- nvim_bufferline {{{2
 vim.keymap.set("n", "<BS>", "<Cmd>BufferLineCyclePrev<CR>")
 vim.keymap.set("n", "\\", "<Cmd>BufferLineCycleNext<CR>")
@@ -337,7 +340,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "term://*", group = "AutoCommands", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif]] })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "AutoCommands", callback = require("rooter").root })
-vim.api.nvim_create_autocmd("User", {
+vim.api.nvim_create_autocmd("User", { -- fugitive :Git
     pattern = "FugitiveIndex",
     group = "AutoCommands",
     callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
@@ -391,8 +394,8 @@ vim.notify = function(...)
     vim.notify(...)
 end
 vim.paste = (function(overridden)
-    return function(lines, phase) -- break undo before pasting in insert mode
-        if (phase == -1 or phase == 1) and vim.fn.mode() == "i" and not vim.o.paste then
+    return function(lines, phase) -- break undo before pasting in insert mode, :h vim.paste()
+        if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
             vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
         end
         overridden(lines, phase)
@@ -401,8 +404,11 @@ end)(vim.paste)
 vim.filetype.add({
     extension = {
         csv = "csv",
-        conf = "config",
         http = "http",
+        conf = "config",
+    },
+    filename = {
+        Caddyfile = "config",
     },
 })
 if vim.env.SSH_CLIENT ~= nil then -- ssh session
