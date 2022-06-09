@@ -136,6 +136,8 @@ nnoremap zm :%foldclose<CR>
 nnoremap cr :call funcs#edit_register()<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
+nmap zh zhz
+nmap zl zlz
 nnoremap <C-c> :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> redraw!<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>

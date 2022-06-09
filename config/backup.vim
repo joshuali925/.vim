@@ -969,7 +969,7 @@ if has('gui_running')
   if has('win32')  " Windows gVim
     " :set guifont=* :set guifont?  " manually run to pick font and get value
     set guifont=JetBrainsMono_NF:h10:cANSI
-    set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 versions need to match
+    set pythonthreedll=python38.dll  " set to python3x.dll for python3.x, python and vim x86/x64 versions need to match and vim should be downloaded from https://github.com/vim/vim-win32-installer/releases
     let g:gVimPath = substitute($VIMRUNTIME. '\gvim', '\', '\\\\', 'g'). ' '
     nnoremap <leader>W :silent execute '!sudo /c '. g:gVimPath. '"%:p"'<CR>
     nnoremap <leader><C-r> :silent execute '!'. g:gVimPath. '"%:p"' <bar> quit<CR>
@@ -2313,7 +2313,7 @@ let g:wildfire_objects = {
             }
         }, ]]
                 keymaps = {
-                    -- TODO @parameter.outer is not supported by most languages, use vim-swap for now
+                    -- @parameter.outer is not supported by most languages, use vim-swap for now
                     --[[ ['ia'] = '@parameter.inner',
                     ['aa'] = '@parameter.outer', ]]
                     ["if"] = "@function.inner",
@@ -3378,6 +3378,7 @@ install_unison() {
     git clone https://github.com/hnsl/unox ~/.local/lib/unison/unox --depth=1
     python3 -m venv ~/.local/lib/unison && source ~/.local/lib/unison/bin/activate
     pip install ~/.local/lib/unison/unox
+    " maybe pip install git+https://github.com/hnsl/unox.git
     pip install unison-gitignore
     deactivate
     ln -sf ~/.local/lib/unison/bin/unison-fsmonitor ~/.local/bin/unison-fsmonitor

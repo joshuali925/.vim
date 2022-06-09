@@ -118,6 +118,8 @@ vim.keymap.set("n", "zm", "<Cmd>%foldclose<CR>")
 vim.keymap.set("n", "cr", "<Cmd>call funcs#edit_register()<CR>")
 vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
+vim.keymap.set("n", "zh", "zhz", { remap = true })
+vim.keymap.set("n", "zl", "zlz", { remap = true })
 vim.keymap.set("n", "<C-c>", "<Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("x", "<C-c>", "<Esc>")
@@ -257,8 +259,9 @@ vim.keymap.set("t", "<C-j>", "<Cmd>lua require('tmux').move_bottom()<CR>")
 vim.keymap.set("t", "<C-k>", "<Cmd>lua require('tmux').move_top()<CR>")
 vim.keymap.set("t", "<C-l>", "<Cmd>lua require('tmux').move_right()<CR>")
 -- telescope {{{2
-vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>")
+vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.builtin').find_files()<CR>")
 vim.keymap.set("x", "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = vim.fn['funcs#get_visual_selection']()})<CR>", { silent = true })
+vim.keymap.set("n", "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>")
 vim.keymap.set("n", "<leader>fs", "<C-p>", { remap = true })
 vim.keymap.set("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>")
 vim.keymap.set("n", "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>")
@@ -267,7 +270,6 @@ vim.keymap.set("n", "<leader>fu", "<Cmd>lua require('telescope.builtin')[require
 vim.keymap.set("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
 vim.keymap.set("n", "<leader>fg", ":GrepRegex ")
 vim.keymap.set("x", "<leader>fg", ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>")
-vim.keymap.set("n", "<leader>fG", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>")
 vim.keymap.set("n", "<leader>fj", ":GrepRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>")
 vim.keymap.set("x", "<leader>fj", ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>")
 vim.keymap.set("n", "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
@@ -347,7 +349,7 @@ vim.api.nvim_create_autocmd("User", { -- fugitive :Git
 })
 
 -- commands {{{1
-vim.api.nvim_create_user_command("SetRunCommand", "let b:RunCommand = <q-args>", { complete = "file", nargs = "*" })
+vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("SetArgs", "let b:args = <q-args> == '' ? '' : ' '. <q-args>", { complete = "file", nargs = "*" })
 vim.api.nvim_create_user_command("S", [[execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr(). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | else | execute "put =execute('". <q-args>. "')" | endif | 1d]], { complete = "command", nargs = "*", range = true, bang = true })
 vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee % > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute 'lua require("packer").loader("neoterm")' | execute "botright T sudo vim +'set paste' +'1,$d' +startinsert %" | endif]], { bang = true })
@@ -404,6 +406,7 @@ end)(vim.paste)
 vim.filetype.add({
     extension = {
         csv = "csv",
+        log = "log",
         http = "http",
         conf = "config",
     },

@@ -13,7 +13,11 @@
   },
   "if command exists": {
     "prefix": "ifcommandexists",
-    "body": ["if ! command -v ${1:cmd} &> /dev/null; then", "  $0", "fi"]
+    "body": [
+      "if ! builtin command -v ${1:cmd} > /dev/null 2>&1; then",
+      "  $0",
+      "fi"
+    ]
   },
   "if glob": {
     "prefix": "ifglob",
@@ -21,7 +25,31 @@
   },
   "if regex": {
     "prefix": "ifregex",
-    "body": ["if [[ \\$${1:VAR} =~ ${2:^([0-9]{10\\}|[a-z]{5\\})\\$} ]]; then", "  $0", "fi"]
+    "body": [
+      "if [[ \\$${1:VAR} =~ ${2:^([0-9]{10\\}|[a-z]{5\\})\\$} ]]; then",
+      "  $0",
+      "fi"
+    ]
+  },
+  "if no arguments": {
+    "prefix": "ifnoarguments",
+    "body": ["if [ \"\\$#\" -eq 0 ]; then", "  $0", "fi"]
+  },
+  "for each element in array": {
+    "prefix": "foreach",
+    "body": ["for ${1:element} in \"${2:\\${array[@]\\}}\"; do", "  $0", "done"]
+  },
+  "for i in range": {
+    "prefix": "forRange",
+    "body": ["for ${1:i} in {1..${2:10}}; do", "  $0", "done"]
+  },
+  "loop lines": {
+    "prefix": "whileread",
+    "body": [
+      "while IFS= read -r line; do",
+      "  echo \"... \\$line ...\"",
+      "done <<< \"\\$${0:list}\""
+    ]
   },
   "case": {
     "prefix": "case",
@@ -31,6 +59,42 @@
       "  *) echo \"Unsupported argument ${1:\\$1}, exiting..\" >&2; exit 1 ;;",
       "esac"
     ]
+  },
+  "variable with default value": {
+    "prefix": "varDefaultValue",
+    "body": "\"\\${${1:VAR}:-'${0:default}'}\""
+  },
+  "substring of variable": {
+    "prefix": "varSubstring",
+    "body": "\"\\${${1:VAR}:${2:offset}:${0:length}}\""
+  },
+  "length of variable": {
+    "prefix": "varLength",
+    "body": "\"\\${#${0:VAR}}\""
+  },
+  "remove first pattern in variable": {
+    "prefix": "varRemoveFirstMatch",
+    "body": "\"\\${${1:VAR}#${0:pattern}}\""
+  },
+  "remove first pattern in variable greedy": {
+    "prefix": "varRemoveFirstMatchGreedy",
+    "body": "\"\\${${1:VAR}##${0:pattern}}\""
+  },
+  "remove last pattern in variable": {
+    "prefix": "varRemoveLastMatch",
+    "body": "\"\\${${1:VAR}%${0:pattern}}\""
+  },
+  "remove last pattern in variable greedy": {
+    "prefix": "varRemoveLastMatchGreedy",
+    "body": "\"\\${${1:VAR}%%${0:pattern}}\""
+  },
+  "substitute first pattern in variable": {
+    "prefix": "varReplace",
+    "body": "\"\\${${1:VAR}/${2:pattern}/${0:str}}\""
+  },
+  "substitute all patterns in variable": {
+    "prefix": "varReplaceAll",
+    "body": "\"\\${${1:VAR}//${2:pattern}/${0:str}}\""
   },
   "redirect to null": {
     "prefix": "redirnull",
@@ -44,16 +108,16 @@
     "prefix": "redirerrorstdin",
     "body": "2>&1"
   },
+  "script directory": {
+    "prefix": "scriptDirectory",
+    "body": "SCRIPT_DIR=\"\\$(cd -- \"\\$(dirname -- \"\\${BASH_SOURCE[0]:-\\$0}\")\" &> /dev/null && pwd 2> /dev/null)\""
+  },
   "log": {
     "prefix": "log",
     "body": "printf \"\\033[0;36m%s\\033[0m\\n\" \"$0\""
   },
-  "loop lines": {
-    "prefix": "whileread",
-    "body": [
-      "while IFS= read -r line; do",
-      "  echo \"... \\$line ...\"",
-      "done <<< \"\\$${0:list}\""
-    ]
+  "ISO date": {
+    "prefix": "dateISO",
+    "body": "date -u +'%Y-%m-%dT%H:%M:%SZ'"
   }
 }

@@ -175,6 +175,11 @@ function M.setup_vim_visual_multi()
 end
 
 function M.nvim_bqf()
+    -- to filter: :g/pattern/lua require('bqf.qfwin.handler').signToggle(1)
+    -- press zn to create new list with marked items
+    -- press zN to create new list excluding marked items
+    -- press < and > to switch between lists
+    -- press z<Tab> to clear marks
     require("bqf").setup({
         func_map = {
             prevfile = "",
@@ -323,16 +328,12 @@ function M.telescope()
             dynamic_preview_title = true,
         },
         pickers = {
+            find_files = { hidden = true, find_command = { "fd", "--type", "f", "--strip-cwd-prefix" } },
             filetypes = { theme = "dropdown" },
             registers = { theme = "dropdown" },
         },
         extensions = {
-            fzf = {
-                fuzzy = true,
-                override_generic_sorter = true,
-                override_file_sorter = true,
-                case_mode = "smart_case",
-            },
+            fzf = { fuzzy = true, override_generic_sorter = true, override_file_sorter = true, case_mode = "smart_case" },
         },
     })
     require("telescope").load_extension("fzf")
@@ -430,10 +431,10 @@ function M.feline_nvim()
                 flags = flags .. "[paste]"
             end
             if vim.bo.fileencoding ~= "" and vim.bo.fileencoding ~= "utf-8" then
-                flags = flags .. "[fenc: " .. vim.bo.fileencoding .. "]"
+                flags = flags .. "[fileencoding: " .. vim.bo.fileencoding .. "]"
             end
             if vim.bo.fileformat ~= "unix" then
-                flags = flags .. "[ff: " .. vim.bo.fileformat .. "]"
+                flags = flags .. "[fileformat: " .. vim.bo.fileformat .. "]"
             end
             if #flags > 0 then
                 return " " .. flags .. " "
@@ -695,6 +696,7 @@ function M.vim_quickui()
         { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
         { "Cou&nt occurrences", [[keeppatterns %s///gn | silent! execute "normal! ``"]], "Count occurrences of current search pattern (:%s/pattern//gn)" },
         { "Search in &buffers", [[execute "cexpr [] | bufdo vimgrepadd //g %" | copen]], "Grep current search pattern in all buffers, add to quickfix" },
+        { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
         { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
         { "--", "" },
         { "Move tab left &-", [[-tabmove]] },
@@ -702,10 +704,11 @@ function M.vim_quickui()
         { "&Refresh screen", [[execute "ScrollViewRefresh | ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
         { "--", "" },
         { "Open &Alpha", [[execute "lua require('packer').loader('alpha-nvim', true)" | Alpha]], "Open Alpha" },
-        { "Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },
-        { "Load session", [[SessionLoad]], "Load session from .cache/nvim/session.vim" },
+        { "&Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },
+        { "Load s&ession", [[SessionLoad]], "Load session from .cache/nvim/session.vim" },
         { "--", "" },
         { "Edit Vimr&c", [[edit $MYVIMRC]] },
+        { "GB18030 to utf-8", [[edit ++enc=GB18030 | set fileencoding=utf8]], "Edit as GB18030 (edit ++enc=GB18030) for Chinese characters and reset file format back to utf-8" },
         { "Open in &VSCode", [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]] },
     })
     vim.fn["quickui#menu#install"]("&Git", {
@@ -772,7 +775,7 @@ function M.vim_quickui()
         { "CSV to table", [[execute "lua require('packer').loader('csv.vim')" | CSVTabularize]], "Convert csv to table" },
     })
     vim.fn["quickui#menu#install"]("L&SP", {
-        { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix" },
+        { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix (run :bufdo edit<CR> to load all buffers)" },
         { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
         { "&Toggle diagnostics", [[lua require("lsp").toggle_diagnostics()]], "Toggle lsp diagnostics" },
         { "--", "" },
