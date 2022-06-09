@@ -42,7 +42,7 @@ install-from-github() {
     [ "$PLATFORM" == 'linux' ] && package=$linux_arm || package=${darwin_arm:-$darwin_x64}
   fi
   if [ "$PLATFORM" == 'darwin' ]; then
-    if ! (builtin command -V gtar > /dev/null 2>&1); then
+    if ! builtin command -V gtar > /dev/null 2>&1; then
       echo 'gnu-tar not installed, trying with tar' >&2
     else
       tar_cmd='gtar'

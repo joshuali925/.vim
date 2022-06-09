@@ -1,10 +1,10 @@
-" TODO use matchfuzzy if available when this is merged https://github.com/neovim/neovim/pull/16873
 function! funcs#complete_word(findstart, base)
   if a:findstart
     return match(getline('.'), '\S\+\%'. col('.'). 'c')
   else
-    let words = map(split(join(getline(1, '$'), "\n")), '{"word": v:val, "kind": "[WORD]"}')
-    return len(a:base) ? filter(words, 'match(v:val.word, "\\V". a:base) != -1') : words
+    let words = split(join(getline(1, '$'), "\n"))
+    let matched = len(a:base) ? exists('*matchfuzzy') ? matchfuzzy(words, a:base) : filter(words, 'match(v:val, "\\V". a:base) != -1') : words
+    return map(matched, '{"word": v:val, "kind": "[WORD]"}')
   endif
 endfunction
 
@@ -154,8 +154,9 @@ function! funcs#get_run_command() abort
     return
   endif
   update  " write buffer unless it's a java class file, which will be modified when vim-sleuth loads
-  if get(b:, 'RunCommand', '') != ''
-    return b:RunCommand
+  let user_command = get(b:, 'RunCommand', get(g:, 'RunCommand', ''))
+  if user_command != ''
+    return user_command
   endif
   if expand('%') =~ '\.test\.[tj]sx\?'
     if !exists('g:neoterm')

@@ -36,6 +36,7 @@ map mc edit-config
 map my copy-path
 map md5 md5
 map mvi vi
+map m! sudolf
 
 map v :toggle; down
 map V invert
@@ -80,6 +81,7 @@ cmd rg !clear && rg "$@"
 cmd code %code .
 cmd tail $less -RiM +F "$f"
 cmd sudoedit $sudo vim -u ~/.vim/config/mini.vim "$f"
+cmd sudolf !EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer'
 cmd file !file "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
@@ -126,7 +128,7 @@ cmd locate-git-file ${{
   if [ "$git_repo" ]; then
     res="$(git ls-files $(git rev-parse --show-toplevel) | fzf --bind='tab:down,btab:up')"
   else
-    res="$(rg --files | fzf --bind='tab:down,btab:up')"
+    res="$(eval "$FZF_CTRL_T_COMMAND $@" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --bind='tab:down,btab:up')"
   fi
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
@@ -136,7 +138,7 @@ cmd locate-git-file ${{
 }}
 
 cmd z ${{
-  res="$(awk -F '|' '{print $1}' ~/.z | fzf)"
+  res="$(awk -F '|' '{print $1}' ~/.z | fzf --bind='tab:down,btab:up')"
   lf -remote "send $id cd \"$res\""
 }}
 

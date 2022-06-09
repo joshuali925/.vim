@@ -31,7 +31,7 @@ return require("packer").startup({
         use({ "akinsho/bufferline.nvim", event = "VimEnter", config = conf("bufferline_nvim") })
         use({ "feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim") })
         use({ "lukas-reineke/indent-blankline.nvim", config = conf("indent_blankline") })
-        -- TODO try petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
+        -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
         use({ "dstein64/nvim-scrollview", config = "require('scrollview').setup()" })
         use({
             "DarwinSenior/nvim-colorizer.lua",
@@ -96,7 +96,7 @@ return require("packer").startup({
         })
         use({ "RRethy/vim-illuminate", config = "vim.g.Illuminate_ftblacklist = vim.g.qs_filetype_blacklist" })
         use({ "danymat/neogen", module = "neogen", config = "require('neogen').setup({})" })
-        use({ "MTDL9/vim-log-highlighting", event = "BufNewFile,BufRead *.log" })
+        use({ "MTDL9/vim-log-highlighting", ft = "log" })
         use({ "udalov/kotlin-vim", ft = "kotlin" })
         use({ "chrisbra/csv.vim", setup = conf("setup_csv_vim"), cmd = "CSVWhatColumn" })
 
@@ -129,7 +129,7 @@ return require("packer").startup({
         use({ "tpope/vim-sleuth" })
         use({ "tpope/vim-unimpaired", keys = { { "", "[" }, { "", "]" }, { "n", "=p" }, { "n", "yo" } } })
         use({ "moll/vim-bbye", cmd = "Bdelete" })
-        use({ "ojroques/vim-oscyank", cmd = { "OSCYank", "OSCYankReg" } })
+        use({ "ojroques/vim-oscyank", cmd = { "OSCYank", "OSCYankReg" }, setup = "vim.g.oscyank_term = 'default'" })
         use({ "AckslD/nvim-neoclip.lua", event = "TextYankPost", config = conf("nvim_neoclip_lua") })
         use({ "aserowy/tmux.nvim", module = "tmux", config = function() require("tmux").setup({ navigation = { cycle_navigation = false } }) end })
 

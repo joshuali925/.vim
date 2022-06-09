@@ -3,6 +3,10 @@ https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js
 
 GlobalSpeed.json
 {"common":{"audioFx":{"delay":0,"eq":{"enabled":false,"factor":1,"values":[0,0,0,0,0,0,0,0,0,0]},"pitch":0,"volume":1},"backdropFx":{"filters":[{"name":"sepia","value":0},{"name":"hueRotate","value":0},{"name":"grayscale","value":0},{"name":"contrast","value":1},{"name":"brightness","value":1},{"name":"saturate","value":1},{"name":"invert","value":0},{"name":"blur","value":0},{"name":"opacity","value":1}],"transforms":[{"name":"scaleX","value":1},{"name":"scaleY","value":1},{"name":"translateX","value":0},{"name":"translateY","value":0},{"name":"rotateX","value":0},{"name":"rotateY","value":0},{"name":"rotateZ","value":0}]},"elementFx":{"filters":[{"name":"sepia","value":0},{"name":"hueRotate","value":0},{"name":"grayscale","value":0},{"name":"contrast","value":1},{"name":"brightness","value":1},{"name":"saturate","value":1},{"name":"invert","value":0},{"name":"blur","value":0},{"name":"opacity","value":1}],"transforms":[{"name":"scaleX","value":1},{"name":"scaleY","value":1},{"name":"translateX","value":0},{"name":"translateY","value":0},{"name":"rotateX","value":0},{"name":"rotateY","value":0},{"name":"rotateZ","value":0}]},"enabled":true,"enabledLatestViaPopup":false,"lastSpeed":1.4,"speed":1.3},"firstUse":1627628559467,"keybinds":[{"adjustMode":2,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"2623896300","key":{"altKey":false,"code":"KeyX","ctrlKey":false,"metaKey":false,"shiftKey":false},"valueNumberAlt":-0.1},{"adjustMode":1,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"3565761808","key":{"altKey":false,"code":"KeyZ","ctrlKey":false,"metaKey":false,"shiftKey":false},"valueNumber":1},{"adjustMode":2,"command":"adjustSpeed","enabled":true,"greedy":true,"id":"8445439043","key":{"altKey":false,"code":"KeyC","ctrlKey":false,"metaKey":false,"shiftKey":false},"spacing":1,"valueNumberAlt":0.1},{"command":"setState","enabled":true,"greedy":false,"id":"9280901153","key":{"altKey":false,"code":"KeyI","ctrlKey":false,"metaKey":false,"shiftKey":true},"spacing":2,"valueState":"toggle"},{"command":"seek","enabled":true,"greedy":true,"id":"3175808952","key":{"altKey":false,"code":"Comma","ctrlKey":false,"metaKey":false,"shiftKey":false},"valueBool2":true,"valueNumber":-5},{"command":"seek","enabled":true,"greedy":true,"id":"7654966709","key":{"altKey":false,"code":"Period","ctrlKey":false,"metaKey":false,"shiftKey":false},"spacing":1,"valueBool2":true,"valueNumber":5},{"command":"seek","enabled":true,"greedy":true,"id":"3788998064","key":{"ctrlKey":false,"altKey":true,"shiftKey":false,"metaKey":false,"code":"Comma"},"spacing":0,"valueBool":false,"valueBool3":true,"valueNumber":-0.041},{"command":"seek","enabled":true,"greedy":true,"id":"3314411603","key":{"ctrlKey":false,"altKey":true,"shiftKey":false,"metaKey":false,"code":"Period"},"spacing":1,"valueBool3":true,"valueNumber":0.041},{"command":"fullscreen","enabled":true,"greedy":true,"id":"5553514632","key":{"code":"KeyF","shiftKey":true},"spacing":2,"valueBool":true}],"version":10}
+
+<A-i> toggle surfingkeys for current site
+<S-i><S-i> toggle GlobalSpeed
+yop toggle pdf viewer
 */
 
 chrome.storage.local.set({ noPdfViewer: 1 }); // https://github.com/brookhong/Surfingkeys/issues/320
@@ -78,8 +82,8 @@ api.map('yt', 'yl'); // copy page title
 api.map('J', 'W'); // move tab to window
 api.map(';q', 'x'); // close tab
 api.map(';x', 'x'); // close tab
+api.map('ZQ', 'ZZ'); // save session and close, ZR to restore
 api.map('ZZ', 'x'); // close tab
-api.map('ZQ', 'ZZ'); // save session and close
 api.map(';K', ';t'); // google translate selected text
 api.unmap(';t');
 api.map(';tu', 'X'); // restore closed tab
@@ -106,10 +110,9 @@ api.unmap('ga');
 api.mapkey('ga', '#12Open Chrome Apps', function() { api.tabOpenLink('chrome://apps/'); });
 api.mapkey('<Ctrl-,>', 'Open Chrome Settings', function() { api.tabOpenLink('chrome://settings/'); });
 api.mapkey('<Ctrl-Alt-,>', 'Open ChromeOS Settings', function() { api.tabOpenLink('chrome://os-settings/'); });
-api.unmap(';v');
-api.mapkey(';vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
-api.mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
-api.mapkey(';vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
+api.mapkey(';Vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
+api.mapkey(';Vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
+api.mapkey(';Vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
 api.mapkey('<Ctrl-r>', 'Hard reload', function() { window.location.reload(); });
 api.unmap("'");
 api.mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
@@ -123,7 +126,8 @@ api.mapkey(';Q', 'Close all tabs', function() {
     api.RUNTIME('tabOnly');
     api.RUNTIME('closeTab');
 });
-api.mapkey(';V', 'Edit with web vim', function() {
+api.unmap(';v');
+api.mapkey(';v', 'Edit with web vim', function() {
     api.Clipboard.read(function(response) {
         api.Front.showEditor(response.data, function(data) {
             api.Clipboard.write(data);
@@ -176,10 +180,12 @@ api.mapkey('gP', 'DuckDuckGo first result', function() {
         });
     }
 });
-api.map('yop', ';s'); // toggle pdf viewer
-api.mapkey('yoe', 'Toggle editable', function() { document.body.contentEditable = document.body.contentEditable === 'true' ? 'false' : 'true'; });
-api.mapkey('yof', 'Toggle full screen', function() {
+api.mapkey('r', 'Toggle full screen', function() {
     if (window.location.hostname === 'www.bilibili.com') {
+        if (window.location.pathname === '/') {
+            document.getElementsByClassName('roll-btn-wrap')[0].getElementsByTagName('button')[0].click(); // 换一换
+            return;
+        }
         document.getElementsByClassName(window.location.pathname.startsWith('/bangumi') ? 'squirtle-video-pagefullscreen' : 'bilibili-player-video-web-fullscreen')[0].click();
         document.getElementById('playerControlBtn').style.visibility = 'hidden'
         document.getElementById('picinpicBtn').style.visibility = 'hidden'
@@ -188,7 +194,8 @@ api.mapkey('yof', 'Toggle full screen', function() {
     else
         document.getElementById('playerControlBtn').click(); // https://greasyfork.org/en/scripts/4870-maximize-video, escape also works
 });
-api.map('r', 'yof');
+api.map('yop', ';s'); // toggle pdf viewer
+api.mapkey('yoe', 'Toggle editable', function() { document.body.contentEditable = document.body.contentEditable === 'true' ? 'false' : 'true'; });
 api.mapkey('yor', 'Toggle github raw', function() {
     if (window.location.hostname === 'github.com') {
         var matches = window.location.href.match(/github.com\/([^/]+)\/([^/]+)\/blob\/(.*)/);

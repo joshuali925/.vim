@@ -11,7 +11,7 @@ export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER='\'
 export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top'
 export FZF_DEFAULT_COMMAND='rg --files'
-export FZF_CTRL_T_COMMAND='fd --type=f --hidden --exclude=.git --color=always'
+export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --hidden --exclude=.git --color=always'
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND --no-ignore || true)'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)'"
@@ -39,6 +39,7 @@ alias ll='ls -AlhF --color=auto'
 alias ls='ls -F --color=auto'
 alias l='exa -alF --git --color=always --color-scale --icons --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
+alias size-subdir="du | sort -r -n | awk '{split(\"K M G\",v); s=1; while(\$1>1024){\$1/=1024; s++} print int(\$1)v[s]\"\\t\"\$2}' | head -n 20"
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
 alias sudo='sudo '
@@ -56,7 +57,7 @@ alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
-alias rga='rg --text --no-ignore --search-zip'
+alias rga='rg --text --no-ignore --search-zip --follow'
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
@@ -68,7 +69,7 @@ alias ga='git add'
 alias gau='git add -u'
 alias gaa='git add --all'
 alias gb='git branch'
-alias gba='git branch -a -vv --sort=-committerdate'
+alias gba='git branch -vv --sort=-committerdate -a'
 alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(HEAD)%(color:yellow)%(refname:short)|%(color:green)%(committerdate:relative)|%(color:red)%(objectname:short)%(color:reset) - %(subject) %(color:bold blue)<%(authorname)>%(color:reset)" --color=always | column -ts"|"'
 alias gc='git commit -m'
 alias gc!='git commit -v --amend'
@@ -169,7 +170,9 @@ gcb() {
       fzf --height=50% --min-height=20 --ansi --no-sort --reverse --tiebreak=index --preview-window=60% --toggle-sort=\` \
       --header='Press ` to toggle sort' \
       --preview='git log -n 50 --color=always --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
-    [ -n "$FZFTEMP" ] && git checkout "${FZFTEMP#remotes/[^\/]*/}"
+    if [ -n "$FZFTEMP" ]; then
+      git show-ref --verify --quiet "refs/heads/${FZFTEMP#remotes/[^\/]*/}" && git checkout "${FZFTEMP#remotes/[^\/]*/}" || git checkout --track "${FZFTEMP#remotes/}"
+    fi
   fi
 }
 
@@ -340,7 +343,7 @@ gvf() {
 
 cdf() {
   local FZFTEMP
-  FZFTEMP=$(fd --hidden --exclude=.git --no-ignore | fzf --bind='tab:down,btab:up' --query="${1:-}") && {
+  FZFTEMP=$(fd --strip-cwd-prefix --hidden --exclude=.git --no-ignore | fzf --bind='tab:down,btab:up' --query="${1:-}") && {
     [ -d "$FZFTEMP" ] && cd "$FZFTEMP" || {
       [ -d "$(dirname "$FZFTEMP" 2> /dev/null)" ] && cd "$(dirname "$FZFTEMP")"
     }
@@ -497,13 +500,12 @@ docker-shell() {
       echo 'Starting stopped container..'; docker start -ai vim_container
     else
       echo 'Starting new container with host network and docker socket mapped..'
-      docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -it --name vim_container ubuntu_vim
+      mkdir -p "$HOME/.local/docker-share"
+      docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME/.local/docker-share":/docker-share -it --name vim_container ubuntu_vim
     fi
     return $?
   fi
-  local CONTAINERS SELECTED_ID
-  CONTAINERS=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}')
-  SELECTED_ID=$(echo "$CONTAINERS" | fzf --height=40% --no-sort --tiebreak=begin,index)
+  local SELECTED_ID=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index)
   if [[ -n $SELECTED_ID ]]; then
     printf "\n → %s\n" "$SELECTED_ID"
     SELECTED_ID=$(echo "$SELECTED_ID" | awk '{print $1}')
@@ -540,6 +542,7 @@ if [[ $OSTYPE = darwin* ]]; then
   alias idea='open -na "IntelliJ IDEA.app" --args'
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
   alias clear-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
+  alias toggle-dark-theme='automator ~/.vim/config/macToggleDark.wflow'
   browser-history() {
     [ "$(uname -s)" != Darwin ] && echo "Only supports MacOS, exiting.." && return 1
     local COLS SEP FZFTEMP FZFPROMPT
