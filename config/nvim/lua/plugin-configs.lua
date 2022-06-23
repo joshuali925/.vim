@@ -108,6 +108,11 @@ function M.indent_blankline()
     })
 end
 
+local aerial_callbacks = {}
+function M.aerial_nvim_save_callback(callback)
+    table.insert(aerial_callbacks, callback)
+end
+
 function M.aerial_nvim()
     require("aerial").setup({
         filter_kind = {
@@ -122,6 +127,10 @@ function M.aerial_nvim()
             "Struct",
         },
     })
+    for i, callback in ipairs(aerial_callbacks) do
+        pcall(callback)
+        aerial_callbacks[i] = nil
+    end
 end
 
 function M.conflict_marker()
@@ -715,11 +724,14 @@ function M.vim_quickui()
         { "Git checko&ut", [[Gread]], "Checkout current file from index and load as unsaved buffer (Gread)" },
         { "Git checkout HEAD", [[Gread HEAD:%]], "Checkout current file from HEAD and load as unsaved buffer (Gread HEAD:%)" },
         { "Git &blame", [[Git blame]], "Git blame of current file" },
-        { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
         { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
         { "Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version (Gdiffsplit HEAD)" },
         { "Git &file history", [[vsplit | execute "lua require('packer').loader('vim-fugitive')" | 0Gclog]], "Browse previously committed versions of current file" },
         { "Diffview file history", [[DiffviewFileHistory -f -a]], "Browse previously committed versions of current file (DiffviewFileHistory -f -a)" },
+        { "--", "" },
+        { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
+        { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
+        { "Git toggle blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
         { "--", "" },
         { "Git &status", [[Git]], "Git status" },
         { "Git unstaged &changes", [[Git! difftool]], "Load unstaged changes into quickfix (Git! difftool)" },
@@ -731,7 +743,6 @@ function M.vim_quickui()
         { "Git gre&p all", [[call feedkeys(":Git log --all --full-history --name-status -i -G \"\"\<Left>", "n")]], 'Search a regex in all committed versions of files, command: git log -p --all -i -G "<pattern>" --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>' },
         { "Git fi&nd files all", [[call feedkeys(":Git log --all --full-history --name-status -- \"**\"\<Left>\<Left>", "n")]], "Grep file names in all commits" },
         { "Git root", [[Grt]], "Change current directory to git root" },
-        { "Cd current file", [[if expand("%") == '' | cd $PWD | else | cd %:p:h | endif]], "Change current directory to current file" },
     })
     vim.fn["quickui#menu#install"]("&Toggle", {
         { 'Quickfix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', [[execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"]] },
@@ -747,7 +758,7 @@ function M.vim_quickui()
         { 'Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', [[set cursorcolumn!]], "Toggle cursorcolumn" },
         { 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}', [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
         { "--", "" },
-        { "Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
+        { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
     })
     vim.fn["quickui#menu#install"]("Ta&bles", {
         { "Table &mode", [[TableModeToggle]], "Toggle TableMode" },
@@ -814,7 +825,8 @@ function M.vim_quickui()
     vim.fn["quickui#menu#switch"]("visual")
     vim.fn["quickui#menu#reset"]()
     vim.fn["quickui#menu#install"]("&Actions", {
-        { "OSC &yank", [[OSCYank]], "Use ANSI OSC52 sequence to copy from remote SSH sessions" },
+        { "OSC &yank", [[OSCYank]], "Use ANSI OSC52 sequence to copy (OSCYank plugin)" },
+        { "OSC yank script", [[lua require("utils").copy_with_osc_yank_script()]], "Use custom oscyank script to copy" },
         { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | S put x]], "Use base64 to encode selected text" },
         { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | S put x]], "Use base64 to decode selected text" },
     })

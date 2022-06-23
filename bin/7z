@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+if [ -x "$HOME/.local/bin/7z" ]; then
+  "$HOME/.local/bin/7z" "$@"
+  return 0
+fi
+
+source ~/.vim/bin/_install_from_github.sh
+detect-env
+VERSION=2200  # https://www.7-zip.org/download.html
+if [ "$PLATFORM" != 'linux' ]; then
+  echo "package not found for '7z' on $PLATFORM $ARCHITECTURE, exiting.." >&2
+  return 1
+fi
+
+[ "$ARCHITECTURE" = 'x86_64' ] && ARCHITECTURE=x64
+echo "Installing 7z from https://www.7-zip.org/a/7z$VERSION-linux-$ARCHITECTURE.tar.xz" >&2
+curl -sL -o- "https://www.7-zip.org/a/7z$VERSION-linux-$ARCHITECTURE.tar.xz" | tar xJ -C "$HOME/.local/bin" 7zzs && mv ~/.local/bin/7zzs ~/.local/bin/7z
+"$HOME/.local/bin/7z" "$@"

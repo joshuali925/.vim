@@ -27,7 +27,7 @@ if [ ! -f "$HOME/.vim/config/.bashrc" ]; then
     echo "~/.vim already exists and is not empty, exiting.." >&2
     exit 1
   fi
-  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib/node-packages,share/lf} ~/.config/{lf,lazygit}
+  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit}
   mkdir -pv ~/.vim
   curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C "$HOME/.vim" --strip-components=1
 fi

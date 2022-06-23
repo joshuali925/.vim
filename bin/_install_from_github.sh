@@ -29,7 +29,7 @@ install-from-github() {
   local executable=$1 repo=$2 linux_x64=$3 linux_arm=$4 darwin_x64=$5 darwin_arm=$6 extract_flags=$7
   shift 7
 
-  if [ -f "$HOME/.local/bin/$executable" ]; then
+  if [ -x "$HOME/.local/bin/$executable" ]; then
     "$HOME/.local/bin/$executable" "$@"
     return 0
   fi

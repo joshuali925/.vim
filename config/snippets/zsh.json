@@ -1,4 +1,13 @@
 {
+  "read one character": {
+    "prefix": "promptOneKey",
+    "body": [
+    "read -s -k '?${1:To abort press n.}'; echo",
+    "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
+    "  ${0:return 0}",
+    "fi"
+    ]
+  },
   "heredoc append to file": {
     "prefix": "heredocToFile",
     "body": ["tee -a ${1:file} > /dev/null <<EOF", "$0", "EOF"]
@@ -9,11 +18,11 @@
   },
   "curl POST JSON": {
     "prefix": "curlPost",
-    "body": "curl -X POST -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\" key=\"val\"})\" -k"
+    "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\" key=\"val\"})\""
   },
   "curl POST data from stdin": {
     "prefix": "curlPostStdin",
-    "body": "curl -X POST -H 'Content-Type: application/json' ${0:https://example.com} --data-binary @- -k"
+    "body": "curl -X POST -k -H 'Content-Type: application/json' ${0:https://example.com} --data-binary @-"
   },
   "compress and encrypt files": {
     "prefix": "tarEncrypt",
