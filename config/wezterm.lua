@@ -70,4 +70,19 @@ return {
         { key = "]", mods = "CMD", action = wezterm.action({ MoveTabRelative = 1 }) },
         { key = "Enter", mods = "CMD", action = "ToggleFullScreen" },
     },
+    key_tables = {
+        search_mode = {
+            { key = "Escape", mods = "NONE", action = wezterm.action { CopyMode = "Close" } },
+            { key = "UpArrow", mods = "NONE", action = wezterm.action { CopyMode = "PriorMatch" } },
+            { key = "p", mods = "CTRL", action = wezterm.action { CopyMode = "PriorMatch" } },
+            { key = "PageUp", mods = "NONE", action = wezterm.action { CopyMode = "PriorMatchPage" } },
+            { key = "PageDown", mods = "NONE", action = wezterm.action { CopyMode = "NextMatchPage" } },
+            { key = "n", mods = "CTRL", action = wezterm.action { CopyMode = "NextMatchPage" } },
+            { key = "DownArrow", mods = "NONE", action = wezterm.action { CopyMode = "NextMatch" } },
+            { key = "r", mods = "CTRL", action = wezterm.action { CopyMode = "CycleMatchType" } },
+            { key = "Enter", mods = "SHIFT", action = wezterm.action { CopyMode = "PriorMatch" } },
+            { key = "Enter", mods = "NONE", action = wezterm.action { CopyMode = "NextMatch" } },
+            { key = "w", mods = "CTRL", action = wezterm.action { CopyMode = "ClearPattern" } },
+        }
+    }
 }

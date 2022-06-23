@@ -20,7 +20,7 @@ RUN ~/.vim/bin/lf --version; ~/.vim/bin/rg --version; ~/.vim/bin/fd --version; ~
 #       sudo chmod +x /usr/bin/bashrc; echo 'exec bashrc' >> ~/.bashrc && bash -ic 'exit'
 
 # use busybox wget if busybox runs (x86_64)
-RUN ~/.vim/bin/busybox && ln -sr ~/.vim/bin/busybox ~/.vim/bin/wget || true
+RUN ~/.vim/bin/busybox > /dev/null && ln -sr ~/.vim/bin/busybox ~/.vim/bin/wget || true
 
 # # additional dependencies
 # RUN sudo apt-get install -y wget file

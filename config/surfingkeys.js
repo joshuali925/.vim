@@ -78,7 +78,7 @@ api.map('ys', 'ya'); // select url to copy
 api.map('yP', 'yp'); // copy POST form data
 api.map('yp', 'yt'); // duplicate page
 api.map('yt', 'yl'); // copy page title
-// yj to copy all settings as json, ;pj to restore
+// yj to copy all settings as json, ;pj to restore from clipboard
 api.map('J', 'W'); // move tab to window
 api.map(';q', 'x'); // close tab
 api.map(';x', 'x'); // close tab
@@ -160,23 +160,22 @@ api.mapkey('P', 'Open url or google', function() {
         });
     }
 });
-api.mapkey('gp', 'Google first result', function() {
-    // bypassing redirect using navclient doesn't always work: https://www.google.com/search?q=${encodeURIComponent(q)}&btnI=&sourceid=navclient&gfns=1
-    // current one needs https://greasyfork.org/en/scripts/390770-workaround-for-google-i-m-feeling-lucky-redirect
-    if (window.getSelection().toString()) {
-        api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(window.getSelection().toString())}&btnI`);
-    } else {
-        api.Clipboard.read(function(response) {
-            api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(response.data)}&btnI`);
-        });
-    }
-});
-api.mapkey('gP', 'DuckDuckGo first result', function() {
+api.mapkey('gp', 'DuckDuckGo first result', function() {
     if (window.getSelection().toString()) {
         api.tabOpenLink("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(window.getSelection().toString()));
     } else {
         api.Clipboard.read(function(response) {
             api.tabOpenLink("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(response.data));
+        });
+    }
+});
+api.mapkey('gP', 'Google first result', function() {
+    // or use `...&btnI` with https://greasyfork.org/en/scripts/390770-workaround-for-google-i-m-feeling-lucky-redirect (might cover more sites)
+    if (window.getSelection().toString()) {
+        api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(window.getSelection().toString())}&btnI=&sourceid=navclient&gfns=1`);
+    } else {
+        api.Clipboard.read(function(response) {
+            api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(response.data)}&btnI=&sourceid=navclient&gfns=1`);
         });
     }
 });

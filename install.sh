@@ -81,7 +81,7 @@ install_development_tools() {
     sudo apt-get update && sudo apt-get install -y build-essential zsh git curl unzip
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils
     echo "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
     echo "FPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" >> ~/.zshrc
@@ -96,8 +96,8 @@ install_development_tools() {
     defaults write -g ApplePressAndHoldEnabled -bool false
     log "Disabled ApplePressAndHoldEnabled to support key repeats"
     # brew tap wez/wezterm
-    # brew install --cask wez/wezterm/wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code
-    # manually install https://github.com/xiaogdgenuine/Doll
+    # brew install --cask wez/wezterm/wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel
+    # manually install https://github.com/xiaogdgenuine/Doll snipaste
   fi
   log "\nInstalling asdf.."
   git clone https://github.com/asdf-vm/asdf.git "$HOME/.asdf" --depth=1
@@ -117,44 +117,23 @@ install_docker() {
   sudo groupadd docker || true
   sudo usermod -aG docker "$USER" || true
   sudo systemctl restart docker || sudo service docker restart
+  sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login, enable read write access for other groups now to work immediately
+  # TODO remove docker-compose when 'docker compose <Tab>' completions are working
   log "Installing docker-compose.."
   sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
-  log "Installed, re-login and run ${YELLOW}docker info${CYAN} for status"
-  log "Change socket permission for immediate access: ${YELLOW}sudo chmod 666 /var/run/docker.sock"
+  log "Installed, run ${YELLOW}docker info${CYAN} for status"
 }
 
-install_java() {
-  # https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
-  local jdk_version jdk_url
-  if [ "$PLATFORM" == 'linux' ]; then
-    if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      jdk_url=https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz
-      jdk_version=jdk-14.0.1
-    else
-      jdk_url=https://github.com/bell-sw/Liberica/releases/download/14.0.2+13/bellsoft-jdk14.0.2+13-linux-aarch64.tar.gz
-      jdk_version=jdk-14.0.2
-    fi
-  elif [ "$PLATFORM" == 'darwin' ]; then
-    if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      # brew tap AdoptOpenJDK/openjdk && brew install --cask adoptopenjdk14
-      # echo "export JAVA_HOME=$(/usr/libexec/java_home)" >> ~/.zshrc
-      # return 0
-      jdk_url=https://cdn.azul.com/zulu/bin/zulu14.29.23-ca-jdk14.0.2-macosx_x64.tar.gz
-      jdk_version=zulu14.29.23-ca-jdk14.0.2-macosx_x64
-    else
-      jdk_url=https://cdn.azul.com/zulu/bin/zulu15.36.13-ca-jdk15.0.5-macosx_aarch64.tar.gz
-      jdk_version=zulu15.36.13-ca-jdk15.0.5-macosx_aarch64
-    fi
-  else
-    echo "Unknown distro.."
-    return 0
-  fi
-  curl -L -o- "$jdk_url" | tar -xz -C "$HOME/.local/lib"
-  echo "export PATH=\$HOME/.local/lib/$jdk_version/bin:\$PATH" >> ~/.zshrc
-  echo "export JAVA_HOME=\$HOME/.local/lib/$jdk_version" >> ~/.zshrc
-  log "Installed $jdk_version, exported JAVA_HOME to ~/.zshrc, restart your shell"
-  # export JAVA_HOME installed by asdf: echo "export JAVA_HOME=$(asdf where java)" >> ~/.zshrc
+install_java() {  # manual install list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
+  local jdk_version=adoptopenjdk-14.0.2+12
+  [ "$PLATFORM" == 'darwin' ] && [ "$ARCHITECTURE" == 'arm64' ] && jdk_version=adoptopenjdk-11.0.15+10
+  asdf plugin add java || true
+  asdf install java "$jdk_version"
+  asdf global java "$jdk_version"
+  export JAVA_HOME="$(asdf where java)"
+  echo "export JAVA_HOME=\"$(asdf where java)\"" | tee -a ~/.bashrc ~/.zshrc
+  log "Installed $jdk_version, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
 }
 
 install_python() {
@@ -178,7 +157,7 @@ install_dotfiles() {
     git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth=1
   fi
   log "\nCreating directories.."
-  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib/node-packages,share/lf} ~/.config/{lf,lazygit}
+  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit}
   log "\nLinking configurations.."
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
   echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc
@@ -243,13 +222,12 @@ install_tmux() {
 
 install_node() {
   log "Installing node $NODE_VERSION.."
-  asdf plugin add nodejs
+  asdf plugin add nodejs || true
   asdf install nodejs "$NODE_VERSION"
-  asdf global nodejs "$NODE_VERSION" && node --version
+  asdf global nodejs "$NODE_VERSION"
   log "Installing node packages.."
-  pushd ~/.local/lib/node-packages
+  mkdir -p ~/.local/lib/node-packages && pushd ~/.local/lib/node-packages
   echo '{}' >> package.json
-  # curl -o- -L https://yarnpkg.com/install.sh | bash  # installs yarn to ~/.yarn
   npm install yarn || true
   npm install eslint || true
   npm install prettier || true
@@ -262,20 +240,19 @@ install_neovim() {
   backup "$HOME/.local/lib/nvim"
   if [ "$PLATFORM" == 'linux' ]; then
     if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      curl -LO "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
+      curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
       chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
       \mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
 
       # curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C ~/.local/lib
-      # \mv ~/.local/lib/nvim-linux64 ~/.local/lib/nvim
-      # ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
+      # \mv ~/.local/lib/nvim-linux64 ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
     else
       curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local/lib nvim
       ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
     fi
   elif [ "$PLATFORM" == 'darwin' ]; then
-    curl -L -o- "https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz" | tar xz -C ~/.local/lib
-    \mv ~/.local/lib/nvim-osx64 ~/.local/lib/nvim
+    curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz | tar xz -C ~/.local/lib
+    \mv ~/.local/lib/nvim-macos ~/.local/lib/nvim
     ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
   else
     echo "Unknown distro.."
@@ -283,8 +260,9 @@ install_neovim() {
   fi
   log "Installed neovim, installing plugins.."
   # TODO https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
-  timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +"autocmd User PackerComplete quitall" +"silent lua require('plugins').sync()" || true
-  timeout 30 ~/.local/bin/nvim --headless +"lua vim.defer_fn(function() vim.cmd('quitall') end, 27000)" || true
+  timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +'autocmd User PackerComplete quitall' +'silent lua require("plugins").sync()' || true
+  timeout 120 ~/.local/bin/nvim --headless +'PackerLoad! nvim-treesitter' +'TSUpdateSync | quitall' || true
+  timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd("quitall") end, 27000)' || true
   log "\nInstalled neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"
   log "Run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
   echo

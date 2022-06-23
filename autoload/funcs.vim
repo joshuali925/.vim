@@ -57,7 +57,7 @@ endfunction
 function! funcs#lf_edit_callback(code) abort
   if filereadable(g:lf_selection_path)
     for filename in readfile(g:lf_selection_path)
-      execute 'edit '. filename
+      execute 'edit '. escape(filename, '%#')
     endfor
     call delete(g:lf_selection_path)
   endif

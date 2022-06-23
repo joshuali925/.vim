@@ -43,7 +43,7 @@ return require("packer").startup({
         use({ "kassio/neoterm", cmd = { "T", "Ttoggle", "Tnew" }, keys = "<Plug>(neoterm-repl-send", setup = conf("setup_neoterm") })
         use({ "skywind3000/vim-quickui", fn = "quickui#*", setup = conf("setup_vim_quickui"), config = conf("vim_quickui") })
         use({ "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = "vim.g.asyncrun_open = 12" })
-        use({ "stevearc/aerial.nvim", module = "aerial", cmd = "AerialToggle", config = conf("aerial_nvim") })
+        use({ "stevearc/aerial.nvim", cmd = "AerialToggle", config = conf("aerial_nvim") })
         use({ "simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo") })
         use({ "goolord/alpha-nvim", cond = "vim.fn.argc() == 0 and vim.fn.line2byte('$') == -1", config = conf("alpha_nvim") })
         use({

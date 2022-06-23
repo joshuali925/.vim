@@ -465,6 +465,19 @@ untildone() {
   done
 }
 
+set-var() {
+  if [ "$#" -ne 1 ]; then echo "Usage: $0 {java_home|path}"; return 1; fi
+  local command
+  case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
+    java_home|javahome) command="export JAVA_HOME=\"$(asdf where java)\"" ;;
+    path) command="export PATH=\"$PWD:\$PATH\"" ;;
+    *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
+  esac
+  eval "$command"
+  echo "$command" | tee -a ~/.bashrc ~/.zshrc
+  echo 'Appended to ~/.bashrc and ~/.zshrc'
+}
+
 croc() {
   local line phrase
   if [ "$#" -eq 0 ]; then

@@ -32,12 +32,16 @@ end
 function M.init()
     local function on_attach(client, bufnr)
         -- use null-ls for formatting except on lua
-        if (client.name ~= "sumneko_lua") then
+        if client.name ~= "sumneko_lua" then
             client.resolved_capabilities.document_formatting = false
             client.resolved_capabilities.document_range_formatting = false
         end
         require("illuminate").on_attach(client)
-        require("aerial").on_attach(client, bufnr)
+        if packer_plugins["aerial.nvim"].loaded then
+            require("aerial").on_attach(client, bufnr)
+        else
+            require("plugin-configs").aerial_nvim_save_callback(function() require("aerial").on_attach(client, bufnr) end)
+        end
     end
 
     local function make_config()

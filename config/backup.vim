@@ -3121,6 +3121,8 @@ vim.keymap.set("n", "yof", "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <b
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
   NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+" yarn
+  curl -o- -L https://yarnpkg.com/install.sh | bash
 _load_nvm() {
   unset -f _load_nvm nvm npx node yarn
   export NVM_DIR=~/.nvm
@@ -3389,4 +3391,42 @@ install_unison() {
     return 0
   fi
 }
-
+" use asdf
+install_java() {
+  # https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
+  local jdk_version jdk_url
+  if [ "$PLATFORM" == 'linux' ]; then
+    if [ "$ARCHITECTURE" == 'x86_64' ]; then
+      jdk_url=https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz
+      jdk_version=jdk-14.0.1
+    else
+      jdk_url=https://github.com/bell-sw/Liberica/releases/download/14.0.2+13/bellsoft-jdk14.0.2+13-linux-aarch64.tar.gz
+      jdk_version=jdk-14.0.2
+    fi
+  elif [ "$PLATFORM" == 'darwin' ]; then
+    if [ "$ARCHITECTURE" == 'x86_64' ]; then
+      # brew tap AdoptOpenJDK/openjdk && brew install --cask adoptopenjdk14
+      # echo "export JAVA_HOME=$(/usr/libexec/java_home)" >> ~/.zshrc
+      # return 0
+      jdk_url=https://cdn.azul.com/zulu/bin/zulu14.29.23-ca-jdk14.0.2-macosx_x64.tar.gz
+      jdk_version=zulu14.29.23-ca-jdk14.0.2-macosx_x64
+    else
+      jdk_url=https://cdn.azul.com/zulu/bin/zulu15.36.13-ca-jdk15.0.5-macosx_aarch64.tar.gz
+      jdk_version=zulu15.36.13-ca-jdk15.0.5-macosx_aarch64
+    fi
+  else
+    echo "Unknown distro.."
+    return 0
+  fi
+  curl -L -o- "$jdk_url" | tar -xz -C "$HOME/.local/lib"
+  echo "export PATH=\$HOME/.local/lib/$jdk_version/bin:\$PATH" >> ~/.zshrc
+  echo "export JAVA_HOME=\$HOME/.local/lib/$jdk_version" >> ~/.zshrc
+  log "Installed $jdk_version, exported JAVA_HOME to ~/.zshrc, restart your shell"
+  # export JAVA_HOME installed by asdf: echo "export JAVA_HOME=$(asdf where java)" >> ~/.zshrc
+}
+" 7z-bin install, use official 7z
+source ~/.vim/bin/_install_from_github.sh
+detect-env
+[ "$PLATFORM" = 'darwin' ] && PLATFORM=mac
+[ "$ARCHITECTURE" = 'x86_64' ] && ARCHITECTURE=x64
+install-from-url 7z "https://github.com/develar/7zip-bin/raw/master/$PLATFORM/$ARCHITECTURE/7za" "$@"

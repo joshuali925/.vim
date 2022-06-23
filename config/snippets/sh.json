@@ -35,6 +35,14 @@
     "prefix": "ifnoarguments",
     "body": ["if [ \"\\$#\" -eq 0 ]; then", "  $0", "fi"]
   },
+  "if variable equals ignore case": {
+    "prefix": "ifEqualsIgnoreCase",
+    "body": [
+      "if [ \"\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$${1:VAR}\")\" = '${2:string}' ]; then",
+      "  $0",
+      "fi"
+    ]
+  },
   "for each element in array": {
     "prefix": "foreach",
     "body": ["for ${1:element} in \"${2:\\${array[@]\\}}\"; do", "  $0", "done"]
@@ -54,9 +62,11 @@
   "case": {
     "prefix": "case",
     "body": [
-      "case ${1:\\$1} in",
-      "  ${2:help}) $0 ;;",
-      "  *) echo \"Unsupported argument ${1:\\$1}, exiting..\" >&2; exit 1 ;;",
+      "case \\$(tr '[:upper:]' '[:lower:]' <<< \"\\$${1:1}\") in",
+      "  ${2:help})",
+      "    $0",
+      "    ;;",
+      "  *) echo \"Unsupported argument \\$${1:1}, exiting..\" >&2; return 1 ;;",
       "esac"
     ]
   },
@@ -100,6 +110,10 @@
     "prefix": "redirnull",
     "body": "> /dev/null 2>&1"
   },
+  "redirect to stderr": {
+    "prefix": "redirerr",
+    "body": ">&2"
+  },
   "redirect stderr to null": {
     "prefix": "redirerrornull",
     "body": "2> /dev/null"
@@ -119,5 +133,24 @@
   "ISO date": {
     "prefix": "dateISO",
     "body": "date -u +'%Y-%m-%dT%H:%M:%SZ'"
+  },
+  "prompt yes or no": {
+    "prefix": "promptYesNo",
+    "body": [
+      "printf '${1:Continue} (Y/n)? '",
+      "read -r REPLY",
+      "if [ -z \"\\$REPLY\" ] || [ \"\\$REPLY\" != \"\\${REPLY#[Yy]}\" ]; then",
+      "  ${0:echo Yes}",
+      "fi"
+    ]
+  },
+  "read one character": {
+    "prefix": "promptOneKey",
+    "body": [
+    "read -p '${1:To abort press n.}' -n 1; echo",
+    "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
+    "  ${0:return 0}",
+    "fi"
+    ]
   }
 }

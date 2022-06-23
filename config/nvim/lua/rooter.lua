@@ -41,8 +41,12 @@ end
 
 function M.toggle()
     enabled = not enabled
-    M.root()
-    vim.notify("Rooter is " .. (enabled and "enabled" or "disabled"), "INFO", { title = "Rooter", icon = "" })
+    if enabled then
+        M.root()
+    else -- set working directory to directory of current file or directory where nvim was started
+        vim.api.nvim_set_current_dir(vim.fn.expand("%") == "" and vim.env.PWD or vim.fn.expand("%:p:h"))
+    end
+    vim.notify("Current directory: " .. vim.fn.fnamemodify(vim.loop.cwd(), ":~"), "INFO", { title = "Rooter is " .. (enabled and "enabled" or "disabled"), icon = "" })
 end
 
 return M

@@ -277,9 +277,9 @@ function! s:EditCallback(cmd, cd_git_root) abort
       for line in readfile(tempfile)
         if sink == 'edit ' && line =~ ':\d'
           let args = split(line, ':')
-          execute 'edit +'. args[1]. ' '. args[0]
+          execute 'edit +'. args[1]. ' '. escape(args[0], '%#')
         else
-          execute sink. line
+          execute sink. escape(line, '%#')
         endif
       endfor
     endif
