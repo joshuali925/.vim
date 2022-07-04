@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+run-if-exists "$0" "$@"
+detect-env
+
+case $PLATFORM:$ARCHITECTURE in
+  linux:x86_64) url=https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz ;;
+  linux:arm64) url=https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-arm64-static.tar.xz ;;
+  darwin:x86_64) url=https://evermeet.cx/ffmpeg/ffmpeg-5.0.1.7z ;;
+  darwin:arm64) url=https://www.osxexperts.net/FFmpeg501ARM.zip ;;
+  *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2; exit 1 ;;
+esac
+
+[ "$PLATFORM" = 'linux' ] && extract_flags='--strip-components=1 --wildcards ffmpeg*/ffmpeg'
+install-archive-from-url "$url" ffmpeg "$extract_flags" "$@"
+

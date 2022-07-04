@@ -9,11 +9,11 @@ if [ -n "$GET_BASHRC" ]; then
   clear-env() {
     local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/{bin,share/lf} ~/.config/{lf,lazygit})
     [ "$(readlink -f "$HOME/.tmux.conf")" == "$HOME/.vim/config/.tmux.conf" ] && config_files+=(~/.tmux.conf)
-    echo "This will delete the following directories and files:"
+    echo 'This will delete the following directories and files:'
     for i in "${config_files[@]}"; do
       find "$i" -maxdepth 1 2> /dev/null
     done
-    read -p "Confirm delete? (y/n) " -n 1
+    read -p 'Confirm to delete? (y/N) ' -n 1
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       rm -rf "${config_files[@]}"
@@ -24,7 +24,7 @@ fi
 
 if [ ! -f "$HOME/.vim/config/.bashrc" ]; then
   if [ -d "$HOME/.vim" ] && [ -n "$(command ls -A "$HOME/.vim")" ]; then
-    echo "~/.vim already exists and is not empty, exiting.." >&2
+    echo '~/.vim already exists and is not empty, exiting..' >&2
     exit 1
   fi
   mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit}

@@ -3,6 +3,8 @@ set incfilter
 set info size
 set dircounts
 set icons
+# for `<command> "$fx"` to work (defaults is '' which needs: `echo "$fx" | xargs -d '\n' <command>`)
+set ifs "\n"
 set previewer ~/.vim/config/lf-preview.sh
 
 map zh
@@ -25,11 +27,12 @@ map m
 map mm mark-save
 map mM mark-remove
 map me edit-selected
+map mE sudoedit
 map mp paste-symlink --relative
 map mP paste-symlink
 map mr vidir-bulk-rename
 map mR vimv-bulk-rename
-map ms selected-dir-size
+map ms selected-size
 map mS cwd-size
 map mt tail
 map mc edit-config
@@ -75,24 +78,26 @@ cmd mkdir %mkdir -p "$@"
 cmd touch %touch "$@"
 cmd chmod %{{ chmod "$@" "$f"; lf -remote "send $id reload" }}
 cmd chmod? %stat --printf "%a %n \n" "$f"
+cmd chown %sudo chown -R "$USER:$USER" "$f"
+cmd chown? %stat "$f" | grep '^Access: ('
 cmd vi $command vim -u ~/.vim/config/mini.vim -i NONE "$f"
 cmd vim $$EDITOR "$@"
 cmd rg !clear && rg "$@"
 cmd code %code .
 cmd tail $less -RiM +F "$f"
-cmd sudoedit $sudo vim -u ~/.vim/config/mini.vim "$f"
+cmd sudoedit $sudo TERM=xterm-256color vim -u ~/.vim/config/mini.vim "$f"
 cmd sudolf !EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer'
 cmd file !file "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
 cmd gdu $"$HOME/.vim/bin/gdu"
-cmd md5 !echo "$fx" | xargs -d '\n' md5sum
-cmd selected-dir-size %du -h --max-depth=0 "$f"
+cmd md5 !md5sum $fx
+cmd selected-size %du -ch --max-depth=0 $fx | grep 'total$'
 cmd cwd-size %du -h --max-depth=0 .
-cmd edit-config ${{ $EDITOR ~/.vim/config/lfrc }}
-cmd edit-selected ${{ echo "$fx" | xargs -d '\n' $EDITOR }}
+cmd edit-config $$EDITOR ~/.vim/config/lfrc
+cmd edit-selected $$EDITOR $fx
 cmd vidir-bulk-rename ${{ echo "$fx" | vidir - }}
-cmd vimv-bulk-rename ${{ echo "$fx" | xargs -d '\n' vimv; echo }}
+cmd vimv-bulk-rename ${{ vimv $fx; echo }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
 cmd copy-path %{{ realpath "$f" | y; echo "copied: $(realpath "$f")" }}
 
@@ -159,39 +164,49 @@ cmd paste-symlink %{{
 }}
 
 cmd zip ${{
+  set -f
   selected=()
-  while IFS= read -r line; do
-    selected+=("$(realpath --relative-to='.' "$line")")
+  while IFS= read -r filepath; do
+    selected+=("$(realpath --relative-to='.' "$filepath")")
   done <<< "$fx"
   zip -r "${selected[0]}.zip" "${selected[@]}"
 }}
 
 cmd x ${{
   set -f
-  filename="$(basename "$f")"
-  if [ -f "$filename" ] ; then
-    case "$filename" in
-      *.tar)                       tar xvf "$filename"     ;;
-      *.tar.gz | *.tgz)            tar xvzf "$filename"    ;;
-      *.tar.xz | *.xz)             tar xvJf "$filename"    ;;
-      *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$filename"    ;;
-      *.bz2)                       bunzip2 "$filename"     ;;
-      *.gz)                        gunzip "$filename"      ;;
-      *.zip)                       unzip "$filename"       ;;
-      *.rar)                       unrar x "$filename"     ;;
-      *.Z)                         uncompress "$filename"  ;;
-      *.7z)                        7z x "$filename"        ;;
-      *)                           echo "Unable to extract '$filename'" ;;
-    esac
-  else
-    tar czvf "$filename.tar.gz" "$filename"
+  if [ -z "$fs" ]; then  # if no selected files
+    filename="$(basename "$f")"
+    if [ -f "$filename" ]; then  # try to extract if is a file
+      case "$filename" in
+        *.tar)                       tar xvf "$filename"     ;;
+        *.tar.gz | *.tgz)            tar xvzf "$filename"    ;;
+        *.tar.xz | *.xz)             tar xvJf "$filename"    ;;
+        *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$filename"    ;;
+        *.bz2)                       bunzip2 "$filename"     ;;
+        *.gz)                        gunzip "$filename"      ;;
+        *.zip)                       unzip "$filename"       ;;
+        *.rar)                       unrar x "$filename"     ;;
+        *.Z)                         uncompress "$filename"  ;;
+        *.7z)                        7z x "$filename"        ;;
+        *)                           echo "Unable to extract '$filename'" ;;
+      esac
+    else  # assume it's a directory and compress it
+      tar czvf "$filename.tar.gz" "$filename"
+    fi
+  else  # selection exists, compress all selected files
+    selected=()
+    while IFS= read -r filepath; do
+      selected+=("$(realpath --relative-to='.' "$filepath")")
+    done <<< "$fs"
+    tar czvf "${selected[0]}.tar.gz" "${selected[@]}"
   fi
 }}
 
+# extract to a directory / compress without top directory, see ./common.sh
 cmd X ${{
   set -f
   selected="$(basename "$f")"
-  if [ -f "$selected" ] ; then
+  if [ -f "$selected" ]; then
     dir="${selected%.*}"
     filename="$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)_$selected"
     command mkdir -pv "$dir"

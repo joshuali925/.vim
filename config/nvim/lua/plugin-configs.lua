@@ -102,7 +102,6 @@ end
 function M.indent_blankline()
     require("indent_blankline").setup({
         char = "▏",
-        show_first_indent_level = false,
         filetype_exclude = vim.g.qs_filetype_blacklist,
         buftype_exclude = vim.g.qs_buftype_blacklist,
     })
@@ -233,8 +232,9 @@ function M.alpha_nvim()
     theme.section.top_buttons.val = {}
     theme.section.bottom_buttons.val = {
         theme.button("!", "Git unstaged changes", ":args `Git ls-files --modified` | Git difftool<CR>"),
-        theme.button("+", "Git diff HEAD", ":DiffviewOpen<CR>"),
-        theme.button("*", "Git diff remote", ":execute 'DiffviewOpen @{upstream}..HEAD'<CR>"),
+        theme.button("+", "Git HEAD changes", ":args `Git diff HEAD --name-only` | Git difftool HEAD<CR>"),
+        theme.button("?", "Git diff HEAD", ":DiffviewOpen<CR>"),
+        theme.button("*", "Git diff remote", ":DiffviewOpen @{upstream}..HEAD<CR>"),
         theme.button("o", "Git log", ":Flog<CR>"),
         theme.button("\\", "Open quickui", ":call quickui#menu#open('normal')<CR>"),
         theme.button("f", "Find files", ":lua require('telescope.builtin').find_files({hidden = true})<CR>"),
@@ -335,6 +335,7 @@ function M.telescope()
             layout_config = { vertical = { preview_height = 0.3 } },
             file_ignore_patterns = { ".git/", "node_modules/", "venv/", "vim/.*/doc/.*%.txt" },
             dynamic_preview_title = true,
+            path_display = { "truncate" },
         },
         pickers = {
             find_files = { hidden = true, find_command = { "fd", "--type", "f", "--strip-cwd-prefix" } },
@@ -699,7 +700,7 @@ function M.vim_quickui()
         { "&Trim spaces", [[keeppatterns %s/\s\+$//e | silent! execute "normal! ``"]], "Remove trailing spaces" },
         { "Re&indent", [[let g:temp = getcurpos() | Sleuth | execute "normal! gg=G" | call setpos('.', g:temp)]], "Recalculate indent with Sleuth and reindent whole file" },
         { "Ded&up lines", [[%!awk '\!x[$0]++']], "Remove duplicated lines and preserve order" },
-        { "Du&plicated lines", [[sort | let @/ = '\C^\(.*\)$\n\1$' | set hlsearch]], "Sort and show duplicated lines" },
+        { "Du&plicated lines", [[sort | let @/ = '\C^\(.*\)$\n\1$' | set hlsearch]], "Sort and search duplicated lines" },
         { "Calculate line &=", [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]], 'Calculate expression from previous "=" or current line' },
         { "--", "" },
         { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
@@ -710,7 +711,7 @@ function M.vim_quickui()
         { "--", "" },
         { "Move tab left &-", [[-tabmove]] },
         { "Move tab right &+", [[+tabmove]] },
-        { "&Refresh screen", [[execute "ScrollViewRefresh | ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
+        { "&Refresh screen", [[execute "IndentBlanklineRefresh" | execute "ScrollViewRefresh | ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
         { "--", "" },
         { "Open &Alpha", [[execute "lua require('packer').loader('alpha-nvim', true)" | Alpha]], "Open Alpha" },
         { "&Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },
@@ -758,6 +759,7 @@ function M.vim_quickui()
         { 'Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', [[set cursorcolumn!]], "Toggle cursorcolumn" },
         { 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}', [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
         { "--", "" },
+        { "&Indent line", [[IndentBlanklineToggle]], "Toggle indent lines" },
         { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
     })
     vim.fn["quickui#menu#install"]("Ta&bles", {
@@ -825,10 +827,13 @@ function M.vim_quickui()
     vim.fn["quickui#menu#switch"]("visual")
     vim.fn["quickui#menu#reset"]()
     vim.fn["quickui#menu#install"]("&Actions", {
-        { "OSC &yank", [[OSCYank]], "Use ANSI OSC52 sequence to copy (OSCYank plugin)" },
-        { "OSC yank script", [[lua require("utils").copy_with_osc_yank_script()]], "Use custom oscyank script to copy" },
+        { "OSC &yank (script)", [[lua require("utils").copy_selection_with_osc_yank_script()]], "Use custom oscyank script to copy" },
+        { "OSC yank (plugin)", [[OSCYank]], "Use OSCYank plugin to copy" },
+        { "--", "" },
         { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | S put x]], "Use base64 to encode selected text" },
         { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | S put x]], "Use base64 to decode selected text" },
+        { "--", "" },
+        { "Search in selection", [[call feedkeys('/\%>'. (line("'<") - 1). 'l\%<'. (line("'>") + 1). 'l')]], [[Search in selected lines, to search in previous visual selection use /\%V]] },
     })
     vim.fn["quickui#menu#install"]("&Git", {
         { "Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },

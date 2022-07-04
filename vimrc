@@ -62,8 +62,9 @@ set nostartofline
 set display=lastline
 set virtualedit+=block
 set previewheight=7
-set foldmethod=indent
-set foldlevelstart=99
+" ignore errors for sudoedit
+silent! set foldmethod=indent
+silent! set foldlevelstart=99
 set history=1000
 set undofile
 set undolevels=1000

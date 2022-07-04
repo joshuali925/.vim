@@ -42,6 +42,7 @@ alias size='du -h --max-depth=1 | sort -hr'
 alias size-subdir="du | sort -r -n | awk '{split(\"K M G\",v); s=1; while(\$1>1024){\$1/=1024; s++} print int(\$1)v[s]\"\\t\"\$2}' | head -n 20"
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
+alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'
 alias sudo='sudo '
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
@@ -148,8 +149,21 @@ d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
-grg() { git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | DELTA_PAGER="$BAT_PAGER --pattern='$1'" delta --line-numbers; }
-gls-files-all() { git log --pretty=format: --name-only --all | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --query="${*:-}" --preview='git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}' | xargs -I{} bash -c 'echo -e "\033[0;35mgit show <SHA>:{}\033[0m"; git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --max-count 10 -- {}; echo'; }
+
+grg() {
+  git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | DELTA_PAGER="$BAT_PAGER --pattern='$1'" delta --line-numbers
+}
+
+gvf() {  # git log takes glob: gvf '*filename*'
+  local FILEPATH=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}')
+  if [ -n "$FILEPATH" ]; then
+    local SHA=$(git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- "$FILEPATH" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- $FILEPATH | delta --dark --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
+    if [ -n "$SHA" ]; then
+      echo -e "\033[0;35mgit show $SHA:$FILEPATH\033[0m" >&2
+      git --no-pager show "$SHA:$FILEPATH"
+    fi
+  fi
+}
 
 glof() {
   git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
@@ -221,9 +235,9 @@ sudorun() {
     return 0
   fi
   case $CMD in
-    v|vi|vim) sudo "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
+    v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
     lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
-    *) XDG_CONFIG_HOME="$HOME/.config" EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
+    *) TERM=xterm-256color XDG_CONFIG_HOME="$HOME/.config" EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
   esac
 }
 
@@ -298,7 +312,7 @@ x() {
   fi
 }
 
-X() {  # extract to a directory / archive without top directory
+X() {  # extract to a directory / compress without top directory
   if [ -f "$1" ]; then
     local dir="${1%.*}"
     local filename="$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)_$1"
@@ -308,7 +322,6 @@ X() {  # extract to a directory / archive without top directory
     command mv -n "$dir/$filename" "$1"
   else
     tar czvf "$1.tar.gz" -C "$1" .
-    return 0
   fi
 }
 
@@ -327,16 +340,6 @@ vf() {
     FZFTEMP=($(eval "$FZF_CTRL_T_COMMAND" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
   else
     FZFTEMP=($(eval "$FZF_CTRL_T_COMMAND" "$@" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
-  fi
-  [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
-}
-
-gvf() {
-  local IFS=$'\n' FZFTEMP
-  if [ -z "$1" ]; then
-    FZFTEMP=($(git ls-files $(git rev-parse --show-toplevel) | fzf --multi))
-  else
-    FZFTEMP=($(git ls-files $(git rev-parse --show-toplevel) | rg "$@" | fzf --multi))
   fi
   [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
 }
@@ -379,7 +382,7 @@ rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to
       --bind="enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
       --bind='tab:down,btab:up' \
       --prompt='1. ripgrep> ' --delimiter=: \
-      --preview='bat --theme=Dracula --color=always {1} --highlight-line {2}' \
+      --preview='bat --color=always --theme=Dracula {1} --highlight-line {2}' \
       --preview-window='up,40%,border-bottom,+{2}+3/3,~3'
 }
 
@@ -476,6 +479,20 @@ set-var() {
   eval "$command"
   echo "$command" | tee -a ~/.bashrc ~/.zshrc
   echo 'Appended to ~/.bashrc and ~/.zshrc'
+}
+
+getip() {
+  if [ "$#" -gt 1 ]; then
+    echo "Usage: $0 [--private|ip|domain]"
+  elif [ -z "$1" ]; then
+    curl -s "https://checkip.amazonaws.com"  # or ifconfig.me
+  elif [ "$1" = '--private' ]; then  # en0: wireless, en1: ethernet, en3: thunderbolt to ethernet
+    hostname -I 2> /dev/null || ipconfig getifaddr en0 2> /dev/null || ipconfig getifaddr en1
+  elif [[ $1 =~ ^[0-9.]+$ ]]; then
+    curl -s "http://ip-api.com/line/$1"
+  else
+    curl -s "https://dns.google.com/resolve?name=$1"
+  fi
 }
 
 croc() {
