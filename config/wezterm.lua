@@ -1,4 +1,4 @@
--- icon: https://github.com/DinkDonk/kitty-icon
+-- icon: https://raw.githubusercontent.com/DinkDonk/kitty-icon/HEAD/kitty-dark.png
 local wezterm = require("wezterm")
 
 -- wezterm.on("update-right-status", function(window, pane)

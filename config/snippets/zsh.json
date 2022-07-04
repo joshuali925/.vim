@@ -2,10 +2,10 @@
   "read one character": {
     "prefix": "promptOneKey",
     "body": [
-    "read -s -k '?${1:To abort press n.}'; echo",
-    "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
-    "  ${0:return 0}",
-    "fi"
+      "read -s -k '?${1:To abort press n.}'; echo",
+      "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
+      "  ${0:return 0}",
+      "fi"
     ]
   },
   "heredoc append to file": {

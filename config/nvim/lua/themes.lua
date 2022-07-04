@@ -78,7 +78,7 @@ local themes = {
             vim.g.gruvbox_flat_style = "dark"
             vim.g.gruvbox_sidebars = sidebars
             vim.cmd("colorscheme gruvbox-flat")
-            -- TODO https://github.com/eddyekofo94/gruvbox-flat.nvim/issues/21
+            -- https://github.com/eddyekofo94/gruvbox-flat.nvim/issues/21
             vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", { fg = "#808080" })
             vim.api.nvim_set_hl(0, "CmpItemMenu", { fg = "#7c6f64" })
             vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", { fg = "#ea6962" })

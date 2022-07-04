@@ -1,5 +1,5 @@
 {
-  "Bash template": {
+  "bash template": {
     "prefix": "template",
     "body": ["#!/usr/bin/env bash", "set -eo pipefail", "", "$0"]
   },
@@ -19,6 +19,10 @@
       "fi"
     ]
   },
+  "if variable exists": {
+    "prefix": "ifvarexists",
+    "body": ["if [ -n \"\\$${1:VAR}\" ]; then", "  $0", "fi"]
+  },
   "if glob": {
     "prefix": "ifglob",
     "body": ["if [[ \\$${1:VAR} = *${2:STRING}* ]]; then", "  $0", "fi"]
@@ -33,7 +37,16 @@
   },
   "if no arguments": {
     "prefix": "ifnoarguments",
-    "body": ["if [ \"\\$#\" -eq 0 ]; then", "  $0", "fi"]
+    "body": [
+      "if [ \"\\$#\" -eq 0 ]; then",
+      "  echo \"Usage: \\$0 <args>\"",
+      "  exit 1$0",
+      "fi"
+    ]
+  },
+  "if array is empty": {
+    "prefix": "ifarrayempty",
+    "body": ["if [ \\${#${1:array}[@]} -eq 0 ]; then", "  $0", "fi"]
   },
   "if variable equals ignore case": {
     "prefix": "ifEqualsIgnoreCase",
@@ -42,6 +55,10 @@
       "  $0",
       "fi"
     ]
+  },
+  "else if": {
+    "prefix": "elseif",
+    "body": ["elif [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "  $0"]
   },
   "for each element in array": {
     "prefix": "foreach",
@@ -62,11 +79,11 @@
   "case": {
     "prefix": "case",
     "body": [
-      "case \\$(tr '[:upper:]' '[:lower:]' <<< \"\\$${1:1}\") in",
-      "  ${2:help})",
+      "case ${1:\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$1\")} in",
+      "  ${3:help})",
       "    $0",
       "    ;;",
-      "  *) echo \"Unsupported argument \\$${1:1}, exiting..\" >&2; return 1 ;;",
+      "  *) echo \"Unsupported argument \\$${2:1}, exiting..\" >&2; exit 1 ;;",
       "esac"
     ]
   },
@@ -82,29 +99,37 @@
     "prefix": "varLength",
     "body": "\"\\${#${0:VAR}}\""
   },
-  "remove first pattern in variable": {
+  "remove first match in variable": {
     "prefix": "varRemoveFirstMatch",
     "body": "\"\\${${1:VAR}#${0:pattern}}\""
   },
-  "remove first pattern in variable greedy": {
+  "remove first match in variable greedy": {
     "prefix": "varRemoveFirstMatchGreedy",
     "body": "\"\\${${1:VAR}##${0:pattern}}\""
   },
-  "remove last pattern in variable": {
+  "remove last match in variable": {
     "prefix": "varRemoveLastMatch",
     "body": "\"\\${${1:VAR}%${0:pattern}}\""
   },
-  "remove last pattern in variable greedy": {
+  "remove last match in variable greedy": {
     "prefix": "varRemoveLastMatchGreedy",
     "body": "\"\\${${1:VAR}%%${0:pattern}}\""
   },
-  "substitute first pattern in variable": {
+  "substitute first match in variable": {
     "prefix": "varReplace",
     "body": "\"\\${${1:VAR}/${2:pattern}/${0:str}}\""
   },
-  "substitute all patterns in variable": {
+  "substitute all matches in variable": {
     "prefix": "varReplaceAll",
     "body": "\"\\${${1:VAR}//${2:pattern}/${0:str}}\""
+  },
+  "keep everything after last slash": {
+    "prefix": "varBasename",
+    "body": "\\${${1:VAR}##*/}$0"
+  },
+  "keep everything after last dot": {
+    "prefix": "varExtension",
+    "body": "\\${${1:VAR}##*.}$0"
   },
   "redirect to null": {
     "prefix": "redirnull",
@@ -134,7 +159,7 @@
     "prefix": "dateISO",
     "body": "date -u +'%Y-%m-%dT%H:%M:%SZ'"
   },
-  "prompt yes or no": {
+  "prompt yes or no (zsh compatible)": {
     "prefix": "promptYesNo",
     "body": [
       "printf '${1:Continue} (Y/n)? '",
@@ -147,10 +172,10 @@
   "read one character": {
     "prefix": "promptOneKey",
     "body": [
-    "read -p '${1:To abort press n.}' -n 1; echo",
-    "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
-    "  ${0:return 0}",
-    "fi"
+      "read -p '${1:To abort press n.}' -n 1; echo",
+      "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
+      "  ${0:exit 0}",
+      "fi"
     ]
   }
 }

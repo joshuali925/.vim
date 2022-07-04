@@ -3111,6 +3111,10 @@ end
 " =======================================================
 " broken by scrollview
 vim.keymap.set("n", "yof", "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <bar> -tabedit %<CR><Cmd>call winrestview(g:temp) <bar> let b:is_zoomed = 1<CR>' : get(b:, 'is_zoomed', 0) ? '<Cmd>tabclose<CR>' : ''", { expr = true })
+" nvim-ufo fold
+    require("indent_blankline").setup({
+        indent_blankline_char_priority = 20, -- https://github.com/kevinhwang91/nvim-ufo/issues/19
+        use({ "kevinhwang91/nvim-ufo", requires = "kevinhwang91/promise-async", wants = "promise-async", keys = "z", config = "require('ufo').setup({ provider_selector = function(bufnr, filetype) return { 'treesitter', 'indent' } end })" })
 
 " =======================================================
 " doesn't work for .class files opened in jar
@@ -3357,6 +3361,16 @@ alias quote="awk -v q=\"'\" 'BEGIN{ for (i=1; i<ARGC; i++) { gsub(q, q \"\\\\\" 
 export FZF_CTRL_T_COMMAND='rg --files'
 alias rgf='rg --files | rg'
 alias rgd='rg --files --null | xargs -0 dirname | sort -u | rg'
+gvf() {
+  local IFS=$'\n' FZFTEMP
+  if [ -z "$1" ]; then
+    FZFTEMP=($(git ls-files $(git rev-parse --show-toplevel) | fzf --multi))
+  else
+    FZFTEMP=($(git ls-files $(git rev-parse --show-toplevel) | rg "$@" | fzf --multi))
+  fi
+  [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
+}
+
 
 " =======================================================
 " doesn't work with gitignore

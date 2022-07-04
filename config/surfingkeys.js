@@ -92,7 +92,6 @@ api.map(';b', 'ab'); // add bookmark
 api.map(';B', ';db'); // remove bookmark
 api.map(';c', ';e'); // edit configs
 api.map(';e', ';U'); // edit url
-api.unmap('r');
 api.unmap('<Ctrl-h>');
 api.unmap('<Ctrl-j>');
 api.unmap('<Ctrl-u>');
@@ -179,6 +178,7 @@ api.mapkey('gP', 'Google first result', function() {
         });
     }
 });
+api.unmap('r');
 api.mapkey('r', 'Toggle full screen', function() {
     if (window.location.hostname === 'www.bilibili.com') {
         if (window.location.pathname === '/') {
@@ -213,16 +213,18 @@ api.mapkey('yraw', 'Copy github raw', function() {
     fetch(href).then(response => response.text()).then((text) => api.Clipboard.write(text));
 }, {domain: /github.com|raw.githubusercontent.com/i});
 api.mapkey('yov', 'Toggle sites', function() {
-    if (/github.(com|dev)/.test(window.location.hostname)) {
+    if (/[^.]+\.github\.io/.test(window.location.hostname)) {
+        window.location.href = `https://github.com/${window.location.hostname.match(/([^.]+)\.github\.io/)[1]}`;
+    } else if (/github.(com|dev)/.test(window.location.hostname)) {
         api.tabOpenLink(window.location.href.replace(/github.(com|dev)/, function(match, p1) { return p1 === 'com' ? 'github.dev' : 'github.com' }));
     } else if (window.location.hostname === 'www.baidu.com') {
         window.location.href = `https://www.google.com/search?q=${window.location.href.match(/[?&]wd=([^&]+)/)[1]}`;
     } else if (window.location.hostname === 'www.google.com') {
         window.location.href = `https://www.baidu.com/s?ie=UTF-8&wd=${window.location.href.match(/[?&]q=([^&]+)/)[1]}`;
     }
-}, {domain: /(baidu|google|github)\.(com|dev)/i});
+}, {domain: /(baidu|google|github)\.(com|dev|io)/i});
 api.mapkey('yos', 'Toggle sourcegraph search', function() {
-    api.tabOpenLink('sourcegraph.com/search?q=context:global+repo:' + window.location.href.match(/(github.com\/[^/]+\/?[^/]+)/)[1] + '+');
+    api.tabOpenLink('https://sourcegraph.com/search?q=context:global+repo:' + window.location.href.match(/(github.com\/[^/]+\/?[^/]+)/)[1] + '+');
 }, {domain: /github\.com/i});
 
 api.unmap('gg');

@@ -28,6 +28,7 @@ function M.lsp_install_all()
     vim.cmd("LspInstallInfo")
 end
 
+-- TODO https://www.reddit.com/r/neovim/comments/vvtltr/remove_the_message_select_a_language_server/
 -- https://www.reddit.com/r/neovim/comments/u5si2w/breaking_changes_inbound_next_few_weeks_for/
 function M.init()
     local function on_attach(client, bufnr)

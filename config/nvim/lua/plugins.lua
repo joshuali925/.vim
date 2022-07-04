@@ -8,7 +8,7 @@ return require("packer").startup({
     config = {
         opt_default = true,
         -- TODO https://github.com/wbthomason/packer.nvim/issues/456
-        -- max_jobs = 10, -- this fixes above issue but breaks plugin installing in headless nvim
+        -- max_jobs = 50, -- this fixes above issue but breaks plugin installing in headless nvim
         display = { open_fn = require("packer.util").float },
         profile = { enable = false },
         compile_path = vim.fn.stdpath("config") .. "/lua/packer_compiled.lua", -- impatient.nvim
@@ -115,7 +115,7 @@ return require("packer").startup({
         -- editing
         use({ "mg979/vim-visual-multi", fn = "vm#*", keys = { "<Plug>(VM-", { "n", "<leader><C-n>" } }, setup = conf("setup_vim_visual_multi") })
         use({ "phaazon/hop.nvim", cmd = { "HopWord", "HopChar1", "HopLineAC", "HopLineBC", "HopWordCurrentLine" }, config = conf("hop_nvim") })
-        use({ "unblevable/quick-scope", config = conf("quick_scope") })
+        use({ "unblevable/quick-scope", config = conf("quick_scope") }) -- TODO try https://github.com/jinh0/eyeliner.nvim
         use({ "dahu/vim-fanfingtastic" })
         use({ "chaoren/vim-wordmotion", setup = "vim.g.wordmotion_nomap = 1" })
         use({ "machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1" })
@@ -142,7 +142,8 @@ return require("packer").startup({
             cmd = { "TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine" },
             setup = conf("setup_vim_table_mode"),
         })
-        use({ "NTBBloodbath/rest.nvim", module = "rest-nvim", config = conf("rest_nvim") })
+        -- TODO https://github.com/NTBBloodbath/rest.nvim/issues/114
+        use({ "NTBBloodbath/rest.nvim", commit = "e5f68db73276c4d4d255f75a77bbe6eff7a476ef", module = "rest-nvim", config = conf("rest_nvim") })
         use({ "will133/vim-dirdiff", cmd = "DirDiff" })
     end,
 })
