@@ -31,7 +31,6 @@ detect-env() {
       elif [ -x "$(command -v apt-get)" ]; then
         PACKAGE_MANAGER=apt-get
       else
-        PACKAGE_MANAGER=echo
         echo 'package manager not supported' >&2
       fi
       ;;
@@ -61,7 +60,7 @@ usage() {
 backup() {
   if [ -e "$1" ]; then
     mkdir -p "$BACKUP_DIR"
-    \mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(date +%s)"
+    \mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"  # .backup_$(date +%s) suffix won't be unique in this script
   fi
 }
 
@@ -70,6 +69,14 @@ link_file() {
   backup "$destFile"
   ln -s "$sourceFile" "$destFile"
   log "Linked $sourceFile to $destFile"
+}
+
+install_asdf() {
+  if [ ! -s "$HOME/.asdf/asdf.sh" ]; then
+    log '\nInstalling asdf..'
+    git clone https://github.com/asdf-vm/asdf.git "$HOME/.asdf" --depth=1
+    source "$HOME/.asdf/asdf.sh"
+  fi
 }
 
 install_development_tools() {
@@ -84,6 +91,7 @@ install_development_tools() {
     brew install coreutils
     echo "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
     echo "FPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" >> ~/.zshrc
+    brew install grep && ln -s "$(which ggrep)" ~/.local/bin/grep
     brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
     brew install findutils && ln -s "$(which gxargs)" ~/.local/bin/xargs
     brew install gawk && ln -s "$(which gawk)" ~/.local/bin/awk
@@ -98,9 +106,7 @@ install_development_tools() {
     # brew install --cask wez/wezterm/wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel
     # manually install https://github.com/xiaogdgenuine/Doll snipaste
   fi
-  log '\nInstalling asdf..'
-  git clone https://github.com/asdf-vm/asdf.git "$HOME/.asdf" --depth=1
-  [ -s "$HOME/.asdf/asdf.sh" ] && source "$HOME/.asdf/asdf.sh"
+  install_asdf
 }
 
 install_dotfiles() {
@@ -156,7 +162,8 @@ install_docker() {
   log "Installed, run ${YELLOW}docker info${CYAN} for status"
 }
 
-install_java() {  # manual install list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
+install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
+  install_asdf
   local jdk_version=adoptopenjdk-14.0.2+12
   [ "$PLATFORM" == 'darwin' ] && [ "$ARCHITECTURE" == 'arm64' ] && jdk_version=adoptopenjdk-11.0.15+10
   asdf plugin add java || true
@@ -182,6 +189,7 @@ install_python() {
 }
 
 install_node() {
+  install_asdf
   log "Installing node $NODE_VERSION.."
   asdf plugin add nodejs || true
   asdf install nodejs "$NODE_VERSION"
@@ -190,8 +198,6 @@ install_node() {
   mkdir -p ~/.local/lib/node-packages && pushd ~/.local/lib/node-packages
   [ ! -f package.json ] && echo '{}' >> package.json
   npm install --cache npm-temp-cache yarn || true
-  npm install --cache npm-temp-cache eslint || true
-  npm install --cache npm-temp-cache prettier || true
   rm -rf npm-temp-cache
   popd
   echo
@@ -200,33 +206,27 @@ install_node() {
 install_tmux() {  # https://raw.githubusercontent.com/mjakob-gh/build-static-tmux/HEAD/build-static-tmux.sh
   log 'Installing tmux..'
   backup "$HOME/.local/bin/tmux"
-  if [ "$PLATFORM" == 'linux' ]; then
-    if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-x86_64.tar.gz | tar xz -C "$HOME/.local/bin" tmux
-    else
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-arm64.tar.gz | tar xz -C "$HOME/.local/bin" tmux
+  case $PLATFORM:$ARCHITECTURE in
+    linux:x86_64) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-x86_64.tar.gz | tar xz -C "$HOME/.local/bin" tmux ;;
+    linux:arm64) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-arm64.tar.gz | tar xz -C "$HOME/.local/bin" tmux ;;
+    darwin:*) brew install tmux --HEAD ;;
+    *) echo 'Unknown distro..'; return 0 ;;
+  esac
+  if [ ! -d "$HOME/.tmux" ]; then
+    log 'Installing tmux plugins..'
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth=1
+    ~/.tmux/plugins/tpm/bin/install_plugins || true
+    if [ -e "$HOME/.tmux/plugins/tmux-thumbs" ]; then
+      log 'Installing tmux-thumbs binaries..'
+      case $PLATFORM:$ARCHITECTURE in
+        linux:x86_64) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs" ;;
+        linux:arm64) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-arm64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs" ;;
+        darwin:*) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-darwin-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs" ;;
+      esac
     fi
-  elif [ "$PLATFORM" == 'darwin' ]; then
-    brew install tmux --HEAD
   else
-    echo 'Unknown distro..'
-    return 0
-  fi
-  log 'Installing tmux plugins..'
-  backup "$HOME/.tmux"
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth=1
-  ~/.tmux/plugins/tpm/bin/install_plugins || true
-  if [ -e "$HOME/.tmux/plugins/tmux-thumbs" ]; then
-    log 'Installing tmux-thumbs binaries..'
-    if [ "$PLATFORM" == 'linux' ]; then
-      if [ "$ARCHITECTURE" == 'x86_64' ]; then
-        curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
-      else
-        curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-arm64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
-      fi
-    elif [ "$PLATFORM" == 'darwin' ]; then
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-darwin-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
-    fi
+    log '~/.tmux directory exists, updating tmux plugins..'
+    ~/.tmux/plugins/tpm/bin/update_plugins all || true
   fi
   if [ ! -d "$HOME/.terminfo" ]; then
     curl -LO https://invisible-island.net/datafiles/current/terminfo.src.gz && gunzip terminfo.src.gz
@@ -239,30 +239,23 @@ install_tmux() {  # https://raw.githubusercontent.com/mjakob-gh/build-static-tmu
 install_neovim() {
   link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
   backup "$HOME/.local/lib/nvim"
-  if [ "$PLATFORM" == 'linux' ]; then
-    if [ "$ARCHITECTURE" == 'x86_64' ]; then
-      curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-      chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage
-      \mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
-
-      # curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C ~/.local/lib
-      # \mv ~/.local/lib/nvim-linux64 ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
-    else
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local/lib nvim
-      ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
-    fi
-  elif [ "$PLATFORM" == 'darwin' ]; then
-    curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz | tar xz -C ~/.local/lib
-    \mv ~/.local/lib/nvim-macos ~/.local/lib/nvim
-    ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
-  else
-    echo 'Unknown distro..'
-    return 0
-  fi
+  case $PLATFORM:$ARCHITECTURE in
+    linux:x86_64)
+      # appimage: curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage && chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage && \mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
+      curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C ~/.local/lib
+      \mv ~/.local/lib/nvim-linux64 ~/.local/lib/nvim ;;
+    linux:arm64)
+      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local/lib nvim ;;
+    darwin:*)
+      curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz | tar xz -C ~/.local/lib
+      \mv ~/.local/lib/nvim-macos ~/.local/lib/nvim ;;
+    *) echo 'Unknown distro..'; return 0 ;;
+  esac
+  ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
   log 'Installed neovim, installing plugins..'
   # TODO https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
   timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +'autocmd User PackerComplete quitall' +'silent lua require("plugins").sync()' || true
-  timeout 120 ~/.local/bin/nvim --headless +'PackerLoad! nvim-treesitter' +'TSUpdateSync | quitall' || true
+  timeout 120 ~/.local/bin/nvim --headless +'PackerLoad! nvim-treesitter' +'lua require("lsp").install_tools()' +'TSUpdateSync | quitall' || true
   timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd("quitall") end, 27000)' || true
   log "\nInstalled neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"
   log "Run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
@@ -270,9 +263,8 @@ install_neovim() {
 }
 
 setup_ssh_key() {
-  # ssh-keygen -t rsa -b 4096 -C "" -N "" -f "$HOME/.ssh/id_rsa"
-  ssh-keygen -t ed25519 -C "" -N "" -f "$HOME/.ssh/id_ed25519"
-  cat ~/.ssh/id_ed25519.pub
+  # ssh-keygen -t rsa -b 4096 -C "" -N "" -f "$HOME/.ssh/id_rsa" && cat ~/.ssh/id_rsa.pub
+  ssh-keygen -t ed25519 -C "" -N "" -f "$HOME/.ssh/id_ed25519" && cat ~/.ssh/id_ed25519.pub
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
 }
 

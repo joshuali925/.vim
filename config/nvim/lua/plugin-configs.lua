@@ -53,7 +53,7 @@ vim.g.qs_filetype_blacklist = {
     "netrw",
     "packer",
     "alpha",
-    "lsp-installer",
+    "mason.nvim",
     "TelescopePrompt",
     "Mundo",
     "aerial",
@@ -66,15 +66,7 @@ vim.g.qs_filetype_blacklist = {
 } -- will only run on first require
 vim.g.qs_buftype_blacklist = { "terminal" }
 function M.quick_scope()
-    local function highlight_quickscope()
-        vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = vim.g.theme_index < 0 and "#ffbe6d" or "#bf8000" })
-        vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = vim.g.theme_index < 0 and "#6eb9e6" or "#005e7d" })
-    end
-
     vim.g.qs_hi_priority = -1
-    vim.api.nvim_create_augroup("QuickScopeHighlight", {})
-    vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", group = "QuickScopeHighlight", callback = highlight_quickscope })
-    highlight_quickscope()
 end
 
 function M.mundo()
@@ -102,6 +94,8 @@ end
 function M.indent_blankline()
     require("indent_blankline").setup({
         char = "▏",
+        context_char = "▏",
+        show_current_context = true,
         filetype_exclude = vim.g.qs_filetype_blacklist,
         buftype_exclude = vim.g.qs_buftype_blacklist,
     })
@@ -137,17 +131,6 @@ function M.conflict_marker()
     vim.g.conflict_marker_begin = "^<<<<<<< .*$"
     vim.g.conflict_marker_end = "^>>>>>>> .*$"
     vim.g.conflict_marker_highlight_group = ""
-    if vim.g.theme_index < 0 then
-        vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#427266" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#364f49" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#3a4f67" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#234a78" })
-    else
-        vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#7ed9ae" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#94ffcc" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#b9d1fa" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#86abeb" })
-    end
 end
 
 function M.setup_vim_table_mode()
@@ -268,7 +251,7 @@ function M.nvim_tree()
         hijack_netrw = false,
         git = { ignore = false },
         actions = { open_file = { resize_window = false } },
-        renderer = { highlight_git = true },
+        renderer = { highlight_git = true, full_name = true },
         view = {
             mappings = {
                 list = {
@@ -359,7 +342,7 @@ function M.nvim_treesitter()
             "markdown",
             "bash",
             "http",
-            "html", -- TODO https://github.com/nvim-treesitter/nvim-treesitter/issues/1788
+            "html",
             "css",
             "javascript",
             "typescript",
@@ -686,7 +669,6 @@ function M.open_quickui_context_menu()
 end
 
 function M.setup_vim_quickui()
-    vim.g.quickui_color_scheme = vim.g.theme_index < 0 and "papercol-dark" or "papercol-light"
     vim.g.quickui_show_tip = 1
     vim.g.quickui_border_style = 2
 end
@@ -795,6 +777,9 @@ function M.vim_quickui()
         { "&Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
         { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
         { "Remove folder from workspace", [[lua vim.lsp.buf.remove_workspace_folder()]], "Remove folder from workspace for LSP" },
+        { "--", "" },
+        { "&Install all packages", [[execute "lua require('lsp').lsp_install_all()" | lua require("lsp").install_tools()]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
+        { "Install language tools", [[lua require("lsp").install_tools()]], "Install commonly used linters, formatters" },
     })
     local quickui_theme_list = {}
     local used_chars = "hjklqg"

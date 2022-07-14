@@ -73,8 +73,8 @@ vim.keymap.set("x", "il", "^og_")
 vim.keymap.set("o", "il", "<Cmd>normal vil<CR>")
 vim.keymap.set("x", "al", "0o$")
 vim.keymap.set("o", "al", "<Cmd>normal val<CR>")
-vim.keymap.set("x", "ie", "GoggV")
-vim.keymap.set("o", "ie", "<Cmd>normal vie<CR>")
+vim.keymap.set("x", "ae", "GoggV")
+vim.keymap.set("o", "ae", "<Cmd>normal vae<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
@@ -430,7 +430,7 @@ if require("states").small_file then
                 "nvim-treesitter-textobjects",
                 "plenary.nvim",
                 "vim-illuminate",
-                "nvim-lsp-installer",
+                "mason.nvim",
             }
             require("packer").loader(table.concat(plugins, " "))
         end, 30)

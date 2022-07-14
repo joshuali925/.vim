@@ -127,3 +127,8 @@ _get_prompt_tail() {
     printf "$_tail"
   fi
 }
+
+_disable_prompt_functions() {
+  PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
+  PROMPT_COMMAND=
+}

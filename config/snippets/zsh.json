@@ -1,5 +1,5 @@
 {
-  "read one character": {
+  "Read one character": {
     "prefix": "promptOneKey",
     "body": [
       "read -s -k '?${1:To abort press n.}'; echo",
@@ -8,27 +8,27 @@
       "fi"
     ]
   },
-  "heredoc append to file": {
+  "Heredoc append to file": {
     "prefix": "heredocToFile",
     "body": ["tee -a ${1:file} > /dev/null <<EOF", "$0", "EOF"]
   },
-  "find files and exec": {
+  "Find files and exec": {
     "prefix": "findExec",
-    "body": "find . -iname '${1:*.txt}' -print -exec ${0:cat {\\} \\; -exec sleep 1} \\;"
+    "body": "find . -iname '${1:*.txt}' -print -exec ${0:file {\\} \\; -exec sleep 1} \\;"
   },
-  "curl POST JSON": {
+  "Curl POST JSON": {
     "prefix": "curlPost",
     "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\" key=\"val\"})\""
   },
-  "curl POST data from stdin": {
+  "Curl POST data from stdin": {
     "prefix": "curlPostStdin",
     "body": "curl -X POST -k -H 'Content-Type: application/json' ${0:https://example.com} --data-binary @-"
   },
-  "compress and encrypt files": {
+  "Compress and encrypt files": {
     "prefix": "tarEncrypt",
     "body": "tar zcvf - ${1:files} | openssl enc -aes-256-cbc -salt -out ${0:encrypted}.tar.gz"
   },
-  "decompress and decrypt files": {
+  "Decompress and decrypt files": {
     "prefix": "tarDecrypt",
     "body": "openssl enc -d -aes256 -in ${0:encrypted}.tar.gz | tar zxv"
   }

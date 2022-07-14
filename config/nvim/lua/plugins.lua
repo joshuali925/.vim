@@ -77,8 +77,8 @@ return require("packer").startup({
             requires = { "nvim-treesitter/nvim-treesitter-textobjects" },
             config = conf("nvim_treesitter"),
         })
-        use({ "williamboman/nvim-lsp-installer" })
-        use({ "neovim/nvim-lspconfig", after = "nvim-lsp-installer" })
+        use({ "williamboman/mason.nvim" })
+        use({ "neovim/nvim-lspconfig", after = "mason.nvim" })
         use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
         use({ "weilbith/nvim-code-action-menu", cmd = "CodeActionMenu" })
         use({
@@ -118,7 +118,7 @@ return require("packer").startup({
         use({ "unblevable/quick-scope", config = conf("quick_scope") }) -- TODO try https://github.com/jinh0/eyeliner.nvim
         use({ "dahu/vim-fanfingtastic" })
         use({ "chaoren/vim-wordmotion", setup = "vim.g.wordmotion_nomap = 1" })
-        use({ "machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1" })
+        use({ "machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1" }) -- TODO try https://github.com/kylechui/nvim-surround
         use({ "machakann/vim-swap", keys = "<Plug>(swap-" })
         use({ "AndrewRadev/splitjoin.vim", keys = { { "n", "gS" }, { "n", "gJ" } } })
 
