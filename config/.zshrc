@@ -11,17 +11,9 @@ fi
 source ~/.zinit/bin/zinit.zsh
 
 if [ -n "$ZINIT_POST_INSTALL" ]; then
-  zinit depth=1 light-mode for zdharma-continuum/z-a-bin-gem-node
-  zinit light-mode as"program" from"gh-r" for \
-    mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
-    mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
-    mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
-    mv"delta* -> delta" sbin"delta/delta" dandavison/delta \
-    sbin junegunn/fzf \
-    sbin gokcehan/lf \
-    sbin jesseduffield/lazygit
-
   zinit as"completion" for \
+    https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
+    https://github.com/sharkdp/fd/blob/master/contrib/completion/_fd \
     https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
     https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \
     https://github.com/gradle/gradle-completion/blob/master/_gradle \
@@ -148,6 +140,7 @@ bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
 bindkey '^i' tab-complete-or-cd
 bindkey -s '^z' 'fg^m'
+bindkey '\el' forward-char                    # unbind <Esc>l = ls from oh-my-zsh key-bindings
 
 alias history='history -f 0'
 alias get-completion='compdef _gnu_generic'

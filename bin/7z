@@ -3,11 +3,10 @@ source ~/.vim/bin/_install_from_github.sh
 run-if-exists "$0" "$@"
 detect-env
 
-VERSION=2200  # https://www.7-zip.org/download.html
-if [ "$PLATFORM" != 'linux' ]; then
-  echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2
-  exit 1
-fi
+case $PLATFORM in  # versions: https://www.7-zip.org/download.html
+  linux) VERSION=2201; [ "$ARCHITECTURE" = 'x86_64' ] && DISTRO=linux-x64 || DISTRO=linux-arm64; executable=7zzs ;;
+  darwin) VERSION=2107; DISTRO=mac; executable=7zz ;;
+  *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2 ; exit 1 ;;
+esac
 
-[ "$ARCHITECTURE" = 'x86_64' ] && ARCHITECTURE=x64
-install-archive-from-url "https://www.7-zip.org/a/7z$VERSION-linux-$ARCHITECTURE.tar.xz" 7z '7zzs && mv ~/.local/bin/7zzs ~/.local/bin/7z'
+install-archive-from-url "https://www.7-zip.org/a/7z$VERSION-$DISTRO.tar.xz" 7z "$executable && mv ~/.local/bin/$executable ~/.local/bin/7z"

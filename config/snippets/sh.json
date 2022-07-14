@@ -1,33 +1,33 @@
 {
-  "bash template": {
+  "Bash template": {
     "prefix": "template",
     "body": ["#!/usr/bin/env bash", "set -eo pipefail", "", "$0"]
   },
-  "if": {
+  "If": {
     "prefix": "if",
     "body": ["if [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "  $0", "fi"]
   },
-  "if command succeeds": {
+  "If command succeeds": {
     "prefix": "ifcommand",
     "body": ["if ${1:grep -q text <<< \"\\$VAR\"}; then", "  $0", "fi"]
   },
-  "if command exists": {
-    "prefix": "ifcommandexists",
+  "If command does not exist": {
+    "prefix": "ifcommandnotexists",
     "body": [
       "if ! builtin command -v ${1:cmd} > /dev/null 2>&1; then",
       "  $0",
       "fi"
     ]
   },
-  "if variable exists": {
+  "If variable exists": {
     "prefix": "ifvarexists",
     "body": ["if [ -n \"\\$${1:VAR}\" ]; then", "  $0", "fi"]
   },
-  "if glob": {
+  "If glob": {
     "prefix": "ifglob",
     "body": ["if [[ \\$${1:VAR} = *${2:STRING}* ]]; then", "  $0", "fi"]
   },
-  "if regex": {
+  "If regex": {
     "prefix": "ifregex",
     "body": [
       "if [[ \\$${1:VAR} =~ ${2:^([0-9]{10\\}|[a-z]{5\\})\\$} ]]; then",
@@ -35,7 +35,7 @@
       "fi"
     ]
   },
-  "if no arguments": {
+  "If no arguments": {
     "prefix": "ifnoarguments",
     "body": [
       "if [ \"\\$#\" -eq 0 ]; then",
@@ -44,11 +44,11 @@
       "fi"
     ]
   },
-  "if array is empty": {
+  "If array is empty": {
     "prefix": "ifarrayempty",
     "body": ["if [ \\${#${1:array}[@]} -eq 0 ]; then", "  $0", "fi"]
   },
-  "if variable equals ignore case": {
+  "If variable equals ignore case": {
     "prefix": "ifEqualsIgnoreCase",
     "body": [
       "if [ \"\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$${1:VAR}\")\" = '${2:string}' ]; then",
@@ -56,19 +56,19 @@
       "fi"
     ]
   },
-  "else if": {
+  "Else if": {
     "prefix": "elseif",
     "body": ["elif [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "  $0"]
   },
-  "for each element in array": {
+  "For each element in array": {
     "prefix": "foreach",
     "body": ["for ${1:element} in \"${2:\\${array[@]\\}}\"; do", "  $0", "done"]
   },
-  "for i in range": {
+  "For i in range": {
     "prefix": "forRange",
     "body": ["for ${1:i} in {1..${2:10}}; do", "  $0", "done"]
   },
-  "loop lines": {
+  "Loop lines": {
     "prefix": "whileread",
     "body": [
       "while IFS= read -r line; do",
@@ -76,7 +76,7 @@
       "done <<< \"\\$${0:list}\""
     ]
   },
-  "case": {
+  "Case": {
     "prefix": "case",
     "body": [
       "case ${1:\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$1\")} in",
@@ -87,79 +87,83 @@
       "esac"
     ]
   },
-  "variable with default value": {
+  "Variable with default value": {
     "prefix": "varDefaultValue",
     "body": "\"\\${${1:VAR}:-'${0:default}'}\""
   },
-  "substring of variable": {
+  "Substring of variable": {
     "prefix": "varSubstring",
     "body": "\"\\${${1:VAR}:${2:offset}:${0:length}}\""
   },
-  "length of variable": {
+  "Length of variable": {
     "prefix": "varLength",
     "body": "\"\\${#${0:VAR}}\""
   },
-  "remove first match in variable": {
+  "Remove first match in variable": {
     "prefix": "varRemoveFirstMatch",
     "body": "\"\\${${1:VAR}#${0:pattern}}\""
   },
-  "remove first match in variable greedy": {
+  "Remove first match in variable greedy": {
     "prefix": "varRemoveFirstMatchGreedy",
     "body": "\"\\${${1:VAR}##${0:pattern}}\""
   },
-  "remove last match in variable": {
+  "Remove last match in variable": {
     "prefix": "varRemoveLastMatch",
     "body": "\"\\${${1:VAR}%${0:pattern}}\""
   },
-  "remove last match in variable greedy": {
+  "Remove last match in variable greedy": {
     "prefix": "varRemoveLastMatchGreedy",
     "body": "\"\\${${1:VAR}%%${0:pattern}}\""
   },
-  "substitute first match in variable": {
+  "Substitute first match in variable": {
     "prefix": "varReplace",
     "body": "\"\\${${1:VAR}/${2:pattern}/${0:str}}\""
   },
-  "substitute all matches in variable": {
+  "Substitute all matches in variable": {
     "prefix": "varReplaceAll",
     "body": "\"\\${${1:VAR}//${2:pattern}/${0:str}}\""
   },
-  "keep everything after last slash": {
+  "Keep everything after last slash": {
     "prefix": "varBasename",
     "body": "\\${${1:VAR}##*/}$0"
   },
-  "keep everything after last dot": {
+  "Keep everything before last dot": {
+    "prefix": "varNoExtension",
+    "body": "\\${${1:VAR}%.*}$0"
+  },
+  "Keep everything after last dot": {
     "prefix": "varExtension",
     "body": "\\${${1:VAR}##*.}$0"
   },
-  "redirect to null": {
+  "Redirect to null": {
     "prefix": "redirnull",
     "body": "> /dev/null 2>&1"
   },
-  "redirect to stderr": {
+  "Redirect to stderr": {
     "prefix": "redirerr",
     "body": ">&2"
   },
-  "redirect stderr to null": {
+  "Redirect stderr to null": {
     "prefix": "redirerrornull",
     "body": "2> /dev/null"
   },
-  "redirect stderr to stdin": {
+  "Redirect stderr to stdin": {
     "prefix": "redirerrorstdin",
     "body": "2>&1"
   },
-  "script directory": {
+  "Script directory": {
     "prefix": "scriptDirectory",
     "body": "SCRIPT_DIR=\"\\$(cd -- \"\\$(dirname -- \"\\${BASH_SOURCE[0]:-\\$0}\")\" &> /dev/null && pwd 2> /dev/null)\""
   },
-  "log": {
+  "Log": {
     "prefix": "log",
     "body": "printf \"\\033[0;36m%s\\033[0m\\n\" \"$0\""
   },
-  "ISO date": {
+  "iSO date": {
     "prefix": "dateISO",
     "body": "date -u +'%Y-%m-%dT%H:%M:%SZ'"
   },
-  "prompt yes or no (zsh compatible)": {
+  "Prompt yes or no (zsh compatible)": {
     "prefix": "promptYesNo",
     "body": [
       "printf '${1:Continue} (Y/n)? '",
@@ -169,7 +173,7 @@
       "fi"
     ]
   },
-  "read one character": {
+  "Read one character": {
     "prefix": "promptOneKey",
     "body": [
       "read -p '${1:To abort press n.}' -n 1; echo",

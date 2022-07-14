@@ -1583,6 +1583,7 @@ zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'
 install-from-url vimv https://raw.githubusercontent.com/thameera/vimv/HEAD/vimv "$@"
 install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin '' btm "$@"
 install-from-github stylua JohnnyMorganz/StyLua linux '' macos '' '' "$@"
+install-from-github shellcheck koalaman/shellcheck linux.x86_64 linux.aarch64 darwin.x86_64 '' '--strip-components=1 --wildcards shellcheck*/shellcheck' "$@"
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
     btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
@@ -3444,3 +3445,59 @@ detect-env
 [ "$PLATFORM" = 'darwin' ] && PLATFORM=mac
 [ "$ARCHITECTURE" = 'x86_64' ] && ARCHITECTURE=x64
 install-from-url 7z "https://github.com/develar/7zip-bin/raw/master/$PLATFORM/$ARCHITECTURE/7za" "$@"
+
+" =======================================================
+" lf shell doesn't support <<< and array
+cmd zip ${{
+  set -f
+  selected=()
+  while IFS= read -r filepath; do
+    selected+=("$(realpath --relative-to='.' "$filepath")")
+  done <<< "$fx"
+  zip -r "${selected[0]}.zip" "${selected[@]}"
+}}
+" column on ansi escaped colors for aligning git log with filename (gls alias)
+https://unix.stackexchange.com/questions/121107/a-shell-tool-to-tablify-input-data-containing-ansi-escape-codes/448471#448471
+https://github.com/LukeSavefrogs/column_ansi
+" =======================================================
+" oscyank before tmux 3.3
+buf=$(cat "$@")
+buflen=$(printf %s "$buf" | wc -c)
+maxlen=74994
+while [ "$buflen" -gt 0 ]; do
+  esc="\033]52;c;$(printf %s "$buf" | tail -c "$buflen" | head -c "$maxlen" | base64 | tr -d '\r\n')\a"
+  if [ -n "$SSH_TTY" ]; then
+    otty=$SSH_TTY
+  elif [ -n "$TMUX" ]; then
+    esc="\033Ptmux;\033$esc\033\\"
+    otty=$(tmux list-panes -F "#{pane_active} #{pane_tty}" | awk '$1=="1" { print $2 }')
+  else
+    otty=$TTY
+    if [ -z "$otty" ]; then
+      otty="/dev/$(ps -p $PPID -o tty=)"
+    fi
+    if [ -z "$otty" ]; then
+      otty="/dev/tty"
+    fi
+  fi
+  printf "$esc" > $otty
+  ((buflen -= maxlen))
+  if [ "$buflen" -gt 0 ]; then
+    printf "input is %d bytes too long, needs %d more time" "$buflen" "$((buflen / maxlen + 1))" >&2
+    read -p ', continue? (Y/n) ' -n 1 < $otty
+    echo
+    [[ ! $REPLY =~ ^[Yy]?$ ]] && break
+  fi
+done
+
+" =======================================================
+" all zinit binaries
+  zinit depth=1 light-mode for zdharma-continuum/z-a-bin-gem-node
+  zinit light-mode as"program" from"gh-r" for \
+    mv"ripgrep* -> ripgrep" sbin"ripgrep/rg" BurntSushi/ripgrep \
+    mv"fd* -> fd" sbin"fd/fd" @sharkdp/fd \
+    mv"bat* -> bat" sbin"bat/bat" @sharkdp/bat \
+    mv"delta* -> delta" sbin"delta/delta" dandavison/delta \
+    sbin junegunn/fzf \
+    sbin gokcehan/lf \
+    sbin jesseduffield/lazygit

@@ -2,6 +2,7 @@
 # https://github.com/kevinhwang91/dotfiles/blob/156c2e258c17677081b412675cef45b07a597a7c/script/shell/osc52send
 # https://medium.com/free-code-camp/tmux-in-practice-integration-with-system-clipboard-bcd72c62ff7b
 # https://sunaku.github.io/tmux-yank-osc52.html
+# https://github.com/ojroques/vim-oscyank/issues/26: tmux >= 3.3 doesn't need OSC52 sequence to be wrapped
 
 buf=$(cat "$@")
 buflen=$(printf %s "$buf" | wc -c)
@@ -9,13 +10,6 @@ maxlen=74994
 
 while [ "$buflen" -gt 0 ]; do
   esc="\033]52;c;$(printf %s "$buf" | tail -c "$buflen" | head -c "$maxlen" | base64 | tr -d '\r\n')\a"
-  # # tmux >= 3.3 doesn't seem to need OSC52 sequence to be wrapped (https://github.com/ojroques/vim-oscyank/issues/26)
-  # if [ -n "$SSH_TTY" ]; then
-  #   otty=$SSH_TTY
-  # elif [ -n "$TMUX" ]; then
-  #   esc="\033Ptmux;\033$esc\033\\"
-  #   otty=$(tmux list-panes -F "#{pane_active} #{pane_tty}" | awk '$1=="1" { print $2 }')
-  # else
     otty=$TTY
     if [ -z "$otty" ]; then
       otty="/dev/$(ps -p $PPID -o tty=)"
@@ -23,7 +17,6 @@ while [ "$buflen" -gt 0 ]; do
     if [ -z "$otty" ]; then
       otty="/dev/tty"
     fi
-  # fi
   printf "$esc" > $otty
   ((buflen -= maxlen))
   if [ "$buflen" -gt 0 ]; then

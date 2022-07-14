@@ -9,7 +9,7 @@ GlobalSpeed.json
 yop toggle pdf viewer
 */
 
-chrome.storage.local.set({ noPdfViewer: 1 }); // https://github.com/brookhong/Surfingkeys/issues/320
+chrome.storage.local.set({ noPdfViewer: 1 }); // disable pdf viewer, yop or ;s to toggle
 settings.tabsThreshold = 0;
 settings.richHintsForKeystroke = 1500;
 settings.stealFocusOnLoad = false;
@@ -43,7 +43,9 @@ api.aceVimMap(';w', '<Esc>', 'insert');
 // https://github.com/brookhong/Surfingkeys/blob/7626d9515ce6fec36e14499e1e1a4e49a6d1b43a/src/content_scripts/common/api.js#L467
 // https://github.com/brookhong/Surfingkeys/blob/master/src/content_scripts/common/default.js
 api.map('h', 'E'); // tab left
+api.map('aa', 'E'); // tab left
 api.map('l', 'R'); // tab right
+api.map('as', 'R'); // tab right
 api.map('Z[', 'gx0'); // close tabs to the left
 api.map('Z]', 'gx$'); // close tabs to the right
 api.map('<Ctrl-q>', 'i'); // temp key holder
@@ -79,6 +81,7 @@ api.map('yP', 'yp'); // copy POST form data
 api.map('yp', 'yt'); // duplicate page
 api.map('yt', 'yl'); // copy page title
 // yj to copy all settings as json, ;pj to restore from clipboard
+// yy to copy url of current tab, yY to copy url of all tabs
 api.map('J', 'W'); // move tab to window
 api.map(';q', 'x'); // close tab
 api.map(';x', 'x'); // close tab
@@ -107,6 +110,8 @@ api.vunmap('gr');
 api.mapkey('gr', 'Go to referrer', function() { if(document.referrer) open(document.referrer); });
 api.unmap('ga');
 api.mapkey('ga', '#12Open Chrome Apps', function() { api.tabOpenLink('chrome://apps/'); });
+api.unmap('gc');
+api.mapkey('gc', 'Clear cookies for specific sites', function() { api.tabOpenLink('chrome://settings/siteData'); });
 api.mapkey('<Ctrl-,>', 'Open Chrome Settings', function() { api.tabOpenLink('chrome://settings/'); });
 api.mapkey('<Ctrl-Alt-,>', 'Open ChromeOS Settings', function() { api.tabOpenLink('chrome://os-settings/'); });
 api.mapkey(';Vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
@@ -214,7 +219,7 @@ api.mapkey('yraw', 'Copy github raw', function() {
 }, {domain: /github.com|raw.githubusercontent.com/i});
 api.mapkey('yov', 'Toggle sites', function() {
     if (/[^.]+\.github\.io/.test(window.location.hostname)) {
-        window.location.href = `https://github.com/${window.location.hostname.match(/([^.]+)\.github\.io/)[1]}`;
+        window.location.href = `https://github.com/${window.location.hostname.match(/([^.]+)\.github\.io/)[1]}/${window.location.pathname.match(/^\/?([^\/]+|)/)[1]}`;
     } else if (/github.(com|dev)/.test(window.location.hostname)) {
         api.tabOpenLink(window.location.href.replace(/github.(com|dev)/, function(match, p1) { return p1 === 'com' ? 'github.dev' : 'github.com' }));
     } else if (window.location.hostname === 'www.baidu.com') {

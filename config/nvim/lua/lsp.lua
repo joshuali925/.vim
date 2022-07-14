@@ -2,11 +2,12 @@ local M = {}
 
 local disabled_servers = {
     -- "tsserver",
+    -- "eslint",
     -- "jdtls",
     -- "kotlin_language_server",
 }
 function M.lsp_install_all()
-    local required_servers = {
+    local required = {
         "sumneko_lua",
         "vimls",
         "jsonls",
@@ -14,18 +15,25 @@ function M.lsp_install_all()
         "html",
         "cssls",
         "tsserver",
+        "eslint",
         "pyright",
         "jdtls",
         "kotlin_language_server",
     }
-    local lsp_installer_servers = require("nvim-lsp-installer.servers")
-    for _, required_server in ipairs(required_servers) do
-        local ok, server = lsp_installer_servers.get_server(required_server)
-        if ok and not server:is_installed() then
-            server:install()
-        end
+    local installed = require("mason-lspconfig").get_installed_servers()
+    local not_installed = vim.tbl_filter(function(server)
+        return not vim.tbl_contains(installed, server)
+    end, required)
+    if #not_installed > 0 then
+        vim.cmd("LspInstall " .. table.concat(not_installed, " "))
+    else
+        vim.cmd("Mason")
     end
-    vim.cmd("LspInstallInfo")
+end
+
+function M.install_tools() -- install formatters, linters, called by installation script
+    require("packer").loader("mason.nvim")
+    vim.cmd("MasonInstall prettier shellcheck")
 end
 
 -- TODO https://www.reddit.com/r/neovim/comments/vvtltr/remove_the_message_select_a_language_server/
@@ -59,59 +67,61 @@ function M.init()
         return { capabilities = capabilities, flags = { debounce_text_changes = 250 }, on_attach = on_attach }
     end
 
-    local lsp_configs = {
-        sumneko_lua = {
-            settings = {
-                Lua = {
-                    runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
-                    diagnostics = { globals = { "vim" }, neededFileStatus = { ["codestyle-check"] = "Any" } },
-                    telemetry = { enable = false },
-                    IntelliSense = { traceLocalSet = true },
-                    workspace = {
-                        -- library = vim.api.nvim_get_runtime_file("", true), -- index library files
-                        library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true, [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
-                    },
-                    format = { enable = true, defaultConfig = { quote_style = "double", max_line_length = "unset" } },
-                },
-            },
-        },
-        tsserver = {
-            init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
-            commands = {
-                OrganizeImports = {
-                    function()
-                        vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
-                            command = "_typescript.organizeImports",
-                            arguments = { vim.api.nvim_buf_get_name(0) },
-                            title = "",
-                        }, 3000)
-                    end,
-                    description = "Organize Imports",
-                },
-            },
-        },
-    }
-
-    local present, lsp_installer = pcall(require, "nvim-lsp-installer")
+    local present, mason = pcall(require, "mason")
     if not present then
         return
     end
-
-    lsp_installer.setup()
-    local lspconfig = require("lspconfig")
-    local servers = vim.tbl_filter(function(server)
-        return not vim.tbl_contains(disabled_servers, server)
-    end, require("nvim-lsp-installer.servers").get_installed_server_names())
-    for _, server in ipairs(servers) do
-        local config = make_config()
-        if lsp_configs[server] ~= nil then
-            for k, v in pairs(lsp_configs[server]) do
-                config[k] = v
+    mason.setup()
+    local function register_server(server, server_config)
+        if not vim.tbl_contains(disabled_servers, server) then
+            local config = make_config()
+            if server_config ~= nil then
+                for k, v in pairs(server_config) do
+                    config[k] = v
+                end
             end
+            require("lspconfig")[server].setup(config)
         end
-        lspconfig[server].setup(config)
-        vim.cmd("doautocmd User LspAttachBuffers")
     end
+
+    require("mason-lspconfig").setup()
+    require("mason-lspconfig").setup_handlers({
+        register_server,
+        sumneko_lua = function()
+            register_server("sumneko_lua", {
+                settings = {
+                    Lua = {
+                        runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
+                        diagnostics = { globals = { "vim" }, neededFileStatus = { ["codestyle-check"] = "Any" } },
+                        telemetry = { enable = false },
+                        IntelliSense = { traceLocalSet = true },
+                        workspace = {
+                            -- library = vim.api.nvim_get_runtime_file("", true), -- index library files
+                            library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true, [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
+                        },
+                        format = { enable = true, defaultConfig = { quote_style = "double", max_line_length = "unset" } },
+                    },
+                },
+            })
+        end,
+        tsserver = function()
+            register_server("tsserver", {
+                init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
+                commands = {
+                    OrganizeImports = {
+                        function()
+                            vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
+                                command = "_typescript.organizeImports",
+                                arguments = { vim.api.nvim_buf_get_name(0) },
+                                title = "",
+                            }, 3000)
+                        end,
+                        description = "Organize Imports",
+                    },
+                },
+            })
+        end,
+    })
 
     local null_ls = require("null-ls")
     null_ls.setup({

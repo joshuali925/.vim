@@ -1,10 +1,10 @@
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
-[ -s "$HOME/.asdf/asdf.sh" ] && source "$HOME/.asdf/asdf.sh"
+[ -s "$HOME/.asdf/asdf.sh" ] && ASDF_DIR=$HOME/.asdf source "$HOME/.asdf/asdf.sh"
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
-export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen
+export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
 export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
@@ -35,7 +35,7 @@ alias .....='cd ../../../..'
 alias mv='mv -iv'
 alias cp='cp -riv'
 alias mkdir='mkdir -pv'
-alias ll='ls -AlhF --color=auto'
+alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
 alias l='exa -alF --git --color=always --color-scale --icons --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
@@ -127,7 +127,6 @@ alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"
 alias gss='git status -sb'
 alias gstash='git stash'
 alias gshow='git show --pretty=short --show-signature'
-alias gts='git tag -s'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
 alias gignore='git update-index --assume-unchanged'
@@ -139,11 +138,12 @@ alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
-alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)"; echo "Branches containing HEAD$(git branch --color=always -a --contains HEAD)"'
+alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranches containing HEAD: $(git branch --color=always -a --contains HEAD)"'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git-foresta --style=10 | \less -RiMXF'
 alias gforesta='git-foresta --style=10 --all | \less -RiMXF'
 alias gpatch='vi +startinsert patch.diff && git apply patch.diff && rm patch.diff'
+alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\\ls -d -F --color=always \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
@@ -236,8 +236,8 @@ sudorun() {
   fi
   case $CMD in
     v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
-    lf) EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' "$@" ;;
-    *) TERM=xterm-256color XDG_CONFIG_HOME="$HOME/.config" EDITOR="vim -u $HOME/.vim/config/mini.vim" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
+    lf) EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' -command 'map i $less -RiM "$f"' "$@" ;;
+    *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
   esac
 }
 
@@ -397,7 +397,7 @@ z() {
 }
 zc() {
   local FZFTEMP
-  FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="$1") && cd "$(echo "$FZFTEMP" | sed 's/^[0-9,.]* *//')"
+  FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="${1:-}") && cd "$(echo "$FZFTEMP" | sed 's/^[0-9,.]* *//')"
 }
 
 t() {  # create, restore, or switch tmux session
@@ -429,13 +429,13 @@ manf() {
 
 envf() {
   local FZFTEMP
-  FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind='tab:down,btab:up' --query="$1" --preview='printenv {}') && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
+  FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind='tab:down,btab:up' --query="${1:-}" --preview='printenv {}') && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
 }
 
 jo() {  # basic implementation of https://github.com/jpmens/jo
   local args=()
   for arg in "$@"; do
-    args+=(--arg "$(cut -d '=' -f 1 <<< "$arg")" "$(cut -d '=' -f 2- <<< "$arg")")
+    args+=(--arg "$(cut -d= -f1 <<< "$arg")" "$(cut -d= -f2- <<< "$arg")")
   done
   jq -n "${args[@]}" '$ARGS.named'
 }
@@ -447,7 +447,8 @@ react() {
   while true; do
     CHANGED=($(fd --base-directory "$1" --absolute-path --type=f --changed-within 2s))
     if [ ${#CHANGED[@]} -gt 0 ]; then
-      eval "${${@:2}//\{\}/${CHANGED[@]}}"
+      local command="${@:2}"
+      eval "${command//\{\}/${CHANGED[@]}}"
     fi
     sleep 2
   done
@@ -491,7 +492,7 @@ getip() {
   elif [[ $1 =~ ^[0-9.]+$ ]]; then
     curl -s "http://ip-api.com/line/$1"
   else
-    curl -s "https://dns.google.com/resolve?name=$1"
+    curl -s "https://dns.google.com/resolve?name=$1" | if builtin command -v python > /dev/null 2>&1; then python -m json.tool; else cat; fi
   fi
 }
 
@@ -535,7 +536,7 @@ docker-shell() {
     fi
     return $?
   fi
-  local SELECTED_ID=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index)
+  local SELECTED_ID=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}")
   if [[ -n $SELECTED_ID ]]; then
     printf "\n → %s\n" "$SELECTED_ID"
     SELECTED_ID=$(echo "$SELECTED_ID" | awk '{print $1}')

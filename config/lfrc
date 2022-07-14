@@ -1,3 +1,5 @@
+# https://pkg.go.dev/github.com/gokcehan/lf
+
 set hidden
 set incfilter
 set info size
@@ -85,8 +87,9 @@ cmd vim $$EDITOR "$@"
 cmd rg !clear && rg "$@"
 cmd code %code .
 cmd tail $less -RiM +F "$f"
+cmd sudorm %sudo rm -r "$f"
 cmd sudoedit $sudo TERM=xterm-256color vim -u ~/.vim/config/mini.vim "$f"
-cmd sudolf !EDITOR="vim -u $HOME/.vim/config/mini.vim" XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer'
+cmd sudolf $TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer' -command 'map i $less -RiM "$f"'; lf -remote "send $id echo sudolf exited"
 cmd file !file "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
@@ -151,25 +154,26 @@ cmd paste-symlink %{{
   load=$(cat ~/.local/share/lf/files)
   mode=$(echo "$load" | sed -n '1p')
   list=$(echo "$load" | sed '1d')
-  args="$@"
-  if [ $mode = 'copy' ] || [ $mode = 'move' ]; then
-    ln="ln --symbolic $args" && [ $mode = 'move' ] && ln='ln'
-    please='' && [ ! -w . ] && please='sudo'
+  if [ "$mode" = 'copy' ] || [ "$mode" = 'move' ]; then
+    [ ! -w . ] && please='sudo'
+    [ "$mode" != 'move' ] && set -- '--symbolic' "$@" || set --
     for f in $list; do
-      $please $ln "$f" "$(pwd)/$(basename $f)"
+      $please ln "$@" "$f" "$(pwd)/$(basename $f)"
     done
     lf -remote 'send clear'
     lf -remote 'send load'
   fi
 }}
 
+# default shell is sh which doesn't support arrays and `<<<`
 cmd zip ${{
   set -f
-  selected=()
-  while IFS= read -r filepath; do
-    selected+=("$(realpath --relative-to='.' "$filepath")")
-  done <<< "$fx"
-  zip -r "${selected[0]}.zip" "${selected[@]}"
+  echo "$fx" | {
+    while IFS= read -r filepath; do
+      set -- "$@" "$(realpath --relative-to='.' "$filepath")"
+    done
+    zip -r "${1}.zip" "$@"  # positional arguments only available in subshell from pipe
+  }
 }}
 
 cmd x ${{
@@ -194,11 +198,12 @@ cmd x ${{
       tar czvf "$filename.tar.gz" "$filename"
     fi
   else  # selection exists, compress all selected files
-    selected=()
-    while IFS= read -r filepath; do
-      selected+=("$(realpath --relative-to='.' "$filepath")")
-    done <<< "$fs"
-    tar czvf "${selected[0]}.tar.gz" "${selected[@]}"
+    echo "$fx" | {
+      while IFS= read -r filepath; do
+        set -- "$@" "$(realpath --relative-to='.' "$filepath")"
+      done
+      tar czvf "${1}.tar.gz" "$@"
+    }
   fi
 }}
 

@@ -58,11 +58,11 @@ nnoremap dil v^og_d
 nnoremap yil v^og_y
 nnoremap <leader>yil v^og_"+y
 xnoremap al 0o$
-xnoremap ie GoggV
-nnoremap cie vGoggVc
-nnoremap die vGoggVd
-nnoremap yie vGoggVy
-nnoremap <leader>yie vGoggV"+y
+xnoremap ae GoggV
+nnoremap cae vGoggVc
+nnoremap dae vGoggVd
+nnoremap yae vGoggVy
+nnoremap <leader>yae vGoggV"+y
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)
 noremap , ;
@@ -140,6 +140,8 @@ nmap [g <Action>(VcsShowPrevChangeMarker)
 nmap ]g <Action>(VcsShowNextChangeMarker)
 nmap [a <Action>(GotoPreviousError)
 nmap ]a <Action>(GotoNextError)
+nmap [b <Action>(ToggleLineBreakpoint)
+nmap ]b <Action>(ViewBreakpoints)
 nnoremap [<Space> mxO<Esc>`x
 nnoremap ]<Space> mxo<Esc>`x
 nnoremap [p O<C-r>"<Esc>
