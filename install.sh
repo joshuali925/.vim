@@ -74,8 +74,8 @@ link_file() {
 install_asdf() {
   if [ ! -s "$HOME/.asdf/asdf.sh" ]; then
     log '\nInstalling asdf..'
-    git clone https://github.com/asdf-vm/asdf.git "$HOME/.asdf" --depth=1
-    source "$HOME/.asdf/asdf.sh"
+    git clone https://github.com/asdf-vm/asdf.git --depth=1 ~/.asdf
+    source ~/.asdf/asdf.sh
   fi
 }
 
@@ -83,13 +83,14 @@ install_development_tools() {
   log '\nInstalling development tools..'
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh git
+    sudo yum install -y epel-release || true
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
     sudo apt-get update && sudo apt-get install -y build-essential zsh git curl unzip
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils
-    echo "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
+    echo -e "export HOMEBREW_NO_AUTO_UPDATE=1\nexport PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
     echo "FPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" >> ~/.zshrc
     brew install grep && ln -s "$(which ggrep)" ~/.local/bin/grep
     brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
@@ -184,8 +185,7 @@ install_python() {
     echo 'Unknown distro..'
     return 0
   fi
-  pip3 install --user pynvim
-  log 'Installed pynvim, python3 and pip3'
+  log 'Installed python3 and pip3'
 }
 
 install_node() {
@@ -253,18 +253,15 @@ install_neovim() {
   esac
   ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
   log 'Installed neovim, installing plugins..'
-  # TODO https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
   timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +'autocmd User PackerComplete quitall' +'silent lua require("plugins").sync()' || true
-  timeout 120 ~/.local/bin/nvim --headless +'PackerLoad! nvim-treesitter' +'lua require("lsp").install_tools()' +'TSUpdateSync | quitall' || true
   timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd("quitall") end, 27000)' || true
-  log "\nInstalled neovim plugins, run ${YELLOW}:LspInstallAll${CYAN} in neovim to install language servers"
-  log "Run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
+  log "\nInstalled neovim plugins, run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
   echo
 }
 
 setup_ssh_key() {
-  # ssh-keygen -t rsa -b 4096 -C "" -N "" -f "$HOME/.ssh/id_rsa" && cat ~/.ssh/id_rsa.pub
-  ssh-keygen -t ed25519 -C "" -N "" -f "$HOME/.ssh/id_ed25519" && cat ~/.ssh/id_ed25519.pub
+  # ssh-keygen -t rsa -b 4096 -C '' -N '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub
+  ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
 }
 

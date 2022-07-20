@@ -60,7 +60,7 @@ keybinding:
     optionMenu-alt1: "?" # show help menu
     select: "<space>"
     goInto: "<enter>"
-    openRecentRepos: "<c-r>"
+    openRecentRepos: "R"
     confirm: "<enter>"
     confirm-alt1: "y"
     remove: "d"
@@ -84,7 +84,7 @@ keybinding:
     nextScreenMode: "_"
     prevScreenMode: "="
     undo: "u"
-    redo: "<c-u>"
+    redo: "<c-r>"
     filteringMenu: "<c-s>"
     diffingMenu: "<c-e>"
     diffingMenu-alt: "W" # deprecated

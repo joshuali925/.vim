@@ -67,7 +67,7 @@ function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
-  let sidebars = ['help', 'man', 'qf', 'aerial', 'NvimTree', 'neoterm']
+  let sidebars = ['help', 'man', 'qf', 'NvimTree', 'neoterm']
   if has_nvim && win_len == 1 && nvim_win_get_config(win_getid()).relative != ''  " floating window focused
     quit
   elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q
@@ -232,15 +232,6 @@ function! s:MapAction(algorithm, key)
   execute 'nmap '. a:key.a:key[strlen(a:key)-1]. ' <Plug>actionsLine'. a:algorithm
 endfunction
 
-function! funcs#map_copy_with_osc_yank()
-  function! s:CopyWithOSCYank(str)
-    let @" = a:str
-    OSCYankReg "
-  endfunction
-  call <SID>MapAction('CopyWithOSCYank', '<leader>y')
-  nmap <leader>Y <leader>y$
-endfunction
-
 function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
   function! s:CopyWithOSCYankScript(str)
     let @" = a:str
@@ -253,7 +244,7 @@ function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
       call system('y', a:str[copied :copied + 74993])
       let copied += 74994
     endwhile
-    echomsg 'Copied '. min([buflen, copied]). ' characters'
+    echomsg '[osc52] Copied '. min([buflen, copied]). ' characters.'
   endfunction
   call <SID>MapAction('CopyWithOSCYankScript', '<leader>y')
   nmap <leader>Y <leader>y$

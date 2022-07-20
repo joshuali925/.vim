@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 if [ -n "$GET_BASHRC" ]; then
-  source "$HOME/.vim/config/.bashrc"
+  source ~/.vim/config/.bashrc
   unset GET_BASHRC
   export EDITOR=vim
   alias vimm='$EDITOR +"cd ~/.vim" ~/.vim/vimrc'
   PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
 
   clear-env() {
-    local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/{bin,share/lf} ~/.config/{lf,lazygit})
+    local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/share/lf ~/.config/{lf,lazygit})
     [ "$(readlink -f "$HOME/.tmux.conf")" == "$HOME/.vim/config/.tmux.conf" ] && config_files+=(~/.tmux.conf)
+    for executable in ~/.local/bin/*; do
+      [ -f "$HOME/.vim/bin/${executable##*/}" ] && config_files+=("$HOME/.local/bin/${executable##*/}")
+    done
     echo 'This will delete the following directories and files:'
     for i in "${config_files[@]}"; do
-      find "$i" -maxdepth 1 2> /dev/null
+      [ -d "$i" ] && find "$i" -maxdepth 1 2> /dev/null || echo "$i"
     done
     read -p 'Confirm to delete? (y/N) ' -n 1
     echo
@@ -27,8 +30,7 @@ if [ ! -f "$HOME/.vim/config/.bashrc" ]; then
     echo '~/.vim already exists and is not empty, exiting..' >&2
     exit 1
   fi
-  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit}
-  mkdir -pv ~/.vim
+  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit} ~/.vim
   curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C "$HOME/.vim" --strip-components=1
 fi
 

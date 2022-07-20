@@ -89,7 +89,7 @@ cmd code %code .
 cmd tail $less -RiM +F "$f"
 cmd sudorm %sudo rm -r "$f"
 cmd sudoedit $sudo TERM=xterm-256color vim -u ~/.vim/config/mini.vim "$f"
-cmd sudolf $TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer' -command 'map i $less -RiM "$f"'; lf -remote "send $id echo sudolf exited"
+cmd sudolf $TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer' -command 'map i $less -RiM "$f"' "$f"; lf -remote "send $id echo sudolf exited"
 cmd file !file "$f"
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr

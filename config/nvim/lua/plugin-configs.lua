@@ -56,7 +56,7 @@ vim.g.qs_filetype_blacklist = {
     "mason.nvim",
     "TelescopePrompt",
     "Mundo",
-    "aerial",
+    "lspsagaoutline",
     "NvimTree",
     "startuptime",
     "DiffviewFileHistory",
@@ -99,31 +99,6 @@ function M.indent_blankline()
         filetype_exclude = vim.g.qs_filetype_blacklist,
         buftype_exclude = vim.g.qs_buftype_blacklist,
     })
-end
-
-local aerial_callbacks = {}
-function M.aerial_nvim_save_callback(callback)
-    table.insert(aerial_callbacks, callback)
-end
-
-function M.aerial_nvim()
-    require("aerial").setup({
-        filter_kind = {
-            "Class",
-            "Constant",
-            "Constructor",
-            "Enum",
-            "Function",
-            "Interface",
-            "Module",
-            "Method",
-            "Struct",
-        },
-    })
-    for i, callback in ipairs(aerial_callbacks) do
-        pcall(callback)
-        aerial_callbacks[i] = nil
-    end
 end
 
 function M.conflict_marker()
@@ -196,7 +171,18 @@ function M.nvim_neoclip_lua()
         -- enable_persistent_history = true,
         content_spec_column = true,
         on_paste = { set_reg = true },
-        keys = { telescope = { n = { select = "y", paste = "<CR>", replay = "Q" } } },
+        keys = { telescope = { n = { select = "yy", paste = "<CR>", replay = "Q" } } },
+    })
+end
+
+function M.lspsaga_nvim()
+    require("lspsaga").init_lsp_saga({
+        saga_winblend = 8,
+        code_action_lightbulb = { virtual_text = false },
+        code_action_keys = { exec = "<CR>", quit = "<Esc>" },
+        finder_action_keys = { open = "<CR>", quit = "<ESC>" },
+        show_outline = { jump_key = "<CR>" },
+        rename_action_quit = "<Esc>",
     })
 end
 
@@ -214,7 +200,7 @@ function M.alpha_nvim()
     }
     theme.section.top_buttons.val = {}
     theme.section.bottom_buttons.val = {
-        theme.button("!", "Git unstaged changes", ":args `Git ls-files --modified` | Git difftool<CR>"),
+        theme.button("!", "Git unstaged changes", ":args `Git ls-files --modified --others --exclude-standard` | Git difftool<CR>"),
         theme.button("+", "Git HEAD changes", ":args `Git diff HEAD --name-only` | Git difftool HEAD<CR>"),
         theme.button("?", "Git diff HEAD", ":DiffviewOpen<CR>"),
         theme.button("*", "Git diff remote", ":DiffviewOpen @{upstream}..HEAD<CR>"),
@@ -640,12 +626,14 @@ end
 
 function M.open_quickui_context_menu()
     local content = {
-        { "Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation" },
-        { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
+        { "Docu&mentation", "lua require('lspsaga.hover').render_hover_doc()", "Show documentation" },
+        { "&Preview definition", "lua require('lspsaga.definition').preview_definition()", "Preview definition" },
+        { "Reference &finder", "lua require('lspsaga.finder').lsp_finder()", "Find references" },
+        { "&Signautre", "lua require('lspsaga.signaturehelp').signature_help()", "Show function signature help" },
         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
         { "Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition" },
-        { "Hover diagnostic", "lua vim.diagnostic.open_float(0, {scope = 'line', border = 'single'})", "Show diagnostic of current line" },
+        { "Hover diagnostic", "lua require('lspsaga.diagnostic').show_line_diagnostics()", "Show diagnostic of current line" },
         { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
         { "--", "" },
         { "Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk" },
@@ -654,7 +642,7 @@ function M.open_quickui_context_menu()
         { "Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk" },
         { "Git buffer reset", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index" },
         { "Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line" },
-        { "Git &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
+        { "Git &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
         { "--", "" },
     }
     local conflict_state = vim.fn["funcs#get_conflict_state"]()
@@ -686,7 +674,7 @@ function M.vim_quickui()
         { "Calculate line &=", [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]], 'Calculate expression from previous "=" or current line' },
         { "--", "" },
         { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
-        { "Cou&nt occurrences", [[keeppatterns %s///gn | silent! execute "normal! ``"]], "Count occurrences of current search pattern (:%s/pattern//gn)" },
+        { "Cou&nt occurrences", [[echo searchcount({'maxcount': 0})]], "Count occurrences of current search pattern (:%s/pattern//gn also works)" },
         { "Search in &buffers", [[execute "cexpr [] | bufdo vimgrepadd //g %" | copen]], "Grep current search pattern in all buffers, add to quickfix" },
         { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
         { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
@@ -772,14 +760,20 @@ function M.vim_quickui()
     vim.fn["quickui#menu#install"]("L&SP", {
         { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix (run :bufdo edit<CR> to load all buffers)" },
         { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
-        { "&Toggle diagnostics", [[lua require("lsp").toggle_diagnostics()]], "Toggle lsp diagnostics" },
+        { "&Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })]], "Toggle lsp diagnostic virtual texts, to disable diagnostics use vim.diagnostic.disable()" },
         { "--", "" },
         { "&Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
         { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
         { "Remove folder from workspace", [[lua vim.lsp.buf.remove_workspace_folder()]], "Remove folder from workspace for LSP" },
+    })
+    vim.fn["quickui#menu#install"]("&Packages", {
+        { "Packer &Status", [[PackerStatus]], "Packer status" },
+        { "Packer Install", [[execute "PackerCompile" | PackerInstall]], "Packer compile and install" },
+        { "Packer Clean", [[execute "PackerCompile" | PackerClean]], "Packer compile and clean" },
+        { "Packer &Update", [[let g:packer_max_jobs = 50 | execute "PackerCompile" | PackerSync]], "Packer sync plugins" },
         { "--", "" },
-        { "&Install all packages", [[execute "lua require('lsp').lsp_install_all()" | lua require("lsp").install_tools()]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
-        { "Install language tools", [[lua require("lsp").install_tools()]], "Install commonly used linters, formatters" },
+        { "&Mason Status", [[Mason]], "Mason status" },
+        { "Mason &Install all", [[execute "lua require('lsp').lsp_install_all()"]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
     })
     local quickui_theme_list = {}
     local used_chars = "hjklqg"
@@ -812,8 +806,7 @@ function M.vim_quickui()
     vim.fn["quickui#menu#switch"]("visual")
     vim.fn["quickui#menu#reset"]()
     vim.fn["quickui#menu#install"]("&Actions", {
-        { "OSC &yank (script)", [[lua require("utils").copy_selection_with_osc_yank_script()]], "Use custom oscyank script to copy" },
-        { "OSC yank (plugin)", [[OSCYank]], "Use OSCYank plugin to copy" },
+        { "OSC &yank", [[lua require("utils").copy_with_osc_yank_script(require("utils").get_visual_selection())]], "Use oscyank script to copy" },
         { "--", "" },
         { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | S put x]], "Use base64 to encode selected text" },
         { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | S put x]], "Use base64 to decode selected text" },
@@ -822,9 +815,9 @@ function M.vim_quickui()
     })
     vim.fn["quickui#menu#install"]("&Git", {
         { "Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
-        { "Git l&og", [[execute "lua require('packer').loader('vim-flog')" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
+        { "Git l&og", [[execute "lua require('packer').loader('vim-fugitive vim-flog')" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
         { "--", "" },
-        { "Git open &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "1" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "OSCYankReg x" | endif]], "Open remote url in browser" },
+        { "Git open &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser" },
     })
     vim.fn["quickui#menu#install"]("Ta&bles", {
         { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },

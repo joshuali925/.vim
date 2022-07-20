@@ -33,6 +33,7 @@ return {
     window_decorations = "RESIZE",
     text_blink_rate = 0,
     cursor_blink_rate = 0,
+    -- force_reverse_video_cursor = true,
     initial_cols = 105,
     initial_rows = 30,
     scrollback_lines = 9999,
