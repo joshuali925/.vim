@@ -49,15 +49,14 @@ install-from-github() {
   run-if-exists "$executable" "$@"
 
   detect-env
-  if [ "$ARCHITECTURE" == 'x86_64' ]; then
-    [ "$PLATFORM" == 'linux' ] && package=$linux_x64 || package=$darwin_x64
-  else
-    [ "$PLATFORM" == 'linux' ] && package=$linux_arm || package=${darwin_arm:-$darwin_x64}
-  fi
-  if [ -z "$package" ]; then
-    echo "package not found for '$executable' on $PLATFORM $ARCHITECTURE, exiting.." >&2
-    return 1
-  fi
+  case $PLATFORM:$ARCHITECTURE in
+    linux:x86_64) package=$linux_x64 ;;
+    linux:arm64) package=$linux_arm ;;
+    darwin:x86_64) package=$darwin_x64 ;;
+    darwin:arm64) package=${darwin_arm:-$darwin_x64}
+      [ -z "$darwin_arm" ] && [ -n "$darwin_x64" ] && echo "darwin_arm package not found for '$executable', using darwin_x64 package.." >&2 ;;
+  esac
+  [ -z "$package" ] && echo "package not found for '$executable' on $PLATFORM $ARCHITECTURE, exiting.." >&2 && return 1
 
   mkdir -p "$HOME/.local/bin"
   url=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4)

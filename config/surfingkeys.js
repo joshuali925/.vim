@@ -43,9 +43,9 @@ api.aceVimMap(';w', '<Esc>', 'insert');
 // https://github.com/brookhong/Surfingkeys/blob/7626d9515ce6fec36e14499e1e1a4e49a6d1b43a/src/content_scripts/common/api.js#L467
 // https://github.com/brookhong/Surfingkeys/blob/master/src/content_scripts/common/default.js
 api.map('h', 'E'); // tab left
-api.map('aa', 'E'); // tab left
+api.map('as', 'E'); // tab left
 api.map('l', 'R'); // tab right
-api.map('as', 'R'); // tab right
+api.map('ad', 'R'); // tab right
 api.map('Z[', 'gx0'); // close tabs to the left
 api.map('Z]', 'gx$'); // close tabs to the right
 api.map('<Ctrl-q>', 'i'); // temp key holder
@@ -55,6 +55,7 @@ api.map('I', '<Alt-i>'); // disable surfingkeys
 api.map('<Alt-i>', '<Alt-s>'); // toggle surfingkeys permanently
 api.map('<Ctrl-o>', 'p'); // temporarily disable surfingkeys
 api.map('<Ctrl-t>', 'on'); // new tab
+api.map('<Ctrl-w>', 'x'); // close tab
 api.map('H', 'S'); // back in history
 api.map('L', 'D'); // forward in history
 api.map(';fi', 'oi'); // open incognito

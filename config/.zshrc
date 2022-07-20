@@ -57,7 +57,7 @@ HISTFILE="$HOME/.zsh_history"
 HISTSIZE=1000000
 SAVEHIST=1000000
 
-unsetopt flow_control  # man zshoptions; man zshbuiltins
+unsetopt flow_control  # man zshoptions; man zshbuiltins; man zshall
 unsetopt nomatch
 setopt glob_dots
 setopt complete_in_word

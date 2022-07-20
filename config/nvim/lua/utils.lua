@@ -85,13 +85,17 @@ function M.get_visual_selection()
     return table.concat(lines, "\n")
 end
 
-function M.copy_selection_with_osc_yank_script()
-    local str = assert(M.get_visual_selection())
+function M.copy_with_osc_yank_script(str)
+    local message = "[osc52] "
+    if str:len() > 70000 then
+        str = str:sub(1, 70000)
+        message = message .. "String too large. "
+    end
     local handle = assert(io.popen("y", "w"))
     handle:write(str)
     handle:flush()
     handle:close()
-    vim.notify("Copied " .. str:len() .. " characters")
+    print(message .. "Copied " .. str:len() .. " characters.")
 end
 
 return M

@@ -21,7 +21,7 @@ M.theme_list = {
 }
 M.theme = M.theme_list[theme_index]
 
-local sidebars = { "qf", "terminal", "aerial", "Mundo", "NvimTree" }
+local sidebars = { "qf", "terminal", "lspsagaoutline", "Mundo", "NvimTree" }
 local default_colors = {
     dim_primary = "#46617a",
     red = "#f7768e",
@@ -207,7 +207,7 @@ local function highlight_plugins()
 end
 
 function M.config()
-    vim.opt.background = theme_index < 0 and "dark" or "light"
+    vim.o.background = theme_index < 0 and "dark" or "light"
     vim.g.quickui_color_scheme = "papercol-" .. vim.o.background
     vim.api.nvim_create_augroup("PluginsHighlights", {})
     vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", group = "PluginsHighlights", callback = highlight_plugins })

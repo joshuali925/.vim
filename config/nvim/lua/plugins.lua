@@ -1,6 +1,7 @@
 local install_path = vim.fn.stdpath("data") .. "/site/pack/packer/opt/packer.nvim"
 if vim.fn.glob(install_path) == "" then
-    vim.cmd("silent !git clone https://github.com/wbthomason/packer.nvim --depth=1 " .. install_path)
+    Packer_bootstrap = vim.fn.system({ "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
+
 end
 vim.cmd("packadd packer.nvim")
 
@@ -8,7 +9,7 @@ return require("packer").startup({
     config = {
         opt_default = true,
         -- TODO https://github.com/wbthomason/packer.nvim/issues/456
-        -- max_jobs = 50, -- this fixes above issue but breaks plugin installing in headless nvim
+        max_jobs = vim.g.packer_max_jobs, -- default nil is unlimited, setting to 50 fixes above issue but breaks plugin installing in headless nvim
         display = { open_fn = require("packer.util").float },
         profile = { enable = false },
         compile_path = vim.fn.stdpath("config") .. "/lua/packer_compiled.lua", -- impatient.nvim
@@ -43,7 +44,6 @@ return require("packer").startup({
         use({ "kassio/neoterm", cmd = { "T", "Ttoggle", "Tnew" }, keys = "<Plug>(neoterm-repl-send", setup = conf("setup_neoterm") })
         use({ "skywind3000/vim-quickui", fn = "quickui#*", setup = conf("setup_vim_quickui"), config = conf("vim_quickui") })
         use({ "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = "vim.g.asyncrun_open = 12" })
-        use({ "stevearc/aerial.nvim", cmd = "AerialToggle", config = conf("aerial_nvim") })
         use({ "simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo") })
         use({ "goolord/alpha-nvim", cond = "vim.fn.argc() == 0 and vim.fn.line2byte('$') == -1", config = conf("alpha_nvim") })
         use({
@@ -71,16 +71,11 @@ return require("packer").startup({
         use({ "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" } })
 
         -- lang
-        use({
-            "nvim-treesitter/nvim-treesitter",
-            run = ":TSUpdate",
-            requires = { "nvim-treesitter/nvim-treesitter-textobjects" },
-            config = conf("nvim_treesitter"),
-        })
-        use({ "williamboman/mason.nvim" })
+        use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate", requires = "nvim-treesitter/nvim-treesitter-textobjects", config = conf("nvim_treesitter") })
+        use({ "williamboman/mason.nvim", requires = "williamboman/mason-lspconfig.nvim" })
         use({ "neovim/nvim-lspconfig", after = "mason.nvim" })
         use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
-        use({ "weilbith/nvim-code-action-menu", cmd = "CodeActionMenu" })
+        use({ "glepnir/lspsaga.nvim", module = "lspsaga", config = conf("lspsaga_nvim") })
         use({
             "b3nj5m1n/kommentary",
             requires = { "JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-treesitter" },
@@ -115,10 +110,10 @@ return require("packer").startup({
         -- editing
         use({ "mg979/vim-visual-multi", fn = "vm#*", keys = { "<Plug>(VM-", { "n", "<leader><C-n>" } }, setup = conf("setup_vim_visual_multi") })
         use({ "phaazon/hop.nvim", cmd = { "HopWord", "HopChar1", "HopLineAC", "HopLineBC", "HopWordCurrentLine" }, config = conf("hop_nvim") })
-        use({ "unblevable/quick-scope", config = conf("quick_scope") }) -- TODO try https://github.com/jinh0/eyeliner.nvim
+        use({ "unblevable/quick-scope", config = conf("quick_scope") }) -- TODO https://github.com/jinh0/eyeliner.nvim/issues/5
         use({ "dahu/vim-fanfingtastic" })
         use({ "chaoren/vim-wordmotion", setup = "vim.g.wordmotion_nomap = 1" })
-        use({ "machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1" }) -- TODO try https://github.com/kylechui/nvim-surround
+        use({ "machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1" })
         use({ "machakann/vim-swap", keys = "<Plug>(swap-" })
         use({ "AndrewRadev/splitjoin.vim", keys = { { "n", "gS" }, { "n", "gJ" } } })
 
@@ -127,9 +122,8 @@ return require("packer").startup({
         use({ "lewis6991/impatient.nvim", opt = false })
         use({ "tpope/vim-repeat", opt = false })
         use({ "tpope/vim-sleuth" })
-        use({ "tpope/vim-unimpaired", keys = { { "", "[" }, { "", "]" }, { "n", "=p" }, { "n", "yo" } } })
+        use({ "tpope/vim-unimpaired", keys = { "[", "]", { "n", "=p" }, { "n", "yo" } } })
         use({ "moll/vim-bbye", cmd = "Bdelete" })
-        use({ "ojroques/vim-oscyank", cmd = { "OSCYank", "OSCYankReg" }, setup = "vim.g.oscyank_term = 'default'" })
         use({ "AckslD/nvim-neoclip.lua", event = "TextYankPost", config = conf("nvim_neoclip_lua") })
         use({ "aserowy/tmux.nvim", module = "tmux", config = function() require("tmux").setup({ navigation = { cycle_navigation = false } }) end })
 
@@ -145,5 +139,7 @@ return require("packer").startup({
         -- TODO https://github.com/NTBBloodbath/rest.nvim/issues/114
         use({ "NTBBloodbath/rest.nvim", commit = "e5f68db73276c4d4d255f75a77bbe6eff7a476ef", module = "rest-nvim", config = conf("rest_nvim") })
         use({ "will133/vim-dirdiff", cmd = "DirDiff" })
+
+        if Packer_bootstrap then require("packer").sync() end
     end,
 })

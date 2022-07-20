@@ -12,53 +12,53 @@ vim.g.netrw_dirhistmax = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_liststyle = 3
 vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
-vim.opt.whichwrap = "<,>,[,]"
-vim.opt.termguicolors = true
-vim.opt.mouse = "a"
-vim.opt.cursorline = true
-vim.opt.numberwidth = 2
-vim.opt.number = true
-vim.opt.linebreak = true
-vim.opt.showmatch = true
-vim.opt.showmode = false
-vim.opt.diffopt = vim.opt.diffopt + { "vertical", "indent-heuristic", "algorithm:patience" }
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-vim.opt.expandtab = true
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 2
-vim.opt.shiftwidth = 2
-vim.opt.shiftround = true
-vim.opt.complete = { ".", "w", "b", "u" }
-vim.opt.completeopt = { "menuone", "noselect" }
-vim.opt.completefunc = "funcs#complete_word"
-vim.opt.shortmess = vim.opt.shortmess + { c = true, A = true }
-vim.opt.spellsuggest = vim.opt.spellsuggest + { 10 }
-vim.opt.scrolloff = 2
-vim.opt.sidescrolloff = 5
-vim.opt.signcolumn = "yes"
-vim.opt.virtualedit = "block"
-vim.opt.previewheight = 7
-vim.opt.foldmethod = "indent"
-vim.opt.foldlevelstart = 99
-vim.opt.jumpoptions = "stack"
-vim.opt.shada = [[!,'1000,<50,s10,/20,@20,h]]
-vim.opt.undofile = true
-vim.opt.isfname = vim.opt.isfname - { "=" }
-vim.opt.path = { ".", "", "**5" }
-vim.opt.list = true
-vim.opt.listchars = { tab = "» ", nbsp = "␣", trail = "•" }
-vim.opt.timeoutlen = 1500
-vim.opt.ttimeoutlen = 40
-vim.opt.synmaxcol = 1000
-vim.opt.lazyredraw = true
-vim.opt.writebackup = false
-vim.opt.wildcharm = 26 -- <C-z>
-vim.opt.grepprg = "rg --vimgrep --smart-case --hidden --auto-hybrid-regex"
-vim.opt.grepformat = "%f:%l:%c:%m,%f:%l:%m"
-vim.opt.cedit = "<C-x>"
+vim.o.whichwrap = "<,>,[,]"
+vim.o.termguicolors = true
+vim.o.mouse = "a"
+vim.o.cursorline = true
+vim.o.numberwidth = 2
+vim.o.number = true
+vim.o.linebreak = true
+vim.o.showmatch = true
+vim.o.showmode = false
+vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:patience"
+vim.o.splitright = true
+vim.o.splitbelow = true
+vim.o.ignorecase = true
+vim.o.smartcase = true
+vim.o.expandtab = true
+vim.o.tabstop = 4
+vim.o.softtabstop = 2
+vim.o.shiftwidth = 2
+vim.o.shiftround = true
+vim.o.complete = ".,w,b,u"
+vim.o.completeopt = "menuone,noselect"
+vim.o.completefunc = "funcs#complete_word"
+vim.o.shortmess = vim.o.shortmess .. "cA"
+vim.o.spellsuggest = vim.o.spellsuggest .. ",10"
+vim.o.scrolloff = 2
+vim.o.sidescrolloff = 5
+vim.o.signcolumn = "yes"
+vim.o.virtualedit = "block"
+vim.o.previewheight = 7
+vim.o.foldmethod = "indent"
+vim.o.foldlevelstart = 99
+vim.o.jumpoptions = "stack"
+vim.o.shada = [[!,'1000,<50,s10,/20,@20,h]]
+vim.o.undofile = true
+vim.o.isfname = vim.o.isfname:gsub(",=", "")
+vim.o.path = ".,,**5"
+vim.o.list = true
+vim.o.listchars = "tab:» ,nbsp:␣,trail:•"
+vim.o.timeoutlen = 1500
+vim.o.ttimeoutlen = 40
+vim.o.synmaxcol = 1000
+vim.o.lazyredraw = true
+vim.o.writebackup = false
+vim.o.wildcharm = 26 -- <C-z>
+vim.o.grepprg = "rg --vimgrep --smart-case --hidden --auto-hybrid-regex"
+vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
+vim.o.cedit = "<C-x>"
 
 -- mappings {{{1
 -- text objects {{{2
@@ -130,11 +130,11 @@ vim.keymap.set("n", "<C-w>+", "<C-w>+<C-w>", { remap = true })
 vim.keymap.set("n", "<C-w>-", "<C-w>-<C-w>", { remap = true })
 vim.keymap.set("n", "<C-f>", "<Cmd>lua require('lsp').organize_imports_and_format()<CR>")
 vim.keymap.set("x", "<C-f>", vim.lsp.buf.range_formatting)
-vim.keymap.set({ "n", "x", "o" }, "<leader>p", '"0p')
-vim.keymap.set({ "n", "x", "o" }, "<leader>P", '"0P')
+vim.keymap.set({ "n", "x" }, "<leader>p", '"0p')
+vim.keymap.set({ "n", "x" }, "<leader>P", '"0P')
 vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
 vim.keymap.set("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
-vim.keymap.set({ "n", "x", "o" }, "<leader>y", '"+y')
+vim.keymap.set({ "n", "x" }, "<leader>y", '"+y')
 vim.keymap.set("n", "<leader>Y", '"+y$')
 vim.keymap.set("n", "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", { expr = true })
 vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
@@ -147,7 +147,7 @@ vim.keymap.set("x", "<leader>l", ":<C-u>call funcs#print_variable(1, 0)<CR>")
 vim.keymap.set("n", "<leader>L", "<Cmd>call funcs#print_variable(0, 1)<CR>")
 vim.keymap.set("x", "<leader>L", ":<C-u>call funcs#print_variable(1, 1)<CR>")
 vim.keymap.set("n", "<leader>u", "<Cmd>MundoToggle<CR>")
-vim.keymap.set("n", "<leader>v", "<Cmd>AerialToggle<CR>")
+vim.keymap.set("n", "<leader>v", "<Cmd>lua require('lspsaga.outline'):render_outline()<CR>")
 vim.keymap.set("n", "<leader>tm", "<Cmd>TableModeToggle<CR>")
 vim.keymap.set("i", "<leader>w", "<Esc><Cmd>update<CR>")
 vim.keymap.set("n", "<leader>w", "<Cmd>update<CR>")
@@ -282,18 +282,21 @@ vim.keymap.set("n", "<leader>f/", "<Cmd>lua require('telescope.builtin').current
 vim.keymap.set("n", "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>")
 vim.keymap.set("n", "<leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>")
 vim.keymap.set("n", "<leader>fy", "<Cmd>lua require('packer').loader('nvim-neoclip.lua')<CR><Cmd>lua require('telescope').extensions.neoclip.default({initial_mode = 'normal'})<CR>")
+vim.keymap.set("x", "<leader>fy", "dh<leader>fy", { remap = true })
 -- lsp {{{2
 vim.keymap.set("n", "gd", "<Cmd>lua if require('lsp').is_active() then vim.lsp.buf.definition() else vim.cmd('normal! gd') end<CR>")
 vim.keymap.set("n", "gD", vim.lsp.buf.type_definition)
 vim.keymap.set("n", "<leader>d", vim.lsp.buf.implementation)
 vim.keymap.set("n", "gr", vim.lsp.buf.references)
-vim.keymap.set("n", "<leader>a", "<Cmd>CodeActionMenu<CR>")
-vim.keymap.set("x", "<leader>a", ":<C-u>CodeActionMenu<CR>")
-vim.keymap.set("n", "gh", "<Cmd>lua if vim.diagnostic.open_float(0, {scope = 'cursor', border = 'single'}) == nil then vim.lsp.buf.hover() end<CR>")
-vim.keymap.set("n", "<leader>R", vim.lsp.buf.rename)
-vim.keymap.set("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({float = {border = 'single'}})<CR>")
-vim.keymap.set("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({float = {border = 'single'}})<CR>")
-vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help)
+vim.keymap.set("n", "<leader>a", "<Cmd>lua require('lspsaga.codeaction').code_action()<CR>")
+vim.keymap.set("x", "<leader>a", ":<C-u>lua require('lspsaga.codeaction').range_code_action()<CR>")
+vim.keymap.set("n", "gh", "<Cmd>lua if require('lspsaga.diagnostic').show_cursor_diagnostics() == nil then require('lspsaga.hover').render_hover_doc() end<CR>")
+vim.keymap.set("n", "]A", "<Cmd>lua require('lspsaga.diagnostic').goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>")
+vim.keymap.set("n", "<leader>R", "<Cmd>lua require('lspsaga.rename').lsp_rename()<CR>")
+vim.keymap.set("n", "[a", "<Cmd>lua require('lspsaga.diagnostic').goto_prev()<CR>")
+vim.keymap.set("n", "]a", "<Cmd>lua require('lspsaga.diagnostic').goto_next()<CR>")
+vim.keymap.set("n", "[A", "<Cmd>lua require('lspsaga.diagnostic').goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>")
+vim.keymap.set("i", "<C-k>", "<Cmd>Lspsaga signature_help<CR>")
 
 -- autocmds {{{1
 vim.api.nvim_create_augroup("AutoCommands", {})
@@ -359,7 +362,6 @@ vim.api.nvim_create_user_command("SessionLoad", "source ~/.cache/nvim/session.vi
 vim.api.nvim_create_user_command("GrepRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("GrepNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
-vim.api.nvim_create_user_command("LspInstallAll", "lua require('lsp').lsp_install_all()", {})
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | nnoremap <buffer> u <C-u>| nnoremap <nowait> <buffer> d <C-d>", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
@@ -390,19 +392,6 @@ else
     })
     require("packer_compiled")
 end
-vim.notify = function(...)
-    require("packer").loader("nvim-notify")
-    vim.notify = require("notify")
-    vim.notify(...)
-end
-vim.paste = (function(overridden)
-    return function(lines, phase) -- break undo before pasting in insert mode, :h vim.paste()
-        if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
-            vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
-        end
-        overridden(lines, phase)
-    end
-end)(vim.paste)
 vim.filetype.add({
     extension = {
         csv = "csv",
@@ -414,9 +403,41 @@ vim.filetype.add({
         Caddyfile = "config",
     },
 })
+vim.notify = (function(overridden)
+    return function(...)
+        require("packer").loader("nvim-notify")
+        local present, notify = pcall(require, "notify")
+        if present then
+            vim.notify = notify
+        else
+            vim.notify = overridden
+        end
+        vim.notify(...)
+    end
+end)(vim.notify)
+vim.paste = (function(overridden)
+    return function(lines, phase) -- break undo before pasting in insert mode, :h vim.paste()
+        if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
+            vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
+        end
+        overridden(lines, phase)
+    end
+end)(vim.paste)
 if vim.env.SSH_CLIENT ~= nil then -- ssh session
-    vim.fn["funcs#map_copy_with_osc_yank"]()
-    vim.keymap.set("n", "gx", "<Cmd>let @x = expand('<cfile>') <bar> OSCYankReg x<CR>")
+    local function copy(lines, _)
+        require("utils").copy_with_osc_yank_script(table.concat(lines, "\n"))
+    end
+
+    local function paste()
+        return { vim.fn.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") }
+    end
+
+    vim.g.clipboard = {
+        name = "osc52",
+        copy = { ["+"] = copy, ["*"] = copy },
+        paste = { ["+"] = paste, ["*"] = paste },
+    }
+    vim.keymap.set("n", "gx", "<Cmd>lua require('utils').copy_with_osc_yank_script(vim.fn.expand('<cfile>'))<CR>")
 elseif vim.fn.has("macunix") ~= 1 then -- WSL Vim
     vim.fn["funcs#map_copy_to_win_clip"]()
 end

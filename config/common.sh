@@ -62,7 +62,7 @@ alias rga='rg --text --no-ignore --search-zip --follow'
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
-alias serve='miniserve --hidden --dirs-first --enable-zip --show-wget-footer --upload-files --color-scheme archlinux --port 8000 .'
+alias serve='miniserve --hidden --dirs-first --enable-zip --enable-tar-gz --show-wget-footer --upload-files --color-scheme archlinux --port 8000 .'
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
 
@@ -136,8 +136,8 @@ alias gpristine='git stash push --include-untracked --message "gpristine tempora
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
-alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
-alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --name-status ORIG_HEAD...HEAD  # what was pulled'
+alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
+alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
 alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranches containing HEAD: $(git branch --color=always -a --contains HEAD)"'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git-foresta --style=10 | \less -RiMXF'
@@ -150,7 +150,7 @@ gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
 
-grg() {
+grg() {  # grep all commits, replace `log` with `reflog` for local commits
   git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | DELTA_PAGER="$BAT_PAGER --pattern='$1'" delta --line-numbers
 }
 
@@ -346,7 +346,7 @@ vf() {
 
 cdf() {
   local FZFTEMP
-  FZFTEMP=$(fd --strip-cwd-prefix --hidden --exclude=.git --no-ignore | fzf --bind='tab:down,btab:up' --query="${1:-}") && {
+  FZFTEMP=$(fd --strip-cwd-prefix --color=always --hidden --exclude=.git | fzf --query="${1:-}" --ansi --bind='tab:down,btab:up' --bind='`:unbind(`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore --no-ignore || true)') && {
     [ -d "$FZFTEMP" ] && cd "$FZFTEMP" || {
       [ -d "$(dirname "$FZFTEMP" 2> /dev/null)" ] && cd "$(dirname "$FZFTEMP")"
     }
@@ -575,10 +575,7 @@ if [[ $OSTYPE = darwin* ]]; then
   alias clear-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
   alias toggle-dark-theme='automator ~/.vim/config/macToggleDark.wflow'
   browser-history() {
-    [ "$(uname -s)" != Darwin ] && echo "Only supports MacOS, exiting.." && return 1
-    local COLS SEP FZFTEMP FZFPROMPT
-    COLS=$(( COLUMNS / 3 ))
-    SEP='{::}'
+    local COLS=$((COLUMNS / 3)) SEP='{::}' FZFTEMP FZFPROMPT
     if [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
       FZFPROMPT='Chrome> '
       command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf-temp
@@ -589,10 +586,9 @@ if [[ $OSTYPE = darwin* ]]; then
       echo "Chrome and Edge histories not found, exiting.."
       return 1
     fi
-    FZFTEMP=$(sqlite3 -separator $SEP /tmp/browser-history-fzf-temp \
-      "select substr(title, 1, $COLS), url
-      from urls order by last_visit_time desc" |
-    awk -F $SEP '{printf "%-'$COLS's  \x1b[36m%s\x1b[m\n", $1, $2}' |
-    fzf --prompt="$FZFPROMPT" --ansi --multi) && echo $FZFTEMP | sed 's#.*\(https*://\)#\1#' | xargs open
+    FZFTEMP=$(sqlite3 -separator $SEP /tmp/browser-history-fzf-temp "select substr(title, 1, $COLS), url from urls order by last_visit_time desc" |
+      awk -F $SEP '{printf "%-'$COLS's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+      fzf --tiebreak=index --toggle-sort=\` --header='Press ` to toggle sort' --prompt="$FZFPROMPT" --ansi --multi) && \
+      echo $FZFTEMP | sed 's#.*\(https*://\)#\1#' | xargs open
   }
 fi

@@ -15,9 +15,9 @@ ENV TERM='xterm-256color' SSH_CLIENT=1 SHELL=/usr/bin/zsh USER=docker
 # outside context: comment COPY and replace $(cat ...) with $(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh)
 COPY --chown=docker . .vim
 RUN bash -c "$(cat ~/.vim/install.sh)" -- install devtools dotfiles neovim
-RUN zsh -ic 'source ~/.zinit/plugins/zdharma-continuum---fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh && fast-theme clean; ~/.zinit/plugins/romkatv---powerlevel10k/gitstatus/install'; sudo chsh -s $(which zsh) $(whoami)  # cannot run interactive shell under RUN
+RUN zsh -ic 'source ~/.zinit/plugins/zdharma-continuum---fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh && fast-theme clean; ~/.zinit/plugins/romkatv---powerlevel10k/gitstatus/install'; sudo chsh -s $(which zsh) $(whoami)
 RUN ~/.vim/bin/lf --version; ~/.vim/bin/rg --version; ~/.vim/bin/fd --version; ~/.vim/bin/fzf --version; \
-      ~/.vim/bin/bat --version; ~/.vim/bin/lazygit --version; ~/.vim/bin/delta --version; ~/.vim/bin/shellcheck --version; \
+      ~/.vim/bin/bat --version; ~/.vim/bin/lazygit --version; ~/.vim/bin/delta --version; \
       ~/.vim/bin/busybox > /dev/null && ln -sr ~/.vim/bin/busybox ~/.local/bin/wget || true  # install binaries and use busybox wget if busybox runs (x86_64)
 
 CMD ["/usr/bin/zsh"]

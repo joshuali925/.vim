@@ -123,6 +123,10 @@
     "prefix": "varReplaceAll",
     "body": "\"\\${${1:VAR}//${2:pattern}/${0:str}}\""
   },
+  "Keep everything before last slash": {
+    "prefix": "varDirname",
+    "body": "\\${${1:VAR}%/*}$0"
+  },
   "Keep everything after last slash": {
     "prefix": "varBasename",
     "body": "\\${${1:VAR}##*/}$0"

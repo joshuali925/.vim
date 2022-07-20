@@ -3439,6 +3439,10 @@ install_java() {
   log "Installed $jdk_version, exported JAVA_HOME to ~/.zshrc, restart your shell"
   # export JAVA_HOME installed by asdf: echo "export JAVA_HOME=$(asdf where java)" >> ~/.zshrc
 }
+" install.sh install neovim plugins and treesitter
+  # https://github.com/wbthomason/packer.nvim/issues/198#issuecomment-817426007
+  timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +'autocmd User PackerComplete quitall' +'silent lua require("plugins").sync()' || true
+  timeout 120 ~/.local/bin/nvim --headless +'PackerLoad! nvim-treesitter mason.nvim' +'MasonInstall prettier' +'TSUpdateSync | quitall' || true
 " 7z-bin install, use official 7z
 source ~/.vim/bin/_install_from_github.sh
 detect-env
@@ -3501,3 +3505,74 @@ done
     sbin junegunn/fzf \
     sbin gokcehan/lf \
     sbin jesseduffield/lazygit
+
+" =======================================================
+" using lspsaga to replace native lsp actions
+        use({ "weilbith/nvim-code-action-menu", cmd = "CodeActionMenu" })
+vim.keymap.set("n", "<leader>a", "<Cmd>CodeActionMenu<CR>")
+vim.keymap.set("x", "<leader>a", ":<C-u>CodeActionMenu<CR>")
+vim.keymap.set("n", "gh", "<Cmd>lua if vim.diagnostic.open_float(0, {scope = 'cursor', border = 'single'}) == nil then vim.lsp.buf.hover() end<CR>")
+vim.keymap.set("n", "<leader>R", vim.lsp.buf.rename)
+vim.keymap.set("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({float = {border = 'single'}})<CR>")
+vim.keymap.set("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({float = {border = 'single'}})<CR>")
+vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help)
+        { "Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation" },
+        { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
+        { "Hover diagnostic", "lua vim.diagnostic.open_float(0, {scope = 'line', border = 'single'})", "Show diagnostic of current line" },
+" aerial
+        use({ "stevearc/aerial.nvim", cmd = "AerialToggle", config = conf("aerial_nvim") })
+vim.keymap.set("n", "<leader>v", "<Cmd>AerialToggle<CR>")
+        if packer_plugins["aerial.nvim"].loaded then
+            require("aerial").on_attach(client, bufnr)
+        else
+            require("plugin-configs").aerial_nvim_save_callback(function() require("aerial").on_attach(client, bufnr) end)
+        end
+local aerial_callbacks = {}
+function M.aerial_nvim_save_callback(callback)
+    table.insert(aerial_callbacks, callback)
+end
+function M.aerial_nvim()
+    require("aerial").setup({
+        filter_kind = {
+            "Class",
+            "Constant",
+            "Constructor",
+            "Enum",
+            "Function",
+            "Interface",
+            "Module",
+            "Method",
+            "Struct",
+        },
+    })
+    for i, callback in ipairs(aerial_callbacks) do
+        pcall(callback)
+        aerial_callbacks[i] = nil
+    end
+end
+" nvim-surround, css not correct, no repeats for visual
+use({ "kylechui/nvim-surround", keys = { { "n", "y" }, { "n", "c" }, { "n", "d" }, { "x", "s" } }, config = conf("nvim_surround") })
+function M.nvim_surround()
+    require("nvim-surround").setup({
+        keymaps = {
+            normal_cur = "<NOP>",
+            normal_line = "<NOP>",
+            normal_cur_line = "ysl",
+            visual = "s",
+        },
+    })
+end
+vim.keymap.set("n", "yss", "ysiw", { remap = true })
+vim.keymap.set("n", "yS", "ysg_", { remap = true })
+" vim-oscyank
+        use({ "ojroques/vim-oscyank", cmd = { "OSCYank", "OSCYankReg" }, setup = "vim.g.oscyank_term = 'default'" })
+        { "OSC yank (plugin)", [[OSCYank]], "Use OSCYank plugin to copy" },
+function! funcs#map_copy_with_osc_yank()
+  function! s:CopyWithOSCYank(str)
+    let @" = a:str
+    OSCYankReg "
+  endfunction
+  call <SID>MapAction('CopyWithOSCYank', '<leader>y')
+  nmap <leader>Y <leader>y$
+endfunction
+    vim.fn["funcs#map_copy_with_osc_yank"]()

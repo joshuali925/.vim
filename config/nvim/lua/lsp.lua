@@ -15,7 +15,7 @@ function M.lsp_install_all()
         "html",
         "cssls",
         "tsserver",
-        "eslint",
+        -- "eslint",
         "pyright",
         "jdtls",
         "kotlin_language_server",
@@ -29,11 +29,7 @@ function M.lsp_install_all()
     else
         vim.cmd("Mason")
     end
-end
-
-function M.install_tools() -- install formatters, linters, called by installation script
-    require("packer").loader("mason.nvim")
-    vim.cmd("MasonInstall prettier shellcheck")
+    vim.cmd("MasonInstall prettier shellcheck") -- TODO https://github.com/williamboman/mason.nvim/issues/103
 end
 
 -- TODO https://www.reddit.com/r/neovim/comments/vvtltr/remove_the_message_select_a_language_server/
@@ -46,11 +42,6 @@ function M.init()
             client.resolved_capabilities.document_range_formatting = false
         end
         require("illuminate").on_attach(client)
-        if packer_plugins["aerial.nvim"].loaded then
-            require("aerial").on_attach(client, bufnr)
-        else
-            require("plugin-configs").aerial_nvim_save_callback(function() require("aerial").on_attach(client, bufnr) end)
-        end
     end
 
     local function make_config()
@@ -87,6 +78,18 @@ function M.init()
     require("mason-lspconfig").setup()
     require("mason-lspconfig").setup_handlers({
         register_server,
+        jdtls = function()
+            register_server("jdtls", { -- needs python3.9+, or remove `action=argparse.BooleanOptionalAction` in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py
+                -- cmd_env = { -- jdtls requires java 17, or use :LspInstall jdtls@1.12.0
+                --     JAVA_HOME = vim.loop.os_homedir() .. "/.asdf/installs/java/corretto-17.0.4.8.1"
+                -- },
+                -- initializationOptions = {
+                --     bundles = { -- for debugger
+                --         vim.loop.os_homedir() .. "/.vim/com.microsoft.java.debug.plugin-0.34.0.jar", -- https://repo1.maven.org/maven2/com/microsoft/java/com.microsoft.java.debug.plugin/0.34.0/com.microsoft.java.debug.plugin-0.34.0.jar
+                --     },
+                -- },
+            })
+        end,
         sumneko_lua = function()
             register_server("sumneko_lua", {
                 settings = {
@@ -174,16 +177,6 @@ function M.organize_imports_and_format()
     else
         vim.cmd("Prettier")
     end
-end
-
-local diagnostics_on = true
-function M.toggle_diagnostics()
-    if diagnostics_on then
-        vim.diagnostic.disable()
-    else
-        vim.diagnostic.enable()
-    end
-    diagnostics_on = not diagnostics_on
 end
 
 function M.is_active()
