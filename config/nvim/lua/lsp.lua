@@ -2,7 +2,7 @@ local M = {}
 
 local disabled_servers = {
     -- "tsserver",
-    -- "eslint",
+    "eslint",
     -- "jdtls",
     -- "kotlin_language_server",
 }

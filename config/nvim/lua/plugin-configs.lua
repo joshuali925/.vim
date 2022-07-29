@@ -56,13 +56,14 @@ vim.g.qs_filetype_blacklist = {
     "mason.nvim",
     "TelescopePrompt",
     "Mundo",
-    "lspsagaoutline",
     "NvimTree",
     "startuptime",
     "DiffviewFileHistory",
     "DiffviewFiles",
     "floggraph",
     "fugitiveblame",
+    "lspsagaoutline",
+    "lspsagafinder",
 } -- will only run on first require
 vim.g.qs_buftype_blacklist = { "terminal" }
 function M.quick_scope()
@@ -79,11 +80,15 @@ function M.setup_markdown_preview_nvim()
     vim.g.mkdp_preview_options = { disable_sync_scroll = 1 }
 end
 
-function M.setup_neoterm()
-    vim.g.neoterm_default_mod = "belowright"
-    vim.g.neoterm_automap_keys = ";tT"
-    vim.g.neoterm_autoinsert = 1
-    vim.g.neoterm_repl_command = {} -- bug?
+function M.toggleterm_nvim()
+    require("toggleterm").setup({
+        on_open = function(_)
+            vim.cmd("startinsert!")
+        end,
+        open_mapping = "<C-b>",
+        start_in_insert = false,
+        auto_scroll = false,
+    })
 end
 
 function M.setup_csv_vim()
@@ -676,6 +681,7 @@ function M.vim_quickui()
         { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
         { "Cou&nt occurrences", [[echo searchcount({'maxcount': 0})]], "Count occurrences of current search pattern (:%s/pattern//gn also works)" },
         { "Search in &buffers", [[execute "cexpr [] | bufdo vimgrepadd //g %" | copen]], "Grep current search pattern in all buffers, add to quickfix" },
+        { "Search non-ascii", [[let @/ = '[^\d0-\d127]' | set hlsearch]], "Search all non-ascii characters" },
         { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
         { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
         { "--", "" },

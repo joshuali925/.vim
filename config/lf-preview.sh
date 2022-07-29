@@ -10,6 +10,10 @@ pager() {
   fi
 }
 
+preview() {
+  [ -n "$FULL_PREVIEW" ] && less -RiM || head -n 150
+}
+
 if [ -n "$FULL_PREVIEW" ] && [ "$(file -Lb --mime-type -- "$1" | cut -d/ -f1)" = 'image' ]; then
   if [ -n "$TMUX" ]; then
     printf 'Press enter to copy print image command and detach tmux'; read; echo
@@ -21,10 +25,10 @@ if [ -n "$FULL_PREVIEW" ] && [ "$(file -Lb --mime-type -- "$1" | cut -d/ -f1)" =
 fi
 
 case "$1" in
-  *.tar*|*.tgz|*.xz|*.tbz|*.tbz2) tar tf "$1" ;;
-  *.zip) zipinfo -1 "$1" ;;
-  *.rar) unrar l "$1" ;;
-  *.7z) 7z l -p "$1" ;;
+  *.tar*|*.tgz|*.xz|*.tbz|*.tbz2) tar tf "$1" | preview ;;
+  *.zip) zipinfo -1 "$1" | preview ;;
+  *.rar) unrar l "$1" | preview ;;
+  *.7z) 7z l -p "$1" | preview ;;
   # *.pdf) pdftotext "$1" -;;
   *) pager "$1" ;;
 esac
