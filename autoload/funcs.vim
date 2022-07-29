@@ -54,20 +54,11 @@ function! funcs#edit_register() abort
   call feedkeys('q:ilet @'. r. " = \<C-r>\<C-r>=string(@". r. ")\<CR>\<Esc>0f'", 'n')
 endfunction
 
-function! funcs#lf_edit_callback(code) abort
-  if filereadable(g:lf_selection_path)
-    for filename in readfile(g:lf_selection_path)
-      execute 'edit '. escape(filename, '%#')
-    endfor
-    call delete(g:lf_selection_path)
-  endif
-endfunction
-
 function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
-  let sidebars = ['help', 'man', 'qf', 'NvimTree', 'neoterm']
+  let sidebars = ['help', 'man', 'qf', 'NvimTree', 'toggleterm']
   if has_nvim && win_len == 1 && nvim_win_get_config(win_getid()).relative != ''  " floating window focused
     quit
   elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q
@@ -144,8 +135,7 @@ function! funcs#jest_context() abort
   let desc_match = matchstr(getline(search('describe'. regex, 'cbnW')), 'describe'. regex)
   let it_match = matchstr(getline(search('\(it\|test\)'. regex, 'cbnW')), '\(it\|test\)'. regex)
   call setpos('.', pos)
-  let context = "'". desc_match. ' '. it_match. "'"
-  return escape(context, '<>')
+  return '"'. desc_match. ' '. it_match. '"'
 endfunction
 
 function! funcs#get_run_command() abort
@@ -159,10 +149,7 @@ function! funcs#get_run_command() abort
     return user_command
   endif
   if expand('%') =~ '\.test\.[tj]sx\?'
-    if !exists('g:neoterm')
-      lua require('packer').loader('neoterm')
-    endif
-    return 'vertical T yarn test '. expand('%'). ' -t '. funcs#jest_context(). ' --coverage -u'
+    return 'TermExec size='. max([10, &columns * 1/2]). " direction=vertical cmd='yarn test ". expand('%'). ' -t '. funcs#jest_context(). ' --coverage -u'. "'"
   endif
   let run_command = {}
   let run_command['vim'] = 'source %'

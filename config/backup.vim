@@ -3576,3 +3576,39 @@ function! funcs#map_copy_with_osc_yank()
   nmap <leader>Y <leader>y$
 endfunction
     vim.fn["funcs#map_copy_with_osc_yank"]()
+" neoterm
+        use({ "kassio/neoterm", cmd = { "T", "Ttoggle", "Tnew" }, keys = "<Plug>(neoterm-repl-send", setup = conf("setup_neoterm") })
+function M.setup_neoterm()
+    vim.g.neoterm_default_mod = "belowright"
+    vim.g.neoterm_automap_keys = ";tT"
+    vim.g.neoterm_autoinsert = 1
+    vim.g.neoterm_repl_command = {} -- bug?
+end
+vim.keymap.set("n", "<C-b>", "<Cmd>execute 'Ttoggle resize='. min([10, &lines * 2/5])<CR>")
+vim.keymap.set("n", "<leader>to", "<Cmd>lua require('rooter').run_without_rooter('Ttoggle resize=' .. math.min(10, vim.o.lines))<CR>")
+vim.keymap.set("n", "<leader>tt", "<Cmd>tab Tnew<CR>")
+vim.keymap.set("n", "<leader>tO", "<Cmd>Tnew <bar> only<CR>")
+vim.keymap.set("n", "<leader>t<C-l>", "<Cmd>Tclear!<CR>")
+vim.keymap.set("n", "<leader>te", "<Plug>(neoterm-repl-send)")
+vim.keymap.set("n", "<leader>tee", "<Plug>(neoterm-repl-send-line)")
+vim.keymap.set("x", "<leader>te", "<Plug>(neoterm-repl-send)")
+vim.keymap.set("t", "<C-u>", "<C-\\><C-n>")
+vim.keymap.set("t", "<C-b>", "<Cmd>Ttoggle<CR>")
+  let context = '"'. desc_match. ' '. it_match. '"'
+  return escape(context, '<>')  " funcs#jest_context()
+  if expand('%') =~ '\.test\.[tj]sx\?'
+    if !exists('g:neoterm')
+      lua require('packer').loader('neoterm')
+    endif
+    return 'vertical T yarn test '. expand('%'). ' -t '. funcs#jest_context(). ' --coverage -u'
+  endif
+vim.keymap.set("n", "<C-o>", [[<Cmd>let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. substitute(fnameescape(g:lf_selection_path), '\\', '\\\\\', 'g'). ' "'. expand('%'). '"', {'h': &lines - 7, 'w': &columns * 9/10, 'line': 3, 'callback': 'funcs#lf_edit_callback'})<CR>]])
+function! funcs#lf_edit_callback(code) abort
+  if filereadable(g:lf_selection_path)
+    for filename in readfile(g:lf_selection_path)
+      execute 'edit '. escape(filename, '%#')
+    endfor
+    call delete(g:lf_selection_path)
+  endif
+endfunction
+

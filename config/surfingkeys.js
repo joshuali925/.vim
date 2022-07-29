@@ -70,8 +70,7 @@ api.map('q', '<Ctrl-h>'); // hover
 api.map('Q', '<Ctrl-j>'); // unhover
 api.map('f', 'gf'); // open in background new tab
 api.map('F', 'cf'); // open multiple links in new tab
-api.map('gf', 'w'); // switch frames
-api.map('e', 'cS'); // reset scroll target
+api.map('e', 'cS'); // reset scroll target, w to switch frames
 api.map('E', 'cs'); // switch scroll target
 api.map(';fj', ';fs'); // choose scroll target
 api.map('gv', 'V'); // restore visual mode
@@ -113,6 +112,8 @@ api.unmap('ga');
 api.mapkey('ga', '#12Open Chrome Apps', function() { api.tabOpenLink('chrome://apps/'); });
 api.unmap('gc');
 api.mapkey('gc', 'Clear cookies for specific sites', function() { api.tabOpenLink('chrome://settings/siteData'); });
+api.unmap('gf');
+api.mapkey('gf', 'Go to flags', function() { api.tabOpenLink('chrome://flags'); });
 api.mapkey('<Ctrl-,>', 'Open Chrome Settings', function() { api.tabOpenLink('chrome://settings/'); });
 api.mapkey('<Ctrl-Alt-,>', 'Open ChromeOS Settings', function() { api.tabOpenLink('chrome://os-settings/'); });
 api.mapkey(';Vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
@@ -191,7 +192,7 @@ api.mapkey('r', 'Toggle full screen', function() {
             document.getElementsByClassName('roll-btn-wrap')[0].getElementsByTagName('button')[0].click(); // 换一换
             return;
         }
-        document.getElementsByClassName(window.location.pathname.startsWith('/bangumi') ? 'squirtle-video-pagefullscreen' : 'bilibili-player-video-web-fullscreen')[0].click();
+        document.getElementsByClassName(window.location.pathname.startsWith('/bangumi') ? 'squirtle-video-pagefullscreen' : 'bpx-player-ctrl-web-enter')[0].click();
         document.getElementById('playerControlBtn').style.visibility = 'hidden'
         document.getElementById('picinpicBtn').style.visibility = 'hidden'
     } else if (/age.?fans/.test(window.location.hostname))

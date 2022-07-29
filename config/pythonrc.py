@@ -87,7 +87,7 @@ __version__ = "0.9.0"
 
 config = SimpleNamespace(
     ONE_INDENT  = '    ',  # what should we use for indentation ?
-    HISTFILE    = os.path.expanduser("~/.python_history"),
+    HISTFILE    = os.path.expanduser("~/.cache/.python_history"),
     HISTSIZE    = -1,
     EDITOR      = os.getenv('EDITOR', 'vi'),
     SHELL       = os.getenv('SHELL', '/bin/bash'),
@@ -346,6 +346,8 @@ class ImprovedConsole(InteractiveConsole):
 
         def append_history(len_at_start):
             current_len = readline.get_current_history_length()
+            with open(config.HISTFILE, 'w') as fp:
+                pass
             readline.append_history_file(current_len - len_at_start, config.HISTFILE)
 
         if readline.get_current_history_length() == 0:

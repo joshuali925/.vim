@@ -8,12 +8,25 @@ local function is_empty(value)
     return value == nil or value == ""
 end
 
+local function do_action_over_motion(callback)
+    local old_func = vim.go.operatorfunc
+    _G.op_func_custom = function()
+        local start = vim.api.nvim_buf_get_mark(0, "[")
+        local finish = vim.api.nvim_buf_get_mark(0, "]")
+        local lines = vim.api.nvim_buf_get_lines(0, start[1] - 1, finish[1], false)
+        callback(lines)
+        vim.go.operatorfunc = old_func
+        _G.op_func_custom = nil
+    end
+    vim.go.operatorfunc = "v:lua.op_func_custom"
+end
+
 -- terminate and rerun previous command in tmux first window top left pane
 function M.restart_tmux_task()
     io.popen("tmux send-keys -t 1.0 -X cancel 2>/dev/null; tmux send-keys -t 1.0 c-c 2>/dev/null"):close()
     vim.schedule(function()
         vim.defer_fn(function()
-            local handle = io.popen("tmux send-keys -t 1.0 s-up enter 2>&1")
+            local handle = assert(io.popen("tmux send-keys -t 1.0 s-up enter 2>&1"))
             local result = handle:read("*a")
             handle:close()
             if result ~= "" then
@@ -96,6 +109,41 @@ function M.copy_with_osc_yank_script(str)
     handle:flush()
     handle:close()
     print(message .. "Copied " .. str:len() .. " characters.")
+end
+
+function M.send_to_toggleterm()
+    do_action_over_motion(function(lines)
+        for _, line in ipairs(lines) do
+            require("toggleterm").exec(line)
+        end
+    end)
+end
+
+local lf_term, lf_height, lf_width
+function M.toggle_lf()
+    local curr_height = vim.o.lines - 7
+    local curr_width = math.ceil(vim.o.columns * 9 / 10)
+    if lf_term == nil or lf_height ~= curr_height or lf_width ~= curr_width then
+        local lf_selection_path = os.tmpname()
+        lf_term = require("toggleterm.terminal").Terminal:new({
+            cmd = ('lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path=%s %s'):format(vim.fn.fnameescape(lf_selection_path):gsub([[\\]], [[\\\\\]]), vim.fn.expand("%")),
+            direction = "float",
+            float_opts = { height = curr_height, width = curr_width },
+            on_close = function(_)
+                local handle = io.open(lf_selection_path, "r")
+                if handle ~= nil then
+                    local files = {}
+                    for line in handle:lines() do
+                        table.insert(files, vim.fn.fnameescape(line));
+                    end
+                    handle:close()
+                    os.remove(lf_selection_path)
+                    vim.cmd("wincmd p | args " .. table.concat(files, " "))
+                end
+            end,
+        })
+    end
+    lf_term:toggle()
 end
 
 return M

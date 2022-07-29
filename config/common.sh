@@ -42,7 +42,7 @@ alias size='du -h --max-depth=1 | sort -hr'
 alias size-subdir="du | sort -r -n | awk '{split(\"K M G\",v); s=1; while(\$1>1024){\$1/=1024; s++} print int(\$1)v[s]\"\\t\"\$2}' | head -n 20"
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
-alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'
+alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
 alias sudo='sudo '
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
@@ -119,13 +119,14 @@ alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,\(ht
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
-alias greset-to-remote='git reset --hard @{upstream}'
+alias greset-to-remote='git stash push --message "greset-to-remote temporary stash"; git reset --hard @{upstream}'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grv='git remote -v'
 alias gs='git status'
 alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
 alias gss='git status -sb'
-alias gstash='git stash'
+alias gst='git stash'
+alias gsts='git stash; git stash apply'
 alias gshow='git show --pretty=short --show-signature'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
@@ -293,36 +294,40 @@ print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f729679
 }
 
 x() {
-  if [ -f "$1" ]; then
-    case $1 in
-      *.tar)                       tar xvf "$1"     ;;
-      *.tar.gz | *.tgz)            tar xvzf "$1"    ;;
-      *.tar.xz | *.xz)             tar xvJf "$1"    ;;
-      *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$1"    ;;
-      *.bz2)                       bunzip2 "$1"     ;;
-      *.gz)                        gunzip "$1"      ;;
-      *.zip)                       unzip "$1"       ;;
-      *.rar)                       unrar x "$1"     ;;
-      *.Z)                         uncompress "$1"  ;;
-      *.7z)                        7z x "$1"        ;;
-      *)                           echo "Unable to extract '$1'" ;;
-    esac
-  else
-    tar czvf "$1.tar.gz" "$1"
-  fi
+  for arg in "$@"; do
+    if [ -f "$arg" ]; then
+      case $arg in
+        *.tar)                       tar xvf "$arg"     ;;
+        *.tar.gz | *.tgz)            tar xvzf "$arg"    ;;
+        *.tar.xz | *.xz)             tar xvJf "$arg"    ;;
+        *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$arg"    ;;
+        *.bz2)                       bunzip2 "$arg"     ;;
+        *.gz)                        gunzip "$arg"      ;;
+        *.zip)                       unzip "$arg"       ;;
+        *.rar)                       unrar x "$arg"     ;;
+        *.Z)                         uncompress "$arg"  ;;
+        *.7z)                        7z x "$arg"        ;;
+        *)                           echo "Unable to extract '$arg'" ;;
+      esac
+    else
+      tar czvf "$arg.tar.gz" "$arg"
+    fi
+  done
 }
 
 X() {  # extract to a directory / compress without top directory
-  if [ -f "$1" ]; then
-    local dir="${1%.*}"
-    local filename="$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)_$1"
-    command mkdir -pv "$dir"
-    command mv -i "$1" "$dir/$filename"
-    (cd "$dir" > /dev/null && x "$filename")
-    command mv -n "$dir/$filename" "$1"
-  else
-    tar czvf "$1.tar.gz" -C "$1" .
-  fi
+  for arg in "$@"; do
+    if [ -f "$arg" ]; then
+      local dir="${arg%.*}"
+      local filename="$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)_$arg"
+      command mkdir -pv "$dir"
+      command mv -i "$arg" "$dir/$filename"
+      (cd "$dir" > /dev/null && x "$filename")
+      command mv -n "$dir/$filename" "$arg"
+    else
+      tar czvf "$arg.tar.gz" -C "$arg" .
+    fi
+  done
 }
 
 path() {

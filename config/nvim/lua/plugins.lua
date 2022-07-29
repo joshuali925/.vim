@@ -41,7 +41,12 @@ return require("packer").startup({
         })
 
         -- ui
-        use({ "kassio/neoterm", cmd = { "T", "Ttoggle", "Tnew" }, keys = "<Plug>(neoterm-repl-send", setup = conf("setup_neoterm") })
+        use({
+            "akinsho/toggleterm.nvim",
+            module = "toggleterm",
+            cmd = { "ToggleTerm", "TermExec", "ToggleTermSendCurrentLine", "ToggleTermSendVisualSelection" },
+            config = conf("toggleterm_nvim"),
+        })
         use({ "skywind3000/vim-quickui", fn = "quickui#*", setup = conf("setup_vim_quickui"), config = conf("vim_quickui") })
         use({ "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = "vim.g.asyncrun_open = 12" })
         use({ "simnalamburt/vim-mundo", cmd = "MundoToggle", config = conf("mundo") })
@@ -49,7 +54,6 @@ return require("packer").startup({
         use({
             "nvim-telescope/telescope.nvim",
             requires = { { "nvim-lua/popup.nvim" }, { "nvim-lua/plenary.nvim" }, { "nvim-telescope/telescope-fzf-native.nvim", run = "make" } },
-            wants = { "popup.nvim", "plenary.nvim", "telescope-fzf-native.nvim" },
             module = "telescope",
             config = conf("telescope"),
         })
@@ -72,8 +76,8 @@ return require("packer").startup({
 
         -- lang
         use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate", requires = "nvim-treesitter/nvim-treesitter-textobjects", config = conf("nvim_treesitter") })
-        use({ "williamboman/mason.nvim", requires = "williamboman/mason-lspconfig.nvim" })
-        use({ "neovim/nvim-lspconfig", after = "mason.nvim" })
+        use({ "williamboman/mason.nvim", requires = { "williamboman/mason-lspconfig.nvim", after = "mason.nvim" } })
+        use({ "neovim/nvim-lspconfig", after = "mason-lspconfig.nvim" })
         use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
         use({ "glepnir/lspsaga.nvim", module = "lspsaga", config = conf("lspsaga_nvim") })
         use({
@@ -83,12 +87,7 @@ return require("packer").startup({
             setup = "vim.g.kommentary_create_default_mappings = false",
             config = conf("kommentary"),
         })
-        use({
-            "windwp/nvim-ts-autotag",
-            ft = { "html", "javascript", "javascriptreact", "typescriptreact" },
-            wants = "nvim-treesitter",
-            config = "require('nvim-ts-autotag').setup()",
-        })
+        use({ "windwp/nvim-ts-autotag", ft = { "html", "javascript", "javascriptreact", "typescriptreact" }, config = "require('nvim-ts-autotag').setup()" })
         use({ "RRethy/vim-illuminate", config = "vim.g.Illuminate_ftblacklist = vim.g.qs_filetype_blacklist" })
         use({ "danymat/neogen", module = "neogen", config = "require('neogen').setup({})" })
         use({ "MTDL9/vim-log-highlighting", ft = "log" })
