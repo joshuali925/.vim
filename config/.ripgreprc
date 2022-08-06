@@ -1,6 +1,7 @@
 --max-columns=500
 --max-columns-preview
 --glob=!.git
+--glob=!tags
 --smart-case
 --hidden
 --auto-hybrid-regex

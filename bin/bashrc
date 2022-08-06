@@ -3,22 +3,24 @@ if [ -n "$GET_BASHRC" ]; then
   source ~/.vim/config/.bashrc
   unset GET_BASHRC
   export EDITOR=vim
+  export TMUX_NO_TPM=1
   alias vimm='$EDITOR +"cd ~/.vim" ~/.vim/vimrc'
   PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
 
   clear-env() {
-    local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/share/lf ~/.config/{lf,lazygit})
+    local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/share/lf ~/.config/{lf,lazygit} ~/.cache/{n,}vim)
     [ "$(readlink -f "$HOME/.tmux.conf")" == "$HOME/.vim/config/.tmux.conf" ] && config_files+=(~/.tmux.conf)
     for executable in ~/.local/bin/*; do
       [ -f "$HOME/.vim/bin/${executable##*/}" ] && config_files+=("$HOME/.local/bin/${executable##*/}")
     done
-    echo 'This will delete the following directories and files:'
+    echo 'This will revert ~/.bashrc changes and delete the following:'
     for i in "${config_files[@]}"; do
       [ -d "$i" ] && find "$i" -maxdepth 1 2> /dev/null || echo "$i"
     done
     read -p 'Confirm to delete? (y/N) ' -n 1
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
+      sed -i '/\.vim\/bin\/bashrc/d' ~/.bashrc
       rm -rf "${config_files[@]}"
     fi
   }
@@ -32,6 +34,7 @@ if [ ! -f "$HOME/.vim/config/.bashrc" ]; then
   fi
   mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit} ~/.vim
   curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C "$HOME/.vim" --strip-components=1
+  echo -e "\n\033[0;36mDownloaded configs, to add to .bashrc: \033[0;33mecho 'exec ~/.vim/bin/bashrc' >> ~/.bashrc\033[0m"
 fi
 
-GET_BASHRC=1 bash --rcfile "$HOME/.vim/bin/bashrc" "$@"
+GET_BASHRC=1 exec bash --rcfile "$HOME/.vim/bin/bashrc" "$@"

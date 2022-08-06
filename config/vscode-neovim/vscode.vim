@@ -1,10 +1,13 @@
 " vscode-neovim vimrc, to install plugins:
-" nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall
+" nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall
 
 set packpath=
 set runtimepath-=$HOME/.config/nvim
 set runtimepath+=$HOME/.vim/config/vscode-neovim
 
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/HEAD/plug.vim
+endif
 call plug#begin('~/.vim/config/vscode-neovim/plugged')
 " change these in plugged/vim-easymotion/autoload/EasyMotion.vim:1159 after installing easymotion to limit line range instead of whole file
 " let win_first_line = max([line('w0'), line('.') - 30]) " visible first line num
@@ -26,12 +29,9 @@ set ignorecase
 set smartcase
 
 let mapleader=';'
-nmap <BS> gT
-nmap \ gt
 map gw <Plug>WordMotion_w
 map gb <Plug>WordMotion_b
 map ge <Plug>WordMotion_e
-omap u <Plug>WordMotion_w
 omap iu <Plug>WordMotion_iw
 xmap iu <Plug>WordMotion_iw
 omap au <Plug>WordMotion_aw
@@ -90,6 +90,8 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
+nmap <BS> gT
+nmap \ gt
 noremap <expr> 0 funcs#home()
 noremap ^ 0
 noremap - $

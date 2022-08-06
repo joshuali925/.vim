@@ -8,7 +8,7 @@ end
 function M.bufferline_nvim()
     require("bufferline").setup({
         -- options = { offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } } }, -- taking too much space
-        highlights = { buffer_selected = { gui = "bold" } },
+        highlights = { buffer_selected = { bold = true, italic = false } },
     })
 end
 
@@ -28,8 +28,15 @@ function M.gitsigns()
             ["x ig"] = ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>",
         },
         update_debounce = 250,
-        sign_priority = 11,
+        sign_priority = 11, -- higher priority than diagnostic signs
     })
+end
+
+function M.vim_illuminate()
+    require("illuminate").configure({ filetypes_denylist = vim.g.qs_filetype_blacklist })
+    vim.api.nvim_set_hl(0, "IlluminatedWordText", { link = "LspReferenceText" })
+    vim.api.nvim_set_hl(0, "IlluminatedWordRead", { link = "LspReferenceRead" })
+    vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "LspReferenceWrite" })
 end
 
 function M.kommentary()
@@ -183,7 +190,7 @@ end
 function M.lspsaga_nvim()
     require("lspsaga").init_lsp_saga({
         saga_winblend = 8,
-        code_action_lightbulb = { virtual_text = false },
+        code_action_lightbulb = { sign_priority = 6, virtual_text = false },
         code_action_keys = { exec = "<CR>", quit = "<Esc>" },
         finder_action_keys = { open = "<CR>", quit = "<ESC>" },
         show_outline = { jump_key = "<CR>" },
@@ -312,6 +319,7 @@ function M.telescope()
             path_display = { "truncate" },
         },
         pickers = {
+            buffers = { mappings = { n = { ["dd"] = actions.delete_buffer } } },
             find_files = { hidden = true, find_command = { "fd", "--type", "f", "--strip-cwd-prefix" } },
             filetypes = { theme = "dropdown" },
             registers = { theme = "dropdown" },
@@ -633,7 +641,7 @@ function M.open_quickui_context_menu()
     local content = {
         { "Docu&mentation", "lua require('lspsaga.hover').render_hover_doc()", "Show documentation" },
         { "&Preview definition", "lua require('lspsaga.definition').preview_definition()", "Preview definition" },
-        { "Reference &finder", "lua require('lspsaga.finder').lsp_finder()", "Find references" },
+        { "Reference &finder", "Lspsaga lsp_finder", "Find references" },
         { "&Signautre", "lua require('lspsaga.signaturehelp').signature_help()", "Show function signature help" },
         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
@@ -724,16 +732,17 @@ function M.vim_quickui()
     vim.fn["quickui#menu#install"]("&Toggle", {
         { 'Quickfix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', [[execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"]] },
         { 'Location list        %{empty(filter(getwininfo(), "v:val.loclist")) ? "[ ]" : "[x]"}', [[execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"]] },
-        { 'Set &diff             %{&diff ? "[x]" : "[ ]"}', [[execute &diff ? "windo diffoff" : "windo diffthis"]], "Toggle diff in current window" },
-        { 'Set scr&ollbind       %{&scrollbind ? "[x]" : "[ ]"}', [[execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"]], "Toggle scrollbind in current window" },
+        { 'Set &diff             %{&diff ? "[x]" : "[ ]"}', [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
+        { 'Set scr&ollbind       %{&scrollbind ? "[x]" : "[ ]"}', [[execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"]], "Toggle scrollbind in current tab" },
         { 'Set &wrap             %{&wrap ? "[x]" : "[ ]"}', [[set wrap!]], "Toggle wrap lines" },
-        { 'Set &paste            %{&paste ? "[x]" : "[ ]"}', [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]], "Toggle paste mode (shift alt drag to select and copy)" },
+        { 'Set &paste            %{&paste ? "[x]" : "[ ]"}', [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]], "Toggle paste mode" },
         { 'Set &spelling         %{&spell ? "[x]" : "[ ]"}', [[set spell!]], "Toggle spell checker (z= to auto correct current word)" },
         { 'Set &virtualedit      %{&virtualedit=~#"all" ? "[x]" : "[ ]"}', [[execute &virtualedit=~#"all" ? "set virtualedit-=all" : "set virtualedit+=all"]], "Toggle virtualedit" },
         { 'Set previ&ew          %{&completeopt=~"preview" ? "[x]" : "[ ]"}', [[execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"]], "Toggle function preview" },
         { 'Set &cursorline       %{&cursorline ? "[x]" : "[ ]"}', [[set cursorline!]], "Toggle cursorline" },
         { 'Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', [[set cursorcolumn!]], "Toggle cursorcolumn" },
         { 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}', [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
+        { 'Reader &mode          %{get(g:, "ReaderMode", 0) == 0 ? "[ ]" : "[x]"}', [[execute get(g:, "ReaderMode", 0) == 0 ? "nnoremap <nowait> d <C-d>\<bar>nnoremap <nowait> u <C-u>" : "nunmap d\<bar>nunmap u" | let g:ReaderMode = 1 - get(g:, "ReaderMode", 0) | echo "Reader mode ". (g:ReaderMode == 1 ? 'on' : 'off')]], "Toggle using 'd' and 'u' for '<C-d>' and '<C-u>' scrolling" },
         { "--", "" },
         { "&Indent line", [[IndentBlanklineToggle]], "Toggle indent lines" },
         { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
@@ -766,9 +775,10 @@ function M.vim_quickui()
     vim.fn["quickui#menu#install"]("L&SP", {
         { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix (run :bufdo edit<CR> to load all buffers)" },
         { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
-        { "&Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })]], "Toggle lsp diagnostic virtual texts, to disable diagnostics use vim.diagnostic.disable()" },
+        { "&Toggle diagnostics", [[lua require("lsp").toggle_diagnostics()]], "Toggle LSP diagnostics" },
+        { "Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })]], "Toggle LSP diagnostic virtual texts" },
         { "--", "" },
-        { "&Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
+        { "Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
         { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
         { "Remove folder from workspace", [[lua vim.lsp.buf.remove_workspace_folder()]], "Remove folder from workspace for LSP" },
     })
@@ -821,7 +831,7 @@ function M.vim_quickui()
     })
     vim.fn["quickui#menu#install"]("&Git", {
         { "Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
-        { "Git l&og", [[execute "lua require('packer').loader('vim-fugitive vim-flog')" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
+        { "Git l&og", [['<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
         { "--", "" },
         { "Git open &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser" },
     })

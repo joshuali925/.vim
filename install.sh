@@ -13,10 +13,10 @@ detect-env() {
     # mac shows i386 for x86_64
     i[36]86 | amd64 | x86_64)
       ARCHITECTURE=x86_64 ;;
-    *armv6*)
-      ARCHITECTURE=arm6 ;;
-    *armv7*)
-      ARCHITECTURE=arm7 ;;
+    # *armv6*)
+    #   ARCHITECTURE=arm6 ;;
+    # *armv7*)
+    #   ARCHITECTURE=arm7 ;;
     *aarch64* | *armv8* | arm64)
       ARCHITECTURE=arm64 ;;
     *)
@@ -67,7 +67,8 @@ backup() {
 link_file() {
   local sourceFile="$1" destFile="$2"
   backup "$destFile"
-  ln -s "$sourceFile" "$destFile"
+  shift 2
+  ln -s "$@" "$sourceFile" "$destFile"
   log "Linked $sourceFile to $destFile"
 }
 
@@ -125,14 +126,14 @@ install_dotfiles() {
   log "Appended 'source ~/.vim/config/.bashrc' to ~/.bashrc"
   log "Appended 'source ~/.vim/config/.zshrc' to ~/.zshrc"
   log "Appended 'skip_global_compinit=1' to ~/.zshenv"
-  link_file "$HOME/.vim/config/.tmux.conf" "$HOME/.tmux.conf"
-  link_file "$HOME/.vim/config/.gitconfig" "$HOME/.gitconfig"
+  link_file "$HOME/.vim/config/.tmux.conf" "$HOME/.tmux.conf" --relative
+  link_file "$HOME/.vim/config/.gitconfig" "$HOME/.gitconfig" --relative
+  link_file "$HOME/.vim/config/.ideavimrc" "$HOME/.ideavimrc" --relative
   link_file "$HOME/.vim/config/lfrc" "$HOME/.config/lf/lfrc"
   link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/.config/lazygit/config.yml"
-  link_file "$HOME/.vim/config/.ideavimrc" "$HOME/.ideavimrc"
   if [ "$PLATFORM" == 'darwin' ]; then
     mkdir -p ~/Library/Application\ Support/lazygit "$HOME/.config/wezterm"
-    ln -sf ~/Library/Application\ Support ~/Library/ApplicationSupport
+    ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport
     link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/Library/ApplicationSupport/lazygit/config.yml"
     link_file "$HOME/.vim/config/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
     mkdir -p ~/.config/karabiner/assets/complex_modifications
@@ -156,7 +157,7 @@ install_docker() {
   sudo usermod -aG docker "$USER" || true
   sudo systemctl restart docker || sudo service docker restart
   sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login, enable read write access for other groups now to work immediately
-  # TODO remove docker-compose when 'docker compose <Tab>' completions are working
+  # TODO https://github.com/docker/compose/issues/8550, remove docker-compose when 'docker compose <Tab>' completions are working
   log 'Installing docker-compose..'
   sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
@@ -203,26 +204,17 @@ install_node() {
   echo
 }
 
-install_tmux() {  # https://raw.githubusercontent.com/mjakob-gh/build-static-tmux/HEAD/build-static-tmux.sh
+install_tmux() {
   log 'Installing tmux..'
   backup "$HOME/.local/bin/tmux"
-  case $PLATFORM:$ARCHITECTURE in
-    linux:x86_64) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-x86_64.tar.gz | tar xz -C "$HOME/.local/bin" tmux ;;
-    linux:arm64) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-arm64.tar.gz | tar xz -C "$HOME/.local/bin" tmux ;;
-    darwin:*) brew install tmux --HEAD ;;
-    *) echo 'Unknown distro..'; return 0 ;;
-  esac
+  tmux -V
   if [ ! -d "$HOME/.tmux" ]; then
     log 'Installing tmux plugins..'
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth=1
     ~/.tmux/plugins/tpm/bin/install_plugins || true
-    if [ -e "$HOME/.tmux/plugins/tmux-thumbs" ]; then
+    if [ -d "$HOME/.tmux/plugins/tmux-thumbs" ]; then
       log 'Installing tmux-thumbs binaries..'
-      case $PLATFORM:$ARCHITECTURE in
-        linux:x86_64) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs" ;;
-        linux:arm64) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-linux-arm64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs" ;;
-        darwin:*) curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-darwin-x86_64.tar.gz | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs" ;;
-      esac
+      curl -L -o- "https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-$PLATFORM-$ARCHITECTURE.tar.gz" | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
     fi
   else
     log '~/.tmux directory exists, updating tmux plugins..'
@@ -239,23 +231,11 @@ install_tmux() {  # https://raw.githubusercontent.com/mjakob-gh/build-static-tmu
 install_neovim() {
   link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
   backup "$HOME/.local/lib/nvim"
-  case $PLATFORM:$ARCHITECTURE in
-    linux:x86_64)
-      # appimage: curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage && chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage && \mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
-      curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C ~/.local/lib
-      \mv ~/.local/lib/nvim-linux64 ~/.local/lib/nvim ;;
-    linux:arm64)
-      curl -L -o- https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz | tar xz -C ~/.local/lib nvim ;;
-    darwin:*)
-      curl -L -o- https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz | tar xz -C ~/.local/lib
-      \mv ~/.local/lib/nvim-macos ~/.local/lib/nvim ;;
-    *) echo 'Unknown distro..'; return 0 ;;
-  esac
-  ln -sf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
+  nvim --version
   log 'Installed neovim, installing plugins..'
   timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +'autocmd User PackerComplete quitall' +'silent lua require("plugins").sync()' || true
   timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd("quitall") end, 27000)' || true
-  log "\nInstalled neovim plugins, run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
+  log "\nInstalled neovim plugins, run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
   echo
 }
 
@@ -266,7 +246,6 @@ setup_ssh_key() {
 }
 
 install() {
-  shift 1
   [ "$#" -eq 0 ] && usage
   init
   for package in "$@"; do
@@ -286,27 +265,21 @@ install() {
 }
 
 init() {
+  [ -n "$INSTALL_ENV_INIT" ] && return 0 || INSTALL_ENV_INIT=1
   set -eo pipefail
   cd "$HOME"
-  export PATH="$HOME/.local/bin:$PATH"
+  export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"
   detect-env
 }
 
 default-install() {
-  init
   log "Installing for $PLATFORM"
-  install_development_tools
-  install_dotfiles
-  install_java
-  install_python
-  install_node
-  install_tmux
-  install_neovim
+  install devtools dotfiles java python node tmux neovim
 
   log '\nInstalling zsh plugins..'
   zsh  # -ic 'exit' makes installing binaries to fail for some reason
 
-  setup_ssh_key
+  install ssh-key
 
   sudo chsh -s "$(which zsh)" "$(whoami)" || true
   log '\nChanged default shell to zsh, try the following if it did not work'
@@ -318,7 +291,7 @@ default-install() {
 
 case $1 in
   '')         default-install ;;
-  install)    install "$@" ;;
+  install)    shift 1; install "$@" ;;
   detect-env) detect-env ;;
   *)          usage ;;
 esac

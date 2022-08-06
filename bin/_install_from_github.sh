@@ -10,12 +10,11 @@ run-if-exists() {
     return 0
   fi
 
-  local executable=$(basename "$1")
+  local executable=${1##*/}
   shift 1
 
   if [ -x "$HOME/.local/bin/$executable" ]; then
-    "$HOME/.local/bin/$executable" "$@"
-    exit $?
+    exec "$HOME/.local/bin/$executable" "$@"
   fi
 }
 
@@ -34,7 +33,7 @@ install-from-url() {
   echo "Installing $executable from $url" >&2
   curl -sL -o "$HOME/.local/bin/$executable" "$url"
   chmod +x "$HOME/.local/bin/$executable"
-  "$HOME/.local/bin/$executable" "$@"
+  run-if-exists "$executable" "$@"
 }
 
 install-from-github() {
@@ -99,5 +98,5 @@ install-archive-from-url() {
 
   curl -sL -o- "$url" | eval "$extract_cmd $extract_flags" > /dev/null
   chmod +x "$HOME/.local/bin/$executable"
-  "$HOME/.local/bin/$executable" "$@"
+  run-if-exists "$executable" "$@"
 }

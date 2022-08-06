@@ -13,4 +13,3 @@ esac
 
 [ "$PLATFORM" = 'linux' ] && extract_flags='--strip-components=1 --wildcards ffmpeg*/ffmpeg'
 install-archive-from-url "$url" ffmpeg "$extract_flags" "$@"
-

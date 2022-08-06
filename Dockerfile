@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 # add additional dependencies
-RUN apt-get update; apt-get install -y curl sudo
+RUN apt-get update; DEBIAN_FRONTEND=noninteractive apt-get install -y curl sudo
 
 RUN useradd -s /bin/bash -d /home/docker -m -G sudo docker; passwd -d docker
 USER docker

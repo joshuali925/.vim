@@ -1,16 +1,19 @@
 " forked from https://github.com/kevinhwang91/dotfiles/blob/d58baa79d5d2db7898e45ea4d8282e0c5e741f1e/nvim/colors/one.vim
+" add 256colors: https://raw.githubusercontent.com/vim-scripts/gui2term.py/master/gui2term.py
+" hex to 256color: https://stackoverflow.com/questions/11765623/convert-hex-to-closest-x11-color-number/62219320#62219320
 
-if v:vim_did_enter
-    hi clear
-    syntax reset
+if exists('g:colors_name')
+  hi clear
+  syntax reset
 endif
 let g:colors_name = 'one'
 
-hi Normal guifg=#abb2bf ctermfg=249 guibg=#292c33 ctermbg=235
 hi Bold gui=bold cterm=bold
+hi Italic gui=italic cterm=italic
+hi Cursor cterm=reverse gui=reverse
+hi Normal guifg=#abb2bf ctermfg=249 guibg=#292c33 ctermbg=235
 hi ColorColumn guibg=#282c34 ctermbg=236
 hi Conceal guifg=#4b5263 ctermfg=239 guibg=NONE ctermbg=NONE
-hi Cursor guibg=#528bff ctermbg=69
 hi CursorColumn guibg=#282c34 ctermbg=236
 hi CursorLine guibg=#282c34 ctermbg=236 gui=none cterm=none
 hi Directory guifg=#61afef ctermfg=75
@@ -22,7 +25,6 @@ hi IncSearch guifg=#d19a66 ctermfg=173
 hi LineNr guifg=#4b5263 ctermfg=239
 hi CursorLineNr guifg=#abb2bf ctermfg=249 guibg=#282c34 ctermbg=236 gui=none cterm=none
 hi MatchParen guifg=#e06c75 ctermfg=168 guibg=NONE ctermbg=NONE gui=underline,bold cterm=underline,bold
-hi Italic gui=italic cterm=italic
 hi ModeMsg guifg=#abb2bf ctermfg=249
 hi MoreMsg guifg=#abb2bf ctermfg=249
 hi NonText guifg=#5c6370 ctermfg=241 gui=none cterm=none
@@ -45,7 +47,7 @@ hi WarningMsg guifg=#e06c75 ctermfg=168
 hi WildMenu guifg=#abb2bf ctermfg=249 guibg=#5c6370 ctermbg=241
 hi SignColumn guibg=#202326 ctermbg=16
 hi Special guifg=#61afef ctermfg=75
-hi Comment guifg=#5c6370 ctermfg=241 gui=italic cterm=italic
+hi Comment guifg=#5c6370 ctermfg=241
 hi Constant guifg=#98c379 ctermfg=114
 hi Number guifg=#d19a66 ctermfg=173
 hi Identifier guifg=#e06c75 ctermfg=168 gui=none cterm=none
@@ -58,20 +60,6 @@ hi SpecialChar guifg=#56b6c2 ctermfg=73
 hi Underlined guifg=NONE ctermfg=NONE guibg=NONE ctermbg=NONE gui=underline cterm=underline
 hi Error guifg=#e06c75 ctermfg=168 guibg=NONE ctermbg=NONE gui=bold cterm=bold
 hi Todo guifg=#c678dd ctermfg=176 guibg=NONE ctermbg=NONE gui=italic cterm=italic
-hi StatusLineNormal guifg=#30353f ctermfg=236 guibg=#98c379 ctermbg=114 gui=bold cterm=bold
-hi StatusLineInsert guifg=#30353f ctermfg=236 guibg=#61afef ctermbg=75 gui=bold cterm=bold
-hi StatusLineReplace guifg=#30353f ctermfg=236 guibg=#e06c75 ctermbg=168 gui=bold cterm=bold
-hi StatusLineVisual guifg=#30353f ctermfg=236 guibg=#c678dd ctermbg=176 gui=bold cterm=bold
-hi StatusLineCommand guifg=#30353f ctermfg=236 guibg=#56b6c2 ctermbg=73 gui=bold cterm=bold
-hi StatusLineBranch guifg=#56b6c2 ctermfg=73 guibg=#30353f ctermbg=236
-hi StatusLineHunkAdd guifg=#98c379 ctermfg=114 guibg=#30353f ctermbg=236
-hi StatusLineHunkChange guifg=#d19a66 ctermfg=173 guibg=#30353f ctermbg=236
-hi StatusLineHunkRemove guifg=#e06c75 ctermfg=168 guibg=#30353f ctermbg=236
-hi StatusLineFileName guifg=#abb2bf ctermfg=249 guibg=#30353f ctermbg=236
-hi StatusLineFileModified guifg=#c678dd ctermfg=176 guibg=#30353f ctermbg=236
-hi StatusLineFormat guifg=#528bff ctermfg=69 guibg=#30353f ctermbg=236 gui=bold cterm=bold
-hi StatusLineError guifg=#be5046 ctermfg=130 guibg=#30353f ctermbg=236
-hi StatusLineWarning guifg=#e5c07b ctermfg=180 guibg=#30353f ctermbg=236
 hi Parameter guifg=#50a14f ctermfg=71
 hi CurrentWord guibg=#31435e ctermbg=238 gui=bold cterm=bold
 hi DiffAdd guifg=NONE ctermfg=NONE guibg=#0b4820 ctermbg=22 gui=none cterm=none
@@ -118,6 +106,7 @@ hi link markdownCodeDelimiter Constant
 hi link markdownCodeBlock Identifier
 hi link markdownHeadingDelimiter SpecialChar
 hi link markdownListMarker Identifier
+hi link markdownError Normal
 
 " vim
 hi link vimCommentTitle NonText
@@ -146,7 +135,5 @@ hi link zshVariableDef Number
 hi link manTitle SpecialChar
 hi link manFooter NonText
 
-" call writefile(s:dump, '/tmp/dump_nvim_color.vim')
-hi Comment cterm=NONE
-hi! link markdownItalic Normal
+" hi! link markdownItalic Normal
 set background=dark

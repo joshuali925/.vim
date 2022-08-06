@@ -2094,6 +2094,19 @@ export FZF_ALT_C_COMMAND='ls -1dA */ 2> /dev/null'  # dir only
 export FZF_ALT_C_COMMAND='ls -1A 2> /dev/null'  # include files
 " use bat
 alias man="LESS_TERMCAP_md=$'\e[01;31m' LESS_TERMCAP_me=$'\e[0m' LESS_TERMCAP_se=$'\e[0m' LESS_TERMCAP_so=$'\e[01;44;33m' LESS_TERMCAP_ue=$'\e[0m' LESS_TERMCAP_us=$'\e[01;32m' man"
+export LESS_TERMCAP_mb=$'\E[1m\E[32m'
+export LESS_TERMCAP_mh=$'\E[2m'
+export LESS_TERMCAP_mr=$'\E[7m'
+export LESS_TERMCAP_md=$'\E[1m\E[36m'
+export LESS_TERMCAP_ZW=""
+export LESS_TERMCAP_us=$'\E[4m\E[1m\E[37m'
+export LESS_TERMCAP_me=$'\E(B\E[m'
+export LESS_TERMCAP_ue=$'\E[24m\E(B\E[m'
+export LESS_TERMCAP_ZO=""
+export LESS_TERMCAP_ZN=""
+export LESS_TERMCAP_se=$'\E[27m\E(B\E[m'
+export LESS_TERMCAP_ZV=""
+export LESS_TERMCAP_so=$'\E[1m\E[33m\E[44m'
 
 " =======================================================
 " auto virtualenv for bash
@@ -3602,6 +3615,7 @@ vim.keymap.set("t", "<C-b>", "<Cmd>Ttoggle<CR>")
     endif
     return 'vertical T yarn test '. expand('%'). ' -t '. funcs#jest_context(). ' --coverage -u'
   endif
+vim.keymap.set("n", "<leader>tp", [[<Cmd>call quickui#terminal#open('zsh', {'h': &lines * 3/4, 'w': &columns * 4/5, 'line': &lines * 1/8, 'callback': ''})<CR>]])
 vim.keymap.set("n", "<C-o>", [[<Cmd>let g:lf_selection_path = tempname() <bar> call quickui#terminal#open('lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. substitute(fnameescape(g:lf_selection_path), '\\', '\\\\\', 'g'). ' "'. expand('%'). '"', {'h': &lines - 7, 'w': &columns * 9/10, 'line': 3, 'callback': 'funcs#lf_edit_callback'})<CR>]])
 function! funcs#lf_edit_callback(code) abort
   if filereadable(g:lf_selection_path)
@@ -3611,4 +3625,13 @@ function! funcs#lf_edit_callback(code) abort
     call delete(g:lf_selection_path)
   endif
 endfunction
+function M.run_without_rooter(command)
+    local prev_dir = vim.fn.getcwd()
+    local prev_enabled = enabled
+    enabled = false
+    vim.api.nvim_set_current_dir(vim.fn.expand("%") == "" and vim.env.PWD or vim.fn.expand("%:p:h"))
+    vim.cmd(command)
+    vim.api.nvim_set_current_dir(prev_dir)
+    enabled = prev_enabled
+end
 

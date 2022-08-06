@@ -17,7 +17,7 @@ if [ -z "$otty" ]; then
 fi
 
 if [ "$buflen" -le "$maxlen" ]; then
-  esc="\033]52;c;$(printf %s "$buf" | base64 | tr -d '\r\n')\a"
+  esc="\033]52;c;$(printf %s "$buf" | base64 | tr -d '\r\n')\a"  # pipe into tr instead of `base64 -w0` for portability
   printf "$esc" > $otty
 else
   while true; do

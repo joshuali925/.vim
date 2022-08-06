@@ -275,3 +275,19 @@ function! funcs#decompile_java_class() abort
   endif
   set nomodified readonly filetype=java
 endfunction
+
+function! funcs#ctags() abort
+  try
+    silent execute 'ltag '. expand('<cword>')
+    echo 'tag 1 of '. len(getloclist(0))
+  catch /^Vim\%((\a\+)\)\=:E433:/
+    let answer = input('Generate ctags for language (y for all, empty to cancel): ', '', 'filetype')  " language list: ctags --list-languages
+    if answer != ''
+      let args = answer == 'y' ? '' : '--languages='. answer
+      " TODO https://github.com/universal-ctags/ctags/issues/2667
+      execute '!ctags --exclude=.git --exclude=node_modules --exclude=venv --langmap=TypeScript:.ts.tsx -R '. args
+      silent execute 'ltag '. expand('<cword>')
+      echo 'tag 1 of '. len(getloclist(0))
+    endif
+  endtry
+endfunction

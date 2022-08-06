@@ -139,8 +139,8 @@ local themes = {
         config = function()
             require("ayu").setup({ overrides = { Comment = { fg = "#69737d" } } })
             vim.cmd("colorscheme ayu-" .. (theme_index < 0 and "mirage" or "light"))
-            vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#30364f" })
             vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#30364f" })
+            vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#30364f" })
             vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#30364f" })
         end,
     },

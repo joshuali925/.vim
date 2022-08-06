@@ -342,16 +342,16 @@ path() {
 vf() {
   local IFS=$'\n' FZFTEMP
   if [ -z "$1" ]; then
-    FZFTEMP=($(eval "$FZF_CTRL_T_COMMAND" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
+    FZFTEMP=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
   else
-    FZFTEMP=($(eval "$FZF_CTRL_T_COMMAND" "$@" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
+    FZFTEMP=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
   fi
   [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
 }
 
 cdf() {
   local FZFTEMP
-  FZFTEMP=$(fd --strip-cwd-prefix --color=always --hidden --exclude=.git | fzf --query="${1:-}" --ansi --bind='tab:down,btab:up' --bind='`:unbind(`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore --no-ignore || true)') && {
+  FZFTEMP=$(FZF_DEFAULT_COMMAND='fd --strip-cwd-prefix --color=always --hidden --exclude=.git' fzf --query="${1:-}" --ansi --bind='tab:down,btab:up' --bind='`:unbind(`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore --no-ignore || true)') && {
     [ -d "$FZFTEMP" ] && cd "$FZFTEMP" || {
       [ -d "$(dirname "$FZFTEMP" 2> /dev/null)" ] && cd "$(dirname "$FZFTEMP")"
     }
@@ -474,17 +474,18 @@ untildone() {
   done
 }
 
-set-var() {
-  if [ "$#" -ne 1 ]; then echo "Usage: $0 {java_home|path}"; return 1; fi
-  local command
-  case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
-    java_home|javahome) command="export JAVA_HOME=\"$(asdf where java)\"" ;;
-    path) command="export PATH=\"$PWD:\$PATH\"" ;;
-    *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
-  esac
-  eval "$command"
-  echo "$command" | tee -a ~/.bashrc ~/.zshrc
-  echo 'Appended to ~/.bashrc and ~/.zshrc'
+set-env() {
+  if [ "$#" -lt 1 ]; then echo "Usage: $0 [--write-rc] {java_home|path}"; return 1; fi
+  local command write_to_rc
+  while [ $# != 0 ]; do
+    case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
+      java_home|javahome) command="export JAVA_HOME=\"$(asdf where java)\""; shift 1 ;;
+      path) command="export PATH=\"$PWD:\$PATH\""; shift 1 ;;
+      --write-rc) write_to_rc=1; shift 1 ;;
+      *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
+    esac
+  done
+  eval "$command" && echo "$command" | if [ -n "$write_to_rc" ]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
 }
 
 getip() {

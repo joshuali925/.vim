@@ -189,10 +189,12 @@ api.unmap('r');
 api.mapkey('r', 'Toggle full screen', function() {
     if (window.location.hostname === 'www.bilibili.com') {
         if (window.location.pathname === '/') {
-            document.getElementsByClassName('roll-btn-wrap')[0].getElementsByTagName('button')[0].click(); // 换一换
+            // 换一换, .roll-btn-wrap 旧版, .palette-button-wrap 新版
+            document.querySelectorAll('.roll-btn-wrap, .palette-button-wrap')[0].getElementsByTagName('button')[0].click();
             return;
         }
-        document.getElementsByClassName(window.location.pathname.startsWith('/bangumi') ? 'squirtle-video-pagefullscreen' : 'bpx-player-ctrl-web-enter')[0].click();
+        // /video, /(medialist|festival), /bangumi
+        document.querySelectorAll('.bilibili-player-iconfont-web-fullscreen-off, .bpx-player-ctrl-web-enter, .squirtle-video-pagefullscreen')[0].click();
         document.getElementById('playerControlBtn').style.visibility = 'hidden'
         document.getElementById('picinpicBtn').style.visibility = 'hidden'
     } else if (/age.?fans/.test(window.location.hostname))

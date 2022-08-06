@@ -35,7 +35,7 @@ return require("packer").startup({
         -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
         use({ "dstein64/nvim-scrollview", config = "require('scrollview').setup()" })
         use({
-            "DarwinSenior/nvim-colorizer.lua",
+            "NvChad/nvim-colorizer.lua",
             cmd = "ColorizerAttachToBuffer",
             config = function() require("colorizer").setup({}, { RGB = false, rgb_fn = true, mode = "virtualtext" }) end,
         })
@@ -63,13 +63,12 @@ return require("packer").startup({
 
         -- git
         use({
-            "tpope/vim-fugitive",
+            "rbong/vim-flog",
+            requires = { "tpope/vim-fugitive", "tpope/vim-rhubarb" },
             fn = "fugitive#*",
-            requires = { "tpope/vim-rhubarb" },
             event = "BufNewFile,BufRead *.git/{COMMIT,ISSUE,PULLREQ,RELEASE}_EDITMSG", -- issue number omni-completion
-            cmd = { "Git", "Ggrep", "Glgrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog" },
+            cmd = { "Git", "Ggrep", "Glgrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog", "Flogsplit" }, -- GBrowse loaded on demand won't include line number
         })
-        use({ "rbong/vim-flog", cmd = { "Flog", "Flogsplit" } })
         use({ "lewis6991/gitsigns.nvim", config = conf("gitsigns") })
         use({ "rhysd/conflict-marker.vim", config = conf("conflict_marker") })
         use({ "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" } })
@@ -79,7 +78,7 @@ return require("packer").startup({
         use({ "williamboman/mason.nvim", requires = { "williamboman/mason-lspconfig.nvim", after = "mason.nvim" } })
         use({ "neovim/nvim-lspconfig", after = "mason-lspconfig.nvim" })
         use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
-        use({ "glepnir/lspsaga.nvim", module = "lspsaga", config = conf("lspsaga_nvim") })
+        use({ "glepnir/lspsaga.nvim", cmd = "Lspsaga", module = "lspsaga", config = conf("lspsaga_nvim") })
         use({
             "b3nj5m1n/kommentary",
             requires = { "JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-treesitter" },
@@ -88,7 +87,7 @@ return require("packer").startup({
             config = conf("kommentary"),
         })
         use({ "windwp/nvim-ts-autotag", ft = { "html", "javascript", "javascriptreact", "typescriptreact" }, config = "require('nvim-ts-autotag').setup()" })
-        use({ "RRethy/vim-illuminate", config = "vim.g.Illuminate_ftblacklist = vim.g.qs_filetype_blacklist" })
+        use({ "RRethy/vim-illuminate", config = conf("vim_illuminate") })
         use({ "danymat/neogen", module = "neogen", config = "require('neogen').setup({})" })
         use({ "MTDL9/vim-log-highlighting", ft = "log" })
         use({ "udalov/kotlin-vim", ft = "kotlin" })
@@ -119,7 +118,6 @@ return require("packer").startup({
         -- misc
         use({ "kyazdani42/nvim-web-devicons", opt = false })
         use({ "lewis6991/impatient.nvim", opt = false })
-        use({ "tpope/vim-repeat", opt = false })
         use({ "tpope/vim-sleuth" })
         use({ "tpope/vim-unimpaired", keys = { "[", "]", { "n", "=p" }, { "n", "yo" } } })
         use({ "moll/vim-bbye", cmd = "Bdelete" })
@@ -135,8 +133,7 @@ return require("packer").startup({
             cmd = { "TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine" },
             setup = conf("setup_vim_table_mode"),
         })
-        -- TODO https://github.com/NTBBloodbath/rest.nvim/issues/114
-        use({ "NTBBloodbath/rest.nvim", commit = "e5f68db73276c4d4d255f75a77bbe6eff7a476ef", module = "rest-nvim", config = conf("rest_nvim") })
+        use({ "rest-nvim/rest.nvim", module = "rest-nvim", config = conf("rest_nvim") })
         use({ "will133/vim-dirdiff", cmd = "DirDiff" })
 
         if Packer_bootstrap then require("packer").sync() end
