@@ -15,7 +15,7 @@ function M.lsp_install_all()
         "html",
         "cssls",
         "tsserver",
-        -- "eslint",
+        "eslint",
         "pyright",
         "jdtls",
         "kotlin_language_server",
@@ -41,7 +41,6 @@ function M.init()
             client.resolved_capabilities.document_formatting = false
             client.resolved_capabilities.document_range_formatting = false
         end
-        require("illuminate").on_attach(client)
     end
 
     local function make_config()
@@ -177,6 +176,16 @@ function M.organize_imports_and_format()
     else
         vim.cmd("Prettier")
     end
+end
+
+local diagnostic_enabled = true
+function M.toggle_diagnostics()
+    if diagnostic_enabled then
+        vim.diagnostic.disable()
+    else
+        vim.diagnostic.enable()
+    end
+    diagnostic_enabled = not diagnostic_enabled
 end
 
 function M.is_active()

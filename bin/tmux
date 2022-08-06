@@ -6,5 +6,13 @@ fi
 
 source ~/.vim/bin/_install_from_github.sh
 run-if-exists "$0" "$@"
-"$HOME/.vim/install.sh" install tmux
-"$HOME/.local/bin/tmux" "$@"
+detect-env
+
+case $PLATFORM:$ARCHITECTURE in
+  linux:*) url=https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-$ARCHITECTURE.tar.gz ;;
+  darwin:*) brew install tmux --HEAD ;;
+  *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2; exit 1 ;;
+esac
+
+[ -n "$url" ] && install-archive-from-url "$url" tmux '' "$@"
+run-if-exists "$0" "$@"

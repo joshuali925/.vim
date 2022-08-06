@@ -114,7 +114,7 @@ cmd follow-symlink ${{
 }}
 
 cmd locate-file-cwd ${{
-  res="$(eval "$FZF_ALT_C_COMMAND" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" fzf)"
+  res="$(FZF_DEFAULT_COMMAND="$FZF_ALT_C_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" fzf)"
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then
@@ -123,7 +123,7 @@ cmd locate-file-cwd ${{
 }}
 
 cmd locate-file ${{
-  res="$(eval "$FZF_CTRL_T_COMMAND $@" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --bind='tab:down,btab:up')"
+  res="$(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --bind='tab:down,btab:up')"
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""
   elif [ -d "$res" ]; then
@@ -136,7 +136,7 @@ cmd locate-git-file ${{
   if [ "$git_repo" ]; then
     res="$(git ls-files $(git rev-parse --show-toplevel) | fzf --bind='tab:down,btab:up')"
   else
-    res="$(eval "$FZF_CTRL_T_COMMAND $@" | FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --bind='tab:down,btab:up')"
+    res="$(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --bind='tab:down,btab:up')"
   fi
   if [ -f "$res" ]; then
     lf -remote "send $id select \"$res\""

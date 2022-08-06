@@ -8,6 +8,15 @@
       "fi"
     ]
   },
+  "Pipe run for each line": {
+    "prefix": "whileread",
+    "body": [
+      "while IFS= read -r line; do",
+      "  echo \"\\$line:\"",
+      "  $0",
+      "done"
+    ]
+  },
   "Heredoc append to file": {
     "prefix": "heredocToFile",
     "body": ["tee -a ${1:file} > /dev/null <<EOF", "$0", "EOF"]

@@ -1,3 +1,6 @@
+" if empty(glob('~/.vim/autoload/plug.vim'))
+"   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/HEAD/plug.vim
+" endif
 " call plug#begin(expand('<sfile>:p:h'). '/plugged')
 " Plug ''
 " call plug#end()
@@ -5,17 +8,22 @@
 let &t_ut = ''  " https://github.com/microsoft/terminal/issues/832
 let &t_SI .= "\<Esc>[6 q"  " cursor shape
 let &t_EI .= "\<Esc>[2 q"
-set background=dark
+if has('termguicolors')
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum" " https://github.com/vim/vim/issues/3608#issuecomment-438487463
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  set t_Co=256
+  set termguicolors
+endif
 syntax enable
 filetype plugin indent on
-colorscheme gruvbox_material
+colorscheme ayu
 let g:netrw_dirhistmax = 0
 let g:netrw_banner = 0
 let g:netrw_browse_split = 4
 let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
-let g:markdown_fenced_languages = [ "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" ]
-let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS. ' --layout=default --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
+let g:markdown_fenced_languages = [ 'javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c', 'bash=sh' ]
+let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS. ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
 
 set backspace=eol,start,indent
 set whichwrap=<,>,[,]
@@ -89,14 +97,6 @@ set grepformat=%f:%l:%c:%m,%f:%l:%m
 set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
 
 let mapleader=';'
-nnoremap <BS> :bprevious<CR>
-nnoremap \ :bnext<CR>
-nnoremap [\ :tab sbuffer<CR>
-nnoremap ]\ :enew<CR>
-nnoremap [<BS> :new<CR>
-nnoremap ]<BS> :vnew<CR>
-noremap , ;
-noremap ;, ,
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
   execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
   execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
@@ -109,6 +109,15 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
+nnoremap <BS> :bprevious<CR>
+nnoremap \ :bnext<CR>
+nnoremap [\ :tab sbuffer<CR>
+nnoremap ]\ :enew<CR>
+nnoremap [<BS> :new<CR>
+nnoremap ]<BS> :vnew<CR>
+nnoremap <silent> <C-]> :call funcs#ctags()<CR>
+noremap , ;
+noremap ;, ,
 noremap <expr> 0 funcs#home()
 noremap ^ 0
 noremap - $
@@ -142,10 +151,6 @@ nmap zl zlz
 nnoremap <C-c> :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> redraw!<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
 nnoremap <C-w><C-c> <Esc>
 nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
@@ -173,8 +178,8 @@ nnoremap <leader>fj :GrepRegex \b<C-r><C-w>\b<CR>
 xnoremap <leader>fj :<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>
 nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=Dracula --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"', 1)<CR>
 nnoremap <leader>ft :call <SID>EditCallback('filetypes', 0)<CR>
-" Vexplore instead of Lexplore for 7.4 compatibility
-nnoremap <leader>b :Vexplore<CR>
+" Vexplore for 7.4 compatibility
+nnoremap <expr> <leader>b exists(':Lexplore') ? ':Lexplore<CR>' : ':Vexplore<CR>'
 nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
@@ -190,10 +195,10 @@ nnoremap ;w :update<CR>
 nnoremap <leader>W :wall<CR>
 " map ;q separately from <leader>q for sudoedit to work
 nnoremap ;q :quit<CR>
-nnoremap <leader>q :call funcs#quit(0, 0)<CR>
-nnoremap <leader>Q :call funcs#quit(0, 1)<CR>
-nnoremap <leader>x :call funcs#quit(1, 0)<CR>
-nnoremap <leader>X :call funcs#quit(1, 1)<CR>
+nnoremap <silent> <leader>q :call funcs#quit(0, 0)<CR>
+nnoremap <silent> <leader>Q :call funcs#quit(0, 1)<CR>
+nnoremap <silent> <leader>x :call funcs#quit(1, 0)<CR>
+nnoremap <silent> <leader>X :call funcs#quit(1, 1)<CR>
 nnoremap yoq :call <SID>ToggleQuickfix()<CR>
 nnoremap <expr> yol empty(filter(getwininfo(), 'v:val.loclist')) ? ':lopen<CR>' : ':lclose<CR>'
 cnoremap <expr> <Tab> '/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'
@@ -207,7 +212,8 @@ augroup AutoCommands
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
   autocmd FileType * setlocal formatoptions=jql
-  autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q
+  " cd in netrw to change working directory
+  autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>
 augroup END
 command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
@@ -217,8 +223,9 @@ command! -nargs=+ GrepNoRegex call s:Grep(0, 0, <q-args>)
 command! -nargs=+ Ggrep call s:Grep(1, 1, <q-args>)
 command! -nargs=+ GgrepNoRegex call s:Grep(1, 0, <q-args>)
 command! Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
-command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
 command! -nargs=* Gdiff execute 'Grt' | execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | file !git\ show\ <args>:'. expand('%:~:.'). ' | silent read !git show <args>:'. expand('%:~:.') | 0d_ | diffthis
+command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
+command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute "normal! ``"
 
 function! s:ToggleQuickfix()
   for i in range(1, winnr('$'))
@@ -325,11 +332,33 @@ nnoremap [L :lfirst<CR>
 nnoremap ]L :llast<CR>
 nnoremap [<C-l> :lpfile<CR>
 nnoremap ]<C-l> :lnfile<CR>
+nnoremap [t :tprevious<CR>
+nnoremap ]t :tnext<CR>
+nnoremap [T :tfirst<CR>
+nnoremap ]T :tlast<CR>
+nnoremap [<C-t> :ptprevious<CR>
+nnoremap ]<C-t> :ptnext<CR>
 
+nnoremap <silent> <C-h> :call plugins#tmux_navigator#navigate('h')<CR>
+nnoremap <silent> <C-j> :call plugins#tmux_navigator#navigate('j')<CR>
+nnoremap <silent> <C-k> :call plugins#tmux_navigator#navigate('k')<CR>
+nnoremap <silent> <C-l> :call plugins#tmux_navigator#navigate('l')<CR>
 nnoremap <expr> gc plugins#commentary#go()
 nnoremap <expr> gcc plugins#commentary#go(). '_'
 xnoremap <expr> gc plugins#commentary#go()
 onoremap <silent> gc :<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>
+xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
+xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
+nnoremap <silent> ds :<C-u>call plugins#surround#dosurround(plugins#surround#inputtarget())<CR>
+nnoremap <silent> cs :<C-u>call plugins#surround#changesurround()<CR>
+nnoremap <silent> cS :<C-u>call plugins#surround#changesurround(1)<CR>
+nmap yss ysiw
+nnoremap <expr> ySs plugins#surround#opfunc2('setup'). '_'
+nnoremap <expr> ySS plugins#surround#opfunc2('setup'). '_'
+nnoremap <expr> ys plugins#surround#opfunc('setup')
+nmap yS ysg_
+xnoremap <silent> s :<C-u>call plugins#surround#opfunc(visualmode(),visualmode() ==# 'V' ? 1 : 0)<CR>
+xnoremap <silent> gS :<C-u>call plugins#surround#opfunc(visualmode(),visualmode() ==# 'V' ? 0 : 1)<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -338,8 +367,6 @@ xnoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1,
 onoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
-xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 call funcs#map_copy_with_osc_yank_script()
 if $SSH_CLIENT != ''
   nnoremap gx :call system('y', expand('<cfile>'))<CR>
@@ -351,10 +378,10 @@ if has('terminal')
     autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no
   augroup END
   tnoremap <C-u> <C-\><C-n>
-  tnoremap <C-h> <C-w>h
-  tnoremap <C-j> <C-w>j
-  tnoremap <C-k> <C-w>k
-  tnoremap <C-l> <C-w>l
+  tnoremap <silent> <C-h> <C-w>:call plugins#tmux_navigator#navigate('h')<CR>
+  tnoremap <silent> <C-j> <C-w>:call plugins#tmux_navigator#navigate('j')<CR>
+  tnoremap <silent> <C-k> <C-w>:call plugins#tmux_navigator#navigate('k')<CR>
+  tnoremap <silent> <C-l> <C-w>:call plugins#tmux_navigator#navigate('l')<CR>
   nnoremap <leader>to :execute 'terminal ++close ++rows='. min([15, &lines * 2/5])<CR>
   nmap <C-b> <leader>to
   nnoremap <leader>tO :terminal ++curwin ++noclose<CR>

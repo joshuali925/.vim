@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+run-if-exists "$0" "$@"
+detect-env
+
+# linux x86_64 appimage: curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage && chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage && \mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
+case $PLATFORM:$ARCHITECTURE in
+  linux:x86_64) url=https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz ;;
+  linux:arm64) url=https://github.com/joshuali925/.vim/releases/download/binaries/neovim-linux-arm64.tar.gz ;;
+  darwin:*) url=https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz ;;
+  *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2; exit 1 ;;
+esac
+
+curl -L -o- "$url" | tar xz -C ~/.local/lib
+mv -v ~/.local/lib/nvim-* ~/.local/lib/nvim
+ln -sv ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
+run-if-exists "$0" "$@"
