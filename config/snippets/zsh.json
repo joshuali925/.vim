@@ -13,7 +13,7 @@
     "body": [
       "while IFS= read -r line; do",
       "  echo \"\\$line:\"",
-      "  $0",
+      "  $0 || break",
       "done"
     ]
   },

@@ -37,18 +37,19 @@ alias cp='cp -riv'
 alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
-alias l='exa -alF --git --color=always --color-scale --icons --group-directories-first'
+alias l='exa -alF --git --color=always --color-scale --icons --header --group-directories-first'
 alias size='du -h --max-depth=1 | sort -hr'
 alias size-subdir="du | sort -r -n | awk '{split(\"K M G\",v); s=1; while(\$1>1024){\$1/=1024; s++} print int(\$1)v[s]\"\\t\"\$2}' | head -n 20"
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
+alias tre='find . -print | sed -e "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"'
 alias sudo='sudo '
+alias less='less -RiM'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" ~/.vim/config/nvim/init.lua'
-alias less='less -RiM'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
@@ -133,6 +134,9 @@ alias gtree='git ls-files | tree --fromfile'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gunignore='git update-index --no-assume-unchanged'
+alias gexclude='cat >> "$(git rev-parse --show-toplevel)/.git/info/exclude" <<<'
+alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclude"'
+gunexclude() { sed -i "/^$*\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
@@ -147,6 +151,7 @@ alias gpatch='vi +startinsert patch.diff && git apply patch.diff && rm patch.dif
 alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\\ls -d -F --color=always \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
+gpr() { git fetch origin "pull/$1/head:pr/$1"; git checkout "pr/$1"; }
 gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
@@ -156,12 +161,12 @@ grg() {  # grep all commits, replace `log` with `reflog` for local commits
 }
 
 gvf() {  # git log takes glob: gvf '*filename*'
-  local FILEPATH=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}')
-  if [ -n "$FILEPATH" ]; then
-    local SHA=$(git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- "$FILEPATH" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- $FILEPATH | delta --dark --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
-    if [ -n "$SHA" ]; then
-      echo -e "\033[0;35mgit show $SHA:$FILEPATH\033[0m" >&2
-      git --no-pager show "$SHA:$FILEPATH"
+  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}')
+  if [ -n "$filepath" ]; then
+    local sha=$(git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- "$filepath" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- $filepath | delta --dark --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
+    if [ -n "$sha" ]; then
+      echo -e "\033[0;35mgit show $sha:$filepath\033[0m" >&2
+      git --no-pager show "$sha:$filepath"
     fi
   fi
 }
@@ -180,13 +185,13 @@ gcb() {
   if [ -n "$1" ]; then
     git checkout -b "$@" || git checkout "$@"
   else
-    local FZFTEMP=$(git branch --color=always --sort=-committerdate --all |
+    local fzftemp=$(git branch --color=always --sort=-committerdate --all |
       awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
       fzf --height=50% --min-height=20 --ansi --no-sort --reverse --tiebreak=index --preview-window=60% --toggle-sort=\` \
       --header='Press ` to toggle sort' \
       --preview='git log -n 50 --color=always --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
-    if [ -n "$FZFTEMP" ]; then
-      git show-ref --verify --quiet "refs/heads/${FZFTEMP#remotes/[^\/]*/}" && git checkout "${FZFTEMP#remotes/[^\/]*/}" || git checkout --track "${FZFTEMP#remotes/}"
+    if [ -n "$fzftemp" ]; then
+      git show-ref --verify --quiet "refs/heads/${fzftemp#remotes/[^\/]*/}" && git checkout "${fzftemp#remotes/[^\/]*/}" || git checkout --track "${fzftemp#remotes/}"
     fi
   fi
 }
@@ -228,17 +233,17 @@ psmem() {
 
 sudorun() {
   if [ "$#" -eq 0 ]; then echo 'Need a command to run.'; return 1; fi
-  local CMD=$1
+  local cmd=$1
   shift
-  if [ ! -x "$(command -v "$CMD")" ] && type "$CMD" | grep -q "$CMD is a \(shell \)\?function"; then
+  if [ ! -x "$(command -v "$cmd")" ] && type "$cmd" | grep -q "$cmd is a \(shell \)\?function"; then
     echo -e "Running as bash function..\n" >&2
-    sudo bash -c "$(declare -f "$CMD"); $CMD $*"
+    sudo bash -c "$(declare -f "$cmd"); $cmd $*"
     return 0
   fi
-  case $CMD in
+  case $cmd in
     v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
     lf) EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.cache/lf_dir" -command 'set previewer' -command 'map i $less -RiM "$f"' "$@" ;;
-    *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which "$CMD")" "$@" ;;
+    *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which "$cmd")" "$@" ;;
   esac
 }
 
@@ -340,20 +345,20 @@ path() {
 }
 
 vf() {
-  local IFS=$'\n' FZFTEMP
+  local IFS=$'\n' fzftemp
   if [ -z "$1" ]; then
-    FZFTEMP=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
+    fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
   else
-    FZFTEMP=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
+    fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
   fi
-  [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
+  [ -n "$fzftemp" ] && $EDITOR "${fzftemp[@]}"
 }
 
 cdf() {
-  local FZFTEMP
-  FZFTEMP=$(FZF_DEFAULT_COMMAND='fd --strip-cwd-prefix --color=always --hidden --exclude=.git' fzf --query="${1:-}" --ansi --bind='tab:down,btab:up' --bind='`:unbind(`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore --no-ignore || true)') && {
-    [ -d "$FZFTEMP" ] && cd "$FZFTEMP" || {
-      [ -d "$(dirname "$FZFTEMP" 2> /dev/null)" ] && cd "$(dirname "$FZFTEMP")"
+  local fzftemp
+  fzftemp=$(FZF_DEFAULT_COMMAND='fd --strip-cwd-prefix --color=always --hidden --exclude=.git' fzf --query="${1:-}" --ansi --bind='tab:down,btab:up' --bind='`:unbind(`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore --no-ignore || true)') && {
+    [ -d "$fzftemp" ] && cd "$fzftemp" || {
+      [ -d "$(dirname "$fzftemp" 2> /dev/null)" ] && cd "$(dirname "$fzftemp")"
     }
   }
 }
@@ -376,14 +381,14 @@ fif() {  # find in file
   rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute($EDITOR {+} -c \"/$1\" < /dev/tty)"
 }
 rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to switch to fzf filter
-  [ "$#" -gt 0 ] && [[ "$1" != -* ]] && local INIT_QUERY="$1" && shift 1
-  local RG_PREFIX="rg --column --line-number --no-heading --color=always$([ "$#" -gt 0 ] && printf " %q" "$@")"
-  FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "${INIT_QUERY:-}")" \
-  fzf --ansi --layout=default --height=100% --disabled --query="${INIT_QUERY:-}" \
+  [ "$#" -gt 0 ] && [[ "$1" != -* ]] && local init_query="$1" && shift 1
+  local rg_prefix="rg --column --line-number --no-heading --color=always$([ "$#" -gt 0 ] && printf " %q" "$@")"
+  FZF_DEFAULT_COMMAND="$rg_prefix $(printf %q "${init_query:-}")" \
+  fzf --ansi --layout=default --height=100% --disabled --query="${init_query:-}" \
       --header='╱ <C-s> (fzf mode) ╱ <C-r> (Reset ripgrep) ╱' \
       --bind="ctrl-s:unbind(change,ctrl-s)+change-prompt(2. fzf> )+enable-search+clear-query+rebind(ctrl-r)" \
-      --bind="ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-s)" \
-      --bind="change:reload:sleep 0.2; $RG_PREFIX {q}" \
+      --bind="ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($rg_prefix {q} || true)+rebind(change,ctrl-s)" \
+      --bind="change:reload:sleep 0.2; $rg_prefix {q}" \
       --bind="enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
       --bind='tab:down,btab:up' \
       --prompt='1. ripgrep> ' --delimiter=: \
@@ -393,48 +398,48 @@ rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to
 
 unalias z 2> /dev/null
 z() {
-  local FZFTEMP
+  local fzftemp
   if [ -z "$1" ]; then
-    FZFTEMP=$(_z -l 2>&1 | fzf --tac --bind='tab:down,btab:up') && cd "$(echo "$FZFTEMP" | sed 's/^[0-9,.]* *//')"
+    fzftemp=$(_z -l 2>&1 | fzf --tac --bind='tab:down,btab:up') && cd "$(echo "$fzftemp" | sed 's/^[0-9,.]* *//')"
   else
     _z 2>&1 "$@"
   fi
 }
 zc() {
-  local FZFTEMP
-  FZFTEMP=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="${1:-}") && cd "$(echo "$FZFTEMP" | sed 's/^[0-9,.]* *//')"
+  local fzftemp
+  fzftemp=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="${1:-}") && cd "$(echo "$fzftemp" | sed 's/^[0-9,.]* *//')"
 }
 
 t() {  # create, restore, or switch tmux session
-  local CHANGE CURRENT FZFTEMP SESSIONS
-  [ -n "$TMUX" ] && CHANGE='switch-client' && CURRENT=$(tmux display-message -p '#{session_name}') || CHANGE='attach-session'
+  local change current fzftemp sessions
+  [ -n "$TMUX" ] && change='switch-client' && current=$(tmux display-message -p '#{session_name}') || change='attach-session'
   if [ -z "$1" ]; then
-    FZFTEMP=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$CURRENT$/d" | fzf --prompt='attach> ' --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $CHANGE -t "$FZFTEMP"
+    fzftemp=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$current$/d" | fzf --prompt='attach> ' --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $change -t "$fzftemp"
     if [ "$?" -ne 0 ]; then
-      SESSIONS=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
-      [ -n "$SESSIONS" ] && FZFTEMP=$(echo "$SESSIONS" | fzf --prompt='restore> ' --bind='ctrl-d:execute(mv {} {}.bak)' --bind='tab:down,btab:up' --tac --preview='cat {}') && {
-        ln -sf "$FZFTEMP" ~/.tmux/resurrect/last
+      sessions=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
+      [ -n "$sessions" ] && fzftemp=$(echo "$sessions" | fzf --prompt='restore> ' --bind='ctrl-d:execute(mv {} {}.bak)' --bind='tab:down,btab:up' --tac --preview='cat {}') && {
+        ln -sf "$fzftemp" ~/.tmux/resurrect/last
         tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
         tmux attach-session
       } || tmux
     fi
   else
-    [ "$1" == a ] && tmux attach || tmux $CHANGE -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $CHANGE -t "$1")
+    [ "$1" == a ] && tmux attach || tmux $change -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $change -t "$1")
   fi
 }
 
 manf() {
   if [ -z "$1" ]; then
-    local FZFTEMP
-    FZFTEMP=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$FZFTEMP" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
+    local fzftemp
+    fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$fzftemp" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
   else
     nvim +"Man $*" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
   fi
 }
 
 envf() {
-  local FZFTEMP
-  FZFTEMP=$(printenv | cut -d= -f1 | fzf --bind='tab:down,btab:up' --query="${1:-}" --preview='printenv {}') && echo "$FZFTEMP=$(printenv "$FZFTEMP")"
+  local fzftemp
+  fzftemp=$(printenv | cut -d= -f1 | fzf --bind='tab:down,btab:up' --query="${1:-}" --preview='printenv {}') && echo "$fzftemp=$(printenv "$fzftemp")"
 }
 
 jo() {  # basic implementation of https://github.com/jpmens/jo
@@ -447,13 +452,13 @@ jo() {  # basic implementation of https://github.com/jpmens/jo
 
 react() {
   if [ "$#" -lt 2 ]; then echo "Usage: $0 <dir_to_watch> <command>, use {} as placeholder of modified files."; return 1; fi
-  local CHANGED
+  local changed
   echo "Watching \"$1\", passing modified files to \"${*:2}\" command every 2 seconds."
   while true; do
-    CHANGED=($(fd --base-directory "$1" --absolute-path --type=f --changed-within 2s))
-    if [ ${#CHANGED[@]} -gt 0 ]; then
+    changed=($(fd --base-directory "$1" --absolute-path --type=f --changed-within 2s))
+    if [ ${#changed[@]} -gt 0 ]; then
       local command="${@:2}"
-      eval "${command//\{\}/${CHANGED[@]}}"
+      eval "${command//\{\}/${changed[@]}}"
     fi
     sleep 2
   done
@@ -494,7 +499,7 @@ getip() {
   elif [ -z "$1" ]; then
     curl -s "https://checkip.amazonaws.com"  # or ifconfig.me
   elif [ "$1" = '--private' ]; then  # en0: wireless, en1: ethernet, en3: thunderbolt to ethernet
-    hostname -I 2> /dev/null || ipconfig getifaddr en0 2> /dev/null || ipconfig getifaddr en1
+    builtin command -v ifconfig > /dev/null 2>&1 && ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' || ipconfig getifaddr en0 2> /dev/null || ipconfig getifaddr en1 2> /dev/null || hostname -I 2> /dev/null || ip route get 1.1.1.1 | awk '{print $7}'
   elif [[ $1 =~ ^[0-9.]+$ ]]; then
     curl -s "http://ip-api.com/line/$1"
   else
@@ -521,56 +526,72 @@ croc() {
   fi
 }
 
+bin-update() {
+  for executable in "$@"; do
+    local bin="$HOME/.local/bin/$executable" vim_bin="$HOME/.vim/bin/$executable"
+    if [ ! -x "$bin" ] || [ ! -x "$vim_bin" ]; then
+      echo "$executable not found, skipping.." >&2; break
+    fi
+    "$bin" --version || "$bin" -version || "$bin" -V || "$bin" version
+    mkdir -p "$HOME/config-backup"
+    command mv -v "$bin" "$HOME/config-backup/$executable.backup_$(date +%s)"
+    "$vim_bin" --version || "$vim_bin" -version || "$vim_bin" -V || "$vim_bin" version
+  done
+}
+
 docker-shell() {
-  if [ "$1" == vim ] || [ "$1" == vim-once ]; then
+  if [[ $1 = vim* ]]; then
     docker image ls | grep -q ubuntu_vim || {
       docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim && echo -e "\n\nFinished building image. To commit new change: docker commit vim_container ubuntu_vim" || return 1
     }
-    if [ "$1" == vim-once ]; then
-      echo 'Starting new container, will be removed after it exits..'; docker run --network host -it --name vim_container_temp --rm ubuntu_vim
-      return $?
-    fi
-    local CONTAINER_STAT=$(docker inspect -f '{{.State.Running}}' 'vim_container' 2> /dev/null)
-    if [ "$CONTAINER_STAT" == true ]; then
-      echo 'Starting shell in running container..'; docker exec -it vim_container zsh
-    elif [ "$CONTAINER_STAT" == false ]; then
-      echo 'Starting stopped container..'; docker start -ai vim_container
+    case $1 in
+      vim-once) docker run --network host -it --name vim_container_temp --rm ubuntu_vim; return $? ;;
+      vim-rm) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
+      vim-build) docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
+      vim) local container_name=${2:-vim_container} ;;
+      *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
+    esac
+    local running=$(docker inspect -f '{{.State.Running}}' "$container_name" 2> /dev/null)
+    if [ "$running" == true ]; then
+      echo 'Starting shell in running container..'; docker exec -it "$container_name" zsh
+    elif [ "$running" == false ]; then
+      echo 'Starting stopped container..'; docker start -ai "$container_name"
     else
-      echo 'Starting new container with host network and docker socket mapped..'
+      echo "Starting new container ($container_name) with host network and docker socket mapped.."
       mkdir -p "$HOME/.local/docker-share"
-      docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME/.local/docker-share":/docker-share -it --name vim_container ubuntu_vim
+      docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME/.local/docker-share":/docker-share -it --name "$container_name" ubuntu_vim
     fi
     return $?
   fi
-  local SELECTED_ID=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}")
-  if [[ -n $SELECTED_ID ]]; then
-    printf "\n → %s\n" "$SELECTED_ID"
-    SELECTED_ID=$(echo "$SELECTED_ID" | awk '{print $1}')
-    docker exec -it "$SELECTED_ID" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)' || docker exec -it "$SELECTED_ID" sh
+  local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}")
+  if [[ -n $selected_id ]]; then
+    printf "\n → %s\n" "$selected_id"
+    selected_id=$(echo "$selected_id" | awk '{print $1}')
+    docker exec -it "$selected_id" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)' || docker exec -it "$SELECTED_ID" sh
   fi
 }
 
 ec2() {
-  local INSTANCES IDS CURR_STATE
+  local instances ids curr_state
   case $1 in
-    start) CURR_STATE='stopped' ;;
-    stop) CURR_STATE='running' ;;
+    start) curr_state='stopped' ;;
+    stop) curr_state='running' ;;
     refresh)
       aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
       return 0 ;;
     *) echo "Usage: $0 {start|stop|refresh} [instance-tag]"; return 1 ;;
   esac
-  INSTANCES=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$CURR_STATE" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
+  instances=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
   if [ -n "$2" ]; then
-    IDS=$(echo "$INSTANCES" | grep -w "$2" | awk '{print $2}')
+    ids=$(echo "$instances" | grep -w "$2" | awk '{print $2}')
   else
-    IDS=$(echo "$INSTANCES" | fzf --multi | awk '{print $2}')
+    ids=$(echo "$instances" | fzf --multi | awk '{print $2}')
   fi
-  [ -z "$IDS" ] && return 1
-  if [ "$CURR_STATE" = stopped ]; then
-    aws ec2 start-instances --instance-ids $(echo $IDS)
+  [ -z "$ids" ] && return 1
+  if [ "$curr_state" = stopped ]; then
+    aws ec2 start-instances --instance-ids $(echo $ids)
   else
-    aws ec2 stop-instances --instance-ids $(echo $IDS)
+    aws ec2 stop-instances --instance-ids $(echo $ids)
   fi
 }
 
@@ -581,20 +602,20 @@ if [[ $OSTYPE = darwin* ]]; then
   alias clear-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
   alias toggle-dark-theme='automator ~/.vim/config/macToggleDark.wflow'
   browser-history() {
-    local COLS=$((COLUMNS / 3)) SEP='{::}' FZFTEMP FZFPROMPT
+    local cols=$((COLUMNS / 3)) sep='{::}' fzftemp fzfprompt
     if [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
-      FZFPROMPT='Chrome> '
+      fzfprompt='Chrome> '
       command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf-temp
     elif [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
-      FZFPROMPT='Edge> '
+      fzfprompt='Edge> '
       command cp -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" /tmp/browser-history-fzf-temp
     else
       echo "Chrome and Edge histories not found, exiting.."
       return 1
     fi
-    FZFTEMP=$(sqlite3 -separator $SEP /tmp/browser-history-fzf-temp "select substr(title, 1, $COLS), url from urls order by last_visit_time desc" |
-      awk -F $SEP '{printf "%-'$COLS's  \x1b[36m%s\x1b[m\n", $1, $2}' |
-      fzf --tiebreak=index --toggle-sort=\` --header='Press ` to toggle sort' --prompt="$FZFPROMPT" --ansi --multi) && \
-      echo $FZFTEMP | sed 's#.*\(https*://\)#\1#' | xargs open
+    fzftemp=$(sqlite3 -separator $sep /tmp/browser-history-fzf-temp "select substr(title, 1, $cols), url from urls order by last_visit_time desc" |
+      awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+      fzf --tiebreak=index --toggle-sort=\` --header='Press ` to toggle sort' --prompt="$fzfprompt" --ansi --multi) && \
+      echo $fzftemp | sed 's#.*\(https*://\)#\1#' | xargs open
   }
 fi

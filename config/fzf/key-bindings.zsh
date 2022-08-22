@@ -1,4 +1,5 @@
 # https://raw.githubusercontent.com/junegunn/fzf/HEAD/shell/key-bindings.zsh
+# commit: 6fb41a202a97ad3f2437f6e5aee8890268560412
 #     ____      ____
 #    / __/___  / __/
 #   / /_/_  / / /_
@@ -72,7 +73,7 @@ bindkey -M vicmd '^P' fzf-file-widget
 bindkey -M viins '^P' fzf-file-widget
 
 # =======================================================
-# Ensure precmds are run after cd
+# customized: ensure precmds are run after cd
 fzf-redraw-prompt() {
   local precmd
   for precmd in $precmd_functions; do
@@ -94,6 +95,7 @@ fzf-cd-widget() {
     return 0
   fi
   # =======================================================
+  # customized: to support editing files, and run cd command in zle
   if [[ -d "$dir" ]]; then
     cd "$dir"
   else
@@ -103,7 +105,7 @@ fzf-cd-widget() {
   # =======================================================
   local ret=$?
   unset dir # ensure this doesn't end up appearing in prompt expansion
-  zle fzf-redraw-prompt  # use fzf-redraw-prompt instead of reset-prompt
+  zle fzf-redraw-prompt  # customized: use fzf-redraw-prompt instead of reset-prompt so prompt would update
   return $ret
 }
 zle     -N             fzf-cd-widget
@@ -115,8 +117,8 @@ bindkey -M viins '\ec' fzf-cd-widget
 fzf-history-widget() {
   local selected num
   setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2> /dev/null
-  selected=( $(fc -rl 1 | perl -ne 'print if !$seen{(/^\s*[0-9]+\**\s+(.*)/, $1)}++' |
-    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --tiebreak=index --bind=\\\`:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --theme=OneHalfDark --color=always --plain' --preview-window='right,40%,wrap'" $(__fzfcmd)) )
+  selected=( $(fc -rl 1 | awk '{ cmd=$0; sub(/^[ \t]*[0-9]+\**[ \t]+/, "", cmd); if (!seen[cmd]++) print $0 }' |
+    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --scheme=history --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m" $(__fzfcmd)) )
   local ret=$?
   if [ -n "$selected" ]; then
     num=$selected[1]

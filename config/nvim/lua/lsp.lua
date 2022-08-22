@@ -110,7 +110,7 @@ function M.init()
             register_server("tsserver", {
                 init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
                 commands = {
-                    OrganizeImports = {
+                    OrganizeImports = { -- TODO use https://github.com/jose-elias-alvarez/typescript.nvim
                         function()
                             vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
                                 command = "_typescript.organizeImports",

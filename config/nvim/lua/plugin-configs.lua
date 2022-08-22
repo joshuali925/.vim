@@ -50,7 +50,7 @@ end
 
 function M.rest_nvim()
     require("rest-nvim").setup({ skip_ssl_verification = true })
-    vim.api.nvim_create_user_command("RestNvimPreviewCurl", [[execute "normal \<Plug>RestNvimPreview" | sleep 100m | S 1,2messages]], {})
+    vim.api.nvim_create_user_command("RestNvimPreviewCurl", [[execute "normal \<Plug>RestNvimPreview"]], {})
 end
 
 vim.g.qs_filetype_blacklist = {
@@ -60,7 +60,7 @@ vim.g.qs_filetype_blacklist = {
     "netrw",
     "packer",
     "alpha",
-    "mason.nvim",
+    "mason",
     "TelescopePrompt",
     "Mundo",
     "NvimTree",
@@ -234,7 +234,7 @@ function M.alpha_nvim()
         group = "AlphaAutoCommands",
         callback = function()
             vim.b.RestoredCursor = 1 -- do not restore cursor position
-            vim.keymap.set("n", "v", require("alpha").queue_press, { buffer = true }) -- TODO https://github.com/goolord/alpha-nvim/issues/92
+            vim.keymap.set("n", "v", require("alpha").queue_press, { buffer = true })
             vim.keymap.set("n", "q", "len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'", { buffer = true, expr = true })
             vim.keymap.set("n", "e", "<Cmd>enew<CR>", { buffer = true })
             vim.keymap.set("n", "i", "<Cmd>enew <bar> startinsert<CR>", { buffer = true })
@@ -272,8 +272,9 @@ function M.nvim_tree()
                     { key = { "q" }, cb = "<Cmd>execute 'NvimTreeResize '. winwidth(0) <bar> NvimTreeClose<CR>" },
                     { key = { "<Left>" }, cb = "<Cmd>normal! zh<CR>" },
                     { key = { "<Right>" }, cb = "<Cmd>normal! zl<CR>" },
-                    { key = { "H" }, cb = "<Cmd>normal! H<CR>" },
                     { key = { "-" }, cb = "<Cmd>normal! $<CR>" },
+                    { key = { "H" }, cb = "<Cmd>normal! H<CR>" },
+                    { key = { "<C-e>" }, cb = "<Cmd>normal! <C-e><CR>" },
                 },
             },
         },
@@ -355,7 +356,7 @@ function M.nvim_treesitter()
                 enable = true,
                 keymaps = {
                     ["if"] = "@function.inner",
-                    ["af"] = "@function.outer",
+                    ["aF"] = "@function.outer",
                     ["ic"] = "@class.inner",
                     ["ac"] = "@class.outer",
                 },
@@ -612,6 +613,7 @@ function M.nvim_cmp()
         },
         sources = {
             { name = "nvim_lsp" },
+            { name = "nvim_lsp_signature_help" },
             { name = "vsnip" },
             { name = "path" },
             { name = "nvim_lua" },
@@ -655,7 +657,7 @@ function M.open_quickui_context_menu()
         { "Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk" },
         { "Git buffer reset", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index" },
         { "Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line" },
-        { "Git &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
+        { "Git &remote", [[execute "lua require('packer').loader('vim-flog')" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
         { "--", "" },
     }
     local conflict_state = vim.fn["funcs#get_conflict_state"]()
@@ -711,12 +713,13 @@ function M.vim_quickui()
         { "Git &blame", [[Git blame]], "Git blame of current file" },
         { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
         { "Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version (Gdiffsplit HEAD)" },
-        { "Git &file history", [[vsplit | execute "lua require('packer').loader('vim-fugitive')" | 0Gclog]], "Browse previously committed versions of current file" },
-        { "Diffview file history", [[DiffviewFileHistory -f -a]], "Browse previously committed versions of current file (DiffviewFileHistory -f -a)" },
+        { "Git &file history", [[vsplit | execute "lua require('packer').loader('vim-flog')" | 0Gclog]], "Browse previously committed versions of current file" },
+        { "Diffview file history", [[DiffviewFileHistory % --follow --all]], "Browse previously committed versions of current file with Diffview" },
         { "--", "" },
         { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
         { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
         { "Git toggle blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
+        { "Git hunks against HEAD", [[lua require("gitsigns").change_base("HEAD", true)]], "Show hunks based on HEAD instead of staged, to reset run :GitSigns change_base" },
         { "--", "" },
         { "Git &status", [[Git]], "Git status" },
         { "Git unstaged &changes", [[Git! difftool]], "Load unstaged changes into quickfix (Git! difftool)" },
@@ -833,7 +836,7 @@ function M.vim_quickui()
         { "Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
         { "Git l&og", [['<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
         { "--", "" },
-        { "Git open &remote", [[execute "lua require('packer').loader('vim-rhubarb vim-fugitive')" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser" },
+        { "Git open &remote", [[execute "lua require('packer').loader('vim-flog')" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser" },
     })
     vim.fn["quickui#menu#install"]("Ta&bles", {
         { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },
