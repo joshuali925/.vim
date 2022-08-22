@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NODE_VERSION=14.19.1
+NODE_VERSION=14.20.0
 BACKUP_DIR=$HOME/config-backup
 
 CYAN='\033[0;36m'
@@ -106,7 +106,10 @@ install_development_tools() {
     log 'Disabled ApplePressAndHoldEnabled to support key repeats'
     # brew tap wez/wezterm
     # brew install --cask wez/wezterm/wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel
-    # manually install https://github.com/xiaogdgenuine/Doll snipaste
+    # manually install:
+    # Doll: https://github.com/xiaogdgenuine/Doll
+    # snipaste: https://www.snipaste.com/download.html
+    # mousefix: https://mousefix.org
   fi
   install_asdf
 }
@@ -277,7 +280,7 @@ default-install() {
   install devtools dotfiles java python node tmux neovim
 
   log '\nInstalling zsh plugins..'
-  zsh  # -ic 'exit' makes installing binaries to fail for some reason
+  zsh -ic 'exit'
 
   install ssh-key
 

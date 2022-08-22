@@ -1,4 +1,5 @@
 # https://raw.githubusercontent.com/junegunn/fzf/HEAD/shell/completion.bash
+# commit: 6532b3e655c765c79feaa5936d8e686d943c1e4e
 #     ____      ____
 #    / __/___  / __/
 #   / /_/_  / / /_
@@ -162,7 +163,11 @@ _fzf_handle_dynamic_completion() {
 
 __fzf_generic_path_completion() {
   local cur base dir leftover matches trigger cmd
-  cmd="${COMP_WORDS[0]//[^A-Za-z0-9_=]/_}"
+  cmd="${COMP_WORDS[0]}"
+  if [[ $cmd == \\* ]]; then
+    cmd="${cmd:1}"
+  fi
+  cmd="${cmd//[^A-Za-z0-9_=]/_}"
   COMPREPLY=()
   trigger=${FZF_COMPLETION_TRIGGER-'**'}
   cur="${COMP_WORDS[COMP_CWORD]}"
@@ -178,7 +183,7 @@ __fzf_generic_path_completion() {
         [[ -z "$dir" ]] && dir='.'
         [[ "$dir" != "/" ]] && dir="${dir/%\//}"
         matches=$(eval "$1 $(printf %q "$dir")" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_COMPLETION_OPTS $2" __fzf_comprun "$4" -q "$leftover" | while read -r item; do
-          printf "%q$3 " "$item"
+          printf "%q " "${item%$3}$3"
         done)
         matches=${matches% }
         [[ -z "$3" ]] && [[ "$__fzf_nospace_commands" = *" ${COMP_WORDS[0]} "* ]] && matches="$matches "
@@ -261,6 +266,7 @@ _fzf_dir_completion() {
 }
 
 _fzf_complete_kill() {
+  # customized: kept to support empty trigger
   local trigger=${FZF_COMPLETION_TRIGGER-'**'}
   local cur="${COMP_WORDS[COMP_CWORD]}"
   if [[ -z "$cur" ]]; then
@@ -284,7 +290,7 @@ _fzf_proc_completion_post() {
 
 _fzf_host_completion() {
   _fzf_complete +m -- "$@" < <(
-    command cat <(command tail -n +1 ~/.ssh/config ~/.ssh/config.d/* /etc/ssh/ssh_config 2> /dev/null | command grep -i '^\s*host\(name\)\? ' | awk '{for (i = 2; i <= NF; i++) print $1 " " $i}' | command grep -v '[*?]') \
+    command cat <(command tail -n +1 ~/.ssh/config ~/.ssh/config.d/* /etc/ssh/ssh_config 2> /dev/null | command grep -i '^\s*host\(name\)\? ' | awk '{for (i = 2; i <= NF; i++) print $1 " " $i}' | command grep -v '[*?%]') \
         <(command grep -oE '^[[a-z0-9.,:-]+' ~/.ssh/known_hosts | tr ',' '\n' | tr -d '[' | awk '{ print $1 " " $1 }') \
         <(command grep -v '^\s*\(#\|$\)' /etc/hosts | command grep -Fv '0.0.0.0') |
         awk '{if (length($2) > 0) {print $2}}' | sort -u
@@ -305,6 +311,10 @@ _fzf_alias_completion() {
 
 # fzf options
 complete -o default -F _fzf_opts_completion fzf
+# fzf-tmux is a thin fzf wrapper that has only a few more options than fzf
+# itself. As a quick improvement we take fzf's completion. Adding the few extra
+# fzf-tmux specific options (like `-w WIDTH`) are left as a future patch.
+complete -o default -F _fzf_opts_completion fzf-tmux
 
 d_cmds="${FZF_COMPLETION_DIR_COMMANDS:-cd pushd rmdir}"
 a_cmds="
@@ -350,6 +360,7 @@ for cmd in $d_cmds; do
 done
 
 # Kill completion (supports empty completion trigger)
+# customized: kept to support empty trigger
 complete -F _fzf_complete_kill -o default -o bashdefault kill
 
 unset cmd d_cmds a_cmds
@@ -374,9 +385,11 @@ _fzf_setup_completion() {
   done
 }
 
-# Environment variables / Aliases / Hosts
+# Environment variables / Aliases / Hosts / Process
 _fzf_setup_completion 'var'   export unset
 _fzf_setup_completion 'alias' unalias
 _fzf_setup_completion 'host'  ssh telnet
+# customized: commented out to support empty trigger
+# _fzf_setup_completion 'proc'  kill
 
 fi

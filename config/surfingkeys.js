@@ -230,8 +230,10 @@ api.mapkey('yov', 'Toggle sites', function() {
         window.location.href = `https://www.google.com/search?q=${window.location.href.match(/[?&]wd=([^&]+)/)[1]}`;
     } else if (window.location.hostname === 'www.google.com') {
         window.location.href = `https://www.baidu.com/s?ie=UTF-8&wd=${window.location.href.match(/[?&]q=([^&]+)/)[1]}`;
+    } else if (window.location.hostname === 'www.reddit.com') {
+        window.location.href = window.location.href.replace('www.reddit.com', 'libredd.it');
     }
-}, {domain: /(baidu|google|github)\.(com|dev|io)/i});
+}, {domain: /(baidu|google|github|reddit)\.(com|dev|io)/i});
 api.mapkey('yos', 'Toggle sourcegraph search', function() {
     api.tabOpenLink('https://sourcegraph.com/search?q=context:global+repo:' + window.location.href.match(/(github.com\/[^/]+\/?[^/]+)/)[1] + '+');
 }, {domain: /github\.com/i});

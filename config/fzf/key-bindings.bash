@@ -1,4 +1,5 @@
 # https://raw.githubusercontent.com/junegunn/fzf/HEAD/shell/key-bindings.bash
+# commit: 6fb41a202a97ad3f2437f6e5aee8890268560412
 #     ____      ____
 #    / __/___  / __/
 #   / /_/_  / / /_
@@ -15,14 +16,17 @@
 # Key bindings
 # ------------
 __fzf_select__() {
-  local cmd="${FZF_CTRL_T_COMMAND:-"command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
+  local cmd opts
+  cmd="${FZF_CTRL_T_COMMAND:-"command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
     -o -type f -print \
     -o -type d -print \
     -o -type l -print 2> /dev/null | cut -b3-"}"
-  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read -r item; do
-    printf '%q ' "$item"
-  done
-  echo
+  opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore --reverse $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS -m"
+  eval "$cmd" |
+    FZF_DEFAULT_OPTS="$opts" $(__fzfcmd) "$@" |
+    while read -r item; do
+      printf '%q ' "$item"  # escape special chars
+    done
 }
 
 if [[ $- =~ i ]]; then
@@ -42,15 +46,19 @@ __fzf_cd__() {
   local cmd dir
   cmd="${FZF_ALT_C_COMMAND:-"command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
     -o -type d -print 2> /dev/null | cut -b3-"}"
-  dir=$(eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" $(__fzfcmd) +m) && if [[ -d "$dir" ]]; then printf 'cd %q' "$dir"; else printf '%q %q' "$EDITOR" "$dir"; fi
+  opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore --reverse $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS +m"
+  # customized to allow editing files
+  dir=$(eval "$cmd" | FZF_DEFAULT_OPTS="$opts" $(__fzfcmd)) && if [ -d "$dir" ]; then printf 'cd %q' "$dir"; else printf '%q %q' "$EDITOR" "$dir"; fi
 }
 
 __fzf_history__() {
-  local output
+  local output opts script
+  opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS -n2..,.. --scheme=history --bind=ctrl-r:toggle-sort $FZF_CTRL_R_OPTS +m --read0"
+  script='BEGIN { getc; $/ = "\n\t"; $HISTCOUNT = $ENV{last_hist} + 1 } s/^[ *]//; print $HISTCOUNT - $. . "\t$_" if !$seen{$_}++'
   output=$(
     builtin fc -lnr -2147483648 |
-      last_hist=$(HISTTIMEFORMAT='' builtin history 1) perl -n -l0 -e 'BEGIN { getc; $/ = "\n\t"; $HISTCMD = $ENV{last_hist} + 1 } s/^[ *]//; print $HISTCMD - $. . "\t$_" if !$seen{$_}++' |
-      FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --tiebreak=index --bind=\\\`:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS +m --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --theme=OneHalfDark --color=always --plain' --preview-window='right,40%,wrap' --read0" $(__fzfcmd) --query "$READLINE_LINE"
+      last_hist=$(HISTTIMEFORMAT='' builtin history 1) perl -n -l0 -e "$script" |
+      FZF_DEFAULT_OPTS="$opts" $(__fzfcmd) --query "$READLINE_LINE"
   ) || return
   READLINE_LINE=${output#*$'\t'}
   if [[ -z "$READLINE_POINT" ]]; then

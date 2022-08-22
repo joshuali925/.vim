@@ -27,13 +27,15 @@ rmdir /S /Q %USERPROFILE%\vimfiles
 
 - configs
 
-```markdown
-Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: option command t
+```
+Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: command-option-t
          -> Text -> uncheck Use smart quotes and dashes
-Maccy -> Preferences -> Hotkey -> control shift v
-                     -> Paste automatically (cmd + shift + enter pastes without formatting)
+
+Maccy -> Preferences -> Hotkey -> control-shift-v
+                     -> Paste automatically (command-shift-enter pastes without formatting)
                      -> History size 999
                      -> Appearance -> Menu size 100
+
 Alt-tab -> Preferences -> Controls -> change "Hold option" to "Hold cmd"
                                    -> change "Select previous window" to shift tab
                        -> Appearance -> check Hide apps with no open window

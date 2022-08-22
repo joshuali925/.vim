@@ -62,6 +62,10 @@ xnoremap ae GoggV
 nnoremap cae vGoggVc
 nnoremap dae vGoggVd
 nnoremap yae vGoggVy
+xnoremap af iw%
+nnoremap caf viw%c
+nnoremap daf viw%d
+nnoremap yaf viw%y
 nnoremap <leader>yae vGoggV"+y
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)

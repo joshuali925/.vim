@@ -5,6 +5,9 @@
   email = joshuali925@gmail.com
   name = Joshua Li
 
+; [credential]
+;   helper = store
+
 [url "https://github.com/"]
   insteadOf = gh:
 
@@ -19,6 +22,9 @@
 
 [core]
   pager = less -RiMXF
+
+[fetch]
+  prune = true
 
 [pull]
   rebase = false

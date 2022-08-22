@@ -109,6 +109,8 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
+xnoremap af iw%
+onoremap <silent> af :normal vaf<CR>
 nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
 nnoremap [\ :tab sbuffer<CR>
@@ -209,7 +211,7 @@ cnoremap <expr> <BS> '/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()
 
 augroup AutoCommands
   autocmd!
-  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
+  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line('$') | execute "normal! g`\"" | endif
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
   autocmd FileType * setlocal formatoptions=jql
   " cd in netrw to change working directory
@@ -224,8 +226,9 @@ command! -nargs=+ Ggrep call s:Grep(1, 1, <q-args>)
 command! -nargs=+ GgrepNoRegex call s:Grep(1, 0, <q-args>)
 command! Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
 command! -nargs=* Gdiff execute 'Grt' | execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | file !git\ show\ <args>:'. expand('%:~:.'). ' | silent read !git show <args>:'. expand('%:~:.') | 0d_ | diffthis
+command! -nargs=* Gblame call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')
 command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
-command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute "normal! ``"
+command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute 'normal! ``'
 
 function! s:ToggleQuickfix()
   for i in range(1, winnr('$'))
@@ -274,9 +277,9 @@ function! s:EditCallback(cmd, cd_git_root) abort
     execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. fnameescape(tempfile). ' "'. expand('%'). '"'
   elseif a:cmd == 'filetypes'
     let sink = 'set filetype='
-    let $FZFTEMP = join(sort(map(split(globpath(&rtp, 'syntax/*.vim'), '\n'), 'fnamemodify(v:val, ":t:r")')), '\n')
-    execute 'silent !echo -e $FZFTEMP | fzf > '. fnameescape(tempfile)
-    let $FZFTEMP = ''  " cannot unlet environment variables in 7.4
+    let $fzftemp = join(sort(map(split(globpath(&rtp, 'syntax/*.vim'), '\n'), 'fnamemodify(v:val, ":t:r")')), '\n')
+    execute 'silent !echo -e $fzftemp | fzf > '. fnameescape(tempfile)
+    let $fzftemp = ''  " cannot unlet environment variables in 7.4
   else
     execute 'silent !'. a:cmd. ' > '. fnameescape(tempfile)
   endif

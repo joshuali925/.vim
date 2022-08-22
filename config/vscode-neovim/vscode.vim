@@ -90,6 +90,8 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
+xnoremap af iw%
+onoremap <silent> af :normal vaf<CR>
 nmap <BS> gT
 nmap \ gt
 noremap <expr> 0 funcs#home()

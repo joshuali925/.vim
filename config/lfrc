@@ -60,11 +60,12 @@ map J push hjl
 map `` push ''
 map c :clear; unselect
 map gs !clear && git status
+map glo !clear && git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit
 map gr cd-git-root
 map gvi :cd ~/.vim
 map gvd :cd ~/.local/share/nvim
 map gvp :cd ~/.local/share/nvim/site/pack/packer/opt
-map gl follow-symlink
+map gf follow-symlink
 map t locate-file
 map T locate-file --no-ignore
 map <c-p> locate-git-file

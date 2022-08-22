@@ -99,6 +99,7 @@ return require("packer").startup({
         use({ "hrsh7th/cmp-path", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-nvim-lua", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-nvim-lsp", after = "nvim-cmp" })
+        use({ "hrsh7th/cmp-nvim-lsp-signature-help", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-cmdline", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-vsnip", after = "nvim-cmp" })
         use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" }) -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets

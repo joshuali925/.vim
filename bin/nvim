@@ -13,5 +13,5 @@ esac
 
 curl -L -o- "$url" | tar xz -C ~/.local/lib
 mv -v ~/.local/lib/nvim-* ~/.local/lib/nvim
-ln -sv ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
+[ ! -x "$HOME/.local/bin/nvim" ] && ln -sv ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
 run-if-exists "$0" "$@"
