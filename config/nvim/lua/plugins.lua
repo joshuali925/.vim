@@ -75,7 +75,8 @@ return require("packer").startup({
 
         -- lang
         use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate", requires = "nvim-treesitter/nvim-treesitter-textobjects", config = conf("nvim_treesitter") })
-        use({ "williamboman/mason.nvim", requires = { "williamboman/mason-lspconfig.nvim", after = "mason.nvim" } })
+        use({ "williamboman/mason.nvim" })
+        use({ "williamboman/mason-lspconfig.nvim", after = "mason.nvim" })
         use({ "neovim/nvim-lspconfig", after = "mason-lspconfig.nvim" })
         use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
         use({ "glepnir/lspsaga.nvim", cmd = "Lspsaga", module = "lspsaga", config = conf("lspsaga_nvim") })

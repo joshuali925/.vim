@@ -59,11 +59,14 @@ local themes = {
             return default_colors
         end,
         config = function()
-            vim.g.tokyonight_style = theme_index < 0 and "storm" or "day"
-            vim.g.tokyonight_italic_keywords = false
-            vim.g.tokyonight_italic_comments = false
-            vim.g.tokyonight_sidebars = sidebars
-            vim.g.tokyonight_colors = { comment = "#717993" }
+            require("tokyonight").setup({
+                style = theme_index < 0 and "storm" or "day",
+                styles = { comments = "NONE", keywords = "NONE" },
+                sidebars = sidebars,
+                on_colors = function(colors)
+                    colors.comment = "#717993"
+                end,
+            })
             vim.cmd("colorscheme tokyonight")
         end,
     },
