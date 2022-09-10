@@ -3,7 +3,7 @@ if vim.fn.glob(install_path) == "" then
     Packer_bootstrap = vim.fn.system({ "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
 
 end
-vim.cmd("packadd packer.nvim")
+vim.cmd.packadd("packer.nvim")
 
 return require("packer").startup({
     config = {
@@ -35,7 +35,7 @@ return require("packer").startup({
         -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
         use({ "dstein64/nvim-scrollview", config = "require('scrollview').setup()" })
         use({
-            "NvChad/nvim-colorizer.lua",
+            "NvChad/nvim-colorizer.lua", -- TODO https://github.com/uga-rosa/ccc.nvim
             cmd = "ColorizerAttachToBuffer",
             config = function() require("colorizer").setup({}, { RGB = false, rgb_fn = true, mode = "virtualtext" }) end,
         })
@@ -54,11 +54,12 @@ return require("packer").startup({
         use({
             "nvim-telescope/telescope.nvim",
             requires = { { "nvim-lua/popup.nvim" }, { "nvim-lua/plenary.nvim" }, { "nvim-telescope/telescope-fzf-native.nvim", run = "make" } },
+            wants = "telescope-fzf-native.nvim",
             module = "telescope",
             config = conf("telescope"),
         })
         use({ "kevinhwang91/nvim-bqf", ft = "qf", config = conf("nvim_bqf") })
-        use({ "rcarriga/nvim-notify" })
+        use({ "rcarriga/nvim-notify" }) -- TODO https://github.com/folke/noice.nvim
         use({ "kyazdani42/nvim-tree.lua", cmd = { "NvimTreeFindFile", "NvimTreeOpen" }, config = conf("nvim_tree") })
 
         -- git
@@ -79,7 +80,7 @@ return require("packer").startup({
         use({ "williamboman/mason-lspconfig.nvim", after = "mason.nvim" })
         use({ "neovim/nvim-lspconfig", after = "mason-lspconfig.nvim" })
         use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
-        use({ "glepnir/lspsaga.nvim", cmd = "Lspsaga", module = "lspsaga", config = conf("lspsaga_nvim") })
+        use({ "glepnir/lspsaga.nvim", after = "null-ls.nvim", config = conf("lspsaga_nvim") })
         use({
             "b3nj5m1n/kommentary",
             requires = { "JoosepAlviste/nvim-ts-context-commentstring", after = "nvim-treesitter" },

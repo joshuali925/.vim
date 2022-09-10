@@ -73,11 +73,11 @@ end
 
 function M.command_without_quickscope(command)
     if vim.g.qs_enable == 1 then
-        vim.cmd("QuickScopeToggle")
+        vim.cmd.QuickScopeToggle()
     end
     vim.cmd(command)
     if vim.g.qs_enable == 0 then
-        vim.cmd("QuickScopeToggle")
+        vim.cmd.QuickScopeToggle()
     end
 end
 

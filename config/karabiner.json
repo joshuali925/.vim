@@ -44,7 +44,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep Chrome && open -a 'Google Chrome') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep 'Firefox' && open -a 'Firefox')"
+              "shell_command": "(pgrep Chrome && open -a 'Google Chrome') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep 'Orion' && open -a 'Orion') || (pgrep 'Firefox' && open -a 'Firefox')"
             }
           ]
         },
@@ -109,31 +109,6 @@
     {
       "description": "Application Specific",
       "manipulators": [
-        {
-          "from": {
-            "key_code": "2",
-            "modifiers": {
-              "mandatory": [
-                "right_command",
-                "right_control",
-                "right_shift",
-                "right_option"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "t"
-            }
-          ],
-          "type": "basic",
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "bundle_identifiers": ["^cn\\.better365\\.ishot$"]
-            }
-          ]
-        },
         {
           "from": {
             "key_code": "h",
@@ -207,8 +182,7 @@
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$",
-                "^org\\.vim\\.MacVim$"
+                "^com\\.qvacua\\.VimR$"
               ]
             }
           ]
@@ -238,8 +212,7 @@
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$",
-                "^org\\.vim\\.MacVim$"
+                "^com\\.qvacua\\.VimR$"
               ]
             }
           ]
@@ -269,8 +242,7 @@
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$",
-                "^org\\.vim\\.MacVim$"
+                "^com\\.qvacua\\.VimR$"
               ]
             }
           ]
@@ -299,8 +271,7 @@
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$",
-                "^org\\.vim\\.MacVim$"
+                "^com\\.qvacua\\.VimR$"
               ]
             }
           ]
@@ -329,8 +300,7 @@
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$",
-                "^org\\.vim\\.MacVim$"
+                "^com\\.qvacua\\.VimR$"
               ]
             }
           ]
@@ -363,8 +333,7 @@
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$",
-                "^org\\.vim\\.MacVim$"
+                "^com\\.qvacua\\.VimR$"
               ]
             }
           ]
@@ -455,7 +424,7 @@
       ]
     },
     {
-      "description": "Navigation",
+      "description": "CapsLock",
       "manipulators": [
         {
           "from": {
@@ -493,7 +462,12 @@
             "basic.to_if_alone_timeout_milliseconds": 300
           },
           "type": "basic"
-        },
+        }
+      ]
+    },
+    {
+      "description": "Navigation",
+      "manipulators": [
         {
           "from": {
             "key_code": "a",

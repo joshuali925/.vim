@@ -67,7 +67,7 @@ local themes = {
                     colors.comment = "#717993"
                 end,
             })
-            vim.cmd("colorscheme tokyonight")
+            vim.cmd.colorscheme("tokyonight")
         end,
     },
     ["gruvbox-flat.nvim"] = {
@@ -81,7 +81,7 @@ local themes = {
         config = function()
             vim.g.gruvbox_flat_style = "dark"
             vim.g.gruvbox_sidebars = sidebars
-            vim.cmd("colorscheme gruvbox-flat")
+            vim.cmd.colorscheme("gruvbox-flat")
             -- https://github.com/eddyekofo94/gruvbox-flat.nvim/issues/21
             vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", { fg = "#808080" })
             vim.api.nvim_set_hl(0, "CmpItemMenu", { fg = "#7c6f64" })
@@ -122,7 +122,7 @@ local themes = {
             return default_colors
         end,
         config = function()
-            vim.cmd("colorscheme vscode")
+            vim.cmd.colorscheme("vscode")
             if theme_index < 0 then
                 vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
                 vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#4a4a4a" })
@@ -141,7 +141,7 @@ local themes = {
         end,
         config = function()
             require("ayu").setup({ overrides = { Comment = { fg = "#69737d" } } })
-            vim.cmd("colorscheme ayu-" .. (theme_index < 0 and "mirage" or "light"))
+            vim.cmd.colorscheme("ayu-" .. (theme_index < 0 and "mirage" or "light"))
             vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#30364f" })
             vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#30364f" })
             vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#30364f" })
@@ -159,6 +159,7 @@ local themes = {
         end,
         config = function()
             require("catppuccin").setup({
+                custom_highlights = { Comment = { fg = "#717993" } },
                 integrations = {
                     native_lsp = {
                         underlines = { errors = { "undercurl" }, hints = { "undercurl" }, warnings = { "undercurl" }, information = { "undercurl" } },
@@ -167,7 +168,7 @@ local themes = {
                 compile = { enabled = true, path = vim.fn.stdpath("cache") .. "/catppuccin", suffix = "_compiled" },
             })
             vim.g.catppuccin_flavour = (theme_index < 0 and "macchiato" or "latte")
-            vim.cmd("colorscheme catppuccin")
+            vim.cmd.colorscheme("catppuccin")
         end,
     },
     ["nightfox.nvim"] = {
@@ -182,7 +183,7 @@ local themes = {
             return default_colors
         end,
         config = function()
-            vim.cmd("colorscheme " .. (theme_index < 0 and "nordfox" or "dawnfox"))
+            vim.cmd.colorscheme(theme_index < 0 and "nordfox" or "dawnfox")
         end,
     },
 }
@@ -223,7 +224,7 @@ end
 
 function M.switch(index)
     local states_file = vim.fn.stdpath("config") .. "/lua/states.lua"
-    vim.cmd(('call writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")'):format(index, states_file, states_file))
+    vim.cmd.call(('writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")'):format(index, states_file, states_file))
     vim.g.theme_index = index
     theme_index = index
     M.theme = M.theme_list[index]

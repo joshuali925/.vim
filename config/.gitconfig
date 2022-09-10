@@ -5,6 +5,9 @@
   email = joshuali925@gmail.com
   name = Joshua Li
 
+[alias]
+  open = "!git remote get-url origin | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//' | if command -v open > /dev/null 2>&1; then xargs open; else y; fi"
+
 ; [credential]
 ;   helper = store
 

@@ -38,12 +38,13 @@ alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
 alias l='exa -alF --git --color=always --color-scale --icons --header --group-directories-first'
+alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias size='du -h --max-depth=1 | sort -hr'
 alias size-subdir="du | sort -r -n | awk '{split(\"K M G\",v); s=1; while(\$1>1024){\$1/=1024; s++} print int(\$1)v[s]\"\\t\"\$2}' | head -n 20"
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
+alias escape="sed 's/\\([\"\\]\\)/\\\\\\1/g'"  # escape "\ with backslash
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
-alias tre='find . -print | sed -e "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"'
 alias sudo='sudo '
 alias less='less -RiM'
 alias v='$EDITOR'
@@ -82,8 +83,7 @@ alias gcs!='git commit -s --amend'
 alias gcv='git commit -v'
 alias gcgpg='export GPG_TTY=$(tty) && git commit -S -s -m'
 alias gcf='git config --list'
-alias gcm='git checkout main || git checkout master'
-alias gcd='git checkout develop || git checkout dev'
+alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
 alias gcp='git cherry-pick'
 alias gcpa='git cherry-pick --abort'
@@ -128,7 +128,7 @@ alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"
 alias gss='git status -sb'
 alias gst='git stash'
 alias gsts='git stash; git stash apply'
-alias gshow='git show --pretty=short --show-signature'
+alias gshow='git show --pretty=fuller --show-signature'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
 alias gignore='git update-index --assume-unchanged'
@@ -136,7 +136,7 @@ alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gunignore='git update-index --no-assume-unchanged'
 alias gexclude='cat >> "$(git rev-parse --show-toplevel)/.git/info/exclude" <<<'
 alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclude"'
-gunexclude() { sed -i "/^$*\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
+gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
@@ -151,7 +151,8 @@ alias gpatch='vi +startinsert patch.diff && git apply patch.diff && rm patch.dif
 alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\\ls -d -F --color=always \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
-gpr() { git fetch origin "pull/$1/head:pr/$1"; git checkout "pr/$1"; }
+tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
+gpr() { git fetch origin "pull/$1/head"; git branch "pr/$1" 2> /dev/null; git checkout "pr/$1"; git reset --hard FETCH_HEAD; }
 gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
@@ -493,6 +494,10 @@ set-env() {
   eval "$command" && echo "$command" | if [ -n "$write_to_rc" ]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
 }
 
+tldr() {
+  curl "https://cheat.sh/${*// /+}"
+}
+
 getip() {
   if [ "$#" -gt 1 ]; then
     echo "Usage: $0 [--private|ip|domain]"
@@ -527,6 +532,7 @@ croc() {
 }
 
 bin-update() {
+  local executable
   for executable in "$@"; do
     local bin="$HOME/.local/bin/$executable" vim_bin="$HOME/.vim/bin/$executable"
     if [ ! -x "$bin" ] || [ ! -x "$vim_bin" ]; then
@@ -564,7 +570,7 @@ docker-shell() {
     return $?
   fi
   local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}")
-  if [[ -n $selected_id ]]; then
+  if [ -n "$selected_id" ]; then
     printf "\n → %s\n" "$selected_id"
     selected_id=$(echo "$selected_id" | awk '{print $1}')
     docker exec -it "$selected_id" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)' || docker exec -it "$SELECTED_ID" sh
@@ -574,16 +580,22 @@ docker-shell() {
 ec2() {
   local instances ids curr_state
   case $1 in
-    start) curr_state='stopped' ;;
-    stop) curr_state='running' ;;
+    start) curr_state=stopped ;;
+    stop) curr_state=running ;;
     refresh)
       aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
       return 0 ;;
-    *) echo "Usage: $0 {start|stop|refresh} [instance-tag]"; return 1 ;;
+    ssh)
+      local host=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$2$" | awk '{print $1}')
+      [ -z "$host" ] && return 1
+      echo "ssh to ec2: $host" >&2
+      ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "ec2-user@$host" || ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "ubuntu@$host"
+      return 0 ;;
+    *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag]"; return 1 ;;
   esac
   instances=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
   if [ -n "$2" ]; then
-    ids=$(echo "$instances" | grep -w "$2" | awk '{print $2}')
+    ids=$(echo "$instances" | grep "^$2\s" | awk '{print $2}')
   else
     ids=$(echo "$instances" | fzf --multi | awk '{print $2}')
   fi
