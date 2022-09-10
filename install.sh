@@ -75,6 +75,7 @@ link_file() {
 install_asdf() {
   if [ ! -s "$HOME/.asdf/asdf.sh" ]; then
     log '\nInstalling asdf..'
+    echo 'legacy_version_file = yes' > ~/.asdfrc
     git clone https://github.com/asdf-vm/asdf.git --depth=1 ~/.asdf
     source ~/.asdf/asdf.sh
   fi
@@ -110,6 +111,8 @@ install_development_tools() {
     # Doll: https://github.com/xiaogdgenuine/Doll
     # snipaste: https://www.snipaste.com/download.html
     # mousefix: https://mousefix.org
+    # Orion: https://browser.kagi.com
+    # coconutBattery: https://www.coconut-flavour.com/coconutbattery
   fi
   install_asdf
 }
@@ -237,7 +240,7 @@ install_neovim() {
   nvim --version
   log 'Installed neovim, installing plugins..'
   timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +'autocmd User PackerComplete quitall' +'silent lua require("plugins").compile()' || true
-  timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd("quitall") end, 27000)' || true
+  timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd.quitall() end, 27000)' || true
   log "\nInstalled neovim plugins, run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
   echo
 }

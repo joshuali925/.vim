@@ -90,7 +90,7 @@ end
 function M.toggleterm_nvim()
     require("toggleterm").setup({
         on_open = function(_)
-            vim.cmd("startinsert!")
+            vim.cmd.startinsert({ bang = true })
         end,
         open_mapping = "<C-b>",
         start_in_insert = false,
@@ -148,7 +148,7 @@ function M.setup_vim_visual_multi()
     vim.api.nvim_create_autocmd("User", {
         pattern = "visual_multi_exit",
         group = "VisualMultiRemapBS",
-        callback = function() vim.keymap.set("i", "<BS>", "v:lua.MPairs.autopairs_bs(" .. vim.fn.bufnr() .. ")", { buffer = true, expr = true }) end,
+        callback = function() vim.keymap.set("i", "<BS>", "v:lua.MPairs.autopairs_bs(" .. vim.fn.bufnr() .. ")", { buffer = true, expr = true, replace_keycodes = false }) end,
     })
 end
 
@@ -190,11 +190,12 @@ end
 function M.lspsaga_nvim()
     require("lspsaga").init_lsp_saga({
         saga_winblend = 8,
-        code_action_lightbulb = { sign_priority = 6, virtual_text = false },
+        code_action_lightbulb = { enable = false, sign_priority = 6, virtual_text = false },
         code_action_keys = { exec = "<CR>", quit = "<Esc>" },
         finder_action_keys = { open = "<CR>", quit = "<ESC>" },
         show_outline = { jump_key = "<CR>" },
         rename_action_quit = "<Esc>",
+        symbol_in_winbar = { enable = true, separator = "  " },
     })
 end
 
@@ -235,7 +236,7 @@ function M.alpha_nvim()
         callback = function()
             vim.b.RestoredCursor = 1 -- do not restore cursor position
             vim.keymap.set("n", "v", require("alpha").queue_press, { buffer = true })
-            vim.keymap.set("n", "q", "len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'", { buffer = true, expr = true })
+            vim.keymap.set("n", "q", "len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'", { buffer = true, expr = true, replace_keycodes = false })
             vim.keymap.set("n", "e", "<Cmd>enew<CR>", { buffer = true })
             vim.keymap.set("n", "i", "<Cmd>enew <bar> startinsert<CR>", { buffer = true })
         end,
@@ -297,7 +298,7 @@ function M.telescope()
                 i = {
                     ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
                     ["<Esc>"] = actions.close,
-                    ["<C-u>"] = function() vim.cmd("stopinsert") end,
+                    ["<C-u>"] = function() vim.cmd.stopinsert() end,
                 },
             },
             vimgrep_arguments = {
@@ -641,8 +642,8 @@ end
 
 function M.open_quickui_context_menu()
     local content = {
-        { "Docu&mentation", "lua require('lspsaga.hover').render_hover_doc()", "Show documentation" },
-        { "&Preview definition", "lua require('lspsaga.definition').preview_definition()", "Preview definition" },
+        { "Docu&mentation", "lua require('lspsaga.hover'):render_hover_doc()", "Show documentation" },
+        { "&Preview definition", "lua require('lspsaga.definition'):peek_definition()", "Preview definition" },
         { "Reference &finder", "Lspsaga lsp_finder", "Find references" },
         { "&Signautre", "lua require('lspsaga.signaturehelp').signature_help()", "Show function signature help" },
         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
@@ -789,7 +790,7 @@ function M.vim_quickui()
         { "Packer &Status", [[PackerStatus]], "Packer status" },
         { "Packer Install", [[execute "PackerCompile" | PackerInstall]], "Packer compile and install" },
         { "Packer Clean", [[execute "PackerCompile" | PackerClean]], "Packer compile and clean" },
-        { "Packer &Update", [[let g:packer_max_jobs = 50 | execute "PackerCompile" | PackerSync]], "Packer sync plugins" },
+        { "Packer &Update", [[let g:packer_max_jobs = 10 | execute "PackerCompile" | PackerSync]], "Packer sync plugins" },
         { "--", "" },
         { "&Mason Status", [[Mason]], "Mason status" },
         { "Mason &Install all", [[execute "lua require('lsp').lsp_install_all()"]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
@@ -827,8 +828,8 @@ function M.vim_quickui()
     vim.fn["quickui#menu#install"]("&Actions", {
         { "OSC &yank", [[lua require("utils").copy_with_osc_yank_script(require("utils").get_visual_selection())]], "Use oscyank script to copy" },
         { "--", "" },
-        { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | S put x]], "Use base64 to encode selected text" },
-        { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | S put x]], "Use base64 to decode selected text" },
+        { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
+        { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | execute 'S put x' | file base64_decode]], "Use base64 to decode selected text" },
         { "--", "" },
         { "Search in selection", [[call feedkeys('/\%>'. (line("'<") - 1). 'l\%<'. (line("'>") + 1). 'l')]], [[Search in selected lines, to search in previous visual selection use /\%V]] },
     })

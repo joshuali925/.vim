@@ -6,7 +6,7 @@ RUN apt-get update; DEBIAN_FRONTEND=noninteractive apt-get install -y curl sudo
 RUN useradd -s /bin/bash -d /home/docker -m -G sudo docker; passwd -d docker
 USER docker
 WORKDIR /home/docker
-ENV TERM='xterm-256color' SSH_CLIENT=1 SHELL=/usr/bin/zsh USER=docker
+ENV TERM=xterm-256color SSH_CLIENT=1 SHELL=/usr/bin/zsh USER=docker
 
 ## if only using bash
 # RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)" -- -c 'echo "exec ~/.vim/bin/bashrc" >> ~/.bashrc'

@@ -15,16 +15,16 @@
   },
   "GET request": {
     "prefix": "getrequest",
-    "body": ["GET {{BASE}}$0"]
+    "body": ["GET {{BASE}}/$0"]
   },
   "DELETE request": {
     "prefix": "deleterequest",
-    "body": ["DELETE {{BASE}}$0"]
+    "body": ["DELETE {{BASE}}/$0"]
   },
   "PUT request": {
     "prefix": "putrequest",
     "body": [
-      "PUT {{BASE}}$1",
+      "PUT {{BASE}}/$1",
       "Content-Type: application/json",
       "",
       "{",
@@ -35,7 +35,7 @@
   "POST request": {
     "prefix": "postrequest",
     "body": [
-      "POST {{BASE}}$1",
+      "POST {{BASE}}/$1",
       "Content-Type: application/json",
       "",
       "{",

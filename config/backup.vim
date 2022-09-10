@@ -3384,7 +3384,10 @@ gvf() {
   fi
   [ -n "$FZFTEMP" ] && $EDITOR "${FZFTEMP[@]}"
 }
-
+tldr() {
+  glow https://raw.githubusercontent.com/tldr-pages/tldr/master/pages/common/"$1".md
+}
+install-from-url tldr https://cht.sh/:cht.sh "$@"
 
 " =======================================================
 " doesn't work with gitignore

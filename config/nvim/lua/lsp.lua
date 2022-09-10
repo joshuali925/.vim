@@ -25,24 +25,14 @@ function M.lsp_install_all()
         return not vim.tbl_contains(installed, server)
     end, required)
     if #not_installed > 0 then
-        vim.cmd("LspInstall " .. table.concat(not_installed, " "))
+        vim.cmd.LspInstall({ args = not_installed })
     else
-        vim.cmd("Mason")
+        vim.cmd.Mason()
     end
-    vim.cmd("MasonInstall prettier shellcheck") -- TODO https://github.com/williamboman/mason.nvim/issues/103
+    vim.cmd.MasonInstall({ args = { "prettier", "shellcheck" } }) -- TODO https://github.com/williamboman/mason.nvim/issues/103
 end
 
--- TODO https://www.reddit.com/r/neovim/comments/vvtltr/remove_the_message_select_a_language_server/
--- https://www.reddit.com/r/neovim/comments/u5si2w/breaking_changes_inbound_next_few_weeks_for/
 function M.init()
-    local function on_attach(client, bufnr)
-        -- use null-ls for formatting except on lua
-        if client.name ~= "sumneko_lua" then
-            client.resolved_capabilities.document_formatting = false
-            client.resolved_capabilities.document_range_formatting = false
-        end
-    end
-
     local function make_config()
         local capabilities = vim.lsp.protocol.make_client_capabilities()
         capabilities.textDocument.completion.completionItem.documentationFormat = { "markdown", "plaintext" }
@@ -54,7 +44,7 @@ function M.init()
         capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
         capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
         capabilities.textDocument.completion.completionItem.resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } }
-        return { capabilities = capabilities, flags = { debounce_text_changes = 250 }, on_attach = on_attach }
+        return { capabilities = capabilities, flags = { debounce_text_changes = 250 } }
     end
 
     local present, mason = pcall(require, "mason")
@@ -147,7 +137,7 @@ function M.init()
                     "yaml",
                     "markdown",
                     "graphql",
-                    "sh", -- prettier-plugin-sh
+                    "sh", -- prettier-plugin-sh (cd ~/.local/share/nvim/mason/packages/prettier; npm install prettier-plugin-sh)
                     "bash",
                     "java", -- prettier-plugin-java
                     "kotlin", -- prettier-plugin-kotlin
@@ -169,12 +159,13 @@ function M.init()
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
 end
 
+local formatting_lsp = { "null-ls", "sumneko_lua" }
 function M.organize_imports_and_format()
     if next(vim.lsp.buf_get_clients()) ~= nil then
         vim.cmd("silent! OrganizeImports")
-        vim.lsp.buf.formatting_sync({}, 3000)
+        vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsp, client.name) end, timeout_ms = 3000 })
     else
-        vim.cmd("Prettier")
+        vim.cmd.Prettier()
     end
 end
 
@@ -210,7 +201,7 @@ function M.quickfix_all_diagnostics(filter)
         return a_sev < b_sev
     end)
     vim.fn.setqflist(diagnostics, "r")
-    vim.cmd("copen")
+    vim.cmd.copen()
 end
 
 return M

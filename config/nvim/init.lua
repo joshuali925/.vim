@@ -4,12 +4,10 @@ require("states") --                   lua/utils.lua
 vim.g.loaded_2html_plugin = 1 --       lua/themes.lua
 vim.g.loaded_remote_plugins = 1 --     lua/plugins.lua
 vim.g.loaded_tutor_mode_plugin = 1 --  lua/plugin-configs.lua
-vim.g.do_filetype_lua = 1 --           lua/lsp.lua
-vim.g.did_load_filetypes = 0 --        lua/rooter.lua
-vim.g.mapleader = ";" --               ginit.vim
-vim.g.maplocalleader = "|" --          autoload/funcs.vim
-vim.g.netrw_dirhistmax = 0
-vim.g.netrw_banner = 0
+vim.g.mapleader = ";" --               lua/lsp.lua
+vim.g.maplocalleader = "|" --          lua/rooter.lua
+vim.g.netrw_dirhistmax = 0 --          ginit.vim
+vim.g.netrw_banner = 0 --              autoload/funcs.vim
 vim.g.netrw_liststyle = 3
 vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
 vim.o.whichwrap = "<,>,[,]"
@@ -93,7 +91,7 @@ vim.keymap.set("n", "]\\", "<Cmd>enew<CR>")
 vim.keymap.set("n", "[<BS>", "<Cmd>new<CR>")
 vim.keymap.set("n", "]<BS>", "<Cmd>vnew<CR>")
 vim.keymap.set("n", "<C-]>", "<Cmd>call funcs#ctags()<CR>")
-vim.keymap.set({ "n", "x", "o" }, "0", "funcs#home()", { expr = true })
+vim.keymap.set({ "n", "x", "o" }, "0", "funcs#home()", { expr = true, replace_keycodes = false })
 vim.keymap.set({ "n", "x", "o" }, "^", "0")
 vim.keymap.set({ "n", "o" }, "-", "$") -- $ in normal mode will always put cursor at last column when scrolling, g_ will not
 vim.keymap.set("x", "-", "g_")
@@ -103,8 +101,8 @@ vim.keymap.set({ "n", "x", "o" }, "<End>", "g$")
 vim.keymap.set({ "n", "x", "o" }, "<Down>", "gj")
 vim.keymap.set({ "n", "x", "o" }, "<Up>", "gk")
 vim.keymap.set("!", "<S-Del>", "<BS>")
-vim.keymap.set("i", "<Down>", "pumvisible() ? '<C-n>' : '<C-o>gj'", { expr = true })
-vim.keymap.set("i", "<Up>", "pumvisible() ? '<C-p>' : '<C-o>gk'", { expr = true })
+vim.keymap.set("i", "<Down>", "pumvisible() ? '<C-n>' : '<C-o>gj'", { expr = true, replace_keycodes = false })
+vim.keymap.set("i", "<Up>", "pumvisible() ? '<C-p>' : '<C-o>gk'", { expr = true, replace_keycodes = false })
 vim.keymap.set("i", "<Home>", "<C-o>g^")
 vim.keymap.set("i", "<End>", "<C-o>g$")
 vim.keymap.set("i", "<C-_>", "<C-o>u")
@@ -139,7 +137,7 @@ vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
 vim.keymap.set("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
 vim.keymap.set({ "n", "x" }, "<leader>y", '"+y')
 vim.keymap.set("n", "<leader>Y", '"+y$')
-vim.keymap.set("n", "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", { expr = true })
+vim.keymap.set("n", "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
@@ -159,13 +157,13 @@ vim.keymap.set("n", "<leader>q", "<Cmd>call funcs#quit(0, 0)<CR>") -- close wind
 vim.keymap.set("n", "<leader>Q", "<Cmd>call funcs#quit(0, 1)<CR>") -- close tab
 vim.keymap.set("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>") -- close buffer and preserve layout
 vim.keymap.set("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
-vim.keymap.set("n", "yoq", "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'", { expr = true })
-vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'", { expr = true })
+vim.keymap.set("n", "yoq", "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'", { expr = true, replace_keycodes = false })
+vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight<CR>")
-vim.keymap.set("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true })
-vim.keymap.set("c", "<BS>", [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true })
-vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
-vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { expr = true })
+vim.keymap.set("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true, replace_keycodes = false })
+vim.keymap.set("c", "<BS>", [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
+vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true, replace_keycodes = false }) -- <C-z> is 'wildcharm'
+vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { expr = true, replace_keycodes = false })
 vim.cmd("cnoreabbrev print <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua =( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua =( )' ? setcmdpos(7)[-1] : '')<CR>") -- vim.pretty_print
 vim.cmd("cnoreabbrev git <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>") -- fugitive
 -- nvim_bufferline {{{2
@@ -275,11 +273,11 @@ vim.keymap.set("n", "gd", "<Cmd>lua if require('lsp').is_active() then vim.lsp.b
 vim.keymap.set("n", "gD", vim.lsp.buf.type_definition)
 vim.keymap.set("n", "<leader>d", vim.lsp.buf.implementation)
 vim.keymap.set("n", "gr", vim.lsp.buf.references)
-vim.keymap.set("n", "<leader>a", "<Cmd>lua require('lspsaga.codeaction').code_action()<CR>")
-vim.keymap.set("x", "<leader>a", ":<C-u>lua require('lspsaga.codeaction').range_code_action()<CR>")
-vim.keymap.set("n", "gh", "<Cmd>lua if require('lspsaga.diagnostic').show_cursor_diagnostics() == nil then require('lspsaga.hover').render_hover_doc() end<CR>")
+vim.keymap.set("n", "<leader>a", "<Cmd>lua require('lspsaga.codeaction'):code_action()<CR>")
+vim.keymap.set("x", "<leader>a", ":<C-u>lua require('lspsaga.codeaction'):range_code_action()<CR>")
+vim.keymap.set("n", "gh", "<Cmd>lua if require('lspsaga.diagnostic').show_cursor_diagnostics() == nil then require('lspsaga.hover'):render_hover_doc() end<CR>")
 vim.keymap.set("n", "]A", "<Cmd>lua require('lspsaga.diagnostic').goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>")
-vim.keymap.set("n", "<leader>R", "<Cmd>lua require('lspsaga.rename').lsp_rename()<CR>")
+vim.keymap.set("n", "<leader>R", "<Cmd>lua require('lspsaga.rename'):lsp_rename()<CR>")
 vim.keymap.set("n", "[a", "<Cmd>lua require('lspsaga.diagnostic').goto_prev()<CR>")
 vim.keymap.set("n", "]a", "<Cmd>lua require('lspsaga.diagnostic').goto_next()<CR>")
 vim.keymap.set("n", "[A", "<Cmd>lua require('lspsaga.diagnostic').goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>")
