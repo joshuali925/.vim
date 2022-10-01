@@ -150,6 +150,8 @@ nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
 nmap zh zhz
 nmap zl zlz
+inoremap jk <Esc>
+inoremap kj <Esc>
 nnoremap <C-c> :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> redraw!<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>

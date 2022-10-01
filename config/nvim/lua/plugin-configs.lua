@@ -12,6 +12,10 @@ function M.bufferline_nvim()
     })
 end
 
+function M.better_escape_nvim()
+    require("better_escape").setup({ mapping = { "jk", "kj" }, timeout = 200, clear_empty_lines = true })
+end
+
 function M.gitsigns()
     require("gitsigns").setup({
         signs = {
@@ -351,7 +355,13 @@ function M.nvim_treesitter()
             "python",
             "java",
         },
-        highlight = { enable = true, disable = {} },
+        highlight = {
+            enable = true,
+            disable = function(_, buf)
+                local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+                return ok and stats and stats.size > 1048576
+            end,
+        },
         textobjects = {
             select = {
                 enable = true,
@@ -582,7 +592,7 @@ function M.nvim_cmp()
                 if vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
                     vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
                 elseif require("neogen").jumpable() then
-                    vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_next()<CR>", true, true, true), "")
+                    require("neogen").jump_next()
                 else
                     fallback()
                 end
@@ -595,7 +605,7 @@ function M.nvim_cmp()
                 elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
                     vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
                 elseif require("neogen").jumpable() then
-                    vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_next()<CR>", true, true, true), "")
+                    require("neogen").jump_next()
                 else
                     fallback()
                 end
@@ -606,7 +616,7 @@ function M.nvim_cmp()
                 elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
                     vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
                 elseif require("neogen").jumpable(-1) then
-                    vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Cmd>lua require('neogen').jump_prev()<CR>", true, true, true), "")
+                    require("neogen").jump_prev()
                 else
                     fallback()
                 end

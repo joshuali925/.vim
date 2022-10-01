@@ -3638,3 +3638,13 @@ function M.run_without_rooter(command)
     enabled = prev_enabled
 end
 
+" =======================================================
+" cmdheight = 0
+vim.o.cmdheight = 0
+    components.active[3][6] = { -- TODO https://github.com/neovim/neovim/issues/19193
+        provider = function()
+            return " recording @" .. vim.fn.reg_recording()
+        end,
+        enabled = function() return vim.fn.reg_recording() ~= "" end,
+        hl = { fg = colors.red, bg = colors.lightbg },
+    }
