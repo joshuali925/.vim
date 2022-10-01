@@ -63,7 +63,7 @@ map gs !clear && git status
 map glo !clear && git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit
 map gr cd-git-root
 map gvi :cd ~/.vim
-map gvd :cd ~/.local/share/nvim
+map gvd :cd ~/.local/state/nvim
 map gvp :cd ~/.local/share/nvim/site/pack/packer/opt
 map gf follow-symlink
 map t locate-file

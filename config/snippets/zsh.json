@@ -29,6 +29,16 @@
     "prefix": "curlPost",
     "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\" key=\"val\"})\""
   },
+  "Curl POST JSON heredoc": {
+    "prefix": "curlPostHeredoc",
+    "body": [
+      "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} --data-binary @- << EOF",
+      "{",
+      "  ${0:\"key\": \"value\"}",
+      "}",
+      "EOF"
+    ]
+  },
   "Curl POST data from stdin": {
     "prefix": "curlPostStdin",
     "body": "curl -X POST -k -H 'Content-Type: application/json' ${0:https://example.com} --data-binary @-"

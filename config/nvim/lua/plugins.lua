@@ -117,6 +117,7 @@ return require("packer").startup({
         use({ "machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1" })
         use({ "machakann/vim-swap", keys = "<Plug>(swap-" })
         use({ "AndrewRadev/splitjoin.vim", keys = { { "n", "gS" }, { "n", "gJ" } } })
+        use { "max397574/better-escape.nvim", event = "InsertEnter", config = conf("better_escape_nvim") }
 
         -- misc
         use({ "kyazdani42/nvim-web-devicons", opt = false })
