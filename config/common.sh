@@ -78,10 +78,10 @@ alias gc='git commit -m'
 alias gc!='git commit -v --amend'
 alias gca='git commit -v -a'
 alias gca!='git commit -v -a --amend'
-alias gcs='git commit -s -m'
-alias gcs!='git commit -s --amend'
+alias gcs='git commit --signoff -m'
+alias gcs!='git commit --signoff --amend'
 alias gcv='git commit -v'
-alias gcgpg='export GPG_TTY=$(tty) && git commit -S -s -m'
+alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcf='git config --list'
 alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
@@ -126,7 +126,7 @@ alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"
 alias gss='git status -sb'
 alias gst='git stash'
 alias gsts='git stash; git stash apply'
-alias gshow='git show --pretty=fuller --show-signature'
+alias gshow='git show --pretty=fuller'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
 alias gignore='git update-index --assume-unchanged'
@@ -137,7 +137,7 @@ alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclu
 gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
-alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m "--wip--"'
+alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff -m "--wip--"'
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
@@ -155,14 +155,14 @@ gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
 
-grg() {  # grep all commits, replace `log` with `reflog` for local commits
-  git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | DELTA_PAGER="$BAT_PAGER --pattern='$1'" delta --line-numbers
+grg() {  # grep regex in all commits, replace `log` with `reflog` for local commits
+  git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
 }
 
-gvf() {  # git log takes glob: gvf '*filename*'
+gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
   local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}')
   if [ -n "$filepath" ]; then
-    local sha=$(git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- "$filepath" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- $filepath | delta --dark --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
+    local sha=$(git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- "$filepath" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- $filepath | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
     if [ -n "$sha" ]; then
       echo -e "\033[0;35mgit show $sha:$filepath\033[0m" >&2
       git --no-pager show "$sha:$filepath"
@@ -172,12 +172,12 @@ gvf() {  # git log takes glob: gvf '*filename*'
 
 glof() {
   git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
-    fzf --height=50% --min-height=20 --ansi --no-sort --reverse --tiebreak=index --toggle-sort=\` --multi \
+    fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --toggle-sort=\` --multi \
     --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
-    --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show | delta --dark --paging=never' \
+    --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show | delta --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tr "\n" " " | y)+abort' \
-    --bind='enter:execute(echo {} | grep -o "[a-f0-9]\{7,\}" | xargs git show | delta --line-numbers --navigate)'
+    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show | delta --line-numbers --navigate)'
 }
 
 gcb() {
@@ -186,7 +186,7 @@ gcb() {
   else
     local fzftemp=$(git branch --color=always --sort=-committerdate --all |
       awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
-      fzf --height=50% --min-height=20 --ansi --no-sort --reverse --tiebreak=index --preview-window=60% --toggle-sort=\` \
+      fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
       --header='Press ` to toggle sort' \
       --preview='git log -n 50 --color=always --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
     if [ -n "$fzftemp" ]; then
@@ -399,14 +399,14 @@ unalias z 2> /dev/null
 z() {
   local fzftemp
   if [ -z "$1" ]; then
-    fzftemp=$(_z -l 2>&1 | fzf --tac --bind='tab:down,btab:up') && cd "$(echo "$fzftemp" | sed 's/^[0-9,.]* *//')"
+    fzftemp=$(_z -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --bind='tab:down,btab:up') && cd "$fzftemp"
   else
     _z 2>&1 "$@"
   fi
 }
 zc() {
   local fzftemp
-  fzftemp=$(_z -c -l 2>&1 | fzf --tac --bind='tab:down,btab:up' --query="${1:-}") && cd "$(echo "$fzftemp" | sed 's/^[0-9,.]* *//')"
+  fzftemp=$(_z -c -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --bind='tab:down,btab:up' --query="${1:-}") && cd "$fzftemp"
 }
 
 t() {  # create, restore, or switch tmux session
@@ -587,9 +587,10 @@ ec2() {
       local host=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$2$" | awk '{print $1}')
       [ -z "$host" ] && return 1
       echo "ssh to ec2: $host" >&2
-      ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "ec2-user@$host" || ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "ubuntu@$host"
+      shift 2
+      ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "$@" "ec2-user@$host" || ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "$@" "ubuntu@$host"
       return 0 ;;
-    *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag]"; return 1 ;;
+    *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]"; return 1 ;;
   esac
   instances=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
   if [ -n "$2" ]; then

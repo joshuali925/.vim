@@ -15,7 +15,6 @@ call plug#begin('~/.vim/config/vscode-neovim/plugged')
 Plug 'asvetliakov/vim-easymotion'
 Plug 'justinmk/vim-sneak'
 Plug 'machakann/vim-swap'
-Plug 'chaoren/vim-wordmotion'
 Plug 'machakann/vim-sandwich'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
@@ -29,23 +28,6 @@ set ignorecase
 set smartcase
 
 let mapleader=';'
-map gw <Plug>WordMotion_w
-map gb <Plug>WordMotion_b
-map ge <Plug>WordMotion_e
-omap iu <Plug>WordMotion_iw
-xmap iu <Plug>WordMotion_iw
-omap au <Plug>WordMotion_aw
-xmap au <Plug>WordMotion_aw
-xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
-xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 map f <Plug>Sneak_f
 map F <Plug>Sneak_F
 nmap t <Plug>Sneak_s
@@ -65,12 +47,6 @@ map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
 map gc <Plug>VSCodeCommentary
 nmap gcc <Plug>VSCodeCommentaryLine
-for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
-  execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
-  execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
-  execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vt'. char. '<CR>'
-  execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
-endfor
 omap ia <Plug>(swap-textobject-i)
 xmap ia <Plug>(swap-textobject-i)
 omap aa <Plug>(swap-textobject-a)
@@ -84,6 +60,35 @@ nmap cs <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)
 nmap css <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
 xmap s <Plug>(operator-sandwich-add)
 xmap s< <Plug>(operator-sandwich-add)t
+for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
+  execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
+  execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
+  execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vt'. char. '<CR>'
+  execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
+endfor
+xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+nnoremap <silent> gw :call plugins#wordmotion#motion(v:count1, 'n', 'w', 0, [])<CR>
+xnoremap <silent> gw :<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'w', 0, [])<CR>
+onoremap <silent> gw :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'w', 0, [])<CR>
+nnoremap <silent> gb :call plugins#wordmotion#motion(v:count1, 'n', 'b', 0, [])<CR>
+xnoremap <silent> gb :<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'b', 0, [])<CR>
+onoremap <silent> gb :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'b', 0, [])<CR>
+nnoremap <silent> ge :call plugins#wordmotion#motion(v:count1, 'n', 'e', 0, [])<CR>
+xnoremap <silent> ge :<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'e', 0, [])<CR>
+onoremap <silent> ge :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'e', 0, [])<CR>
+xnoremap <silent> iu :<C-U>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>
+onoremap <silent> iu :<C-U>call plugins#wordmotion#object(v:count1, 'o', 1, 0)<CR>
+xnoremap <silent> au :<C-U>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>
+onoremap <silent> au :<C-U>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>
+xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
+xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$
@@ -210,7 +215,6 @@ function! s:RunCode()
   endif
 endfunction
 
-let g:wordmotion_nomap = 1
 let g:sandwich_no_default_key_mappings = 1
 let g:operator_sandwich_no_default_key_mappings = 1
 let g:EasyMotion_do_mapping = 0
