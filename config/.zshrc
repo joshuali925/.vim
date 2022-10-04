@@ -7,7 +7,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-[[ ! -f ~/.zinit/bin/zinit.zsh ]] && command git clone https://github.com/zdharma-continuum/zinit --depth=1 ~/.zinit/bin && ZINIT_POST_INSTALL=1
+[ ! -f ~/.zinit/bin/zinit.zsh ] && git clone https://github.com/zdharma-continuum/zinit --depth=1 ~/.zinit/bin && ZINIT_POST_INSTALL=1
 source ~/.zinit/bin/zinit.zsh
 
 if [ -n "$ZINIT_POST_INSTALL" ]; then
@@ -88,7 +88,6 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -AF --color=always -1 $realpath'
 zstyle ':fzf-tab:*' switch-group '[' ']'
 
 compdef _dirs d
-compdef _tmux t
 compdef _command_names path
 compdef _git gdf=git-diff
 compdef _git gdd=git-diff

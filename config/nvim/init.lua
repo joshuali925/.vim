@@ -83,6 +83,19 @@ vim.keymap.set("x", "iI", [[:<C-u>call plugins#indent_object#HandleTextObjectMap
 vim.keymap.set("o", "iI", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "aI", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "aI", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
+vim.keymap.set("n", "gw", "<Cmd>call plugins#wordmotion#motion(v:count1, 'n', 'w', 0, [])<CR>", { silent = true })
+vim.keymap.set("x", "gw", ":<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'w', 0, [])<CR>", { silent = true })
+vim.keymap.set("o", "gw", "<Cmd>call plugins#wordmotion#motion(v:count1, 'o', 'w', 0, [])<CR>", { silent = true })
+vim.keymap.set("n", "gb", "<Cmd>call plugins#wordmotion#motion(v:count1, 'n', 'b', 0, [])<CR>", { silent = true })
+vim.keymap.set("x", "gb", ":<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'b', 0, [])<CR>", { silent = true })
+vim.keymap.set("o", "gb", "<Cmd>call plugins#wordmotion#motion(v:count1, 'o', 'b', 0, [])<CR>", { silent = true })
+vim.keymap.set("n", "ge", "<Cmd>call plugins#wordmotion#motion(v:count1, 'n', 'e', 0, [])<CR>", { silent = true })
+vim.keymap.set("x", "ge", ":<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'e', 0, [])<CR>", { silent = true })
+vim.keymap.set("o", "ge", "<Cmd>call plugins#wordmotion#motion(v:count1, 'o', 'e', 0, [])<CR>", { silent = true })
+vim.keymap.set("x", "iu", ":<C-U>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>", { silent = true })
+vim.keymap.set("o", "iu", "<Cmd>call plugins#wordmotion#object(v:count1, 'o', 1, 0)<CR>", { silent = true })
+vim.keymap.set("x", "au", ":<C-U>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>", { silent = true })
+vim.keymap.set("o", "au", "<Cmd>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>", { silent = true })
 vim.keymap.set("x", "v", ":<C-u>call plugins#expand_region#next('v', '+')<CR>", { silent = true })
 vim.keymap.set("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>", { silent = true })
 -- general {{{2
@@ -171,8 +184,8 @@ vim.keymap.set("n", "<BS>", "<Cmd>BufferLineCyclePrev<CR>")
 vim.keymap.set("n", "\\", "<Cmd>BufferLineCycleNext<CR>")
 vim.keymap.set("n", "<C-w><BS>", "<Cmd>BufferLineMovePrev<CR><C-w>", { remap = true })
 vim.keymap.set("n", "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", { remap = true })
-vim.keymap.set("n", "Z[", "<Cmd>BufferLineCloseLeft<CR>")
-vim.keymap.set("n", "Z]", "<Cmd>BufferLineCloseRight<CR>")
+vim.keymap.set("n", "Z[", ":BufferLineCloseLeft<CR><Cmd>echo<CR>") -- https://github.com/akinsho/bufferline.nvim/issues/579
+vim.keymap.set("n", "Z]", ":BufferLineCloseRight<CR><Cmd>echo<CR>")
 -- terminal {{{2
 vim.keymap.set("n", "<C-b>", "<Cmd>ToggleTerm<CR>")
 vim.keymap.set("n", "<leader>to", "<Cmd>execute 'ToggleTerm dir='. expand('%:p:h')<CR>")
@@ -212,22 +225,9 @@ vim.keymap.set({ "n", "x", "o" }, ";,", "<Plug>fanfingtastic_,")
 -- vim-illuminate {{{2
 vim.keymap.set("n", "[m", "<Cmd>lua require('illuminate').goto_prev_reference()<CR>")
 vim.keymap.set("n", "]m", "<Cmd>lua require('illuminate').goto_next_reference()<CR>")
--- wordmotion {{{2
-vim.keymap.set({ "n", "x", "o" }, "gw", "<Plug>WordMotion_w")
-vim.keymap.set({ "n", "x", "o" }, "gb", "<Plug>WordMotion_b")
-vim.keymap.set({ "n", "x", "o" }, "ge", "<Plug>WordMotion_e")
-vim.keymap.set({ "x", "o" }, "iu", "<Plug>WordMotion_iw")
-vim.keymap.set({ "x", "o" }, "au", "<Plug>WordMotion_aw")
--- sandwich {{{2
-vim.keymap.set("n", "ys", "<Plug>(operator-sandwich-add)")
-vim.keymap.set("n", "yss", "<Plug>(operator-sandwich-add)iw")
-vim.keymap.set("n", "yS", "<Plug>(operator-sandwich-add)g_")
-vim.keymap.set("n", "ds", "<Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)")
-vim.keymap.set("n", "dss", "<Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)")
-vim.keymap.set("n", "cs", "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)")
-vim.keymap.set("n", "css", "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)")
-vim.keymap.set("x", "s", "<Plug>(operator-sandwich-add)")
-vim.keymap.set("x", "s<", "<Plug>(operator-sandwich-add)t")
+-- nvim-surround {{{2
+vim.keymap.set("n", "yss", "ysiw", { remap = true })
+vim.keymap.set("n", "yS", "ysg_", { remap = true })
 -- vim-swap {{{2
 vim.keymap.set({ "x", "o" }, "ia", "<Plug>(swap-textobject-i)")
 vim.keymap.set({ "x", "o" }, "aa", "<Plug>(swap-textobject-a)")
@@ -340,11 +340,11 @@ vim.api.nvim_create_autocmd("User", { -- fugitive :Git
 -- commands {{{1
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("SetArgs", "let b:args = <q-args> == '' ? '' : ' '. <q-args>", { complete = "file", nargs = "*" })
-vim.api.nvim_create_user_command("S", [[execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr(). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | else | execute "put =execute('". <q-args>. "')" | endif | 1d]], { complete = "command", nargs = "*", range = true, bang = true })
+vim.api.nvim_create_user_command("S", [[execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <range> != 0 | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr(). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | else | execute "put =execute('". <q-args>. "')" | endif | 1d]], { complete = "command", nargs = "*", range = true, bang = true })
 vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee % > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute "botright terminal sudo `which nvim` +'set paste' +'1,$d' +startinsert %" | startinsert | endif]], { bang = true })
 vim.api.nvim_create_user_command("Grt", [[execute 'lua require("packer").loader("vim-flog")' | Gcd]], {})
-vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | mksession! ~/.cache/nvim/session.vim | silent! ScrollViewEnable | lua vim.notify('Session saved to ~/.cache/nvim/session.vim')", {})
-vim.api.nvim_create_user_command("SessionLoad", "source ~/.cache/nvim/session.vim | lua vim.notify('Loaded session from ~/.cache/nvim/session.vim')", {})
+vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | mksession! ~/.cache/nvim/session.vim | silent! ScrollViewEnable | lua vim.notify('Session saved to ~/.cache/nvim/session.vim', 'INFO', { title = 'Session' })", {})
+vim.api.nvim_create_user_command("SessionLoad", "source ~/.cache/nvim/session.vim | lua vim.notify('Loaded session from ~/.cache/nvim/session.vim', 'INFO', { title = 'Session' })", {})
 vim.api.nvim_create_user_command("GrepRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("GrepNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
@@ -352,13 +352,15 @@ vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | nnoremap <
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
-    local formatted = vim.fn.system("prettier --parser " .. parser, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+    local line1 = args.range == 0 and 0 or args.line1 - 1
+    local line2 = args.range == 0 and -1 or args.line2 + 1
+    local formatted = vim.fn.systemlist("prettier --parser " .. parser, vim.api.nvim_buf_get_lines(0, line1, line2, false))
     if vim.api.nvim_get_vvar("shell_error") == 0 then
-        vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(formatted, "\n"))
+        vim.api.nvim_buf_set_lines(0, line1, line2, false, formatted)
     else
         vim.notify(formatted, "ERROR", { title = "Prettier failed" })
     end
-end, { complete = "filetype", nargs = "*" })
+end, { complete = "filetype", nargs = "*", range = true })
 
 -- overrides {{{1
 if vim.fn.glob(vim.fn.stdpath("config") .. "/lua/packer_compiled.lua") == "" then
@@ -447,11 +449,8 @@ if require("states").small_file then
                 "nvim-scrollview",
                 "gitsigns.nvim",
                 "conflict-marker.vim",
-                "vim-sleuth",
                 "quick-scope",
-                "vim-wordmotion", -- motions/text objects sometimes don't work if loaded on keys
-                "vim-sandwich",
-                "vim-fanfingtastic",
+                "vim-fanfingtastic", -- motions/text objects sometimes don't work if loaded on keys
             }
             require("packer").loader(table.concat(plugins, " "))
         end, 100)

@@ -114,11 +114,12 @@ bindkey -M vicmd '\ec' fzf-cd-widget
 bindkey -M viins '\ec' fzf-cd-widget
 
 # CTRL-R - Paste the selected command from history into the command line
+# customized to show preview
 fzf-history-widget() {
   local selected num
   setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2> /dev/null
   selected=( $(fc -rl 1 | awk '{ cmd=$0; sub(/^[ \t]*[0-9]+\**[ \t]+/, "", cmd); if (!seen[cmd]++) print $0 }' |
-    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --scheme=history --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m" $(__fzfcmd)) )
+    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --scheme=history --bind=\\\`:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --theme=OneHalfDark --color=always --plain' --preview-window='right,40%,wrap'" $(__fzfcmd)) )
   local ret=$?
   if [ -n "$selected" ]; then
     num=$selected[1]

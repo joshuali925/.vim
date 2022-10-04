@@ -3637,6 +3637,17 @@ function M.run_without_rooter(command)
     vim.api.nvim_set_current_dir(prev_dir)
     enabled = prev_enabled
 end
+" vim-sandwich
+        use({ "machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1" })
+vim.keymap.set("n", "ys", "<Plug>(operator-sandwich-add)")
+vim.keymap.set("n", "yss", "<Plug>(operator-sandwich-add)iw")
+vim.keymap.set("n", "yS", "<Plug>(operator-sandwich-add)g_")
+vim.keymap.set("n", "ds", "<Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)")
+vim.keymap.set("n", "dss", "<Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)")
+vim.keymap.set("n", "cs", "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)")
+vim.keymap.set("n", "css", "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)")
+vim.keymap.set("x", "s", "<Plug>(operator-sandwich-add)")
+vim.keymap.set("x", "s<", "<Plug>(operator-sandwich-add)t")
 
 " =======================================================
 " cmdheight = 0
@@ -3648,3 +3659,8 @@ vim.o.cmdheight = 0
         enabled = function() return vim.fn.reg_recording() ~= "" end,
         hl = { fg = colors.red, bg = colors.lightbg },
     }
+
+" =======================================================
+grg() {  # grep all commits, replace `log` with `reflog` for local commits
+  git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | DELTA_PAGER="$BAT_PAGER --pattern='$1'" delta --line-numbers
+}

@@ -150,6 +150,7 @@ install_dotfiles() {
 }
 
 install_docker() {
+  log "Installing docker.."
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y docker
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
@@ -174,6 +175,7 @@ install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEA
   install_asdf
   local jdk_version=adoptopenjdk-14.0.2+12
   [ "$PLATFORM" == 'darwin' ] && [ "$ARCHITECTURE" == 'arm64' ] && jdk_version=adoptopenjdk-11.0.15+10
+  log "Installing java $jdk_version.."
   asdf plugin add java || true
   asdf install java "$jdk_version"
   asdf global java "$jdk_version"
@@ -183,6 +185,7 @@ install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEA
 }
 
 install_python() {
+  log "Installing python.."
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y python3-devel
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
@@ -235,6 +238,8 @@ install_tmux() {
 }
 
 install_neovim() {
+  # linux x64 appimage: curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage && chmod u+x nvim.appimage && ./nvim.appimage --appimage-extract && rm nvim.appimage && \mv squashfs-root ~/.local/lib/nvim && ln -sf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
+  log "Installing neovim.."
   link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
   backup "$HOME/.local/lib/nvim"
   nvim --version

@@ -191,6 +191,17 @@ function M.nvim_neoclip_lua()
     })
 end
 
+function M.nvim_surround()
+    require("nvim-surround").setup({
+        keymaps = {
+            normal_cur = "<NOP>",
+            normal_line = "<NOP>",
+            normal_cur_line = "ysl",
+            visual = "s",
+        },
+    })
+end
+
 function M.lspsaga_nvim()
     require("lspsaga").init_lsp_saga({
         saga_winblend = 8,
@@ -725,7 +736,7 @@ function M.vim_quickui()
         { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
         { "Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version (Gdiffsplit HEAD)" },
         { "Git &file history", [[vsplit | execute "lua require('packer').loader('vim-flog')" | 0Gclog]], "Browse previously committed versions of current file" },
-        { "Diffview file history", [[DiffviewFileHistory % --follow --all]], "Browse previously committed versions of current file with Diffview" },
+        { "Diffview file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
         { "--", "" },
         { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
         { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },

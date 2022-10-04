@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github flog mingrammer/flog linux_amd64.tar.gz '' darwin_amd64 '' flog "$@"

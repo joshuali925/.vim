@@ -113,8 +113,7 @@ return require("packer").startup({
         use({ "phaazon/hop.nvim", cmd = { "HopWord", "HopChar1", "HopLineAC", "HopLineBC", "HopWordCurrentLine" }, config = conf("hop_nvim") })
         use({ "unblevable/quick-scope", config = conf("quick_scope") }) -- TODO https://github.com/jinh0/eyeliner.nvim/issues/5
         use({ "dahu/vim-fanfingtastic" })
-        use({ "chaoren/vim-wordmotion", setup = "vim.g.wordmotion_nomap = 1" })
-        use({ "machakann/vim-sandwich", setup = "vim.g.operator_sandwich_no_default_key_mappings = 1" })
+        use({ "kylechui/nvim-surround", keys = { { "n", "y" }, { "n", "c" }, { "n", "d" }, { "x", "s" } }, config = conf("nvim_surround") })
         use({ "machakann/vim-swap", keys = "<Plug>(swap-" })
         use({ "AndrewRadev/splitjoin.vim", keys = { { "n", "gS" }, { "n", "gJ" } } })
         use { "max397574/better-escape.nvim", event = "InsertEnter", config = conf("better_escape_nvim") }
@@ -122,7 +121,7 @@ return require("packer").startup({
         -- misc
         use({ "kyazdani42/nvim-web-devicons", opt = false })
         use({ "lewis6991/impatient.nvim", opt = false })
-        use({ "tpope/vim-sleuth" })
+        use({ "tpope/vim-sleuth", cond = "require('states').small_file" })
         use({ "tpope/vim-unimpaired", keys = { "[", "]", { "n", "=p" }, { "n", "yo" } } })
         use({ "moll/vim-bbye", cmd = "Bdelete" })
         use({ "AckslD/nvim-neoclip.lua", event = "TextYankPost", config = conf("nvim_neoclip_lua") })

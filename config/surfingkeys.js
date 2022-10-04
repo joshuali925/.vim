@@ -42,6 +42,8 @@ api.aceVimMap(';w', '<Esc>', 'insert');
 // default keys
 // https://github.com/brookhong/Surfingkeys/blob/7626d9515ce6fec36e14499e1e1a4e49a6d1b43a/src/content_scripts/common/api.js#L467
 // https://github.com/brookhong/Surfingkeys/blob/master/src/content_scripts/common/default.js
+api.map('{', 'h'); // scroll left
+api.map('}', 'l'); // scroll right
 api.map('h', 'E'); // tab left
 api.map('as', 'E'); // tab left
 api.map('l', 'R'); // tab right
@@ -237,6 +239,21 @@ api.mapkey('yov', 'Toggle sites', function() {
 api.mapkey('yos', 'Toggle sourcegraph search', function() {
     api.tabOpenLink('https://sourcegraph.com/search?q=context:global+repo:' + window.location.href.match(/(github.com\/[^/]+\/?[^/]+)/)[1] + '+');
 }, {domain: /github\.com/i});
+api.mapkey('yrss', 'Copy rss', function() {
+    if (window.location.hostname === 'www.reddit.com') {
+        api.Clipboard.write(window.location.href.replace(/\/$/, '') + '.rss');
+    } else if (window.location.hostname === 'github.com') {
+        if (/([^/]+)\/([^/]+)\/(issues|pull)\/(\d+)/.test(window.location.pathname)) { // issue comments
+            api.Clipboard.write('https://rsshub.app/github/comments' + window.location.pathname);
+        } else if (/^\/([^/]+)\/([^/]+)\/?$/.test(window.location.pathname)) { // main page, commits
+            api.Clipboard.write(window.location.href.replace(/\/$/, '') + '/commits.atom');
+        } else { // /commits/<branch>.atom or /releases.atom
+            api.Clipboard.write(window.location.href.replace(/\/$/, '') + '.atom');
+        }
+    } else if (window.location.hostname === 'weibo.com') { // path needs to be user id
+        api.Clipboard.write('https://rssfeed.today/weibo/rss' + window.location.pathname);
+    }
+}, {domain: /(github|reddit|weibo)\.com/i});
 
 api.unmap('gg');
 api.unmap('G');

@@ -230,7 +230,7 @@ function M.switch(index)
     M.theme = M.theme_list[index]
     require("packer").loader(M.theme, true)
     M.config()
-    vim.notify("Restart to change theme to " .. M.theme .. ".")
+    vim.notify("Restart to change theme to " .. M.theme .. ".", "INFO", { title = "Theme" })
 end
 
 return M

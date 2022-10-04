@@ -34,16 +34,17 @@ end
 
 function M.init()
     local function make_config()
+        -- https://github.com/hrsh7th/cmp-nvim-lsp/blob/389f06d3101fb412db64cb49ca4f22a67882e469/lua/cmp_nvim_lsp/init.lua#L24
         local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities.textDocument.completion.completionItem.documentationFormat = { "markdown", "plaintext" }
-        capabilities.textDocument.completion.completionItem.snippetSupport = true
-        capabilities.textDocument.completion.completionItem.preselectSupport = true
+        capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
+        capabilities.textDocument.completion.completionItem.deprecatedSupport = true
         capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
         capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
-        capabilities.textDocument.completion.completionItem.deprecatedSupport = true
-        capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
-        capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
+        capabilities.textDocument.completion.completionItem.preselectSupport = true
         capabilities.textDocument.completion.completionItem.resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } }
+        capabilities.textDocument.completion.completionItem.snippetSupport = true
+        capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
+        capabilities.textDocument.completion.completionItem.documentationFormat = { "markdown", "plaintext" }
         return { capabilities = capabilities, flags = { debounce_text_changes = 250 } }
     end
 
@@ -71,11 +72,6 @@ function M.init()
             register_server("jdtls", { -- needs python3.9+, or remove `action=argparse.BooleanOptionalAction` in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py
                 -- cmd_env = { -- jdtls requires java 17, or use :LspInstall jdtls@1.12.0
                 --     JAVA_HOME = vim.loop.os_homedir() .. "/.asdf/installs/java/corretto-17.0.4.8.1"
-                -- },
-                -- initializationOptions = {
-                --     bundles = { -- for debugger
-                --         vim.loop.os_homedir() .. "/.vim/com.microsoft.java.debug.plugin-0.34.0.jar", -- https://repo1.maven.org/maven2/com/microsoft/java/com.microsoft.java.debug.plugin/0.34.0/com.microsoft.java.debug.plugin-0.34.0.jar
-                --     },
                 -- },
             })
         end,

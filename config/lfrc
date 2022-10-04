@@ -147,7 +147,7 @@ cmd locate-git-file ${{
 }}
 
 cmd z ${{
-  res="$(awk -F '|' '{print $1}' ~/.z | fzf --bind='tab:down,btab:up')"
+  res="$(sort -nr -k 3 -t '|' ~/.z | awk -F '|' '{print $1}' | fzf --bind='tab:down,btab:up')"
   lf -remote "send $id cd \"$res\""
 }}
 

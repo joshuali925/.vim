@@ -89,7 +89,7 @@
   },
   "Variable with default value": {
     "prefix": "varDefaultValue",
-    "body": "\"\\${${1:VAR}:-'${0:default}'}\""
+    "body": "\"\\${${1:VAR}:-${0:default}}\""
   },
   "Substring of variable": {
     "prefix": "varSubstring",

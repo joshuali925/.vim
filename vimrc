@@ -93,8 +93,9 @@ set nobackup
 set nowritebackup
 set wildcharm=<C-z>
 set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ --auto-hybrid-regex
-set grepformat=%f:%l:%c:%m,%f:%l:%m
-set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
+set grepformat=%f:%l:%c:%m,%f:%l:%m,%f
+set cedit=<C-x>
+set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%{&fileencoding!=''&&&fileencoding!='utf-8'?'[fileencoding\:\ '.&fileencoding.']':''}%{&fileformat!='unix'?'[fileformat\:\ '.&fileformat.']':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
 
 let mapleader=';'
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
@@ -111,6 +112,29 @@ xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
 xnoremap af iw%
 onoremap <silent> af :normal vaf<CR>
+xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+nnoremap <silent> gw :call plugins#wordmotion#motion(v:count1, 'n', 'w', 0, [])<CR>
+xnoremap <silent> gw :<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'w', 0, [])<CR>
+onoremap <silent> gw :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'w', 0, [])<CR>
+nnoremap <silent> gb :call plugins#wordmotion#motion(v:count1, 'n', 'b', 0, [])<CR>
+xnoremap <silent> gb :<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'b', 0, [])<CR>
+onoremap <silent> gb :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'b', 0, [])<CR>
+nnoremap <silent> ge :call plugins#wordmotion#motion(v:count1, 'n', 'e', 0, [])<CR>
+xnoremap <silent> ge :<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'e', 0, [])<CR>
+onoremap <silent> ge :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'e', 0, [])<CR>
+xnoremap <silent> iu :<C-U>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>
+onoremap <silent> iu :<C-U>call plugins#wordmotion#object(v:count1, 'o', 1, 0)<CR>
+xnoremap <silent> au :<C-U>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>
+onoremap <silent> au :<C-U>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>
+xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
+xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
 nnoremap [\ :tab sbuffer<CR>
@@ -220,18 +244,33 @@ augroup AutoCommands
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>
 augroup END
-command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
+
 command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
-command! -nargs=+ GrepRegex call s:Grep(0, 1, <q-args>)
-command! -nargs=+ GrepNoRegex call s:Grep(0, 0, <q-args>)
-command! -nargs=+ Ggrep call s:Grep(1, 1, <q-args>)
-command! -nargs=+ GgrepNoRegex call s:Grep(1, 0, <q-args>)
+command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute 'normal! ``'
+command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
 command! Grt execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
 command! -nargs=* Gdiff execute 'Grt' | execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | file !git\ show\ <args>:'. expand('%:~:.'). ' | silent read !git show <args>:'. expand('%:~:.') | 0d_ | diffthis
 command! -nargs=* Gblame call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')
-command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
-command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute 'normal! ``'
+command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
+command! -complete=file -nargs=+ Find call s:Grep('find . -type f -iname', <q-args>)
+command! -complete=file -nargs=+ Gfind call s:Grep('git ls-files', <q-args>)
+command! -nargs=+ Grep call s:Grep('grep --ignore-case --line-number -I -R $* .', <q-args>)
+command! -nargs=+ VimGrep execute 'vimgrep /'. escape(<q-args>, '/'). '/gj **/*' | copen
+command! -nargs=+ GrepRegex call s:Grep('', <q-args>)
+command! -nargs=+ GrepNoRegex call s:Grep(' --fixed-strings', <q-args>)
+command! -nargs=+ Ggrep call s:Grep('git grep -n --ignore-case', <q-args>)
+command! -nargs=+ GgrepNoRegex call s:Grep('git grep -n --ignore-case --fixed-strings', <q-args>)
 
+function! s:Grep(prg, pattern)
+  " use execute so sudoedit will not complain
+  execute 'Grt'
+  let saved_grepprg = &grepprg
+  let &grepprg = (a:prg =~ '^ \|^$' ? saved_grepprg. a:prg : a:prg)
+  silent execute 'grep! '. (a:prg =~ '^find ' ? '"' : '-- "'). escape(a:pattern, '\#%$|"'). '"'
+  let &grepprg = saved_grepprg
+  redraw!
+  copen
+endfunction
 function! s:ToggleQuickfix()
   for i in range(1, winnr('$'))
     if getbufvar(winbufnr(i), '&buftype') == 'quickfix'
@@ -239,16 +278,6 @@ function! s:ToggleQuickfix()
       return
     endif
   endfor
-  copen
-endfunction
-function! s:Grep(git_grep, use_regex, pattern)
-  " use execute so sudoedit will not complain
-  execute 'Grt'
-  let saved_grepprg = &grepprg
-  let &grepprg = (a:git_grep ? 'git grep -n --ignore-case' : saved_grepprg). (a:use_regex ? '' : ' --fixed-strings')
-  silent execute 'grep! -- "'. escape(a:pattern, '\#%$|"'). '"'
-  let &grepprg = saved_grepprg
-  redraw!
   copen
 endfunction
 let s:tail_on = 0
@@ -343,6 +372,10 @@ nnoremap [T :tfirst<CR>
 nnoremap ]T :tlast<CR>
 nnoremap [<C-t> :ptprevious<CR>
 nnoremap ]<C-t> :ptnext<CR>
+nnoremap Ko K
+nnoremap Km K
+nnoremap Kd :Gdiff<CR>
+nnoremap Kb :Gblame<CR>
 
 nnoremap <silent> <C-h> :call plugins#tmux_navigator#navigate('h')<CR>
 nnoremap <silent> <C-j> :call plugins#tmux_navigator#navigate('j')<CR>
@@ -352,8 +385,6 @@ nnoremap <expr> gc plugins#commentary#go()
 nnoremap <expr> gcc plugins#commentary#go(). '_'
 xnoremap <expr> gc plugins#commentary#go()
 onoremap <silent> gc :<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>
-xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
-xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 nnoremap <silent> ds :<C-u>call plugins#surround#dosurround(plugins#surround#inputtarget())<CR>
 nnoremap <silent> cs :<C-u>call plugins#surround#changesurround()<CR>
 nnoremap <silent> cS :<C-u>call plugins#surround#changesurround(1)<CR>
@@ -364,14 +395,10 @@ nnoremap <expr> ys plugins#surround#opfunc('setup')
 nmap yS ysg_
 xnoremap <silent> s :<C-u>call plugins#surround#opfunc(visualmode(),visualmode() ==# 'V' ? 1 : 0)<CR>
 xnoremap <silent> gS :<C-u>call plugins#surround#opfunc(visualmode(),visualmode() ==# 'V' ? 0 : 1)<CR>
-xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> iI :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
-xnoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
-onoremap <silent> aI :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent> ia :<C-U>call plugins#argtextobj#MotionArgument(1, 1)<CR>
+onoremap <silent> ia :<C-U>call plugins#argtextobj#MotionArgument(1, 0)<CR>
+xnoremap <silent> aa :<C-U>call plugins#argtextobj#MotionArgument(0, 1)<CR>
+onoremap <silent> aa :<C-U>call plugins#argtextobj#MotionArgument(0, 0)<CR>
 call funcs#map_copy_with_osc_yank_script()
 if $SSH_CLIENT != ''
   nnoremap gx :call system('y', expand('<cfile>'))<CR>
