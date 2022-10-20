@@ -87,7 +87,7 @@ install_development_tools() {
     sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh git
     sudo yum install -y epel-release || true
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
-    sudo apt-get update && sudo apt-get install -y build-essential zsh git curl unzip
+    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential zsh git curl unzip
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -190,7 +190,7 @@ install_python() {
     sudo yum install -y python3-devel
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
-    sudo apt-get update && sudo apt-get install -y python3-dev python3-pip python3-venv
+    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-dev python3-pip python3-venv
   elif [ "$PLATFORM" != 'darwin' ]; then
     echo 'Unknown distro..'
     return 0

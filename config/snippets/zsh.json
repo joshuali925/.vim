@@ -1,6 +1,6 @@
 {
   "Read one character": {
-    "prefix": "promptOneKey",
+    "prefix": "prompt-one-key",
     "body": [
       "read -s -k '?${1:To abort press n.}'; echo",
       "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
@@ -9,7 +9,7 @@
     ]
   },
   "Pipe run for each line": {
-    "prefix": "whileread",
+    "prefix": "while-read",
     "body": [
       "while IFS= read -r line; do",
       "  echo \"\\$line:\"",
@@ -18,19 +18,19 @@
     ]
   },
   "Heredoc append to file": {
-    "prefix": "heredocToFile",
+    "prefix": "heredoc-to-file",
     "body": ["tee -a ${1:file} > /dev/null <<EOF", "$0", "EOF"]
   },
   "Find files and exec": {
-    "prefix": "findExec",
+    "prefix": "find-exec",
     "body": "find . -iname '${1:*.txt}' -print -exec ${0:file {\\} \\; -exec sleep 1} \\;"
   },
   "Curl POST JSON": {
-    "prefix": "curlPost",
+    "prefix": "curl-post",
     "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\" key=\"val\"})\""
   },
   "Curl POST JSON heredoc": {
-    "prefix": "curlPostHeredoc",
+    "prefix": "curl-post-heredoc",
     "body": [
       "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} --data-binary @- << EOF",
       "{",
@@ -40,15 +40,15 @@
     ]
   },
   "Curl POST data from stdin": {
-    "prefix": "curlPostStdin",
+    "prefix": "curl-post-stdin",
     "body": "curl -X POST -k -H 'Content-Type: application/json' ${0:https://example.com} --data-binary @-"
   },
   "Compress and encrypt files": {
-    "prefix": "tarEncrypt",
+    "prefix": "tar-encrypt",
     "body": "tar zcvf - ${1:files} | openssl enc -aes-256-cbc -salt -out ${0:encrypted}.tar.gz"
   },
   "Decompress and decrypt files": {
-    "prefix": "tarDecrypt",
+    "prefix": "tar-decrypt",
     "body": "openssl enc -d -aes256 -in ${0:encrypted}.tar.gz | tar zxv"
   }
 }

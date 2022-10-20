@@ -13,6 +13,6 @@ case $PLATFORM:$ARCHITECTURE in
 esac
 
 curl -L -o- "$url" | tar xz -C ~/.local/lib
-mv -v ~/.local/lib/nvim-* ~/.local/lib/nvim || true
+command mv -v ~/.local/lib/nvim-* ~/.local/lib/nvim 2> /dev/null || true
 [ ! -x "$HOME/.local/bin/nvim" ] && ln -svf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
 run-if-exists "$0" "$@"

@@ -1,6 +1,6 @@
 {
   "Performance test template": {
-    "prefix": "perfTemplate",
+    "prefix": "template-perf",
     "body": [
       "import java.io.*;",
       "import java.text.*;",

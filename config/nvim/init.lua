@@ -54,8 +54,8 @@ vim.o.synmaxcol = 1000
 vim.o.lazyredraw = true
 vim.o.writebackup = false
 vim.o.wildcharm = 26 -- <C-z>
-vim.o.grepprg = "rg --vimgrep --smart-case --hidden --auto-hybrid-regex"
-vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
+vim.o.grepprg = "rg --vimgrep"
+vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m,%f"
 vim.o.cedit = "<C-x>"
 
 -- mappings {{{1
@@ -92,9 +92,9 @@ vim.keymap.set("o", "gb", "<Cmd>call plugins#wordmotion#motion(v:count1, 'o', 'b
 vim.keymap.set("n", "ge", "<Cmd>call plugins#wordmotion#motion(v:count1, 'n', 'e', 0, [])<CR>", { silent = true })
 vim.keymap.set("x", "ge", ":<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'e', 0, [])<CR>", { silent = true })
 vim.keymap.set("o", "ge", "<Cmd>call plugins#wordmotion#motion(v:count1, 'o', 'e', 0, [])<CR>", { silent = true })
-vim.keymap.set("x", "iu", ":<C-U>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>", { silent = true })
+vim.keymap.set("x", "iu", ":<C-u>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>", { silent = true })
 vim.keymap.set("o", "iu", "<Cmd>call plugins#wordmotion#object(v:count1, 'o', 1, 0)<CR>", { silent = true })
-vim.keymap.set("x", "au", ":<C-U>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>", { silent = true })
+vim.keymap.set("x", "au", ":<C-u>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>", { silent = true })
 vim.keymap.set("o", "au", "<Cmd>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>", { silent = true })
 vim.keymap.set("x", "v", ":<C-u>call plugins#expand_region#next('v', '+')<CR>", { silent = true })
 vim.keymap.set("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>", { silent = true })
@@ -184,8 +184,8 @@ vim.keymap.set("n", "<BS>", "<Cmd>BufferLineCyclePrev<CR>")
 vim.keymap.set("n", "\\", "<Cmd>BufferLineCycleNext<CR>")
 vim.keymap.set("n", "<C-w><BS>", "<Cmd>BufferLineMovePrev<CR><C-w>", { remap = true })
 vim.keymap.set("n", "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", { remap = true })
-vim.keymap.set("n", "Z[", ":BufferLineCloseLeft<CR><Cmd>echo<CR>") -- https://github.com/akinsho/bufferline.nvim/issues/579
-vim.keymap.set("n", "Z]", ":BufferLineCloseRight<CR><Cmd>echo<CR>")
+vim.keymap.set("n", "Z[", "<Cmd>BufferLineCloseLeft<CR>")
+vim.keymap.set("n", "Z]", "<Cmd>BufferLineCloseRight<CR>")
 -- terminal {{{2
 vim.keymap.set("n", "<C-b>", "<Cmd>ToggleTerm<CR>")
 vim.keymap.set("n", "<leader>to", "<Cmd>execute 'ToggleTerm dir='. expand('%:p:h')<CR>")
@@ -448,7 +448,6 @@ if require("states").small_file then
                 "indent-blankline.nvim",
                 "nvim-scrollview",
                 "gitsigns.nvim",
-                "conflict-marker.vim",
                 "quick-scope",
                 "vim-fanfingtastic", -- motions/text objects sometimes don't work if loaded on keys
             }

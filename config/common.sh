@@ -73,7 +73,7 @@ alias gau='git add -u'
 alias gaa='git add --all'
 alias gb='git branch'
 alias gba='git branch -vv --sort=-committerdate -a'
-alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(HEAD)%(color:yellow)%(refname:short)|%(color:green)%(committerdate:relative)|%(color:red)%(objectname:short)%(color:reset) - %(subject) %(color:bold blue)<%(authorname)>%(color:reset)" --color=always | column -ts"|"'
+alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(HEAD)%(color:yellow)%(refname:short)|%(color:green)%(committerdate:relative)|%(color:red)%(objectname:short)%(color:reset) - %(subject) %(color:bold blue)<%(authorname)>%(color:reset)" --color | column -ts"|"'
 alias gc='git commit -m'
 alias gc!='git commit -v --amend'
 alias gca='git commit -v -a'
@@ -103,7 +103,7 @@ alias glgg='git log --graph --pretty=fuller'
 alias glgga='git log --graph --decorate --all --pretty=fuller'
 alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 alias gloo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --max-count 10'
-alias glog='git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)" --all'
+alias glog='git log --color --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all'
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
@@ -112,9 +112,9 @@ gmerge-preview-diff() { git diff HEAD..."$*"; }  # diff between target and the c
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
-alias grl='git reflog --date=format:%T --pretty=format:"%C(yellow)%h%Creset %C(037)%gD:%Creset %C(white)%gs%Creset%C(auto)%d%Creset" --date=iso'
+alias grl='git reflog --color --date=human-local --pretty=format:"%Cred%h%Creset %C(037)%gD:%Creset %gs%Creset%C(auto)%d%Creset"'
 alias gra='git remote add'
-alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,\(https://\|git@\)\([^:/]\+\)[:/][^/]\+/\([^/]\+\)/\?$,git@\2:joshuali925/\3,')\"; git remote -v"
+alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,^\(https://\|git@\)\([^:/]\+\)[:/][^/]\+/\([^/]\+\)/\?$,git@\2:joshuali925/\3,')\"; git remote -v"
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
@@ -126,7 +126,7 @@ alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"
 alias gss='git status -sb'
 alias gst='git stash'
 alias gsts='git stash; git stash apply'
-alias gshow='git show --pretty=fuller'
+alias gshow='git show --patch-with-stat --pretty=fuller'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
 alias gignore='git update-index --assume-unchanged'
@@ -141,12 +141,12 @@ alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
-alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranches containing HEAD: $(git branch --color=always -a --contains HEAD)"'
+alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranches containing HEAD: $(git branch --color -a --contains HEAD)"'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git-foresta --style=10 | \less -RiMXF'
 alias gforesta='git-foresta --style=10 --all | \less -RiMXF'
 alias gpatch='vi +startinsert patch.diff && git apply patch.diff && rm patch.diff'
-alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\\ls -d -F --color=always \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
+alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
@@ -155,14 +155,21 @@ gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
 
-grg() {  # grep regex in all commits, replace `log` with `reflog` for local commits
-  git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
+gr-toggle-url() {
+  local pattern='s,^\(https://\|git@\)\([^:/]\+\)[:/],' remote="${1:-origin}" url="$(git remote get-url "${1:-origin}")"
+  grep -q '^https://' <<< "$url" && pattern="${pattern}git@\\2:," || pattern="${pattern}https://\\2/,"
+  git remote set-url "$remote" "$(sed "$pattern" <<< "$url")"
+  git remote -v
+}
+
+grg() {  # grep regex in all commits, replace `log` with `reflog` for local commits, change -G to -S for literal string search, add --patch to see all diff together
+  git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
 }
 
 gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
-  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}')
+  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}')
   if [ -n "$filepath" ]; then
-    local sha=$(git log --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- "$filepath" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- $filepath | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
+    local sha=$(git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- "$filepath" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- $filepath | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
     if [ -n "$sha" ]; then
       echo -e "\033[0;35mgit show $sha:$filepath\033[0m" >&2
       git --no-pager show "$sha:$filepath"
@@ -171,24 +178,34 @@ gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
 }
 
 glof() {
-  git log --graph --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
+  git log --graph --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
     fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --toggle-sort=\` --multi \
     --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
-    --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show | delta --paging=never' \
+    --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tr "\n" " " | y)+abort' \
-    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show | delta --line-numbers --navigate)'
+    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
+}
+
+grlf() {
+  git reflog --color --date=human-local --pretty=format:"%Cred%h%Creset %C(037)%gD:%Creset %gs%Creset%C(auto)%d%Creset" "$@" | awk '!x[$1]++' |
+    fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --toggle-sort=\` --multi \
+    --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
+    --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
+    --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
+    --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tr "\n" " " | y)+abort' \
+    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
 
 gcb() {
-  if [ -n "$1" ]; then
+  if [ "$#" -gt 0 ]; then
     git checkout -b "$@" || git checkout "$@"
   else
-    local fzftemp=$(git branch --color=always --sort=-committerdate --all |
+    local fzftemp=$(git branch --color --sort=-committerdate --all |
       awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
       fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
       --header='Press ` to toggle sort' \
-      --preview='git log -n 50 --color=always --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
+      --preview='git log -n 50 --color --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
     if [ -n "$fzftemp" ]; then
       git show-ref --verify --quiet "refs/heads/${fzftemp#remotes/[^\/]*/}" && git checkout "${fzftemp#remotes/[^\/]*/}" || git checkout --track "${fzftemp#remotes/}"
     fi
@@ -204,14 +221,14 @@ pscpu() {
     ps_out=$(ps auxww --sort=-pcpu)
     pstree_flags='-Glps'
   fi
-  [ -z "$1" ] && echo "$ps_out" | head -n 11
+  [ "$#" -eq 0 ] && echo "$ps_out" | head -n 11
   if [ ! -x "$(command -v pstree)" ]; then
     echo 'pstree not found (e.g. yum install -y psmisc).'
   else
-    if [ -n "$1" ]; then
-      pids=($(grep -i "$@" <<< "$ps_out" | awk '{print $2}'))
-    else
+    if [ "$#" -eq 0 ]; then
       pids=($(sed -n '2,4p' <<< "$ps_out" | awk '{print $2}'))
+    else
+      pids=($(grep -i "$@" <<< "$ps_out" | awk '{print $2}'))
     fi
     for pid in "${pids[@]}"; do
       pstree_out=$(pstree "$pstree_flags" "$pid")
@@ -227,7 +244,8 @@ psmem() {
   else
     ps_out=$(ps axwwo pid,rss,args --sort -size)
   fi
-  echo "$ps_out" | head -n 16 | awk '{ hr=$2/1024 ; printf("%7s %9.2f Mb\t",$1,hr) } { for ( x=3 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }'
+  [ "$#" -gt 0 ] && ps_out=$(grep -i "$@" <<< "$ps_out" | head -n 16)
+  head -n 16 <<< "$ps_out" | awk '{ hr=$2/1024 ; printf("%7s %9.2f Mb\t",$1,hr) } { for ( x=3 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }'
 }
 
 sudorun() {
@@ -335,7 +353,7 @@ X() {  # extract to a directory / compress without top directory
 }
 
 path() {
-  if [ -z "$1" ]; then
+  if [ "$#" -eq 0 ]; then
     echo -e "${PATH//:/\\n}"
   else
     type -a "$@"
@@ -345,17 +363,13 @@ path() {
 
 vf() {
   local IFS=$'\n' fzftemp
-  if [ -z "$1" ]; then
-    fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
-  else
-    fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
-  fi
+  fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
   [ -n "$fzftemp" ] && $EDITOR "${fzftemp[@]}"
 }
 
 cdf() {
   local fzftemp
-  fzftemp=$(FZF_DEFAULT_COMMAND='fd --strip-cwd-prefix --color=always --hidden --exclude=.git' fzf --query="${1:-}" --ansi --bind='tab:down,btab:up' --bind='`:unbind(`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore --no-ignore || true)') && {
+  fzftemp=$(FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --color=always --hidden --exclude=.git $*" fzf --ansi --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore $* || true)") && {
     [ -d "$fzftemp" ] && cd "$fzftemp" || {
       [ -d "$(dirname "$fzftemp" 2> /dev/null)" ] && cd "$(dirname "$fzftemp")"
     }
@@ -398,7 +412,7 @@ rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to
 unalias z 2> /dev/null
 z() {
   local fzftemp
-  if [ -z "$1" ]; then
+  if [ "$#" -eq 0 ]; then
     fzftemp=$(_z -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --bind='tab:down,btab:up') && cd "$fzftemp"
   else
     _z 2>&1 "$@"
@@ -412,12 +426,12 @@ zc() {
 t() {  # create, restore, or switch tmux session
   local change current fzftemp sessions
   [ -n "$TMUX" ] && change='switch-client' && current=$(tmux display-message -p '#{session_name}') || change='attach-session'
-  if [ -z "$1" ]; then
+  if [ "$#" -eq 0 ]; then
     fzftemp=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$current$/d" | fzf --prompt='attach> ' --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $change -t "$fzftemp"
     if [ "$?" -ne 0 ]; then
-      sessions=$(ls ~/.tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
+      sessions=$(ls ~/.local/share/tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
       [ -n "$sessions" ] && fzftemp=$(echo "$sessions" | fzf --prompt='restore> ' --bind='ctrl-d:execute(mv {} {}.bak)' --bind='tab:down,btab:up' --tac --preview='cat {}') && {
-        ln -sf "$fzftemp" ~/.tmux/resurrect/last
+        ln -sf "$fzftemp" ~/.local/share/tmux/resurrect/last
         tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
         tmux attach-session
       } || tmux
@@ -428,7 +442,7 @@ t() {  # create, restore, or switch tmux session
 }
 
 manf() {
-  if [ -z "$1" ]; then
+  if [ "$#" -eq 0 ]; then
     local fzftemp
     fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$fzftemp" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
   else
@@ -456,8 +470,8 @@ react() {
   while true; do
     changed=($(fd --base-directory "$1" --absolute-path --type=f --changed-within 2s))
     if [ ${#changed[@]} -gt 0 ]; then
-      local command="${@:2}"
-      eval "${command//\{\}/${changed[@]}}"
+      local cmd="${@:2}"
+      eval "${cmd//\{\}/${changed[@]}}"
     fi
     sleep 2
   done
@@ -480,16 +494,16 @@ untildone() {
 
 set-env() {
   if [ "$#" -lt 1 ]; then echo "Usage: $0 [--write-rc] {java_home|path}"; return 1; fi
-  local command write_to_rc
+  local cmd write_to_rc
   while [ $# != 0 ]; do
     case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
-      java_home|javahome) command="export JAVA_HOME=\"$(asdf where java)\""; shift 1 ;;
-      path) command="export PATH=\"$PWD:\$PATH\""; shift 1 ;;
+      java_home|javahome) cmd="export JAVA_HOME=\"$(asdf where java)\""; shift 1 ;;
+      path) cmd="export PATH=\"$PWD:\$PATH\""; shift 1 ;;
       --write-rc) write_to_rc=1; shift 1 ;;
       *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
     esac
   done
-  eval "$command" && echo "$command" | if [ -n "$write_to_rc" ]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
+  eval "$cmd" && echo "$cmd" | if [ -n "$write_to_rc" ]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
 }
 
 tldr() {
@@ -499,7 +513,7 @@ tldr() {
 getip() {
   if [ "$#" -gt 1 ]; then
     echo "Usage: $0 [--private|ip|domain]"
-  elif [ -z "$1" ]; then
+  elif [ "$#" -eq 0 ]; then
     curl -s "https://checkip.amazonaws.com"  # or ifconfig.me
   elif [ "$1" = '--private' ]; then  # en0: wireless, en1: ethernet, en3: thunderbolt to ethernet
     builtin command -v ifconfig > /dev/null 2>&1 && ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' || ipconfig getifaddr en0 2> /dev/null || ipconfig getifaddr en1 2> /dev/null || hostname -I 2> /dev/null || ip route get 1.1.1.1 | awk '{print $7}'
@@ -544,34 +558,35 @@ bin-update() {
 }
 
 docker-shell() {
-  if [[ $1 = vim* ]]; then
-    docker image ls | grep -q ubuntu_vim || {
-      docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim && echo -e "\n\nFinished building image. To commit new change: docker commit vim_container ubuntu_vim" || return 1
-    }
-    case $1 in
-      vim-once) docker run --network host -it --name vim_container_temp --rm ubuntu_vim; return $? ;;
-      vim-rm) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
-      vim-build) docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
-      vim) local container_name=${2:-vim_container} ;;
-      *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
-    esac
-    local running=$(docker inspect -f '{{.State.Running}}' "$container_name" 2> /dev/null)
-    if [ "$running" == true ]; then
-      echo 'Starting shell in running container..'; docker exec -it "$container_name" zsh
-    elif [ "$running" == false ]; then
-      echo 'Starting stopped container..'; docker start -ai "$container_name"
-    else
-      echo "Starting new container ($container_name) with host network and docker socket mapped.."
-      mkdir -p "$HOME/.local/docker-share"
-      docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME/.local/docker-share":/docker-share -it --name "$container_name" ubuntu_vim
+  if [[ $1 != vim* ]]; then
+    local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}")
+    if [ -n "$selected_id" ]; then
+      printf "\n → %s\n" "$selected_id"
+      selected_id=$(awk '{print $1}' <<< "$selected_id")
+      docker exec -it "$selected_id" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)' || docker exec -it "$selected_id" sh
     fi
     return $?
   fi
-  local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}")
-  if [ -n "$selected_id" ]; then
-    printf "\n → %s\n" "$selected_id"
-    selected_id=$(echo "$selected_id" | awk '{print $1}')
-    docker exec -it "$selected_id" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)' || docker exec -it "$SELECTED_ID" sh
+  if ! docker image ls | grep -q ubuntu_vim; then
+    docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim || return 1
+    echo -e "\n\nFinished building image. To commit new change: docker commit vim_container ubuntu_vim"
+  fi
+  case $1 in
+    vim-once) docker run --network host -it --name vim_container_temp --rm ubuntu_vim; return $? ;;
+    vim-rm) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
+    vim-build) docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
+    vim) local container_name=${2:-vim_container} ;;
+    *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
+  esac
+  local running=$(docker inspect -f '{{.State.Running}}' "$container_name" 2> /dev/null)
+  if [ "$running" == true ]; then
+    echo 'Starting shell in running container..'; docker exec -it "$container_name" zsh
+  elif [ "$running" == false ]; then
+    echo 'Starting stopped container..'; docker start -ai "$container_name"
+  else
+    echo "Starting new container ($container_name) with host network and docker socket mapped.."
+    mkdir -p "$HOME/.local/docker-share"
+    docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME/.local/docker-share":/docker-share -it --name "$container_name" ubuntu_vim
   fi
 }
 
@@ -585,7 +600,10 @@ ec2() {
       return 0 ;;
     ssh)
       local host=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$2$" | awk '{print $1}')
-      [ -z "$host" ] && return 1
+      if [ -z "$host" ]; then
+        ec2 start "$2" && sleep 15 && ec2 ssh "$2"
+        return $?
+      fi
       echo "ssh to ec2: $host" >&2
       shift 2
       ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "$@" "ec2-user@$host" || ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "$@" "ubuntu@$host"
@@ -614,12 +632,12 @@ if [[ $OSTYPE = darwin* ]]; then
   alias toggle-dark-theme='automator ~/.vim/config/macToggleDark.wflow'
   browser-history() {
     local cols=$((COLUMNS / 3)) sep='{::}' fzftemp fzfprompt
-    if [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
-      fzfprompt='Chrome> '
-      command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf-temp
-    elif [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
+    if [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
       fzfprompt='Edge> '
       command cp -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" /tmp/browser-history-fzf-temp
+    elif [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
+      fzfprompt='Chrome> '
+      command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf-temp
     else
       echo "Chrome and Edge histories not found, exiting.."
       return 1

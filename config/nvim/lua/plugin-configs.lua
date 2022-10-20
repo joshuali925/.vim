@@ -323,9 +323,6 @@ function M.telescope()
                 "--with-filename",
                 "--line-number",
                 "--column",
-                "--smart-case",
-                "--hidden",
-                "--auto-hybrid-regex",
             },
             prompt_prefix = "   ",
             selection_caret = "  ",
@@ -584,7 +581,10 @@ function M.nvim_cmp()
     cmp.setup({
         completion = { completeopt = "menuone,noselect" },
         snippet = { expand = function(args) vim.fn["vsnip#anonymous"](args.body) end },
-        window = { completion = cmp.config.window.bordered({ border = "single" }), documentation = cmp.config.window.bordered({ border = "single" }) },
+        window = {
+            completion = vim.tbl_extend("force", require("cmp").config.window.bordered({ border = "single" }), { col_offset = -4 }),
+            documentation = cmp.config.window.bordered({ border = "single" }),
+        },
         formatting = {
             fields = { "kind", "abbr", "menu" },
             format = function(_, vim_item)
@@ -855,8 +855,8 @@ function M.vim_quickui()
         { "Search in selection", [[call feedkeys('/\%>'. (line("'<") - 1). 'l\%<'. (line("'>") + 1). 'l')]], [[Search in selected lines, to search in previous visual selection use /\%V]] },
     })
     vim.fn["quickui#menu#install"]("&Git", {
-        { "Git &file history", [[vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
-        { "Git l&og", [['<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
+        { "Git &file history", [[execute "lua require('packer').loader('vim-flog')" | vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
+        { "Git l&og", [[execute "lua require('packer').loader('vim-flog')" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
         { "--", "" },
         { "Git open &remote", [[execute "lua require('packer').loader('vim-flog')" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser" },
     })

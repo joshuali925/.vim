@@ -113,7 +113,7 @@ api.mapkey('gr', 'Go to referrer', function() { if(document.referrer) open(docum
 api.unmap('ga');
 api.mapkey('ga', '#12Open Chrome Apps', function() { api.tabOpenLink('chrome://apps/'); });
 api.unmap('gc');
-api.mapkey('gc', 'Clear cookies for specific sites', function() { api.tabOpenLink('chrome://settings/siteData'); });
+api.mapkey('gc', 'Clear cookies for specific sites', function() { api.tabOpenLink('chrome://settings/' + (navigator.userAgent.indexOf('Edg') != 1 ? 'siteData' : 'content/all')); });
 api.unmap('gf');
 api.mapkey('gf', 'Go to flags', function() { api.tabOpenLink('chrome://flags'); });
 api.mapkey('<Ctrl-,>', 'Open Chrome Settings', function() { api.tabOpenLink('chrome://settings/'); });

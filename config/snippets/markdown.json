@@ -10,7 +10,7 @@
     ]
   },
   "Opensearch release notes": {
-    "prefix": "releasenotes",
+    "prefix": "template-release-notes",
     "body": [
       "## Version $1 Release Notes",
       "",

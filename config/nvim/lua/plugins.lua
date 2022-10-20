@@ -67,11 +67,11 @@ return require("packer").startup({
             "rbong/vim-flog",
             requires = { "tpope/vim-fugitive", "tpope/vim-rhubarb" },
             fn = "fugitive#*",
-            event = "BufNewFile,BufRead *.git/{COMMIT,ISSUE,PULLREQ,RELEASE}_EDITMSG", -- issue number omni-completion
+            event = "BufNewFile,BufRead *.git/{COMMIT,ISSUE,PULLREQ,RELEASE}_EDITMSG", -- issue number omni-completion, needs :e to manually trigger filetype autocmd, does not work if cloned with url.replacement.insteadOf
             cmd = { "Git", "Ggrep", "Glgrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog", "Flogsplit" }, -- GBrowse loaded on demand won't include line number
         })
         use({ "lewis6991/gitsigns.nvim", config = conf("gitsigns") })
-        use({ "rhysd/conflict-marker.vim", config = conf("conflict_marker") })
+        use({ "rhysd/conflict-marker.vim", cond = "require('states').small_file", config = conf("conflict_marker") })
         use({ "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" } })
 
         -- lang
