@@ -10,19 +10,19 @@
     ]
   },
   "Content type JSON": {
-    "prefix": "contentType",
+    "prefix": "content-type",
     "body": ["Content-Type: application/json", "", "{", "  $0", "}"]
   },
   "GET request": {
-    "prefix": "getrequest",
+    "prefix": "get-request",
     "body": ["GET {{BASE}}/$0"]
   },
   "DELETE request": {
-    "prefix": "deleterequest",
+    "prefix": "delete-request",
     "body": ["DELETE {{BASE}}/$0"]
   },
   "PUT request": {
-    "prefix": "putrequest",
+    "prefix": "put-request",
     "body": [
       "PUT {{BASE}}/$1",
       "Content-Type: application/json",
@@ -33,7 +33,7 @@
     ]
   },
   "POST request": {
-    "prefix": "postrequest",
+    "prefix": "post-request",
     "body": [
       "POST {{BASE}}/$1",
       "Content-Type: application/json",

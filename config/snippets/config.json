@@ -1,6 +1,6 @@
 {
   "Supervisord template": {
-    "prefix": "supervisordTemplate",
+    "prefix": "template-supervisord",
     "body": [
       "; vim:ft=dosini",
       "",
@@ -27,7 +27,7 @@
     ]
   },
   "Caddy template": {
-    "prefix": "caddyTemplate",
+    "prefix": "template-caddy",
     "body": [
       "# vim:ft=config:noet",
       "",

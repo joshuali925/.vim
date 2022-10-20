@@ -92,7 +92,7 @@ set noswapfile
 set nobackup
 set nowritebackup
 set wildcharm=<C-z>
-set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ --auto-hybrid-regex
+set grepprg=rg\ --vimgrep
 set grepformat=%f:%l:%c:%m,%f:%l:%m,%f
 set cedit=<C-x>
 set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%{&fileencoding!=''&&&fileencoding!='utf-8'?'[fileencoding\:\ '.&fileencoding.']':''}%{&fileformat!='unix'?'[fileformat\:\ '.&fileformat.']':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
@@ -129,10 +129,10 @@ onoremap <silent> gb :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'b', 0,
 nnoremap <silent> ge :call plugins#wordmotion#motion(v:count1, 'n', 'e', 0, [])<CR>
 xnoremap <silent> ge :<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'e', 0, [])<CR>
 onoremap <silent> ge :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'e', 0, [])<CR>
-xnoremap <silent> iu :<C-U>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>
-onoremap <silent> iu :<C-U>call plugins#wordmotion#object(v:count1, 'o', 1, 0)<CR>
-xnoremap <silent> au :<C-U>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>
-onoremap <silent> au :<C-U>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>
+xnoremap <silent> iu :<C-u>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>
+onoremap <silent> iu :<C-u>call plugins#wordmotion#object(v:count1, 'o', 1, 0)<CR>
+xnoremap <silent> au :<C-u>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>
+onoremap <silent> au :<C-u>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>
 xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
 xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 nnoremap <BS> :bprevious<CR>
@@ -395,10 +395,10 @@ nnoremap <expr> ys plugins#surround#opfunc('setup')
 nmap yS ysg_
 xnoremap <silent> s :<C-u>call plugins#surround#opfunc(visualmode(),visualmode() ==# 'V' ? 1 : 0)<CR>
 xnoremap <silent> gS :<C-u>call plugins#surround#opfunc(visualmode(),visualmode() ==# 'V' ? 0 : 1)<CR>
-xnoremap <silent> ia :<C-U>call plugins#argtextobj#MotionArgument(1, 1)<CR>
-onoremap <silent> ia :<C-U>call plugins#argtextobj#MotionArgument(1, 0)<CR>
-xnoremap <silent> aa :<C-U>call plugins#argtextobj#MotionArgument(0, 1)<CR>
-onoremap <silent> aa :<C-U>call plugins#argtextobj#MotionArgument(0, 0)<CR>
+xnoremap <silent> ia :<C-u>call plugins#argtextobj#MotionArgument(1, 1)<CR>
+onoremap <silent> ia :<C-u>call plugins#argtextobj#MotionArgument(1, 0)<CR>
+xnoremap <silent> aa :<C-u>call plugins#argtextobj#MotionArgument(0, 1)<CR>
+onoremap <silent> aa :<C-u>call plugins#argtextobj#MotionArgument(0, 0)<CR>
 call funcs#map_copy_with_osc_yank_script()
 if $SSH_CLIENT != ''
   nnoremap gx :call system('y', expand('<cfile>'))<CR>

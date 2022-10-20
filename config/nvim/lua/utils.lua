@@ -142,7 +142,9 @@ function M.toggle_lf()
                     end
                     handle:close()
                     os.remove(lf_selection_path)
-                    vim.cmd("wincmd p | args " .. table.concat(files, " "))
+                    vim.schedule(function()
+                        vim.cmd.args(files)
+                    end)
                 end
             end,
         })

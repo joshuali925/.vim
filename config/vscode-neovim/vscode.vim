@@ -83,10 +83,10 @@ onoremap <silent> gb :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'b', 0,
 nnoremap <silent> ge :call plugins#wordmotion#motion(v:count1, 'n', 'e', 0, [])<CR>
 xnoremap <silent> ge :<C-u>call plugins#wordmotion#motion(v:count1, 'x', 'e', 0, [])<CR>
 onoremap <silent> ge :<C-u>call plugins#wordmotion#motion(v:count1, 'o', 'e', 0, [])<CR>
-xnoremap <silent> iu :<C-U>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>
-onoremap <silent> iu :<C-U>call plugins#wordmotion#object(v:count1, 'o', 1, 0)<CR>
-xnoremap <silent> au :<C-U>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>
-onoremap <silent> au :<C-U>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>
+xnoremap <silent> iu :<C-u>call plugins#wordmotion#object(v:count1, 'x', 1, 0)<CR>
+onoremap <silent> iu :<C-u>call plugins#wordmotion#object(v:count1, 'o', 1, 0)<CR>
+xnoremap <silent> au :<C-u>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<CR>
+onoremap <silent> au :<C-u>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>
 xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
 xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
 xnoremap il ^og_

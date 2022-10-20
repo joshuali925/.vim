@@ -8,11 +8,11 @@
     "body": ["if [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "  $0", "fi"]
   },
   "If command succeeds": {
-    "prefix": "ifcommand",
+    "prefix": "if-command",
     "body": ["if ${1:grep -q text <<< \"\\$VAR\"}; then", "  $0", "fi"]
   },
   "If command does not exist": {
-    "prefix": "ifcommandnotexists",
+    "prefix": "if-command-not-exists",
     "body": [
       "if ! builtin command -v ${1:cmd} > /dev/null 2>&1; then",
       "  $0",
@@ -20,15 +20,15 @@
     ]
   },
   "If variable exists": {
-    "prefix": "ifvarexists",
+    "prefix": "if-var-exists",
     "body": ["if [ -n \"\\$${1:VAR}\" ]; then", "  $0", "fi"]
   },
   "If glob": {
-    "prefix": "ifglob",
+    "prefix": "if-glob",
     "body": ["if [[ \\$${1:VAR} = *${2:STRING}* ]]; then", "  $0", "fi"]
   },
   "If regex": {
-    "prefix": "ifregex",
+    "prefix": "if-regex",
     "body": [
       "if [[ \\$${1:VAR} =~ ${2:^([0-9]{10\\}|[a-z]{5\\})\\$} ]]; then",
       "  $0",
@@ -36,7 +36,7 @@
     ]
   },
   "If no arguments": {
-    "prefix": "ifnoarguments",
+    "prefix": "if-no-arguments",
     "body": [
       "if [ \"\\$#\" -eq 0 ]; then",
       "  echo \"Usage: \\$0 <args>\"",
@@ -45,11 +45,11 @@
     ]
   },
   "If array is empty": {
-    "prefix": "ifarrayempty",
+    "prefix": "if-array-empty",
     "body": ["if [ \\${#${1:array}[@]} -eq 0 ]; then", "  $0", "fi"]
   },
   "If variable equals ignore case": {
-    "prefix": "ifEqualsIgnoreCase",
+    "prefix": "if-equals-ignore-case",
     "body": [
       "if [ \"\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$${1:VAR}\")\" = '${2:string}' ]; then",
       "  $0",
@@ -65,11 +65,11 @@
     "body": ["for ${1:element} in \"${2:\\${array[@]\\}}\"; do", "  $0", "done"]
   },
   "For i in range": {
-    "prefix": "forRange",
+    "prefix": "for-range",
     "body": ["for ${1:i} in {1..${2:10}}; do", "  $0", "done"]
   },
   "Loop lines": {
-    "prefix": "whileread",
+    "prefix": "while-read",
     "body": [
       "while IFS= read -r line; do",
       "  echo \"\\$line\"",
@@ -88,75 +88,75 @@
     ]
   },
   "Variable with default value": {
-    "prefix": "varDefaultValue",
+    "prefix": "var-default-value",
     "body": "\"\\${${1:VAR}:-${0:default}}\""
   },
   "Substring of variable": {
-    "prefix": "varSubstring",
+    "prefix": "var-substring",
     "body": "\"\\${${1:VAR}:${2:offset}:${0:length}}\""
   },
   "Length of variable": {
-    "prefix": "varLength",
+    "prefix": "var-length",
     "body": "\"\\${#${0:VAR}}\""
   },
   "Remove first match in variable": {
-    "prefix": "varRemoveFirstMatch",
+    "prefix": "var-remove-first-match",
     "body": "\"\\${${1:VAR}#${0:pattern}}\""
   },
   "Remove first match in variable greedy": {
-    "prefix": "varRemoveFirstMatchGreedy",
+    "prefix": "var-remove-first-match-greedy",
     "body": "\"\\${${1:VAR}##${0:pattern}}\""
   },
   "Remove last match in variable": {
-    "prefix": "varRemoveLastMatch",
+    "prefix": "var-remove-last-match",
     "body": "\"\\${${1:VAR}%${0:pattern}}\""
   },
   "Remove last match in variable greedy": {
-    "prefix": "varRemoveLastMatchGreedy",
+    "prefix": "var-remove-last-match-greedy",
     "body": "\"\\${${1:VAR}%%${0:pattern}}\""
   },
   "Substitute first match in variable": {
-    "prefix": "varReplace",
+    "prefix": "var-replace",
     "body": "\"\\${${1:VAR}/${2:pattern}/${0:str}}\""
   },
   "Substitute all matches in variable": {
-    "prefix": "varReplaceAll",
+    "prefix": "var-replace-all",
     "body": "\"\\${${1:VAR}//${2:pattern}/${0:str}}\""
   },
   "Keep everything before last slash": {
-    "prefix": "varDirname",
+    "prefix": "var-dirname",
     "body": "\\${${1:VAR}%/*}$0"
   },
   "Keep everything after last slash": {
-    "prefix": "varBasename",
+    "prefix": "var-basename",
     "body": "\\${${1:VAR}##*/}$0"
   },
   "Keep everything before last dot": {
-    "prefix": "varNoExtension",
+    "prefix": "var-no-extension",
     "body": "\\${${1:VAR}%.*}$0"
   },
   "Keep everything after last dot": {
-    "prefix": "varExtension",
+    "prefix": "var-extension",
     "body": "\\${${1:VAR}##*.}$0"
   },
   "Redirect to null": {
-    "prefix": "redirnull",
+    "prefix": "redir-null",
     "body": "> /dev/null 2>&1"
   },
   "Redirect to stderr": {
-    "prefix": "redirerr",
+    "prefix": "redir-err",
     "body": ">&2"
   },
   "Redirect stderr to null": {
-    "prefix": "redirerrornull",
+    "prefix": "redir-error-null",
     "body": "2> /dev/null"
   },
   "Redirect stderr to stdin": {
-    "prefix": "redirerrorstdin",
+    "prefix": "redir-error-stdin",
     "body": "2>&1"
   },
   "Script directory": {
-    "prefix": "scriptDirectory",
+    "prefix": "script-directory",
     "body": "SCRIPT_DIR=\"\\$(cd -- \"\\$(dirname -- \"\\${BASH_SOURCE[0]:-\\$0}\")\" &> /dev/null && pwd 2> /dev/null)\""
   },
   "Log": {
@@ -164,11 +164,11 @@
     "body": "printf \"\\033[0;36m%s\\033[0m\\n\" \"$0\""
   },
   "iSO date": {
-    "prefix": "dateISO",
+    "prefix": "date-iso",
     "body": "date -u +'%Y-%m-%dT%H:%M:%SZ'"
   },
   "Prompt yes or no (zsh compatible)": {
-    "prefix": "promptYesNo",
+    "prefix": "prompt-yes-no",
     "body": [
       "printf '${1:Continue} (Y/n)? '",
       "read -r REPLY",
@@ -178,7 +178,7 @@
     ]
   },
   "Read one character": {
-    "prefix": "promptOneKey",
+    "prefix": "prompt-one-key",
     "body": [
       "read -p '${1:To abort press n.}' -n 1; echo",
       "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",

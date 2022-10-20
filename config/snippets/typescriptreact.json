@@ -17,13 +17,13 @@
     ]
   },
   "Random string": {
-    "prefix": "randomstring",
+    "prefix": "random-string",
     "body": [
       "const randString = () => Math.random().toString(36).substring(2);"
     ]
   },
   "Random integer": {
-    "prefix": "randomint",
+    "prefix": "random-int",
     "body": [
       "const randint = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);"
     ]
@@ -44,7 +44,7 @@
     ]
   },
   "Promise then log": {
-    "prefix": "thenlog",
+    "prefix": "then-log",
     "body": [".then((resp) => {", "  console.log(resp);", "})"]
   },
   "UseState": {
@@ -68,7 +68,7 @@
     "body": "$0={$0}"
   },
   "Props get set type": {
-    "prefix": "propsgettersetter",
+    "prefix": "props-getter-setter",
     "body": [
       "${1:state}: ${0:string};",
       "set${1/(.*)/${1:/capitalize}/}: (${1:state}: ${0:string}) => void;"
@@ -133,7 +133,7 @@
     "body": ["const $0 = jest.fn();"]
   },
   "Jest waitfor": {
-    "prefix": "waitfor",
+    "prefix": "waitFor",
     "body": ["await waitFor(() => {", "  $0", "});"]
   }
 }
