@@ -1,0 +1,27 @@
+{
+  "cli template": {
+    "prefix": "template-cli",
+    "body": [
+      "#!/usr/bin/env python3",
+      "",
+      "import os, sys, re, io, random, math, json, shlex, subprocess",
+      "from functools import reduce",
+      "",
+      "if not sys.stdin.isatty():",
+      "    stdin = [line.rstrip() for line in sys.stdin]",
+      "    print(\"\\n\".join([\"Read from stdin:\"] + stdin))",
+      "    # json_data = json.loads(\"\".join(stdin))",
+      "",
+      "if len(sys.argv) > 1:",
+      "    arg_str = shlex.quote(shlex.join(sys.argv[1:]))",
+      "    print(f\"Quoted shell string: {arg_str}\\n\")",
+      "    out = subprocess.run(",
+      "        [\"bash\", \"-c\", \"echo {}\".format(arg_str)],",
+      "        capture_output=True,",
+      "        text=True,",
+      "    )",
+      "    print(out.stdout)",
+      "    print(f\"Process finished with status {out.returncode}\")"
+    ]
+  }
+}

@@ -347,5 +347,21 @@ function! s:expand_region(mode, direction)
   let &selectmode = s:saved_selectmode
 endfunction
 
+" mode: use 'v' for visual. text_object_mode: 'i' or 'a'
+function! plugins#expand_region#any_pair(mode, text_object_mode)
+  let expand_region_text_objects_save = g:expand_region_text_objects
+  let g:expand_region_text_objects = {
+          \ a:text_object_mode. '`'  :1,
+          \ a:text_object_mode. '"'  :1,
+          \ a:text_object_mode. '''' :1,
+          \ a:text_object_mode. ']'  :1,
+          \ a:text_object_mode. ')'  :1,
+          \ a:text_object_mode. '}'  :1,
+          \ a:text_object_mode. '>'  :1,
+          \}
+  call plugins#expand_region#next(a:mode, '+')
+  let g:expand_region_text_objects = expand_region_text_objects_save
+endfunction
+
 let &cpo = s:save_cpo
 unlet s:save_cpo

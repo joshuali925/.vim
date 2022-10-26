@@ -150,10 +150,14 @@ alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do gi
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
-gpr() { git fetch origin "pull/$1/head"; git branch "pr/$1" 2> /dev/null; git checkout "pr/$1"; git reset --hard FETCH_HEAD; }
 gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
 gdd() { git diff "$@" | delta --line-numbers --navigate; }
 gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
+
+gpr() {
+  git stash push --include-untracked --message 'git PR temporary stash'
+  git fetch origin "pull/$1/head" && { git branch "pr/$1" 2> /dev/null; git checkout "pr/$1" && git reset --hard FETCH_HEAD; }
+}
 
 gr-toggle-url() {
   local pattern='s,^\(https://\|git@\)\([^:/]\+\)[:/],' remote="${1:-origin}" url="$(git remote get-url "${1:-origin}")"
@@ -444,9 +448,9 @@ t() {  # create, restore, or switch tmux session
 manf() {
   if [ "$#" -eq 0 ]; then
     local fzftemp
-    fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$fzftemp" | awk -F' |,' '{print $1}')" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
+    fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$fzftemp" | awk -F' |,' '{print $1}')" +'bdelete #'
   else
-    nvim +"Man $*" +'bdelete #' +'nnoremap <buffer> <nowait> d <C-d>' +'nnoremap <buffer> u <C-u>'
+    nvim +"Man $*" +'bdelete #'
   fi
 }
 

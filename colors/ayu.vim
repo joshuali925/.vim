@@ -42,7 +42,6 @@ hi Visual guibg=#323a4c ctermbg=237
 hi WarningMsg guifg=#ffa759 ctermfg=215
 hi WildMenu guifg=#cbccc6 guibg=#f28779 ctermfg=252 ctermbg=210
 hi SignColumn guibg=#1f2430 ctermbg=235
-hi Special guifg=#ffcc66 ctermfg=222
 hi Comment guifg=#69737d ctermfg=243
 hi Constant guifg=#bae67e ctermfg=149
 hi Number guifg=#d4bfff ctermfg=183

@@ -15,12 +15,16 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bi
 ### Windows
 
 ```bash
+git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\.vim --depth=1
+copy %USERPROFILE%\.vim\config\.gitconfig %USERPROFILE%\.gitconfig
+mkdir %USERPROFILE%\.vim\config\lfrc %LOCALAPPDATA%\lf
+copy %USERPROFILE%\.vim\config\lfrc %LOCALAPPDATA%\lf\lfrc
+
 # nvim
-git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\vimfiles --depth=1
-move %USERPROFILE%\vimfiles\config\nvim %LOCALAPPDATA%
+rmdir /S /Q %LOCALAPPDATA%\nvim
+robocopy %USERPROFILE%\.vim\config\nvim %LOCALAPPDATA%\nvim /e
 del %LOCALAPPDATA%\nvim\autoload
-move %USERPROFILE%\vimfiles\autoload %LOCALAPPDATA%\nvim\autoload
-rmdir /S /Q %USERPROFILE%\vimfiles
+robocopy %USERPROFILE%\.vim\autoload %LOCALAPPDATA%\nvim\autoload /e
 ```
 
 ### Mac OS

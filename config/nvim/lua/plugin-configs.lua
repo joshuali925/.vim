@@ -251,7 +251,7 @@ function M.alpha_nvim()
         callback = function()
             vim.b.RestoredCursor = 1 -- do not restore cursor position
             vim.keymap.set("n", "v", require("alpha").queue_press, { buffer = true })
-            vim.keymap.set("n", "q", "len(getbufinfo({'buflisted':1})) == 0 ? '<Cmd>quit<CR>' : '<Cmd>Bdelete<CR>'", { buffer = true, expr = true, replace_keycodes = false })
+            vim.keymap.set("n", "q", [[len(getbufinfo({"buflisted":1})) == 0 ? "<Cmd>quit<CR>" : "<Cmd>call plugins#bbye#bdelete('bdelete', '', '')<CR>"]], { buffer = true, expr = true, replace_keycodes = false })
             vim.keymap.set("n", "e", "<Cmd>enew<CR>", { buffer = true })
             vim.keymap.set("n", "i", "<Cmd>enew <bar> startinsert<CR>", { buffer = true })
         end,
