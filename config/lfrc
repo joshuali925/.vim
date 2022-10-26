@@ -5,7 +5,7 @@ set incfilter
 set info size
 set dircounts
 set icons
-# for `<command> "$fx"` to work (defaults is '' which needs: `echo "$fx" | xargs -d '\n' <command>`)
+# for `<command> $fx` to work (defaults is '' which needs: `echo "$fx" | xargs -d '\n' <command>`)
 set ifs "\n"
 set previewer ~/.vim/config/lf-preview.sh
 
@@ -88,10 +88,10 @@ cmd vim $$EDITOR "$@"
 cmd rg !clear && rg "$@"
 cmd code %code .
 cmd tail $less -RiM +F "$f"
-cmd sudorm %sudo rm -r "$f"
+cmd sudorm %sudo rm -r $fx
 cmd sudoedit $sudo TERM=xterm-256color vim -u ~/.vim/config/mini.vim "$f"
 cmd sudolf $TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer' -command 'map i $less -RiM "$f"' "$f"; lf -remote "send $id echo sudolf exited"
-cmd file !file "$f"
+cmd file !file $fx
 cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
 cmd gdu $"$HOME/.vim/bin/gdu"
@@ -166,7 +166,7 @@ cmd paste-symlink %{{
   fi
 }}
 
-# default shell is sh which doesn't support arrays and `<<<`
+# default shell is sh which doesn't support arrays and `<<<` herestring
 cmd zip ${{
   set -f
   echo "$fx" | {

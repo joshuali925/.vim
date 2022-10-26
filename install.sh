@@ -5,7 +5,7 @@ BACKUP_DIR=$HOME/config-backup
 
 CYAN='\033[0;36m'
 YELLOW='\033[0;33m'
-BLACK="\033[1;30m"
+BLACK='\033[1;30m'
 NC='\033[0m'
 
 detect-env() {

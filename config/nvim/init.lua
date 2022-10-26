@@ -98,12 +98,17 @@ vim.keymap.set("x", "au", ":<C-u>call plugins#wordmotion#object(v:count1, 'x', 0
 vim.keymap.set("o", "au", "<Cmd>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>", { silent = true })
 vim.keymap.set("x", "v", ":<C-u>call plugins#expand_region#next('v', '+')<CR>", { silent = true })
 vim.keymap.set("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>", { silent = true })
+vim.keymap.set("o", "ib", "<Cmd>call plugins#expand_region#any_pair('o', 'i')<CR>", { silent = true })
+vim.keymap.set("x", "ib", ":<C-u>call plugins#expand_region#any_pair('v', 'i')<CR>", { silent = true })
+vim.keymap.set("o", "ab", "<Cmd>call plugins#expand_region#any_pair('o', 'a')<CR>", { silent = true })
+vim.keymap.set("x", "ab", ":<C-u>call plugins#expand_region#any_pair('v', 'a')<CR>", { silent = true })
 -- general {{{2
 vim.keymap.set("n", "[\\", "<Cmd>tab sbuffer<CR>")
 vim.keymap.set("n", "]\\", "<Cmd>enew<CR>")
 vim.keymap.set("n", "[<BS>", "<Cmd>new<CR>")
 vim.keymap.set("n", "]<BS>", "<Cmd>vnew<CR>")
 vim.keymap.set("n", "<C-]>", "<Cmd>call funcs#ctags()<CR>")
+vim.keymap.set("n", "<leader><C-]>", "<Cmd>call funcs#ctags_create_and_jump()<CR>")
 vim.keymap.set({ "n", "x", "o" }, "0", "funcs#home()", { expr = true })
 vim.keymap.set({ "n", "x", "o" }, "^", "0")
 vim.keymap.set({ "n", "o" }, "-", "$") -- $ in normal mode will always put cursor at last column when scrolling, g_ will not
@@ -173,6 +178,7 @@ vim.keymap.set("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
 vim.keymap.set("n", "yoq", "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight<CR>")
+vim.keymap.set("n", "yog", "<Cmd>lua require('rooter').toggle()<CR>")
 vim.keymap.set("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<BS>", [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
@@ -253,10 +259,10 @@ vim.keymap.set("n", "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplis
 vim.keymap.set("n", "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers({initial_mode = 'normal'})<CR>")
 vim.keymap.set("n", "<leader>fu", "<Cmd>lua require('telescope.builtin')[require('lsp').is_active() and 'lsp_document_symbols' or 'treesitter']()<CR>")
 vim.keymap.set("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
-vim.keymap.set("n", "<leader>fg", ":GrepRegex ")
-vim.keymap.set("x", "<leader>fg", ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR>")
-vim.keymap.set("n", "<leader>fj", ":GrepRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>")
-vim.keymap.set("x", "<leader>fj", ":<C-u>GrepNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>")
+vim.keymap.set("n", "<leader>fg", ":RgRegex ")
+vim.keymap.set("x", "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>")
+vim.keymap.set("n", "<leader>fj", ":RgRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>")
+vim.keymap.set("x", "<leader>fj", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>")
 vim.keymap.set("n", "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>")
 vim.keymap.set("n", "<leader>fl", "<Cmd>lua require('telescope.builtin').loclist()<CR>")
 vim.keymap.set("n", "<leader>fL", "<Cmd>lua require('telescope.builtin').live_grep()<CR>")
@@ -304,6 +310,7 @@ vim.api.nvim_create_autocmd("BufWritePost", { pattern = "*/lua/plugins.lua", gro
 vim.api.nvim_create_autocmd("User", { pattern = "PackerCompileDone", group = "AutoCommands", command = "execute 'PackerInstall' | lua vim.notify('PackerCompile done')" })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=jql" })
+vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man" }, group = "AutoCommands", command = "nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "netrw",
@@ -312,10 +319,11 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.bo.bufhidden = "wipe"
         vim.keymap.set("n", "h", "[[<CR>^", { remap = true, buffer = true })
         vim.keymap.set("n", "l", "<CR>", { remap = true, buffer = true })
-        vim.keymap.set("n", "C", "gn", { remap = true, buffer = true })
+        vim.keymap.set("n", "C", "gn:execute 'cd '. b:netrw_curdir<CR>", { remap = true, buffer = true })
         vim.keymap.set("n", "<C-l>", "<C-w>l", { buffer = true })
         vim.keymap.set("n", "q", "<Cmd>call funcs#quit_netrw_and_dirs()<CR>", { buffer = true, nowait = true })
         vim.keymap.set("n", "<leader>q", "q", { remap = true, buffer = true })
+        vim.keymap.set("n", "a", "%", { remap = true, buffer = true })
     end,
 })
 vim.api.nvim_create_autocmd("BufReadPost", {
@@ -345,10 +353,10 @@ vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<
 vim.api.nvim_create_user_command("Grt", [[execute 'lua require("packer").loader("vim-flog")' | Gcd]], {})
 vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | mksession! ~/.cache/nvim/session.vim | silent! ScrollViewEnable | lua vim.notify('Session saved to ~/.cache/nvim/session.vim', 'INFO', { title = 'Session' })", {})
 vim.api.nvim_create_user_command("SessionLoad", "source ~/.cache/nvim/session.vim | lua vim.notify('Loaded session from ~/.cache/nvim/session.vim', 'INFO', { title = 'Session' })", {})
-vim.api.nvim_create_user_command("GrepRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
-vim.api.nvim_create_user_command("GrepNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
+vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
+vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
-vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | nnoremap <buffer> u <C-u>| nnoremap <nowait> <buffer> d <C-d>", {})
+vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)

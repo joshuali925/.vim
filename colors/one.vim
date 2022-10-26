@@ -1,4 +1,4 @@
-" forked from https://github.com/kevinhwang91/dotfiles/blob/d58baa79d5d2db7898e45ea4d8282e0c5e741f1e/nvim/colors/one.vim
+" https://raw.githubusercontent.com/kevinhwang91/dotfiles/d58baa79d5d2db7898e45ea4d8282e0c5e741f1e/nvim/colors/one.vim
 " add 256colors: https://raw.githubusercontent.com/vim-scripts/gui2term.py/master/gui2term.py
 " hex to 256color: https://stackoverflow.com/questions/11765623/convert-hex-to-closest-x11-color-number/62219320#62219320
 
@@ -46,7 +46,6 @@ hi Visual guibg=#3e4452 ctermbg=238
 hi WarningMsg guifg=#e06c75 ctermfg=168
 hi WildMenu guifg=#abb2bf ctermfg=249 guibg=#5c6370 ctermbg=241
 hi SignColumn guibg=#202326 ctermbg=16
-hi Special guifg=#61afef ctermfg=75
 hi Comment guifg=#5c6370 ctermfg=241
 hi Constant guifg=#98c379 ctermfg=114
 hi Number guifg=#d19a66 ctermfg=173

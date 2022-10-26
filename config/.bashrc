@@ -1,12 +1,7 @@
 # [ -t 1 ] && exec zsh
 
-# Source global definitions
-if [ -f /etc/bashrc ]; then
-  . /etc/bashrc
-fi
-
-[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] \
-  && . /usr/share/bash-completion/bash_completion && alias get-completion='complete -F _longopt'
+[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && alias get-completion='complete -F _longopt' \
+  && [ -z "$BASH_COMPLETION_VERSINFO" ] && . /usr/share/bash-completion/bash_completion
 
 source ~/.vim/config/fzf/completion.bash
 source ~/.vim/config/fzf/key-bindings.bash
@@ -18,6 +13,7 @@ PS1='\[\e[38;5;208m\]\W$(_get_prompt_tail " ")'
 stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
+shopt -s checkwinsize
 
 HISTCONTROL=ignoreboth:erasedups:ignorespace
 

@@ -123,7 +123,6 @@ return require("packer").startup({
         use({ "lewis6991/impatient.nvim", opt = false })
         use({ "tpope/vim-sleuth", cond = "require('states').small_file" })
         use({ "tpope/vim-unimpaired", keys = { "[", "]", { "n", "=p" }, { "n", "yo" } } })
-        use({ "moll/vim-bbye", cmd = "Bdelete" })
         use({ "AckslD/nvim-neoclip.lua", event = "TextYankPost", config = conf("nvim_neoclip_lua") })
         use({ "aserowy/tmux.nvim", module = "tmux", config = function() require("tmux").setup({ navigation = { cycle_navigation = false } }) end })
 

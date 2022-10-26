@@ -58,7 +58,7 @@ function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
-  let sidebars = ['help', 'man', 'qf', 'NvimTree', 'toggleterm']
+  let sidebars = ['help', 'netrw', 'man', 'qf', 'NvimTree', 'toggleterm']
   if has_nvim && win_len == 1 && nvim_win_get_config(win_getid()).relative != ''  " floating window focused
     quit
   elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q
@@ -69,23 +69,7 @@ function! funcs#quit(buffer_mode, force) abort
     endif
   " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; multiple windows but the other ones are sidebars
   elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (win_len > 1 && len(filter(range(1, win_len), 'v:val != winnr() && index(sidebars, getbufvar(winbufnr(v:val), "&filetype")) >= 0')) == win_len - 1 && (buf_len > 1 || bufname('%') != ''))
-    if exists(':Bdelete')
-      try
-        execute 'Bdelete'. (a:force ? '!' : '')
-      catch
-        throw 'Unsaved buffer'
-      endtry
-    else
-      bprevious
-      if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1  " check number of buffers again after bprevious
-        try
-          execute 'bdelete'. (a:force ? '!' : ''). ' #'
-        catch
-          bnext
-          throw 'Unsaved buffer'
-        endtry
-      endif
-    endif
+    call plugins#bbye#bdelete('bdelete', (a:force ? '!' : ''), '')
   else
     execute 'quit'. (a:force ? '!' : '')
   endif
@@ -93,10 +77,8 @@ endfunction
 
 function! funcs#quit_netrw_and_dirs()
   for i in range(1, bufnr('$'))
-    if buflisted(i)
-      if getbufvar(i, '&filetype') == 'netrw' || isdirectory(bufname(i)) == 1
-        execute 'bdelete '. i
-      endif
+    if buflisted(i) && (getbufvar(i, '&filetype') == 'netrw' || isdirectory(bufname(i)) == 1)
+      execute 'bdelete '. i
     endif
   endfor
   if &filetype == 'netrw'
@@ -281,13 +263,17 @@ function! funcs#ctags() abort
     silent execute 'ltag '. expand('<cword>')
     echo 'tag 1 of '. len(getloclist(0))
   catch /^Vim\%((\a\+)\)\=:E433:/
-    let answer = input('Generate ctags for language (y for all, empty to cancel): ', '', 'filetype')  " language list: ctags --list-languages
-    if answer != ''
-      let args = answer == 'y' ? '' : '--languages='. answer
-      " TODO https://github.com/universal-ctags/ctags/issues/2667
-      execute '!ctags --exclude=.git --exclude=node_modules --exclude=venv --langmap=TypeScript:.ts.tsx -R '. args
-      silent execute 'ltag '. expand('<cword>')
-      echo 'tag 1 of '. len(getloclist(0))
-    endif
+    call funcs#ctags_create_and_jump()
   endtry
+endfunction
+
+function! funcs#ctags_create_and_jump() abort
+  let answer = input('Generate ctags for language (y for all, empty to cancel): ', &filetype, 'filetype')  " language list: ctags --list-languages
+  if answer != ''
+    let args = answer == 'y' ? '' : '--languages='. answer
+    " TODO https://github.com/universal-ctags/ctags/issues/2667
+    execute '!ctags --exclude=.git --exclude=node_modules --exclude=venv --langmap=TypeScript:.ts.tsx -R '. args
+    silent execute 'ltag '. expand('<cword>')
+    echo 'tag 1 of '. len(getloclist(0))
+  endif
 endfunction

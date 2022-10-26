@@ -89,6 +89,10 @@ xnoremap <silent> au :<C-u>call plugins#wordmotion#object(v:count1, 'x', 0, 0)<C
 onoremap <silent> au :<C-u>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>
 xnoremap <silent> v :<C-u>call plugins#expand_region#next('v', '+')<CR>
 xnoremap <silent> <BS> :<C-u>call plugins#expand_region#next('v', '-')<CR>
+onoremap <silent> ib :<C-u>call plugins#expand_region#any_pair('o', 'i')<CR>
+xnoremap <silent> ib :<C-u>call plugins#expand_region#any_pair('v', 'i')<CR>
+onoremap <silent> ab :<C-u>call plugins#expand_region#any_pair('o', 'a')<CR>
+xnoremap <silent> ab :<C-u>call plugins#expand_region#any_pair('v', 'a')<CR>
 xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$

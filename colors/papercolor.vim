@@ -42,7 +42,6 @@ hi Visual term=reverse guifg=#eeeeee guibg=#0087af ctermfg=255 ctermbg=31
 hi WarningMsg term=standout guifg=#d70087 ctermfg=162
 hi WildMenu term=standout guifg=#444444 guibg=#ffff00 gui=bold ctermfg=238 ctermbg=226 cterm=bold
 hi SignColumn term=standout guifg=#008700 guibg=#eeeeee ctermfg=28 ctermbg=255
-hi Special term=bold guifg=#444444 ctermfg=238
 hi Comment term=bold guifg=#878787 ctermfg=102
 hi Constant term=underline guifg=#d75f00 ctermfg=166
 hi Number guifg=#d75f00 ctermfg=166

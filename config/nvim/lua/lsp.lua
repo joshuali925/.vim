@@ -16,7 +16,7 @@ function M.lsp_install_all()
         "cssls",
         "tsserver",
         "eslint",
-        "pyright",
+        "pylsp",
         "jdtls",
         "kotlin_language_server",
     }

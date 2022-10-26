@@ -3664,3 +3664,46 @@ vim.o.cmdheight = 0
 grg() {  # grep all commits, replace `log` with `reflog` for local commits
   git log --patch --color=always --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | DELTA_PAGER="$BAT_PAGER --pattern='$1'" delta --line-numbers
 }
+
+" =======================================================
+Plug 'ctrlpvim/ctrlp.vim'
+if exists('*matchfuzzy')
+  Plug 'mattn/ctrlp-matchfuzzy'
+  let g:ctrlp_match_func = {'match': 'ctrlp_matchfuzzy#matcher'}
+endif
+let g:ctrlp_show_hidden = 1
+let g:ctrlp_prompt_mappings = { 'ToggleType(1)': ['<Tab>'], 'ToggleType(-1)': ['<S-Tab>'], 'ToggleFocus()': ['<C-b>'] }
+
+" =======================================================
+nnoremap <leader>fM :browse oldfiles<CR>
+command! -complete=file -nargs=+ VFind execute 'Grt' | execute 'vimgrep /\%(\%<2l\)/j **/.'. <q-args>. ' **/'. <q-args> | copen
+command! -complete=file -nargs=+ VFind execute 'Grt' | execute 'vimgrep /\%^/j **/.'. <q-args>. ' **/'. <q-args> | copen
+function! s:Grep(prg, pattern)
+  " use execute so sudoedit will not complain
+  execute 'Grt'
+  let saved_grepprg = &grepprg
+  let &grepprg = (a:prg =~ '^ \|^$' ? saved_grepprg. a:prg : a:prg)
+  " do not prepend '--' if pattern is part of flag value
+  silent execute 'grep! '. (a:prg =~ '^find\|--files' ? '"' : '-- "'). escape(a:pattern, '\#%$|"'). '"'
+  let &grepprg = saved_grepprg
+  redraw!
+  copen
+endfunction
+function! funcs#quit(buffer_mode, force) abort
+    if exists(':Bdelete')
+      try
+        execute 'Bdelete'. (a:force ? '!' : '')
+      catch
+        throw 'Unsaved buffer'
+      endtry
+    else
+      bprevious
+      if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1  " check number of buffers again after bprevious
+        try
+          execute 'bdelete'. (a:force ? '!' : ''). ' #'
+        catch
+          bnext
+          echoerr v:exception
+        endtry
+      endif
+    endif
