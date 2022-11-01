@@ -2,10 +2,7 @@
 if [ -n "$GET_BASHRC" ]; then
   source ~/.vim/config/.bashrc
   unset GET_BASHRC
-  export EDITOR=vim
-  export TMUX_NO_TPM=1
-  alias vimm='$EDITOR +"cd ~/.vim" ~/.vim/vimrc'
-  PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
+  export EDITOR=vim TMUX_NO_TPM=1
   source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
 
   clear-env() {

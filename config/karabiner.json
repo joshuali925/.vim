@@ -100,7 +100,7 @@
           },
           "to": [
             {
-              "shell_command": "open -a 'VimR'"
+              "shell_command": "open -a 'Notes'"
             }
           ]
         }
@@ -181,8 +181,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$"
+                "^com\\.github\\.wez\\.wezterm$"
               ]
             }
           ]
@@ -211,8 +210,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$"
+                "^com\\.github\\.wez\\.wezterm$"
               ]
             }
           ]
@@ -241,8 +239,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$"
+                "^com\\.github\\.wez\\.wezterm$"
               ]
             }
           ]
@@ -270,8 +267,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$"
+                "^com\\.github\\.wez\\.wezterm$"
               ]
             }
           ]
@@ -299,8 +295,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$"
+                "^com\\.github\\.wez\\.wezterm$"
               ]
             }
           ]
@@ -332,8 +327,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$",
-                "^com\\.qvacua\\.VimR$"
+                "^com\\.github\\.wez\\.wezterm$"
               ]
             }
           ]

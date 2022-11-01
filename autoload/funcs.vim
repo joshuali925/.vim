@@ -34,12 +34,13 @@ endfunction
 
 function! funcs#get_conflict_state() abort  " conflict-marker.vim
   let current_styles = map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
-  if match(current_styles, '^ConflictMarker') != -1
-    if match(current_styles, '^ConflictMarker\(Begin\|Ours\)$') != -1
+  if match(current_styles, '^Conflict') != -1
+    if len(current_styles) == 2 && match(current_styles, '^ConflictMarkerBegin$') != -1 || len(current_styles) == 1 && match(current_styles, '^ConflictMarker\(Begin\|Ours\)$') != -1
       return 'Ourselves'
-    elseif match(current_styles, '^ConflictMarker\(End\|Theirs\)$') != -1
+    elseif len(current_styles) == 2 && match(current_styles, '^ConflictMarkerEnd$') != -1 || len(current_styles) == 1 && match(current_styles, '^ConflictMarker\(End\|Theirs\)$') != -1
       return 'Themselves'
     endif
+    return 'AncestorOrSeparator'
   endif
   return ''
 endfunction
@@ -136,14 +137,14 @@ function! funcs#get_run_command() abort
   let run_command = {}
   let run_command['vim'] = 'source %'
   let run_command['lua'] = 'luafile %'
-  let run_command['python'] = 'AsyncRun -raw python3 %'
-  let run_command['c'] = 'AsyncRun -raw gcc % -o %< -g && ./%<'
-  let run_command['cpp'] = 'AsyncRun -raw g++ % -o %< -g && ./%<'
-  let run_command['java'] = 'AsyncRun -raw javac % && java %<'
-  let run_command['javascript'] = 'AsyncRun -raw node %'
+  let run_command['python'] = 'AsyncRun -raw python3 "$(VIM_FILEPATH)"'
+  let run_command['c'] = 'AsyncRun -raw gcc "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
+  let run_command['cpp'] = 'AsyncRun -raw g++ "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
+  let run_command['java'] = 'AsyncRun -raw javac "$(VIM_FILEPATH)" && java -classpath "$(VIM_FILEDIR)" "$(VIM_FILENOEXT)"'
+  let run_command['javascript'] = 'AsyncRun -raw node "$(VIM_FILEPATH)"'
   let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
-  let run_command['html'] = 'AsyncRun -silent open %'
-  let run_command['xhtml'] = 'AsyncRun -silent open %'
+  let run_command['html'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
+  let run_command['xhtml'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
   let run_command['http'] = 'lua require("rest-nvim").run()'
   return get(run_command, &filetype, ''). get(b:, 'args', '')
 endfunction

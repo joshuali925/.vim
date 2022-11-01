@@ -37,7 +37,7 @@ alias cp='cp -riv'
 alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
-alias l='exa -alF --git --color=always --color-scale --icons --header --group-directories-first'
+alias l='exa -alF --git --color=always --color-scale --icons --header --group-directories-first --time-style=long-iso'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias size='du -h --max-depth=1 | sort -hr'
 alias size-subdir="du | sort -r -n | awk '{split(\"K M G\",v); s=1; while(\$1>1024){\$1/=1024; s++} print int(\$1)v[s]\"\\t\"\$2}' | head -n 20"
@@ -50,8 +50,8 @@ alias less='less -RiM'
 alias v='$EDITOR'
 alias vi='command vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
-alias vimm='nvim +PackerCompile +PackerInstall +PackerClean -c "cd ~/.vim" ~/.vim/config/nvim/init.lua'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
+alias gvenv='[ ! -d "$HOME/.local/lib/venv" ] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
 alias lzd='lazydocker'
@@ -136,7 +136,7 @@ alias gexclude='cat >> "$(git rev-parse --show-toplevel)/.git/info/exclude" <<<'
 alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclude"'
 gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
-alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo "\nRun \"git fetch --unshallow\" to fetch all history"'
+alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo -e "\nRun \"git fetch --unshallow\" to fetch all history"'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff -m "--wip--"'
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
@@ -187,7 +187,7 @@ glof() {
     --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
-    --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tr "\n" " " | y)+abort' \
+    --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
 
@@ -197,7 +197,7 @@ grlf() {
     --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
-    --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tr "\n" " " | y)+abort' \
+    --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
 
@@ -365,10 +365,14 @@ path() {
   fi
 }
 
-vf() {
-  local IFS=$'\n' fzftemp
-  fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
-  [ -n "$fzftemp" ] && $EDITOR "${fzftemp[@]}"
+vf() {  # find files: vf; open files from pipe: fd | vf
+  local IFS=$'\n'
+  if [ ! -t 0 ] ; then
+    $EDITOR "$@" -- $(cat)
+  else
+    local fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
+    [ -n "$fzftemp" ] && $EDITOR -- "${fzftemp[@]}"
+  fi
 }
 
 cdf() {
@@ -395,21 +399,21 @@ vrg() {
 # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration
 fif() {  # find in file
   if [ "$#" -eq 0 ]; then echo 'Need a string to search for.'; return 1; fi
-  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 $(printf "%q " "$@"){+} --max-columns 0" --bind="enter:execute($EDITOR {+} -c \"/$1\" < /dev/tty)"
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 --max-columns 0 -- $(printf "%q " "$@"){+}" --bind="enter:execute($EDITOR -c \"/$1\" -- {+} < /dev/tty)"
 }
 rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to switch to fzf filter
   [ "$#" -gt 0 ] && [[ "$1" != -* ]] && local init_query="$1" && shift 1
   local rg_prefix="rg --column --line-number --no-heading --color=always$([ "$#" -gt 0 ] && printf " %q" "$@")"
   FZF_DEFAULT_COMMAND="$rg_prefix $(printf %q "${init_query:-}")" \
   fzf --ansi --layout=default --height=100% --disabled --query="${init_query:-}" \
-      --header='╱ <C-s> (fzf mode) ╱ <C-r> (Reset ripgrep) ╱' \
-      --bind="ctrl-s:unbind(change,ctrl-s)+change-prompt(2. fzf> )+enable-search+clear-query+rebind(ctrl-r)" \
+      --header='╱ <C-s> (fzf mode) ╱ <C-r> (reset ripgrep) ╱' \
+      --bind='ctrl-s:unbind(change,ctrl-s)+change-prompt(2. fzf> )+enable-search+clear-query+rebind(ctrl-r)' \
       --bind="ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($rg_prefix {q} || true)+rebind(change,ctrl-s)" \
-      --bind="change:reload:sleep 0.2; $rg_prefix {q}" \
-      --bind="enter:execute($EDITOR {1} +{2} -c \"let @/={q}\" -c \"set hlsearch\" < /dev/tty)" \
+      --bind="change:reload:sleep 0.2; $rg_prefix -- {q}" \
+      --bind="enter:execute($EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1} < /dev/tty)" \
       --bind='tab:down,btab:up' \
       --prompt='1. ripgrep> ' --delimiter=: \
-      --preview='bat --color=always --theme=Dracula {1} --highlight-line {2}' \
+      --preview='bat --color=always --theme=Dracula --highlight-line {2} -- {1}' \
       --preview-window='up,40%,border-bottom,+{2}+3/3,~3'
 }
 
@@ -417,14 +421,10 @@ unalias z 2> /dev/null
 z() {
   local fzftemp
   if [ "$#" -eq 0 ]; then
-    fzftemp=$(_z -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --bind='tab:down,btab:up') && cd "$fzftemp"
+    fzftemp=$(_z -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -n -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$PWD\" '\$0~cwd {print \$1}')") && cd "$fzftemp"
   else
     _z 2>&1 "$@"
   fi
-}
-zc() {
-  local fzftemp
-  fzftemp=$(_z -c -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --bind='tab:down,btab:up' --query="${1:-}") && cd "$fzftemp"
 }
 
 t() {  # create, restore, or switch tmux session
@@ -600,21 +600,21 @@ ec2() {
     start) curr_state=stopped ;;
     stop) curr_state=running ;;
     refresh)
-      aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
+      aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
       return 0 ;;
     ssh)
-      local host=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$2$" | awk '{print $1}')
+      local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$2$" | awk '{print $1}')
       if [ -z "$host" ]; then
         ec2 start "$2" && sleep 15 && ec2 ssh "$2"
         return $?
       fi
       echo "ssh to ec2: $host" >&2
       shift 2
-      ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "$@" "ec2-user@$host" || ssh -o "StrictHostKeyChecking no" -i ~/.ssh/ec2.pem "$@" "ubuntu@$host"
+      ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host" || ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ubuntu@$host"
       return 0 ;;
     *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]"; return 1 ;;
   esac
-  instances=$(aws ec2 describe-instances --filter "Name=tag-key,Values=Name" "Name=tag-value,Values=*" "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
+  instances=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
   if [ -n "$2" ]; then
     ids=$(echo "$instances" | grep "^$2\s" | awk '{print $2}')
   else
