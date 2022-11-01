@@ -3707,3 +3707,18 @@ function! funcs#quit(buffer_mode, force) abort
         endtry
       endif
     endif
+
+" =======================================================
+" oneline bash prompt PS1
+PS1='\[\e[38;5;208m\]\W$(_get_prompt_tail " ")'
+_disable_prompt_functions() {
+  PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
+" _z -c -l
+    fzftemp=$(_z -l 2>&1 | sed 's/^[0-9,.]* *//' | subdirs=$(_z -c -l 2>&1 | sed -e '/^common:/d' -e 's/^[0-9,.]* *//') fzf --scheme=history --tac --bind='tab:down,btab:up' --bind='`:unbind(`)+reload(echo $subdirs)') && cd "$fzftemp"
+" windows lfrc, "$f" doesn't expand correctly under git bash
+# use unix settings on windows for git bash
+set shell sh
+set shellflag -c
+map e $$EDITOR "$f"
+map w $$SHELL
+map i $$PAGER "$f"

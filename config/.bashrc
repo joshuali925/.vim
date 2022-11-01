@@ -9,7 +9,7 @@ source ~/.vim/config/fzf/key-bindings.bash
 source ~/.vim/config/common.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
-PS1='\[\e[38;5;208m\]\W$(_get_prompt_tail " ")'
+PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
 stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
@@ -99,9 +99,9 @@ complete -d cd
 _get_prompt_tail() {
   # https://gist.github.com/bingzhangdai/dd4e283a14290c079a76c4ba17f19d69
   # git branch with prompt sign colored by exit code
-  # takes one argument as separator between those two
+  # takes optional arguments as separators between those two
   local _head_file _head _dir="$PWD" _tail _exit="$?"
-  [ $_exit != 0 ] && _tail="$1"$'\001\e[38;5;9m\002$\001\e[0m\002 ' || _tail="$1"$'\001\e[38;5;141m\002$\001\e[0m\002 '
+  [ $_exit != 0 ] && _tail="${*:- }"$'\001\e[38;5;9m\002$\001\e[0m\002 ' || _tail="${*:- }"$'\001\e[38;5;141m\002$\001\e[0m\002 '
   while [ -n "$_dir" ]; do
     _head_file="$_dir/.git/HEAD"
     if [ -f "$_dir/.git" ]; then
@@ -125,6 +125,6 @@ _get_prompt_tail() {
 }
 
 _disable_prompt_functions() {
-  PS1='\[\e[38;5;208m\]\W \[\e[38;5;141m\]$ \[\e[0m\]'
+  PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([ \$? != 0 ] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")$ \[\e[0m\]"
   PROMPT_COMMAND=
 }

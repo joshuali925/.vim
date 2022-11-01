@@ -64,7 +64,7 @@ return {
     },
     keys = {
         { key = "t", mods = "CMD", action = wezterm.action({ SpawnCommandInNewTab = { cwd = "" } }) },
-        { key = "d", mods = "CMD", action = wezterm.action({ SplitHorizontal = { domain = "CurrentPaneDomain" } }) },
+        { key = "d", mods = "CMD", action = wezterm.action({ SplitVertical = { domain = "CurrentPaneDomain" } }) },
         { key = "k", mods = "CMD", action = wezterm.action({ ClearScrollback = "ScrollbackAndViewport" }) },
         { key = "f", mods = "CMD", action = wezterm.action({ Search = { CaseInSensitiveString = "" } }) },
         { key = "[", mods = "CMD", action = wezterm.action({ MoveTabRelative = -1 }) },

@@ -159,15 +159,14 @@ local themes = {
         end,
         config = function()
             require("catppuccin").setup({
+                flavour = (theme_index < 0 and "macchiato" or "latte"),
                 custom_highlights = { Comment = { fg = "#717993" } },
                 integrations = {
                     native_lsp = {
                         underlines = { errors = { "undercurl" }, hints = { "undercurl" }, warnings = { "undercurl" }, information = { "undercurl" } },
                     },
                 },
-                compile = { enabled = true, path = vim.fn.stdpath("cache") .. "/catppuccin", suffix = "_compiled" },
             })
-            vim.g.catppuccin_flavour = (theme_index < 0 and "macchiato" or "latte")
             vim.cmd.colorscheme("catppuccin")
         end,
     },
@@ -194,6 +193,8 @@ local function highlight_plugins()
         vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#4f5778" })
         vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#427266" })
         vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#364f49" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestors", { bg = "#383838" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestorsHunk", { bg = "#282828" })
         vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#3a4f67" })
         vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#234a78" })
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#ffbe6d" })
@@ -203,6 +204,8 @@ local function highlight_plugins()
         vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#c4c8cc" })
         vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#7ed9ae" })
         vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#94ffcc" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestors", { bg = "#bfbfbf" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestorsHunk", { bg = "#e5e5e5" })
         vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#b9d1fa" })
         vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#86abeb" })
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#bf8000" })

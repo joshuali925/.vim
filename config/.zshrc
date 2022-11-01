@@ -52,6 +52,7 @@ source ~/.vim/config/common.sh
 autoload -Uz compinit && compinit -u
 zinit cdreplay -q
 
+typeset -U path
 WORDCHARS=${WORDCHARS/\/}
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=1000000
@@ -76,6 +77,7 @@ setopt hist_find_no_dups
 setopt hist_expire_dups_first
 setopt hist_ignore_dups
 setopt hist_ignore_space
+setopt hist_reduce_blanks
 setopt hist_verify
 
 zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate
@@ -86,12 +88,19 @@ zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -AF --color=always -1 $realpath'
 zstyle ':fzf-tab:*' switch-group '[' ']'
+zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+zstyle ':fzf-tab:*' popup-min-size 50 8
 
 compdef _dirs d
 compdef _command_names path
 compdef _git gdf=git-diff
 compdef _git gdd=git-diff
 compdef _git gdg=git-diff
+
+bracketed-paste() {
+  zle .$WIDGET && LBUFFER=${LBUFFER%$'\n'}
+}
+zle -N bracketed-paste  # remove trailing new line in bracketed paste
 
 up-line-or-local-history() {
   zle set-local-history 1
@@ -137,6 +146,7 @@ bindkey '^[[1;2B' down-line-or-local-history  # <S-Down>
 bindkey '^[[3;2~' backward-delete-char        # <S-Del>
 bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
+bindkey '^u' backward-kill-line
 bindkey '^i' tab-complete-or-cd
 bindkey -s '^z' 'fg^m'
 bindkey '\el' forward-char                    # unbind <Esc>l = ls from oh-my-zsh key-bindings

@@ -41,6 +41,7 @@ map mc edit-config
 map my copy-path
 map md5 md5
 map mvi vi
+map m1 $btop
 map m! sudolf
 
 map v :toggle; down
@@ -147,7 +148,7 @@ cmd locate-git-file ${{
 }}
 
 cmd z ${{
-  res="$(sort -nr -k 3 -t '|' ~/.z | awk -F '|' '{print $1}' | fzf --bind='tab:down,btab:up')"
+  res="$(sort -nr -k 3 -t '|' ~/.z | awk -F '|' '{print $1}' | fzf --scheme=history --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -nr -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$PWD\" '\$0~cwd {print \$1}')")"
   lf -remote "send $id cd \"$res\""
 }}
 

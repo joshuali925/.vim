@@ -1,5 +1,7 @@
 # Dot Files
 
+![](https://img.shields.io/github/repo-size/joshuali925/.vim)
+
 ### Install tools and configs
 
 ```bash
@@ -12,15 +14,19 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/in
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"
 ```
 
-### Windows
+### Windows (cmd)
 
-```bash
+```cmd
+setx PROMPT "$p [$d$t]$+$_$g"
 git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\.vim --depth=1
+mkdir %USERPROFILE%\.cache\vim %LOCALAPPDATA%\lf %APPDATA%\lazygit
 copy %USERPROFILE%\.vim\config\.gitconfig %USERPROFILE%\.gitconfig
-mkdir %USERPROFILE%\.vim\config\lfrc %LOCALAPPDATA%\lf
+copy %USERPROFILE%\.vim\config\lazygit_config.yml %APPDATA%\lazygit\config.yml
 copy %USERPROFILE%\.vim\config\lfrc %LOCALAPPDATA%\lf\lfrc
+echo set previewer '' >> %LOCALAPPDATA%\lf\lfrc
+echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc
+echo export EDITOR=vim VIM_SYSTEM_CLIPBOARD=1 >> %USERPROFILE%\.bashrc
 
-# nvim
 rmdir /S /Q %LOCALAPPDATA%\nvim
 robocopy %USERPROFILE%\.vim\config\nvim %LOCALAPPDATA%\nvim /e
 del %LOCALAPPDATA%\nvim\autoload
@@ -45,4 +51,4 @@ Alt-tab -> Preferences -> Controls -> change "Hold option" to "Hold cmd"
                        -> Appearance -> check Hide apps with no open window
 ```
 
-- Surfingkeys settings https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js
+- Surfingkeys settings: https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js

@@ -72,7 +72,7 @@ set nostartofline
 set display=lastline
 set virtualedit+=block
 set previewheight=7
-" ignore errors for sudoedit
+" ignore errors for sudoedit (vim small)
 silent! set foldmethod=indent
 silent! set foldlevelstart=99
 set history=1000
@@ -83,7 +83,7 @@ set undodir=$HOME/.cache/vim/undo
 set viminfo='1000,<50,s10,h,n~/.cache/vim/viminfo
 set isfname-==
 set path=.,,**5
-set wildignore+=*/tags,*/\.git/*,*/node_modules/*,*/venv/*
+set wildignore=*/tags,*/\.git/*,*/dist/*,*/build/*,*/node_modules/*,*/venv/*,*/__pycache__/*
 set encoding=utf-8
 set timeout
 set timeoutlen=1500
@@ -231,7 +231,7 @@ xnoremap <leader>L :<C-u>call funcs#print_variable(1, 1)<CR>
 inoremap <leader>w <Esc>:update<CR>
 nnoremap ;w :update<CR>
 nnoremap <leader>W :wall<CR>
-" map ;q separately from <leader>q for sudoedit to work
+" map ;q separately from <leader>q to support sudoedit (vim small)
 nnoremap ;q :quit<CR>
 nnoremap <silent> <leader>q :call funcs#quit(0, 0)<CR>
 nnoremap <silent> <leader>Q :call funcs#quit(0, 1)<CR>
@@ -253,7 +253,7 @@ augroup AutoCommands
   autocmd FileType * setlocal formatoptions=jql
   autocmd FileType help,man nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn:execute 'cd '. b:netrw_curdir<CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q| nmap <buffer> a %
-  autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> o <CR>:cclose<CR>
+  autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> o <CR>:cclose<CR>
 augroup END
 
 command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
@@ -435,18 +435,21 @@ onoremap <silent> ia :call plugins#angry#list(',', 1, 0, v:count1)<CR>
 xnoremap <silent> ia :<C-u>call plugins#angry#list(',', 1, 0, v:count1, visualmode())<CR>
 onoremap <silent> aa :call plugins#angry#list(',', 1, 1, v:count1)<CR>
 xnoremap <silent> aa :<C-u>call plugins#angry#list(',', 1, 1, v:count1, visualmode())<CR>
-call funcs#map_copy_with_osc_yank_script()
+if $VIM_SYSTEM_CLIPBOARD != ''
+  nnoremap <leader>y "+y
+  xnoremap <leader>y "+y
+  nnoremap <leader>Y "+y$
+else
+  call funcs#map_copy_with_osc_yank_script()
+endif
 if $SSH_CLIENT != ''
   nnoremap gx :call system('y', expand('<cfile>'))<CR>
 endif
-" nnoremap <leader>y "+y
-" xnoremap <leader>y "+y
-" nnoremap <leader>Y "+y$
 
 if has('terminal')
   augroup VimTerminal
     autocmd!
-    autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no
+    autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no filetype=terminal | nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
   augroup END
   tnoremap <C-u> <C-\><C-n>
   tnoremap <silent> <C-h> <C-w>:call plugins#tmux_navigator#navigate('h')<CR>

@@ -3,6 +3,8 @@ source ~/.vim/bin/_install_from_github.sh
 run-if-exists "$0" "$@"
 detect-env
 
+# Windows: https://www.gyan.dev/ffmpeg/builds/
+# Windows/Linux alternative builds: https://github.com/BtbN/FFmpeg-Builds/releases
 case $PLATFORM:$ARCHITECTURE in
   linux:x86_64) url=https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz ;;
   linux:arm64) url=https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-arm64-static.tar.xz ;;

@@ -6,13 +6,8 @@ else
 endif
 
 if exists('g:neovide')
-  let g:neovide_cursor_vfx_mode = "railgun"
-  " let g:neovide_cursor_animation_length=0.12
-  " let g:neovide_cursor_vfx_particle_lifetime=1.2
-  " let g:neovide_cursor_vfx_particle_density=7.0
-  " let g:neovide_cursor_vfx_particle_speed=10.0
-  " let g:neovide_refresh_rate = 30
-
+  " do not enable particles, https://github.com/neovide/neovide/issues/843
+  let g:neovide_refresh_rate = 30
   inoremap <D-v> <C-g>u<C-o>"+p
   nnoremap <D-v> "+p
   xnoremap <D-v> "+p
@@ -28,7 +23,7 @@ if exists('g:neovide')
   noremap! <M-Right> <C-right>
   noremap! <M-BS> <C-w>
 
-elseif !has('gui_vimr')  " nvim-qt
+else  " nvim-qt
   GuiTabline 0
   GuiPopupmenu 0
   inoremap <S-Insert> <C-g>u<C-o>"+p

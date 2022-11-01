@@ -19,7 +19,7 @@ vim.o.number = true
 vim.o.linebreak = true
 vim.o.showmatch = true
 vim.o.showmode = false
-vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:patience"
+vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:patience" -- TODO(0.9) https://github.com/neovim/neovim/pull/14537
 vim.o.splitright = true
 vim.o.splitbelow = true
 vim.o.ignorecase = true
@@ -177,7 +177,7 @@ vim.keymap.set("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>") -- close buff
 vim.keymap.set("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
 vim.keymap.set("n", "yoq", "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'", { expr = true, replace_keycodes = false })
-vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight<CR>")
+vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight <bar> TSBufToggle indent<CR>")
 vim.keymap.set("n", "yog", "<Cmd>lua require('rooter').toggle()<CR>")
 vim.keymap.set("c", "<C-Space>", [['/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<BS>", [['/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
@@ -280,13 +280,13 @@ vim.keymap.set("n", "gD", vim.lsp.buf.type_definition)
 vim.keymap.set("n", "<leader>d", vim.lsp.buf.implementation)
 vim.keymap.set("n", "gr", vim.lsp.buf.references)
 vim.keymap.set("n", "<leader>a", "<Cmd>lua require('lspsaga.codeaction'):code_action()<CR>")
-vim.keymap.set("x", "<leader>a", ":<C-u>lua require('lspsaga.codeaction'):range_code_action()<CR>")
+vim.keymap.set("x", "<leader>a", ":<C-u>lua require('lspsaga.codeaction'):code_action()<CR>")
 vim.keymap.set("n", "gh", "<Cmd>lua if require('lspsaga.diagnostic').show_cursor_diagnostics() == nil then require('lspsaga.hover'):render_hover_doc() end<CR>")
-vim.keymap.set("n", "]A", "<Cmd>lua require('lspsaga.diagnostic').goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>")
 vim.keymap.set("n", "<leader>R", "<Cmd>lua require('lspsaga.rename'):lsp_rename()<CR>")
 vim.keymap.set("n", "[a", "<Cmd>lua require('lspsaga.diagnostic').goto_prev()<CR>")
 vim.keymap.set("n", "]a", "<Cmd>lua require('lspsaga.diagnostic').goto_next()<CR>")
 vim.keymap.set("n", "[A", "<Cmd>lua require('lspsaga.diagnostic').goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>")
+vim.keymap.set("n", "]A", "<Cmd>lua require('lspsaga.diagnostic').goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>")
 vim.keymap.set("i", "<C-k>", "<Cmd>Lspsaga signature_help<CR>")
 
 -- autocmds {{{1
@@ -310,7 +310,7 @@ vim.api.nvim_create_autocmd("BufWritePost", { pattern = "*/lua/plugins.lua", gro
 vim.api.nvim_create_autocmd("User", { pattern = "PackerCompileDone", group = "AutoCommands", command = "execute 'PackerInstall' | lua vim.notify('PackerCompile done')" })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=jql" })
-vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man" }, group = "AutoCommands", command = "nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>" })
+vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "netrw",
@@ -332,14 +332,14 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     callback = function()
         vim.bo.buflisted = false
         vim.bo.modifiable = true
-        vim.keymap.set("n", "<leader>w", [[<Cmd>let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>]], { buffer = true })
+        vim.keymap.set("n", "<leader>w", [[<Cmd>let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>]], { buffer = true })
         vim.keymap.set("n", "<CR>", "<CR>", { buffer = true })
     end,
 })
 vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "term://*", group = "AutoCommands", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif]] })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "AutoCommands", callback = require("rooter").root })
-vim.api.nvim_create_autocmd("User", { -- fugitive :Git
+vim.api.nvim_create_autocmd("User", { -- fugitive buffer :Git
     pattern = "FugitiveIndex",
     group = "AutoCommands",
     callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
@@ -349,14 +349,14 @@ vim.api.nvim_create_autocmd("User", { -- fugitive :Git
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("SetArgs", "let b:args = <q-args> == '' ? '' : ' '. <q-args>", { complete = "file", nargs = "*" })
 vim.api.nvim_create_user_command("S", [[execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <range> != 0 | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr(). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | else | execute "put =execute('". <q-args>. "')" | endif | 1d]], { complete = "command", nargs = "*", range = true, bang = true })
-vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee % > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute "botright terminal sudo `which nvim` +'set paste' +'1,$d' +startinsert %" | startinsert | endif]], { bang = true })
+vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee % > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute "botright terminal sudo `which nvim` +'set paste' +'1,$d' +startinsert %" | startinsert | endif]], { bang = true }) -- TODO(0.9) https://github.com/neovim/neovim/issues/19884
 vim.api.nvim_create_user_command("Grt", [[execute 'lua require("packer").loader("vim-flog")' | Gcd]], {})
 vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | mksession! ~/.cache/nvim/session.vim | silent! ScrollViewEnable | lua vim.notify('Session saved to ~/.cache/nvim/session.vim', 'INFO', { title = 'Session' })", {})
 vim.api.nvim_create_user_command("SessionLoad", "source ~/.cache/nvim/session.vim | lua vim.notify('Loaded session from ~/.cache/nvim/session.vim', 'INFO', { title = 'Session' })", {})
 vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
-vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>", {})
+vim.api.nvim_create_user_command("Glow", "terminal glow %", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
@@ -445,14 +445,15 @@ if require("states").small_file then
             local plugins = {
                 "nvim-treesitter",
                 "nvim-treesitter-textobjects",
-                "plenary.nvim",
-                "vim-illuminate",
                 "mason.nvim",
             }
             require("packer").loader(table.concat(plugins, " "))
         end, 30)
         vim.defer_fn(function()
             local plugins = {
+                "plenary.nvim",
+                "vim-illuminate",
+                "conflict-marker.vim",
                 "indent-blankline.nvim",
                 "nvim-scrollview",
                 "gitsigns.nvim",

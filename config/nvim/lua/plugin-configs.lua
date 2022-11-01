@@ -120,8 +120,10 @@ end
 function M.conflict_marker()
     vim.g.conflict_marker_enable_mappings = 0
     vim.g.conflict_marker_begin = "^<<<<<<< .*$"
+    vim.g.conflict_marker_common_ancestors = "^||||||| .*$"
     vim.g.conflict_marker_end = "^>>>>>>> .*$"
     vim.g.conflict_marker_highlight_group = ""
+    vim.cmd.doautocmd("BufReadPost") -- refresh highlights when delay loaded after treesitter
 end
 
 function M.setup_vim_table_mode()
@@ -228,8 +230,9 @@ function M.alpha_nvim()
     }
     theme.section.top_buttons.val = {}
     theme.section.bottom_buttons.val = {
-        theme.button("!", "Git unstaged changes", ":args `Git ls-files --modified --others --exclude-standard` | Git difftool<CR>"),
-        theme.button("+", "Git HEAD changes", ":args `Git diff HEAD --name-only` | Git difftool HEAD<CR>"),
+        theme.button("!", "Git unstaged changes", ":args `git ls-files --modified --others --exclude-standard` | Git difftool<CR>"),
+        theme.button("+", "Git HEAD changes", ":args `git diff HEAD --name-only` | Git difftool HEAD<CR>"),
+        theme.button("~", "Git conflicts", ":Git mergetool<CR>"),
         theme.button("?", "Git diff HEAD", ":DiffviewOpen<CR>"),
         theme.button("*", "Git diff remote", ":DiffviewOpen @{upstream}..HEAD<CR>"),
         theme.button("o", "Git log", ":Flog<CR>"),
@@ -299,6 +302,16 @@ end
 
 function M.telescope()
     local actions = require("telescope.actions")
+    local action_state = require("telescope.actions.state")
+    local git_diff_ref = function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        if selection ~= nil then
+            actions.close(prompt_bufnr)
+            vim.schedule(function()
+                vim.cmd.Gdiffsplit(selection.value .. ":%")
+            end)
+        end
+    end
     -- TODO https://github.com/nvim-telescope/telescope.nvim/issues/416
     require("telescope").setup({
         defaults = {
@@ -337,6 +350,8 @@ function M.telescope()
             find_files = { hidden = true, find_command = { "fd", "--type", "f", "--strip-cwd-prefix" } },
             filetypes = { theme = "dropdown" },
             registers = { theme = "dropdown" },
+            git_branches = { mappings = { i = { ["<C-e>"] = git_diff_ref } } },
+            git_commits = { mappings = { i = { ["<C-e>"] = git_diff_ref } } },
         },
         extensions = {
             fzf = { fuzzy = true, override_generic_sorter = true, override_file_sorter = true, case_mode = "smart_case" },
@@ -684,8 +699,10 @@ function M.open_quickui_context_menu()
     }
     local conflict_state = vim.fn["funcs#get_conflict_state"]()
     if conflict_state ~= "" then
-        table.insert(content, { "Git &conflict get", "ConflictMarker" .. conflict_state, "Get change from " .. conflict_state })
-        table.insert(content, { "Git conflict get all", "ConflictMarkerBoth", "Get change from both" })
+        if conflict_state == "Ourselves" or conflict_state == "Themselves" then
+            table.insert(content, { "Git &conflict get", "ConflictMarker" .. conflict_state, "Get change from " .. conflict_state })
+        end
+        table.insert(content, { "Git conflict get all", "ConflictMarkerBoth", "Get change from ours and theirs" })
         table.insert(content, { "Git conflict remove", "ConflictMarkerNone", "Remove conflict" })
         table.insert(content, { "--", "" })
     end
@@ -741,7 +758,7 @@ function M.vim_quickui()
         { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
         { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
         { "Git toggle blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
-        { "Git hunks against HEAD", [[lua require("gitsigns").change_base("HEAD", true)]], "Show hunks based on HEAD instead of staged, to reset run :GitSigns change_base" },
+        { "Git hunks against HEAD", [[lua require("gitsigns").change_base("HEAD", true)]], "Show hunks based on HEAD instead of staged, to reset run :Gitsigns change_base" },
         { "--", "" },
         { "Git &status", [[Git]], "Git status" },
         { "Git unstaged &changes", [[Git! difftool]], "Load unstaged changes into quickfix (Git! difftool)" },
@@ -800,21 +817,21 @@ function M.vim_quickui()
     vim.fn["quickui#menu#install"]("L&SP", {
         { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix (run :bufdo edit<CR> to load all buffers)" },
         { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
-        { "&Toggle diagnostics", [[lua require("lsp").toggle_diagnostics()]], "Toggle LSP diagnostics" },
-        { "Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })]], "Toggle LSP diagnostic virtual texts" },
+        { "&Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })]], "Toggle LSP diagnostic virtual texts" },
+        { "Toggle diagnostics", [[lua require("lsp").toggle_diagnostics()]], "Toggle LSP diagnostics" },
         { "--", "" },
         { "Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
         { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
         { "Remove folder from workspace", [[lua vim.lsp.buf.remove_workspace_folder()]], "Remove folder from workspace for LSP" },
     })
     vim.fn["quickui#menu#install"]("&Packages", {
-        { "Packer &Status", [[PackerStatus]], "Packer status" },
-        { "Packer Install", [[execute "PackerCompile" | PackerInstall]], "Packer compile and install" },
-        { "Packer Clean", [[execute "PackerCompile" | PackerClean]], "Packer compile and clean" },
-        { "Packer &Update", [[let g:packer_max_jobs = 10 | execute "PackerCompile" | PackerSync]], "Packer sync plugins" },
+        { "Packer &status", [[PackerStatus]], "Packer status" },
+        { "Packer &compile", [[execute "PackerCompile"]], "Packer compile (PackerCompileDone triggers install)" },
+        { "Packer clean", [[execute "PackerCompile" | PackerClean]], "Packer compile and clean" },
+        { "Packer &update", [[let g:packer_max_jobs = 10 | execute "PackerCompile" | PackerSync]], "Packer sync plugins" },
         { "--", "" },
-        { "&Mason Status", [[Mason]], "Mason status" },
-        { "Mason &Install all", [[execute "lua require('lsp').lsp_install_all()"]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
+        { "&Mason status", [[Mason]], "Mason status" },
+        { "Mason &install all", [[execute "lua require('lsp').lsp_install_all()"]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
     })
     local quickui_theme_list = {}
     local used_chars = "hjklqg"
