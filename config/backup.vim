@@ -3648,6 +3648,35 @@ vim.keymap.set("n", "cs", "<Plug>(operator-sandwich-replace)<Plug>(operator-sand
 vim.keymap.set("n", "css", "<Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)")
 vim.keymap.set("x", "s", "<Plug>(operator-sandwich-add)")
 vim.keymap.set("x", "s<", "<Plug>(operator-sandwich-add)t")
+" tmux.nvim
+        use({ "aserowy/tmux.nvim", module = "tmux", config = function() require("tmux").setup({ navigation = { cycle_navigation = false } }) end })
+vim.keymap.set({ "n", "t" }, "<M-h>", "<Cmd>lua require('tmux').resize_left()<CR>")
+vim.keymap.set({ "n", "t" }, "<M-j>", "<Cmd>lua require('tmux').resize_bottom()<CR>")
+vim.keymap.set({ "n", "t" }, "<M-k>", "<Cmd>lua require('tmux').resize_top()<CR>")
+vim.keymap.set({ "n", "t" }, "<M-l>", "<Cmd>lua require('tmux').resize_right()<CR>")
+vim.keymap.set({ "n", "t" }, "<C-h>", "<Cmd>lua require('tmux').move_left()<CR>")
+vim.keymap.set({ "n", "t" }, "<C-j>", "<Cmd>lua require('tmux').move_bottom()<CR>")
+vim.keymap.set({ "n", "t" }, "<C-k>", "<Cmd>lua require('tmux').move_top()<CR>")
+vim.keymap.set({ "n", "t" }, "<C-l>", "<Cmd>lua require('tmux').move_right()<CR>")
+" sneak
+map f <Plug>Sneak_f
+map F <Plug>Sneak_F
+nmap t <Plug>Sneak_s
+nmap T <Plug>Sneak_S
+xmap t <Plug>Sneak_t
+xmap T <Plug>Sneak_T
+omap t <Plug>Sneak_t
+omap T <Plug>Sneak_T
+map , <Plug>Sneak_;
+map ;, <Plug>Sneak_,
+map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
+map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
+" colorizer
+        use({
+            "NvChad/nvim-colorizer.lua",
+            cmd = "ColorizerAttachToBuffer",
+            config = function() require("colorizer").setup({}, { RGB = false, rgb_fn = true, mode = "virtualtext" }) end,
+        })
 
 " =======================================================
 " cmdheight = 0
@@ -3722,3 +3751,23 @@ set shellflag -c
 map e $$EDITOR "$f"
 map w $$SHELL
 map i $$PAGER "$f"
+
+" =======================================================
+" use https://github.com/jose-elias-alvarez/typescript.nvim
+        tsserver = function()
+            register_server("tsserver", {
+                init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
+                commands = {
+                    OrganizeImports = {
+                        function()
+                            vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
+                                command = "_typescript.organizeImports",
+                                arguments = { vim.api.nvim_buf_get_name(0) },
+                                title = "",
+                            }, 3000)
+                        end,
+                        description = "Organize Imports",
+                    },
+                },
+            })
+        end,

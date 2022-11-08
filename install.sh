@@ -164,7 +164,7 @@ install_docker() {
   sudo usermod -aG docker "$USER" || true
   sudo systemctl restart docker || sudo service docker restart
   sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login, enable read write access for other groups now to work immediately
-  # TODO https://github.com/docker/compose/issues/8550, remove docker-compose when 'docker compose <Tab>' completions are working
+  # TODO https://github.com/docker/compose/issues/8550, remove docker-compose and its zsh completion when 'docker compose <Tab>' completions are working
   log 'Installing docker-compose..'
   sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
@@ -184,7 +184,7 @@ install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEA
   log "Installed $jdk_version, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
 }
 
-install_python() {
+install_python() {  # environment for asdf install from source: https://github.com/pyenv/pyenv/wiki#suggested-build-environment
   log "Installing python.."
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y python3-devel
@@ -195,7 +195,9 @@ install_python() {
     echo 'Unknown distro..'
     return 0
   fi
-  log 'Installed python3 and pip3'
+  pip3 install --user pynvim
+  log 'Installed python3, pip3, pynvim'
+  log "To use pynvim regardless of venv, set ${YELLOW}vim.g.python3_host_prog = \"$(which python3)\""
 }
 
 install_node() {

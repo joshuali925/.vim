@@ -29,7 +29,7 @@ function M.lsp_install_all()
     else
         vim.cmd.Mason()
     end
-    vim.cmd.MasonInstall({ args = { "prettier", "shellcheck" } }) -- TODO https://github.com/williamboman/mason.nvim/issues/103
+    vim.cmd.MasonInstall({ args = { "prettier", "shellcheck" } })
 end
 
 function M.init()
@@ -55,13 +55,12 @@ function M.init()
     mason.setup()
     local function register_server(server, server_config)
         if not vim.tbl_contains(disabled_servers, server) then
-            local config = make_config()
-            if server_config ~= nil then
-                for k, v in pairs(server_config) do
-                    config[k] = v
-                end
+            local config = vim.tbl_deep_extend("force", make_config(), server_config or {})
+            if server == "tsserver" then
+                require("typescript").setup({ server = config })
+            else
+                require("lspconfig")[server].setup(config)
             end
-            require("lspconfig")[server].setup(config)
         end
     end
 
@@ -80,7 +79,7 @@ function M.init()
                 settings = {
                     Lua = {
                         runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
-                        diagnostics = { globals = { "vim" }, neededFileStatus = { ["codestyle-check"] = "Any" } },
+                        diagnostics = { globals = { "vim", "packer_plugins" }, neededFileStatus = { ["codestyle-check"] = "Any" } },
                         telemetry = { enable = false },
                         IntelliSense = { traceLocalSet = true },
                         workspace = {
@@ -95,54 +94,44 @@ function M.init()
         tsserver = function()
             register_server("tsserver", {
                 init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
-                commands = {
-                    OrganizeImports = { -- TODO use https://github.com/jose-elias-alvarez/typescript.nvim
-                        function()
-                            vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
-                                command = "_typescript.organizeImports",
-                                arguments = { vim.api.nvim_buf_get_name(0) },
-                                title = "",
-                            }, 3000)
-                        end,
-                        description = "Organize Imports",
-                    },
-                },
             })
         end,
     })
 
     local null_ls = require("null-ls")
-    null_ls.setup({
-        sources = {
-            null_ls.builtins.code_actions.gitrebase,
-            null_ls.builtins.code_actions.shellcheck,
-            null_ls.builtins.diagnostics.shellcheck,
-            null_ls.builtins.diagnostics.zsh,
-            null_ls.builtins.formatting.prettier.with({
-                filetypes = {
-                    "javascript",
-                    "javascriptreact",
-                    "typescript",
-                    "typescriptreact",
-                    "vue",
-                    "css",
-                    "scss",
-                    "less",
-                    "html",
-                    "json",
-                    "yaml",
-                    "markdown",
-                    "graphql",
-                    "sh", -- prettier-plugin-sh (cd ~/.local/share/nvim/mason/packages/prettier; npm install prettier-plugin-sh)
-                    "bash",
-                    "java", -- prettier-plugin-java
-                    "kotlin", -- prettier-plugin-kotlin
-                },
-            }),
-            null_ls.builtins.formatting.black,
-            null_ls.builtins.formatting.sqlformat.with({ extra_args = { "-rsk", "upper" } }),
-        },
-    })
+    local null_ls_sources = {
+        null_ls.builtins.code_actions.gitrebase,
+        null_ls.builtins.code_actions.shellcheck,
+        null_ls.builtins.diagnostics.zsh,
+        null_ls.builtins.formatting.prettier.with({
+            filetypes = {
+                "javascript",
+                "javascriptreact",
+                "typescript",
+                "typescriptreact",
+                "vue",
+                "css",
+                "scss",
+                "less",
+                "html",
+                "json",
+                "yaml",
+                "markdown",
+                "graphql",
+                "sh", -- prettier-plugin-sh (cd ~/.local/share/nvim/mason/packages/prettier; npm install prettier-plugin-sh)
+                "bash",
+                "java", -- prettier-plugin-java
+                "kotlin", -- prettier-plugin-kotlin
+            },
+        }),
+        null_ls.builtins.formatting.black,
+        null_ls.builtins.formatting.sqlformat.with({ extra_args = { "-rsk", "upper" } }),
+        require("typescript.extensions.null-ls.code-actions"),
+    }
+    if require("mason-registry").is_installed("shellcheck") then
+        table.insert(null_ls_sources, null_ls.builtins.diagnostics.shellcheck)
+    end
+    null_ls.setup({ sources = null_ls_sources })
 
     vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError", numhl = "DiagnosticError" })
     vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticWarn", numhl = "DiagnosticWarn" })
@@ -157,8 +146,10 @@ end
 
 local formatting_lsp = { "null-ls", "sumneko_lua" }
 function M.organize_imports_and_format()
-    if next(vim.lsp.buf_get_clients()) ~= nil then
-        vim.cmd("silent! OrganizeImports")
+    if next(vim.lsp.get_active_clients({ bufnr = 0 })) ~= nil then
+        if next(vim.lsp.get_active_clients({ bufnr = 0, name = "tsserver" })) ~= nil then
+            require("typescript").actions.organizeImports({ sync = true })
+        end
         vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsp, client.name) end, timeout_ms = 3000 })
     else
         vim.cmd.Prettier()
@@ -176,7 +167,7 @@ function M.toggle_diagnostics()
 end
 
 function M.is_active()
-    for _, client in ipairs(vim.lsp.buf_get_clients(0)) do
+    for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
         if client.name ~= "null-ls" then
             return true
         end

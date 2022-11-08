@@ -13,6 +13,7 @@ set easymotion  " requires https://plugins.jetbrains.com/plugin/13360-ideavim-ea
 set exchange
 set NERDTree
 set textobj-indent
+set textobj-entire
 
 """ Plugin settings -------------------------
 let g:argtextobj_pairs="[:],(:),<:>,{:}"
@@ -58,10 +59,6 @@ nnoremap dil v^og_d
 nnoremap yil v^og_y
 nnoremap <leader>yil v^og_"+y
 xnoremap al 0o$
-xnoremap ae GoggV
-nnoremap cae vGoggVc
-nnoremap dae vGoggVd
-nnoremap yae vGoggVy
 xnoremap af iw%
 nnoremap caf viw%c
 nnoremap daf viw%d

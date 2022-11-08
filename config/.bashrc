@@ -14,6 +14,7 @@ stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
 shopt -s checkwinsize
+shopt -s dotglob
 
 HISTCONTROL=ignoreboth:erasedups:ignorespace
 

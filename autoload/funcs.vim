@@ -102,6 +102,7 @@ function! funcs#print_variable(visual, printAbove) abort
   let print['sh'] = 'echo "❗'. word. ': ${'. word. '}"'
   let print['bash'] = print['sh']
   let print['zsh'] = print['sh']
+  let print['tmux'] = 'display-message "❗'. word. '"'
   if has_key(print, &filetype)
     let pos = getcurpos()
     execute new_line

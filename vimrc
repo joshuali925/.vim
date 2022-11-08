@@ -74,7 +74,7 @@ set virtualedit+=block
 set previewheight=7
 " ignore errors for sudoedit (vim small)
 silent! set foldmethod=indent
-silent! set foldlevelstart=99
+silent! set foldlevel=99
 set history=1000
 set undofile
 set undolevels=1000
@@ -141,6 +141,28 @@ onoremap <silent> ib :<C-u>call plugins#expand_region#any_pair('o', 'i')<CR>
 xnoremap <silent> ib :<C-u>call plugins#expand_region#any_pair('v', 'i')<CR>
 onoremap <silent> ab :<C-u>call plugins#expand_region#any_pair('o', 'a')<CR>
 xnoremap <silent> ab :<C-u>call plugins#expand_region#any_pair('v', 'a')<CR>
+nnoremap <silent> f :call plugins#fanfingtastic#next_char(v:count1, '', 'f', 'f')<CR>
+xnoremap <silent> f :call plugins#fanfingtastic#visual_next_char(v:count1, '', 'f', 'f')<CR>
+onoremap <silent> f :call plugins#fanfingtastic#operator_next_char(v:count1, '', 'f', 'f')<CR>
+nnoremap <silent> F :call plugins#fanfingtastic#next_char(v:count1, '', 'F', 'F')<CR>
+xnoremap <silent> F :call plugins#fanfingtastic#visual_next_char(v:count1, '', 'F', 'F')<CR>
+onoremap <silent> F :call plugins#fanfingtastic#operator_next_char(v:count1, '', 'F', 'F')<CR>
+nnoremap <silent> t :call plugins#fanfingtastic#next_char(v:count1, '', 't', 't')<CR>
+xnoremap <silent> t :call plugins#fanfingtastic#visual_next_char(v:count1, '', 't', 't')<CR>
+onoremap <silent> t :call plugins#fanfingtastic#operator_next_char(v:count1, '', 't', 't')<CR>
+nnoremap <silent> T :call plugins#fanfingtastic#next_char(v:count1, '', 'T', 'T')<CR>
+xnoremap <silent> T :call plugins#fanfingtastic#visual_next_char(v:count1, '', 'T', 'T')<CR>
+onoremap <silent> T :call plugins#fanfingtastic#operator_next_char(v:count1, '', 'T', 'T')<CR>
+nnoremap <silent> , :call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>
+xnoremap <silent> , :call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>
+onoremap <silent> , :call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>
+nnoremap <silent> ;, :call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
+xnoremap <silent> ;, :call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
+onoremap <silent> ;, :call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
+nnoremap <expr> cx ':set operatorfunc=plugins#exchange#exchange_set<CR>'. (v:count1 == 1 ? '' : v:count1). 'g@'
+xnoremap X :<C-u>call plugins#exchange#exchange_set(visualmode(), 1)<CR>
+nnoremap <expr> cxx ':set operatorfunc=plugins#exchange#exchange_set<CR>'. (v:count1 == 1 ? '' : v:count1). 'g@_'
+nnoremap cxc :call plugins#exchange#exchange_clear()<CR>
 nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
 nnoremap [\ :tab sbuffer<CR>
@@ -149,8 +171,6 @@ nnoremap [<BS> :new<CR>
 nnoremap ]<BS> :vnew<CR>
 nnoremap <silent> <C-]> :call funcs#ctags()<CR>
 nnoremap <silent> <leader><C-]> :call funcs#ctags_create_and_jump()<CR>
-noremap , ;
-noremap ;, ,
 noremap <expr> 0 funcs#home()
 noremap ^ 0
 noremap - $
@@ -173,6 +193,8 @@ nnoremap U :execute 'earlier '. v:count1. 'f'<CR>
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
+nnoremap gf gF
+nnoremap gF gf
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
 xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>
 nnoremap zm :%foldclose<CR>
@@ -258,6 +280,7 @@ augroup END
 
 command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
 command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute 'normal! ``'
+command! ShowHighlightGroups echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
 command! Grt silent execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
 command! -nargs=* Gdiff execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | file !git\ show\ <args>:'. expand('%:~:.'). ' | silent read !git show <args>:'. expand('%:~:.') | 0d_ | diffthis
@@ -282,7 +305,7 @@ function! s:Grep(prg, pattern)
   set errorformat=%f:%l:%c:%m,%f:%l:%m,%f
   if a:prg == 'glob'
     let cmd = a:pattern[0] == '*' ? '{**/.'. a:pattern. ',**/'. a:pattern. '}' : '**/'. a:pattern
-    if a:pattern[0] == '*'  " hidden file needs **/.*pattern*, {.*,*} depends on &shell and doesn't work on windows and some bash
+    if a:pattern[0] == '*'  " hidden file needs **/.*pat, {**/.*pat,**/*pat} is faster but depends on &shell and doesn't work on windows and some bash
       cgetexpr glob('**/.'. a:pattern, 0, 1)
       caddexpr glob('**/'. a:pattern, 0, 1)
     else
@@ -294,7 +317,7 @@ function! s:Grep(prg, pattern)
   endif
   let &errorformat = saved_errorformat
   let len = len(getqflist())
-  silent! call setqflist([], 'a', {'title': '('. len. ') '. cmd })  " setqflist() does not support changing title in 7.4
+  silent! call setqflist([], 'a', {'title': '('. len. ') '. cmd })  " setqflist() does not support 'title' in 7.4
   if len > 1
     copen
   else
@@ -413,10 +436,18 @@ nnoremap Km K
 nnoremap Kd :Gdiff<CR>
 nnoremap Kb :Gblame<CR>
 
+" execute "set <M-h>=\<Esc>h"
+" execute "set <M-j>=\<Esc>j"
+" execute "set <M-k>=\<Esc>k"
+" execute "set <M-l>=\<Esc>l"
 nnoremap <silent> <C-h> :call plugins#tmux_navigator#navigate('h')<CR>
 nnoremap <silent> <C-j> :call plugins#tmux_navigator#navigate('j')<CR>
 nnoremap <silent> <C-k> :call plugins#tmux_navigator#navigate('k')<CR>
 nnoremap <silent> <C-l> :call plugins#tmux_navigator#navigate('l')<CR>
+nnoremap <silent> <M-h> :call plugins#tmux_navigator#resize('h')<CR>
+nnoremap <silent> <M-j> :call plugins#tmux_navigator#resize('j')<CR>
+nnoremap <silent> <M-k> :call plugins#tmux_navigator#resize('k')<CR>
+nnoremap <silent> <M-l> :call plugins#tmux_navigator#resize('l')<CR>
 nnoremap <expr> gc plugins#commentary#go()
 nnoremap <expr> gcc plugins#commentary#go(). '_'
 xnoremap <expr> gc plugins#commentary#go()
@@ -456,6 +487,10 @@ if has('terminal')
   tnoremap <silent> <C-j> <C-w>:call plugins#tmux_navigator#navigate('j')<CR>
   tnoremap <silent> <C-k> <C-w>:call plugins#tmux_navigator#navigate('k')<CR>
   tnoremap <silent> <C-l> <C-w>:call plugins#tmux_navigator#navigate('l')<CR>
+  tnoremap <silent> <M-h> <C-w>:call plugins#tmux_navigator#resize('h')<CR>
+  tnoremap <silent> <M-j> <C-w>:call plugins#tmux_navigator#resize('j')<CR>
+  tnoremap <silent> <M-k> <C-w>:call plugins#tmux_navigator#resize('k')<CR>
+  tnoremap <silent> <M-l> <C-w>:call plugins#tmux_navigator#resize('l')<CR>
   nnoremap <C-b> :execute 'terminal ++close ++rows='. min([15, &lines * 2/5])<CR>
   nnoremap <leader>to :let $VIM_DIR=expand('%:p:h')<CR>:execute 'terminal ++close ++rows='. min([15, &lines * 2/5])<CR>cd $VIM_DIR<CR>
   nnoremap <leader>tO :terminal ++curwin ++noclose<CR>
