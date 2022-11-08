@@ -9,7 +9,7 @@ export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
 export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER='\'
-export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top'
+export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top --info=inline'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --hidden --exclude=.git --color=always'
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND --no-ignore || true)'"
@@ -61,6 +61,7 @@ alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
 alias rga='rg --text --no-ignore --search-zip --follow'
+alias rg!="rg '❗'"
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
@@ -225,7 +226,7 @@ pscpu() {
     ps_out=$(ps auxww --sort=-pcpu)
     pstree_flags='-Glps'
   fi
-  [ "$#" -eq 0 ] && echo "$ps_out" | head -n 11
+  { [ "$#" -eq 0 ] && echo "$ps_out" || grep -i "$@" <<<"$ps_out"; } | head -n 11
   if [ ! -x "$(command -v pstree)" ]; then
     echo 'pstree not found (e.g. yum install -y psmisc).'
   else
@@ -236,7 +237,7 @@ pscpu() {
     fi
     for pid in "${pids[@]}"; do
       pstree_out=$(pstree "$pstree_flags" "$pid")
-      [[ $pstree_out =~ "$pid" ]] && head -n 8 <<< "$pstree_out" | grep --color -E "^|$pid"
+      [[ $pstree_out =~ $pid ]] && head -n 8 <<< "$pstree_out" | grep --color -E "^|$pid"
     done
   fi
 }
@@ -497,17 +498,17 @@ untildone() {
 }
 
 set-env() {
-  if [ "$#" -lt 1 ]; then echo "Usage: $0 [--write-rc] {java_home|path}"; return 1; fi
-  local cmd write_to_rc
+  if [ "$#" -lt 1 ]; then echo "Usage: $0 [--shell] {java_home|path}"; return 1; fi
+  local cmd shell_only=0
   while [ $# != 0 ]; do
     case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
       java_home|javahome) cmd="export JAVA_HOME=\"$(asdf where java)\""; shift 1 ;;
       path) cmd="export PATH=\"$PWD:\$PATH\""; shift 1 ;;
-      --write-rc) write_to_rc=1; shift 1 ;;
+      --shell) shell_only=1; shift 1 ;;
       *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
     esac
   done
-  eval "$cmd" && echo "$cmd" | if [ -n "$write_to_rc" ]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
+  eval "$cmd" && echo "$cmd" | if [ "$shell_only" != 1 ]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
 }
 
 tldr() {

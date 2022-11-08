@@ -111,6 +111,7 @@ local themes = {
                 sidebars = sidebars,
                 theme_style = theme_index < 0 and "dimmed" or "light",
             })
+            vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = theme_index < 0 and "#4d5462" or "#bbbbbb" })
         end,
     },
     ["vscode.nvim"] = {

@@ -40,7 +40,7 @@ vim.o.signcolumn = "yes"
 vim.o.virtualedit = "block"
 vim.o.previewheight = 7
 vim.o.foldmethod = "indent"
-vim.o.foldlevelstart = 99
+vim.o.foldlevel = 99
 vim.o.jumpoptions = "stack"
 vim.o.shada = "!,'1000,<50,s10,/20,@20,h"
 vim.o.undofile = true
@@ -102,6 +102,28 @@ vim.keymap.set("o", "ib", "<Cmd>call plugins#expand_region#any_pair('o', 'i')<CR
 vim.keymap.set("x", "ib", ":<C-u>call plugins#expand_region#any_pair('v', 'i')<CR>", { silent = true })
 vim.keymap.set("o", "ab", "<Cmd>call plugins#expand_region#any_pair('o', 'a')<CR>", { silent = true })
 vim.keymap.set("x", "ab", ":<C-u>call plugins#expand_region#any_pair('v', 'a')<CR>", { silent = true })
+vim.keymap.set("n", "f", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, '', 'f', 'f')<CR>")
+vim.keymap.set("x", "f", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, '', 'f', 'f')<CR>")
+vim.keymap.set("o", "f", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, '', 'f', 'f')<CR>")
+vim.keymap.set("n", "F", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, '', 'F', 'F')<CR>")
+vim.keymap.set("x", "F", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, '', 'F', 'F')<CR>")
+vim.keymap.set("o", "F", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, '', 'F', 'F')<CR>")
+vim.keymap.set("n", "t", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, '', 't', 't')<CR>")
+vim.keymap.set("x", "t", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, '', 't', 't')<CR>")
+vim.keymap.set("o", "t", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, '', 't', 't')<CR>")
+vim.keymap.set("n", "T", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, '', 'T', 'T')<CR>")
+vim.keymap.set("x", "T", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, '', 'T', 'T')<CR>")
+vim.keymap.set("o", "T", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, '', 'T', 'T')<CR>")
+vim.keymap.set("n", ",", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>")
+vim.keymap.set("x", ",", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>")
+vim.keymap.set("o", ",", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>")
+vim.keymap.set("n", ";,", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
+vim.keymap.set("x", ";,", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
+vim.keymap.set("o", ";,", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
+vim.keymap.set("n", "cx", "'<Cmd>set operatorfunc=plugins#exchange#exchange_set<CR>'. (v:count1 == 1 ? '' : v:count1). 'g@'", { expr = true, replace_keycodes = false })
+vim.keymap.set("x", "X", "<Cmd>call plugins#exchange#exchange_set(visualmode(), 1)<CR>")
+vim.keymap.set("n", "cxx", "'<Cmd>set operatorfunc=plugins#exchange#exchange_set<CR>'. (v:count1 == 1 ? '' : v:count1). 'g@_'", { expr = true, replace_keycodes = false })
+vim.keymap.set("n", "cxc", "<Cmd>call plugins#exchange#exchange_clear()<CR>")
 -- general {{{2
 vim.keymap.set("n", "[\\", "<Cmd>tab sbuffer<CR>")
 vim.keymap.set("n", "]\\", "<Cmd>enew<CR>")
@@ -135,6 +157,8 @@ vim.keymap.set("x", ">", ">gv")
 vim.keymap.set("n", "gp", "`[v`]")
 vim.keymap.set("n", "zm", "<Cmd>%foldclose<CR>")
 vim.keymap.set("n", "cr", "<Cmd>call funcs#edit_register()<CR>")
+vim.keymap.set("n", "gf", "gF")
+vim.keymap.set("n", "gF", "gf")
 vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("n", "zh", "zhz", { remap = true })
@@ -147,6 +171,14 @@ vim.keymap.set("n", "<C-w><", "<C-w><<C-w>", { remap = true })
 vim.keymap.set("n", "<C-w>>", "<C-w>><C-w>", { remap = true })
 vim.keymap.set("n", "<C-w>+", "<C-w>+<C-w>", { remap = true })
 vim.keymap.set("n", "<C-w>-", "<C-w>-<C-w>", { remap = true })
+vim.keymap.set({ "n", "t" }, "<C-h>", "<Cmd>call plugins#tmux_navigator#navigate('h')<CR>")
+vim.keymap.set({ "n", "t" }, "<C-j>", "<Cmd>call plugins#tmux_navigator#navigate('j')<CR>")
+vim.keymap.set({ "n", "t" }, "<C-k>", "<Cmd>call plugins#tmux_navigator#navigate('k')<CR>")
+vim.keymap.set({ "n", "t" }, "<C-l>", "<Cmd>call plugins#tmux_navigator#navigate('l')<CR>")
+vim.keymap.set({ "n", "t" }, "<M-h>", "<Cmd>call plugins#tmux_navigator#resize('h')<CR>")
+vim.keymap.set({ "n", "t" }, "<M-j>", "<Cmd>call plugins#tmux_navigator#resize('j')<CR>")
+vim.keymap.set({ "n", "t" }, "<M-k>", "<Cmd>call plugins#tmux_navigator#resize('k')<CR>")
+vim.keymap.set({ "n", "t" }, "<M-l>", "<Cmd>call plugins#tmux_navigator#resize('l')<CR>")
 vim.keymap.set("n", "<C-f>", "<Cmd>lua require('lsp').organize_imports_and_format()<CR>")
 vim.keymap.set("x", "<C-f>", vim.lsp.buf.format)
 vim.keymap.set({ "n", "x" }, "<leader>p", '"0p')
@@ -204,7 +236,7 @@ vim.keymap.set("x", "<leader>te", "<Cmd>ToggleTermSendVisualSelection<CR>")
 vim.keymap.set("t", "<C-u>", "<C-\\><C-n>")
 vim.keymap.set("n", "<C-o>", "<Cmd>lua require('utils').toggle_lf()<CR>")
 -- quickui {{{2
-vim.keymap.set("n", "K", "<Cmd>lua require('plugin-configs').open_quickui_context_menu()<CR>")
+vim.keymap.set("n", "K", function() if not require("ufo").peekFoldedLinesUnderCursor() then require("plugin-configs").open_quickui_context_menu() end end)
 vim.keymap.set("n", "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>")
 vim.keymap.set("x", "<CR>", "<Esc><Cmd>call quickui#menu#open('visual')<CR>")
 -- kommentary {{{2
@@ -221,13 +253,6 @@ vim.keymap.set({ "n", "x", "o" }, "q", "<Cmd>lua require('utils').command_withou
 vim.keymap.set({ "n", "x", "o" }, "<leader>e", "<Cmd>lua require('utils').command_without_quickscope('HopWordCurrentLine')<CR>")
 vim.keymap.set({ "n", "x", "o" }, "<leader>j", "<Cmd>lua require('utils').command_without_quickscope('HopLineAC')<CR>")
 vim.keymap.set({ "n", "x", "o" }, "<leader>k", "<Cmd>lua require('utils').command_without_quickscope('HopLineBC')<CR>")
--- fanfingtastic {{{2
-vim.keymap.set({ "n", "x", "o" }, "f", "<Plug>fanfingtastic_f")
-vim.keymap.set({ "n", "x", "o" }, "F", "<Plug>fanfingtastic_F")
-vim.keymap.set({ "n", "x", "o" }, "t", "<Plug>fanfingtastic_t")
-vim.keymap.set({ "n", "x", "o" }, "T", "<Plug>fanfingtastic_T")
-vim.keymap.set({ "n", "x", "o" }, ",", "<Plug>fanfingtastic_;")
-vim.keymap.set({ "n", "x", "o" }, ";,", "<Plug>fanfingtastic_,")
 -- vim-illuminate {{{2
 vim.keymap.set("n", "[m", "<Cmd>lua require('illuminate').goto_prev_reference()<CR>")
 vim.keymap.set("n", "]m", "<Cmd>lua require('illuminate').goto_next_reference()<CR>")
@@ -240,15 +265,6 @@ vim.keymap.set({ "x", "o" }, "aa", "<Plug>(swap-textobject-a)")
 vim.keymap.set("n", "g<", "<Plug>(swap-prev)")
 vim.keymap.set("n", "g>", "<Plug>(swap-next)")
 vim.keymap.set({ "n", "x" }, "gs", "<Plug>(swap-interactive)")
--- tmux-navigator {{{2
-vim.keymap.set({ "n", "t" }, "<M-h>", "<Cmd>lua require('tmux').resize_left()<CR>")
-vim.keymap.set({ "n", "t" }, "<M-j>", "<Cmd>lua require('tmux').resize_bottom()<CR>")
-vim.keymap.set({ "n", "t" }, "<M-k>", "<Cmd>lua require('tmux').resize_top()<CR>")
-vim.keymap.set({ "n", "t" }, "<M-l>", "<Cmd>lua require('tmux').resize_right()<CR>")
-vim.keymap.set({ "n", "t" }, "<C-h>", "<Cmd>lua require('tmux').move_left()<CR>")
-vim.keymap.set({ "n", "t" }, "<C-j>", "<Cmd>lua require('tmux').move_bottom()<CR>")
-vim.keymap.set({ "n", "t" }, "<C-k>", "<Cmd>lua require('tmux').move_top()<CR>")
-vim.keymap.set({ "n", "t" }, "<C-l>", "<Cmd>lua require('tmux').move_right()<CR>")
 -- telescope {{{2
 vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.builtin').find_files()<CR>")
 vim.keymap.set("x", "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = vim.fn['funcs#get_visual_selection']()})<CR>", { silent = true })
@@ -450,7 +466,7 @@ if require("states").small_file then
             require("packer").loader(table.concat(plugins, " "))
         end, 30)
         vim.defer_fn(function()
-            local plugins = {
+            local plugins = { -- motions/text objects sometimes don't work if loaded on keys
                 "plenary.nvim",
                 "vim-illuminate",
                 "conflict-marker.vim",
@@ -458,7 +474,7 @@ if require("states").small_file then
                 "nvim-scrollview",
                 "gitsigns.nvim",
                 "quick-scope",
-                "vim-fanfingtastic", -- motions/text objects sometimes don't work if loaded on keys
+                "nvim-ufo",
             }
             require("packer").loader(table.concat(plugins, " "))
         end, 100)

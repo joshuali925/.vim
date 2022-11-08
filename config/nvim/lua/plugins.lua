@@ -34,11 +34,7 @@ return require("packer").startup({
         use({ "lukas-reineke/indent-blankline.nvim", config = conf("indent_blankline") })
         -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
         use({ "dstein64/nvim-scrollview", config = "require('scrollview').setup()" })
-        use({
-            "NvChad/nvim-colorizer.lua", -- TODO https://github.com/uga-rosa/ccc.nvim
-            cmd = "ColorizerAttachToBuffer",
-            config = function() require("colorizer").setup({}, { RGB = false, rgb_fn = true, mode = "virtualtext" }) end,
-        })
+        use({ "uga-rosa/ccc.nvim", cmd = "CccHighlighterEnable", config = conf("ccc_nvim") })
 
         -- ui
         use({
@@ -59,6 +55,7 @@ return require("packer").startup({
             config = conf("telescope"),
         })
         use({ "kevinhwang91/nvim-bqf", ft = "qf", config = conf("nvim_bqf") })
+        use({ "kevinhwang91/nvim-ufo", requires = "kevinhwang91/promise-async", wants = "promise-async", config = conf("nvim_ufo") })
         use({ "rcarriga/nvim-notify" }) -- TODO https://github.com/folke/noice.nvim
         use({ "kyazdani42/nvim-tree.lua", cmd = { "NvimTreeFindFile", "NvimTreeOpen" }, config = conf("nvim_tree") })
 
@@ -79,7 +76,8 @@ return require("packer").startup({
         use({ "williamboman/mason.nvim" })
         use({ "williamboman/mason-lspconfig.nvim", after = "mason.nvim" })
         use({ "neovim/nvim-lspconfig", after = "mason-lspconfig.nvim" })
-        use({ "jose-elias-alvarez/null-ls.nvim", after = "nvim-lspconfig", config = "require('lsp').init()" })
+        use({ "jose-elias-alvarez/typescript.nvim", after = "nvim-lspconfig" })
+        use({ "jose-elias-alvarez/null-ls.nvim", after = "typescript.nvim", config = "require('lsp').init()" })
         use({ "glepnir/lspsaga.nvim", after = "null-ls.nvim", config = conf("lspsaga_nvim") })
         use({
             "b3nj5m1n/kommentary",
@@ -92,7 +90,6 @@ return require("packer").startup({
         use({ "RRethy/vim-illuminate", config = conf("vim_illuminate") })
         use({ "danymat/neogen", module = "neogen", config = "require('neogen').setup({})" })
         use({ "MTDL9/vim-log-highlighting", ft = "log" })
-        use({ "udalov/kotlin-vim", ft = "kotlin" })
         use({ "chrisbra/csv.vim", setup = conf("setup_csv_vim"), cmd = "CSVWhatColumn" })
 
         -- completion
@@ -112,7 +109,6 @@ return require("packer").startup({
         use({ "mg979/vim-visual-multi", fn = "vm#*", keys = { "<Plug>(VM-", { "n", "<leader><C-n>" } }, setup = conf("setup_vim_visual_multi") })
         use({ "phaazon/hop.nvim", cmd = { "HopWord", "HopChar1", "HopLineAC", "HopLineBC", "HopWordCurrentLine" }, config = conf("hop_nvim") })
         use({ "unblevable/quick-scope", config = conf("quick_scope") })
-        use({ "dahu/vim-fanfingtastic" })
         use({ "kylechui/nvim-surround", keys = { { "n", "y" }, { "n", "c" }, { "n", "d" }, { "x", "s" } }, config = conf("nvim_surround") })
         use({ "machakann/vim-swap", keys = "<Plug>(swap-" })
         use({ "AndrewRadev/splitjoin.vim", keys = { { "n", "gS" }, { "n", "gJ" } } })
@@ -124,7 +120,6 @@ return require("packer").startup({
         use({ "tpope/vim-sleuth", cond = "require('states').small_file" })
         use({ "tpope/vim-unimpaired", keys = { "[", "]", { "n", "=p" }, { "n", "yo" } } })
         use({ "AckslD/nvim-neoclip.lua", event = "TextYankPost", config = conf("nvim_neoclip_lua") })
-        use({ "aserowy/tmux.nvim", module = "tmux", config = function() require("tmux").setup({ navigation = { cycle_navigation = false } }) end })
 
         -- tools
         use({ "dstein64/vim-startuptime", cmd = "StartupTime" })

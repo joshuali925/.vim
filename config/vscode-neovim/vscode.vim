@@ -13,12 +13,10 @@ call plug#begin('~/.vim/config/vscode-neovim/plugged')
 " let win_first_line = max([line('w0'), line('.') - 30]) " visible first line num
 " let win_last_line  = min([line('w$'), line('.') + 30]) " visible last line num
 Plug 'asvetliakov/vim-easymotion'
-Plug 'justinmk/vim-sneak'
 Plug 'machakann/vim-swap'
 Plug 'machakann/vim-sandwich'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'machakann/vim-highlightedyank'
-Plug 'tpope/vim-repeat'
 Plug 'maxbrunsfeld/vim-yankstack'
 call plug#end()
 call yankstack#setup()
@@ -28,18 +26,6 @@ set ignorecase
 set smartcase
 
 let mapleader=';'
-map f <Plug>Sneak_f
-map F <Plug>Sneak_F
-nmap t <Plug>Sneak_s
-nmap T <Plug>Sneak_S
-xmap t <Plug>Sneak_t
-xmap T <Plug>Sneak_T
-omap t <Plug>Sneak_t
-omap T <Plug>Sneak_T
-map , <Plug>Sneak_;
-map ;, <Plug>Sneak_,
-map <expr> n sneak#is_sneaking() ? '<Plug>Sneak_;' : 'n'
-map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
 map ' <Plug>(easymotion-bd-f)
 map q <Plug>(easymotion-bd-w)
 map <leader>e <Plug>(easymotion-lineanywhere)
@@ -66,6 +52,14 @@ for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*',
   execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vt'. char. '<CR>'
   execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
 endfor
+xnoremap il ^og_
+onoremap <silent> il :normal vil<CR>
+xnoremap al 0o$
+onoremap <silent> al :normal val<CR>
+xnoremap ae GoggV
+onoremap <silent> ae :normal vae<CR>
+xnoremap af iw%
+onoremap <silent> af :normal vaf<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -93,14 +87,28 @@ onoremap <silent> ib :<C-u>call plugins#expand_region#any_pair('o', 'i')<CR>
 xnoremap <silent> ib :<C-u>call plugins#expand_region#any_pair('v', 'i')<CR>
 onoremap <silent> ab :<C-u>call plugins#expand_region#any_pair('o', 'a')<CR>
 xnoremap <silent> ab :<C-u>call plugins#expand_region#any_pair('v', 'a')<CR>
-xnoremap il ^og_
-onoremap <silent> il :normal vil<CR>
-xnoremap al 0o$
-onoremap <silent> al :normal val<CR>
-xnoremap ae GoggV
-onoremap <silent> ae :normal vae<CR>
-xnoremap af iw%
-onoremap <silent> af :normal vaf<CR>
+nnoremap <silent> f :call plugins#fanfingtastic#next_char(v:count1, '', 'f', 'f')<CR>
+xnoremap <silent> f :call plugins#fanfingtastic#visual_next_char(v:count1, '', 'f', 'f')<CR>
+onoremap <silent> f :call plugins#fanfingtastic#operator_next_char(v:count1, '', 'f', 'f')<CR>
+nnoremap <silent> F :call plugins#fanfingtastic#next_char(v:count1, '', 'F', 'F')<CR>
+xnoremap <silent> F :call plugins#fanfingtastic#visual_next_char(v:count1, '', 'F', 'F')<CR>
+onoremap <silent> F :call plugins#fanfingtastic#operator_next_char(v:count1, '', 'F', 'F')<CR>
+nnoremap <silent> t :call plugins#fanfingtastic#next_char(v:count1, '', 't', 't')<CR>
+xnoremap <silent> t :call plugins#fanfingtastic#visual_next_char(v:count1, '', 't', 't')<CR>
+onoremap <silent> t :call plugins#fanfingtastic#operator_next_char(v:count1, '', 't', 't')<CR>
+nnoremap <silent> T :call plugins#fanfingtastic#next_char(v:count1, '', 'T', 'T')<CR>
+xnoremap <silent> T :call plugins#fanfingtastic#visual_next_char(v:count1, '', 'T', 'T')<CR>
+onoremap <silent> T :call plugins#fanfingtastic#operator_next_char(v:count1, '', 'T', 'T')<CR>
+nnoremap <silent> , :call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>
+xnoremap <silent> , :call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>
+onoremap <silent> , :call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>
+nnoremap <silent> ;, :call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
+xnoremap <silent> ;, :call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
+onoremap <silent> ;, :call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
+nnoremap <expr> cx ':set operatorfunc=plugins#exchange#exchange_set<CR>'. (v:count1 == 1 ? '' : v:count1). 'g@'
+xnoremap X :<C-u>call plugins#exchange#exchange_set(visualmode(), 1)<CR>
+nnoremap <expr> cxx ':set operatorfunc=plugins#exchange#exchange_set<CR>'. (v:count1 == 1 ? '' : v:count1). 'g@_'
+nnoremap cxc :call plugins#exchange#exchange_clear()<CR>
 nmap <BS> gT
 nmap \ gt
 noremap <expr> 0 funcs#home()

@@ -154,7 +154,9 @@ function M.setup_vim_visual_multi()
     vim.api.nvim_create_autocmd("User", {
         pattern = "visual_multi_exit",
         group = "VisualMultiRemapBS",
-        callback = function() vim.keymap.set("i", "<BS>", "v:lua.MPairs.autopairs_bs(" .. vim.fn.bufnr() .. ")", { buffer = true, expr = true, replace_keycodes = false }) end,
+        callback = function()
+            vim.keymap.set("i", "<BS>", "v:lua.MPairs.autopairs_bs(" .. vim.fn.bufnr() .. ")", { buffer = true, expr = true, replace_keycodes = false })
+        end,
     })
 end
 
@@ -174,6 +176,15 @@ function M.nvim_bqf()
             ptoggleauto = "p",
         },
     })
+end
+
+function M.nvim_ufo()
+    require("ufo").setup({ provider_selector = function(bufnr, filetype, buftype) return { "treesitter", "indent" } end })
+end
+
+function M.ccc_nvim()
+    local ccc = require("ccc")
+    ccc.setup({ highlighter = { auto_enable = true }, mappings = { ["<Tab>"] = ccc.mapping.toggle_input_mode } })
 end
 
 function M.hop_nvim()
@@ -377,6 +388,7 @@ function M.nvim_treesitter()
             "tsx",
             "python",
             "java",
+            "kotlin",
         },
         highlight = {
             enable = true,
@@ -706,6 +718,11 @@ function M.open_quickui_context_menu()
         table.insert(content, { "Git conflict remove", "ConflictMarkerNone", "Remove conflict" })
         table.insert(content, { "--", "" })
     end
+    if packer_plugins["ccc.nvim"] and packer_plugins["ccc.nvim"].loaded then
+        table.insert(content, { "&Color picker", "CccPick", "Open color picker, control: hjkl, 1-9" })
+        table.insert(content, { "Color convert", "CccConvert", "Convert color between hex, rgb, hsl" })
+        table.insert(content, { "--", "" })
+    end
     table.insert(content, { "Built-in d&ocs", 'execute "normal! K"', "Open vim built in help" })
     vim.fn["quickui#context#open"](content, { index = vim.g["quickui#context#cursor"] or -1 })
 end
@@ -733,10 +750,11 @@ function M.vim_quickui()
         { "Search non-ascii", [[let @/ = '[^\d0-\d127]' | set hlsearch]], "Search all non-ascii characters" },
         { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
         { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
+        { "Enable colori&zer", [[CccHighlighterEnable]], "Enable colorizer" },
         { "--", "" },
         { "Move tab left &-", [[-tabmove]] },
         { "Move tab right &+", [[+tabmove]] },
-        { "&Refresh screen", [[execute "IndentBlanklineRefresh" | execute "ScrollViewRefresh | ColorizerAttachToBuffer" | execute "nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
+        { "&Refresh screen", [[execute "IndentBlanklineRefresh" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
         { "--", "" },
         { "Open &Alpha", [[execute "lua require('packer').loader('alpha-nvim', true)" | Alpha]], "Open Alpha" },
         { "&Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },
@@ -784,7 +802,7 @@ function M.vim_quickui()
         { 'Set &cursorline       %{&cursorline ? "[x]" : "[ ]"}', [[set cursorline!]], "Toggle cursorline" },
         { 'Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', [[set cursorcolumn!]], "Toggle cursorcolumn" },
         { 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}', [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
-        { 'Reader &mode          %{get(g:, "ReaderMode", 0) == 0 ? "[ ]" : "[x]"}', [[execute get(g:, "ReaderMode", 0) == 0 ? "nnoremap <nowait> d <C-d>\<bar>nnoremap <nowait> u <C-u>" : "nunmap d\<bar>nunmap u" | let g:ReaderMode = 1 - get(g:, "ReaderMode", 0) | echo "Reader mode ". (g:ReaderMode == 1 ? 'on' : 'off')]], "Toggle using 'd' and 'u' for '<C-d>' and '<C-u>' scrolling" },
+        { 'Reader &mode          %{get(g:, "ReaderMode", 0) == 0 ? "[ ]" : "[x]"}', [[execute get(g:, "ReaderMode", 0) == 0 ? "nnoremap <nowait> d <C-d>\<bar>nnoremap u <C-u>" : "nunmap d\<bar>nunmap u" | let g:ReaderMode = 1 - get(g:, "ReaderMode", 0) | lua vim.notify("Reader mode " .. (vim.g.ReaderMode == 1 and "on" or "off"))]], "Toggle using 'd' and 'u' for '<C-d>' and '<C-u>' scrolling" },
         { "--", "" },
         { "&Indent line", [[IndentBlanklineToggle]], "Toggle indent lines" },
         { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
