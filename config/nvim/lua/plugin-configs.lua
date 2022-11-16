@@ -178,10 +178,6 @@ function M.nvim_bqf()
     })
 end
 
-function M.nvim_ufo()
-    require("ufo").setup({ provider_selector = function(bufnr, filetype, buftype) return { "treesitter", "indent" } end })
-end
-
 function M.ccc_nvim()
     local ccc = require("ccc")
     ccc.setup({ highlighter = { auto_enable = true }, mappings = { ["<Tab>"] = ccc.mapping.toggle_input_mode } })
@@ -202,6 +198,15 @@ function M.nvim_neoclip_lua()
         on_paste = { set_reg = true },
         keys = { telescope = { n = { select = "yy", paste = "<CR>", replay = "Q" } } },
     })
+end
+
+function M.setup_vim_vsnip()
+    vim.g.vsnip_snippet_dir = vim.fn.expand("~/.vim/config/snippets") -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
+    vim.g.vsnip_filetypes = {
+        zsh = { "sh" },
+        typescript = { "javascript" },
+        typescriptreact = { "javascript" },
+    }
 end
 
 function M.nvim_surround()
@@ -544,15 +549,16 @@ function M.feline_nvim()
         enabled = checkwidth,
         hl = { fg = colors.secondary },
     }
-    components.active[3][1] = { provider = "lsp_client_names", enabled = checkwidth, hl = { fg = colors.grey } }
-    components.active[3][2] = { provider = " ", hl = { fg = colors.lightbg } }
-    components.active[3][3] = {
+    components.active[3][1] = { provider = "search_count", hl = { fg = colors.secondary }, right_sep = { str = " " } }
+    components.active[3][2] = { provider = "macro", hl = { fg = colors.orange }, right_sep = { str = " " } }
+    components.active[3][3] = { provider = "lsp_client_names", enabled = checkwidth, hl = { fg = colors.grey } }
+    components.active[3][4] = {
         provider = "git_branch",
         enabled = checkwidth,
         hl = { fg = colors.grey, bg = colors.lightbg },
         icon = " ",
+        left_sep = { str = " ", hl = { fg = colors.lightbg } },
     }
-    components.active[3][4] = { provider = " ", hl = { fg = colors.primary, bg = colors.lightbg } }
     components.active[3][5] = {
         provider = function()
             local untildone_count = require("states").untildone_count
@@ -563,6 +569,7 @@ function M.feline_nvim()
             end
         end,
         hl = { fg = colors.lightbg, bg = colors.primary },
+        left_sep = { str = " ", hl = { fg = colors.primary, bg = colors.lightbg } },
     }
     components.active[3][6] = {
         provider = function()
@@ -882,10 +889,11 @@ function M.vim_quickui()
     vim.fn["quickui#menu#switch"]("visual")
     vim.fn["quickui#menu#reset"]()
     vim.fn["quickui#menu#install"]("&Actions", {
-        { "OSC &yank", [[lua require("utils").copy_with_osc_yank_script(require("utils").get_visual_selection())]], "Use oscyank script to copy" },
-        { "--", "" },
+        { "&Format JSON", [['<,'>Prettier json]], "Use prettier to format selected text as JSON" },
         { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
         { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | execute 'S put x' | file base64_decode]], "Use base64 to decode selected text" },
+        { "--", "" },
+        { "OSC &yank", [[lua require("utils").copy_with_osc_yank_script(require("utils").get_visual_selection())]], "Use oscyank script to copy" },
         { "--", "" },
         { "Search in selection", [[call feedkeys('/\%>'. (line("'<") - 1). 'l\%<'. (line("'>") + 1). 'l')]], [[Search in selected lines, to search in previous visual selection use /\%V]] },
     })

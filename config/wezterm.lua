@@ -22,6 +22,14 @@ local wezterm = require("wezterm")
 --     window:set_right_status(wezterm.format({ { Text = battery .. "   " .. date } }))
 -- end)
 
+local search_mode = nil
+if wezterm.gui then
+    search_mode = wezterm.gui.default_key_tables().search_mode
+    table.insert(search_mode, { key = "Enter", mods = "SHIFT", action = wezterm.action { CopyMode = "PriorMatch" } })
+    table.insert(search_mode, { key = "Enter", mods = "NONE", action = wezterm.action { CopyMode = "NextMatch" } })
+    table.insert(search_mode, { key = "w", mods = "CTRL", action = wezterm.action { CopyMode = "ClearPattern" } })
+end
+
 return {
     use_ime = true,
     font = wezterm.font("JetBrainsMono Nerd Font"),
@@ -63,27 +71,14 @@ return {
         },
     },
     keys = {
-        { key = "t", mods = "CMD", action = wezterm.action({ SpawnCommandInNewTab = { cwd = "" } }) },
-        { key = "d", mods = "CMD", action = wezterm.action({ SplitVertical = { domain = "CurrentPaneDomain" } }) },
-        { key = "k", mods = "CMD", action = wezterm.action({ ClearScrollback = "ScrollbackAndViewport" }) },
-        { key = "f", mods = "CMD", action = wezterm.action({ Search = { CaseInSensitiveString = "" } }) },
-        { key = "[", mods = "CMD", action = wezterm.action({ MoveTabRelative = -1 }) },
-        { key = "]", mods = "CMD", action = wezterm.action({ MoveTabRelative = 1 }) },
-        { key = "Enter", mods = "CMD", action = "ToggleFullScreen" },
+        { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
+        { key = "d", mods = "CMD", action = wezterm.action.SplitPane({ direction = "Right" }) },
+        { key = "k", mods = "CMD", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
+        { key = "f", mods = "CMD", action = wezterm.action.Search({ CaseInSensitiveString = "" }) },
+        { key = "[", mods = "CMD", action = wezterm.action.MoveTabRelative(-1) },
+        { key = "]", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
+        { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
+        { key = "/", mods = "CTRL", action = wezterm.action.SendKey({ key = "/", mods = "CTRL" }) },
     },
-    key_tables = {
-        search_mode = {
-            { key = "Escape", mods = "NONE", action = wezterm.action { CopyMode = "Close" } },
-            { key = "UpArrow", mods = "NONE", action = wezterm.action { CopyMode = "PriorMatch" } },
-            { key = "p", mods = "CTRL", action = wezterm.action { CopyMode = "PriorMatch" } },
-            { key = "PageUp", mods = "NONE", action = wezterm.action { CopyMode = "PriorMatchPage" } },
-            { key = "PageDown", mods = "NONE", action = wezterm.action { CopyMode = "NextMatchPage" } },
-            { key = "n", mods = "CTRL", action = wezterm.action { CopyMode = "NextMatchPage" } },
-            { key = "DownArrow", mods = "NONE", action = wezterm.action { CopyMode = "NextMatch" } },
-            { key = "r", mods = "CTRL", action = wezterm.action { CopyMode = "CycleMatchType" } },
-            { key = "Enter", mods = "SHIFT", action = wezterm.action { CopyMode = "PriorMatch" } },
-            { key = "Enter", mods = "NONE", action = wezterm.action { CopyMode = "NextMatch" } },
-            { key = "w", mods = "CTRL", action = wezterm.action { CopyMode = "ClearPattern" } },
-        }
-    }
+    key_tables = { search_mode = search_mode },
 }

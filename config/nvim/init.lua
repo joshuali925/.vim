@@ -1,4 +1,4 @@
--- options {{{
+-- options {{{1
 pcall(require, "impatient") --         lua/states.lua
 require("states") --                   lua/utils.lua
 vim.g.loaded_2html_plugin = 1 --       lua/themes.lua
@@ -32,16 +32,15 @@ vim.o.shiftround = true
 vim.o.complete = ".,w,b,u"
 vim.o.completeopt = "menuone,noselect"
 vim.o.completefunc = "funcs#complete_word"
-vim.o.shortmess = vim.o.shortmess .. "cA"
+vim.o.shortmess = vim.o.shortmess .. "cAS"
 vim.o.spellsuggest = vim.o.spellsuggest .. ",10"
 vim.o.scrolloff = 2
 vim.o.sidescrolloff = 5
 vim.o.signcolumn = "yes"
 vim.o.virtualedit = "block"
 vim.o.previewheight = 7
-vim.o.foldmethod = "indent"
 vim.o.foldlevel = 99
-vim.o.jumpoptions = "stack"
+vim.o.jumpoptions = "view"
 vim.o.shada = "!,'1000,<50,s10,/20,@20,h"
 vim.o.undofile = true
 vim.o.isfname = vim.o.isfname:gsub(",=", "")
@@ -236,7 +235,7 @@ vim.keymap.set("x", "<leader>te", "<Cmd>ToggleTermSendVisualSelection<CR>")
 vim.keymap.set("t", "<C-u>", "<C-\\><C-n>")
 vim.keymap.set("n", "<C-o>", "<Cmd>lua require('utils').toggle_lf()<CR>")
 -- quickui {{{2
-vim.keymap.set("n", "K", function() if not require("ufo").peekFoldedLinesUnderCursor() then require("plugin-configs").open_quickui_context_menu() end end)
+vim.keymap.set("n", "K", "<Cmd>lua require('plugin-configs').open_quickui_context_menu()<CR>")
 vim.keymap.set("n", "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>")
 vim.keymap.set("x", "<CR>", "<Esc><Cmd>call quickui#menu#open('visual')<CR>")
 -- kommentary {{{2
@@ -274,7 +273,7 @@ vim.keymap.set("n", "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfile
 vim.keymap.set("n", "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>")
 vim.keymap.set("n", "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers({initial_mode = 'normal'})<CR>")
 vim.keymap.set("n", "<leader>fu", "<Cmd>lua require('telescope.builtin')[require('lsp').is_active() and 'lsp_document_symbols' or 'treesitter']()<CR>")
-vim.keymap.set("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>")
+vim.keymap.set("n", "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_dynamic_workspace_symbols()<CR>")
 vim.keymap.set("n", "<leader>fg", ":RgRegex ")
 vim.keymap.set("x", "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>")
 vim.keymap.set("n", "<leader>fj", ":RgRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>")
@@ -327,6 +326,7 @@ vim.api.nvim_create_autocmd("User", { pattern = "PackerCompileDone", group = "Au
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=jql" })
 vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>" })
+vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = "nnoremap <buffer> gf :argadd <C-r><C-p><CR>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "netrw",
@@ -377,7 +377,7 @@ vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
     local line1 = args.range == 0 and 0 or args.line1 - 1
-    local line2 = args.range == 0 and -1 or args.line2 + 1
+    local line2 = args.range == 0 and -1 or args.line2
     local formatted = vim.fn.systemlist("prettier --parser " .. parser, vim.api.nvim_buf_get_lines(0, line1, line2, false))
     if vim.api.nvim_get_vvar("shell_error") == 0 then
         vim.api.nvim_buf_set_lines(0, line1, line2, false, formatted)
@@ -466,6 +466,10 @@ if require("states").small_file then
             require("packer").loader(table.concat(plugins, " "))
         end, 30)
         vim.defer_fn(function()
+            vim.o.foldmethod = "expr"
+            vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
+            vim.o.foldtext = "getline(v:foldstart).' ⋯'"
+            vim.o.fillchars = "fold: "
             local plugins = { -- motions/text objects sometimes don't work if loaded on keys
                 "plenary.nvim",
                 "vim-illuminate",
@@ -474,7 +478,6 @@ if require("states").small_file then
                 "nvim-scrollview",
                 "gitsigns.nvim",
                 "quick-scope",
-                "nvim-ufo",
             }
             require("packer").loader(table.concat(plugins, " "))
         end, 100)

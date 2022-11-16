@@ -93,9 +93,6 @@ zstyle ':fzf-tab:*' popup-min-size 50 8
 
 compdef _dirs d
 compdef _command_names path
-compdef _git gdf=git-diff
-compdef _git gdd=git-diff
-compdef _git gdg=git-diff
 
 bracketed-paste() {
   zle .$WIDGET && LBUFFER=${LBUFFER%$'\n'}
@@ -119,7 +116,7 @@ zle -N down-line-or-local-history
 # vim <C-p>: all files in current and subdirectories, respects .gitignore
 # vim \<tab>: all files in current and subdirectories
 tab-complete-or-cd() {
-  if [[ -z "$BUFFER" ]]; then
+  if [[ -z "$LBUFFER" ]]; then
     zle fzf-cd-widget
   else
     zle fzf-tab-complete

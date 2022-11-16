@@ -1,6 +1,5 @@
 " set commands: https://github.com/JetBrains/ideavim/wiki/%22set%22-commands
-" actions (from :actionlist [pattern]): https://gist.github.com/zchee/9c78f91cc5ad771c1f5d
-" https://gist.githubusercontent.com/zchee/9c78f91cc5ad771c1f5d/raw/actionlist.vim
+" actions (from :actionlist [pattern]): https://gist.githubusercontent.com/zchee/9c78f91cc5ad771c1f5d/raw/actionlist.vim
 
 let mapleader=";"
 
@@ -106,13 +105,13 @@ noremap <leader>p "0p
 noremap <leader>P "0P
 map <leader>fs <Action>(GotoFile)
 map <leader>fu <Action>(FileStructurePopup)
-map <leader>ft <Action>(GotoSymbol)
+map <leader>fU <Action>(GotoSymbol)
 map <leader>fm <Action>(RecentLocations)
 map <leader>fM <Action>(RecentFiles)
 map <leader>fg <Action>(SearchEverywhere)
 nmap <leader>fj viw<Action>(FindInPath)
 xmap <leader>fj <Action>(FindInPath)
-map <leader>fa <Action>(GotoAction)
+map <leader>ff <Action>(GotoAction)
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>n *N
 xnoremap <leader>n y/\V<C-r>"<CR>N
@@ -157,7 +156,7 @@ nmap Ku <Action>(Vcs.RollbackChangedLines)
 nmap Kd <Action>(Vcs.Show.Local.Changes)
 nmap Kb <Action>(Annotate)
 nmap Kf <Action>(Vcs.ShowTabbedFileHistory)
-nmap Kg <Action>(Generate)
+nmap Ke <Action>(Generate)
 nmap Kr <Action>(Github.Open.In.Browser)
 nmap KR <Action>(Refactorings.QuickListPopupAction)
 nmap gh <Action>(ShowErrorDescription)

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github watchexec watchexec/watchexec x86_64-unknown-linux-musl.tar.xz aarch64-unknown-linux-musl.tar.xz x86_64-apple-darwin.tar.xz '' '--strip-components=1 --wildcards watchexec*/watchexec' "$@"

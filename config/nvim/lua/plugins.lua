@@ -23,12 +23,10 @@ return require("packer").startup({
 
         -- appearance
         use({ "folke/tokyonight.nvim", cond = "require('themes').theme == 'tokyonight.nvim'", config = "require('themes').config()" })
-        use({ "eddyekofo94/gruvbox-flat.nvim", cond = "require('themes').theme == 'gruvbox-flat.nvim'", config = "require('themes').config()" })
         use({ "projekt0n/github-nvim-theme", cond = "require('themes').theme == 'github-nvim-theme'", config = "require('themes').config()" })
         use({ "Mofiqul/vscode.nvim", cond = "require('themes').theme == 'vscode.nvim'", config = "require('themes').config()" })
         use({ "Shatur/neovim-ayu", cond = "require('themes').theme == 'neovim-ayu'", config = "require('themes').config()" })
         use({ "catppuccin/nvim", as = "catppuccin", cond = "require('themes').theme == 'catppuccin'", config = "require('themes').config()" })
-        use({ "EdenEast/nightfox.nvim", cond = "require('themes').theme == 'nightfox.nvim'", config = "require('themes').config()" })
         use({ "akinsho/bufferline.nvim", event = "VimEnter", config = conf("bufferline_nvim") })
         use({ "feline-nvim/feline.nvim", event = "VimEnter", config = conf("feline_nvim") })
         use({ "lukas-reineke/indent-blankline.nvim", config = conf("indent_blankline") })
@@ -55,7 +53,6 @@ return require("packer").startup({
             config = conf("telescope"),
         })
         use({ "kevinhwang91/nvim-bqf", ft = "qf", config = conf("nvim_bqf") })
-        use({ "kevinhwang91/nvim-ufo", requires = "kevinhwang91/promise-async", wants = "promise-async", config = conf("nvim_ufo") })
         use({ "rcarriga/nvim-notify" }) -- TODO https://github.com/folke/noice.nvim
         use({ "kyazdani42/nvim-tree.lua", cmd = { "NvimTreeFindFile", "NvimTreeOpen" }, config = conf("nvim_tree") })
 
@@ -101,8 +98,8 @@ return require("packer").startup({
         use({ "hrsh7th/cmp-nvim-lsp-signature-help", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-cmdline", after = "nvim-cmp" })
         use({ "hrsh7th/cmp-vsnip", after = "nvim-cmp" })
-        use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" }) -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
-        use({ "hrsh7th/vim-vsnip", after = "friendly-snippets", setup = "vim.g.vsnip_snippet_dir = vim.fn.expand('~/.vim/config/snippets')" })
+        use({ "rafamadriz/friendly-snippets", after = "nvim-cmp" })
+        use({ "hrsh7th/vim-vsnip", after = "friendly-snippets", setup = conf("setup_vim_vsnip") })
         use({ "windwp/nvim-autopairs", after = "nvim-cmp", config = conf("nvim_autopairs") })
 
         -- editing

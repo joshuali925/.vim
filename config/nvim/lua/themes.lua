@@ -6,18 +6,15 @@ local theme_index = vim.g.theme_index or -1
 -- :source $VIMRUNTIME/syntax/hitest.vim
 M.theme_list = {
     [-1] = "tokyonight.nvim",
-    [-2] = "gruvbox-flat.nvim",
-    [-3] = "github-nvim-theme",
-    [-4] = "vscode.nvim",
-    [-5] = "neovim-ayu",
-    [-6] = "catppuccin",
-    [-7] = "nightfox.nvim",
-    [0] = "github-nvim-theme",
-    [1] = "tokyonight.nvim",
-    [2] = "nightfox.nvim",
-    [3] = "vscode.nvim",
-    [4] = "neovim-ayu",
-    [5] = "catppuccin",
+    [-2] = "github-nvim-theme",
+    [-3] = "vscode.nvim",
+    [-4] = "neovim-ayu",
+    [-5] = "catppuccin",
+    [0] = "tokyonight.nvim",
+    [1] = "github-nvim-theme",
+    [2] = "vscode.nvim",
+    [3] = "neovim-ayu",
+    [4] = "catppuccin",
 }
 M.theme = M.theme_list[theme_index]
 
@@ -68,34 +65,6 @@ local themes = {
                 end,
             })
             vim.cmd.colorscheme("tokyonight")
-        end,
-    },
-    ["gruvbox-flat.nvim"] = {
-        colors = function()
-            default_colors.bg = "#242400"
-            default_colors.primary = "#7daea3"
-            default_colors.secondary = "#a9b665"
-            default_colors.dim_primary = "#5c6e6a"
-            return default_colors
-        end,
-        config = function()
-            vim.g.gruvbox_flat_style = "dark"
-            vim.g.gruvbox_sidebars = sidebars
-            vim.cmd.colorscheme("gruvbox-flat")
-            -- https://github.com/eddyekofo94/gruvbox-flat.nvim/issues/21
-            vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", { fg = "#808080" })
-            vim.api.nvim_set_hl(0, "CmpItemMenu", { fg = "#7c6f64" })
-            vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", { fg = "#ea6962" })
-            vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", { fg = "#ea6962" })
-            vim.api.nvim_set_hl(0, "CmpItemKindVariable", { fg = "#9da85f" })
-            vim.api.nvim_set_hl(0, "CmpItemKindInterface", { fg = "#9da85f" })
-            vim.api.nvim_set_hl(0, "CmpItemKindText", { fg = "#9da85f" })
-            vim.api.nvim_set_hl(0, "CmpItemKindMethod", { fg = "#7daea3" })
-            vim.api.nvim_set_hl(0, "CmpItemKindKeyword", { fg = "#7daea3" })
-            vim.api.nvim_set_hl(0, "CmpItemKindProperty", { fg = "#d4d4d4" })
-            vim.api.nvim_set_hl(0, "CmpItemKindUnit", { fg = "#d4d4d4" })
-            vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#47403b" })
-            vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#706964" })
         end,
     },
     ["github-nvim-theme"] = {
@@ -169,21 +138,6 @@ local themes = {
                 },
             })
             vim.cmd.colorscheme("catppuccin")
-        end,
-    },
-    ["nightfox.nvim"] = {
-        colors = function()
-            default_colors.secondary = "#8bb19c"
-            if theme_index < 0 then
-                default_colors.primary = "#7a9bd1"
-            else
-                default_colors.bg = "#ede8e2"
-                default_colors.primary = "#65929d"
-            end
-            return default_colors
-        end,
-        config = function()
-            vim.cmd.colorscheme(theme_index < 0 and "nordfox" or "dawnfox")
         end,
     },
 }

@@ -19,9 +19,10 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bi
 ```cmd
 setx PROMPT "$p [$d$t]$+$_$g"
 git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\.vim --depth=1
+mklink /J %USERPROFILE%\vimfiles %USERPROFILE%\.vim
 mkdir %USERPROFILE%\.cache\vim %LOCALAPPDATA%\lf %APPDATA%\lazygit
-copy %USERPROFILE%\.vim\config\.gitconfig %USERPROFILE%\.gitconfig
-copy %USERPROFILE%\.vim\config\lazygit_config.yml %APPDATA%\lazygit\config.yml
+mklink /H %USERPROFILE%\.gitconfig %USERPROFILE%\.vim\config\.gitconfig
+mklink /H %APPDATA%\lazygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
 copy %USERPROFILE%\.vim\config\lfrc %LOCALAPPDATA%\lf\lfrc
 echo set previewer '' >> %LOCALAPPDATA%\lf\lfrc
 echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc

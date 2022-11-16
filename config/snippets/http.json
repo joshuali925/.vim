@@ -5,8 +5,11 @@
     "body": [
       "# ENV {{{",
       "# vim:foldmethod=marker",
-      "BASE: ${0:localhost:8888}",
-      "# }}}"
+      "BASE: ${1:localhost:8888}",
+      "# }}}",
+      "",
+      "$0",
+      ""
     ]
   },
   "Content type JSON": {

@@ -5,10 +5,7 @@
   },
   "Log stringify": {
     "prefix": "cls",
-    "body": [
-      "console.log('DEBUGGING ❗$0:');",
-      "console.log(JSON.stringify($0, null, 2);"
-    ]
+    "body": ["console.log('DEBUGGING ❗$0:\\n' + JSON.stringify($0, null, 2));"]
   },
   "Logger": {
     "prefix": "logger",
@@ -32,20 +29,51 @@
     "prefix": "arrow",
     "body": ["() => { }"]
   },
+  "Timeout": {
+    "prefix": "timeout",
+    "body": [
+      "function timeout(ms) {",
+      "\treturn new Promise((resolve) => setTimeout(resolve, ms));",
+      "}"
+    ]
+  },
+  "Timeout outside async": {
+    "prefix": "sleep",
+    "body": [
+      "(async () => await new Promise((resolve) => setTimeout(resolve, ${1:1000})))();$0"
+    ]
+  },
   "Promise then": {
     "prefix": "then",
     "body": [
       ".then((resp) => {",
-      "  $0",
+      "\t$0",
       "})",
       ".catch((error) => {",
-      "  $0",
+      "\t$0",
       "})"
     ]
   },
   "Promise then log": {
     "prefix": "then-log",
     "body": [".then((resp) => {", "  console.log(resp);", "})"]
+  },
+  "Read from file": {
+    "prefix": "read-file",
+    "body": [
+      "const fs = require('fs');",
+      "const lines = fs.readFileSync(`\\${__dirname}/${1:fileName}`, 'utf8')",
+      "\t.split(/\\r?\\n/)",
+      "\t.filter(line => line.trim() !== '');"
+    ]
+  },
+  "Write to file": {
+    "prefix": "write-file",
+    "body": [
+      "const fs = require('fs');",
+      "fs.writeFileSync(`\\${__dirname}/${1:fileName}`, ${0:str});",
+      "fs.appendFileSync(`\\${__dirname}/${1:fileName}`, ${0:str});"
+    ]
   },
   "Cypress delay": {
     "prefix": "cydelay",
