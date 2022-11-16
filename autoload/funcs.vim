@@ -143,6 +143,7 @@ function! funcs#get_run_command() abort
   let run_command['cpp'] = 'AsyncRun -raw g++ "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
   let run_command['java'] = 'AsyncRun -raw javac "$(VIM_FILEPATH)" && java -classpath "$(VIM_FILEDIR)" "$(VIM_FILENOEXT)"'
   let run_command['javascript'] = 'AsyncRun -raw node "$(VIM_FILEPATH)"'
+  let run_command['typescript'] = 'AsyncRun -raw npx ts-node "$(VIM_FILEPATH)"'
   let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
   let run_command['html'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'

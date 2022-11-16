@@ -39,7 +39,7 @@
     "prefix": "if-no-arguments",
     "body": [
       "if [ \"\\$#\" -eq 0 ]; then",
-      "  echo \"Usage: \\$0 <args>\"",
+      "  echo \"Usage: \\$0 <args>\" >&2",
       "  exit 1$0",
       "fi"
     ]
@@ -167,12 +167,26 @@
     "prefix": "date-iso",
     "body": "date -u +'%Y-%m-%dT%H:%M:%SZ'"
   },
-  "Prompt yes or no (zsh compatible)": {
+  "Find files and exec": {
+    "prefix": "find-exec",
+    "body": "find . -iname '${1:*.txt}' -print -exec ${0:file {\\} \\; -exec sleep 1} \\;"
+  },
+  "Prompt yes or no (default yes)": {
     "prefix": "prompt-yes-no",
     "body": [
       "printf '${1:Continue} (Y/n)? '",
       "read -r REPLY",
       "if [ -z \"\\$REPLY\" ] || [ \"\\$REPLY\" != \"\\${REPLY#[Yy]}\" ]; then",
+      "  ${0:echo Yes}",
+      "fi"
+    ]
+  },
+  "Prompt yes or no (default no)": {
+    "prefix": "prompt-yes-no-default-no",
+    "body": [
+      "printf '${1:Continue} (y/N)? '",
+      "read -r REPLY",
+      "if [[ \"\\$REPLY\" == [Yy] ]]; then",
       "  ${0:echo Yes}",
       "fi"
     ]

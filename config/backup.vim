@@ -3128,7 +3128,11 @@ vim.keymap.set("n", "yof", "winnr('$') > 1 ? '<Cmd>let g:temp = winsaveview() <b
 " nvim-ufo fold
     require("indent_blankline").setup({
         indent_blankline_char_priority = 20, -- https://github.com/kevinhwang91/nvim-ufo/issues/19
-        use({ "kevinhwang91/nvim-ufo", requires = "kevinhwang91/promise-async", wants = "promise-async", keys = "z", config = "require('ufo').setup({ provider_selector = function(bufnr, filetype) return { 'treesitter', 'indent' } end })" })
+        use({ "kevinhwang91/nvim-ufo", requires = "kevinhwang91/promise-async", wants = "promise-async", config = conf("nvim_ufo") })
+function M.nvim_ufo()
+    require("ufo").setup({ provider_selector = function(bufnr, filetype, buftype) return { "treesitter", "indent" } end })
+end
+vim.keymap.set("n", "K", function() if not require("ufo").peekFoldedLinesUnderCursor() then require("plugin-configs").open_quickui_context_menu() end end)
 
 " =======================================================
 " doesn't work for .class files opened in jar
@@ -3771,3 +3775,51 @@ map i $$PAGER "$f"
                 },
             })
         end,
+" fold
+    vim.o.foldexpr = "nvim_treesitter#foldexpr()"
+" themes
+        use({ "EdenEast/nightfox.nvim", cond = "require('themes').theme == 'nightfox.nvim'", config = "require('themes').config()" })
+    ["nightfox.nvim"] = {
+        colors = function()
+            default_colors.secondary = "#8bb19c"
+            if theme_index < 0 then
+                default_colors.primary = "#7a9bd1"
+            else
+                default_colors.bg = "#ede8e2"
+                default_colors.primary = "#65929d"
+            end
+            return default_colors
+        end,
+        config = function()
+            vim.cmd.colorscheme(theme_index < 0 and "nordfox" or "dawnfox")
+        end,
+    },
+        use({ "eddyekofo94/gruvbox-flat.nvim", cond = "require('themes').theme == 'gruvbox-flat.nvim'", config = "require('themes').config()" })
+    ["gruvbox-flat.nvim"] = {
+        colors = function()
+            default_colors.bg = "#242400"
+            default_colors.primary = "#7daea3"
+            default_colors.secondary = "#a9b665"
+            default_colors.dim_primary = "#5c6e6a"
+            return default_colors
+        end,
+        config = function()
+            vim.g.gruvbox_flat_style = "dark"
+            vim.g.gruvbox_sidebars = sidebars
+            vim.cmd.colorscheme("gruvbox-flat")
+            -- https://github.com/eddyekofo94/gruvbox-flat.nvim/issues/21
+            vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", { fg = "#808080" })
+            vim.api.nvim_set_hl(0, "CmpItemMenu", { fg = "#7c6f64" })
+            vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", { fg = "#ea6962" })
+            vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", { fg = "#ea6962" })
+            vim.api.nvim_set_hl(0, "CmpItemKindVariable", { fg = "#9da85f" })
+            vim.api.nvim_set_hl(0, "CmpItemKindInterface", { fg = "#9da85f" })
+            vim.api.nvim_set_hl(0, "CmpItemKindText", { fg = "#9da85f" })
+            vim.api.nvim_set_hl(0, "CmpItemKindMethod", { fg = "#7daea3" })
+            vim.api.nvim_set_hl(0, "CmpItemKindKeyword", { fg = "#7daea3" })
+            vim.api.nvim_set_hl(0, "CmpItemKindProperty", { fg = "#d4d4d4" })
+            vim.api.nvim_set_hl(0, "CmpItemKindUnit", { fg = "#d4d4d4" })
+            vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#47403b" })
+            vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#706964" })
+        end,
+    },

@@ -145,8 +145,8 @@ nnoremap <leader>fg :call VSCodeNotify('workbench.view.search')<CR>
 xnoremap <leader>fg <Cmd>call VSCodeNotifyRangePos('workbench.action.findInFiles', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1)<CR>
 nnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': expand('<cword>')})<CR>
 xnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': funcs#get_visual_selection() })<CR>
-nnoremap <leader>fa :call VSCodeNotify('workbench.action.showCommands')<CR>
-nnoremap <leader>fA :call VSCodeNotify('workbench.action.focusActivityBar')<CR>
+nnoremap <leader>fa :call VSCodeNotify('workbench.action.focusActivityBar')<CR>
+nnoremap <leader>ff :call VSCodeNotify('workbench.action.showCommands')<CR>
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>b :call VSCodeNotify('workbench.view.explorer')<CR>
 nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>

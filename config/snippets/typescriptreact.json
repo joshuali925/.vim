@@ -1,65 +1,17 @@
 {
-  "Log": {
-    "prefix": "cl",
-    "body": ["console.log('DEBUGGING ❗$0:', $0);"]
-  },
-  "Log stringify": {
-    "prefix": "cls",
-    "body": [
-      "console.log('DEBUGGING ❗$0:');",
-      "console.log(JSON.stringify($0, null, 2);"
-    ]
-  },
-  "Logger": {
-    "prefix": "logger",
-    "body": [
-      "const log = (...args) => console.log(`[\\${new Date().toISOString()}]`, ...args);"
-    ]
-  },
-  "Random string": {
-    "prefix": "random-string",
-    "body": [
-      "const randString = () => Math.random().toString(36).substring(2);"
-    ]
-  },
-  "Random integer": {
-    "prefix": "random-int",
-    "body": [
-      "const randint = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);"
-    ]
-  },
-  "Empty arrow function": {
-    "prefix": "arrow",
-    "body": ["() => { }"]
-  },
-  "Promise then": {
-    "prefix": "then",
-    "body": [
-      ".then((resp) => {",
-      "  $0",
-      "})",
-      ".catch((error) => {",
-      "  $0",
-      "})"
-    ]
-  },
-  "Promise then log": {
-    "prefix": "then-log",
-    "body": [".then((resp) => {", "  console.log(resp);", "})"]
-  },
   "UseState": {
     "prefix": "useState",
-    "body": ["const [$1, set${1/(.*)/${1:/capitalize}/}] = useState($0);"]
+    "body": ["const [${1:state}, set${1/(.*)/${1:/capitalize}/}] = useState($0);"]
   },
   "UseEffect": {
     "prefix": "useEffect",
-    "body": ["useEffect(() => {", "  $0", "}, []);"]
+    "body": ["useEffect(() => {", "\t$0", "}, []);"]
   },
   "Test EuiButton": {
     "prefix": "test",
     "body": [
       "<button style={{ border: 'solid red', padding: 3 }} onClick={() => {",
-      "  console.log($0);",
+      "\tconsole.log($0);",
       "}}>TEST</button>"
     ]
   },
@@ -85,11 +37,11 @@
       "",
       "import React from 'react';",
       "",
-      "interface ${1:${TM_FILENAME_BASE}}Props {",
+      "interface ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props {",
       "",
       "}",
       "",
-      "export function ${1:${TM_FILENAME_BASE}}(props: ${1:${TM_FILENAME_BASE}}Props) {",
+      "export const ${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}}: React.FC<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props> = (props) => {",
       "\treturn (",
       "\t\t<>",
       "\t\t\t$0",
@@ -112,17 +64,17 @@
       "import Adapter from 'enzyme-adapter-react-16';",
       "import React from 'react';",
       "",
-      "describe('<${TM_FILENAME_BASE/(.*).test$/$1/} /> spec', () => {",
-      "  configure({ adapter: new Adapter() });$0",
+      "describe('<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} /> spec', () => {",
+      "\tconfigure({ adapter: new Adapter() });$0",
       "",
-      "  it('renders the component', () => {",
-      "    const utils = render(",
-      "      <${TM_FILENAME_BASE/(.*).test$/$1/} ",
+      "\tit('renders the component', () => {",
+      "\t\tconst utils = render(",
+      "\t\t\t<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}",
       "",
-      "      />",
-      "    );",
-      "    expect(utils.container.firstChild).toMatchSnapshot();",
-      "  });",
+      "\t\t\t/>",
+      "\t\t);",
+      "\t\texpect(utils.container.firstChild).toMatchSnapshot();",
+      "\t});",
       "",
       "});",
       ""

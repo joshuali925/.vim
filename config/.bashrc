@@ -10,7 +10,6 @@ source ~/.vim/config/common.sh
 
 # Set bash prompt (\w for whole path, \W for current directory)
 PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
-stty -ixon  # disable Ctrl-S freeze
 shopt -s autocd
 shopt -s cdspell
 shopt -s checkwinsize
@@ -18,66 +17,69 @@ shopt -s dotglob
 
 HISTCONTROL=ignoreboth:erasedups:ignorespace
 
-bind 'set show-all-if-ambiguous on'
-bind 'set completion-ignore-case on'
-bind 'set enable-bracketed-paste on'
-bind 'TAB: menu-complete'
-bind '"\e[Z":menu-complete-backward'
-bind '"\C-x\C-e": edit-and-execute-command'
-bind '"\C-xa": shell-expand-line' # same as in zsh, 'C-x a' expands aliases
-bind '"\e[A": history-search-backward'
-bind '"\e[B": history-search-forward'
-bind '"\eOA": history-search-backward'
-bind '"\eOB": history-search-forward'
-bind '"\e[1;5D": backward-word'
-bind '"\e[1;5C": forward-word'
-bind '"\e[3;2~": backward-delete-char'
-bind -x '"\C-o":"lf"'
-stty werase undef # unbind werase to C-w
-bind '"\C-w": unix-filename-rubout'
+if [ -t 1 ]; then
+  bind 'set show-all-if-ambiguous on'
+  bind 'set completion-ignore-case on'
+  bind 'set enable-bracketed-paste on'
+  bind 'TAB: menu-complete'
+  bind '"\e[Z":menu-complete-backward'
+  bind '"\C-x\C-e": edit-and-execute-command'
+  bind '"\C-xa": shell-expand-line'  # same as in zsh, 'C-x a' expands aliases
+  bind '"\e[A": history-search-backward'
+  bind '"\e[B": history-search-forward'
+  bind '"\eOA": history-search-backward'
+  bind '"\eOB": history-search-forward'
+  bind '"\e[1;5D": backward-word'
+  bind '"\e[1;5C": forward-word'
+  bind '"\e[3;2~": backward-delete-char'
+  bind -x '"\C-o":"lf"'
+  stty -ixon  # disable Ctrl-S freeze
+  stty werase undef  # unbind werase to C-w
+  bind '"\C-w": unix-filename-rubout'
 
-if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
-  # bash >= 4.0 needed for $READLINE_LINE
-  BINDED_COMPLETION=-1
-  _check_tab_complete() {
-    if [ -n "$READLINE_LINE" ]; then
-      bind '"\301": menu-complete'
-      bind 'TAB: menu-complete'
-      BINDED_COMPLETION=1
-    fi
-  }
-  _reset_tab() {
-    if [ $BINDED_COMPLETION != 0 ]; then
-      bind '"\301": "\ec"'
-      bind 'TAB: "\300\301"'
-      BINDED_COMPLETION=0
-    fi
-  }
-  bind -x '"\300": _check_tab_complete'
-  PROMPT_COMMAND="_reset_tab; $PROMPT_COMMAND"
+  if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
+    # bash >= 4.0 needed for $READLINE_LINE
+    BINDED_COMPLETION=-1
+    _check_tab_complete() {
+      if [ -n "$READLINE_LINE" ]; then
+        bind '"\301": menu-complete'
+        bind 'TAB: menu-complete'
+        BINDED_COMPLETION=1
+      fi
+    }
+    _reset_tab() {
+      if [ $BINDED_COMPLETION != 0 ]; then
+        bind '"\301": "\ec"'
+        bind 'TAB: "\300\301"'
+        BINDED_COMPLETION=0
+      fi
+    }
+    bind -x '"\300": _check_tab_complete'
+    PROMPT_COMMAND="_reset_tab; $PROMPT_COMMAND"
 
-  # bind -x breaks stdout without \n and multi-line prompt on some bash versions
-  READLINE_LINE_TEMP=()
-  READLINE_POINT_TEMP=()
-  _push_line() {
-    READLINE_LINE_TEMP+=("$READLINE_LINE")
-    READLINE_POINT_TEMP+=("$READLINE_POINT")
-    READLINE_LINE=
-    bind '"\C-m": "\365\366"'
-  }
-  _restore_pushed_line() {
-    READLINE_LINE="${READLINE_LINE_TEMP[@]: -1}"
-    READLINE_POINT="${READLINE_POINT_TEMP[@]: -1}"
-    unset 'READLINE_LINE_TEMP[${#READLINE_LINE_TEMP[@]}-1]'
-    unset 'READLINE_POINT_TEMP[${#READLINE_POINT_TEMP[@]}-1]'
-    if [ "${#READLINE_LINE_TEMP[@]}" -eq 0 ]; then
-      bind '"\C-m": accept-line'
-    fi
-  }
-  bind '"\365": accept-line'
-  bind -x '"\366": _restore_pushed_line'
-  bind -x '"\eq": _push_line'
-  bind -x '"\C-q": _push_line'
+    # bind -x breaks stdout without \n and multi-line prompt on some bash versions
+    READLINE_LINE_TEMP=()
+    READLINE_POINT_TEMP=()
+    _push_line() {
+      READLINE_LINE_TEMP+=("$READLINE_LINE")
+      READLINE_POINT_TEMP+=("$READLINE_POINT")
+      READLINE_LINE=
+      bind '"\C-m": "\365\366"'
+    }
+    _restore_pushed_line() {
+      READLINE_LINE="${READLINE_LINE_TEMP[@]: -1}"
+      READLINE_POINT="${READLINE_POINT_TEMP[@]: -1}"
+      unset 'READLINE_LINE_TEMP[${#READLINE_LINE_TEMP[@]}-1]'
+      unset 'READLINE_POINT_TEMP[${#READLINE_POINT_TEMP[@]}-1]'
+      if [ "${#READLINE_LINE_TEMP[@]}" -eq 0 ]; then
+        bind '"\C-m": accept-line'
+      fi
+    }
+    bind '"\365": accept-line'
+    bind -x '"\366": _restore_pushed_line'
+    bind -x '"\eq": _push_line'
+    bind -x '"\C-q": _push_line'
+  fi
 fi
 
 cd() {

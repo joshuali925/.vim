@@ -16,9 +16,9 @@ if has('termguicolors')
   set t_Co=256
   set termguicolors
 endif
-syntax enable
+silent! syntax enable  " ignore errors when no runtime files
 filetype plugin indent on
-colorscheme ayu
+silent! colorscheme ayu
 let g:netrw_dirhistmax = 0
 let g:netrw_banner = 0
 let g:netrw_browse_split = 4

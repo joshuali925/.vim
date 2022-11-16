@@ -37,7 +37,7 @@ alias cp='cp -riv'
 alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
-alias l='exa -alF --git --color=always --color-scale --icons --header --group-directories-first --time-style=long-iso'
+alias l='exa -lF --git --color=always --color-scale --icons --header --group-directories-first --time-style=long-iso --all'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias size='du -h --max-depth=1 | sort -hr'
 alias size-subdir="du | sort -r -n | awk '{split(\"K M G\",v); s=1; while(\$1>1024){\$1/=1024; s++} print int(\$1)v[s]\"\\t\"\$2}' | head -n 20"
@@ -92,6 +92,9 @@ alias gds='git diff --stat'
 alias gdst='git diff --staged'
 alias gdsts='git diff --stat --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
+alias gdf='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff'
+alias gdd='GIT_PAGER="delta --line-numbers --navigate" git diff'
+alias gdg='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
 alias ggl='git pull origin $(gref)'
@@ -151,13 +154,16 @@ alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do gi
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
-gdf() { git diff --color "$@" | diff-so-fancy | \less --tabs=4 -RiMXF; }
-gdd() { git diff "$@" | delta --line-numbers --navigate; }
-gdg() { git diff "$@" | delta --line-numbers --navigate --side-by-side; }
 
 gpr() {
+  local pr=$1 repo
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    repo=${1%/pull/*} pr=${1##*/}
+    git clone "$repo" "${repo##*/}-$pr"
+    cd "${repo##*/}-$pr" > /dev/null || return 1
+  fi
   git stash push --include-untracked --message 'git PR temporary stash'
-  git fetch origin "pull/$1/head" && { git branch "pr/$1" 2> /dev/null; git checkout "pr/$1" && git reset --hard FETCH_HEAD; }
+  git fetch origin "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
 }
 
 gr-toggle-url() {
@@ -469,9 +475,9 @@ jo() {  # basic implementation of https://github.com/jpmens/jo
 }
 
 react() {
-  if [ "$#" -lt 2 ]; then echo "Usage: $0 <dir_to_watch> <command>, use {} as placeholder of modified files."; return 1; fi
+  if [ "$#" -lt 2 ]; then echo "Usage: $0 <dir_to_watch> <command>, use {} as placeholder of modified files." >&2; return 1; fi
   local changed
-  echo "Watching \"$1\", passing modified files to \"${*:2}\" command every 2 seconds."
+  echo "Watching \"$1\", passing modified files to \"${*:2}\" command every 2 seconds." >&2
   while true; do
     changed=($(fd --base-directory "$1" --absolute-path --type=f --changed-within 2s))
     if [ ${#changed[@]} -gt 0 ]; then
@@ -484,7 +490,7 @@ react() {
 
 untildone() {
   if [ "$#" -eq 0 ]; then
-    echo -e "Usage: $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour"
+    echo -e "Usage: $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour" >&2
     return 1
   fi
   local i=1
@@ -498,17 +504,19 @@ untildone() {
 }
 
 set-env() {
-  if [ "$#" -lt 1 ]; then echo "Usage: $0 [--shell] {java_home|path}"; return 1; fi
-  local cmd shell_only=0
+  if [ "$#" -lt 1 ]; then echo "Usage: $0 {java_home|path}" >&2; return 1; fi
+  local cmd reply
   while [ $# != 0 ]; do
     case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
       java_home|javahome) cmd="export JAVA_HOME=\"$(asdf where java)\""; shift 1 ;;
       path) cmd="export PATH=\"$PWD:\$PATH\""; shift 1 ;;
-      --shell) shell_only=1; shift 1 ;;
       *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
     esac
   done
-  eval "$cmd" && echo "$cmd" | if [ "$shell_only" != 1 ]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
+  eval "$cmd"
+  printf 'Write to .bashrc and .zshrc (y/N)? '
+  read -r reply
+  echo "$cmd" | if [[ "$reply" == [Yy] ]]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
 }
 
 tldr() {
@@ -517,7 +525,7 @@ tldr() {
 
 getip() {
   if [ "$#" -gt 1 ]; then
-    echo "Usage: $0 [--private|ip|domain]"
+    echo "Usage: $0 [--private|ip|domain]" >&2
   elif [ "$#" -eq 0 ]; then
     curl -s "https://checkip.amazonaws.com"  # or ifconfig.me
   elif [ "$1" = '--private' ]; then  # en0: wireless, en1: ethernet, en3: thunderbolt to ethernet
@@ -553,7 +561,7 @@ bin-update() {
   for executable in "$@"; do
     local bin="$HOME/.local/bin/$executable" vim_bin="$HOME/.vim/bin/$executable"
     if [ ! -x "$bin" ] || [ ! -x "$vim_bin" ]; then
-      echo "$executable not found, skipping.." >&2; break
+      echo "$executable not found, skipping.." >&2; continue
     fi
     "$bin" --version || "$bin" -version || "$bin" -V || "$bin" version
     mkdir -p "$HOME/config-backup"
@@ -579,7 +587,7 @@ docker-shell() {
   case $1 in
     vim-once) docker run --network host -it --name vim_container_temp --rm ubuntu_vim; return $? ;;
     vim-rm) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
-    vim-build) docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
+    vim-build) docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
     vim) local container_name=${2:-vim_container} ;;
     *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
   esac
@@ -613,7 +621,7 @@ ec2() {
       shift 2
       ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host" || ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ubuntu@$host"
       return 0 ;;
-    *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]"; return 1 ;;
+    *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]" >&2; return 1 ;;
   esac
   instances=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
   if [ -n "$2" ]; then

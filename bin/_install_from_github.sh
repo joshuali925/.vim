@@ -6,7 +6,7 @@ detect-env() {
 
 run-if-exists() {
   if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 <executable> [<args>]"
+    echo "Usage: $0 <executable> [<args>]" >&2
     return 0
   fi
 
@@ -20,7 +20,7 @@ run-if-exists() {
 
 install-from-url() {
   if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 <executable> <url> [<args>]"
+    echo "Usage: $0 <executable> <url> [<args>]" >&2
     return 0
   fi
 
@@ -38,7 +38,7 @@ install-from-url() {
 
 install-from-github() {
   if [ "$#" -lt 7 ]; then
-    echo "Usage: $0 <executable> <repo> <linux-x64-package-name> <linux-arm64-package-name> <macos-x64-package-name> <macos-arm64-package-name> <extract-command-flags> [<args>]"
+    echo "Usage: $0 <executable> <repo> <linux-x64-package-name> <linux-arm64-package-name> <macos-x64-package-name> <macos-arm64-package-name> <extract-command-flags> [<args>]" >&2
     return 0
   fi
 
@@ -65,7 +65,7 @@ install-from-github() {
 
 install-archive-from-url() {
   if [ "$#" -lt 3 ]; then
-    echo "Usage: $0 <url> <executable> <extract-command-flags> [<args>]"
+    echo "Usage: $0 <url> <executable> <extract-command-flags> [<args>]" >&2
     return 0
   fi
 

@@ -21,10 +21,6 @@
     "prefix": "heredoc-to-file",
     "body": ["tee -a ${1:file} > /dev/null <<EOF", "$0", "EOF"]
   },
-  "Find files and exec": {
-    "prefix": "find-exec",
-    "body": "find . -iname '${1:*.txt}' -print -exec ${0:file {\\} \\; -exec sleep 1} \\;"
-  },
   "Curl POST JSON": {
     "prefix": "curl-post",
     "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\" key=\"val\"})\""
