@@ -154,3 +154,8 @@ chpwd() { emulate -L zsh; [ $(command ls | wc -l) -lt 200 ] && ls -AF --color=au
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/.p10k.zsh.
 source ~/.vim/config/.p10k.zsh
+
+# prompt_user() {
+#   p10k segment -f 208 -i '⭐' -t "$USER"
+# }
+# POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS+=user

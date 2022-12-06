@@ -54,8 +54,6 @@ map / filter
 map ~ cd
 map , find-next
 map ; find-prev
-map H push <c-u>
-map L push <c-d>
 map K push hkl
 map J push hjl
 map `` push ''
