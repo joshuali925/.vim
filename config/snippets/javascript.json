@@ -13,6 +13,14 @@
       "const log = (...args) => console.log(`[\\${new Date().toISOString()}]`, ...args);"
     ]
   },
+  "Benchmark": {
+    "prefix": "benchmark",
+    "body": [
+      "console.time('${1:Performance test}');",
+      "$0",
+      "console.timeEnd('${1:Performance test}');"
+    ]
+  },
   "Random string": {
     "prefix": "random-string",
     "body": [
@@ -32,7 +40,7 @@
   "Timeout": {
     "prefix": "timeout",
     "body": [
-      "function timeout(ms) {",
+      "const timeout = (ms) => {",
       "\treturn new Promise((resolve) => setTimeout(resolve, ms));",
       "}"
     ]

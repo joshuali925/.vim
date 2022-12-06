@@ -23,6 +23,9 @@
 [url "https://github.com/opensearch-project/"]
   insteadOf = os:
 
+[url "https://github.com/opensearch-project/dashboards-"]
+  insteadOf = osd:
+
 [core]
   pager = less -RiMXF
 

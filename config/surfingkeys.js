@@ -362,9 +362,9 @@ settings.theme = `
     font-size: 12pt;
 }
 :root {
-    --theme-ace-bg:#fcf6e5;
-    --theme-ace-bg-accent:#ede8d7;
-    --theme-ace-select:#c7c2b3;
+    --theme-ace-bg:#edeeee;
+    --theme-ace-bg-accent:#e4e4e4;
+    --theme-ace-select:#b8c2c3;
 }
 #sk_editor {
     height: 75% !important;

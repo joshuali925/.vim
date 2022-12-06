@@ -97,6 +97,7 @@ function! funcs#print_variable(visual, printAbove) abort
   let print['typescriptreact'] = print['javascript']
   let print['java'] = 'System.out.println("[" + getClass().getSimpleName() + " " + ('. word. ').getClass().getSimpleName() + "] ❗'. word. ': " + '. word. ');'
   let print['kotlin'] = 'println("[${javaClass.simpleName}] ❗'. word. ': " + '. word. ')'
+  let print['groovy'] = 'println "❗'. word. ': " + '. word
   let print['vim'] = "echomsg '❗". word. ":' ". word
   let print['lua'] = 'print("❗'. word. ': " .. vim.inspect('. word. '))'
   let print['sh'] = 'echo "❗'. word. ': ${'. word. '}"'

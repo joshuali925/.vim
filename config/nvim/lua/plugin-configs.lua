@@ -593,6 +593,7 @@ function M.feline_nvim()
         hl = { fg = colors.dim_primary },
     }
     require("feline").setup({ theme = { fg = colors.fg, bg = colors.bg }, components = components })
+    require("feline").winbar.setup()
 end
 
 function M.nvim_cmp()
@@ -700,7 +701,7 @@ function M.open_quickui_context_menu()
         { "Docu&mentation", "lua require('lspsaga.hover'):render_hover_doc()", "Show documentation" },
         { "&Preview definition", "lua require('lspsaga.definition'):peek_definition()", "Preview definition" },
         { "Reference &finder", "Lspsaga lsp_finder", "Find references" },
-        { "&Signautre", "lua require('lspsaga.signaturehelp').signature_help()", "Show function signature help" },
+        { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
         { "Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition" },
@@ -786,7 +787,8 @@ function M.vim_quickui()
         { "Git hunks against HEAD", [[lua require("gitsigns").change_base("HEAD", true)]], "Show hunks based on HEAD instead of staged, to reset run :Gitsigns change_base" },
         { "--", "" },
         { "Git &status", [[Git]], "Git status" },
-        { "Git unstaged &changes", [[Git! difftool]], "Load unstaged changes into quickfix (Git! difftool)" },
+        { "Git &changed files", [[Git! difftool --name-status]], "Load unstaged files into quickfix (Git! difftool --name-status)" },
+        { "Git unstaged changes", [[Git! difftool]], "Load unstaged changes into quickfix (Git! difftool)" },
         { "Git HEAD changes", [[Git! difftool HEAD]], "Load changes from HEAD into quickfix (Git! difftool HEAD)" },
         { "Diff&view HEAD", [[DiffviewOpen]], "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits" },
         { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
@@ -804,7 +806,7 @@ function M.vim_quickui()
         { 'Set &wrap             %{&wrap ? "[x]" : "[ ]"}', [[set wrap!]], "Toggle wrap lines" },
         { 'Set &paste            %{&paste ? "[x]" : "[ ]"}', [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]], "Toggle paste mode" },
         { 'Set &spelling         %{&spell ? "[x]" : "[ ]"}', [[set spell!]], "Toggle spell checker (z= to auto correct current word)" },
-        { 'Set &virtualedit      %{&virtualedit=~#"all" ? "[x]" : "[ ]"}', [[execute &virtualedit=~#"all" ? "set virtualedit-=all" : "set virtualedit+=all"]], "Toggle virtualedit" },
+        { 'Set &virtualedit      %{&virtualedit=~#"all" ? "[x]" : "[ ]"}', [[execute &virtualedit=~#"all" ? "set virtualedit=block" : "set virtualedit=all"]], "Toggle virtualedit" },
         { 'Set previ&ew          %{&completeopt=~"preview" ? "[x]" : "[ ]"}', [[execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"]], "Toggle function preview" },
         { 'Set &cursorline       %{&cursorline ? "[x]" : "[ ]"}', [[set cursorline!]], "Toggle cursorline" },
         { 'Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', [[set cursorcolumn!]], "Toggle cursorcolumn" },

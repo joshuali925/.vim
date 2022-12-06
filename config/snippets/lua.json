@@ -1,0 +1,10 @@
+{
+  "Benchmark": {
+    "prefix": "benchmark",
+    "body": [
+      "local start_time = os.clock()",
+      "$0",
+      "print(string.format(\"Loop took %0.6f seconds to run\", os.clock() - start_time))"
+    ]
+  }
+}

@@ -302,7 +302,7 @@ vim.keymap.set("n", "[a", "<Cmd>lua require('lspsaga.diagnostic').goto_prev()<CR
 vim.keymap.set("n", "]a", "<Cmd>lua require('lspsaga.diagnostic').goto_next()<CR>")
 vim.keymap.set("n", "[A", "<Cmd>lua require('lspsaga.diagnostic').goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>")
 vim.keymap.set("n", "]A", "<Cmd>lua require('lspsaga.diagnostic').goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>")
-vim.keymap.set("i", "<C-k>", "<Cmd>Lspsaga signature_help<CR>")
+vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help)
 
 -- autocmds {{{1
 vim.api.nvim_create_augroup("AutoCommands", {})
@@ -459,6 +459,7 @@ if require("states").small_file then
     vim.schedule(function()
         vim.defer_fn(function()
             local plugins = {
+                "plenary.nvim",
                 "nvim-treesitter",
                 "nvim-treesitter-textobjects",
                 "mason.nvim",
@@ -471,7 +472,6 @@ if require("states").small_file then
             vim.o.foldtext = "getline(v:foldstart).' ⋯'"
             vim.o.fillchars = "fold: "
             local plugins = { -- motions/text objects sometimes don't work if loaded on keys
-                "plenary.nvim",
                 "vim-illuminate",
                 "conflict-marker.vim",
                 "indent-blankline.nvim",

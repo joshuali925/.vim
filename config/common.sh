@@ -57,6 +57,7 @@ alias lg='lazygit'
 alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.cache/lf_dir"'
 alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/ctop/issues/263
+alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias 0='[ -f "$HOME/.cache/lf_dir" ] && cd "$(cat "$HOME/.cache/lf_dir")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
@@ -65,7 +66,6 @@ alias rg!="rg '❗'"
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database $HOME/.cache/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
-alias serve='miniserve --hidden --dirs-first --enable-zip --enable-tar-gz --show-wget-footer --upload-files --color-scheme archlinux --port 8000 .'
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
 
@@ -173,8 +173,8 @@ gr-toggle-url() {
   git remote -v
 }
 
-grg() {  # grep regex in all commits, replace `log` with `reflog` for local commits, change -G to -S for literal string search, add --patch to see all diff together
-  git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -G "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
+grg() {  # search literal string in all commits, replace `log` with `reflog` for local commits, change -S to -G for regex search, add --patch to see all diff together
+  git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -S "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
 }
 
 gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
@@ -612,14 +612,22 @@ ec2() {
       aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
       return 0 ;;
     ssh)
-      local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$2$" | awk '{print $1}')
+      local tag=$2
+      local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
+      local config="Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n"
       if [ -z "$host" ]; then
-        ec2 start "$2" && sleep 15 && ec2 ssh "$2"
+        ec2 start "$tag" && sleep 15 && ec2 ssh "$tag"
         return $?
       fi
       echo "ssh to ec2: $host" >&2
       shift 2
-      ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host" || ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ubuntu@$host"
+      sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
+      printf "$config" ec2-user >> ~/.ssh/ec2hosts
+      ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host" || {
+        sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
+        printf "$config" ubuntu >> ~/.ssh/ec2hosts
+        ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ubuntu@$host"
+      }
       return 0 ;;
     *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]" >&2; return 1 ;;
   esac
@@ -635,6 +643,35 @@ ec2() {
   else
     aws ec2 stop-instances --instance-ids $(echo $ids)
   fi
+}
+
+os-get() {
+  ver() {
+    awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"
+  }
+  if [ "$#" -eq 0 ]; then echo "Usage: $0 <3-digit-version> [{x64|arm64}]" >&2; return 1; fi
+  local version=$1 arch=${2:-$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64)} url selected
+  local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management')
+  local artifacts=("${core[@]}" "${opensearch_plugin[@]}" "${es[@]}")
+  selected=$(printf "%s\n" "${artifacts[@]}" | fzf --bind='tab:down,btab:up') || return 1
+  if printf '%s\0' "${es[@]}" | grep -q -x -z -F -- "$selected"; then
+    [ "$arch" = 'x64' ] && arch=x86_64 || arch=aarch64
+    url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
+  elif printf '%s\0' "${core[@]}" | grep -q -x -z -F -- "$selected"; then
+    if [ "$(ver "$version")" -ge "$(ver '2.5.0')" ]; then
+      url="https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/$selected-$version-linux-$arch.tar.gz"
+    else
+      url="https://artifacts.opensearch.org/releases/bundle/$selected/$version/$selected-$version-linux-$arch.tar.gz"
+    fi
+  elif printf '%s\0' "${opensearch_plugin[@]}" | grep -q -x -z -F -- "$selected"; then
+    if [ "$(ver "$version")" -ge "$(ver '1.3.2')" ]; then
+      url="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$version/latest/linux/$arch/tar/builds/opensearch/plugins/$selected-$version.0.zip"
+    else
+      url="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$version/latest/linux/$arch/builds/opensearch/plugins/$selected-$version.0.zip"
+    fi
+  fi
+  printf "\033[0;36m%s\033[0m\n" "Downloading from: $url" >&2
+  curl -LO "$url"
 }
 
 # ====================== MacOS ==========================
