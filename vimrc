@@ -269,6 +269,8 @@ cnoremap <expr> <BS> '/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()
 
 augroup AutoCommands
   autocmd!
+  autocmd StdinReadPre * let s:std_in=1
+  autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | nnoremap <silent> <buffer> <CR> :nunmap <buffer> <lt>CR><bar>call <SID>Oldfiles()<CR>| endif
   autocmd BufEnter * execute g:RooterCmd
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line('$') | execute "normal! g`\"" | endif
   autocmd BufWritePost $MYVIMRC source $MYVIMRC

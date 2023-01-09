@@ -221,14 +221,15 @@ function M.nvim_surround()
 end
 
 function M.lspsaga_nvim()
-    require("lspsaga").init_lsp_saga({
-        saga_winblend = 8,
-        code_action_lightbulb = { enable = false, sign_priority = 6, virtual_text = false },
-        code_action_keys = { exec = "<CR>", quit = "<Esc>" },
-        finder_action_keys = { open = "<CR>", quit = "<ESC>" },
+    require("lspsaga").setup({
+        ui = { winblend = 8 },
+        lightbulb = { enable = false, sign_priority = 6, virtual_text = false },
+        code_action = { keys = { quit = "<Esc>" } },
+        rename = { quit = "<Esc>", in_select = false },
         show_outline = { jump_key = "<CR>" },
-        rename_action_quit = "<Esc>",
-        symbol_in_winbar = { enable = true, separator = "  " },
+        outline = { keys = { jump = "<CR>" } },
+        callhierarchy = { show_detail = true, keys = { jump = "<CR>", quit = "<Esc>" } },
+        symbol_in_winbar = { separator = "  " },
     })
 end
 
@@ -698,14 +699,16 @@ end
 
 function M.open_quickui_context_menu()
     local content = {
-        { "Docu&mentation", "lua require('lspsaga.hover'):render_hover_doc()", "Show documentation" },
-        { "&Preview definition", "lua require('lspsaga.definition'):peek_definition()", "Preview definition" },
+        { "Docu&mentation", "Lspsaga hover_doc", "Show documentation" },
+        { "&Preview definition", "Lspsaga peek_definition", "Preview definition" },
         { "Reference &finder", "Lspsaga lsp_finder", "Find references" },
         { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
         { "Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition" },
-        { "Hover diagnostic", "lua require('lspsaga.diagnostic').show_line_diagnostics()", "Show diagnostic of current line" },
+        { "Hover diagnostic", "Lspsaga show_line_diagnostics", "Show diagnostic of current line" },
+        { "Incoming calls", "Lspsaga incoming_calls", "Run lsp callhierarchy incoming_calls" },
+        { "Outgoing calls", "Lspsaga outgoing_calls", "Run lsp callhierarchy outgoing_calls" },
         { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
         { "--", "" },
         { "Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk" },
@@ -777,7 +780,7 @@ function M.vim_quickui()
         { "Git checkout HEAD", [[Gread HEAD:%]], "Checkout current file from HEAD and load as unsaved buffer (Gread HEAD:%)" },
         { "Git &blame", [[Git blame]], "Git blame of current file" },
         { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
-        { "Git diff H&EAD", [[Gdiffsplit HEAD]], "Diff current file with last committed version (Gdiffsplit HEAD)" },
+        { "Git diff H&EAD", [[Gdiffsplit HEAD:%]], "Diff current file with last committed version (Gdiffsplit HEAD:%)" },
         { "Git &file history", [[vsplit | execute "lua require('packer').loader('vim-flog')" | 0Gclog]], "Browse previously committed versions of current file" },
         { "Diffview file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
         { "--", "" },

@@ -223,6 +223,15 @@ gcb() {
   fi
 }
 
+gh-backport() {
+  if [ "$#" -ne 1 ]; then echo "Usage: $0 <SHA>" >&2; return 1; fi
+  local sha=$1 args=()
+  if [ -f ".github/PULL_REQUEST_TEMPLATE.md" ]; then
+    args+=(--body-file .github/PULL_REQUEST_TEMPLATE.md)
+  fi
+  git cherry-pick -f "$sha" && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
+}
+
 pscpu() {
   local ps_out pids pid pstree_flags pstree_out
   if [ "$(uname -s)" = Darwin ]; then
@@ -490,7 +499,7 @@ react() {
 
 untildone() {
   if [ "$#" -eq 0 ]; then
-    echo -e "Usage: $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour" >&2
+    echo -e "Usage: $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour\n\t$0 '! ps <pid>'; ./run  # run after pid exits" >&2
     return 1
   fi
   local i=1
@@ -581,7 +590,7 @@ docker-shell() {
     return $?
   fi
   if ! docker image ls | grep -q ubuntu_vim; then
-    docker build -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim || return 1
+    docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim || return 1
     echo -e "\n\nFinished building image. To commit new change: docker commit vim_container ubuntu_vim"
   fi
   case $1 in
@@ -612,7 +621,8 @@ ec2() {
       aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
       return 0 ;;
     ssh)
-      local tag=$2
+      local tag=${2:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')}
+      [ -z "$tag" ] && return 1
       local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
       local config="Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n"
       if [ -z "$host" ]; then
@@ -658,8 +668,9 @@ os-get() {
     [ "$arch" = 'x64' ] && arch=x86_64 || arch=aarch64
     url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
   elif printf '%s\0' "${core[@]}" | grep -q -x -z -F -- "$selected"; then
-    if [ "$(ver "$version")" -ge "$(ver '2.5.0')" ]; then
+    if [ "$(ver "$version")" -gt "$(ver '2.4.0')" ]; then
       url="https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/$selected-$version-linux-$arch.tar.gz"
+      printf "\033[0;36m%s\033[0m\n" "Manifest: https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/manifest.yml" >&2
     else
       url="https://artifacts.opensearch.org/releases/bundle/$selected/$version/$selected-$version-linux-$arch.tar.gz"
     fi
@@ -671,7 +682,7 @@ os-get() {
     fi
   fi
   printf "\033[0;36m%s\033[0m\n" "Downloading from: $url" >&2
-  curl -LO "$url"
+  wget "$url"
 }
 
 # ====================== MacOS ==========================
