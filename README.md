@@ -1,6 +1,4 @@
-# Dot Files
-
-![](https://img.shields.io/github/repo-size/joshuali925/.vim)
+# Dot Files ![](https://img.shields.io/github/repo-size/joshuali925/.vim?style=for-the-badge&label=SIZE&logo=codesandbox&color=8BD5CA&labelColor=302D41&logoColor=D9E0EE)
 
 ### Install tools and configs
 

@@ -263,9 +263,9 @@ nnoremap yoq :call <SID>ToggleQuickfix()<CR>
 nnoremap <expr> yol empty(filter(getwininfo(), 'v:val.loclist')) ? ':lopen<CR>' : ':lclose<CR>'
 cnoremap <expr> <Tab> '/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'
 cnoremap <expr> <S-Tab> '/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'
-cnoremap <expr> <C-@> '/?' =~ getcmdtype() ? '.\{-}' : '<C-@>'
-cnoremap <expr> <C-Space> '/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>'
-cnoremap <expr> <BS> '/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>'
+cnoremap <expr> <C-@> ':/?' =~ getcmdtype() ? '.\{-}' : '<C-@>'
+cnoremap <expr> <C-Space> ':/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>'
+cnoremap <expr> <BS> ':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>'
 
 augroup AutoCommands
   autocmd!
@@ -435,7 +435,7 @@ nnoremap [<C-t> :ptprevious<CR>
 nnoremap ]<C-t> :ptnext<CR>
 nnoremap Ko K
 nnoremap Km K
-nnoremap Kd :Gdiff<CR>
+nnoremap Kd mx:Gdiff<CR><C-w><C-p>`x<C-w><C-p>
 nnoremap Kb :Gblame<CR>
 
 " execute "set <M-h>=\<Esc>h"

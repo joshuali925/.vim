@@ -79,6 +79,7 @@ return {
         { key = "]", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
         { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
         { key = "/", mods = "CTRL", action = wezterm.action.SendKey({ key = "/", mods = "CTRL" }) },
+        { mods = "CTRL", key = "q", action = wezterm.action({ SendString = "\x11" }) }, -- https://github.com/wez/wezterm/issues/2630
     },
     key_tables = { search_mode = search_mode },
 }

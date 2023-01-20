@@ -245,7 +245,7 @@ install_neovim() {
   backup "$HOME/.local/lib/nvim"
   nvim --version
   log 'Installed neovim, installing plugins..'
-  timeout 120 ~/.local/bin/nvim --headless -u NORC --noplugin +'autocmd User PackerComplete quitall' +'silent lua require("plugins").compile()' || true
+  timeout 120 ~/.local/bin/nvim --headless +'Lazy! sync' +quitall || true
   timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd.quitall() end, 27000)' || true
   log "\nInstalled neovim plugins, run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
   echo
