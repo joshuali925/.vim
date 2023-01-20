@@ -79,7 +79,7 @@ function M.init()
                 settings = {
                     Lua = {
                         runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
-                        diagnostics = { globals = { "vim", "packer_plugins" }, neededFileStatus = { ["codestyle-check"] = "Any" } },
+                        diagnostics = { globals = { "vim" }, neededFileStatus = { ["codestyle-check"] = "Any" } },
                         telemetry = { enable = false },
                         IntelliSense = { traceLocalSet = true },
                         workspace = {

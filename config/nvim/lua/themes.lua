@@ -186,7 +186,7 @@ function M.switch(index)
     vim.g.theme_index = index
     theme_index = index
     M.theme = M.theme_list[index]
-    require("packer").loader(M.theme, true)
+    require("lazy").load({ plugins = M.theme })
     M.config()
     vim.notify("Restart to change theme to " .. M.theme .. ".", "INFO", { title = "Theme" })
 end

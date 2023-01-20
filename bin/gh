@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
+if [ -z "$BIN_INIT" ]; then
+  BIN_INIT=1 gh completion --shell zsh > ~/.zinit/completions/_gh || true
+  BIN_INIT=1 gh extension install dlvhdr/gh-dash || true
+  BIN_INIT=1 gh extension install yusukebe/gh-markdown-preview || true
+fi
 install-from-github gh cli/cli linux_amd64.tar.gz linux_arm64.tar.gz macOS_amd64.tar.gz '' '--strip-components=2 --wildcards gh_*/bin/gh' "$@"
-# gh completion --shell zsh > ~/.zinit/completions/_gh
