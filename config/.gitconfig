@@ -1,75 +1,86 @@
 [init]
-  defaultBranch = main
+	defaultBranch = main
 
 [user]
-  email = joshuali925@gmail.com
-  name = Joshua Li
+	email = joshuali925@gmail.com
+	name = Joshua Li
 
 [alias]
-  open = "!git remote get-url origin | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//' | if command -v open > /dev/null 2>&1; then xargs open; else y; fi"
+	open = "!git remote get-url origin | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//' | if command -v open > /dev/null 2>&1; then xargs open; else y; fi"
 
 ; [credential]
-;   helper = store
+; 	helper = store
 
 [url "https://github.com/"]
-  insteadOf = gh:
+	insteadOf = gh:
 
 [url "git@github.com:joshuali925/"]
-  insteadOf = jos:
+	insteadOf = jos:
 
 [url "https://github.com/joshuali925/"]
-  insteadOf = josh:
+	insteadOf = josh:
 
 [url "https://github.com/opensearch-project/"]
-  insteadOf = os:
+	insteadOf = os:
 
 [url "https://github.com/opensearch-project/dashboards-"]
-  insteadOf = osd:
+	insteadOf = osd:
 
 [core]
-  pager = less -RiMXF
+	; pager = less -RiMXF
+	; pager = diff-so-fancy | less -RiMXF
+	pager = delta --line-numbers --navigate
+
+[interactive]
+	; diffFilter = diff-so-fancy --patch
+	diffFilter = delta --line-numbers
 
 [fetch]
-  prune = true
+	prune = true
 
 [pull]
-  rebase = false
+	rebase = false
 
 [merge]
-  ; conflictstyle = diff3
-  tool = vimdiff
+	; conflictstyle = diff3
+	tool = vimdiff
+
+[diff]
+    colorMoved = default
 
 [rerere]
-  enabled = true
-  autoupdate = true
+	enabled = true
+	autoupdate = true
 
 [color]
-  ui = true
+	ui = true
 
 [color "diff"]
-  meta = 11
-  frag = magenta bold
-  commit = yellow bold
-  old = red bold
-  new = green bold
-  whitespace = red reverse
+	meta = 11
+	frag = magenta bold
+	func = 146 bold
+	commit = yellow bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
 
 [color "diff-highlight"]
-  oldNormal = red bold
-  oldHighlight = red bold 52
-  newNormal = green bold
-  newHighlight = green bold 22
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold
+	newHighlight = green bold 22
 
 [diff-so-fancy]
-  stripLeadingSymbols = false
+	stripLeadingSymbols = false
 
 [delta]
-  syntax-theme = TwoDark
-  hunk-header-style = line-number syntax bold
-  hunk-header-line-number-style = white
-  hunk-header-decoration-style = "#4b5263" box
-  file-style = "#e5b34a" italic
-  file-decoration-style = "#e5b34a" ul
-  line-numbers-zero-style = "#4b5263"
-  line-numbers-left-format = "{nm:^4} "
-  line-numbers-right-format = "{np:^4} "
+	syntax-theme = TwoDark
+	hunk-header-style = line-number syntax bold
+	hunk-header-line-number-style = white
+	hunk-header-decoration-style = "#4b5263" box
+	file-style = "#e5b34a" italic
+	file-decoration-style = "#e5b34a" ul
+	line-numbers-zero-style = "#4b5263"
+	line-numbers-left-format = "{nm:^4} "
+	line-numbers-right-format = "{np:^4} "
+	map-styles = bold purple => syntax "#330f29", bold blue => syntax "#271344", bold cyan => syntax "#0d3531", bold yellow => syntax "#222f14"

@@ -4,20 +4,23 @@
 let mapleader=";"
 
 """ Plugins  --------------------------------
-set surround
-set multiple-cursors
-set commentary
-set argtextobj
 set easymotion  " requires https://plugins.jetbrains.com/plugin/13360-ideavim-easymotion/
-set exchange
+set quickscope  " requires https://plugins.jetbrains.com/plugin/19417-ideavim-quickscope/
 set NERDTree
 set textobj-indent
 set textobj-entire
+set argtextobj
+set exchange
+set surround
+set commentary
+set multiple-cursors
 
 """ Plugin settings -------------------------
 let g:argtextobj_pairs="[:],(:),<:>,{:}"
 let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_startofline = 0
+let g:qs_primary_color = '#d68447'
+let g:qs_secondary_color = '#005e7d'
 
 """ Common settings -------------------------
 set number

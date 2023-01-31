@@ -584,9 +584,7 @@
           "conditions": [
             {
               "type": "frontmost_application_unless",
-              "bundle_identifiers": [
-                "com\\.microsoft\\.rdc\\.macos"
-              ]
+              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
             }
           ]
         },

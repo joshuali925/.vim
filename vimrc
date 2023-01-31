@@ -197,7 +197,7 @@ nnoremap gf gF
 nnoremap gF gf
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
 xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>
-nnoremap zm :%foldclose<CR>
+nnoremap <expr> zn v:count > 0 ? ':set foldlevel='. v:count. '<CR>' : ':%foldclose<CR>'
 nnoremap cr :call funcs#edit_register()<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>

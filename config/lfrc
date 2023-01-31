@@ -95,8 +95,8 @@ cmd pwd %echo "$f"
 cmd size !du -h --max-depth=1 | sort -hr
 cmd gdu $"$HOME/.vim/bin/gdu"
 cmd md5 !md5sum $fx
-cmd selected-size %du -ch --max-depth=0 $fx | grep 'total$'
-cmd cwd-size %du -h --max-depth=0 .
+cmd selected-size %du -sbc $fx | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%11.6f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | grep 'total$'
+cmd cwd-size %du -sb . | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%11.6f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
 cmd edit-config $$EDITOR ~/.vim/config/lfrc
 cmd edit-selected $$EDITOR $fx
 cmd vidir-bulk-rename ${{ echo "$fx" | vidir - }}

@@ -38,6 +38,7 @@ robocopy %USERPROFILE%\.vim\autoload %LOCALAPPDATA%\nvim\autoload /e
 
 ```
 Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: command-option-t
+                      -> Input Sources: only keep "Select next source" as option-space
          -> Text -> uncheck Use smart quotes and dashes
 
 Maccy -> Preferences -> Hotkey -> control-shift-v
