@@ -93,7 +93,7 @@ install_development_tools() {
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils
     echo -e "export HOMEBREW_NO_AUTO_UPDATE=1\nexport PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
-    echo "FPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" >> ~/.zshrc
+    sed -i -e "1iFPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" ~/.zshrc
     brew install grep && ln -s "$(which ggrep)" ~/.local/bin/grep
     brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
     brew install findutils && ln -s "$(which gxargs)" ~/.local/bin/xargs

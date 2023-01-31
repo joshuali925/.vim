@@ -39,8 +39,6 @@ alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
 alias l='exa -lF --git --color=always --color-scale --icons --header --group-directories-first --time-style=long-iso --all'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
-alias size='du -h --max-depth=1 | sort -hr'
-alias size-subdir="du | sort -r -n | awk '{split(\"K M G\",v); s=1; while(\$1>1024){\$1/=1024; s++} print int(\$1)v[s]\"\\t\"\$2}' | head -n 20"
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
 alias escape="sed 's/\\([\"\\]\\)/\\\\\\1/g'"  # escape "\ with backslash
@@ -94,8 +92,7 @@ alias gdst='git diff --staged'
 alias gdsts='git diff --stat --staged'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gdf='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff'
-alias gdd='GIT_PAGER="delta --line-numbers --navigate" git diff'
-alias gdg='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
+alias gdd='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
 alias ggl='git pull origin $(gref)'
@@ -113,7 +110,8 @@ alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
 alias gmerge-preview-log='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit HEAD..'  # commits in target but not in HEAD (will be merged with git merge target)
-gmerge-preview-diff() { git diff HEAD..."$*"; }  # diff between target and the common ancestor of HEAD and target
+gmerge-preview-diff() { git diff HEAD..."$@"; }  # diff between target and the common ancestor of HEAD and target
+gmissing() { git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --cherry-pick --right-only HEAD..."$@"; }  # commits in target but not in HEAD and not cherry-picked to HEAD
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
@@ -142,7 +140,7 @@ alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclu
 gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo -e "\nRun \"git fetch --unshallow\" to fetch all history"'
-alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff -m "--wip--"'
+alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m "--wip--"'
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
@@ -231,6 +229,11 @@ gh-backport() {
     args+=(--body-file .github/PULL_REQUEST_TEMPLATE.md)
   fi
   git cherry-pick -f "$sha" && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
+}
+
+size() {
+  [ "$1" = '--recursive' ] && local args=("${@:2}") || local args=(--max-depth=1 "$@")
+  du -ab "${args[@]}" | sort -nr | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | head -n 20
 }
 
 pscpu() {
@@ -669,7 +672,7 @@ os-get() {
     [ "$arch" = 'x64' ] && arch=x86_64 || arch=aarch64
     url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
   elif printf '%s\0' "${core[@]}" | grep -q -x -z -F -- "$selected"; then
-    if [ "$(ver "$version")" -gt "$(ver '2.4.0')" ]; then
+    if [ "$(ver "$version")" -gt "$(ver '2.5.0')" ]; then
       url="https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/$selected-$version-linux-$arch.tar.gz"
       printf "\033[0;36m%s\033[0m\n" "Manifest: https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/manifest.yml" >&2
     else

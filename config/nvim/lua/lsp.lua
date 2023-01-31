@@ -8,7 +8,7 @@ local disabled_servers = {
 }
 function M.lsp_install_all()
     local required = {
-        "sumneko_lua",
+        "lua_ls",
         "vimls",
         "jsonls",
         "yamlls",
@@ -21,9 +21,7 @@ function M.lsp_install_all()
         "kotlin_language_server",
     }
     local installed = require("mason-lspconfig").get_installed_servers()
-    local not_installed = vim.tbl_filter(function(server)
-        return not vim.tbl_contains(installed, server)
-    end, required)
+    local not_installed = vim.tbl_filter(function(server) return not vim.tbl_contains(installed, server) end, required)
     if #not_installed > 0 then
         vim.cmd.LspInstall({ args = not_installed })
     else
@@ -74,8 +72,8 @@ function M.init()
                 -- },
             })
         end,
-        sumneko_lua = function()
-            register_server("sumneko_lua", {
+        lua_ls = function()
+            register_server("lua_ls", {
                 settings = {
                     Lua = {
                         runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },
@@ -144,13 +142,14 @@ function M.init()
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
 end
 
-local formatting_lsp = { "null-ls", "sumneko_lua" }
+local formatting_lsps = { "null-ls", "lua_ls" }
 function M.organize_imports_and_format()
-    if next(vim.lsp.get_active_clients({ bufnr = 0 })) ~= nil then
-        if next(vim.lsp.get_active_clients({ bufnr = 0, name = "tsserver" })) ~= nil then
-            require("typescript").actions.organizeImports({ sync = true })
-        end
-        vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsp, client.name) end, timeout_ms = 3000 })
+    local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_active_clients({ bufnr = 0 }))
+    if vim.tbl_contains(active_clients, "tsserver") then
+        require("typescript").actions.organizeImports({ sync = true })
+    end
+    if not vim.tbl_isempty(vim.tbl_filter(function(name) return vim.tbl_contains(formatting_lsps, name) end, active_clients)) then
+        vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsps, client.name) end, timeout_ms = 3000 })
     else
         vim.cmd.Prettier()
     end

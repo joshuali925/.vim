@@ -272,9 +272,9 @@ function! funcs#ctags() abort
 endfunction
 
 function! funcs#ctags_create_and_jump() abort
-  let answer = input('Generate ctags for language (y for all, empty to cancel): ', &filetype, 'filetype')  " language list: ctags --list-languages
+  let answer = input('Generate ctags for language ("all" for all supported, empty to cancel): ', &filetype, 'filetype')  " language list: ctags --list-languages
   if answer != ''
-    let args = answer == 'y' ? '' : '--languages='. answer
+    let args = answer == 'all' ? '' : '--languages='. answer
     " TODO https://github.com/universal-ctags/ctags/issues/2667
     execute '!ctags --exclude=.git --exclude=node_modules --exclude=venv --langmap=TypeScript:.ts.tsx -R '. args
     silent execute 'ltag '. expand('<cword>')
