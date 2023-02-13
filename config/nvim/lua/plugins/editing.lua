@@ -1,13 +1,12 @@
 return {
-    { "AndrewRadev/splitjoin.vim", keys = { "gS", "gJ" } },
-    { "max397574/better-escape.nvim", event = "InsertEnter", opts = { mapping = { "jk", "kj" }, timeout = 200, clear_empty_lines = true } },
-    { "unblevable/quick-scope", config = function() vim.g.qs_hi_priority = -1 end },
+    { "AndrewRadev/splitjoin.vim",    keys = { "gS", "gJ" } },
+    { "max397574/better-escape.nvim", event = "InsertEnter",                            opts = { mapping = { "jk", "kj" }, timeout = 200, clear_empty_lines = true } },
+    { "unblevable/quick-scope",       config = function() vim.g.qs_hi_priority = -1 end },
     {
         "phaazon/hop.nvim",
         keys = {
-            { "'", "<Cmd>lua require('utils').command_without_quickscope('HopChar1')<CR>", mode = { "n", "x", "o" } },
-            { "q", "<Cmd>lua require('utils').command_without_quickscope('HopWord')<CR>", mode = { "n", "x", "o" } },
-            { "<leader>e", "<Cmd>lua require('utils').command_without_quickscope('HopWordCurrentLine')<CR>", mode = { "n", "x", "o" } },
+            { "'",         "<Cmd>lua require('utils').command_without_quickscope('HopChar1')<CR>",  mode = { "n", "x", "o" } },
+            { "<leader>e", "<Cmd>lua require('utils').command_without_quickscope('HopWord')<CR>",   mode = { "n", "x", "o" } },
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope('HopLineAC')<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope('HopLineBC')<CR>", mode = { "n", "x", "o" } },
         },
@@ -29,14 +28,14 @@ return {
             { "aa", "<Plug>(swap-textobject-a)", mode = { "x", "o" } },
             { "g<", "<Plug>(swap-prev)" },
             { "g>", "<Plug>(swap-next)" },
-            { "gs", "<Plug>(swap-interactive)", mode = { "n", "x" } },
+            { "gs", "<Plug>(swap-interactive)",  mode = { "n", "x" } },
         },
     },
     {
         "monaqa/dial.nvim",
         keys = {
-            { "<C-a>", "<Plug>(dial-increment)", mode = { "n", "x" } },
-            { "<C-x>", "<Plug>(dial-decrement)", mode = { "n", "x" } },
+            { "<C-a>",  "<Plug>(dial-increment)",  mode = { "n", "x" } },
+            { "<C-x>",  "<Plug>(dial-decrement)",  mode = { "n", "x" } },
             { "g<C-a>", "g<Plug>(dial-increment)", mode = { "x" } },
             { "g<C-x>", "g<Plug>(dial-decrement)", mode = { "x" } },
         },
@@ -71,7 +70,8 @@ return {
         init = function()
             vim.g.VM_default_mappings = 0
             vim.g.VM_exit_on_1_cursor_left = 1
-            vim.g.VM_maps = { -- <C-Down/Up> to add cursor
+            vim.g.VM_maps = {
+                -- <C-Down/Up> to add cursor
                 ["Select All"] = "<leader><C-n>",
                 ["Find Under"] = "<C-n>",
                 ["Find Subword Under"] = "<C-n>",

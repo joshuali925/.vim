@@ -1,5 +1,5 @@
 return {
-    { "tpope/vim-sleuth", lazy = false, cond = require("states").small_file },
+    { "tpope/vim-sleuth",     lazy = false,                                                                               cond = require("states").small_file },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
     {
         "AckslD/nvim-neoclip.lua",
@@ -22,7 +22,7 @@ return {
             vim.g.mkdp_preview_options = { disable_sync_scroll = 1 }
         end,
     },
-    { "godlygeek/tabular", cmd = "Tabularize" },
+    { "godlygeek/tabular",   cmd = "Tabularize" },
     {
         "dhruvasagar/vim-table-mode",
         cmd = { "TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine" },

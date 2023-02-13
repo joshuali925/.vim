@@ -71,15 +71,15 @@ return {
         },
     },
     keys = {
-        { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
-        { key = "d", mods = "CMD", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
-        { key = "k", mods = "CMD", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
-        { key = "f", mods = "CMD", action = wezterm.action.Search({ CaseInSensitiveString = "" }) },
-        { key = "[", mods = "CMD", action = wezterm.action.MoveTabRelative(-1) },
-        { key = "]", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
-        { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
-        { key = "/", mods = "CTRL", action = wezterm.action.SendKey({ key = "/", mods = "CTRL" }) },
-        { mods = "CTRL", key = "q", action = wezterm.action({ SendString = "\x11" }) }, -- https://github.com/wez/wezterm/issues/2630
+        { key = "t",     mods = "CMD",  action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
+        { key = "d",     mods = "CMD",  action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
+        { key = "k",     mods = "CMD",  action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
+        { key = "f",     mods = "CMD",  action = wezterm.action.Search({ CaseInSensitiveString = "" }) },
+        { key = "[",     mods = "CMD",  action = wezterm.action.MoveTabRelative( -1) },
+        { key = "]",     mods = "CMD",  action = wezterm.action.MoveTabRelative(1) },
+        { key = "Enter", mods = "CMD",  action = wezterm.action.ToggleFullScreen },
+        { key = "/",     mods = "CTRL", action = wezterm.action.SendKey({ key = "/", mods = "CTRL" }) },
+        { mods = "CTRL", key = "q",     action = wezterm.action({ SendString = "\x11" }) }, -- https://github.com/wez/wezterm/issues/2630
     },
     key_tables = { search_mode = search_mode },
 }

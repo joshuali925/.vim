@@ -39,6 +39,7 @@ map mS cwd-size
 map mt tail
 map mc edit-config
 map my copy-path
+map mY copy-file-name
 map md5 md5
 map mvi vi
 map m1 $btop
@@ -92,7 +93,7 @@ cmd sudoedit $sudo TERM=xterm-256color vim -u ~/.vim/config/mini.vim "$f"
 cmd sudolf $TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer' -command 'map i $less -RiM "$f"' "$f"; lf -remote "send $id echo sudolf exited"
 cmd file !file $fx
 cmd pwd %echo "$f"
-cmd size !du -h --max-depth=1 | sort -hr
+cmd size !du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
 cmd gdu $"$HOME/.vim/bin/gdu"
 cmd md5 !md5sum $fx
 cmd selected-size %du -sbc $fx | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%11.6f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | grep 'total$'
@@ -103,6 +104,7 @@ cmd vidir-bulk-rename ${{ echo "$fx" | vidir - }}
 cmd vimv-bulk-rename ${{ vimv $fx; echo }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
 cmd copy-path %{{ realpath "$f" | y; echo "copied: $(realpath "$f")" }}
+cmd copy-file-name %{{ basename "$f" | y; echo "copied: $(basename "$f")" }}
 
 cmd follow-symlink ${{
   res="$(readlink -f "$f" || echo '.')"

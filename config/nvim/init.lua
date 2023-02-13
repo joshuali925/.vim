@@ -162,7 +162,7 @@ vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#Chec
 vim.keymap.set("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("n", "zh", "zhz", { remap = true })
 vim.keymap.set("n", "zl", "zlz", { remap = true })
-vim.keymap.set("n", "<C-c>", "<Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
+vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("x", "<C-c>", "<Esc>")
 vim.keymap.set("n", "<C-w><C-c>", "<Esc>")
@@ -229,7 +229,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.api.nvim_create_autocmd("BufReadPost", {
     pattern = "*",
     group = "AutoCommands",
-    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif | let b:RestoredCursor = 1]],
+    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | endif | endif | let b:RestoredCursor = 1]],
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=jql" })
@@ -263,8 +263,8 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "term://*", group = "AutoCommands", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif]] })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "AutoCommands", callback = require("rooter").root })
-vim.api.nvim_create_autocmd("User", { -- fugitive buffer :Git
-    pattern = "FugitiveIndex",
+vim.api.nvim_create_autocmd("User", {
+    pattern = "FugitiveIndex", -- fugitive buffer :Git
     group = "AutoCommands",
     callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
 })
@@ -306,24 +306,24 @@ vim.filetype.add({
     },
 })
 vim.notify = (function(overridden)
-    return function(...)
-        local present, notify = pcall(require, "notify")
-        if present then
-            vim.notify = notify
-        else
-            vim.notify = overridden
+        return function(...)
+            local present, notify = pcall(require, "notify")
+            if present then
+                vim.notify = notify
+            else
+                vim.notify = overridden
+            end
+            vim.notify(...)
         end
-        vim.notify(...)
-    end
-end)(vim.notify)
+    end)(vim.notify)
 vim.paste = (function(overridden)
-    return function(lines, phase) -- break undo before pasting in insert mode, :h vim.paste()
-        if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
-            vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
+        return function(lines, phase) -- break undo before pasting in insert mode, :h vim.paste()
+            if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
+                vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
+            end
+            overridden(lines, phase)
         end
-        overridden(lines, phase)
-    end
-end)(vim.paste)
+    end)(vim.paste)
 if vim.env.SSH_CLIENT ~= nil then -- ssh session
     local function copy(lines, _)
         require("utils").copy_with_osc_yank_script(table.concat(lines, "\n"))
@@ -335,8 +335,8 @@ if vim.env.SSH_CLIENT ~= nil then -- ssh session
 
     vim.g.clipboard = {
         name = "osc52",
-        copy = { ["+"] = copy, ["*"] = copy },
-        paste = { ["+"] = paste, ["*"] = paste },
+        copy = { ["+"] = copy,["*"] = copy },
+        paste = { ["+"] = paste,["*"] = paste },
     }
     vim.keymap.set("n", "gx", "<Cmd>lua require('utils').copy_with_osc_yank_script(vim.fn.expand('<cfile>'))<CR>")
 elseif vim.fn.has("macunix") ~= 1 then -- WSL Vim

@@ -21,8 +21,42 @@ return {
             {
                 "windwp/nvim-autopairs",
                 config = function()
-                    require("nvim-autopairs").setup({ ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=] })
+                    local npairs = require("nvim-autopairs")
+                    npairs.setup({ ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=] })
                     require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
+                    local Rule     = require("nvim-autopairs.rule")
+                    local cond     = require("nvim-autopairs.conds")
+                    local brackets = { { "(", ")" }, { "[", "]" }, { "{", "}" } }
+                    npairs.add_rules({
+                        Rule(" ", " ")
+                        :with_pair(function(opts)
+                            local pair = opts.line:sub(opts.col - 1, opts.col)
+                            return vim.tbl_contains({
+                                brackets[1][1] .. brackets[1][2],
+                                brackets[2][1] .. brackets[2][2],
+                                brackets[3][1] .. brackets[3][2]
+                            }, pair)
+                        end)
+                        :with_move(cond.none())
+                        :with_cr(cond.none())
+                        :with_del(function(opts)
+                            local col = vim.api.nvim_win_get_cursor(0)[2]
+                            local context = opts.line:sub(col - 1, col + 2)
+                            return vim.tbl_contains({
+                                brackets[1][1] .. "  " .. brackets[1][2],
+                                brackets[2][1] .. "  " .. brackets[2][2],
+                                brackets[3][1] .. "  " .. brackets[3][2]
+                            }, context)
+                        end)
+                    })
+                    for _, bracket in ipairs(brackets) do
+                        Rule("", " " .. bracket[2])
+                            :with_pair(cond.none())
+                            :with_move(function(opts) return opts.char == bracket[2] end)
+                            :with_cr(cond.none())
+                            :with_del(cond.none())
+                            :use_key(bracket[2])
+                    end
                 end,
             },
         },
@@ -37,12 +71,33 @@ return {
             --     Color = "", File = "", Reference = "", Folder = "", EnumMember = "",
             --     Constant = "", Struct = "פּ", Event = "", Operator = "", TypeParameter = "",
             -- }
-            local cmp_kinds = { -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
-                Text = " ", Method = " ", Function = " ", Constructor = " ", Field = " ",
-                Variable = " ", Class = " ", Interface = " ", Module = " ", Property = " ",
-                Unit = " ", Value = " ", Enum = " ", Keyword = " ", Snippet = " ",
-                Color = " ", File = " ", Reference = " ", Folder = " ", EnumMember = " ",
-                Constant = " ", Struct = " ", Event = " ", Operator = " ", TypeParameter = " ",
+            local cmp_kinds = {
+                -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
+                Text = " ",
+                Method = " ",
+                Function = " ",
+                Constructor = " ",
+                Field = " ",
+                Variable = " ",
+                Class = " ",
+                Interface = " ",
+                Module = " ",
+                Property = " ",
+                Unit = " ",
+                Value = " ",
+                Enum = " ",
+                Keyword = " ",
+                Snippet = " ",
+                Color = " ",
+                File = " ",
+                Reference = " ",
+                Folder = " ",
+                EnumMember = " ",
+                Constant = " ",
+                Struct = " ",
+                Event = " ",
+                Operator = " ",
+                TypeParameter = " ",
             }
             cmp.setup({
                 completion = { completeopt = "menuone,noselect" },
@@ -60,7 +115,7 @@ return {
                     end,
                 },
                 mapping = {
-                    ["<C-d>"] = cmp.mapping.scroll_docs(-4),
+                    ["<C-d>"] = cmp.mapping.scroll_docs( -4),
                     ["<C-f>"] = cmp.mapping.scroll_docs(4),
                     ["<C-Space>"] = cmp.mapping.complete(),
                     ["<CR>"] = cmp.mapping.confirm(),
@@ -92,7 +147,7 @@ return {
                             cmp.select_prev_item()
                         elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
                             vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
-                        elseif require("neogen").jumpable(-1) then
+                        elseif require("neogen").jumpable( -1) then
                             require("neogen").jump_prev()
                         else
                             fallback()

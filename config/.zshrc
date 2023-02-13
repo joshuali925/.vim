@@ -23,7 +23,7 @@ if [ -n "$ZINIT_POST_INSTALL" ]; then
     https://github.com/asdf-vm/asdf/blob/master/completions/_asdf
 fi
 
-zinit depth=1 light-mode for romkatv/powerlevel10k
+zinit depth=1 light-mode for atclone"$HOME/.zinit/plugins/romkatv---powerlevel10k/gitstatus/install" romkatv/powerlevel10k
 zinit depth=1 wait"0" lucid light-mode for \
   as"program" pick"$ZPFX/bin/git-*" src"etc/git-extras-completion.zsh" make"PREFIX=$ZPFX" tj/git-extras \
   atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
@@ -52,7 +52,7 @@ source ~/.vim/config/common.sh
 autoload -Uz compinit && compinit -u
 zinit cdreplay -q
 
-typeset -U path
+typeset -U path PATH
 WORDCHARS=${WORDCHARS/\/}
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=1000000
@@ -145,7 +145,7 @@ bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
 bindkey '^u' backward-kill-line
 bindkey '^i' tab-complete-or-cd
-bindkey -s '^z' 'fg^m'
+bindkey -s '^z' '%^m'
 bindkey '\el' forward-char                    # unbind <Esc>l = ls from oh-my-zsh key-bindings
 
 alias history='history -f 0'

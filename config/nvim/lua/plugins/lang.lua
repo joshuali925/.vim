@@ -33,23 +33,23 @@ return {
         },
         cond = require("states").small_file, -- prevent LSP loading on keys for large file
         keys = {
-            { "gd", "<Cmd>lua if require('lsp').is_active() then vim.lsp.buf.definition() else vim.cmd('normal! gd') end<CR>" },
-            { "gD", vim.lsp.buf.type_definition },
+            { "gd",        "<Cmd>lua if require('lsp').is_active() then vim.lsp.buf.definition() else vim.cmd('normal! gd') end<CR>" },
+            { "gD",        vim.lsp.buf.type_definition },
             { "<leader>d", vim.lsp.buf.implementation },
-            { "gr", vim.lsp.buf.references },
-            { "<leader>a", "<Cmd>Lspsaga code_action<CR>", mode = { "n", "x" } },
-            { "gh", "<Cmd>lua if vim.diagnostic.open_float({scope = 'cursor', border = 'single'}) == nil then vim.lsp.buf.hover() end<CR>" },
+            { "gr",        vim.lsp.buf.references },
+            { "<leader>a", "<Cmd>Lspsaga code_action<CR>",                                                                                        mode = { "n", "x" } },
+            { "gh",        "<Cmd>lua if vim.diagnostic.open_float({scope = 'cursor', border = 'single'}) == nil then vim.lsp.buf.hover() end<CR>" },
             { "<leader>R", "<Cmd>Lspsaga rename<CR>" },
-            { "[a", "<Cmd>lua require('lspsaga.diagnostic').goto_prev()<CR>" },
-            { "]a", "<Cmd>lua require('lspsaga.diagnostic').goto_next()<CR>" },
-            { "[A", "<Cmd>lua require('lspsaga.diagnostic').goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>" },
-            { "]A", "<Cmd>lua require('lspsaga.diagnostic').goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>" },
-            { "<C-k>", vim.lsp.buf.signature_help, mode = "i" },
+            { "[a",        "<Cmd>Lspsaga diagnostic_jump_prev<CR>" },
+            { "]a",        "<Cmd>Lspsaga diagnostic_jump_next<CR>" },
+            { "[A",        "<Cmd>lua require('lspsaga.diagnostic').goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>" },
+            { "]A",        "<Cmd>lua require('lspsaga.diagnostic').goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>" },
+            { "<C-k>",     vim.lsp.buf.signature_help,                                                                                            mode = "i" },
         },
         config = function() require("lsp").init() end,
     },
-    { "danymat/neogen", config = true },
-    { "windwp/nvim-ts-autotag", ft = { "html", "javascript", "javascriptreact", "typescriptreact" }, config = true },
+    { "danymat/neogen",             config = true },
+    { "windwp/nvim-ts-autotag",     ft = { "html", "javascript", "javascriptreact", "typescriptreact" }, config = true },
     {
         "RRethy/vim-illuminate",
         keys = {
@@ -67,10 +67,10 @@ return {
         "b3nj5m1n/kommentary",
         dependencies = { "nvim-treesitter/nvim-treesitter", "JoosepAlviste/nvim-ts-context-commentstring" },
         keys = {
-            { "gc", "<Plug>kommentary_motion_default" },
+            { "gc",  "<Plug>kommentary_motion_default" },
             { "gcc", "<Plug>kommentary_line_default" },
-            { "gc", "<Plug>kommentary_visual_default<Esc>", mode = "x" },
-            { "gc", ":<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>", mode = "o" },
+            { "gc",  "<Plug>kommentary_visual_default<Esc>",                                          mode = "x" },
+            { "gc",  ":<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>", mode = "o" },
         },
         init = function() vim.g.kommentary_create_default_mappings = false end,
         config = function()
@@ -91,6 +91,7 @@ return {
                 "json",
                 "yaml",
                 "markdown",
+                "markdown_inline",
                 "bash",
                 "http",
                 "html",
@@ -112,7 +113,7 @@ return {
             textobjects = {
                 select = {
                     enable = true,
-                    keymaps = { ["if"] = "@function.inner", ["aF"] = "@function.outer", ["ic"] = "@class.inner", ["ac"] = "@class.outer" },
+                    keymaps = { ["if"] = "@function.inner",["aF"] = "@function.outer",["ic"] = "@class.inner",["ac"] = "@class.outer" },
                 },
                 move = {
                     enable = true,

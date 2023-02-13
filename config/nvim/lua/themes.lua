@@ -5,11 +5,11 @@ local theme_index = vim.g.theme_index or -1
 -- :S hi
 -- :source $VIMRUNTIME/syntax/hitest.vim
 M.theme_list = {
-    [-1] = "tokyonight.nvim",
-    [-2] = "github-nvim-theme",
-    [-3] = "vscode.nvim",
-    [-4] = "neovim-ayu",
-    [-5] = "catppuccin",
+    [ -1] = "tokyonight.nvim",
+    [ -2] = "github-nvim-theme",
+    [ -3] = "vscode.nvim",
+    [ -4] = "neovim-ayu",
+    [ -5] = "catppuccin",
     [0] = "tokyonight.nvim",
     [1] = "github-nvim-theme",
     [2] = "vscode.nvim",
@@ -19,42 +19,8 @@ M.theme_list = {
 M.theme = M.theme_list[theme_index]
 
 local sidebars = { "qf", "terminal", "lspsagaoutline", "Mundo", "NvimTree" }
-local default_colors = {
-    dim_primary = "#46617a",
-    red = "#f7768e",
-    purple = "#9d7cd8",
-    grey = "#6f737b",
-}
-if theme_index < 0 then
-    default_colors.bg = "#22262e"
-    default_colors.fg = "#abb2bf"
-    default_colors.lightbg = "#2d3139"
-    default_colors.lightbg2 = "#262a32"
-    default_colors.primary = "#7aa2f7"
-    default_colors.secondary = "#9ece6a"
-    default_colors.yellow = "#e0af68"
-    default_colors.orange = "#ff9e64"
-else
-    default_colors.bg = "#eeeeee"
-    default_colors.fg = "#484e54"
-    default_colors.lightbg = "#cccccc"
-    default_colors.lightbg2 = "#dddddd"
-    default_colors.primary = "#0366d6"
-    default_colors.secondary = "#22863a"
-    default_colors.yellow = "#b08800"
-    default_colors.orange = "#d18616"
-end
-
 local themes = {
     ["tokyonight.nvim"] = {
-        colors = function()
-            if theme_index >= 0 then
-                default_colors.bg = "#cccccc"
-                default_colors.lightbg = "#bbbbbb"
-                default_colors.lightbg2 = "#c3c3c3"
-            end
-            return default_colors
-        end,
         config = function()
             require("tokyonight").setup({
                 style = theme_index < 0 and "storm" or "day",
@@ -68,13 +34,6 @@ local themes = {
         end,
     },
     ["github-nvim-theme"] = {
-        colors = function()
-            if theme_index < 0 then
-                default_colors.primary = "#3b8eea"
-                default_colors.secondary = "#23d18b"
-            end
-            return default_colors
-        end,
         config = function()
             require("github-theme").setup({
                 sidebars = sidebars,
@@ -84,13 +43,6 @@ local themes = {
         end,
     },
     ["vscode.nvim"] = {
-        colors = function()
-            if theme_index < 0 then
-                default_colors.primary = "#3b8eea"
-                default_colors.secondary = "#23d18b"
-            end
-            return default_colors
-        end,
         config = function()
             vim.cmd.colorscheme("vscode")
             if theme_index < 0 then
@@ -100,15 +52,6 @@ local themes = {
         end,
     },
     ["neovim-ayu"] = {
-        colors = function()
-            default_colors.secondary = "#bae67e"
-            if theme_index < 0 then
-                default_colors.primary = "#4cb9cf"
-            else
-                default_colors.primary = "#6ebfda"
-            end
-            return default_colors
-        end,
         config = function()
             require("ayu").setup({ overrides = { Comment = { fg = "#69737d" } } })
             vim.cmd.colorscheme("ayu-" .. (theme_index < 0 and "mirage" or "light"))
@@ -118,15 +61,6 @@ local themes = {
         end,
     },
     ["catppuccin"] = {
-        colors = function()
-            default_colors.secondary = "#bbe2b2"
-            if theme_index < 0 then
-                default_colors.primary = "#a8b8eb"
-            else
-                default_colors.primary = "#1e66f5"
-            end
-            return default_colors
-        end,
         config = function()
             require("catppuccin").setup({
                 flavour = (theme_index < 0 and "macchiato" or "latte"),
@@ -174,10 +108,6 @@ function M.config()
     vim.api.nvim_create_augroup("PluginsHighlights", {})
     vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", group = "PluginsHighlights", callback = highlight_plugins })
     themes[M.theme].config()
-end
-
-function M.colors()
-    return themes[M.theme].colors and themes[M.theme].colors() or default_colors
 end
 
 function M.switch(index)
