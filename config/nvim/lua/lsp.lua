@@ -82,7 +82,7 @@ function M.init()
                         IntelliSense = { traceLocalSet = true },
                         workspace = {
                             -- library = vim.api.nvim_get_runtime_file("", true), -- index library files
-                            library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true, [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
+                            library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true,[vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
                         },
                         format = { enable = true, defaultConfig = { quote_style = "double", max_line_length = "unset" } },
                     },

@@ -27,8 +27,7 @@ set smartcase
 
 let mapleader=';'
 map ' <Plug>(easymotion-bd-f)
-map q <Plug>(easymotion-bd-w)
-map <leader>e <Plug>(easymotion-lineanywhere)
+map <leader>e <Plug>(easymotion-bd-w)
 map <leader>j <Plug>(easymotion-sol-j)
 map <leader>k <Plug>(easymotion-sol-k)
 map gc <Plug>VSCodeCommentary

@@ -205,7 +205,7 @@ nmap zh zhz
 nmap zl zlz
 inoremap jk <Esc>
 inoremap kj <Esc>
-nnoremap <C-c> :nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> redraw!<CR>
+nnoremap <C-c> <C-c>:nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> redraw!<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
 nnoremap <C-w><C-c> <Esc>
@@ -275,6 +275,7 @@ augroup AutoCommands
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line('$') | execute "normal! g`\"" | endif
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
   autocmd FileType * setlocal formatoptions=jql
+  autocmd FileType json setlocal formatprg=python\ -m\ json.tool
   autocmd FileType help,man nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn:execute 'cd '. b:netrw_curdir<CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q| nmap <buffer> a %
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> o <CR>:cclose<CR>
@@ -306,20 +307,20 @@ function! s:Grep(prg, pattern)
   let saved_errorformat = &errorformat
   set errorformat=%f:%l:%c:%m,%f:%l:%m,%f
   if a:prg == 'glob'
-    let cmd = a:pattern[0] == '*' ? '{**/.'. a:pattern. ',**/'. a:pattern. '}' : '**/'. a:pattern
-    if a:pattern[0] == '*'  " hidden file needs **/.*pat, {**/.*pat,**/*pat} is faster but depends on &shell and doesn't work on windows and some bash
+    let command = a:pattern[0] == '*' ? '{**/.'. a:pattern. ',**/'. a:pattern. '}' : '**/'. a:pattern
+    if a:pattern[0] == '*'  " hidden file needs **/.*pat, {**/.*pat,**/*pat} in `command` is faster but depends on &shell and doesn't work on windows and some bash
       cgetexpr glob('**/.'. a:pattern, 0, 1)
       caddexpr glob('**/'. a:pattern, 0, 1)
     else
-      cgetexpr glob(cmd, 0, 1)
+      cgetexpr glob(command, 0, 1)
     endif
   else
-    let cmd = a:prg. ' '. a:pattern
-    cgetexpr systemlist(cmd)
+    let command = a:prg. ' '. a:pattern
+    cgetexpr systemlist(command)
   endif
   let &errorformat = saved_errorformat
   let len = len(getqflist())
-  silent! call setqflist([], 'a', {'title': '('. len. ') '. cmd })  " setqflist() does not support 'title' in 7.4
+  silent! call setqflist([], 'a', {'title': '('. len. ') '. command })  " setqflist() does not support 'title' in 7.4
   if len > 1
     copen
   else
@@ -329,8 +330,13 @@ endfunction
 function! s:Oldfiles()
   let saved_errorformat = &errorformat
   set errorformat=%f
-  call filter(v:oldfiles, 'expand(v:val) !~ "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^'. expand('%:p'). '$" && filereadable(expand(v:val))')
-  cgetexpr v:oldfiles
+  if &shell =~ '\(bash\|zsh\)$'
+    let MRU = systemlist('awk ''$1 == ">" {print $2}'' $HOME/.cache/vim/viminfo | sed "s,^~/,$HOME/," | grep -v "/vim/.*/doc/.*.txt\|.*COMMIT_EDITMSG\|^'. expand('%:p'). '$" | while IFS= read -r file; do test -f "$file" && echo "$file"; done')
+    cgetexpr MRU
+  else
+    call filter(v:oldfiles, 'filereadable(expand(v:val)) && expand(v:val) !~ "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^'. expand('%:p'). '$"')
+    cgetexpr v:oldfiles
+  endif
   let &errorformat = saved_errorformat
   copen
 endfunction
@@ -361,18 +367,18 @@ function! s:ToggleTail()
   let s:tail_on = !s:tail_on
   echo 'checktime loop '. (s:tail_on ? 'on' : 'off')
 endfunction
-function! s:EditCallback(cmd) abort
+function! s:EditCallback(command) abort
   let sink = 'edit '
   let tempfile = tempname()
-  if a:cmd == 'lf'
+  if a:command == 'lf'
     execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. fnameescape(tempfile). ' "'. expand('%'). '"'
-  elseif a:cmd == 'filetypes'
+  elseif a:command == 'filetypes'
     let sink = 'set filetype='
     let $fzftemp = join(sort(map(split(globpath(&rtp, 'syntax/*.vim'), '\n'), 'fnamemodify(v:val, ":t:r")')), '\n')
     execute 'silent !echo -e $fzftemp | fzf > '. fnameescape(tempfile)
     let $fzftemp = ''  " cannot unlet environment variables in 7.4
   else
-    execute 'silent !'. a:cmd. ' > '. fnameescape(tempfile)
+    execute 'silent !'. a:command. ' > '. fnameescape(tempfile)
   endif
   try
     if filereadable(tempfile)

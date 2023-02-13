@@ -1,0 +1,10 @@
+{
+  "Benchmark": {
+    "prefix": "benchmark",
+    "body": [
+      "let start_time = reltime()",
+      "$0",
+      "echomsg 'elapsed time: '. reltimestr(reltime(start_time)). 's'"
+    ]
+  }
+}

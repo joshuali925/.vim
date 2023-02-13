@@ -232,8 +232,9 @@ gh-backport() {
 }
 
 size() {
-  [ "$1" = '--recursive' ] && local args=("${@:2}") || local args=(--max-depth=1 "$@")
-  du -ab "${args[@]}" | sort -nr | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | head -n 20
+  [ "$1" = '--disk-usage' ] && { du -ah --max-depth=1 "${@:2}" | sort -hr; return $?; }
+  [ "$1" = '--subdirs' ] && local args=("${@:2}") || local args=(--max-depth=1 "$@")
+  du -ab "${args[@]}" | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
 }
 
 pscpu() {
@@ -599,7 +600,7 @@ docker-shell() {
   fi
   case $1 in
     vim-once) docker run --network host -it --name vim_container_temp --rm ubuntu_vim; return $? ;;
-    vim-rm) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
+    vim-remove) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
     vim-build) docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
     vim) local container_name=${2:-vim_container} ;;
     *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
