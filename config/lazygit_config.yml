@@ -2,7 +2,7 @@ git:
   autofetch: false
   paging:
     colorArg: always
-    pager: delta --dark --paging=never --24-bit-color=never
+    pager: delta --dark --paging=never --24-bit-color=always
 gui:
   showCommandLog: false # @ to toggle
   showFileTree: false # ` to toggle

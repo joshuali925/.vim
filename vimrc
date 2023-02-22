@@ -505,6 +505,7 @@ if has('terminal')
   nnoremap <leader>th :terminal ++close<CR>
   nnoremap <leader>tv :vertical terminal ++close<CR>
   nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
+  command! Glow terminal ++curwin glow %
   call funcs#map_vim_send_terminal()
 endif
 

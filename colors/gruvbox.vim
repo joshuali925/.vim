@@ -52,7 +52,7 @@ hi Type term=underline ctermfg=214 guifg=#d8a657
 hi Special term=bold ctermfg=214 guifg=#d8a657
 hi SpecialChar ctermfg=214 guifg=#d8a657
 hi Underlined term=underline cterm=underline gui=underline
-hi Error term=reverse ctermfg=167 guifg=#ea6962
+hi Error ctermfg=167 ctermbg=NONE guifg=#ea6962 guibg=NONE
 hi Todo term=standout cterm=italic ctermfg=175 gui=italic guifg=#d3869b
 hi Parameter guifg=#50a14f ctermfg=71
 hi CurrentWord ctermbg=237 guibg=#3c3836

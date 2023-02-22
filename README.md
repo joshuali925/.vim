@@ -12,6 +12,14 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/in
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"
 ```
 
+### Run alpine docker environment
+
+```bash
+docker run -e TERM -e LC_ALL=C.UTF-8 --network host -w /root -it --rm alpine sh -c '
+  apk add curl bash vim
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"'
+```
+
 ### Windows (cmd)
 
 ```cmd

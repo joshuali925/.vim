@@ -2,11 +2,11 @@ local curr_theme = require("themes").theme
 local config_theme = require("themes").config
 
 return {
-    { "folke/tokyonight.nvim",       lazy = curr_theme ~= "tokyonight.nvim",   config = config_theme },
+    { "folke/tokyonight.nvim", lazy = curr_theme ~= "tokyonight.nvim", config = config_theme },
     { "projekt0n/github-nvim-theme", lazy = curr_theme ~= "github-nvim-theme", config = config_theme },
-    { "Mofiqul/vscode.nvim",         lazy = curr_theme ~= "vscode.nvim",       config = config_theme },
-    { "Shatur/neovim-ayu",           lazy = curr_theme ~= "neovim-ayu",        config = config_theme },
-    { "catppuccin/nvim",             lazy = curr_theme ~= "catppuccin",        config = config_theme, name = "catppuccin" },
+    { "askfiy/visual_studio_code", lazy = curr_theme ~= "visual_studio_code", config = config_theme },
+    { "Shatur/neovim-ayu", lazy = curr_theme ~= "neovim-ayu", config = config_theme },
+    { "catppuccin/nvim", name = "catppuccin", lazy = curr_theme ~= "catppuccin", config = config_theme },
     { "kyazdani42/nvim-web-devicons" },
     {
         "lukas-reineke/indent-blankline.nvim",
@@ -31,15 +31,18 @@ return {
         "akinsho/bufferline.nvim",
         event = "VimEnter",
         keys = {
-            { "<BS>",      "<Cmd>BufferLineCyclePrev<CR>" },
-            { "\\",        "<Cmd>BufferLineCycleNext<CR>" },
+            { "<BS>", "<Cmd>BufferLineCyclePrev<CR>" },
+            { "\\", "<Cmd>BufferLineCycleNext<CR>" },
             { "<C-w><BS>", "<Cmd>BufferLineMovePrev<CR><C-w>", remap = true },
-            { "<C-w>\\",   "<Cmd>BufferLineMoveNext<CR><C-w>", remap = true },
-            { "Z[",        "<Cmd>BufferLineCloseLeft<CR>" },
-            { "Z]",        "<Cmd>BufferLineCloseRight<CR>" },
+            { "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", remap = true },
+            { "Z[", "<Cmd>BufferLineCloseLeft<CR>" },
+            { "Z]", "<Cmd>BufferLineCloseRight<CR>" },
         },
         opts = {
-            -- options = { offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } } }, -- taking too much space
+            options = {
+                themable = true,
+                -- offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } }, -- taking too much space
+            },
             highlights = { buffer_selected = { bold = true, italic = false } },
         },
     },
@@ -47,6 +50,13 @@ return {
         "nvim-lualine/lualine.nvim",
         event = "VimEnter",
         config = function()
+            if curr_theme == "visual_studio_code" then
+                require("lualine").setup({
+                    options = { component_separators = { left = "", right = "" }, section_separators = { left = "", right = "" }, globalstatus = true },
+                    sections = require("visual_studio_code").get_lualine_sections(),
+                })
+                return
+            end
             require("lualine").setup({
                 options = {
                     component_separators = { left = "", right = "" },
@@ -55,7 +65,7 @@ return {
                 sections = {
                     lualine_a = { function() return "" end },
                     lualine_b = {
-                        { "filetype", colored = true,      icon_only = true, padding = { left = 1, right = 0 } },
+                        { "filetype", colored = true, icon_only = true, padding = { left = 1, right = 0 } },
                         { "filename", file_status = false, path = 1 },
                     },
                     lualine_c = {
@@ -127,8 +137,8 @@ return {
                     lualine_a = {},
                     lualine_b = {},
                     lualine_c = {
-                        { "filetype", colored = true,      icon_only = true, padding = { left = 1, right = 0 } },
-                        { "filename", file_status = false, path = 1,         color = "Normal" },
+                        { "filetype", colored = true, icon_only = true, padding = { left = 1, right = 0 } },
+                        { "filename", file_status = false, path = 1, color = "Normal" },
                     },
                     lualine_x = { { "location", color = "Normal" } },
                     lualine_y = {},
