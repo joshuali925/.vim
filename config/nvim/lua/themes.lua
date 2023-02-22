@@ -7,12 +7,12 @@ local theme_index = vim.g.theme_index or -1
 M.theme_list = {
     [ -1] = "tokyonight.nvim",
     [ -2] = "github-nvim-theme",
-    [ -3] = "vscode.nvim",
+    [ -3] = "visual_studio_code",
     [ -4] = "neovim-ayu",
     [ -5] = "catppuccin",
     [0] = "tokyonight.nvim",
     [1] = "github-nvim-theme",
-    [2] = "vscode.nvim",
+    [2] = "visual_studio_code",
     [3] = "neovim-ayu",
     [4] = "catppuccin",
 }
@@ -42,12 +42,13 @@ local themes = {
             vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = theme_index < 0 and "#4d5462" or "#bbbbbb" })
         end,
     },
-    ["vscode.nvim"] = {
+    ["visual_studio_code"] = {
         config = function()
-            vim.cmd.colorscheme("vscode")
+            require("visual_studio_code").setup({ mode = theme_index < 0 and "dark" or "light" })
             if theme_index < 0 then
                 vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
                 vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#4a4a4a" })
+                require("visual_studio_code.utils").hl.set("CursorLine", { bg = "#282828"})
             end
         end,
     },

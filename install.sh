@@ -30,6 +30,8 @@ detect-env() {
         PACKAGE_MANAGER=yum
       elif [ -x "$(command -v apt-get)" ]; then
         PACKAGE_MANAGER=apt-get
+      elif [ -x "$(command -v apk)" ]; then
+        PACKAGE_MANAGER=apk
       else
         echo 'package manager not supported' >&2
       fi
@@ -68,7 +70,7 @@ link_file() {
   local sourceFile="$1" destFile="$2"
   backup "$destFile"
   shift 2
-  ln -s "$@" "$sourceFile" "$destFile"
+  ln -s "$@" "$sourceFile" "$destFile" || ln -s "$sourceFile" "$destFile"
   log "Linked $sourceFile to $destFile"
 }
 
@@ -88,6 +90,8 @@ install_development_tools() {
     sudo yum install -y epel-release || true
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
     sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential zsh git curl unzip
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apk' ]; then
+    sudo apk add zsh git curl
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -153,7 +157,7 @@ install_docker() {
   log "Installing docker.."
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y docker
-  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
+  elif [ "$PLATFORM" == 'linux' ]; then
     curl -fsSL https://get.docker.com/ | sh
   else
     echo 'Unknown distro..'
@@ -188,13 +192,15 @@ install_python() {  # environment for asdf install from source: https://github.c
   log "Installing python.."
   if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
     sudo yum install -y python3-devel
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
-    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-dev python3-pip python3-venv
+    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-dev python3-venv
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apk' ]; then
+    sudo apk add python3
   elif [ "$PLATFORM" != 'darwin' ]; then
     echo 'Unknown distro..'
     return 0
   fi
+  curl https://bootstrap.pypa.io/get-pip.py | python3
   pip3 install --user pynvim
   log 'Installed python3, pip3, pynvim'
   log "To use pynvim regardless of venv, set ${YELLOW}vim.g.python3_host_prog = \"$(which python3)\""

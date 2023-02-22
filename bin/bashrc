@@ -3,7 +3,7 @@ if [ -n "$GET_BASHRC" ]; then
   source ~/.vim/config/.bashrc
   unset GET_BASHRC
   export EDITOR=vim TMUX_NO_TPM=1
-  source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
+  [ -f "$HOME/.bashrc" ] && source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
 
   clear-env() {
     local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/share/lf ~/.config/{lf,lazygit} ~/.cache/{n,}vim) executable f

@@ -24,8 +24,8 @@ return {
                     local npairs = require("nvim-autopairs")
                     npairs.setup({ ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=] })
                     require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
-                    local Rule     = require("nvim-autopairs.rule")
-                    local cond     = require("nvim-autopairs.conds")
+                    local Rule = require("nvim-autopairs.rule")
+                    local cond = require("nvim-autopairs.conds")
                     local brackets = { { "(", ")" }, { "[", "]" }, { "{", "}" } }
                     npairs.add_rules({
                         Rule(" ", " ")
@@ -63,41 +63,34 @@ return {
         cond = require("states").small_file,
         config = function()
             local cmp = require("cmp")
-            -- vim.o.pumblend = 8
-            -- local cmp_kinds = {
-            --     Text = "", Method = "", Function = "", Constructor = "", Field = "ﰠ",
-            --     Variable = "", Class = "ﴯ", Interface = "", Module = "", Property = "ﰠ",
-            --     Unit = "塞", Value = "", Enum = "", Keyword = "", Snippet = "",
-            --     Color = "", File = "", Reference = "", Folder = "", EnumMember = "",
-            --     Constant = "", Struct = "פּ", Event = "", Operator = "", TypeParameter = "",
-            -- }
+            vim.o.pumblend = 8
             local cmp_kinds = {
                 -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
-                Text = " ",
-                Method = " ",
-                Function = " ",
-                Constructor = " ",
-                Field = " ",
-                Variable = " ",
-                Class = " ",
-                Interface = " ",
-                Module = " ",
-                Property = " ",
-                Unit = " ",
-                Value = " ",
-                Enum = " ",
-                Keyword = " ",
-                Snippet = " ",
-                Color = " ",
-                File = " ",
-                Reference = " ",
-                Folder = " ",
-                EnumMember = " ",
-                Constant = " ",
-                Struct = " ",
-                Event = " ",
-                Operator = " ",
-                TypeParameter = " ",
+                Text = " ", --           Text = "",
+                Method = " ", --         Method = "",
+                Function = " ", --       Function = "",
+                Constructor = " ", --    Constructor = "",
+                Field = " ", --          Field = "ﰠ",
+                Variable = " ", --       Variable = "",
+                Class = " ", --          Class = "ﴯ",
+                Interface = " ", --      Interface = "",
+                Module = " ", --         Module = "",
+                Property = " ", --       Property = "ﰠ",
+                Unit = " ", --           Unit = "塞",
+                Value = " ", --          Value = "",
+                Enum = " ", --           Enum = "",
+                Keyword = " ", --        Keyword = "",
+                Snippet = " ", --        Snippet = "",
+                Color = " ", --          Color = "",
+                File = " ", --           File = "",
+                Reference = " ", --      Reference = "",
+                Folder = " ", --         Folder = "",
+                EnumMember = " ", --     EnumMember = "",
+                Constant = " ", --       Constant = "",
+                Struct = " ", --         Struct = "פּ",
+                Event = " ", --          Event = "",
+                Operator = " ", --       Operator = "",
+                TypeParameter = " ", --  TypeParameter = "",
             }
             cmp.setup({
                 completion = { completeopt = "menuone,noselect" },

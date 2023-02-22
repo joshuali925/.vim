@@ -53,7 +53,7 @@ hi Type guifg=#73d0ff ctermfg=117
 hi Special guifg=#ffcc66 ctermfg=222
 hi SpecialChar guifg=#ffcc66 ctermfg=222
 hi Underlined guifg=#5ccfe6 gui=underline ctermfg=45 cterm=underline
-hi Error guifg=#ffffff guibg=#c21919 ctermfg=231 ctermbg=203
+hi Error guifg=#e06c75 guibg=NONE ctermfg=231 ctermbg=NONE
 hi Todo guifg=#bf665a ctermfg=131
 hi Parameter guifg=#50a14f ctermfg=71
 hi CurrentWord guibg=#31435e gui=bold ctermbg=238 cterm=bold

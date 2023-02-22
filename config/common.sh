@@ -90,9 +90,10 @@ alias gd='git diff'
 alias gds='git diff --stat'
 alias gdst='git diff --staged'
 alias gdsts='git diff --stat --staged'
-alias gdt='git diff-tree --no-commit-id --name-only -r'
-alias gdf='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff'
+alias gdt='GIT_EXTERNAL_DIFF=difft git diff'
 alias gdd='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
+alias gdf='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff'
+alias gdw='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff --word-diff=color --ignore-all-space'
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
 alias ggl='git pull origin $(gref)'
@@ -148,7 +149,7 @@ alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranc
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git foresta --style=10 | \less -RiMXF'
 alias gforesta='git foresta --style=10 --all | \less -RiMXF'
-alias gpatch='vi +startinsert patch.diff && git apply patch.diff && rm patch.diff'
+alias gpatch='command vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply patch.diff && rm patch.diff'
 alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }

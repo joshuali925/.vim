@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github difft Wilfred/difftastic x86_64-unknown-linux-gnu '' x86_64-apple-darwin '' 'difft' "$@"

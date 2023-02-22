@@ -280,7 +280,7 @@ vim.api.nvim_create_user_command("SessionLoad", "source ~/.cache/nvim/session.vi
 vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
-vim.api.nvim_create_user_command("Glow", "terminal glow %", {})
+vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)

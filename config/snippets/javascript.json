@@ -51,6 +51,10 @@
       "(async () => await new Promise((resolve) => setTimeout(resolve, ${1:1000})))();$0"
     ]
   },
+  "Immediately-invoked async function": {
+    "prefix": "async",
+    "body": ["(async () => {", "\t$0", "})();"]
+  },
   "Promise then": {
     "prefix": "then",
     "body": [
