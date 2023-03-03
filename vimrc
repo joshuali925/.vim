@@ -1,12 +1,15 @@
+let g:dot_vim_dir=expand('<sfile>:p:h')
+
 " if empty(glob('~/.vim/autoload/plug.vim'))
 "   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/HEAD/plug.vim
 "   let s:init_plug = 1
 " endif
-" call plug#begin(expand('<sfile>:p:h'). '/plugged')
-" Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+" call plug#begin(g:dot_vim_dir . '/plugged')
+" Plug ''
 " call plug#end()
 " if exists('s:init_plug') | PlugInstall | unlet s:init_plug | endif
 
+let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
 let &t_ut = ''  " https://github.com/microsoft/terminal/issues/832
 let &t_SI .= "\<Esc>[6 q"  " cursor shape
 let &t_EI .= "\<Esc>[2 q"
@@ -42,7 +45,6 @@ set showcmd
 set showmatch
 set noshowmode
 set ruler
-set showtabline=2
 set laststatus=2
 set wildmenu
 set splitright
@@ -79,8 +81,8 @@ set history=1000
 set undofile
 set undolevels=1000
 set undoreload=10000
-set undodir=$HOME/.cache/vim/undo
-set viminfo='1000,<50,s10,h,n~/.cache/vim/viminfo
+let &undodir=g:dot_vim_dir . '/tmp/undo'
+let &viminfo="'1000,<50,s10,h,n" . g:dot_vim_dir . '/tmp/viminfo'
 set isfname-==
 set path=.,,**5
 set wildignore=*/tags,*/\.git/*,*/dist/*,*/build/*,*/node_modules/*,*/venv/*,*/__pycache__/*
@@ -98,13 +100,14 @@ set grepprg=rg\ --vimgrep
 set grepformat=%f:%l:%c:%m,%f:%l:%m,%f
 set cedit=<C-x>
 set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%{&fileencoding!=''&&&fileencoding!='utf-8'?'[fileencoding\:\ '.&fileencoding.']':''}%{&fileformat!='unix'?'[fileformat\:\ '.&fileformat.']':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
+silent! set splitkeep=topline
 
 let mapleader=';'
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
-  execute 'xnoremap i'. char. ' :<C-u>normal! T'. char. 'vt'. char. '<CR>'
-  execute 'onoremap i'. char. ' :normal vi'. char. '<CR>'
-  execute 'xnoremap a'. char. ' :<C-u>normal! F'. char. 'vt'. char. '<CR>'
-  execute 'onoremap a'. char. ' :normal va'. char. '<CR>'
+  execute 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<CR>'
+  execute 'onoremap i' . char . ' :normal vi' . char . '<CR>'
+  execute 'xnoremap a' . char . ' :<C-u>normal! F' . char . 'vt' . char . '<CR>'
+  execute 'onoremap a' . char . ' :normal va' . char . '<CR>'
 endfor
 xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
@@ -159,9 +162,9 @@ onoremap <silent> , :call plugins#fanfingtastic#operator_next_char(v:count1, plu
 nnoremap <silent> ;, :call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
 xnoremap <silent> ;, :call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
 onoremap <silent> ;, :call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>
-nnoremap <expr> cx ':set operatorfunc=plugins#exchange#exchange_set<CR>'. (v:count1 == 1 ? '' : v:count1). 'g@'
+nnoremap <expr> cx ':set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@'
 xnoremap X :<C-u>call plugins#exchange#exchange_set(visualmode(), 1)<CR>
-nnoremap <expr> cxx ':set operatorfunc=plugins#exchange#exchange_set<CR>'. (v:count1 == 1 ? '' : v:count1). 'g@_'
+nnoremap <expr> cxx ':set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@_'
 nnoremap cxc :call plugins#exchange#exchange_clear()<CR>
 nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
@@ -183,13 +186,14 @@ noremap <Up> gk
 inoremap <Home> <C-o>g^
 inoremap <End> <C-o>g$
 inoremap <C-_> <C-o>u
+nnoremap q :call plugins#zeef#buffer({'unlisted': 0})<CR>
 nnoremap Q q
 xnoremap @q :normal! @q<CR>
 xnoremap @@ :normal! @@<CR>
 nnoremap _ <C-o>
 nnoremap + <C-i>
 nnoremap Y y$
-nnoremap U :execute 'earlier '. v:count1. 'f'<CR>
+nnoremap U :execute 'earlier ' . v:count1 . 'f'<CR>
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
@@ -197,7 +201,7 @@ nnoremap gf gF
 nnoremap gF gf
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
 xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>
-nnoremap <expr> zn v:count > 0 ? ':set foldlevel='. v:count. '<CR>' : ':%foldclose<CR>'
+nnoremap <expr> zn v:count > 0 ? ':set foldlevel=' . v:count . '<CR>' : ':%foldclose<CR>'
 nnoremap cr :call funcs#edit_register()<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
@@ -222,24 +226,27 @@ noremap <leader>p "0p
 noremap <leader>P "0P
 imap <leader>r <Esc><leader>r
 nnoremap <leader>r :execute funcs#get_run_command()<CR>
-nnoremap <C-p> :call <SID>EditCallback($FZF_CTRL_T_COMMAND. ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
-xnoremap <C-p> :call <SID>EditCallback($FZF_CTRL_T_COMMAND. ' '. shellescape(funcs#get_visual_selection()). ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
-nmap <leader>fs <C-p>
+nnoremap <C-p> :call plugins#zeef#files()<CR>
+xnoremap <C-p> :call plugins#zeef#files(funcs#get_visual_selection())<CR>
+nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
+xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
 nnoremap <leader>ff :VFind **<Left>
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' $HOME/.cache/vim/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^'. expand('%:p'). '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
-nnoremap <leader>fM :call <SID>Oldfiles()<CR>
+nnoremap <leader>fm :call plugins#zeef#oldfiles()<CR>
+nnoremap <leader>fM :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' ' . g:dot_vim_dir . '/tmp/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^' . expand('%:p') . '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
 nnoremap <leader>fg :RgRegex<Space>
 xnoremap <leader>fg :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>
 nnoremap <leader>fj :RgRegex \b<C-r>=expand('<cword>')<CR>\b<CR>
 xnoremap <leader>fj :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>
+nnoremap <leader>fu :call plugins#zeef#buffer_tags()<CR>
 nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=Dracula --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"')<CR>
-nnoremap <leader>ft :call <SID>EditCallback('filetypes')<CR>
+nnoremap <leader>ft :call plugins#zeef#filetype()<CR>
+nnoremap <leader>fT :call <SID>EditCallback('filetypes')<CR>
 nnoremap <leader>fy :registers<CR>:normal! "p<Left>
 xnoremap <leader>fy :<C-u>registers<CR>:normal! gv"p<Left>
-" nnoremap <silent> <leader>b :silent execute 'Lexplore'. (expand('%') != '' ? ' %:h' : '') <bar> if &filetype == 'netrw' <bar> execute 'normal ^'. repeat('-', count(expand('#:~:.'), '/')) <bar> call search(' \zs'. expand('#:t'). '\(\*\\|@\)\?\ze\(\s\\|$\)') <bar> endif<CR>
+" nnoremap <silent> <leader>b :silent execute 'Lexplore' . (expand('%') != '' ? ' %:h' : '') <bar> if &filetype == 'netrw' <bar> execute 'normal ^' . repeat('-', count(expand('#:~:.'), '/')) <bar> call search(' \zs' . expand('#:t') . '\(\*\\|@\)\?\ze\(\s\\|$\)') <bar> endif<CR>
 " 7.4 doesn't have Lexplore and netrw has many issues
-nnoremap <silent> <leader>b :let @x = ' \zs'. expand('%:t'). '\(\*\\|@\)\?\ze\(\s\\|$\)' <bar> let @y = len(split(expand('%:~:.'), '/')) - 1 <bar> silent execute (exists(':Lexplore') ? 'L' : 'V'). 'explore'. (expand('%') != '' ? ' %:h' : '') <bar> if &filetype == 'netrw' <bar> execute @y > 0 ? 'normal '. repeat('-', @y) : '' <bar> call search(@x) <bar> execute 'normal! zb' <bar> endif<CR>
+nnoremap <silent> <leader>b :let @x = ' \zs' . expand('%:t') . '\(\*\\|@\)\?\ze\(\s\\|$\)' <bar> let @y = len(split(expand('%:~:.'), '/')) - 1 <bar> silent execute (exists(':Lexplore') ? 'L' : 'V') . 'explore' . (expand('%') != '' ? ' %:h' : '') <bar> if &filetype == 'netrw' <bar> execute @y > 0 ? 'normal ' . repeat('-', @y) : '' <bar> call search(@x) <bar> execute 'normal! zb' <bar> endif<CR>
 nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
@@ -277,50 +284,50 @@ augroup AutoCommands
   autocmd FileType * setlocal formatoptions=jql
   autocmd FileType json setlocal formatprg=python\ -m\ json.tool
   autocmd FileType help,man nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
-  autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn:execute 'cd '. b:netrw_curdir<CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q| nmap <buffer> a %
+  autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn:execute 'cd ' . b:netrw_curdir<CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q| nmap <buffer> a %
   autocmd BufReadPost quickfix setlocal nobuflisted modifiable | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> o <CR>:cclose<CR>
 augroup END
 
 command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
 command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute 'normal! ``'
 command! ShowHighlightGroups echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
-command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | read ++edit # | 0d_ | diffthis'
-command! Grt silent execute 'cd '. fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' '). ';'), ':h'))
-command! -nargs=* Gdiff execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype='. &filetype. ' | file !git\ show\ <args>:'. expand('%:~:.'). ' | silent read !git show <args>:'. expand('%:~:.') | 0d_ | diffthis
-command! -nargs=* Gblame call setbufvar(winbufnr(popup_atcursor(systemlist('cd '. shellescape(fnamemodify(resolve(expand('%:p')), ':h')). ' && git log --no-merges -n 1 -L '. shellescape(line('v'). ','. line('.'). ':'. resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')
-command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype='. &filetype. ' | put =getbufline('. bufnr('.'). ', <line1>, <line2>) | resize '. min([<line2>-<line1>+2, &lines * 2/5]). '| else | resize '. min([15, &lines * 2/5]). '| endif' | if '<bang>' != '' | execute 'read !'. <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
+command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=' . &filetype . ' | read ++edit # | 0d_ | diffthis'
+command! Grt silent execute 'cd ' . fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' ') . ';'), ':h'))
+command! -nargs=* Gdiff execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype=' . &filetype . ' | file !git\ show\ <args>:' . expand('%:~:.') . ' | silent read !git show <args>:' . expand('%:~:.') | 0d_ | diffthis
+command! -nargs=* Gblame call setbufvar(winbufnr(popup_atcursor(systemlist('cd ' . shellescape(fnamemodify(resolve(expand('%:p')), ':h')) . ' && git log --no-merges -n 1 -L ' . shellescape(line('v') . ',' . line('.') . ':' . resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')
+command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr('.') . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
 command! -complete=file -nargs=+ VFind call s:Grep('glob', <q-args>)
-command! -nargs=* VGrep execute 'vimgrep /'. escape(<q-args>, '/'). '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
-command! -nargs=* VGrepNoRegex execute 'vimgrep /'. substitute(escape(<q-args>, '/\.*$^~['), '\n', '\\n', 'g'). '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
-command! -complete=file -nargs=+ Find call s:Grep('find -L . -type f -iname', shellescape(<q-args>))
-command! -nargs=+ Grep call s:Grep('grep --ignore-case --line-number -I -R', '-- '. shellescape(<q-args>). ' .')
-command! -nargs=+ GrepNoRegex call s:Grep('grep --ignore-case --line-number -I -R --fixed-strings', '-- '. shellescape(<q-args>). ' .')
-command! -complete=file -nargs=+ GFind call s:Grep('git ls-files', '-- '. shellescape(<q-args>))
-command! -nargs=+ GGrep call s:Grep('git grep -n --ignore-case', '-- '. shellescape(<q-args>))
-command! -nargs=+ GGrepNoRegex call s:Grep('git grep -n --ignore-case --fixed-strings', '-- '. shellescape(<q-args>))
+command! -nargs=* VGrep execute 'vimgrep /' . escape(<q-args>, '/') . '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
+command! -nargs=* VGrepNoRegex execute 'vimgrep /' . substitute(escape(<q-args>, '/\.*$^~['), '\n', '\\n', 'g') . '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
+command! -complete=file -nargs=+ Find call s:Grep('find -L . -type f -not -path "*/.git/*" -iname', shellescape(<q-args>))
+command! -nargs=+ Grep call s:Grep('grep --ignore-case --line-number -I -R', '-- ' . shellescape(<q-args>) . ' .')
+command! -nargs=+ GrepNoRegex call s:Grep('grep --ignore-case --line-number -I -R --fixed-strings', '-- ' . shellescape(<q-args>) . ' .')
+command! -complete=file -nargs=+ GFind call s:Grep('git ls-files', '-- ' . shellescape(<q-args>))
+command! -nargs=+ GGrep call s:Grep('git grep -n --ignore-case', '-- ' . shellescape(<q-args>))
+command! -nargs=+ GGrepNoRegex call s:Grep('git grep -n --ignore-case --fixed-strings', '-- ' . shellescape(<q-args>))
 command! -nargs=+ Rg call s:Grep('rg --vimgrep', <q-args>)
 command! -complete=file -nargs=+ RgFind call s:Grep('rg --vimgrep --files -g', shellescape(<q-args>))
-command! -nargs=+ RgRegex call s:Grep('rg --vimgrep', '-- '. shellescape(<q-args>))
-command! -nargs=+ RgNoRegex call s:Grep('rg --vimgrep --fixed-strings', '-- '. shellescape(<q-args>))
+command! -nargs=+ RgRegex call s:Grep('rg --vimgrep', '-- ' . shellescape(<q-args>))
+command! -nargs=+ RgNoRegex call s:Grep('rg --vimgrep --fixed-strings', '-- ' . shellescape(<q-args>))
 
 function! s:Grep(prg, pattern)
   let saved_errorformat = &errorformat
   set errorformat=%f:%l:%c:%m,%f:%l:%m,%f
   if a:prg == 'glob'
-    let command = a:pattern[0] == '*' ? '{**/.'. a:pattern. ',**/'. a:pattern. '}' : '**/'. a:pattern
+    let command = a:pattern[0] == '*' ? '{**/.' . a:pattern . ',**/' . a:pattern . '}' : '**/' . a:pattern
     if a:pattern[0] == '*'  " hidden file needs **/.*pat, {**/.*pat,**/*pat} in `command` is faster but depends on &shell and doesn't work on windows and some bash
-      cgetexpr glob('**/.'. a:pattern, 0, 1)
-      caddexpr glob('**/'. a:pattern, 0, 1)
+      cgetexpr filter(glob('**/.' . a:pattern, 0, 1), '!isdirectory(v:val)')
+      caddexpr filter(glob('**/' . a:pattern, 0, 1), '!isdirectory(v:val)')
     else
-      cgetexpr glob(command, 0, 1)
+      cgetexpr filter(glob(command, 0, 1), '!isdirectory(v:val)')
     endif
   else
-    let command = a:prg. ' '. a:pattern
+    let command = a:prg . ' ' . a:pattern
     cgetexpr systemlist(command)
   endif
   let &errorformat = saved_errorformat
   let len = len(getqflist())
-  silent! call setqflist([], 'a', {'title': '('. len. ') '. command })  " setqflist() does not support 'title' in 7.4
+  silent! call setqflist([], 'a', {'title': '(' . len . ') ' . command })  " setqflist() does not support 'title' in 7.4
   if len > 1
     copen
   else
@@ -330,13 +337,7 @@ endfunction
 function! s:Oldfiles()
   let saved_errorformat = &errorformat
   set errorformat=%f
-  if &shell =~ '\(bash\|zsh\)$'
-    let MRU = systemlist('awk ''$1 == ">" {print $2}'' $HOME/.cache/vim/viminfo | sed "s,^~/,$HOME/," | grep -v "/vim/.*/doc/.*.txt\|.*COMMIT_EDITMSG\|^'. expand('%:p'). '$" | while IFS= read -r file; do test -f "$file" && echo "$file"; done')
-    cgetexpr MRU
-  else
-    call filter(v:oldfiles, 'filereadable(expand(v:val)) && expand(v:val) !~ "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^'. expand('%:p'). '$"')
-    cgetexpr v:oldfiles
-  endif
+  cgetexpr plugins#zeef#filter_oldfiles()
   let &errorformat = saved_errorformat
   copen
 endfunction
@@ -365,29 +366,29 @@ function! s:ToggleTail()
     augroup END
   endif
   let s:tail_on = !s:tail_on
-  echo 'checktime loop '. (s:tail_on ? 'on' : 'off')
+  echo 'checktime loop ' . (s:tail_on ? 'on' : 'off')
 endfunction
 function! s:EditCallback(command) abort
   let sink = 'edit '
   let tempfile = tempname()
   if a:command == 'lf'
-    execute 'silent !lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path='. fnameescape(tempfile). ' "'. expand('%'). '"'
+    execute 'silent !lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path=' . fnameescape(tempfile) . ' "' . expand('%') . '"'
   elseif a:command == 'filetypes'
     let sink = 'set filetype='
-    let $fzftemp = join(sort(map(split(globpath(&rtp, 'syntax/*.vim'), '\n'), 'fnamemodify(v:val, ":t:r")')), '\n')
-    execute 'silent !echo -e $fzftemp | fzf > '. fnameescape(tempfile)
+    let $fzftemp = join(sort(map(globpath(&rtp, 'syntax/*.vim', 0, 1), 'fnamemodify(v:val, ":t:r")')), '\n')
+    execute 'silent !echo -e $fzftemp | fzf > ' . fnameescape(tempfile)
     let $fzftemp = ''  " cannot unlet environment variables in 7.4
   else
-    execute 'silent !'. a:command. ' > '. fnameescape(tempfile)
+    execute 'silent !' . a:command . ' > ' . fnameescape(tempfile)
   endif
   try
     if filereadable(tempfile)
       for line in readfile(tempfile)
         if sink == 'edit ' && line =~ ':\d'
           let args = split(line, ':')
-          execute 'edit +'. args[1]. ' '. fnameescape(args[0])
+          execute 'edit +' . args[1] . ' ' . fnameescape(args[0])
         else
-          execute sink. fnameescape(line)
+          execute sink . fnameescape(line)
         endif
       endfor
     endif
@@ -405,20 +406,20 @@ inoremap <expr> <Down> pumvisible() ? '<C-n>' : '<C-o>gj'
 inoremap <expr> <Up> pumvisible() ? '<C-p>' : '<C-o>gk'
 
 nnoremap <leader>ac :edit $MYVIMRC<CR>
-nnoremap <expr> yow ':setlocal '. (&wrap ? 'no' : ''). 'wrap<CR>'
-nnoremap <expr> yos ':setlocal '. (&spell ? 'no' : ''). 'spell<CR>'
-nnoremap <expr> yon ':setlocal '. (&number ? 'no' : ''). 'number<CR>'
-nnoremap <expr> yor ':setlocal '. (&relativenumber ? 'no' : ''). 'relativenumber<CR>'
-nnoremap <expr> you ':setlocal '. (&cursorline ? 'no' : ''). 'cursorline<CR>'
-nnoremap <expr> yoc ':setlocal '. (&cursorcolumn ? 'no' : ''). 'cursorcolumn<CR>'
+nnoremap <expr> yow ':setlocal ' . (&wrap ? 'no' : '') . 'wrap<CR>'
+nnoremap <expr> yos ':setlocal ' . (&spell ? 'no' : '') . 'spell<CR>'
+nnoremap <expr> yon ':setlocal ' . (&number ? 'no' : '') . 'number<CR>'
+nnoremap <expr> yor ':setlocal ' . (&relativenumber ? 'no' : '') . 'relativenumber<CR>'
+nnoremap <expr> you ':setlocal ' . (&cursorline ? 'no' : '') . 'cursorline<CR>'
+nnoremap <expr> yoc ':setlocal ' . (&cursorcolumn ? 'no' : '') . 'cursorcolumn<CR>'
 nnoremap yox :setlocal cursorline! cursorcolumn!<CR>
-nnoremap <expr> yov ':setlocal virtualedit='. (&virtualedit == 'block' ? 'all' : 'block'). '<CR>'
+nnoremap <expr> yov ':setlocal virtualedit=' . (&virtualedit == 'block' ? 'all' : 'block') . '<CR>'
 nnoremap <expr> yod &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 nnoremap <expr> yop &paste ? ':setlocal nopaste<CR>' : ':setlocal paste<CR>o'
 nnoremap yoF :call <SID>ToggleTail()<CR>
-nnoremap <expr> yog g:RooterCmd == '' ? ':execute "Grt" <bar> let g:RooterCmd = "Grt" <bar> echo "Git rooter enabled"<CR>' : ':silent execute "cd ". (expand("%") == "" ? $PWD : expand("%:p:h")) <bar> let g:RooterCmd = "" <bar> echo "Git rooter disabled"<CR>'
-nnoremap <expr> [<Space> 'mx'. v:count1. 'O<Esc>`x'
-nnoremap <expr> ]<Space> 'mx'. v:count1. 'o<Esc>`x'
+nnoremap <expr> yog g:RooterCmd == '' ? ':execute "Grt" <bar> let g:RooterCmd = "Grt" <bar> echo "Git rooter enabled"<CR>' : ':silent execute "cd " . (expand("%") == "" ? $PWD : expand("%:p:h")) <bar> let g:RooterCmd = "" <bar> echo "Git rooter disabled"<CR>'
+nnoremap <expr> [<Space> 'mx' . v:count1 . 'O<Esc>`x'
+nnoremap <expr> ]<Space> 'mx' . v:count1 . 'o<Esc>`x'
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 nnoremap [q :cprevious<CR>
@@ -457,15 +458,15 @@ nnoremap <silent> <M-j> :call plugins#tmux_navigator#resize('j')<CR>
 nnoremap <silent> <M-k> :call plugins#tmux_navigator#resize('k')<CR>
 nnoremap <silent> <M-l> :call plugins#tmux_navigator#resize('l')<CR>
 nnoremap <expr> gc plugins#commentary#go()
-nnoremap <expr> gcc plugins#commentary#go(). '_'
+nnoremap <expr> gcc plugins#commentary#go() . '_'
 xnoremap <expr> gc plugins#commentary#go()
 onoremap <silent> gc :<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>
 nnoremap <silent> ds :<C-u>call plugins#surround#dosurround(plugins#surround#inputtarget())<CR>
 nnoremap <silent> cs :<C-u>call plugins#surround#changesurround()<CR>
 nnoremap <silent> cS :<C-u>call plugins#surround#changesurround(1)<CR>
 nmap yss ysiw
-nnoremap <expr> ySs plugins#surround#opfunc2('setup'). '_'
-nnoremap <expr> ySS plugins#surround#opfunc2('setup'). '_'
+nnoremap <expr> ySs plugins#surround#opfunc2('setup') . '_'
+nnoremap <expr> ySS plugins#surround#opfunc2('setup') . '_'
 nnoremap <expr> ys plugins#surround#opfunc('setup')
 nmap yS ysg_
 xnoremap <silent> s :<C-u>call plugins#surround#opfunc(visualmode(),visualmode() ==# 'V' ? 1 : 0)<CR>
@@ -499,19 +500,12 @@ if has('terminal')
   tnoremap <silent> <M-j> <C-w>:call plugins#tmux_navigator#resize('j')<CR>
   tnoremap <silent> <M-k> <C-w>:call plugins#tmux_navigator#resize('k')<CR>
   tnoremap <silent> <M-l> <C-w>:call plugins#tmux_navigator#resize('l')<CR>
-  nnoremap <C-b> :execute 'terminal ++close ++rows='. min([15, &lines * 2/5])<CR>
-  nnoremap <leader>to :let $VIM_DIR=expand('%:p:h')<CR>:execute 'terminal ++close ++rows='. min([15, &lines * 2/5])<CR>cd $VIM_DIR<CR>
+  nnoremap <C-b> :execute 'terminal ++close ++rows=' . min([15, &lines * 2/5])<CR>
+  nnoremap <leader>to :let $VIM_DIR=expand('%:p:h')<CR>:execute 'terminal ++close ++rows=' . min([15, &lines * 2/5])<CR>cd $VIM_DIR<CR>
   nnoremap <leader>tO :terminal ++curwin ++noclose<CR>
   nnoremap <leader>th :terminal ++close<CR>
   nnoremap <leader>tv :vertical terminal ++close<CR>
   nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
   command! Glow terminal ++curwin glow %
   call funcs#map_vim_send_terminal()
-endif
-
-if exists('g:plugs')
-  nnoremap <C-p> :FZF<CR>
-  xnoremap <C-p> :<C-u>execute 'FZF --query='. funcs#get_visual_selection()<CR>
-else
-  let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS. ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
 endif

@@ -102,7 +102,7 @@ function! s:DoCompletion() abort
 
   if !s:omni_info.on || s:omni_info.col != col || s:omni_info.line != line
     let last_char = line_content[col - 2]
-    if last_char == '/' && line_content[match(line_content, '\S\+\%'. col. 'c')] =~ '\W'
+    if last_char == '/' && line_content[match(line_content, '\S\+\%' . col . 'c')] =~ '\W'
       let s:omni_info = {'on': 1, 'line': line, 'col': col}
       call feedkeys("\<C-x>\<C-f>\<C-p>", 'in')
       return
@@ -114,7 +114,7 @@ function! s:DoCompletion() abort
   endif
   let s:omni_info.on = 0
 
-  let base_start = match(line_content, '\w\+\%'. col. 'c')
+  let base_start = match(line_content, '\w\+\%' . col . 'c')
   let col_index = col - 2
   let base = line_content[base_start : col_index]
   if len(base) < g:fpc_min_match_len
@@ -145,7 +145,7 @@ function! s:RefreshBufWords(options) abort  " {'type': 0 = refresh current buffe
     if s:prev_line == a:options.line
       let curr_line = getline('.')
       let base_end = match(curr_line, '\W', col('.'))
-      let buf_string = curr_line[:a:options.col]. (base_end >= 0 ? curr_line[base_end :] : '')
+      let buf_string = curr_line[:a:options.col] . (base_end >= 0 ? curr_line[base_end :] : '')
     elseif s:prev_line < a:options.line
       let buf_string = join(getline(s:prev_line, a:options.line), "\n")
     else  " editing text above, add a few more lines down in case new lines are added above
@@ -158,9 +158,9 @@ function! s:RefreshBufWords(options) abort  " {'type': 0 = refresh current buffe
     let line_index = line('.') - 1
     let col = col('.')
     let curr_line = lines[line_index]
-    let base_start = match(curr_line, '\w\+\%'. col. 'c')
+    let base_start = match(curr_line, '\w\+\%' . col . 'c')
     let base_end = match(curr_line, '\W', col)
-    let lines[line_index] = curr_line[:base_start]. curr_line[base_end :]
+    let lines[line_index] = curr_line[:base_start] . curr_line[base_end :]
     let buf_string = join(lines, "\n")
   endif
 
@@ -178,7 +178,7 @@ function! s:GetWordsList(f) abort
 
   let s:curr_bwords_len = len(all_words)  " s:curr_bwords_len > 0 && all_words[:s:curr_bwords_len-1] will be words in current buffer
   let curr_buf = bufnr('%')
-  for bufnr in filter(range(1, bufnr('$')), 'bufloaded(v:val) && v:val != '. curr_buf)
+  for bufnr in filter(range(1, bufnr('$')), 'bufloaded(v:val) && v:val != ' . curr_buf)
     let buf_words_dict = getbufvar(bufnr, 'fpc_words_dict', {})
     if len(buf_words_dict) > 0 && len(buf_words_dict) < 20000
       call extend(all_words, a:f != '' ? filter(keys(buf_words_dict), 'v:val =~ a:f') : keys(buf_words_dict))
@@ -191,7 +191,7 @@ function! s:FuzzyMatch(base) abort
   let base_arr = split(a:base, '\zs')
   let f = join(base_arr, '\w*')  " regex to filter out unmatched words
   let r = join(base_arr, '\w\{-}')  " regex to find matched rank
-  let words = a:base =~ '^'. s:prev_base ? s:prev_list : s:GetWordsList(f)
+  let words = a:base =~ '^' . s:prev_base ? s:prev_list : s:GetWordsList(f)
 
   if len(a:base) == g:fpc_min_match_len  " save word list if filtered with smallest base
     let s:prev_list = words
@@ -205,8 +205,8 @@ function! s:FuzzyMatch(base) abort
 
   let result = map(curr_buf_words, '{"word": v:val, "kind": "[ID]", "r": matchend(v:val, r)}')
   call extend(result, map(other_buf_words, '{"word": v:val, "kind": "[Buffer]", "r": 2 * matchend(v:val, r)}'))
-  " return filter(sort(result, {i1, i2 -> i1.r > i2.r ? 1 : -1})[:g:fpc_max_matches], 'len(v:val.word) < '. g:fpc_max_keyword_len)  " lambda compare in this order is faster than Funcref
-  return filter(sort(result, 's:CompareTo')[:g:fpc_max_matches], 'len(v:val.word) < '. g:fpc_max_keyword_len)
+  " return filter(sort(result, {i1, i2 -> i1.r > i2.r ? 1 : -1})[:g:fpc_max_matches], 'len(v:val.word) < ' . g:fpc_max_keyword_len)  " lambda compare in this order is faster than Funcref
+  return filter(sort(result, 's:CompareTo')[:g:fpc_max_matches], 'len(v:val.word) < ' . g:fpc_max_keyword_len)
 endfunction
 
 function! s:CompareTo(i1, i2)
@@ -214,5 +214,5 @@ function! s:CompareTo(i1, i2)
 endfunction
 
 function! s:VimFuzzyMatch(base) abort
-  return map(filter(matchfuzzy(s:GetWordsList(''), a:base)[:g:fpc_max_matches], 'len(v:val) < '. g:fpc_max_keyword_len), '{"word": v:val, "kind": "[ID]"}')
+  return map(filter(matchfuzzy(s:GetWordsList(''), a:base)[:g:fpc_max_matches], 'len(v:val) < ' . g:fpc_max_keyword_len), '{"word": v:val, "kind": "[ID]"}')
 endfunction

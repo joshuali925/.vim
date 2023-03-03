@@ -1,0 +1,5 @@
+*
+!.gitignore
+
+# only ignores ./undo/.gitignore
+!/undo/

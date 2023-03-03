@@ -3823,3 +3823,10 @@ map i $$PAGER "$f"
             vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#706964" })
         end,
     },
+
+" =======================================================
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+if exists('g:plugs')
+  nnoremap <C-p> :FZF<CR>
+  xnoremap <C-p> :<C-u>execute 'FZF --query='. funcs#get_visual_selection()<CR>
+endif

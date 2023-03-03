@@ -95,7 +95,7 @@ hi link DiffRemoved DiffDelete
 hi link DiffLine DiffText
 
 " markdown
-hi link markdownUrl NonText
+hi link markdownUrl Constant
 hi link markdownCode Constant
 hi link markdownCodeDelimiter Constant
 hi link markdownCodeBlock Identifier

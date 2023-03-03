@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 if [ ! -f "$HOME/.config/lf/lfrc" ]; then
-  mkdir -p ~/.local/share/lf ~/.config/lf ~/.cache
+  mkdir -p ~/.local/share/lf ~/.config/lf
   ln -sv ~/.vim/config/lfrc ~/.config/lf/lfrc
 fi
 
