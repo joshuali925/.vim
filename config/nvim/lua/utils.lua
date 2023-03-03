@@ -134,7 +134,7 @@ function M.toggle_lf()
     if lf_term == nil or lf_height ~= curr_height or lf_width ~= curr_width then
         local lf_selection_path = os.tmpname()
         lf_term = require("toggleterm.terminal").Terminal:new({
-            cmd = ('lf -last-dir-path="$HOME/.cache/lf_dir" -selection-path=%s %s'):format(lf_selection_path, vim.fn.expand("%")),
+            cmd = ('lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path=%s %s'):format(lf_selection_path, vim.fn.expand("%")),
             direction = "float",
             float_opts = { height = curr_height, width = curr_width },
             on_close = function(_)

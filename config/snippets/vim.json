@@ -4,7 +4,7 @@
     "body": [
       "let start_time = reltime()",
       "$0",
-      "echomsg 'elapsed time: '. reltimestr(reltime(start_time)). 's'"
+      "echomsg 'elapsed time: ' . reltimestr(reltime(start_time)) . 's'"
     ]
   }
 }

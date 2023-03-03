@@ -1,9 +1,9 @@
 function! funcs#complete_word(findstart, base)
   if a:findstart
-    return match(getline('.'), '\S\+\%'. col('.'). 'c')
+    return match(getline('.'), '\S\+\%' . col('.') . 'c')
   else
     let words = split(join(getline(1, '$'), "\n"))
-    let matched = len(a:base) ? exists('*matchfuzzy') ? matchfuzzy(words, a:base) : filter(words, 'match(v:val, "\\V". a:base) != -1') : words
+    let matched = len(a:base) ? exists('*matchfuzzy') ? matchfuzzy(words, a:base) : filter(words, 'match(v:val, "\\V" . a:base) != -1') : words
     return map(matched, '{"word": v:val, "kind": "[WORD]"}')
   endif
 endfunction
@@ -52,7 +52,7 @@ endfunction
 
 function! funcs#edit_register() abort
   let r = nr2char(getchar())
-  call feedkeys('q:ilet @'. r. " = \<C-r>\<C-r>=string(@". r. ")\<CR>\<Esc>0f'", 'n')
+  call feedkeys('q:ilet @' . r . " = \<C-r>\<C-r>=string(@" . r . ")\<CR>\<Esc>0f'", 'n')
 endfunction
 
 function! funcs#quit(buffer_mode, force) abort
@@ -72,14 +72,14 @@ function! funcs#quit(buffer_mode, force) abort
   elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (win_len > 1 && len(filter(range(1, win_len), 'v:val != winnr() && index(sidebars, getbufvar(winbufnr(v:val), "&filetype")) >= 0')) == win_len - 1 && (buf_len > 1 || bufname('%') != ''))
     call plugins#bbye#bdelete('bdelete', (a:force ? '!' : ''), '')
   else
-    execute 'quit'. (a:force ? '!' : '')
+    execute 'quit' . (a:force ? '!' : '')
   endif
 endfunction
 
 function! funcs#quit_netrw_and_dirs()
   for i in range(1, bufnr('$'))
     if buflisted(i) && (getbufvar(i, '&filetype') == 'netrw' || isdirectory(bufname(i)) == 1)
-      execute 'bdelete '. i
+      execute 'bdelete ' . i
     endif
   endfor
   if &filetype == 'netrw'
@@ -88,22 +88,22 @@ function! funcs#quit_netrw_and_dirs()
 endfunction
 
 function! funcs#print_variable(visual, printAbove) abort
-  let new_line = 'normal! '. (a:printAbove ? 'O' : 'o'). "\<Space>\<BS>"
+  let new_line = 'normal! ' . (a:printAbove ? 'O' : 'o') . "\<Space>\<BS>"
   let word = a:visual ? funcs#get_visual_selection() : expand('<cword>')
   let print = {}
-  let print['python'] = "print('❗". word. ":', ". word. ')'
-  let print['javascript'] = "console.log('❗". word. ":', ". word. ');'
+  let print['python'] = "print('❗" . word . ":', " . word . ')'
+  let print['javascript'] = "console.log('❗" . word . ":', " . word . ');'
   let print['typescript'] = print['javascript']
   let print['typescriptreact'] = print['javascript']
-  let print['java'] = 'System.out.println("[" + getClass().getSimpleName() + " " + ('. word. ').getClass().getSimpleName() + "] ❗'. word. ': " + '. word. ');'
-  let print['kotlin'] = 'println("[${javaClass.simpleName}] ❗'. word. ': " + '. word. ')'
-  let print['groovy'] = 'println "❗'. word. ': " + '. word
-  let print['vim'] = "echomsg '❗". word. ":' ". word
-  let print['lua'] = 'print("❗'. word. ': " .. vim.inspect('. word. '))'
-  let print['sh'] = 'echo "❗'. word. ': ${'. word. '}"'
+  let print['java'] = 'System.out.println("[" + getClass().getSimpleName() + " " + (' . word . ').getClass().getSimpleName() + "] ❗' . word . ': " + ' . word . ');'
+  let print['kotlin'] = 'println("[${javaClass.simpleName}] ❗' . word . ': " + ' . word . ')'
+  let print['groovy'] = 'println "❗' . word . ': " + ' . word
+  let print['vim'] = "echomsg '❗" . word . ":' " . word
+  let print['lua'] = 'print("❗' . word . ': " . . vim.inspect(' . word . '))'
+  let print['sh'] = 'echo "❗' . word . ': ${' . word . '}"'
   let print['bash'] = print['sh']
   let print['zsh'] = print['sh']
-  let print['tmux'] = 'display-message "❗'. word. '"'
+  let print['tmux'] = 'display-message "❗' . word . '"'
   if has_key(print, &filetype)
     let pos = getcurpos()
     execute new_line
@@ -117,10 +117,10 @@ function! funcs#jest_context() abort
   let pos = getcurpos()
   normal! $
   let regex = '(''\zs[^'']\+\ze'
-  let desc_match = matchstr(getline(search('describe'. regex, 'cbnW')), 'describe'. regex)
-  let it_match = matchstr(getline(search('\(it\|test\)'. regex, 'cbnW')), '\(it\|test\)'. regex)
+  let desc_match = matchstr(getline(search('describe' . regex, 'cbnW')), 'describe' . regex)
+  let it_match = matchstr(getline(search('\(it\|test\)' . regex, 'cbnW')), '\(it\|test\)' . regex)
   call setpos('.', pos)
-  return '"'. desc_match. ' '. it_match. '"'
+  return '"' . desc_match . ' ' . it_match . '"'
 endfunction
 
 function! funcs#get_run_command() abort
@@ -134,7 +134,7 @@ function! funcs#get_run_command() abort
     return user_command
   endif
   if expand('%') =~ '\.test\.[tj]sx\?'
-    return 'TermExec size='. max([10, &columns * 1/2]). " direction=vertical cmd='yarn test ". expand('%'). ' -t '. funcs#jest_context(). ' --coverage -u'. "'"
+    return 'TermExec size=' . max([10, &columns * 1/2]) . " direction=vertical cmd='yarn test " . expand('%') . ' -t ' . funcs#jest_context() . ' --coverage -u' . "'"
   endif
   let run_command = {}
   let run_command['vim'] = 'source %'
@@ -149,7 +149,7 @@ function! funcs#get_run_command() abort
   let run_command['html'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
   let run_command['http'] = 'lua require("rest-nvim").run()'
-  return get(run_command, &filetype, ''). get(b:, 'args', '')
+  return get(run_command, &filetype, '') . get(b:, 'args', '')
 endfunction
 
 function! funcs#get_visual_selection()
@@ -170,9 +170,9 @@ function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text
   set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
   let reg_save = @x
   if a:type =~ '^\d\+$'
-    silent execute 'normal! V'. a:type. '$"xy'
+    silent execute 'normal! V' . a:type . '$"xy'
   elseif a:type =~ '^.$'
-    silent execute "normal! `<". a:type. '`>"xy'
+    silent execute "normal! `<" . a:type . '`>"xy'
   elseif a:type == 'line'
     silent execute "normal! '[V']\"xy"
   elseif a:type == 'block'
@@ -194,15 +194,15 @@ function! s:ActionOpfunc(type)
 endfunction
 function! s:ActionSetup(algorithm)
   let s:encode_algorithm = a:algorithm
-  let &operatorfunc = matchstr(expand('<sfile>'), '<SNR>\d\+_'). 'ActionOpfunc'
+  let &operatorfunc = matchstr(expand('<sfile>'), '<SNR>\d\+_') . 'ActionOpfunc'
 endfunction
 function! s:MapAction(algorithm, key)
-  execute 'nnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>ActionSetup("'. a:algorithm. '")<CR>g@'
-  execute 'xnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>DoAction("'. a:algorithm. '", visualmode())<CR>'
-  execute 'nnoremap <silent> <Plug>actionsLine'.a:algorithm.' :<C-U>call <SID>DoAction("'. a:algorithm. '", v:count1)<CR>'
-  execute 'nmap '. a:key. '  <Plug>actions'. a:algorithm
-  execute 'xmap '. a:key. '  <Plug>actions'. a:algorithm
-  execute 'nmap '. a:key.a:key[strlen(a:key)-1]. ' <Plug>actionsLine'. a:algorithm
+  execute 'nnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>ActionSetup("' . a:algorithm . '")<CR>g@'
+  execute 'xnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>DoAction("' . a:algorithm . '", visualmode())<CR>'
+  execute 'nnoremap <silent> <Plug>actionsLine'.a:algorithm.' :<C-U>call <SID>DoAction("' . a:algorithm . '", v:count1)<CR>'
+  execute 'nmap ' . a:key . '  <Plug>actions' . a:algorithm
+  execute 'xmap ' . a:key . '  <Plug>actions' . a:algorithm
+  execute 'nmap ' . a:key.a:key[strlen(a:key)-1] . ' <Plug>actionsLine' . a:algorithm
 endfunction
 
 function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
@@ -211,13 +211,13 @@ function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
     let buflen = len(a:str)
     let copied = 0
     while buflen > copied
-      if copied > 0 && input('Total: '. buflen. ', copied: '. copied. ', continue? [Y/n] ') =~ '^[Nn]$'
+      if copied > 0 && input('Total: ' . buflen . ', copied: ' . copied . ', continue? [Y/n] ') =~ '^[Nn]$'
         break
       endif
       call system('y', a:str[copied :copied + 74993])
       let copied += 74994
     endwhile
-    echomsg '[osc52] Copied '. min([buflen, copied]). ' characters.'
+    echomsg '[osc52] Copied ' . min([buflen, copied]) . ' characters.'
   endfunction
   call <SID>MapAction('CopyWithOSCYankScript', '<leader>y')
   nmap <leader>Y <leader>y$
@@ -240,7 +240,7 @@ function! funcs#map_vim_send_terminal()
       let lines = getline(getpos("'<")[1], getpos("'>")[1])
       let indent = match(lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
       for line in lines
-        call term_sendkeys(buff_n, (match(line, '[^ \t]') ? line[indent:] : line). "\<CR>")
+        call term_sendkeys(buff_n, (match(line, '[^ \t]') ? line[indent:] : line) . "\<CR>")
         sleep 10m
       endfor
     endif
@@ -255,17 +255,17 @@ function! funcs#decompile_java_class() abort
   if glob('%') != ''
     silent %!java -jar ~/.local/lib/cfr.jar %
   else
-    write! ~/.cache/vim/cfr-temp.class
-    silent %!java -jar ~/.local/lib/cfr.jar ~/.cache/vim/cfr-temp.class
-    call system('rm -f ~/.cache/vim/cfr-temp.class')
+    write! ~/.vim/tmp/cfr-temp.class
+    silent %!java -jar ~/.local/lib/cfr.jar ~/.vim/tmp/cfr-temp.class
+    call system('rm -f ~/.vim/tmp/cfr-temp.class')
   endif
   set nomodified readonly filetype=java
 endfunction
 
 function! funcs#ctags() abort
   try
-    silent execute 'ltag '. expand('<cword>')
-    echo 'tag 1 of '. len(getloclist(0))
+    silent execute 'ltag ' . expand('<cword>')
+    echo 'tag 1 of ' . len(getloclist(0))
   catch /^Vim\%((\a\+)\)\=:E433:/
     call funcs#ctags_create_and_jump()
   endtry
@@ -274,10 +274,10 @@ endfunction
 function! funcs#ctags_create_and_jump() abort
   let answer = input('Generate ctags for language ("all" for all supported, empty to cancel): ', &filetype, 'filetype')  " language list: ctags --list-languages
   if answer != ''
-    let args = answer == 'all' ? '' : '--languages='. answer
+    let args = answer == 'all' ? '' : '--languages=' . answer
     " TODO https://github.com/universal-ctags/ctags/issues/2667
-    execute '!ctags --exclude=.git --exclude=node_modules --exclude=venv --langmap=TypeScript:.ts.tsx -R '. args
-    silent execute 'ltag '. expand('<cword>')
-    echo 'tag 1 of '. len(getloclist(0))
+    execute '!ctags --exclude=.git --exclude=node_modules --exclude=venv --langmap=TypeScript:.ts.tsx -R ' . args
+    silent execute 'ltag ' . expand('<cword>')
+    echo 'tag 1 of ' . len(getloclist(0))
   endif
 endfunction

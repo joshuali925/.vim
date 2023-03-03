@@ -32,8 +32,8 @@ return {
         cmd = "TermExec",
         keys = {
             { "<C-b>", "<Cmd>ToggleTerm<CR>" },
-            { "<leader>to", "<Cmd>execute 'ToggleTerm dir='. expand('%:p:h')<CR>" },
-            { "<leader>tv", "<Cmd>execute 'ToggleTerm direction=vertical size='. &columns / 2<CR>" },
+            { "<leader>to", "<Cmd>execute 'ToggleTerm dir=' . expand('%:p:h')<CR>" },
+            { "<leader>tv", "<Cmd>execute 'ToggleTerm direction=vertical size=' . &columns / 2<CR>" },
             { "<leader>tt", "<Cmd>ToggleTerm direction=tab<CR>" },
             { "<leader>tp", "<Cmd>ToggleTerm direction=float<CR>" },
             { "<leader>te", "<Cmd>lua require('utils').send_to_toggleterm()<CR>g@" },
@@ -81,7 +81,7 @@ return {
                             { key = { "zR" }, cb = tree_cb("expand_all") },
                             { key = { "[g" }, cb = tree_cb("prev_git_item") },
                             { key = { "]g" }, cb = tree_cb("next_git_item") },
-                            { key = { "q" }, cb = "<Cmd>execute 'NvimTreeResize '. winwidth(0) <bar> NvimTreeClose<CR>" },
+                            { key = { "q" }, cb = "<Cmd>execute 'NvimTreeResize ' . winwidth(0) <bar> NvimTreeClose<CR>" },
                             { key = { "<Left>" }, cb = "<Cmd>normal! zh<CR>" },
                             { key = { "<Right>" }, cb = "<Cmd>normal! zl<CR>" },
                             { key = { "-" }, cb = "<Cmd>normal! $<CR>" },
@@ -277,7 +277,7 @@ return {
                         table.insert(content, { "Color convert", "CccConvert", "Convert color between hex, rgb, hsl" })
                         table.insert(content, { "--", "" })
                     end
-                    table.insert(content, { "Built-in d&ocs", [[execute &filetype == "lua" ? "help ". expand('<cword>') : "normal! K"]], "Open vim built in help" })
+                    table.insert(content, { "Built-in d&ocs", [[execute &filetype == "lua" ? "help " . expand('<cword>') : "normal! K"]], "Open vim built in help" })
                     vim.fn["quickui#context#open"](content, { index = vim.g["quickui#context#cursor"] or -1 })
                 end,
             },
@@ -303,7 +303,7 @@ return {
                 { "&Yank search matches", [[let @x = '' | %s//\=setreg('X', submatch(0), 'V')/gn | let @" = @x | let @x = '']], "Copy all strings matching current search pattern" },
                 { "Search non-ascii", [[let @/ = '[^\d0-\d127]' | set hlsearch]], [[Search all non-ascii characters, in command line: rg '[^\x00-\x7F]']] },
                 { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
-                { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=". &filetype. " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
+                { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
                 { "Enable colori&zer", [[CccHighlighterEnable]], "Enable colorizer" },
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
@@ -442,13 +442,13 @@ return {
                 { "--", "" },
                 { "OSC &yank", [[lua require("utils").copy_with_osc_yank_script(require("utils").get_visual_selection())]], "Use oscyank script to copy" },
                 { "--", "" },
-                { "Search in &buffers", [[execute 'cexpr []' | execute 'bufdo vimgrepadd /'. substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g'). '/g %' | copen]], "Grep current search pattern in all buffers, add to quickfix" },
-                { "Search in selection", [[call feedkeys('/\%>'. (line("'<") - 1). 'l\%<'. (line("'>") + 1). 'l')]], [[Search in selected lines, to search in previous visual selection use /\%V]] },
+                { "Search in &buffers", [[execute 'cexpr []' | execute 'bufdo vimgrepadd /' . substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g') . '/g %' | copen]], "Grep current search pattern in all buffers, add to quickfix" },
+                { "Search in selection", [[call feedkeys('/\%>' . (line("'<") - 1) . 'l\%<' . (line("'>") + 1) . 'l')]], [[Search in selected lines, to search in previous visual selection use /\%V]] },
             })
             vim.fn["quickui#menu#install"]("&Git", {
                 { "Git &file history", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
                 { "Git l&og", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
-                { "Git &search", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | execute "Git log --all --name-status -S '". substitute(funcs#get_visual_selection(), "'", "''", 'g'). "'"]], "Search selected in all committed versions of files" },
+                { "Git &search", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | execute "Git log --all --name-status -S '" . substitute(funcs#get_visual_selection(), "'", "''", 'g') . "'"]], "Search selected in all committed versions of files" },
                 { "--", "" },
                 { "Git open &remote", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser" },
             })

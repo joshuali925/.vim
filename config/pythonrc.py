@@ -90,7 +90,7 @@ __version__ = "0.9.0"
 
 config = SimpleNamespace(
     ONE_INDENT  = '    ',  # what should we use for indentation ?
-    HISTFILE    = os.path.expanduser("~/.cache/.python_history"),
+    HISTFILE    = os.path.expanduser("~/.vim/tmp/.python_history"),
     HISTSIZE    = -1,
     EDITOR      = os.getenv('EDITOR', 'vi'),
     SHELL       = os.getenv('SHELL', '/bin/bash'),

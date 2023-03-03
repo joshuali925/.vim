@@ -128,7 +128,7 @@ install_dotfiles() {
     git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth=1
   fi
   log '\nCreating directories..'
-  mkdir -pv ~/.cache/{n,}vim/undo ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit}
+  mkdir -pv ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit}
   log '\nLinking configurations..'
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
   echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc

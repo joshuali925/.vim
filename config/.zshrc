@@ -126,7 +126,7 @@ tab-complete-or-cd() {
 zle -N tab-complete-or-cd
 
 run-lf () {
-  lf -last-dir-path="$HOME/.cache/lf_dir" < /dev/tty
+  lf -last-dir-path="$HOME/.vim/tmp/lf_dir" < /dev/tty
   zle reset-prompt
 }
 zle -N run-lf
