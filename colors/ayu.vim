@@ -6,7 +6,6 @@ let g:colors_name = 'ayu'
 
 hi Bold gui=bold cterm=bold
 hi Italic gui=italic cterm=italic
-hi Cursor gui=reverse cterm=reverse
 hi Normal guifg=#cbccc6 guibg=#1f2430 ctermfg=252 ctermbg=235
 hi ColorColumn guibg=#191e2a ctermbg=234
 hi Conceal guifg=#5c6773 ctermfg=241

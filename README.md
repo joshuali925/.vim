@@ -20,24 +20,11 @@ docker run -e TERM --network host -w /root -it --rm alpine sh -c '
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"'
 ```
 
-### Windows (cmd)
+### Windows (PowerShell)
 
-```cmd
-setx PROMPT "$p [$d$t]$+$_$g"
-git clone https://github.com/joshuali925/.vim.git %USERPROFILE%\.vim --depth=1
-mklink /J %USERPROFILE%\vimfiles %USERPROFILE%\.vim
-mkdir %LOCALAPPDATA%\lf %APPDATA%\lazygit
-mklink /H %USERPROFILE%\.gitconfig %USERPROFILE%\.vim\config\.gitconfig
-mklink /H %APPDATA%\lazygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
-copy %USERPROFILE%\.vim\config\lfrc %LOCALAPPDATA%\lf\lfrc
-echo set previewer '' >> %LOCALAPPDATA%\lf\lfrc
-echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc
-echo export EDITOR=vim VIM_SYSTEM_CLIPBOARD=1 >> %USERPROFILE%\.bashrc
-
-rmdir /S /Q %LOCALAPPDATA%\nvim
-robocopy %USERPROFILE%\.vim\config\nvim %LOCALAPPDATA%\nvim /e
-del %LOCALAPPDATA%\nvim\autoload
-robocopy %USERPROFILE%\.vim\autoload %LOCALAPPDATA%\nvim\autoload /e
+```powershell
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+irm https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.ps1 | iex
 ```
 
 ### Mac OS

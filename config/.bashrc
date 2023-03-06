@@ -127,7 +127,7 @@ _get_prompt_tail() {
   fi
 }
 
-_disable_prompt_functions() {
+.vim-disable-prompt-command() {
   PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([ \$? != 0 ] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")$ \[\e[0m\]"
   PROMPT_COMMAND=
 }

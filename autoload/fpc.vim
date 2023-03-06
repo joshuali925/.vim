@@ -205,12 +205,13 @@ function! s:FuzzyMatch(base) abort
 
   let result = map(curr_buf_words, '{"word": v:val, "kind": "[ID]", "r": matchend(v:val, r)}')
   call extend(result, map(other_buf_words, '{"word": v:val, "kind": "[Buffer]", "r": 2 * matchend(v:val, r)}'))
-  " return filter(sort(result, {i1, i2 -> i1.r > i2.r ? 1 : -1})[:g:fpc_max_matches], 'len(v:val.word) < ' . g:fpc_max_keyword_len)  " lambda compare in this order is faster than Funcref
-  return filter(sort(result, 's:CompareTo')[:g:fpc_max_matches], 'len(v:val.word) < ' . g:fpc_max_keyword_len)
+  " return filter(sort(result, {i, j -> i.r > j.r ? 1 : -1})[:g:fpc_max_matches], 'len(v:val.word) < ' . g:fpc_max_keyword_len)  " lambda compare in this order is faster than Funcref
+  return filter(sort(result, 's:c')[:g:fpc_max_matches], 'len(v:val.word) < ' . g:fpc_max_keyword_len)
 endfunction
 
-function! s:CompareTo(i1, i2)
-  return a:i1.r > a:i2.r ? 1 : -1
+" Rank function for sorting
+function! s:c(i, j)
+  return a:i.r > a:j.r ? 1 : -1
 endfunction
 
 function! s:VimFuzzyMatch(base) abort

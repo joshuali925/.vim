@@ -6,7 +6,6 @@ let g:colors_name = 'gruvbox'
 
 hi Bold gui=bold cterm=bold
 hi Italic gui=italic cterm=italic
-hi Cursor gui=reverse cterm=reverse
 hi Normal ctermfg=223 ctermbg=235 guifg=#d4be98 guibg=#282828
 hi ColorColumn term=reverse ctermbg=236 guibg=#32302f
 hi Conceal ctermfg=243 guifg=#7c6f64

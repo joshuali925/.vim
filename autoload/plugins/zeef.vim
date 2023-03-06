@@ -410,7 +410,10 @@ endf
 " props is a dictionary with the following keys:
 "   - unlisted: when set to 1, show also unlisted buffers
 fun! plugins#zeef#buffer(props)
-  let l:buffers = map(split(execute('ls' . (get(a:props, 'unlisted', 0) ? '!' : '')), "\n"), 'substitute(v:val, ''"\(.*\)"\s*line\s*\d\+$'', ''\1'', "")')
+  redir => ls_output
+  execute 'ls' . (get(a:props, 'unlisted', 0) ? '!' : '')
+  redir END
+  let l:buffers = map(split(ls_output, "\n"), 'substitute(v:val, ''"\(.*\)"\s*line\s*\d\+$'', ''\1'', "")')
   call plugins#zeef#open(l:buffers, 's:switch_to_buffer', 'Switch buffer')
 endf
 
@@ -463,15 +466,17 @@ endf
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " MRU
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" d: doc path, b: current buffer, i: index, v: file
-func! s:filter_mru(d, b, i, f) abort
+" Filter oldfiles to not be vim_doc, current file, non-exist files
+func! s:f(f) abort
   let p = expand(a:f)
-  return stridx(p, a:d) < 0 && p != a:b && filereadable(p)
+  return stridx(p, s:d) < 0 && p != s:b && filereadable(p)
 endf
 fun! plugins#zeef#filter_oldfiles()
-  let doc_txt = expand("$VIMRUNTIME") . (has("win32") ? '\' : '/') . "doc"
-  return filter(v:oldfiles, function('s:filter_mru', [doc_txt, expand('%:p')]))
+  let s:d = expand("$VIMRUNTIME") . (has("win32") ? '\' : '/') . "doc"
+  let s:b = expand('%:p')
+  return filter(copy(v:oldfiles), 's:f(v:val)')
 endf
+
 fun! plugins#zeef#oldfiles()
   call plugins#zeef#args(plugins#zeef#filter_oldfiles(), 'MRU')
 endf

@@ -489,7 +489,7 @@ endif
 if has('terminal')
   augroup VimTerminal
     autocmd!
-    autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no filetype=terminal | nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
+    silent! autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no | nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
   augroup END
   tnoremap <C-u> <C-\><C-n>
   tnoremap <silent> <C-h> <C-w>:call plugins#tmux_navigator#navigate('h')<CR>
@@ -508,4 +508,10 @@ if has('terminal')
   nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
   command! Glow terminal ++curwin glow %
   call funcs#map_vim_send_terminal()
+endif
+
+if has('gui_running')
+  set guioptions=Mgt
+  set guicursor+=a:blinkon0
+  silent! set guifont=Consolas:h12:cANSI
 endif
