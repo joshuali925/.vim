@@ -6,7 +6,6 @@ let g:colors_name = 'papercolor'
 
 hi Bold gui=bold cterm=bold
 hi Italic gui=italic cterm=italic
-hi Cursor gui=reverse cterm=reverse
 hi Normal guifg=#444444 guibg=#eeeeee ctermfg=238 ctermbg=255
 hi ColorColumn term=reverse guibg=#e4e4e4 ctermbg=254
 hi Conceal guifg=#b2b2b2 guibg=#eeeeee ctermfg=249 ctermbg=255

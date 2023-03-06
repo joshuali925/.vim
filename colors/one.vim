@@ -1,5 +1,5 @@
 " https://raw.githubusercontent.com/kevinhwang91/dotfiles/d58baa79d5d2db7898e45ea4d8282e0c5e741f1e/nvim/colors/one.vim
-" add 256colors: https://raw.githubusercontent.com/vim-scripts/gui2term.py/master/gui2term.py
+" add 256colors: https://raw.githubusercontent.com/vim-scripts/gui2term.py/HEAD/gui2term.py
 " hex to 256color: https://stackoverflow.com/questions/11765623/convert-hex-to-closest-x11-color-number/62219320#62219320
 
 if exists('g:colors_name')
@@ -10,7 +10,6 @@ let g:colors_name = 'one'
 
 hi Bold gui=bold cterm=bold
 hi Italic gui=italic cterm=italic
-hi Cursor cterm=reverse gui=reverse
 hi Normal guifg=#abb2bf ctermfg=249 guibg=#292c33 ctermbg=235
 hi ColorColumn guibg=#282c34 ctermbg=236
 hi Conceal guifg=#4b5263 ctermfg=239 guibg=NONE ctermbg=NONE

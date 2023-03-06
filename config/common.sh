@@ -178,9 +178,10 @@ grg() {  # search literal string in all commits, replace `log` with `reflog` for
 }
 
 gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
-  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- {}')
+  local root=$(git rev-parse --show-toplevel || echo ".")
+  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- '"${root}"'/{}')
   if [ -n "$filepath" ]; then
-    local sha=$(git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all -- "$filepath" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- $filepath | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
+    local sha=$(git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- "${root}/${filepath}" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- ${root}/${filepath} | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
     if [ -n "$sha" ]; then
       echo -e "\033[0;35mgit show $sha:$filepath\033[0m" >&2
       git show "$sha:$filepath" | $EDITOR - -c "file $sha:$filepath" -c 'filetype detect'
@@ -604,7 +605,7 @@ docker-shell() {
     vim-remove) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
     vim-build) docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
     vim) local container_name=${2:-vim_container} ;;
-    *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
+    *) echo -e "Usage: $0 {vim-once|vim-remove|vim-build|vim [container-name]}\nReceived argument $1, exiting.." >&2; return 1 ;;
   esac
   local running=$(docker inspect -f '{{.State.Running}}' "$container_name" 2> /dev/null)
   if [ "$running" == true ]; then

@@ -5,7 +5,7 @@ if [ -n "$GET_BASHRC" ]; then
   export EDITOR=vim TMUX_NO_TPM=1
   [ -f "$HOME/.bashrc" ] && source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
 
-  clear-env() {
+  .vim-clear-env() {
     local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/share/lf ~/.config/{lf,lazygit}) executable f
     [ "$(readlink -f "$HOME/.tmux.conf")" == "$HOME/.vim/config/.tmux.conf" ] && config_files+=(~/.tmux.conf)
     for executable in ~/.local/bin/*; do
@@ -22,7 +22,7 @@ if [ -n "$GET_BASHRC" ]; then
     read -p 'Confirm to delete? (y/N) ' -n 1
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-      sed -i '/\.vim\/bin\/bashrc/d' ~/.bashrc
+      [ -f "$HOME/.bashrc" ] && sed -i '/\.vim\/bin\/bashrc/d' ~/.bashrc
       rm -rf "${config_files[@]}"
     fi
   }

@@ -41,7 +41,7 @@ api.aceVimMap(';w', '<Esc>', 'insert');
 
 // default keys
 // https://github.com/brookhong/Surfingkeys/blob/7626d9515ce6fec36e14499e1e1a4e49a6d1b43a/src/content_scripts/common/api.js#L467
-// https://github.com/brookhong/Surfingkeys/blob/master/src/content_scripts/common/default.js
+// https://github.com/brookhong/Surfingkeys/blob/HEAD/src/content_scripts/common/default.js
 api.map('{', 'h'); // scroll left
 api.map('}', 'l'); // scroll right
 api.map('h', 'E'); // tab left

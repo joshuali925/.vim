@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NODE_VERSION=14.20.0
+NODE_VERSION=14.20.1
 BACKUP_DIR=$HOME/config-backup
 
 CYAN='\033[0;36m'
@@ -200,9 +200,7 @@ install_python() {  # environment for asdf install from source: https://github.c
     echo 'Unknown distro..'
     return 0
   fi
-  curl https://bootstrap.pypa.io/get-pip.py | python3
-  pip3 install --user pynvim
-  log 'Installed python3, pip3, pynvim'
+  curl https://bootstrap.pypa.io/get-pip.py | python3 && pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip'
   log "To use pynvim regardless of venv, set ${YELLOW}vim.g.python3_host_prog = \"$(which python3)\""
 }
 
