@@ -22,32 +22,32 @@ return {
                 "windwp/nvim-autopairs",
                 config = function()
                     local npairs = require("nvim-autopairs")
-                    npairs.setup({ ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=] })
+                    npairs.setup({ ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=], fast_wrap = { map = "<C-l>" } })
                     require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
                     local Rule = require("nvim-autopairs.rule")
                     local cond = require("nvim-autopairs.conds")
                     local brackets = { { "(", ")" }, { "[", "]" }, { "{", "}" } }
                     npairs.add_rules({
                         Rule(" ", " ")
-                        :with_pair(function(opts)
-                            local pair = opts.line:sub(opts.col - 1, opts.col)
-                            return vim.tbl_contains({
-                                brackets[1][1] .. brackets[1][2],
-                                brackets[2][1] .. brackets[2][2],
-                                brackets[3][1] .. brackets[3][2]
-                            }, pair)
-                        end)
-                        :with_move(cond.none())
-                        :with_cr(cond.none())
-                        :with_del(function(opts)
-                            local col = vim.api.nvim_win_get_cursor(0)[2]
-                            local context = opts.line:sub(col - 1, col + 2)
-                            return vim.tbl_contains({
-                                brackets[1][1] .. "  " .. brackets[1][2],
-                                brackets[2][1] .. "  " .. brackets[2][2],
-                                brackets[3][1] .. "  " .. brackets[3][2]
-                            }, context)
-                        end)
+                            :with_pair(function(opts)
+                                local pair = opts.line:sub(opts.col - 1, opts.col)
+                                return vim.tbl_contains({
+                                    brackets[1][1] .. brackets[1][2],
+                                    brackets[2][1] .. brackets[2][2],
+                                    brackets[3][1] .. brackets[3][2]
+                                }, pair)
+                            end)
+                            :with_move(cond.none())
+                            :with_cr(cond.none())
+                            :with_del(function(opts)
+                                local col = vim.api.nvim_win_get_cursor(0)[2]
+                                local context = opts.line:sub(col - 1, col + 2)
+                                return vim.tbl_contains({
+                                    brackets[1][1] .. "  " .. brackets[1][2],
+                                    brackets[2][1] .. "  " .. brackets[2][2],
+                                    brackets[3][1] .. "  " .. brackets[3][2]
+                                }, context)
+                            end)
                     })
                     for _, bracket in ipairs(brackets) do
                         Rule("", " " .. bracket[2])
@@ -66,31 +66,31 @@ return {
             vim.o.pumblend = 8
             local cmp_kinds = {
                 -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
-                Text = " ", --           Text = "",
-                Method = " ", --         Method = "",
-                Function = " ", --       Function = "",
-                Constructor = " ", --    Constructor = "",
-                Field = " ", --          Field = "ﰠ",
-                Variable = " ", --       Variable = "",
-                Class = " ", --          Class = "ﴯ",
-                Interface = " ", --      Interface = "",
-                Module = " ", --         Module = "",
-                Property = " ", --       Property = "ﰠ",
-                Unit = " ", --           Unit = "塞",
-                Value = " ", --          Value = "",
-                Enum = " ", --           Enum = "",
-                Keyword = " ", --        Keyword = "",
-                Snippet = " ", --        Snippet = "",
-                Color = " ", --          Color = "",
-                File = " ", --           File = "",
-                Reference = " ", --      Reference = "",
-                Folder = " ", --         Folder = "",
-                EnumMember = " ", --     EnumMember = "",
-                Constant = " ", --       Constant = "",
-                Struct = " ", --         Struct = "פּ",
-                Event = " ", --          Event = "",
-                Operator = " ", --       Operator = "",
-                TypeParameter = " ", --  TypeParameter = "",
+                Text = " ",        -- Text = "",
+                Method = " ",      -- Method = "",
+                Function = " ",    -- Function = "",
+                Constructor = " ", -- Constructor = "",
+                Field = " ",       -- Field = "ﰠ",
+                Variable = " ",    -- Variable = "",
+                Class = " ",       -- Class = "ﴯ",
+                Interface = " ",   -- Interface = "",
+                Module = " ",      -- Module = "",
+                Property = " ",    -- Property = "ﰠ",
+                Unit = " ",        -- Unit = "塞",
+                Value = " ",       -- Value = "",
+                Enum = " ",        -- Enum = "",
+                Keyword = " ",     -- Keyword = "",
+                Snippet = " ",     -- Snippet = "",
+                Color = " ",       -- Color = "",
+                File = " ",        -- File = "",
+                Reference = " ",   -- Reference = "",
+                Folder = " ",      -- Folder = "",
+                EnumMember = " ",  -- EnumMember = "",
+                Constant = " ",    -- Constant = "",
+                Struct = " ",      -- Struct = "פּ",
+                Event = " ",       -- Event = "",
+                Operator = " ",    -- Operator = "",
+                TypeParameter = " ", -- TypeParameter = "",
             }
             cmp.setup({
                 completion = { completeopt = "menuone,noselect" },
@@ -108,7 +108,7 @@ return {
                     end,
                 },
                 mapping = {
-                    ["<C-d>"] = cmp.mapping.scroll_docs( -4),
+                    ["<C-d>"] = cmp.mapping.scroll_docs(-4),
                     ["<C-f>"] = cmp.mapping.scroll_docs(4),
                     ["<C-Space>"] = cmp.mapping.complete(),
                     ["<CR>"] = cmp.mapping.confirm(),
@@ -140,7 +140,7 @@ return {
                             cmp.select_prev_item()
                         elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
                             vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
-                        elseif require("neogen").jumpable( -1) then
+                        elseif require("neogen").jumpable(-1) then
                             require("neogen").jump_prev()
                         else
                             fallback()

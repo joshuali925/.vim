@@ -75,7 +75,7 @@ return {
         { key = "d", mods = "CMD", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
         { key = "k", mods = "CMD", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
         { key = "f", mods = "CMD", action = wezterm.action.Search({ CaseInSensitiveString = "" }) },
-        { key = "[", mods = "CMD", action = wezterm.action.MoveTabRelative( -1) },
+        { key = "[", mods = "CMD", action = wezterm.action.MoveTabRelative(-1) },
         { key = "]", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
         { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
         { key = "/", mods = "CTRL", action = wezterm.action.SendKey({ key = "/", mods = "CTRL" }) },

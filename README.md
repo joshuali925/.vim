@@ -15,7 +15,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bi
 ### Run alpine docker environment
 
 ```bash
-docker run -e TERM --network host -w /root -it --rm alpine sh -c '
+docker run -e TERM --network host -w /root -it --rm alpine sh -uec '
   apk add curl bash vim
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"'
 ```
@@ -23,7 +23,6 @@ docker run -e TERM --network host -w /root -it --rm alpine sh -c '
 ### Windows (PowerShell)
 
 ```powershell
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 irm https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.ps1 | iex
 ```
 

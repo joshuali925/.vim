@@ -61,10 +61,10 @@ nnoremap dil v^og_d
 nnoremap yil v^og_y
 nnoremap <leader>yil v^og_"+y
 xnoremap al 0o$
-xnoremap af iw%
-nnoremap caf viw%c
-nnoremap daf viw%d
-nnoremap yaf viw%y
+xnoremap af v%va)obo
+nnoremap caf %va)obc
+nnoremap daf %va)obd
+nnoremap yaf %va)oby
 nnoremap <leader>yae vGoggV"+y
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)

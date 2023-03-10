@@ -68,7 +68,7 @@
   },
   "Promise then log": {
     "prefix": "then-log",
-    "body": [".then((resp) => {", "  console.log(resp);", "})"]
+    "body": [".then((resp) => {", "\tconsole.log(resp);", "})"]
   },
   "Read from file": {
     "prefix": "read-file",

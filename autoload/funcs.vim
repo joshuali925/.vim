@@ -83,7 +83,11 @@ function! funcs#quit_netrw_and_dirs()
     endif
   endfor
   if &filetype == 'netrw'
-    bdelete
+    if get(g:, 'dot_vim_dir', '') != ''
+      call writefile([b:netrw_curdir], g:dot_vim_dir . '/tmp/lf_dir')
+      echo "lf_dir: '" . b:netrw_curdir . "'"
+    endif
+    execute get(g:, 'should_quit_netrw', 0) ? 'quit' : 'bdelete'
   endif
 endfunction
 

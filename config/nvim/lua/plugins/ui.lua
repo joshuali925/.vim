@@ -10,10 +10,10 @@ return {
         ft = "qf",
         opts = {
             func_map = {
-                prevfile = "", --     to filter: :g/pattern/lua require('bqf.qfwin.handler').signToggle(1)
-                nextfile = "", --     press zn to create new list with marked items
+                prevfile = "",     -- to filter: :g/pattern/lua require('bqf.qfwin.handler').signToggle(1)
+                nextfile = "",     -- press zn to create new list with marked items
                 pscrolldown = ",", -- press zN to create new list excluding marked items
-                pscrollup = ".", --   press < and > to switch between lists
+                pscrollup = ".",   -- press < and > to switch between lists
                 ptoggleitem = "P", -- press z<Tab> to clear marks
                 ptoggleauto = "p",
             },
@@ -51,45 +51,45 @@ return {
     },
     {
         "kyazdani42/nvim-tree.lua",
-        keys = { { "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", expr = true, replace_keycodes = false } },
+        keys = { { "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile <bar> NvimTreeFocus<CR>'", expr = true, replace_keycodes = false } },
         config = function()
-            local tree_cb = require("nvim-tree.config").nvim_tree_callback
             require("nvim-tree").setup({
                 hijack_cursor = true,
                 hijack_netrw = false,
                 git = { ignore = false },
                 actions = { open_file = { resize_window = false } },
                 renderer = { highlight_git = true, full_name = true },
-                view = {
-                    mappings = {
-                        list = {
-                            { key = { "?" }, cb = tree_cb("toggle_help") },
-                            { key = { "i" }, cb = tree_cb("toggle_ignored") },
-                            { key = { "r" }, cb = [[<Cmd>execute 'lua require("nvim-tree.actions.dispatch").dispatch("refresh")' | if winwidth(0) >= &columns / 2 - 1 | NvimTreeResize 30 | endif<CR>]] },
-                            { key = { "R" }, cb = tree_cb("full_rename") },
-                            { key = { "x" }, cb = tree_cb("remove") },
-                            { key = { "d" }, cb = tree_cb("cut") },
-                            { key = { "y" }, cb = tree_cb("copy") },
-                            { key = { "yy" }, cb = tree_cb("copy_absolute_path") },
-                            { key = { "C" }, cb = tree_cb("cd") },
-                            { key = { "s" }, cb = tree_cb("split") },
-                            { key = { "h" }, cb = tree_cb("close_node") },
-                            { key = { "l" }, cb = tree_cb("edit") },
-                            { key = { "zc" }, cb = tree_cb("close_node") },
-                            { key = { "zo" }, cb = tree_cb("edit") },
-                            { key = { "zM" }, cb = tree_cb("collapse_all") },
-                            { key = { "zR" }, cb = tree_cb("expand_all") },
-                            { key = { "[g" }, cb = tree_cb("prev_git_item") },
-                            { key = { "]g" }, cb = tree_cb("next_git_item") },
-                            { key = { "q" }, cb = "<Cmd>execute 'NvimTreeResize ' . winwidth(0) <bar> NvimTreeClose<CR>" },
-                            { key = { "<Left>" }, cb = "<Cmd>normal! zh<CR>" },
-                            { key = { "<Right>" }, cb = "<Cmd>normal! zl<CR>" },
-                            { key = { "-" }, cb = "<Cmd>normal! $<CR>" },
-                            { key = { "H" }, cb = "<Cmd>normal! H<CR>" },
-                            { key = { "<C-e>" }, cb = "<Cmd>normal! <C-e><CR>" },
-                        },
-                    },
-                },
+                on_attach = function(bufnr)
+                    local function opts(desc)
+                        return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+                    end
+                    local api = require("nvim-tree.api")
+                    api.config.mappings.default_on_attach(bufnr)
+                    vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
+                    vim.keymap.set("n", "i", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
+                    vim.keymap.set("n", "r", [[<Cmd>execute 'lua require("nvim-tree.api").tree.reload()' <bar> if winwidth(0) >= &columns / 2 - 1 <bar> NvimTreeResize 30 <bar> endif<CR>]], opts("Refresh"))
+                    vim.keymap.set("n", "R", api.fs.rename_sub, opts("Rename: Path"))
+                    vim.keymap.set("n", "x", api.fs.remove, opts("Delete"))
+                    vim.keymap.set("n", "d", api.fs.cut, opts("Cut"))
+                    vim.keymap.set("n", "y", api.fs.copy.node, opts("Copy"))
+                    vim.keymap.set("n", "Y", api.fs.copy.absolute_path, opts("Copy Absolute Path"))
+                    vim.keymap.set("n", "C", api.tree.change_root_to_node, opts("CD"))
+                    vim.keymap.set("n", "s", api.node.open.horizontal, opts("Open: Horizontal Split"))
+                    vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close Directory"))
+                    vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
+                    vim.keymap.set("n", "zc", api.node.navigate.parent_close, opts("Close Directory"))
+                    vim.keymap.set("n", "zo", api.node.open.edit, opts("Open"))
+                    vim.keymap.set("n", "zM", api.tree.collapse_all, opts("Collapse"))
+                    vim.keymap.set("n", "zR", api.tree.expand_all, opts("Expand"))
+                    vim.keymap.set("n", "[g", api.node.navigate.git.prev, opts("Prev Git"))
+                    vim.keymap.set("n", "]g", api.node.navigate.git.next, opts("Next Git"))
+                    vim.keymap.set("n", "q", "<Cmd>execute 'NvimTreeResize ' . winwidth(0) <bar> NvimTreeClose<CR>", opts("Close"))
+                    vim.keymap.set("n", "<Left>", "zh", opts("Scroll Left"))
+                    vim.keymap.set("n", "<Right>", "zl", opts("Scroll Right"))
+                    vim.keymap.set("n", "-", "$", opts("Scroll End"))
+                    vim.keymap.set("n", "H", "H", opts("Top"))
+                    vim.keymap.set("n", "<C-e>", "<C-e>", opts("Scroll down"))
+                end,
             })
         end,
     },
@@ -296,7 +296,7 @@ return {
                 { "Re&indent", [[let g:temp = getcurpos() | Sleuth | execute "normal! gg=G" | call setpos('.', g:temp)]], "Recalculate indent with Sleuth and reindent whole file" },
                 { "Ded&up lines", [[%!awk '\!x[$0]++']], "Remove duplicated lines and preserve order" },
                 { "Du&plicated lines", [[sort | let @/ = '\C^\(.*\)$\n\1$' | set hlsearch]], "Sort and search duplicated lines" },
-                { "Calculate line &=", [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]], 'Calculate expression from previous "=" or current line' },
+                { "Calculate line &=", [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]], "Calculate expression from previous '=' or current line" },
                 { "--", "" },
                 { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
                 { "Cou&nt occurrences", [[echo searchcount({'maxcount': 0})]], "Count occurrences of current search pattern (:%s/pattern//gn also works)" },
@@ -318,7 +318,7 @@ return {
                 { "GB18030 to utf-8", [[edit ++enc=GB18030 | set fileencoding=utf8]], "Edit as GB18030 (edit ++enc=GB18030) for Chinese characters and reset file format back to utf-8" },
                 { "Open in &VSCode", [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]] },
             })
-            vim.fn["quickui#menu#install"]("&Git", {
+            vim.fn["quickui#menu#install"]("&Git", { -- GBrowse loaded on command won't include line number in URL, need to explicitly load it. Similar issues for other fugitive commands.
                 { "Git checko&ut", [[Gread]], "Checkout current file from index and load as unsaved buffer (Gread)" },
                 { "Git checkout HEAD", [[Gread HEAD:%]], "Checkout current file from HEAD and load as unsaved buffer (Gread HEAD:%)" },
                 { "Git &blame", [[Git blame]], "Git blame of current file" },
@@ -345,19 +345,19 @@ return {
                 { "Git root", [[Grt]], "Change current directory to git root" },
             })
             vim.fn["quickui#menu#install"]("&Toggle", {
-                { 'Quickfix             %{empty(filter(getwininfo(), "v:val.quickfix")) ? "[ ]" : "[x]"}', [[execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"]] },
-                { 'Location list        %{empty(filter(getwininfo(), "v:val.loclist")) ? "[ ]" : "[x]"}', [[execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"]] },
-                { 'Set &diff             %{&diff ? "[x]" : "[ ]"}', [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
-                { 'Set scr&ollbind       %{&scrollbind ? "[x]" : "[ ]"}', [[execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"]], "Toggle scrollbind in current tab" },
-                { 'Set &wrap             %{&wrap ? "[x]" : "[ ]"}', [[set wrap!]], "Toggle wrap lines" },
-                { 'Set &paste            %{&paste ? "[x]" : "[ ]"}', [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]], "Toggle paste mode" },
-                { 'Set &spelling         %{&spell ? "[x]" : "[ ]"}', [[set spell!]], "Toggle spell checker (z= to auto correct current word)" },
-                { 'Set &virtualedit      %{&virtualedit=~#"all" ? "[x]" : "[ ]"}', [[execute &virtualedit=~#"all" ? "set virtualedit=block" : "set virtualedit=all"]], "Toggle virtualedit" },
-                { 'Set previ&ew          %{&completeopt=~"preview" ? "[x]" : "[ ]"}', [[execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"]], "Toggle function preview" },
-                { 'Set &cursorline       %{&cursorline ? "[x]" : "[ ]"}', [[set cursorline!]], "Toggle cursorline" },
-                { 'Set cursorcol&umn     %{&cursorcolumn ? "[x]" : "[ ]"}', [[set cursorcolumn!]], "Toggle cursorcolumn" },
-                { 'Set light &background %{&background=~"light" ? "[x]" : "[ ]"}', [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
-                { 'Reader &mode          %{get(g:, "ReaderMode", 0) == 0 ? "[ ]" : "[x]"}', [[execute get(g:, "ReaderMode", 0) == 0 ? "nnoremap <nowait> d <C-d>\<bar>nnoremap u <C-u>" : "nunmap d\<bar>nunmap u" | let g:ReaderMode = 1 - get(g:, "ReaderMode", 0) | lua vim.notify("Reader mode " .. (vim.g.ReaderMode == 1 and "on" or "off"))]], "Toggle using 'd' and 'u' for '<C-d>' and '<C-u>' scrolling" },
+                { "Quickfix             %{empty(filter(getwininfo(), 'v:val.quickfix')) ? '[ ]' : '[x]'}", [[execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"]] },
+                { "Location list        %{empty(filter(getwininfo(), 'v:val.loclist')) ? '[ ]' : '[x]'}", [[execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"]] },
+                { "Set &diff             %{&diff ? '[x]' : '[ ]'}", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
+                { "Set scr&ollbind       %{&scrollbind ? '[x]' : '[ ]'}", [[execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"]], "Toggle scrollbind in current tab" },
+                { "Set &wrap             %{&wrap ? '[x]' : '[ ]'}", [[set wrap!]], "Toggle wrap lines" },
+                { "Set &paste            %{&paste ? '[x]' : '[ ]'}", [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]], "Toggle paste mode" },
+                { "Set &spelling         %{&spell ? '[x]' : '[ ]'}", [[set spell!]], "Toggle spell checker (z= to auto correct current word)" },
+                { "Set &virtualedit      %{&virtualedit=~#'all' ? '[x]' : '[ ]'}", [[execute &virtualedit=~#"all" ? "set virtualedit=block" : "set virtualedit=all"]], "Toggle virtualedit" },
+                { "Set previ&ew          %{&completeopt=~'preview' ? '[x]' : '[ ]'}", [[execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"]], "Toggle function preview" },
+                { "Set &cursorline       %{&cursorline ? '[x]' : '[ ]'}", [[set cursorline!]], "Toggle cursorline" },
+                { "Set cursorcol&umn     %{&cursorcolumn ? '[x]' : '[ ]'}", [[set cursorcolumn!]], "Toggle cursorcolumn" },
+                { "Set light &background %{&background=~'light' ? '[x]' : '[ ]'}", [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
+                { "Reader &mode          %{get(g:, 'ReaderMode', 0) == 0 ? '[ ]' : '[x]'}", [[execute get(g:, "ReaderMode", 0) == 0 ? "nnoremap <nowait> d <C-d>\<bar>nnoremap u <C-u>" : "nunmap d\<bar>nunmap u" | let g:ReaderMode = 1 - get(g:, "ReaderMode", 0) | lua vim.notify("Reader mode " .. (vim.g.ReaderMode == 1 and "on" or "off"))]], "Toggle using 'd' and 'u' for '<C-d>' and '<C-u>' scrolling" },
                 { "--", "" },
                 { "&Indent line", [[IndentBlanklineToggle]], "Toggle indent lines" },
                 { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },

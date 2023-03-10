@@ -48,6 +48,7 @@ alias less='less -RiM'
 alias v='$EDITOR'
 alias vi='command vim'
 alias vii='command vim -u ~/.vim/config/mini.vim -i NONE'
+alias vlf='command vim +Explore'
 alias vim='$EDITOR'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias gvenv='[ ! -d "$HOME/.local/lib/venv" ] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
@@ -156,9 +157,10 @@ d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
 
 gpr() {
-  local pr=$1 repo
+  if [ "$#" -ne 1 ]; then echo "Usage: $0 {PR-number|PR-URL}" >&2; return 1; fi
+  local pr=${1##*/}
   if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    repo=${1%/pull/*} pr=${1##*/}
+    local repo=${1%/pull/*}
     git clone "$repo" "${repo##*/}-$pr"
     cd "${repo##*/}-$pr" > /dev/null || return 1
   fi
@@ -675,14 +677,14 @@ os-get() {
     [ "$arch" = 'x64' ] && arch=x86_64 || arch=aarch64
     url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
   elif printf '%s\0' "${core[@]}" | grep -q -x -z -F -- "$selected"; then
-    if [ "$(ver "$version")" -gt "$(ver '2.5.0')" ]; then
+    if [ "$(ver "$version")" -gt "$(ver "$(curl -fsSL https://opensearch.org/ | rg -o 'Current Version: ([\d\.]+)' -r '$1')")" ]; then
       url="https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/$selected-$version-linux-$arch.tar.gz"
       printf "\033[0;36m%s\033[0m\n" "Manifest: https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/manifest.yml" >&2
     else
       url="https://artifacts.opensearch.org/releases/bundle/$selected/$version/$selected-$version-linux-$arch.tar.gz"
     fi
   elif printf '%s\0' "${opensearch_plugin[@]}" | grep -q -x -z -F -- "$selected"; then
-    if [ "$(ver "$version")" -ge "$(ver '1.3.2')" ]; then
+    if [ "$(ver "$version")" -ge "$(ver '1.3.2')" ]; then  # url changed after 1.3.2
       url="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$version/latest/linux/$arch/tar/builds/opensearch/plugins/$selected-$version.0.zip"
     else
       url="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$version/latest/linux/$arch/builds/opensearch/plugins/$selected-$version.0.zip"

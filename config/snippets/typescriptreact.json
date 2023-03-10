@@ -86,6 +86,6 @@
   },
   "Jest waitfor": {
     "prefix": "waitFor",
-    "body": ["await waitFor(() => {", "  $0", "});"]
+    "body": ["await waitFor(() => {", "\t$0", "});"]
   }
 }

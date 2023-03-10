@@ -14,7 +14,7 @@
   },
   "Content type JSON": {
     "prefix": "content-type",
-    "body": ["Content-Type: application/json", "", "{", "  $0", "}"]
+    "body": ["Content-Type: application/json", "", "{", "\t$0", "}"]
   },
   "GET request": {
     "prefix": "get-request",
@@ -31,7 +31,7 @@
       "Content-Type: application/json",
       "",
       "{",
-      "  \"${2:key}\": \"${0:value}\"",
+      "\t\"${2:key}\": \"${0:value}\"",
       "}"
     ]
   },
@@ -42,7 +42,7 @@
       "Content-Type: application/json",
       "",
       "{",
-      "  \"${2:key}\": \"${0:value}\"",
+      "\t\"${2:key}\": \"${0:value}\"",
       "}"
     ]
   }

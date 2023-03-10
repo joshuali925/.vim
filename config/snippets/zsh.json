@@ -4,7 +4,7 @@
     "body": [
       "read -s -k '?${1:To abort press n.}'; echo",
       "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
-      "  ${0:return 0}",
+      "\t${0:return 0}",
       "fi"
     ]
   },
@@ -12,8 +12,8 @@
     "prefix": "while-read",
     "body": [
       "while IFS= read -r line; do",
-      "  echo \"\\$line:\"",
-      "  $0 || break",
+      "\techo \"\\$line:\"",
+      "\t$0 || break",
       "done"
     ]
   },
@@ -30,7 +30,7 @@
     "body": [
       "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} --data-binary @- << 'EOF'",
       "{",
-      "  ${0:\"key\": \"value\"}",
+      "\t${0:\"key\": \"value\"}",
       "}",
       "EOF"
     ]

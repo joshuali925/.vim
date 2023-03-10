@@ -32,27 +32,36 @@ clink autorun install
 clink set autosuggest.enable true
 clink set cmd.ctrld_exits true
 scoop install clink-flex-prompt
+git clone --filter=blob:none https://github.com/vladimir-kotikov/clink-completions "$env:USERPROFILE\scoop\others\clink-completions"
+cmd /c clink installscripts "$env:USERPROFILE\scoop\others\clink-completions"
+# git clone --filter=blob:none https://github.com/chrisant996/clink-gizmos "$env:USERPROFILE\scoop\others\clink-gizmos"
+# cmd /c clink installscripts "$env:USERPROFILE\scoop\others\clink-gizmos"
 
-git clone https://github.com/joshuali925/.vim "$env:USERPROFILE\.vim" --depth=1
+# clone gow and add gow\bin to deduped path
+git clone https://github.com/joshuali925/gow -b main --depth=1 "$env:USERPROFILE\scoop\others\gow"
+$env:Path >> "$env:USERPROFILE\scoop\others\PATH.bak"
+[Environment]::SetEnvironmentVariable("Path", (([Environment]::GetEnvironmentVariable("Path", "User") + ";$env:USERPROFILE\scoop\others\gow\bin" -split ";" | Select-Object -Unique) -join ";"), "User")
+Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\config\flexprompt_autoconfig.lua" "$env:USERPROFILE\scoop\apps\clink-flex-prompt\current\flexprompt_autoconfig.lua"
+Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\z.cmd" "$env:USERPROFILE\scoop\apps\clink\current\z.cmd"
+Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\z.lua" "$env:USERPROFILE\scoop\apps\clink\current\z.lua"
+
+git clone --filter=blob:none https://github.com/joshuali925/.vim "$env:USERPROFILE\.vim"
 cmd /c mklink /J %USERPROFILE%\vimfiles %USERPROFILE%\.vim
-mkdir "$env:APPDATA\lazygit"
-mkdir "$env:LOCALAPPDATA\lf"
-mkdir "$env:LOCALAPPDATA\Microsoft\Windows Terminal"
+New-Item -ItemType Directory -Path "$env:APPDATA\lazygit", "$env:LOCALAPPDATA\lf", "$env:LOCALAPPDATA\Microsoft\Windows Terminal"
 cmd /c mklink /H %USERPROFILE%\.gitconfig %USERPROFILE%\.vim\config\.gitconfig
+cmd /c mklink /H %USERPROFILE%\.tmux.conf %USERPROFILE%\.vim\config\.tmux.conf
 cmd /c mklink /H %APPDATA%\lazlygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
-copy "$env:USERPROFILE\.vim\config\lfrc" "$env:LOCALAPPDATA\lf\lfrc"
-copy "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
+Copy-Item "$env:USERPROFILE\.vim\config\lfrc" "$env:LOCALAPPDATA\lf\lfrc"
+Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
 cmd /c "echo set previewer '' >> %LOCALAPPDATA%\lf\lfrc"
 cmd /c "echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc"
-cmd /c "echo export EDITOR=vim VIM_SYSTEM_CLIPBOARD=1 >> %USERPROFILE%\.bashrc"
+cmd /c "echo export EDITOR=vim VIM_SYSTEM_CLIPBOARD=1 TMUX_NO_TPM=1 >> %USERPROFILE%\.bashrc"
 
 scoop install sudo
 scoop bucket add nerd-fonts
 sudo scoop install --global JetBrainsMono-NF
 
 Remove-Item "$env:LOCALAPPDATA\nvim" -Force -Recurse -ErrorAction SilentlyContinue
-robocopy $env:USERPROFILE\.vim\config\nvim $env:LOCALAPPDATA\nvim /e
-Remove-Item "$env:LOCALAPPDATA\nvim\autoload" -Force -Recurse -ErrorAction SilentlyContinue
-robocopy $env:USERPROFILE\.vim\autoload $env:LOCALAPPDATA\nvim\autoload /e
-
-scoop install gow
+Copy-Item "$env:USERPROFILE\.vim\config\nvim" "$env:LOCALAPPDATA\nvim" -Recurse
+Remove-Item "$env:LOCALAPPDATA\nvim\autoload" -Force -Recurse
+Copy-Item "$env:USERPROFILE\.vim\autoload" "$env:LOCALAPPDATA\nvim\autoload" -Recurse
