@@ -5,11 +5,11 @@ local theme_index = vim.g.theme_index or -1
 -- :S hi
 -- :source $VIMRUNTIME/syntax/hitest.vim
 M.theme_list = {
-    [ -1] = "tokyonight.nvim",
-    [ -2] = "github-nvim-theme",
-    [ -3] = "visual_studio_code",
-    [ -4] = "neovim-ayu",
-    [ -5] = "catppuccin",
+    [-1] = "tokyonight.nvim",
+    [-2] = "github-nvim-theme",
+    [-3] = "visual_studio_code",
+    [-4] = "neovim-ayu",
+    [-5] = "catppuccin",
     [0] = "tokyonight.nvim",
     [1] = "github-nvim-theme",
     [2] = "visual_studio_code",
@@ -48,7 +48,7 @@ local themes = {
             if theme_index < 0 then
                 vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
                 vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#4a4a4a" })
-                require("visual_studio_code.utils").hl.set("CursorLine", { bg = "#282828"})
+                require("visual_studio_code.utils").hl.set("CursorLine", { bg = "#282828" })
             end
         end,
     },
@@ -113,7 +113,7 @@ end
 
 function M.switch(index)
     local states_file = vim.fn.stdpath("config") .. "/lua/states.lua"
-    vim.cmd.call(('writefile(["vim.g.theme_index = %s"] + readfile("%s")[1:], "%s")'):format(index, states_file, states_file))
+    vim.cmd.call(("writefile(['vim.g.theme_index = %s'] + readfile('%s')[1:], '%s')"):format(index, states_file, states_file))
     vim.g.theme_index = index
     theme_index = index
     M.theme = M.theme_list[index]

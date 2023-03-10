@@ -1,13 +1,20 @@
 let g:dot_vim_dir=expand('<sfile>:p:h')
 
-" if empty(glob('~/.vim/autoload/plug.vim'))
-"   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/HEAD/plug.vim
+" if empty(glob(g:dot_vim_dir . '/autoload/plug.vim'))
+"   silent execute '!curl -fLo ' . g:dot_vim_dir . '/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/HEAD/plug.vim'
 "   let s:init_plug = 1
 " endif
 " call plug#begin(g:dot_vim_dir . '/plugged')
-" Plug ''
+" Plug 'airblade/vim-gitgutter' | set updatetime=200
 " call plug#end()
 " if exists('s:init_plug') | PlugInstall | unlet s:init_plug | endif
+
+if has('gui_running')
+  set guioptions=Mgt
+  set guicursor+=a:blinkon0
+  silent! set guifont=Consolas:h12:cANSI
+  let $VIM_SYSTEM_CLIPBOARD=1
+endif
 
 let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
 let &t_ut = ''  " https://github.com/microsoft/terminal/issues/832
@@ -115,7 +122,7 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
-xnoremap af iw%
+xnoremap af v%va)obo
 onoremap <silent> af :normal vaf<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
@@ -277,7 +284,7 @@ cnoremap <expr> <BS> ':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos(
 augroup AutoCommands
   autocmd!
   autocmd StdinReadPre * let s:std_in=1
-  autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | nnoremap <silent> <buffer> <CR> :nunmap <buffer> <lt>CR><bar>call <SID>Oldfiles()<CR>| endif
+  autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | if &filetype == 'netrw' | let g:should_quit_netrw = 1 | else | nnoremap <silent> <buffer> <CR> :nunmap <buffer> <lt>CR><bar>call <SID>Oldfiles()<CR>| endif | endif
   autocmd BufEnter * execute g:RooterCmd
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line('$') | execute "normal! g`\"" | endif
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
@@ -508,10 +515,4 @@ if has('terminal')
   nnoremap <leader>tt :tabedit <bar> terminal ++curwin ++close<CR>
   command! Glow terminal ++curwin glow %
   call funcs#map_vim_send_terminal()
-endif
-
-if has('gui_running')
-  set guioptions=Mgt
-  set guicursor+=a:blinkon0
-  silent! set guifont=Consolas:h12:cANSI
 endif

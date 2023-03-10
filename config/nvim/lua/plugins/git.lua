@@ -3,7 +3,7 @@ return {
         "rbong/vim-flog",
         dependencies = { "tpope/vim-fugitive", "tpope/vim-rhubarb" },
         ft = "gitcommit", -- issue number omni-completion, does not work if cloned with url.replacement.insteadOf
-        cmd = { "Git", "Gcd", "Ggrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog", "Flogsplit" }, -- GBrowse loaded on demand won't include line number
+        cmd = { "Git", "Gcd", "Ggrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog", "Flogsplit" },
         config = function() vim.g.fugitive_summary_format = "%d %s (%cr) <%an>" end,
     },
     {

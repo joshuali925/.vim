@@ -2,6 +2,7 @@ git:
   autofetch: false
   paging:
     colorArg: always
+    # pager: diff-so-fancy
     pager: delta --dark --paging=never --24-bit-color=always
 gui:
   showCommandLog: false # @ to toggle

@@ -116,9 +116,9 @@ function M.init()
                 "yaml",
                 "markdown",
                 "graphql",
-                "sh", -- prettier-plugin-sh (cd ~/.local/share/nvim/mason/packages/prettier; npm install prettier-plugin-sh)
+                "sh",     -- prettier-plugin-sh (cd ~/.local/share/nvim/mason/packages/prettier; npm install prettier-plugin-sh)
                 "bash",
-                "java", -- prettier-plugin-java
+                "java",   -- prettier-plugin-java
                 "kotlin", -- prettier-plugin-kotlin
             },
         }),

@@ -8,20 +8,20 @@
       "from functools import reduce",
       "",
       "if not sys.stdin.isatty():",
-      "    stdin = [line.rstrip() for line in sys.stdin]",
-      "    print(\"\\n\".join([\"Read from stdin:\"] + stdin))",
-      "    # json_data = json.loads(\"\".join(stdin))",
+      "\tstdin = [line.rstrip() for line in sys.stdin]",
+      "\tprint(\"\\n\".join([\"Read from stdin:\"] + stdin))",
+      "\t# json_data = json.loads(\"\".join(stdin))",
       "",
       "if len(sys.argv) > 1:",
-      "    arg_str = shlex.quote(shlex.join(sys.argv[1:]))",
-      "    print(f\"Quoted shell string: {arg_str}\\n\")",
-      "    out = subprocess.run(",
-      "        [\"bash\", \"-c\", \"echo {}\".format(arg_str)],",
-      "        capture_output=True,",
-      "        text=True,",
-      "    )",
-      "    print(out.stdout)",
-      "    print(f\"Process finished with status {out.returncode}\")"
+      "\targ_str = shlex.quote(shlex.join(sys.argv[1:]))",
+      "\tprint(f\"Quoted shell string: {arg_str}\\n\")",
+      "\tout = subprocess.run(",
+      "\t\t[\"bash\", \"-c\", \"echo {}\".format(arg_str)],",
+      "\t\tcapture_output=True,",
+      "\t\ttext=True,",
+      "\t)",
+      "\tprint(out.stdout)",
+      "\tprint(f\"Process finished with status {out.returncode}\")"
     ]
   }
 }

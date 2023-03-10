@@ -57,7 +57,7 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
-xnoremap af iw%
+xnoremap af v%va)obo
 onoremap <silent> af :normal vaf<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>

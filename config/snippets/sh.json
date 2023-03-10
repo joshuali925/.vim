@@ -5,33 +5,33 @@
   },
   "If": {
     "prefix": "if",
-    "body": ["if [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "  $0", "fi"]
+    "body": ["if [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "\t$0", "fi"]
   },
   "If command succeeds": {
     "prefix": "if-command",
-    "body": ["if ${1:grep -q text <<< \"\\$VAR\"}; then", "  $0", "fi"]
+    "body": ["if ${1:grep -q text <<< \"\\$VAR\"}; then", "\t$0", "fi"]
   },
   "If command does not exist": {
     "prefix": "if-command-not-exists",
     "body": [
       "if ! builtin command -v ${1:cmd} > /dev/null 2>&1; then",
-      "  $0",
+      "\t$0",
       "fi"
     ]
   },
   "If variable exists": {
     "prefix": "if-var-exists",
-    "body": ["if [ -n \"\\$${1:VAR}\" ]; then", "  $0", "fi"]
+    "body": ["if [ -n \"\\$${1:VAR}\" ]; then", "\t$0", "fi"]
   },
   "If glob": {
     "prefix": "if-glob",
-    "body": ["if [[ \\$${1:VAR} = *${2:STRING}* ]]; then", "  $0", "fi"]
+    "body": ["if [[ \\$${1:VAR} = *${2:STRING}* ]]; then", "\t$0", "fi"]
   },
   "If regex": {
     "prefix": "if-regex",
     "body": [
       "if [[ \\$${1:VAR} =~ ${2:^([0-9]{10\\}|[a-z]{5\\})\\$} ]]; then",
-      "  $0",
+      "\t$0",
       "fi"
     ]
   },
@@ -39,44 +39,44 @@
     "prefix": "if-no-arguments",
     "body": [
       "if [ \"\\$#\" -eq 0 ]; then",
-      "  echo \"Usage: \\$0 <args>\" >&2",
-      "  exit 1$0",
+      "\techo \"Usage: \\$0 <args>\" >&2",
+      "\texit 1$0",
       "fi"
     ]
   },
   "If array is empty": {
     "prefix": "if-array-empty",
-    "body": ["if [ \\${#${1:array}[@]} -eq 0 ]; then", "  $0", "fi"]
+    "body": ["if [ \\${#${1:array}[@]} -eq 0 ]; then", "\t$0", "fi"]
   },
   "If array contains string": {
     "prefix": "if-array-contains",
-    "body": ["if printf '%s\\0' \"\\${${1:array}[@]}\" | grep -q -x -z -F -- '${2:value}'; then", "  $0", "fi"]
+    "body": ["if printf '%s\\0' \"\\${${1:array}[@]}\" | grep -q -x -z -F -- '${2:value}'; then", "\t$0", "fi"]
   },
   "If variable equals ignore case": {
     "prefix": "if-equals-ignore-case",
     "body": [
       "if [ \"\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$${1:VAR}\")\" = '${2:string}' ]; then",
-      "  $0",
+      "\t$0",
       "fi"
     ]
   },
   "Else if": {
     "prefix": "elseif",
-    "body": ["elif [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "  $0"]
+    "body": ["elif [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "\t$0"]
   },
   "For each element in array": {
     "prefix": "foreach",
-    "body": ["for ${1:element} in \"${2:\\${array[@]\\}}\"; do", "  $0", "done"]
+    "body": ["for ${1:element} in \"${2:\\${array[@]\\}}\"; do", "\t$0", "done"]
   },
   "For i in range": {
     "prefix": "for-range",
-    "body": ["for ${1:i} in {1..${2:10}}; do", "  $0", "done"]
+    "body": ["for ${1:i} in {1..${2:10}}; do", "\t$0", "done"]
   },
   "Loop lines": {
     "prefix": "while-read",
     "body": [
       "while IFS= read -r line; do",
-      "  echo \"\\$line\"",
+      "\techo \"\\$line\"",
       "done <<< \"\\$${0:list}\""
     ]
   },
@@ -84,10 +84,10 @@
     "prefix": "case",
     "body": [
       "case ${1:\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$1\")} in",
-      "  ${3:help})",
-      "    $0",
-      "    ;;",
-      "  *) echo \"Unsupported argument \\$${2:1}, exiting..\" >&2; exit 1 ;;",
+      "\t${3:help})",
+      "\t\t$0",
+      "\t\t;;",
+      "\t*) echo \"Unsupported argument \\$${2:1}, exiting..\" >&2; exit 1 ;;",
       "esac"
     ]
   },
@@ -181,7 +181,7 @@
       "printf '${1:Continue} (Y/n)? '",
       "read -r REPLY",
       "if [ -z \"\\$REPLY\" ] || [ \"\\$REPLY\" != \"\\${REPLY#[Yy]}\" ]; then",
-      "  ${0:echo Yes}",
+      "\t${0:echo Yes}",
       "fi"
     ]
   },
@@ -191,7 +191,7 @@
       "printf '${1:Continue} (y/N)? '",
       "read -r REPLY",
       "if [[ \"\\$REPLY\" == [Yy] ]]; then",
-      "  ${0:echo Yes}",
+      "\t${0:echo Yes}",
       "fi"
     ]
   },
@@ -200,7 +200,7 @@
     "body": [
       "read -p '${1:To abort press n.}' -n 1; echo",
       "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
-      "  ${0:exit 0}",
+      "\t${0:exit 0}",
       "fi"
     ]
   }

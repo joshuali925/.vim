@@ -1,11 +1,11 @@
 -- options {{{1
-require("states") --                   lua/states.lua       plugins/appearance.lua
-vim.g.loaded_2html_plugin = 1 --       lua/utils.lua        plugins/completion.lua
-vim.g.loaded_remote_plugins = 1 --     lua/themes.lua       plugins/editing.lua
-vim.g.loaded_tutor_mode_plugin = 1 --  lua/lsp.lua          plugins/git.lua
-vim.g.mapleader = ";" --               lua/rooter.lua       plugins/lang.lua
-vim.g.maplocalleader = "|" --          ginit.vim            plugins/misc.lua
-vim.g.netrw_dirhistmax = 0 --          autoload/funcs.vim   plugins/ui.lua
+require("states")                  -- lua/states.lua       plugins/appearance.lua
+vim.g.loaded_2html_plugin = 1      -- lua/utils.lua        plugins/completion.lua
+vim.g.loaded_remote_plugins = 1    -- lua/themes.lua       plugins/editing.lua
+vim.g.loaded_tutor_mode_plugin = 1 -- lua/lsp.lua          plugins/git.lua
+vim.g.mapleader = ";"              -- lua/rooter.lua       plugins/lang.lua
+vim.g.maplocalleader = "|"         -- ginit.vim            plugins/misc.lua
+vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/ui.lua
 vim.g.netrw_banner = 0
 vim.g.netrw_liststyle = 3
 vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
@@ -33,6 +33,7 @@ vim.o.completeopt = "menuone,noselect"
 vim.o.completefunc = "funcs#complete_word"
 vim.o.shortmess = vim.o.shortmess .. "cAS"
 vim.o.spellsuggest = vim.o.spellsuggest .. ",10"
+vim.o.fileencodings = "utf-8,gb2312,gb18030,gbk,ucs-bom,cp936,latin1"
 vim.o.scrolloff = 2
 vim.o.sidescrolloff = 5
 vim.o.signcolumn = "yes"
@@ -71,7 +72,7 @@ vim.keymap.set("x", "al", "0o$")
 vim.keymap.set("o", "al", "<Cmd>normal val<CR>")
 vim.keymap.set("x", "ae", "GoggV")
 vim.keymap.set("o", "ae", "<Cmd>normal vae<CR>")
-vim.keymap.set("x", "af", "iw%")
+vim.keymap.set("x", "af", "v%va)obo")
 vim.keymap.set("o", "af", "<Cmd>normal vaf<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
@@ -180,12 +181,12 @@ vim.keymap.set({ "n", "t" }, "<M-k>", "<Cmd>call plugins#tmux_navigator#resize('
 vim.keymap.set({ "n", "t" }, "<M-l>", "<Cmd>call plugins#tmux_navigator#resize('l')<CR>")
 vim.keymap.set("n", "<C-f>", "<Cmd>lua require('lsp').organize_imports_and_format()<CR>")
 vim.keymap.set("x", "<C-f>", vim.lsp.buf.format)
-vim.keymap.set({ "n", "x" }, "<leader>p", '"0p')
-vim.keymap.set({ "n", "x" }, "<leader>P", '"0P')
+vim.keymap.set({ "n", "x" }, "<leader>p", [["0p]])
+vim.keymap.set({ "n", "x" }, "<leader>P", [["0P]])
 vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
 vim.keymap.set("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
-vim.keymap.set({ "n", "x" }, "<leader>y", '"+y')
-vim.keymap.set("n", "<leader>Y", '"+y$')
+vim.keymap.set({ "n", "x" }, "<leader>y", [["+y]])
+vim.keymap.set("n", "<leader>Y", [["+y$]])
 vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
@@ -211,7 +212,7 @@ vim.keymap.set("c", "<C-Space>", [[':/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>'
 vim.keymap.set("c", "<BS>", [[':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
 vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { expr = true })
-vim.cmd("cnoreabbrev print <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua =( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua =( )' ? setcmdpos(7)[-1] : '')<CR>") -- vim.pretty_print
+vim.cmd("cnoreabbrev print <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua vim.pretty_print( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua vim.pretty_print( )' ? setcmdpos(22)[-1] : '')<CR>")
 vim.cmd("cnoreabbrev git <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>") -- fugitive
 
 -- autocmds {{{1
@@ -306,33 +307,31 @@ vim.filetype.add({
     },
 })
 vim.notify = (function(overridden)
-        return function(...)
-            local present, notify = pcall(require, "notify")
-            if present then
-                vim.notify = notify
-            else
-                vim.notify = overridden
-            end
-            vim.notify(...)
+    return function(...)
+        local present, notify = pcall(require, "notify")
+        if present then
+            vim.notify = notify
+        else
+            vim.notify = overridden
         end
-    end)(vim.notify)
-vim.paste = (function(overridden)
-        return function(lines, phase) -- break undo before pasting in insert mode, :h vim.paste()
-            if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
-                vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
-            end
-            overridden(lines, phase)
+        vim.notify(...)
+    end
+end)(vim.notify)
+vim.paste = (function(overridden) -- break undo before pasting in insert mode, :h vim.paste()
+    return function(lines, phase)
+        if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
+            vim.cmd("let &undolevels = &undolevels") -- resetting undolevels breaks undo
         end
-    end)(vim.paste)
+        overridden(lines, phase)
+    end
+end)(vim.paste)
 if vim.env.SSH_CLIENT ~= nil then -- ssh session
     local function copy(lines, _)
         require("utils").copy_with_osc_yank_script(table.concat(lines, "\n"))
     end
-
     local function paste()
         return { vim.fn.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") }
     end
-
     vim.g.clipboard = {
         name = "osc52",
         copy = { ["+"] = copy,["*"] = copy },
