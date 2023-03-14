@@ -114,7 +114,9 @@ return {
                     ["<CR>"] = cmp.mapping.confirm(),
                     ["<C-e>"] = cmp.mapping.abort(),
                     ["<C-k>"] = cmp.mapping(function(fallback)
-                        if vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
+                        if vim.fn["vsnip#expandable"]() == 1 then
+                            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-expand)", true, true, true), "")
+                        elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
                             vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
                         elseif require("neogen").jumpable() then
                             require("neogen").jump_next()

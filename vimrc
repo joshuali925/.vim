@@ -14,6 +14,8 @@ if has('gui_running')
   set guicursor+=a:blinkon0
   silent! set guifont=Consolas:h12:cANSI
   let $VIM_SYSTEM_CLIPBOARD=1
+elseif has('win32') || has('win32unix')
+  let $VIM_SYSTEM_CLIPBOARD=1
 endif
 
 let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
@@ -107,7 +109,10 @@ set grepprg=rg\ --vimgrep
 set grepformat=%f:%l:%c:%m,%f:%l:%m,%f
 set cedit=<C-x>
 set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%{&fileencoding!=''&&&fileencoding!='utf-8'?'[fileencoding\:\ '.&fileencoding.']':''}%{&fileformat!='unix'?'[fileformat\:\ '.&fileformat.']':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
+set showtabline=2
+set tabline=%!BufferLine()
 silent! set splitkeep=topline
+set belloff=all
 
 let mapleader=';'
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
@@ -246,6 +251,7 @@ xnoremap <leader>fg :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>
 nnoremap <leader>fj :RgRegex \b<C-r>=expand('<cword>')<CR>\b<CR>
 xnoremap <leader>fj :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>
 nnoremap <leader>fu :call plugins#zeef#buffer_tags()<CR>
+nnoremap <leader>f/ :call plugins#zeef#buffer_lines()<CR>
 nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=Dracula --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"')<CR>
 nnoremap <leader>ft :call plugins#zeef#filetype()<CR>
 nnoremap <leader>fT :call <SID>EditCallback('filetypes')<CR>
@@ -302,7 +308,7 @@ command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile buf
 command! Grt silent execute 'cd ' . fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' ') . ';'), ':h'))
 command! -nargs=* Gdiff execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype=' . &filetype . ' | file !git\ show\ <args>:' . expand('%:~:.') . ' | silent read !git show <args>:' . expand('%:~:.') | 0d_ | diffthis
 command! -nargs=* Gblame call setbufvar(winbufnr(popup_atcursor(systemlist('cd ' . shellescape(fnamemodify(resolve(expand('%:p')), ':h')) . ' && git log --no-merges -n 1 -L ' . shellescape(line('v') . ',' . line('.') . ':' . resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')
-command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr('.') . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
+command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr('%') . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
 command! -complete=file -nargs=+ VFind call s:Grep('glob', <q-args>)
 command! -nargs=* VGrep execute 'vimgrep /' . escape(<q-args>, '/') . '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
 command! -nargs=* VGrepNoRegex execute 'vimgrep /' . substitute(escape(<q-args>, '/\.*$^~['), '\n', '\\n', 'g') . '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
@@ -404,6 +410,30 @@ function! s:EditCallback(command) abort
     call delete(tempfile)
   endtry
 endfunction
+function! BufferLine()  " https://www.reddit.com/r/vim/comments/11tdlx0/comment/jcii423
+  let s = ''
+  let bufnr = bufnr('%')
+  for i in filter(range(1, bufnr('$')), 'buflisted(v:val)')
+    let s .= i == bufnr ? '%#TabLineSel#' : '%#TabLine#'
+    if bufname(i) == ''
+      let s .= ' * '
+    else
+      let s .= ' ' . fnamemodify(bufname(i), ':t') . (getbufvar(i, "&modified") ? ' + ' : ' ')
+    endif
+  endfor
+  let s .= '%#TabLineFill#%T%='
+  let tabs = tabpagenr('$')
+  if tabs > 1
+    let tabpagenr = tabpagenr()
+    for i in range(1, tabs)
+      let s .= (i == tabpagenr ? '%#TabLineSel#' : '%#TabLine#') . '%' . i . 'T ' . i . ' '
+    endfor
+    let s .= '%999X X'
+  endif
+  let s .= '%#TabLineFill#%T'
+  return s
+endfunction
+
 call fpc#init()
 set omnifunc=syntaxcomplete#Complete
 set completefunc=funcs#complete_word

@@ -284,7 +284,7 @@ fun! plugins#zeef#open(items, callback, label, ...) abort
   let s:undoseq = []
   let s:match_pos_stack = []
   let s:filter = ''
-  let s:saved_scrolloff = &scrolloff
+  let s:saved_scrolloff = &scrolloff  " scrolloff is global in 7.4
   let l:query = a:0 > 0 ? a:1 : ''
 
   hi default link ZeefMatch Special
@@ -344,9 +344,9 @@ fun! plugins#zeef#open(items, callback, label, ...) abort
       try
         if s:has_matchfuzzy
           let [l:match_results, l:match_positions, l:scores] = matchfuzzypos(a:items, s:filter)
-          %d | call setline(1, l:match_results)
+          %d _ | call setline(1, l:match_results)
         else
-          execute 'silent keeppatterns v:\m' . s:Regexp(s:filter) . ':d'
+          execute 'silent keeppatterns v:\m' . s:Regexp(s:filter) . ':d _'
         endif
       catch /^Vim\%((\a\+)\)\=:E/
         let l:error = 1
@@ -415,6 +415,17 @@ fun! plugins#zeef#buffer(props)
   redir END
   let l:buffers = map(split(ls_output, "\n"), 'substitute(v:val, ''"\(.*\)"\s*line\s*\d\+$'', ''\1'', "")')
   call plugins#zeef#open(l:buffers, 's:switch_to_buffer', 'Switch buffer')
+endf
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Find in buffer lines
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+fun! s:jump_to_line(result)
+  execute matchstr(a:result[0], '^\d\+\t\t▏ ') + 1
+endf
+
+fun! plugins#zeef#buffer_lines()
+  call plugins#zeef#open(map(getline(1, '$'), 'v:key . "\t\t▏ " . v:val'), 's:jump_to_line', 'Find line')
 endf
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

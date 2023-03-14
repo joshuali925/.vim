@@ -21,6 +21,7 @@ return {
                 keys = { { "<leader>v", "<Cmd>Lspsaga outline<CR>" } },
                 opts = {
                     ui = { winblend = 8 },
+                    diagnostic = { on_insert = false },
                     lightbulb = { enable = false, sign_priority = 6, virtual_text = false },
                     code_action = { keys = { quit = "<Esc>" } },
                     rename = { quit = "<Esc>", in_select = false, whole_project = false },

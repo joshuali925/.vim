@@ -14,7 +14,6 @@ scoop install nodejs@14.20.1
 npm install yarn -g
 echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"
 
-scoop install 7zip
 scoop install ripgrep
 scoop install fzf
 scoop install fd
@@ -46,16 +45,17 @@ Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\z.cmd" "$env:USERPROF
 Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\z.lua" "$env:USERPROFILE\scoop\apps\clink\current\z.lua"
 
 git clone --filter=blob:none https://github.com/joshuali925/.vim "$env:USERPROFILE\.vim"
+[Environment]::SetEnvironmentVariable("RIPGREP_CONFIG_PATH", "$env:USERPROFILE\.vim\config\.ripgreprc", "User")
 cmd /c mklink /J %USERPROFILE%\vimfiles %USERPROFILE%\.vim
 New-Item -ItemType Directory -Path "$env:APPDATA\lazygit", "$env:LOCALAPPDATA\lf", "$env:LOCALAPPDATA\Microsoft\Windows Terminal"
 cmd /c mklink /H %USERPROFILE%\.gitconfig %USERPROFILE%\.vim\config\.gitconfig
 cmd /c mklink /H %USERPROFILE%\.tmux.conf %USERPROFILE%\.vim\config\.tmux.conf
-cmd /c mklink /H %APPDATA%\lazlygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
+cmd /c mklink /H %APPDATA%\lazygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
 Copy-Item "$env:USERPROFILE\.vim\config\lfrc" "$env:LOCALAPPDATA\lf\lfrc"
 Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
 cmd /c "echo set previewer '' >> %LOCALAPPDATA%\lf\lfrc"
 cmd /c "echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc"
-cmd /c "echo export EDITOR=vim VIM_SYSTEM_CLIPBOARD=1 TMUX_NO_TPM=1 >> %USERPROFILE%\.bashrc"
+cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.bashrc"
 
 scoop install sudo
 scoop bucket add nerd-fonts

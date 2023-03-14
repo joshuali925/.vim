@@ -1,0 +1,15 @@
+Host *
+    ServerAliveInterval 30
+    ServerAliveCountMax 1200
+    Compression yes
+    ControlMaster auto
+    ControlPath ~/.ssh/master_%r_%h
+
+# Host *
+#     ControlPersist 10h
+#     ForwardAgent yes
+
+Host *.trycloudflare.com
+    HostName %h
+    Port 22
+    ProxyCommand cloudflared access ssh --hostname %h
