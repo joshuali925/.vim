@@ -12,7 +12,7 @@
     "body": [
       "<button style={{ border: 'solid red', padding: 3 }} onClick={() => {",
       "\tconsole.log($0);",
-      "}}>TEST</button>"
+      "}}>❗TEST</button>"
     ]
   },
   "Props": {
@@ -33,7 +33,6 @@
       " * Copyright OpenSearch Contributors",
       " * SPDX-License-Identifier: Apache-2.0",
       " */",
-      "",
       "",
       "import React from 'react';",
       "",

@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-set -eo pipefail
-
-if [ ! -x "$HOME/.vim/tmp/fff" ]; then
-  curl -sL -o "$HOME/.vim/tmp/fff" https://raw.githubusercontent.com/dylanaraps/fff/HEAD/fff
-  chmod +x "$HOME/.vim/tmp/fff"
-fi
-FFF_HIDDEN=1 FFF_CD_FILE=~/.vim/tmp/lf_dir FFF_KEY_MOVE=d FFF_KEY_TRASH=x FFF_KEY_RENAME=R FFF_KEY_REFRESH=r exec "$HOME/.vim/tmp/fff" "$@"

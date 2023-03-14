@@ -55,7 +55,7 @@ log() {
 
 usage() {
   echo "usage: bash $0 [install <package> ...]"
-  echo '  package list: devtools, dotfiles, docker, java, python, node, tmux, neovim, ssh-key'
+  echo '  package list: devtools, dotfiles, asdf, docker, java, python, node, tmux, neovim, ssh-key'
   exit 1
 }
 
@@ -85,8 +85,15 @@ install_asdf() {
 
 install_development_tools() {
   log '\nInstalling development tools..'
-  if [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
-    sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh git
+  if [ "$OSTYPE" == 'linux-android' ]; then
+    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd tmux bat git-delta neovim
+    mkdir -p ~/temp && cd ~/temp
+    wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip && unzip JetBrainsMono.zip
+    mv 'JetBrains Mono Regular Nerd Font Complete Mono.ttf' ~/.termux/font.ttf
+    git clone https://github.com/adi1090x/termux-style --depth=1 && cd termux-style && ./install && cd ~
+    rm -rf ~/temp
+  elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
+    sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh git vim
     sudo yum install -y epel-release || true
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
     sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential zsh git curl unzip
@@ -128,7 +135,7 @@ install_dotfiles() {
     git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth=1
   fi
   log '\nCreating directories..'
-  mkdir -pv ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit}
+  mkdir -pv ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit} ~/.ssh
   log '\nLinking configurations..'
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
   echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc
@@ -136,6 +143,8 @@ install_dotfiles() {
   log "Appended 'source ~/.vim/config/.bashrc' to ~/.bashrc"
   log "Appended 'source ~/.vim/config/.zshrc' to ~/.zshrc"
   log "Appended 'skip_global_compinit=1' to ~/.zshenv"
+  echo 'Include ~/.vim/config/ssh_config' >> ~/.ssh/config
+  echo 'Include ~/.ssh/ec2hosts' >> ~/.ssh/config
   link_file "$HOME/.vim/config/.tmux.conf" "$HOME/.tmux.conf" --relative
   link_file "$HOME/.vim/config/.gitconfig" "$HOME/.gitconfig" --relative
   link_file "$HOME/.vim/config/.ideavimrc" "$HOME/.ideavimrc" --relative
@@ -148,7 +157,18 @@ install_dotfiles() {
     link_file "$HOME/.vim/config/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
     mkdir -p ~/.config/karabiner/assets/complex_modifications
     link_file "$HOME/.vim/config/karabiner.json" "$HOME/.config/karabiner/assets/complex_modifications/karabiner.json"
-    log 'Linked configs for MacOS'
+  elif [ "$OSTYPE" = 'linux-android' ]; then
+    cat >> ~/.zshrc <<EOF
+export SSH_CLIENT=1 TMUX_NO_TPM=1 USER=$(whoami)  # https://github.com/gokcehan/lf/issues/108
+export EDITOR=vim
+
+bindkey '\ej' down-line-or-beginning-search
+bindkey '\ek' up-line-or-beginning-search
+bindkey '\el' forward-char
+bindkey '\e;' beginning-of-line
+bindkey "\e'" end-of-line
+bindkey '\eu' undo
+EOF
   fi
   echo
 }
@@ -160,7 +180,7 @@ install_docker() {
   elif [ "$PLATFORM" == 'linux' ]; then
     curl -fsSL https://get.docker.com/ | sh
   else
-    echo 'Unknown distro..'
+    log 'Unknown distro..'
     return 0
   fi
   log 'Installed docker, adding user to docker group..'
@@ -197,7 +217,7 @@ install_python() {  # environment for asdf install from source: https://github.c
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apk' ]; then
     sudo apk add python3
   elif [ "$PLATFORM" != 'darwin' ]; then
-    echo 'Unknown distro..'
+    log 'Unknown distro..'
     return 0
   fi
   curl https://bootstrap.pypa.io/get-pip.py | python3 && pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip'
@@ -249,7 +269,7 @@ install_neovim() {
   backup "$HOME/.local/lib/nvim"
   nvim --version
   log 'Installed neovim, installing plugins..'
-  timeout 120 ~/.local/bin/nvim --headless +'Lazy! sync' +quitall || true
+  timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
   timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd.quitall() end, 27000)' || true
   log "\nInstalled neovim plugins, run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
   echo
@@ -268,6 +288,7 @@ install() {
     case $package in
       devtools)   install_development_tools ;;
       dotfiles)   install_dotfiles ;;
+      asdf)       install_asdf ;;
       docker)     install_docker ;;
       java)       install_java ;;
       python)     install_python ;;
@@ -290,7 +311,17 @@ init() {
 
 default-install() {
   log "Installing for $OSTYPE"
-  install devtools dotfiles java python node tmux neovim
+  install devtools dotfiles
+
+  if [ "$OSTYPE" = 'linux-android' ]; then
+    chsh -s zsh "$(whoami)"
+    termux-setup-storage && cp ~/storage/downloads ~/downloads
+    log 'Finished setup for termux, setting styles, choose dark monokai or dracula'
+    termux-style
+    exit $?
+  fi
+
+  install java python node tmux neovim || true
 
   log '\nInstalling zsh plugins..'
   zsh -ic 'exit'

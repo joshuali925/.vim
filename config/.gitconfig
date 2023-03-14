@@ -46,7 +46,7 @@
 	tool = vimdiff
 
 [diff]
-    colorMoved = default
+	colorMoved = default
 
 [rerere]
 	enabled = true

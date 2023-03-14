@@ -46,9 +46,9 @@ alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
 alias sudo='sudo '
 alias less='less -RiM'
 alias v='$EDITOR'
-alias vi='command vim'
-alias vii='command vim -u ~/.vim/config/mini.vim -i NONE'
-alias vlf='command vim +Explore'
+alias vi='\vim'
+alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
+alias vlf='\vim +Explore'
 alias vim='$EDITOR'
 alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias gvenv='[ ! -d "$HOME/.local/lib/venv" ] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
@@ -134,6 +134,7 @@ alias gsts='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
+alias gwt='git worktree'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gunignore='git update-index --no-assume-unchanged'
@@ -150,8 +151,8 @@ alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranc
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git foresta --style=10 | \less -RiMXF'
 alias gforesta='git foresta --style=10 --all | \less -RiMXF'
-alias gpatch='command vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply patch.diff && rm patch.diff'
-alias gls="\\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
+alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply patch.diff && rm patch.diff'
+alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
@@ -214,15 +215,20 @@ grlf() {
 gcb() {
   if [ "$#" -gt 0 ]; then
     git checkout -b "$@" || git checkout "$@"
-  else
-    local fzftemp=$(git branch --color --sort=-committerdate --all |
-      awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
-      fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
-      --header='Press ` to toggle sort' \
-      --preview='git log -n 50 --color --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
-    if [ -n "$fzftemp" ]; then
-      git show-ref --verify --quiet "refs/heads/${fzftemp#remotes/[^\/]*/}" && git checkout "${fzftemp#remotes/[^\/]*/}" || git checkout --track "${fzftemp#remotes/}"
-    fi
+    return $?
+  fi
+  local fzftemp=$(git branch --color --sort=-committerdate --all |
+    awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
+    fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
+    --header='Press ` to toggle sort' \
+    --preview='git log -n 50 --color --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
+  [ -z "$fzftemp" ] && return 1
+  local remote="${fzftemp#remotes/}"  # <remote>/<branch>
+  if git show-ref --verify --quiet "refs/heads/${remote#[^\/]*/}"; then  # <branch> exists, switch if tracking <remote> or create as <remote>-<branch>
+    local tracking="$(git rev-parse --abbrev-ref "${remote#[^\/]*/}@{upstream}" 2> /dev/null)"  # current tracking <remote'>/<branch'> for <branch>
+    [ -n "$tracking" ] && [ "$tracking" != "$remote" ] && git checkout -b "${remote/\//-}" --track "$remote" || git checkout "${remote#[^\/]*/}"
+  else  # <branch> doesn't exist, create it
+    git checkout --track "$remote"
   fi
 }
 
@@ -232,7 +238,7 @@ gh-backport() {
   if [ -f ".github/PULL_REQUEST_TEMPLATE.md" ]; then
     args+=(--body-file .github/PULL_REQUEST_TEMPLATE.md)
   fi
-  git cherry-pick -f "$sha" && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
+  git cherry-pick -x "$sha" && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
 }
 
 size() {

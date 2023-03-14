@@ -48,7 +48,7 @@
   "Timeout outside async": {
     "prefix": "sleep",
     "body": [
-      "(async () => await new Promise((resolve) => setTimeout(resolve, ${1:1000})))();$0"
+      "await new Promise((resolve) => setTimeout(resolve, ${1:1000}));$0"
     ]
   },
   "Immediately-invoked async function": {

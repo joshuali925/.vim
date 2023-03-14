@@ -19,7 +19,7 @@ hi FoldColumn guibg=#1f2430 ctermbg=235
 hi IncSearch guifg=#ffa759 guibg=#323a4c ctermfg=215 ctermbg=237
 hi LineNr guifg=#5f6675 ctermfg=242
 hi CursorLineNr guifg=#ffcc66 guibg=#191e2a gui=none ctermfg=222 ctermbg=234 cterm=none
-hi MatchParen guisp=#ffd580 gui=underline cterm=underline
+hi MatchParen guibg=#444953 gui=bold cterm=bold
 hi ModeMsg guifg=#bae67e ctermfg=149
 hi MoreMsg guifg=#bae67e ctermfg=149
 hi NonText guifg=#383e4c ctermfg=237

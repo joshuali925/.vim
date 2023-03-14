@@ -3830,3 +3830,18 @@ if exists('g:plugs')
   nnoremap <C-p> :FZF<CR>
   xnoremap <C-p> :<C-u>execute 'FZF --query='. funcs#get_visual_selection()<CR>
 endif
+
+" =======================================================
+" mimic fuzzy finder
+" doesn't seem possible to output to stdout in non-headless. https://vi.stackexchange.com/a/800
+" doesn't work if not explicitly called
+fun! s:select_to_file(result)
+  call writefile(a:result, fnamemodify(expand('$MYVIMRC'), ':p:h') . '/tmp/lf_dir')
+endf
+fun! plugins#zeef#fuzzy_select()
+  call plugins#zeef#open(getline(1, '$'), 's:select_to_file', 'Select')
+endf
+fd | \vim -u ~/.vim/config/mini.vim -i NONE +'call plugins#zeef#fuzzy_select()' +'qa!' - && cat ~/.vim/tmp/lf_dir
+
+" for compatibility, also search for '7.4' and 'silent!'
+  bufnr('%')
