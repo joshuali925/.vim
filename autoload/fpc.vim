@@ -32,7 +32,7 @@ function! fpc#init() abort
     set completeopt=menuone
   endif
   set omnifunc=syntaxcomplete#Complete
-  set shortmess+=c
+  silent! set shortmess+=c
 
   augroup FpcInit
     autocmd!

@@ -87,6 +87,7 @@ install_development_tools() {
   log '\nInstalling development tools..'
   if [ "$OSTYPE" == 'linux-android' ]; then
     pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd tmux bat git-delta neovim
+    chsh -s zsh "$(whoami)"
     mkdir -p ~/temp && cd ~/temp
     wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip && unzip JetBrainsMono.zip
     mv 'JetBrains Mono Regular Nerd Font Complete Mono.ttf' ~/.termux/font.ttf
@@ -116,8 +117,7 @@ install_development_tools() {
     log 'Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc'
     defaults write -g ApplePressAndHoldEnabled -bool false
     log 'Disabled ApplePressAndHoldEnabled to support key repeats'
-    # brew tap wez/wezterm
-    # brew install --cask wez/wezterm/wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel
+    # brew update && brew install --cask wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
     # snipaste: https://www.snipaste.com/download.html
@@ -314,14 +314,11 @@ default-install() {
   install devtools dotfiles
 
   if [ "$OSTYPE" = 'linux-android' ]; then
-    chsh -s zsh "$(whoami)"
-    termux-setup-storage && cp ~/storage/downloads ~/downloads
-    log 'Finished setup for termux, setting styles, choose dark monokai or dracula'
-    termux-style
-    exit $?
+    log 'Finished setup for termux. Setting file access and styles (use dark monokai or dracula)'
+    termux-setup-storage && termux-style && cp --preserve=links -r ~/storage/downloads ~/downloads
+  else
+    install java python node tmux neovim || true
   fi
-
-  install java python node tmux neovim || true
 
   log '\nInstalling zsh plugins..'
   zsh -ic 'exit'

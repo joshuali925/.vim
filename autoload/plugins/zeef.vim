@@ -292,7 +292,7 @@ fun! plugins#zeef#open(items, callback, label, ...) abort
   hi default      ZeefSelected term=reverse cterm=reverse gui=reverse
 
   " botright 10new may not set the right height, e.g., if the quickfix window is open
-  execute printf("botright :1new | %dwincmd +", get(g:, 'zeef_height', 10) - 1)
+  execute get(g:, 'zeef_use_tab', 0) ? 'tabe' : printf("botright :1new | %dwincmd +", get(g:, 'zeef_height', 10) - 1)
   setlocal buftype=nofile bufhidden=wipe nobuflisted filetype=zeef
         \  modifiable noreadonly noswapfile noundofile
         \  foldmethod=manual nofoldenable nolist nospell
@@ -478,7 +478,7 @@ endf
 " MRU
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Filter oldfiles to not be vim_doc, current file, non-exist files
-func! s:f(f) abort
+fun! s:f(f) abort
   let p = expand(a:f)
   return stridx(p, s:d) < 0 && p != s:b && filereadable(p)
 endf
@@ -503,6 +503,21 @@ endf
 
 fun! plugins#zeef#filetype()
   call plugins#zeef#open(map(globpath(&rtp, 'syntax/*.vim', 0, 1), 'fnamemodify(v:val, ":t:r")'), 's:set_filetype', 'Filetypes')
+endf
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Command line fuzzy finder (see ../../local-bin/fzf)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Doesn't seem possible to output to stdout in non-headless. https://vi.stackexchange.com/a/800
+fun! s:select_to_file(result)
+  call writefile(a:result, $HOME . '/.vim/tmp/lf_dir')
+  quit!
+endf
+fun! plugins#zeef#fuzzy_select()
+  let g:zeef_use_tab = 1
+  set showtabline=0
+  call plugins#zeef#open(getline(1, '$'), 's:select_to_file', 'Select')
+  cquit!
 endf
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

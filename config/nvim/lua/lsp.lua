@@ -66,10 +66,38 @@ function M.init()
     require("mason-lspconfig").setup_handlers({
         register_server,
         jdtls = function()
-            register_server("jdtls", { -- needs python3.9+, or remove `action=argparse.BooleanOptionalAction` in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py
-                -- cmd_env = { -- jdtls requires java 17, or use :LspInstall jdtls@1.12.0
-                --     JAVA_HOME = vim.loop.os_homedir() .. "/.asdf/installs/java/corretto-17.0.4.8.1"
-                -- },
+            local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+            local workspace_dir = vim.fn.stdpath("cache") .. "/java/workspace/" .. project_name
+            os.execute("mkdir -p " .. workspace_dir)
+            local install_path = require("mason-registry").get_package("jdtls"):get_install_path()
+            local os = vim.fn.has("macunix") and "mac" or "linux"
+            register_server("jdtls", {
+                -- https://astronvim.com/nightly/Recipes/advanced_lsp#java-nvim-jdtls
+                cmd = {     -- needs python3.9+, or remove `action=argparse.BooleanOptionalAction` in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py
+                    "java", -- needs java 17, or use :LspInstall jdtls@1.12.0
+                    -- vim.loop.os_homedir() .. "/.asdf/installs/java/corretto-17.0.4.8.1/bin/java",
+                    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+                    "-Dosgi.bundles.defaultStartLevel=4",
+                    "-Declipse.product=org.eclipse.jdt.ls.core.product",
+                    "-Dlog.protocol=true",
+                    "-Dlog.level=ALL",
+                    "-javaagent:" .. install_path .. "/lombok.jar",
+                    "-Xms1g",
+                    "--add-modules=ALL-SYSTEM",
+                    "--add-opens",
+                    "java.base/java.util=ALL-UNNAMED",
+                    "--add-opens",
+                    "java.base/java.lang=ALL-UNNAMED",
+                    "-jar",
+                    vim.fn.glob(install_path .. "/plugins/org.eclipse.equinox.launcher_*.jar"),
+                    "-configuration",
+                    install_path .. "/config_" .. os,
+                    "-data",
+                    workspace_dir,
+                },
+                settings = {
+                    java = { sources = { organizeImports = { starThreshold = 9999, staticStarThreshold = 9999 } } },
+                },
             })
         end,
         lua_ls = function()

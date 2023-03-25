@@ -1,11 +1,11 @@
 -- options {{{1
-require("states")                  -- lua/states.lua       plugins/appearance.lua
-vim.g.loaded_2html_plugin = 1      -- lua/utils.lua        plugins/completion.lua
-vim.g.loaded_remote_plugins = 1    -- lua/themes.lua       plugins/editing.lua
-vim.g.loaded_tutor_mode_plugin = 1 -- lua/lsp.lua          plugins/git.lua
-vim.g.mapleader = ";"              -- lua/rooter.lua       plugins/lang.lua
-vim.g.maplocalleader = "|"         -- ginit.vim            plugins/misc.lua
-vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/ui.lua
+require("states")                  -- lua/states.lua       plugins/ui.lua
+vim.g.loaded_2html_plugin = 1      -- lua/themes.lua       plugins/appearance.lua
+vim.g.loaded_remote_plugins = 1    -- lua/utils.lua        plugins/misc.lua
+vim.g.loaded_tutor_mode_plugin = 1 -- lua/rooter.lua       plugins/completion.lua
+vim.g.mapleader = ";"              -- lua/lsp.lua          plugins/lang.lua
+vim.g.maplocalleader = "|"         -- ginit.vim            plugins/git.lua
+vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/editing.lua
 vim.g.netrw_banner = 0
 vim.g.netrw_liststyle = 3
 vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
@@ -33,6 +33,8 @@ vim.o.completeopt = "menuone,noselect"
 vim.o.completefunc = "funcs#complete_word"
 vim.o.shortmess = vim.o.shortmess .. "cAS"
 vim.o.spellsuggest = vim.o.spellsuggest .. ",10"
+vim.o.spelloptions = "camel"
+vim.o.spellcapcheck = ""
 vim.o.fileencodings = "utf-8,gb2312,gb18030,gbk,ucs-bom,cp936,latin1"
 vim.o.scrolloff = 2
 vim.o.sidescrolloff = 5

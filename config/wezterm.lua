@@ -72,6 +72,7 @@ return {
     },
     keys = {
         { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
+        { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = true }) },
         { key = "d", mods = "CMD", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
         { key = "k", mods = "CMD", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
         { key = "f", mods = "CMD", action = wezterm.action.Search({ CaseInSensitiveString = "" }) },

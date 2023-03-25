@@ -72,9 +72,9 @@ set shiftround
 set autoread
 set hidden
 set complete=.,w,b,u
-" do not set noselect or noinsert for 7.4 compatibility
+" do not set noselect or noinsert and silent errors on 'shortmess' for 7.4 compatibility
 set completeopt=menuone
-set shortmess+=c
+silent! set shortmess+=c
 set shortmess-=S
 set nrformats-=octal
 set scrolloff=2
@@ -112,7 +112,7 @@ set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\
 set showtabline=2
 set tabline=%!BufferLine()
 silent! set splitkeep=topline
-set belloff=all
+silent! set belloff=all
 
 let mapleader=';'
 for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
