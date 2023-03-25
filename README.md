@@ -12,6 +12,33 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/in
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"
 ```
 
+without downloading external binaries
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)" -- --no-binary-downloads
+```
+
+<details>
+<summary>without downloading anything</summary>
+
+copy base64 on local machine from github
+
+```bash
+curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C /tmp --exclude=bin/busybox --exclude=config/backup.vim --exclude=config/surfingkeys.js --exclude=config/karabiner.json --exclude=config/nvim
+echo "mkdir -p ~/.vim; base64 -d <<<$(tar cJf - -C /tmp .vim-master | base64 | tr -d '\r\n') | tar xvJ -C \"\$HOME/.vim\" --strip-components=1 && ~/.vim/bin/bashrc --no-binary-downloads" | pbcopy
+rm -rf /tmp/.vim-master
+```
+
+or copy from local ~/.vim directory
+
+```bash
+echo "mkdir -p ~/.vim; base64 -d <<<$(cd ~/.vim > /dev/null 2>&1; git ls-files -- ':!bin/busybox' ':!config/backup.vim' ':!config/surfingkeys.js' ':!config/karabiner.json' ':!config/nvim' | tar cJf - -T - | base64 | tr -d '\r\n') | tar xvJ -C \"\$HOME/.vim\" && ~/.vim/bin/bashrc --no-binary-downloads" | pbcopy
+```
+
+paste and run in target machine
+
+</details>
+
 ### Run alpine docker environment
 
 ```bash

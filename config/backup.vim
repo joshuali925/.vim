@@ -3832,16 +3832,22 @@ if exists('g:plugs')
 endif
 
 " =======================================================
-" mimic fuzzy finder
-" doesn't seem possible to output to stdout in non-headless. https://vi.stackexchange.com/a/800
-" doesn't work if not explicitly called
-fun! s:select_to_file(result)
-  call writefile(a:result, fnamemodify(expand('$MYVIMRC'), ':p:h') . '/tmp/lf_dir')
-endf
-fun! plugins#zeef#fuzzy_select()
-  call plugins#zeef#open(getline(1, '$'), 's:select_to_file', 'Select')
-endf
-fd | \vim -u ~/.vim/config/mini.vim -i NONE +'call plugins#zeef#fuzzy_select()' +'qa!' - && cat ~/.vim/tmp/lf_dir
+" local-bin/rg
+#!/usr/bin/env bash
+set -eo pipefail
+[ "$1" = --files ] && exec fd "$@"
+while [ $# -gt 0 ]; do
+  [[ $1 = -* ]] && shift || break
+done
+exec grep --ignore-case --line-number -I -R -- "${1:-*}" .
+" local-bin/fd
+#!/usr/bin/env bash
+set -eo pipefail
+while [ $# -gt 0 ]; do
+  [[ $1 = -* ]] && shift || break
+done
+exec find . -type f -not -path '*/.git/*' -iname "*${1:-}*"
 
+" =======================================================
 " for compatibility, also search for '7.4' and 'silent!'
   bufnr('%')

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -eo pipefail
+{ [ -t 0 ] && eval "$FZF_DEFAULT_COMMAND" || cat; } | sed -e 's/\x1b\[[0-9;]*m//g' -e 's/\x0//g' | vim -u ~/.vim/config/mini.vim -i NONE +'colo one' +'call plugins#zeef#fuzzy_select()' - --not-a-term > /dev/tty && cat ~/.vim/tmp/lf_dir

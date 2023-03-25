@@ -543,6 +543,12 @@ set-env() {
   echo "$cmd" | if [[ "$reply" == [Yy] ]]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
 }
 
+.vim-disable-binary-downloads() {
+  export PATH="${PATH//.vim\/bin/.vim/local-bin}"
+  export FZF_DEFAULT_COMMAND="command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune -o -type f -print -o -type d -print -o -type l -print 2> /dev/null | cut -b3-"
+  export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+}
+
 tldr() {
   curl "https://cheat.sh/${*// /+}"
 }
@@ -699,6 +705,8 @@ os-get() {
   printf "\033[0;36m%s\033[0m\n" "Downloading from: $url" >&2
   wget "$url"
 }
+
+[ -n "$DOT_VIM_LOCAL_BIN" ] && .vim-disable-binary-downloads
 
 # ====================== MacOS ==========================
 if [[ $OSTYPE = darwin* ]]; then
