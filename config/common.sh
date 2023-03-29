@@ -75,13 +75,9 @@ alias gaa='git add --all'
 alias gb='git branch'
 alias gba='git branch -vv --sort=-committerdate -a'
 alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(HEAD)%(color:yellow)%(refname:short)|%(color:green)%(committerdate:relative)|%(color:red)%(objectname:short)%(color:reset) - %(subject) %(color:bold blue)<%(authorname)>%(color:reset)" --color | column -ts"|"'
-alias gc='git commit -m'
 alias gc!='git commit -v --amend'
-alias gca='git commit -v -a'
-alias gca!='git commit -v -a --amend'
 alias gcs='git commit --signoff -m'
 alias gcs!='git commit --signoff --amend'
-alias gcv='git commit -v'
 alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcf='git config --list'
 alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
@@ -104,10 +100,11 @@ alias gl='git pull'
 alias glr='git pull --rebase'
 alias glg='git log --stat'
 alias glgg='git log --graph --pretty=fuller'
-alias glgga='git log --graph --decorate --all --pretty=fuller'
+alias glgga='git log --graph --pretty=fuller --all'
 alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 alias gloo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --max-count 10'
-alias glog='git log --color --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all'
+alias glog='git log --color --graph --abbrev-commit --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all'
+alias glx="git log --all --graph --decorate=short --date-order --color --pretty=format:\"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)\" | awk '{ split(\$0,arr,\"§\"); match(arr[2], /(\\([0-9a-z ,]+\\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf(\"%*s    %s %s %s\\n\", padlen, arr[2], arr[1], arr[3], arr[4]); }' | less -RiMXF -p \$(git show -s --format=%h)"
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
@@ -157,38 +154,33 @@ alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
 
-gpr() {
-  if [ "$#" -ne 1 ]; then echo "Usage: $0 {PR-number|PR-URL}" >&2; return 1; fi
-  local pr=${1##*/}
-  if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    local repo=${1%/pull/*}
-    git clone "$repo" "${repo##*/}-$pr"
-    cd "${repo##*/}-$pr" > /dev/null || return 1
+gc() {
+  [ "$#" -eq 0 ] && { git commit --signoff -v; return $?; }
+  local args=()
+  while [ "$#" -ne 0 ]; do
+    [[ "$1" != -* ]] && args+=(-m) && break
+    args+=("$1") && shift
+  done
+  git commit "${args[@]}" "$@"
+}
+
+gcb() {
+  if [ "$#" -gt 0 ]; then
+    git checkout -b "$@" || git checkout "$@"
+    return $?
   fi
-  git stash push --include-untracked --message 'git PR temporary stash'
-  git fetch origin "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
-}
-
-gr-toggle-url() {
-  local pattern='s,^\(https://\|git@\)\([^:/]\+\)[:/],' remote="${1:-origin}" url="$(git remote get-url "${1:-origin}")"
-  grep -q '^https://' <<< "$url" && pattern="${pattern}git@\\2:," || pattern="${pattern}https://\\2/,"
-  git remote set-url "$remote" "$(sed "$pattern" <<< "$url")"
-  git remote -v
-}
-
-grg() {  # search literal string in all commits, replace `log` with `reflog` for local commits, change -S to -G for regex search, add --patch to see all diff together
-  git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -S "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
-}
-
-gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
-  local root=$(git rev-parse --show-toplevel || echo ".")
-  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- '"${root}"'/{}')
-  if [ -n "$filepath" ]; then
-    local sha=$(git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- "${root}/${filepath}" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- ${root}/${filepath} | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
-    if [ -n "$sha" ]; then
-      echo -e "\033[0;35mgit show $sha:$filepath\033[0m" >&2
-      git show "$sha:$filepath" | $EDITOR - -c "file $sha:$filepath" -c 'filetype detect'
-    fi
+  local fzftemp=$(git branch --color --sort=-committerdate --all |
+    awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
+    fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
+    --header='Press ` to toggle sort' \
+    --preview='git log -n 50 --color --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
+  [ -z "$fzftemp" ] && return 1
+  local remote="${fzftemp#remotes/}"  # <remote>/<branch>
+  if git show-ref --verify --quiet "refs/heads/${remote#[^\/]*/}"; then  # <branch> exists, switch if tracking <remote> or create as <remote>-<branch>
+    local tracking="$(git rev-parse --abbrev-ref "${remote#[^\/]*/}@{upstream}" 2> /dev/null)"  # current tracking <remote'>/<branch'> for <branch>
+    [ -n "$tracking" ] && [ "$tracking" != "$remote" ] && git checkout -b "${remote/\//-}" --track "$remote" || git checkout "${remote#[^\/]*/}"
+  else  # <branch> doesn't exist, create it
+    git checkout --track "$remote"
   fi
 }
 
@@ -212,24 +204,40 @@ grlf() {
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
 
-gcb() {
-  if [ "$#" -gt 0 ]; then
-    git checkout -b "$@" || git checkout "$@"
-    return $?
+grg() {
+  if [ "$#" -eq 0 ]; then echo -e "Usage: $0 <text>\nSearch literal string in all commits.\n\nIn function code:\n\tReplace 'log' with 'reflog' for local commits.\n\tChange '-S' to '-G' for regex search." >&2; return 1; fi
+  git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -S "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
+}
+
+gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
+  local root=$(git rev-parse --show-toplevel || echo ".")
+  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- '"${root}"'/{}')
+  if [ -n "$filepath" ]; then
+    local sha=$(git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- "${root}/${filepath}" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- ${root}/${filepath} | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
+    if [ -n "$sha" ]; then
+      echo -e "\033[0;35mgit show $sha:$filepath\033[0m" >&2
+      git show "$sha:$filepath" | $EDITOR - -c "file $sha:$filepath" -c 'filetype detect'
+    fi
   fi
-  local fzftemp=$(git branch --color --sort=-committerdate --all |
-    awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
-    fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
-    --header='Press ` to toggle sort' \
-    --preview='git log -n 50 --color --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
-  [ -z "$fzftemp" ] && return 1
-  local remote="${fzftemp#remotes/}"  # <remote>/<branch>
-  if git show-ref --verify --quiet "refs/heads/${remote#[^\/]*/}"; then  # <branch> exists, switch if tracking <remote> or create as <remote>-<branch>
-    local tracking="$(git rev-parse --abbrev-ref "${remote#[^\/]*/}@{upstream}" 2> /dev/null)"  # current tracking <remote'>/<branch'> for <branch>
-    [ -n "$tracking" ] && [ "$tracking" != "$remote" ] && git checkout -b "${remote/\//-}" --track "$remote" || git checkout "${remote#[^\/]*/}"
-  else  # <branch> doesn't exist, create it
-    git checkout --track "$remote"
+}
+
+gr-toggle-url() {
+  local pattern='s,^\(https://\|git@\)\([^:/]\+\)[:/],' remote="${1:-origin}" url="$(git remote get-url "${1:-origin}")"
+  grep -q '^https://' <<< "$url" && pattern="${pattern}git@\\2:," || pattern="${pattern}https://\\2/,"
+  git remote set-url "$remote" "$(sed "$pattern" <<< "$url")"
+  git remote -v
+}
+
+gpr() {
+  if [ "$#" -ne 1 ]; then echo "Usage: $0 {PR-number|PR-URL}" >&2; return 1; fi
+  local pr=${1##*/}
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    local repo=${1%/pull/*}
+    git clone "$repo" "${repo##*/}-$pr"
+    cd "${repo##*/}-$pr" > /dev/null || return 1
   fi
+  git stash push --include-untracked --message 'git PR temporary stash'
+  git fetch origin "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
 }
 
 gh-backport() {
@@ -394,6 +402,10 @@ path() {
     type -a "$@"
     declare -f "$@" || true
   fi
+}
+
+vx() {  # run vim commands in pipe: echo foo | vx 's/foo/bar/' 'put=execute(\"echo &tabstop\")'
+  ex -sn "${@/#/+}" +'%write! /dev/stdout | quit!' /dev/stdin
 }
 
 vf() {  # find files: vf; open files from pipe: fd | vf

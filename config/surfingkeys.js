@@ -50,6 +50,7 @@ api.map('l', 'R'); // tab right
 api.map('ad', 'R'); // tab right
 api.map('Z[', 'gx0'); // close tabs to the left
 api.map('Z]', 'gx$'); // close tabs to the right
+api.map('ZX', 'gxx'); // close other tabs
 api.map('<Ctrl-q>', 'i'); // temp key holder
 api.map('i', 'gi'); // first input box
 api.map('gi', '<Ctrl-q>'); // select input box

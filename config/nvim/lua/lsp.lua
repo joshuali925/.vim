@@ -174,7 +174,8 @@ local formatting_lsps = { "null-ls", "lua_ls" }
 function M.organize_imports_and_format()
     local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_active_clients({ bufnr = 0 }))
     if vim.tbl_contains(active_clients, "tsserver") then
-        require("typescript").actions.organizeImports({ sync = true })
+        local ok, resp = pcall(require("typescript").actions.organizeImports, { sync = true })
+        if not ok then vim.notify(resp, "ERROR", { title = "Organize imports failed" }) end
     end
     if not vim.tbl_isempty(vim.tbl_filter(function(name) return vim.tbl_contains(formatting_lsps, name) end, active_clients)) then
         vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsps, client.name) end, timeout_ms = 3000 })

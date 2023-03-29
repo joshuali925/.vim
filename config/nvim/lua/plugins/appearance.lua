@@ -29,7 +29,7 @@ return {
     },
     {
         "akinsho/bufferline.nvim",
-        event = "VimEnter",
+        event = "UIEnter",
         keys = {
             { "<BS>", "<Cmd>BufferLineCyclePrev<CR>" },
             { "\\", "<Cmd>BufferLineCycleNext<CR>" },
@@ -40,7 +40,7 @@ return {
         },
         opts = {
             options = {
-                themable = true,
+                buffer_close_icon = "",
                 -- offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } }, -- taking too much space
             },
             highlights = { buffer_selected = { bold = true, italic = false } },
@@ -48,7 +48,7 @@ return {
     },
     {
         "nvim-lualine/lualine.nvim",
-        event = "VimEnter",
+        event = "UIEnter",
         config = function()
             if curr_theme == "visual_studio_code" then
                 require("lualine").setup({

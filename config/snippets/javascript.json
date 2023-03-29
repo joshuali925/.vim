@@ -102,5 +102,43 @@
   "Cypress text exists": {
     "prefix": "cyexists",
     "body": ["cy.contains('$0').should('exist');"]
+  },
+  "REST requester": {
+    "prefix": "request",
+    "body": [
+      "// request(url: string, { body, ...options }: RequestOptions & { body?: any } = {}): Promise<unknown>;",
+      "function request(url, { body, ...options } = {}) {",
+      "\treturn new Promise((resolve, reject) => {",
+      "\t\tconst req = (",
+      "\t\t\turl.startsWith(\"https://\") || options.protocol === \"https\"",
+      "\t\t\t\t? require(\"https\")",
+      "\t\t\t\t: require(\"http\")",
+      "\t\t).request(url, { ...options }, (res) => {",
+      "\t\t\tconst chunks = [];",
+      "\t\t\tres.on(\"data\", (data) => chunks.push(data));",
+      "\t\t\tres.on(\"end\", () => {",
+      "\t\t\t\tlet resBody = Buffer.concat(chunks).toString();",
+      "\t\t\t\tif (res.headers[\"content-type\"] === \"application/json\") {",
+      "\t\t\t\t\tresBody = JSON.parse(resBody);",
+      "\t\t\t\t}",
+      "\t\t\t\tresolve(resBody.toString());",
+      "\t\t\t});",
+      "\t\t});",
+      "\t\treq.on(\"error\", reject);",
+      "\t\tif (body) {",
+      "\t\t\treq.write(body);",
+      "\t\t}",
+      "\t\treq.end();",
+      "\t});",
+      "}",
+      "",
+      "function postJSON(url, obj) {",
+      "\treturn request(url, {",
+      "\t\tmethod: \"POST\",",
+      "\t\theaders: { \"Content-Type\": \"application/obj\" },",
+      "\t\tbody: obj.stringify(obj),",
+      "\t});",
+      "}"
+    ]
   }
 }
