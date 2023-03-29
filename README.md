@@ -42,7 +42,7 @@ paste and run in target machine
 ### Run alpine docker environment
 
 ```bash
-docker run -e TERM --network host -w /root -it --rm alpine sh -uec '
+docker run -e TERM --network host -w /root -it --rm alpine sh -uelic '
   apk add curl bash vim
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"'
 ```

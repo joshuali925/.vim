@@ -93,6 +93,7 @@ zstyle ':fzf-tab:*' popup-min-size 50 8
 
 compdef _dirs d
 compdef _command_names path
+compdef _git gc=git-commit
 
 bracketed-paste() {
   zle .$WIDGET && LBUFFER=${LBUFFER%$'\n'}

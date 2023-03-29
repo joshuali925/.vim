@@ -46,6 +46,7 @@ if has('mouse')
   set ttymouse=sgr
 endif
 set cursorline
+silent! set cursorlineopt=number,screenline
 set numberwidth=2
 set number
 set wrap

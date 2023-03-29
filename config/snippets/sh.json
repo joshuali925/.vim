@@ -3,6 +3,10 @@
     "prefix": "template",
     "body": ["#!/usr/bin/env bash", "set -eo pipefail", "", "$0"]
   },
+  "Array": {
+    "prefix": "array",
+    "body": "\"\\${${1:array}[@]}\"$0"
+  },
   "If": {
     "prefix": "if",
     "body": ["if [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "\t$0", "fi"]
@@ -71,6 +75,14 @@
   "For i in range": {
     "prefix": "for-range",
     "body": ["for ${1:i} in {1..${2:10}}; do", "\t$0", "done"]
+  },
+  "For each argument": {
+    "prefix": "for-arg",
+    "body": ["for ${1:arg} in \"\\$@\"; do", "\t$0", "done"]
+  },
+  "While argument": {
+    "prefix": "while-arg",
+    "body": ["while [ \"\\$#\" -ne 0 ]; do", "\t$0", "\tshift", "done"]
   },
   "Loop lines": {
     "prefix": "while-read",

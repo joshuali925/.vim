@@ -13,6 +13,7 @@ vim.o.whichwrap = "<,>,[,]"
 vim.o.termguicolors = true
 vim.o.mouse = "a"
 vim.o.cursorline = true
+vim.o.cursorlineopt = "number,screenline"
 vim.o.numberwidth = 2
 vim.o.number = true
 vim.o.linebreak = true
@@ -165,6 +166,12 @@ vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#Chec
 vim.keymap.set("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("n", "zh", "zhz", { remap = true })
 vim.keymap.set("n", "zl", "zlz", { remap = true })
+vim.keymap.set("n", "ZX", function()
+    local cur = vim.api.nvim_get_current_buf()
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.bo[bufnr].buflisted and bufnr ~= cur and vim.b[bufnr].bufpersist ~= 1 then vim.fn["plugins#bbye#bdelete"]("bdelete", "", bufnr) end
+    end
+end, { desc = "Close untouched buffers" })
 vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("x", "<C-c>", "<Esc>")
@@ -233,6 +240,11 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     pattern = "*",
     group = "AutoCommands",
     command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | endif | endif | let b:RestoredCursor = 1]],
+})
+vim.api.nvim_create_autocmd("BufRead", {
+    group = "AutoCommands",
+    pattern = "*",
+    callback = function() vim.api.nvim_create_autocmd({ "InsertEnter", "BufModifiedSet" }, { buffer = 0, once = true, callback = function(opts) vim.b[opts.buf].bufpersist = 1 end }) end
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=jql" })

@@ -143,16 +143,21 @@ function! funcs#get_run_command() abort
   let run_command = {}
   let run_command['vim'] = 'source %'
   let run_command['lua'] = 'luafile %'
-  let run_command['python'] = 'AsyncRun -raw python3 "$(VIM_FILEPATH)"'
-  let run_command['c'] = 'AsyncRun -raw gcc "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
-  let run_command['cpp'] = 'AsyncRun -raw g++ "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
-  let run_command['java'] = 'AsyncRun -raw javac "$(VIM_FILEPATH)" && java -classpath "$(VIM_FILEDIR)" "$(VIM_FILENOEXT)"'
-  let run_command['javascript'] = 'AsyncRun -raw node "$(VIM_FILEPATH)"'
-  let run_command['typescript'] = 'AsyncRun -raw npx ts-node "$(VIM_FILEPATH)"'
-  let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
-  let run_command['html'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
-  let run_command['xhtml'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
+  if exists(':AsyncRun')
+    let run_command['python'] = 'AsyncRun -raw python3 "$(VIM_FILEPATH)"'
+    let run_command['javascript'] = 'AsyncRun -raw node "$(VIM_FILEPATH)"'
+    let run_command['typescript'] = 'AsyncRun -raw npx ts-node "$(VIM_FILEPATH)"'
+    let run_command['c'] = 'AsyncRun -raw gcc "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
+    let run_command['cpp'] = 'AsyncRun -raw g++ "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
+    let run_command['java'] = 'AsyncRun -raw javac "$(VIM_FILEPATH)" && java -classpath "$(VIM_FILEDIR)" "$(VIM_FILENOEXT)"'
+    let run_command['html'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
+    let run_command['xhtml'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
+  else
+    let run_command['python'] = '!clear; python3 %'
+    let run_command['javascript'] = '!clear; node %'
+  endif
   let run_command['http'] = 'lua require("rest-nvim").run()'
+  let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
   return get(run_command, &filetype, '') . get(b:, 'args', '')
 endfunction
 

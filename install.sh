@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NODE_VERSION=14.20.1
+NODE_VERSION=14.21.3
 BACKUP_DIR=$HOME/config-backup
 
 CYAN='\033[0;36m'
@@ -117,6 +117,7 @@ install_development_tools() {
     log 'Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc'
     defaults write -g ApplePressAndHoldEnabled -bool false
     log 'Disabled ApplePressAndHoldEnabled to support key repeats'
+    # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1
     # brew update && brew install --cask wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
@@ -314,7 +315,7 @@ default-install() {
   install devtools dotfiles
 
   if [ "$OSTYPE" = 'linux-android' ]; then
-    log 'Finished setup for termux. Setting file access and styles (use dark monokai or dracula)'
+    log 'Finished package installs for termux. Setting up file access and styles (use dark monokai or dracula)'
     termux-setup-storage && termux-style && cp --preserve=links -r ~/storage/downloads ~/downloads
   else
     install java python node tmux neovim || true
