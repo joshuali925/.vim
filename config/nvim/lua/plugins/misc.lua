@@ -1,5 +1,5 @@
 return {
-    { "tpope/vim-sleuth", lazy = false, cond = require("states").small_file },
+    { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
     {
         "AckslD/nvim-neoclip.lua",

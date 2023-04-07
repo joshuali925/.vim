@@ -119,7 +119,7 @@ function M.switch(index)
     M.theme = M.theme_list[index]
     require("lazy").load({ plugins = M.theme })
     M.config()
-    vim.notify("Restart to change theme to " .. M.theme .. ".", "INFO", { title = "Theme" })
+    vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { title = "Theme" })
 end
 
 return M

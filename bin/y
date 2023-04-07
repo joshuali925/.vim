@@ -3,17 +3,40 @@
 # https://medium.com/free-code-camp/tmux-in-practice-integration-with-system-clipboard-bcd72c62ff7b
 # https://sunaku.github.io/tmux-yank-osc52.html
 # https://github.com/ojroques/vim-oscyank/issues/26: tmux >= 3.3 doesn't need OSC52 sequence to be wrapped
+# https://github.com/neovim/neovim/issues/8450
 
 buf=$(cat "$@")
 buflen=$(printf %s "$buf" | wc -c)
 maxlen=74994
 
-otty=$TTY
+# if called from nvim terminal (:h v:servername), look upwards to find tty of the nvim process
+if [ -n "$NVIM" ]; then
+  ppid=$PPID
+  while [ -n "$ppid" ]; do
+    psout=$(ps -p "$ppid" -o ppid= -o tty= -o comm=)
+    if [ "$(awk '{print $3}' <<<"$psout")" == 'nvim' ]; then
+      otty="/dev/$(awk '{print $2}' <<<"$psout")"; break
+    fi
+    ppid=$(awk '{print $1}' <<<"$psout")
+  done
+fi
+
+otty="${otty:-$TTY}"
 if [ -z "$otty" ]; then
   otty="/dev/$(ps -p $PPID -o tty=)"
+  # nvim 0.9 TUI is a separate process, need to get tty of its parent process
+  if [[ "$otty" = /dev/\?* ]]; then
+    otty="/dev/$(ps -p "$PPID" -o ppid= | xargs ps -o tty= -p)"
+  fi
 fi
 if [ -z "$otty" ]; then
-  otty="/dev/tty"
+  if [ -w /dev/fd/2 ]; then
+    otty='/dev/fd/2'
+  elif [ -w /dev/tty ]; then
+    otty='/dev/tty'
+  else
+    otty='/dev/stderr'
+  fi
 fi
 
 if [ "$buflen" -le "$maxlen" ]; then

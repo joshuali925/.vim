@@ -73,7 +73,7 @@ function M.init()
             local os = vim.fn.has("macunix") and "mac" or "linux"
             register_server("jdtls", {
                 -- https://astronvim.com/nightly/Recipes/advanced_lsp#java-nvim-jdtls
-                cmd = {     -- needs python3.9+, or remove `action=argparse.BooleanOptionalAction` in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py
+                cmd = {     -- needs python3.9+ if not using custom cmd, or remove `action=argparse.BooleanOptionalAction` in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py
                     "java", -- needs java 17, or use :LspInstall jdtls@1.12.0
                     -- vim.loop.os_homedir() .. "/.asdf/installs/java/corretto-17.0.4.8.1/bin/java",
                     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
@@ -175,7 +175,7 @@ function M.organize_imports_and_format()
     local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_active_clients({ bufnr = 0 }))
     if vim.tbl_contains(active_clients, "tsserver") then
         local ok, resp = pcall(require("typescript").actions.organizeImports, { sync = true })
-        if not ok then vim.notify(resp, "ERROR", { title = "Organize imports failed" }) end
+        if not ok then vim.notify(resp, vim.log.levels.ERROR, { title = "Organize imports failed" }) end
     end
     if not vim.tbl_isempty(vim.tbl_filter(function(name) return vim.tbl_contains(formatting_lsps, name) end, active_clients)) then
         vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsps, client.name) end, timeout_ms = 3000 })
@@ -184,14 +184,12 @@ function M.organize_imports_and_format()
     end
 end
 
-local diagnostic_enabled = true
 function M.toggle_diagnostics()
-    if diagnostic_enabled then
-        vim.diagnostic.disable()
-    else
+    if vim.diagnostic.is_disabled() then
         vim.diagnostic.enable()
+    else
+        vim.diagnostic.disable()
     end
-    diagnostic_enabled = not diagnostic_enabled
 end
 
 function M.is_active()

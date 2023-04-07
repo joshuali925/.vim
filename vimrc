@@ -59,6 +59,7 @@ set laststatus=2
 set wildmenu
 set splitright
 set splitbelow
+silent! set splitkeep=topline
 set hlsearch
 set incsearch
 set ignorecase
@@ -67,8 +68,8 @@ set autoindent
 set smarttab
 set expandtab
 set tabstop=4
-set softtabstop=2
-set shiftwidth=2
+set softtabstop=4
+set shiftwidth=4
 set shiftround
 set autoread
 set hidden
@@ -112,7 +113,6 @@ set cedit=<C-x>
 set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%{&fileencoding!=''&&&fileencoding!='utf-8'?'[fileencoding\:\ '.&fileencoding.']':''}%{&fileformat!='unix'?'[fileformat\:\ '.&fileformat.']':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
 set showtabline=2
 set tabline=%!BufferLine()
-silent! set splitkeep=topline
 silent! set belloff=all
 
 let mapleader=';'
