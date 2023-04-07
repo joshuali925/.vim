@@ -9,7 +9,11 @@
   },
   "If": {
     "prefix": "if",
-    "body": ["if [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "\t$0", "fi"]
+    "body": ["if [ $1 ]; then", "\t$0", "fi"]
+  },
+  "If variable equals": {
+    "prefix": "if-var",
+    "body": ["if [ \"\\$${1:VAR}\" = '${2:STRING}' ]; then", "\t$0", "fi"]
   },
   "If command succeeds": {
     "prefix": "if-command",
@@ -96,9 +100,10 @@
     "prefix": "case",
     "body": [
       "case ${1:\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$1\")} in",
-      "\t${3:help})",
+      "\t${3:-h|--help})",
       "\t\t$0",
       "\t\t;;",
+      "\t--) shift; break ;;",
       "\t*) echo \"Unsupported argument \\$${2:1}, exiting..\" >&2; exit 1 ;;",
       "esac"
     ]

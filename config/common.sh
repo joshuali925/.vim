@@ -156,12 +156,12 @@ tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├─
 
 gc() {
   [ "$#" -eq 0 ] && { git commit --signoff -v; return $?; }
-  local args=()
-  while [ "$#" -ne 0 ]; do
-    [[ "$1" != -* ]] && args+=(-m) && break
-    args+=("$1") && shift
+  local args=() message
+  for arg in "$@"; do
+    [[ "$arg" != -* ]] && message+="$arg " || args+=("$arg")
   done
-  git commit "${args[@]}" "$@"
+  [ -n "$message" ] && args+=(-m "$message")
+  git commit "${args[@]}"
 }
 
 gcb() {
@@ -205,8 +205,16 @@ grlf() {
 }
 
 grg() {
-  if [ "$#" -eq 0 ]; then echo -e "Usage: $0 <text>\nSearch literal string in all commits.\n\nIn function code:\n\tReplace 'log' with 'reflog' for local commits.\n\tChange '-S' to '-G' for regex search." >&2; return 1; fi
-  git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case -S "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
+  if [ "$#" -eq 0 ]; then echo -e "Usage: $0 [--reflog] [--regex] <text> [<git-log-args>]" >&2; return 1; fi
+  while [ "$#" -ne 0 ]; do
+    case $1 in
+      --reflog) local cmd=reflog; shift ;;
+      --regex) local search=-G; shift ;;
+      --) shift; break ;;
+      *) break ;;
+    esac
+  done
+  git "${cmd:-log}" --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case "${search:--S}" "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
 }
 
 gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'

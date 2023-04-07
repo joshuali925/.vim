@@ -47,7 +47,7 @@ return {
         },
     },
     {
-        "nvim-lualine/lualine.nvim",
+        "nvim-lualine/lualine.nvim", -- TODO set cmdheight=0, https://github.com/nvim-lualine/lualine.nvim/issues/949, function() local reg = vim.fn.reg_recording() return reg == "" and "" or "recording @" .. reg end,
         event = "UIEnter",
         config = function()
             if curr_theme == "visual_studio_code" then

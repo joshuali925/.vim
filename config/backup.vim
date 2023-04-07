@@ -3851,3 +3851,30 @@ exec find . -type f -not -path '*/.git/*' -iname "*${1:-}*"
 " =======================================================
 " for compatibility, also search for '7.4' and 'silent!'
   bufnr('%')
+
+" =======================================================
+" https://www.reddit.com/r/neovim/comments/10fpqbp/gist_statuscolumn_separate_diagnostics_and/
+" many issues like performance, duplicate line number when wrapped, blank margin for sidebars, etc
+_G.status_column = function()
+    local sign, git_sign
+    local buf = vim.api.nvim_win_get_buf(vim.g.statusline_winid)
+    local signs = vim.tbl_map(function(s)
+        return vim.fn.sign_getdefined(s.name)[1]
+    end, vim.fn.sign_getplaced(buf, { group = "*", lnum = vim.v.lnum })[1].signs)
+    for _, s in ipairs(signs) do
+        if s.name:find("GitSign") then
+            git_sign = s
+        else
+            sign = s
+        end
+    end
+    local components = {
+        sign and ("%#" .. sign.texthl .. "#" .. sign.text .. "%*") or " ",
+        "%=",
+        "%{&nu?(&rnu&&v:relnum?v:relnum:v:lnum):''} ",
+        git_sign and ("%#" .. git_sign.texthl .. "#" .. git_sign.text .. "%*") or "  ",
+    }
+    return table.concat(components, "")
+end
+vim.o.statuscolumn = "%!v:lua.status_column()"
+

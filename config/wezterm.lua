@@ -46,6 +46,7 @@ return {
     initial_rows = 30,
     scrollback_lines = 9999,
     status_update_interval = 10000,
+    check_for_updates_interval_seconds = 864000,
     audible_bell = "Disabled",
     exit_behavior = "Close",
     window_padding = { left = 0, right = 0, top = 0, bottom = 0 },

@@ -118,6 +118,7 @@ install_development_tools() {
     defaults write -g ApplePressAndHoldEnabled -bool false
     log 'Disabled ApplePressAndHoldEnabled to support key repeats'
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1
+    # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
     # brew update && brew install --cask wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
