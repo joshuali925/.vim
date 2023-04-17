@@ -103,8 +103,8 @@ alias glgg='git log --graph --pretty=fuller'
 alias glgga='git log --graph --pretty=fuller --all'
 alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 alias gloo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --max-count 10'
-alias glog='git log --color --graph --abbrev-commit --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all'
-alias glx="git log --all --graph --decorate=short --date-order --color --pretty=format:\"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)\" | awk '{ split(\$0,arr,\"§\"); match(arr[2], /(\\([0-9a-z ,]+\\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf(\"%*s    %s %s %s\\n\", padlen, arr[2], arr[1], arr[3], arr[4]); }' | less -RiMXF -p \$(git show -s --format=%h)"
+alias gloa='git log --color --graph --abbrev-commit --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all'
+alias glx="git log --all --graph --decorate=short --date-order --color --pretty=format:\"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)\" | awk '{ split(\$0,arr,\"§\"); match(arr[2], /(\\([0-9a-z ,]+\\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf(\"%*s    %s %s %s\\n\", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p \$(git show -s --format=%h)"
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
@@ -147,7 +147,7 @@ alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%C
 alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranches containing HEAD: $(git branch --color -a --contains HEAD)"'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git foresta --style=10 | \less -RiMXF'
-alias gforesta='git foresta --style=10 --all | \less -RiMXF'
+alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --format=%h)'
 alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply patch.diff && rm patch.diff'
 alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 

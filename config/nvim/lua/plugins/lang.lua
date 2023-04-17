@@ -19,15 +19,13 @@ return {
             "jose-elias-alvarez/null-ls.nvim",
             {
                 "glepnir/lspsaga.nvim",
-                keys = { { "<leader>v", "<Cmd>Lspsaga outline<CR>" } },
                 opts = {
                     ui = { winblend = 8 },
                     diagnostic = { on_insert = false },
                     lightbulb = { enable = false, sign_priority = 6, virtual_text = false },
                     code_action = { keys = { quit = "<Esc>" } },
                     rename = { quit = "<Esc>", in_select = false, whole_project = false },
-                    show_outline = { jump_key = "<CR>" },
-                    outline = { keys = { jump = "<CR>" } },
+                    outline = { keys = { expand_or_jump = "<CR>" } },
                     callhierarchy = { show_detail = true, keys = { jump = "<CR>", quit = "<Esc>" } },
                     symbol_in_winbar = { separator = "  " },
                 },
@@ -49,6 +47,21 @@ return {
             { "<C-k>", vim.lsp.buf.signature_help, mode = "i" },
         },
         config = function() require("lsp").init() end,
+    },
+    {
+        "stevearc/aerial.nvim",
+        keys = { { "<leader>v", "<Cmd>AerialToggle<CR>" }, { "<leader>V", "<Cmd>AerialNavToggle<CR>" } },
+        opts = {
+            manage_folds = true,
+            link_tree_to_folds = false,
+            keymaps = {
+                ["v"] = function()
+                    require("aerial.actions").close.callback()
+                    require("aerial").nav_open()
+                end,
+            },
+            nav = { preview = true, keymaps = { ["q"] = "actions.close" } },
+        },
     },
     { "danymat/neogen", config = true },
     { "windwp/nvim-ts-autotag", ft = { "html", "javascript", "javascriptreact", "typescriptreact" }, config = true },
@@ -109,7 +122,7 @@ return {
                 enable = true,
                 disable = function(_, buf)
                     local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-                    return ok and stats and stats.size > 1048576
+                    return ok and stats and stats.size > require("states").size_threshold
                 end,
             },
             textobjects = {

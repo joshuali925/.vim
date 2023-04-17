@@ -3877,4 +3877,77 @@ _G.status_column = function()
     return table.concat(components, "")
 end
 vim.o.statuscolumn = "%!v:lua.status_column()"
+" treesitter slow
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 
+" =======================================================
+# tmux alt-click to move cursor in non-alternate screen, fast but only works on the same line
+bind -n M-MouseDown1Pane {
+  select-pane
+  if-shell -F '#{||:#{pane_in_mode},#{alternate_on}}' {
+    send-keys -M
+  } {
+    copy-mode -e
+    send-keys -X begin-selection
+    set-environment -gF TMUX_PREV_X '#{copy_cursor_x}'
+    set-environment -gF TMUX_PREV_Y '#{copy_cursor_y}'
+    send-keys -X cancel
+    if-shell '[ "$TMUX_PREV_X" -ne #{cursor_x} ] || [ "$TMUX_PREV_Y" -ne #{cursor_y} ]' {
+      if-shell '[ "$TMUX_PREV_Y" -eq #{cursor_y} ] && [ "$TMUX_PREV_X" -lt #{cursor_x} ] || [ "$TMUX_PREV_Y" -lt #{cursor_y} ]' {
+        run-shell 'tmux send-keys -N $((#{cursor_x}-$TMUX_PREV_X+(#{cursor_y}-$TMUX_PREV_Y)*#{pane_width})) Left'
+      } {
+        run-shell 'tmux send-keys -N $(($TMUX_PREV_X-#{cursor_x}+($TMUX_PREV_Y-#{cursor_y})*#{pane_width})) Right'
+      }
+    }
+  }
+}
+#!/usr/bin/env bash
+set -eo pipefail
+cursors=($(tmux display-message -p '#{copy_cursor_x} #{copy_cursor_y} #{cursor_x} #{cursor_y}'))
+tmux send-keys -X cancel
+copy_cursor_x="${cursors[0]}"
+copy_cursor_y="${cursors[1]}"
+cursor_x="${cursors[2]}"
+cursor_y="${cursors[3]}"
+if [ "$copy_cursor_y" -lt "$cursor_y" ]; then
+  # TODO fix off by 1
+  # steps = characters in lines above + number of physical lines crossed - target x + current x
+  # if crossing lines, then wc counts correctly (+1 for each line)
+  #                         wc -l = number of lines crossed
+  # if not crossing lines, then wc counts 1 extra for each screen line, needs tr -d '\n'
+  #                             wc -l = 1
+  steps=$(($(tmux capture-pane -p -J -S "$copy_cursor_y" -E "$((cursor_y-1))" | wc -m)-copy_cursor_x+cursor_x-1))
+  tmux send-keys -N "$steps" Left
+elif [ "$copy_cursor_y" -gt "$cursor_y" ]; then
+  steps=$(($(tmux capture-pane -p -J -S "$cursor_y" -E "$((copy_cursor_y-1))" | wc -m)+copy_cursor_x-cursor_x-1))
+  tmux send-keys -N "$steps" Right
+else
+  if [ "$copy_cursor_x" -lt "$cursor_x" ]; then
+    tmux send-keys -N "$((cursor_x-copy_cursor_x))" Left
+  elif [ "$copy_cursor_x" -gt "$cursor_x" ]; then
+    tmux send-keys -N "$((copy_cursor_x-cursor_x))" Right
+  fi
+fi
+
+" =======================================================
+-- treesitter performance issues with other plugins
+            vim.api.nvim_create_autocmd("BufReadPre", {
+                pattern = "*",
+                group = "AutoCommands",
+                callback = function(opts)
+                    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(opts.buf))
+                    if ok and stats and stats.size > vim.g.treesitter_size_threshold then
+                        vim.cmd.IlluminatePauseBuf()
+                        vim.cmd.IndentBlanklineDisable()
+                    end
+                end,
+            })
+            -- telescope insert mappings
+                            ["<Esc>"] = function(opts) -- workaround https://github.com/windwp/nvim-ts-autotag/issues/99
+                                vim.cmd.stopinsert()
+                                vim.schedule(function() actions.close(opts) end)
+                            end,
+                            ["<CR>"] = function(opts)
+                                vim.cmd.stopinsert()
+                                vim.schedule(function() actions.select_default(opts) end)
+                            end,
