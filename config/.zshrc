@@ -11,16 +11,15 @@ fi
 source ~/.zinit/bin/zinit.zsh
 
 if [ -n "$ZINIT_POST_INSTALL" ]; then
+  zinit --depth=1 light-mode for zsh-users/zsh-completions
   zinit as"completion" for \
     https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
     https://github.com/sharkdp/fd/blob/master/contrib/completion/_fd \
+    https://github.com/asdf-vm/asdf/blob/master/completions/_asdf \
     https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
     https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \
     https://github.com/gradle/gradle-completion/blob/master/_gradle \
-    https://github.com/gradle/gradle-completion/blob/master/gradle-completion.plugin.zsh \
-    https://github.com/zsh-users/zsh-completions/blob/master/src/_yarn \
-    https://github.com/zsh-users/zsh-completions/blob/master/src/_supervisorctl \
-    https://github.com/asdf-vm/asdf/blob/master/completions/_asdf
+    https://github.com/gradle/gradle-completion/blob/master/gradle-completion.plugin.zsh
 fi
 
 zinit depth=1 light-mode for atclone"$HOME/.zinit/plugins/romkatv---powerlevel10k/gitstatus/install" romkatv/powerlevel10k

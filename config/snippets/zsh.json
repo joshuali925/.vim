@@ -23,7 +23,7 @@
   },
   "Curl POST JSON": {
     "prefix": "curl-post",
-    "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\" key=\"val\"})\""
+    "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\"})\""
   },
   "Curl POST JSON heredoc": {
     "prefix": "curl-post-heredoc",

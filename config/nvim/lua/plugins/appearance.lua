@@ -29,7 +29,7 @@ return {
     },
     {
         "akinsho/bufferline.nvim",
-        event = "UIEnter",
+        event = "VimEnter", -- UIEnter breaks '+<line>' argument in command line nvim when 'line' is large
         keys = {
             { "<BS>", "<Cmd>BufferLineCyclePrev<CR>" },
             { "\\", "<Cmd>BufferLineCycleNext<CR>" },
@@ -47,7 +47,7 @@ return {
         },
     },
     {
-        "nvim-lualine/lualine.nvim", -- TODO set cmdheight=0, https://github.com/nvim-lualine/lualine.nvim/issues/949, function() local reg = vim.fn.reg_recording() return reg == "" and "" or "recording @" .. reg end,
+        "nvim-lualine/lualine.nvim",
         event = "UIEnter",
         config = function()
             if curr_theme == "visual_studio_code" then
@@ -112,7 +112,15 @@ return {
                         }
                     },
                     lualine_x = {
-                        "searchcount",
+                        "%S",
+                        {
+                            function()
+                                local reg = vim.fn.reg_recording()
+                                return reg == "" and "" or "recording @" .. reg
+                            end,
+                            color = "Constant",
+                        },
+                        { "searchcount", color = "String" },
                         function()
                             local clients = {}
                             for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = 0 })) do

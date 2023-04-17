@@ -99,7 +99,7 @@ install_development_tools() {
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apt-get' ]; then
     sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential zsh git curl unzip
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:apk' ]; then
-    sudo apk add zsh git curl
+    sudo apk add bash zsh git curl alpine-sdk
   elif [ "$PLATFORM" == 'darwin' ]; then
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -126,6 +126,7 @@ install_development_tools() {
     # mousefix: https://mousefix.org
     # Orion: https://browser.kagi.com
     # coconutBattery: https://www.coconut-flavour.com/coconutbattery
+    # update wezterm: brew update && brew upgrade --cask wezterm --no-quarantine --greedy-latest
   fi
   install_asdf
 }

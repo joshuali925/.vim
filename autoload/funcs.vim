@@ -103,7 +103,7 @@ function! funcs#print_variable(visual, printAbove) abort
   let print['kotlin'] = 'println("[${javaClass.simpleName}] ❗' . word . ': " + ' . word . ')'
   let print['groovy'] = 'println "❗' . word . ': " + ' . word
   let print['vim'] = "echomsg '❗" . word . ":' " . word
-  let print['lua'] = 'print("❗' . word . ': " . . vim.inspect(' . word . '))'
+  let print['lua'] = 'print("❗' . word . ': " .. vim.inspect(' . word . '))'
   let print['sh'] = 'echo "❗' . word . ': ${' . word . '}"'
   let print['bash'] = print['sh']
   let print['zsh'] = print['sh']
@@ -132,7 +132,7 @@ function! funcs#get_run_command() abort
     call funcs#decompile_java_class()
     return
   endif
-  update  " write buffer unless it's a java class file, which will be modified when vim-sleuth loads
+  update
   let user_command = get(b:, 'RunCommand', get(g:, 'RunCommand', ''))
   if user_command != ''
     return user_command
