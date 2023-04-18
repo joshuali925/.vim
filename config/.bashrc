@@ -84,18 +84,17 @@ fi
 
 cd() {
   if [ "$1" == "" ]; then
-    pushd "$HOME" > /dev/null
+    pushd "$HOME" > /dev/null || return
   elif [ "$1" == "-" ]; then
-    builtin cd "$OLDPWD" > /dev/null
+    builtin cd "$OLDPWD" > /dev/null || return
   elif [[ "$1" =~ ^-[0-9]+$ ]]; then
-    pushd +${1/-/} > /dev/null
+    pushd "+${1/-/}" > /dev/null || return
   elif [ "$1" == "--" ]; then
-    shift
-    pushd -- "$@" > /dev/null
+    pushd -- "${@:2}" > /dev/null || return
   else
-    pushd "$@" > /dev/null
+    pushd "$@" > /dev/null || return
   fi
-  [ "$?" == 0 ] && [ "$(command ls | wc -l)" -lt 200 ] && ls -AF --color=auto || true
+  if [ "$(command ls | wc -l)" -lt 200 ]; then ls -AF --color=auto; fi
 }
 complete -d cd
 

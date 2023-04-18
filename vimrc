@@ -68,8 +68,8 @@ set autoindent
 set smarttab
 set expandtab
 set tabstop=4
-set softtabstop=4
-set shiftwidth=4
+set softtabstop=2
+set shiftwidth=2
 set shiftround
 set autoread
 set hidden
@@ -85,13 +85,15 @@ set nostartofline
 set display=lastline
 set virtualedit+=block
 set previewheight=7
-" ignore errors for sudoedit (vim small)
-silent! set foldmethod=indent
-silent! set foldlevel=99
+if has('folding')  " vim small does not have folding
+  set foldmethod=expr
+  set foldlevel=99
+  set foldexpr=max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth
+  let &foldtext='getline(v:foldstart)." ⋯"'
+  let &fillchars='fold: '
+endif
 set history=1000
 set undofile
-set undolevels=1000
-set undoreload=10000
 let &undodir=g:dot_vim_dir . '/tmp/undo'
 let &viminfo="'1000,<50,s10,h,n" . g:dot_vim_dir . '/tmp/viminfo'
 set isfname-==
@@ -386,7 +388,7 @@ function! s:EditCallback(command) abort
   let sink = 'edit '
   let tempfile = tempname()
   if a:command == 'lf'
-    execute 'silent !lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path=' . fnameescape(tempfile) . ' "' . expand('%') . '"'
+    execute 'silent !lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path="' . fnameescape(tempfile) . '" "' . expand('%') . '"'
   elseif a:command == 'filetypes'
     let sink = 'set filetype='
     let $fzftemp = join(sort(map(globpath(&rtp, 'syntax/*.vim', 0, 1), 'fnamemodify(v:val, ":t:r")')), '\n')

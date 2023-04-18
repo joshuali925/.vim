@@ -55,6 +55,7 @@ return {
                     augend.date.alias["%H:%M"],
                     augend.constant.new({ elements = { "&&", "||" }, word = false, cyclic = true }),
                     augend.constant.new({ elements = { "and", "or" }, word = true, cyclic = true }),
+                    augend.constant.new({ elements = { "True", "False" }, word = true, cyclic = true, }),
                     augend.constant.new({ elements = { "prev", "next" }, word = true, cyclic = true, }),
                     augend.constant.new({ elements = { "_prev", "_next" }, word = false, cyclic = true, }),
                     augend.constant.new({ elements = { "prev_", "next_" }, word = false, cyclic = true, }),

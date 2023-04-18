@@ -70,6 +70,7 @@ hi markdownItalic guifg=#d19a66 ctermfg=173 gui=bold cterm=bold
 
 " editor color
 hi link Whitespace SpecialKey
+hi link netrwTreeBar Comment
 
 " syntax
 hi link Define Statement

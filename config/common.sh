@@ -205,7 +205,7 @@ grlf() {
 }
 
 grg() {
-  if [ "$#" -eq 0 ]; then echo -e "Usage: $0 [--reflog] [--regex] <text> [<git-log-args>]" >&2; return 1; fi
+  if [ "$#" -eq 0 ]; then echo "Usage: $0 [--reflog] [--regex] <text> [<git-log-args>]" >&2; return 1; fi
   while [ "$#" -ne 0 ]; do
     case $1 in
       --reflog) local cmd=reflog; shift ;;
@@ -412,7 +412,8 @@ path() {
   fi
 }
 
-vx() {  # run vim commands in pipe: echo foo | vx 's/foo/bar/' 'put=execute(\"echo &tabstop\")'
+vx() {
+  if [ "$#" -eq 0 ]; then echo -e "Usage: $0 <vim-commands>\nRun vim commands in pipe: echo foo | $0 '%s/foo/bar' 'put=execute(\\\"echo &tabstop\\\")'" >&2; return 1; fi
   ex -sn "${@/#/+}" +'%write! /dev/stdout | quit!' /dev/stdin
 }
 

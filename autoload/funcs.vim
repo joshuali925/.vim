@@ -281,7 +281,22 @@ function! funcs#ctags() abort
 endfunction
 
 function! funcs#ctags_create_and_jump() abort
-  let answer = input('Generate ctags for language ("all" for all supported, empty to cancel): ', &filetype, 'filetype')  " language list: ctags --list-languages
+  let types = {
+        \ 'aspperl':             'asp',
+        \ 'aspvbs':              'asp',
+        \ 'cpp':                 'c++',
+        \ 'cs':                  'c#',
+        \ 'delphi':              'pascal',
+        \ 'expect':              'tcl',
+        \ 'mf':                  'metapost',
+        \ 'mp':                  'metapost',
+        \ 'rmd':                 'rmarkdown',
+        \ 'csh':                 'sh',
+        \ 'zsh':                 'sh',
+        \ 'tex':                 'latex',
+        \ 'typescriptreact':     'typescript',
+        \ }
+  let answer = input('Generate ctags for language ("all" for all supported, empty to cancel): ', get(types, &filetype, &filetype), 'filetype')  " language list: ctags --list-languages
   if answer != ''
     let args = answer == 'all' ? '' : '--languages=' . answer
     " TODO https://github.com/universal-ctags/ctags/issues/2667

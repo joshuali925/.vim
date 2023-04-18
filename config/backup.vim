@@ -3951,3 +3951,10 @@ fi
                                 vim.cmd.stopinsert()
                                 vim.schedule(function() actions.select_default(opts) end)
                             end,
+
+" =======================================================
+    { "dmmulroy/tsc.nvim", cmd = "TSC", config = true },
+    local mason_path = vim.fn.stdpath("data") .. "/mason"
+    if not vim.loop.fs_stat(mason_path .. "/bin/tsc") then -- for tsc.nvim
+        os.execute("ln -sr " .. mason_path .. "/packages/typescript-language-server/node_modules/typescript/bin/tsc " .. mason_path .. "/bin/tsc")
+    end

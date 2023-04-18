@@ -119,9 +119,9 @@ return {
                 theme.button("m", "Find MRU", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>"),
                 theme.button("c", "Edit vimrc", "<Cmd>edit $MYVIMRC<CR>"),
                 theme.button("\\", "Open quickui", "<Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('normal')<CR>"),
-                theme.button("s", "Open Mason UI", "<Cmd>Mason<CR>"),
-                theme.button("l", "Open Lazy UI", "<Cmd>Lazy<CR>"),
-                theme.button("p", "Open Lazy Profile", "<Cmd>Lazy profile<CR>"),
+                theme.button("s", "Open Lazy UI", "<Cmd>Lazy<CR>"),
+                theme.button("S", "Open Mason UI", "<Cmd>Mason<CR>"),
+                theme.button("U", "Update packages", "<Cmd>Lazy update<CR>"),
                 theme.button("E", "Load from previous session", "<Cmd>silent SessionLoad<CR>"),
             }
             theme.mru_opts.ignore = function(path, ext)
@@ -148,7 +148,7 @@ return {
         keys = {
             { "q", "<Cmd>lua require('telescope.builtin').buffers()<CR>" },
             { "<C-p>", "<Cmd>lua require('telescope.builtin').find_files()<CR>" },
-            { "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = vim.fn['funcs#get_visual_selection']()})<CR>", mode = "x", silent = true },
+            { "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = vim.fn['funcs#get_visual_selection']()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
             { "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>" },
             { "<leader>fs", "<C-p>", remap = true },
             { "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>" },
@@ -309,7 +309,7 @@ return {
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },
-                { "&Refresh screen", [[execute "IndentBlanklineRefresh" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
+                { "&Refresh screen", [[execute "IndentBlanklineRefresh" | execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
                 { "--", "" },
                 { "Open &Alpha", [[Lazy! load alpha-nvim | Alpha]], "Open Alpha" },
                 { "&Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },
