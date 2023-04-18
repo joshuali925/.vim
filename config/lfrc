@@ -50,7 +50,7 @@ map V invert
 map x delete
 map D delete
 map r reload
-map R rename
+map R :rename; cmd-end
 map / filter
 map ~ cd
 map , find-next
@@ -73,9 +73,6 @@ map <c-o> $lazygit
 map <tab> locate-file-cwd
 map I $less -RiM "$f"
 map i $FULL_PREVIEW=1 ~/.vim/config/lf-preview.sh "$f"
-
-cmap <up> cmd-history-prev
-cmap <down> cmd-history-next
 
 cmd mkdir %mkdir -p "$@"
 cmd touch %touch "$@"
@@ -104,7 +101,11 @@ cmd vidir-bulk-rename ${{ echo "$fx" | vidir - }}
 cmd vimv-bulk-rename ${{ vimv $fx; echo }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
 cmd copy-path %{{ realpath "$f" | y; echo "copied: $(realpath "$f")" }}
-cmd copy-file-name %{{ basename "$f" | y; echo "copied: $(basename "$f")" }}
+cmd copy-file-name %{{
+  echo "$fx" | xargs -d'\n' -I@ basename '@' | sed "s/^/'/;s/$/'/" | paste -s -d ' ' - | y
+  echo -n 'copied: '
+  echo "$fx" | xargs -d'\n' -I@ basename '@' | sed "s/^/'/;s/$/'/" | paste -s -d ' ' -
+}}
 
 cmd follow-symlink ${{
   res="$(readlink -f "$f" || echo '.')"

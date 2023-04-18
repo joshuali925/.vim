@@ -29,7 +29,7 @@ return {
     },
     {
         "akinsho/bufferline.nvim",
-        event = "VimEnter", -- UIEnter breaks '+<line>' argument in command line nvim when 'line' is large
+        event = "BufEnter", -- VimEnter/UIEnter breaks '+<line>' argument in command line nvim when 'line' is large
         keys = {
             { "<BS>", "<Cmd>BufferLineCyclePrev<CR>" },
             { "\\", "<Cmd>BufferLineCycleNext<CR>" },
@@ -48,7 +48,7 @@ return {
     },
     {
         "nvim-lualine/lualine.nvim",
-        event = "UIEnter",
+        event = "BufEnter",
         config = function()
             if curr_theme == "visual_studio_code" then
                 require("lualine").setup({

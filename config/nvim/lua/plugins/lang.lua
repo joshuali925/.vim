@@ -52,8 +52,6 @@ return {
         "stevearc/aerial.nvim",
         keys = { { "<leader>v", "<Cmd>AerialToggle<CR>" }, { "<leader>V", "<Cmd>AerialNavToggle<CR>" } },
         opts = {
-            manage_folds = true,
-            link_tree_to_folds = false,
             keymaps = {
                 ["v"] = function()
                     require("aerial.actions").close.callback()

@@ -103,16 +103,16 @@ function M.get_visual_selection()
 end
 
 function M.copy_with_osc_yank_script(str)
-    local message = "[osc52] "
+    local message = ""
     if str:len() > 70000 then
         str = str:sub(1, 70000)
-        message = message .. "String too large. "
+        message = "String too large. "
     end
     local handle = assert(io.popen("y", "w"))
     handle:write(str)
     handle:flush()
     handle:close()
-    print(message .. "Copied " .. str:len() .. " characters.")
+    vim.notify(message .. "Copied " .. str:len() .. " characters.", vim.log.levels.INFO, { title = "osc52" })
 end
 
 function M.send_to_toggleterm()
@@ -134,7 +134,7 @@ function M.toggle_lf()
     if lf_term == nil or lf_height ~= curr_height or lf_width ~= curr_width then
         local lf_selection_path = os.tmpname()
         lf_term = require("toggleterm.terminal").Terminal:new({
-            cmd = ([[lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path=%s %s]]):format(lf_selection_path, vim.fn.expand("%")),
+            cmd = ([[lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path="%s" "%s"]]):format(lf_selection_path, vim.fn.expand("%")),
             direction = "float",
             float_opts = { height = curr_height, width = curr_width },
             on_close = function(_)

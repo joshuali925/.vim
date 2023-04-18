@@ -65,6 +65,7 @@ hi markdownItalic cterm=italic gui=italic
 
 " editor color
 hi link Whitespace SpecialKey
+hi link netrwTreeBar Comment
 
 " syntax
 hi link Define Statement
