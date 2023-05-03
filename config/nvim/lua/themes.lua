@@ -18,7 +18,7 @@ M.theme_list = {
 }
 M.theme = M.theme_list[theme_index]
 
-local sidebars = { "qf", "terminal", "lspsagaoutline", "Mundo", "NvimTree" }
+local sidebars = { "qf", "terminal", "lspsagaoutline", "aerial", "Mundo", "NvimTree" }
 local themes = {
     ["tokyonight.nvim"] = {
         config = function()
@@ -35,10 +35,8 @@ local themes = {
     },
     ["github-nvim-theme"] = {
         config = function()
-            require("github-theme").setup({
-                sidebars = sidebars,
-                theme_style = theme_index < 0 and "dimmed" or "light",
-            })
+            require("github-theme").setup({ options = { darken = { sidebars = { list = sidebars } } } })
+            vim.cmd.colorscheme("github_" .. (theme_index < 0 and "dark_dimmed" or "light"))
             vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = theme_index < 0 and "#4d5462" or "#bbbbbb" })
         end,
     },
@@ -98,9 +96,10 @@ local function highlight_plugins()
         vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestorsHunk", { bg = "#e5e5e5" })
         vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#b9d1fa" })
         vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#86abeb" })
-        vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#bf8000" })
+        vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#916100" })
         vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = "#005e7d" })
     end
+    vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" })
 end
 
 function M.config()

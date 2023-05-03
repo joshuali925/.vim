@@ -42,13 +42,15 @@ function M.untildone(command, should_restart_tmux_task, message)
     end
 
     if is_empty(command) then
+        local jobs = #timers
         for i, timer in pairs(timers) do
             if pcall(timer.close, timer) then
                 states.untildone_count = states.untildone_count - 1
                 table.remove(timers, i)
             end
         end
-        vim.notify("Current number of jobs: " .. states.untildone_count, vim.log.levels.INFO, { title = "All loop stopped" })
+        vim.notify("Number of jobs stoped: " .. jobs - #timers .. "\nNumber of jobs running: " .. #timers,
+            vim.log.levels.INFO, { title = "All loop stopped" })
         return
     end
 

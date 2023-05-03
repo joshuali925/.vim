@@ -312,44 +312,21 @@ command! Grt silent execute 'cd ' . fnameescape(fnamemodify(finddir('.git', esca
 command! -nargs=* Gdiff execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype=' . &filetype . ' | file !git\ show\ <args>:' . expand('%:~:.') . ' | silent read !git show <args>:' . expand('%:~:.') | 0d_ | diffthis
 command! -nargs=* Gblame call setbufvar(winbufnr(popup_atcursor(systemlist('cd ' . shellescape(fnamemodify(resolve(expand('%:p')), ':h')) . ' && git log --no-merges -n 1 -L ' . shellescape(line('v') . ',' . line('.') . ':' . resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')
 command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr('%') . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
-command! -complete=file -nargs=+ VFind call s:Grep('glob', <q-args>)
+command! -nargs=+ Fd call funcs#grep('fd', <q-args>)
+command! -complete=file -nargs=+ VFind call funcs#grep('glob', <q-args>)
 command! -nargs=* VGrep execute 'vimgrep /' . escape(<q-args>, '/') . '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
 command! -nargs=* VGrepNoRegex execute 'vimgrep /' . substitute(escape(<q-args>, '/\.*$^~['), '\n', '\\n', 'g') . '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
-command! -complete=file -nargs=+ Find call s:Grep('find -L . -type f -not -path "*/.git/*" -iname', shellescape(<q-args>))
-command! -nargs=+ Grep call s:Grep('grep --ignore-case --line-number -I -R', '-- ' . shellescape(<q-args>) . ' .')
-command! -nargs=+ GrepNoRegex call s:Grep('grep --ignore-case --line-number -I -R --fixed-strings', '-- ' . shellescape(<q-args>) . ' .')
-command! -complete=file -nargs=+ GFind call s:Grep('git ls-files', '-- ' . shellescape(<q-args>))
-command! -nargs=+ GGrep call s:Grep('git grep -n --ignore-case', '-- ' . shellescape(<q-args>))
-command! -nargs=+ GGrepNoRegex call s:Grep('git grep -n --ignore-case --fixed-strings', '-- ' . shellescape(<q-args>))
-command! -nargs=+ Rg call s:Grep('rg --vimgrep', <q-args>)
-command! -complete=file -nargs=+ RgFind call s:Grep('rg --vimgrep --files -g', shellescape(<q-args>))
-command! -nargs=+ RgRegex call s:Grep('rg --vimgrep', '-- ' . shellescape(<q-args>))
-command! -nargs=+ RgNoRegex call s:Grep('rg --vimgrep --fixed-strings', '-- ' . shellescape(<q-args>))
+command! -complete=file -nargs=+ Find call funcs#grep('find -L . -type f -not -path "*/.git/*" -iname', shellescape(<q-args>))
+command! -nargs=+ Grep call funcs#grep('grep --ignore-case --line-number -I -R', '-- ' . shellescape(<q-args>) . ' .')
+command! -nargs=+ GrepNoRegex call funcs#grep('grep --ignore-case --line-number -I -R --fixed-strings', '-- ' . shellescape(<q-args>) . ' .')
+command! -complete=file -nargs=+ GFind call funcs#grep('git ls-files', '-- ' . shellescape(<q-args>))
+command! -nargs=+ GGrep call funcs#grep('git grep -n --ignore-case', '-- ' . shellescape(<q-args>))
+command! -nargs=+ GGrepNoRegex call funcs#grep('git grep -n --ignore-case --fixed-strings', '-- ' . shellescape(<q-args>))
+command! -nargs=+ Rg call funcs#grep('rg --vimgrep', <q-args>)
+command! -complete=file -nargs=+ RgFind call funcs#grep('rg --vimgrep --files -g', shellescape(<q-args>))
+command! -nargs=+ RgRegex call funcs#grep('rg --vimgrep', '-- ' . shellescape(<q-args>))
+command! -nargs=+ RgNoRegex call funcs#grep('rg --vimgrep --fixed-strings', '-- ' . shellescape(<q-args>))
 
-function! s:Grep(prg, pattern)
-  let saved_errorformat = &errorformat
-  set errorformat=%f:%l:%c:%m,%f:%l:%m,%f
-  if a:prg == 'glob'
-    let command = a:pattern[0] == '*' ? '{**/.' . a:pattern . ',**/' . a:pattern . '}' : '**/' . a:pattern
-    if a:pattern[0] == '*'  " hidden file needs **/.*pat, {**/.*pat,**/*pat} in `command` is faster but depends on &shell and doesn't work on windows and some bash
-      cgetexpr filter(glob('**/.' . a:pattern, 0, 1), '!isdirectory(v:val)')
-      caddexpr filter(glob('**/' . a:pattern, 0, 1), '!isdirectory(v:val)')
-    else
-      cgetexpr filter(glob(command, 0, 1), '!isdirectory(v:val)')
-    endif
-  else
-    let command = a:prg . ' ' . a:pattern
-    cgetexpr systemlist(command)
-  endif
-  let &errorformat = saved_errorformat
-  let len = len(getqflist())
-  silent! call setqflist([], 'a', {'title': '(' . len . ') ' . command })  " setqflist() does not support 'title' in 7.4
-  if len > 1
-    copen
-  else
-    cfirst
-  endif
-endfunction
 function! s:Oldfiles()
   let saved_errorformat = &errorformat
   set errorformat=%f

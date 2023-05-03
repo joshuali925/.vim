@@ -5,4 +5,7 @@ if [ -z "$BIN_INIT" ] && [ ! -x "$HOME/.local/bin/gh" ]; then
   BIN_INIT=1 gh extension install dlvhdr/gh-dash || true
   BIN_INIT=1 gh extension install yusukebe/gh-markdown-preview || true
 fi
-install-from-github gh cli/cli linux_amd64.tar.gz linux_arm64.tar.gz macOS_amd64.tar.gz '' '--strip-components=2 --wildcards gh_*/bin/gh' "$@"
+
+detect-env
+[ "$PLATFORM" = 'linux' ] && extract_flags='--strip-components=2 --wildcards gh_*/bin/gh' || extract_flags='gh_*/bin/gh'
+install-from-github gh cli/cli linux_amd64.tar.gz linux_arm64.tar.gz macOS_amd64.tar.gz macOS_arm64.zip "$extract_flags" "$@"

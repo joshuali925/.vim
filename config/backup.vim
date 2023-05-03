@@ -3958,3 +3958,20 @@ fi
     if not vim.loop.fs_stat(mason_path .. "/bin/tsc") then -- for tsc.nvim
         os.execute("ln -sr " .. mason_path .. "/packages/typescript-language-server/node_modules/typescript/bin/tsc " .. mason_path .. "/bin/tsc")
     end
+
+" =======================================================
+export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
+export MANROFFOPT='-c'
+
+" =======================================================
+" noice.nvim, distracting
+    {
+        "folke/noice.nvim",
+        dependencies = { "MunifTanjim/nui.nvim" },
+        opts = {
+            lsp = { override = { ["vim.lsp.util.convert_input_to_markdown_lines"] = true, ["vim.lsp.util.stylize_markdown"] = true } },
+            presets = { command_palette = true, long_message_to_split = true, lsp_doc_border = true },
+            -- routes = { { filter = { event = "msg_show", find = "search hit" }, skip = true } }, -- filter seems to break long_message_to_split
+        },
+    },
+vim.keymap.set("n", "<C-c>", [[<Cmd>silent execute "normal! \<C-c>"<CR><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>silent! NotificationsDismiss<CR>]])

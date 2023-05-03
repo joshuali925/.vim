@@ -77,7 +77,7 @@ return {
                 ["Remove Last Region"] = "<C-p>",
                 ["Skip Region"] = "<C-x>",
                 ["Switch Mode"] = "<C-c>",
-                ["Add Cursor At Pos"] = "g<C-n>",
+                ["Add Cursor At Pos"] = "<C-LeftMouse>", -- click to move to position first, then ctrl-click to add cursor
                 ["Select Operator"] = "v",
                 ["Case Conversion Menu"] = "s",
             }

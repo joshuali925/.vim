@@ -65,6 +65,7 @@ map gr cd-git-root
 map gvi :cd ~/.vim
 map gvd :cd ~/.local/state/nvim
 map gvp :cd ~/.local/share/nvim/lazy
+map gvn :cd ~/.local/lib/node-packages
 map gf follow-symlink
 map t locate-file
 map T locate-file --no-ignore
@@ -90,9 +91,9 @@ cmd sudoedit $sudo TERM=xterm-256color vim -u ~/.vim/config/mini.vim "$f"
 cmd sudolf $TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -command 'set previewer' -command 'map i $less -RiM "$f"' "$f"; lf -remote "send $id echo sudolf exited"
 cmd file !file $fx
 cmd pwd %echo "$f"
-cmd size !du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
 cmd gdu $"$HOME/.vim/bin/gdu"
 cmd md5 !md5sum $fx
+cmd size !du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
 cmd selected-size %du -sbc $fx | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%11.6f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | grep 'total$'
 cmd cwd-size %du -sb . | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%11.6f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
 cmd edit-config $$EDITOR ~/.vim/config/lfrc

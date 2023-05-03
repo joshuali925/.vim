@@ -1,29 +1,10 @@
 {
-  "UseState": {
-    "prefix": "useState",
-    "body": ["const [${1:state}, set${1/(.*)/${1:/capitalize}/}] = useState($0);"]
-  },
-  "UseEffect": {
-    "prefix": "useEffect",
-    "body": ["useEffect(() => {", "\t$0", "}, []);"]
-  },
   "Test EuiButton": {
     "prefix": "test",
     "body": [
       "<button style={{ border: 'solid red', padding: 3 }} onClick={() => {",
       "\tconsole.log($0);",
       "}}>❗TEST</button>"
-    ]
-  },
-  "Props": {
-    "prefix": "props",
-    "body": "$0={$0}"
-  },
-  "Props get set type": {
-    "prefix": "props-getter-setter",
-    "body": [
-      "${1:state}: ${0:string};",
-      "set${1/(.*)/${1:/capitalize}/}: (${1:state}: ${0:string}) => void;"
     ]
   },
   "Improved react functional component": {
@@ -36,11 +17,12 @@
       "",
       "import React from 'react';",
       "",
-      "interface ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props {",
+      "interface ${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}}Props {",
       "",
       "}",
       "",
-      "export const ${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}}: React.FC<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props> = (props) => {",
+      "export const ${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}}: React.FC<${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}}Props> = (props) => {",
+      "\tconsole.count(\"${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}} rerender\");",
       "\treturn (",
       "\t\t<>",
       "\t\t\t$0",

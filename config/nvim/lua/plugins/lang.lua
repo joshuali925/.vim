@@ -29,6 +29,12 @@ return {
                     callhierarchy = { show_detail = true, keys = { jump = "<CR>", quit = "<Esc>" } },
                     symbol_in_winbar = { separator = "  " },
                 },
+                config = function(_, opts)
+                    require("lspsaga").setup(opts)
+                    if vim.g.theme_index >= 0 then -- seems to default to dark theme, re-config if using light background
+                        require("themes").config()
+                    end
+                end
             },
         },
         cond = require("states").small_file, -- prevent LSP loading on keys for large file
@@ -126,7 +132,7 @@ return {
             textobjects = {
                 select = {
                     enable = true,
-                    keymaps = { ["if"] = "@function.inner",["aF"] = "@function.outer",["ic"] = "@class.inner",["ac"] = "@class.outer" },
+                    keymaps = { ["if"] = "@function.inner", ["aF"] = "@function.outer", ["ic"] = "@class.inner", ["ac"] = "@class.outer" },
                 },
                 move = {
                     enable = true,

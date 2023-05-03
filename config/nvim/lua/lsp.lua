@@ -2,7 +2,7 @@ local M = {}
 
 local disabled_servers = {
     -- "tsserver",
-    -- "eslint",
+    "eslint",
     -- "jdtls",
     -- "kotlin_language_server",
 }
@@ -110,7 +110,7 @@ function M.init()
                         IntelliSense = { traceLocalSet = true },
                         workspace = {
                             -- library = vim.api.nvim_get_runtime_file("", true), -- index library files
-                            library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true,[vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
+                            library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true, [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
                         },
                         format = { enable = true, defaultConfig = { quote_style = "double", max_line_length = "unset", align_array_table = "false" } },
                     },
@@ -159,11 +159,11 @@ function M.init()
     end
     null_ls.setup({ sources = null_ls_sources })
 
-    vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError", numhl = "DiagnosticError" })
-    vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticWarn", numhl = "DiagnosticWarn" })
-    vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticInfo", numhl = "DiagnosticInfo" })
+    vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError", numhl = "DiagnosticError" })
+    vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticWarn", numhl = "DiagnosticWarn" })
+    vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticInfo", numhl = "DiagnosticInfo" })
     vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint", numhl = "DiagnosticHint" })
-    vim.fn.sign_define("DiagnosticSignOther", { text = "﫠", texthl = "DiagnosticOther", numhl = "DiagnosticOther" })
+    vim.fn.sign_define("DiagnosticSignOther", { text = "󰗡", texthl = "DiagnosticOther", numhl = "DiagnosticOther" })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#666666", bg = vim.api.nvim_get_hl_by_name("Normal", true).background })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "DiagnosticVirtualTextHint" })
     vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })

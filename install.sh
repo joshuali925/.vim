@@ -105,21 +105,24 @@ install_development_tools() {
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils
     echo -e "export HOMEBREW_NO_AUTO_UPDATE=1\nexport PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
-    sed -i -e "1iFPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" ~/.zshrc
     brew install grep && ln -s "$(which ggrep)" ~/.local/bin/grep
     brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
     brew install findutils && ln -s "$(which gxargs)" ~/.local/bin/xargs
     brew install gawk && ln -s "$(which gawk)" ~/.local/bin/awk
     brew install gnu-tar && ln -s "$(which gtar)" ~/.local/bin/tar
+    brew install wget
+    brew install lf bat fd git-delta shellcheck
     brew tap homebrew/cask-fonts
     brew install font-jetbrains-mono-nerd-font
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
+    sed -i -e "1iFPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" ~/.zshrc
     log 'Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc'
     defaults write -g ApplePressAndHoldEnabled -bool false
     log 'Disabled ApplePressAndHoldEnabled to support key repeats'
-    # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1
+    # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew update && brew install --cask wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel
+    # brew update && brew install --cask wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
+    # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
     # snipaste: https://www.snipaste.com/download.html
@@ -274,7 +277,10 @@ install_neovim() {
   log 'Installed neovim, installing plugins..'
   timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
   timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd.quitall() end, 27000)' || true
-  log "\nInstalled neovim plugins, run ${YELLOW}nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall${CYAN} to install vscode-neovim plugins"
+  if [ "$PLATFORM" == 'darwin' ]; then
+    nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall
+  fi
+  log "\nInstalled neovim plugins"
   echo
 }
 

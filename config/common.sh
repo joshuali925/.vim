@@ -5,8 +5,6 @@ source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
 export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
-export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
-export MANROFFOPT='-c'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER='\'
 export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top --info=inline'
@@ -497,12 +495,14 @@ t() {  # create, restore, or switch tmux session
   fi
 }
 
-manf() {
+man() {
   if [ "$#" -eq 0 ]; then
     local fzftemp
-    fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && nvim +"Man $(echo "$fzftemp" | awk -F' |,' '{print $1}')" +'bdelete #'
+    fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && man "$(echo "$fzftemp" | awk -F' |,' '{print $1}')"
+  elif [ "$EDITOR" = nvim ]; then
+    MANPAGER='nvim +Man\!' command man "$@"
   else
-    nvim +"Man $*" +'bdelete #'
+    command man "$@"
   fi
 }
 
