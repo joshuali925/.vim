@@ -176,7 +176,7 @@ vim.keymap.set("n", "ZX", function()
         if vim.bo[bufnr].buflisted and bufnr ~= cur and vim.b[bufnr].bufpersist ~= 1 then vim.fn["plugins#bbye#bdelete"]("bdelete", "", bufnr) end
     end
 end, { desc = "Close untouched buffers" })
-vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo<CR>")
+vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>silent! NotificationsDismiss<CR>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("x", "<C-c>", "<Esc>")
 vim.keymap.set("n", "<C-w><C-c>", "<Esc>")
@@ -296,6 +296,8 @@ vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<
 vim.api.nvim_create_user_command("Grt", "Gcd", {})
 vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | mksession! " .. vim.fn.stdpath("cache") .. "/session.vim | silent! ScrollViewEnable | lua vim.notify('Session saved to " .. vim.fn.stdpath("cache") .. "/session.vim', vim.log.levels.INFO, { title = 'Session' })", {})
 vim.api.nvim_create_user_command("SessionLoad", "source " .. vim.fn.stdpath("cache") .. "/session.vim | lua vim.notify('Loaded session from " .. vim.fn.stdpath("cache") .. "/session.vim', vim.log.levels.INFO, { title = 'Session' })", {})
+vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { nargs = "+" })
+vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
@@ -353,8 +355,8 @@ if vim.env.SSH_CLIENT ~= nil then -- ssh session
     end
     vim.g.clipboard = {
         name = "osc52",
-        copy = { ["+"] = copy,["*"] = copy },
-        paste = { ["+"] = paste,["*"] = paste },
+        copy = { ["+"] = copy, ["*"] = copy },
+        paste = { ["+"] = paste, ["*"] = paste },
     }
     vim.keymap.set("n", "gx", "<Cmd>lua require('utils').copy_with_osc_yank_script(vim.fn.expand('<cfile>'))<CR>")
 elseif vim.fn.has("macunix") ~= 1 then -- WSL Vim

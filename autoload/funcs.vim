@@ -32,6 +32,31 @@ function! funcs#simple_complete()
   endif
 endfunction
 
+function! funcs#grep(prg, pattern)
+  let saved_errorformat = &errorformat
+  set errorformat=%f:%l:%c:%m,%f:%l:%m,%f
+  if a:prg == 'glob'
+    let command = a:pattern[0] == '*' ? '{**/.' . a:pattern . ',**/' . a:pattern . '}' : '**/' . a:pattern
+    if a:pattern[0] == '*'  " hidden file needs **/.*pat, {**/.*pat,**/*pat} in `command` is faster but depends on &shell and doesn't work on windows and some bash
+      cgetexpr filter(glob('**/.' . a:pattern, 0, 1), '!isdirectory(v:val)')
+      caddexpr filter(glob('**/' . a:pattern, 0, 1), '!isdirectory(v:val)')
+    else
+      cgetexpr filter(glob(command, 0, 1), '!isdirectory(v:val)')
+    endif
+  else
+    let command = a:prg . ' ' . a:pattern
+    cgetexpr systemlist(command)
+  endif
+  let &errorformat = saved_errorformat
+  let len = len(getqflist())
+  silent! call setqflist([], 'a', {'title': '(' . len . ') ' . command })  " setqflist() does not support 'title' in 7.4
+  if len > 1
+    copen
+  else
+    cfirst
+  endif
+endfunction
+
 function! funcs#get_conflict_state() abort  " conflict-marker.vim
   let current_styles = map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
   if match(current_styles, '^Conflict') != -1
@@ -96,7 +121,7 @@ function! funcs#print_variable(visual, printAbove) abort
   let word = a:visual ? funcs#get_visual_selection() : expand('<cword>')
   let print = {}
   let print['python'] = "print('❗" . word . ":', " . word . ')'
-  let print['javascript'] = "console.log('❗" . word . ":', " . word . ');'
+  let print['javascript'] = "console.info('❗" . word . ":', " . word . ');'
   let print['typescript'] = print['javascript']
   let print['typescriptreact'] = print['javascript']
   let print['java'] = 'System.out.println("[" + getClass().getSimpleName() + " " + (' . word . ').getClass().getSimpleName() + "] ❗' . word . ': " + ' . word . ');'

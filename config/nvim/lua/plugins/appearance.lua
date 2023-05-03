@@ -40,7 +40,6 @@ return {
         },
         opts = {
             options = {
-                buffer_close_icon = "",
                 -- offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } }, -- taking too much space
             },
             highlights = { buffer_selected = { bold = true, italic = false } },
@@ -57,13 +56,14 @@ return {
                 })
                 return
             end
+            local states = require("states")
             require("lualine").setup({
                 options = {
                     component_separators = { left = "", right = "" },
                     section_separators = { left = "", right = "" },
                 },
                 sections = {
-                    lualine_a = { function() return "" end },
+                    lualine_a = { function() return "󰀘" end },
                     lualine_b = {
                         { "filetype", colored = true, icon_only = true, padding = { left = 1, right = 0 } },
                         { "filename", file_status = false, path = 1 },
@@ -109,7 +109,7 @@ return {
                                 return ""
                             end,
                             color = "String",
-                        }
+                        },
                     },
                     lualine_x = {
                         "%S",
@@ -134,12 +134,17 @@ return {
                         {
                             function()
                                 local col = vim.fn.col(".")
-                                return string.format("%s %s/%s", col < 10 and " " .. col or col, vim.fn.line("."), vim.fn.line("$"))
+                                return string.format(
+                                    "%s %s %s/%s",
+                                    states.untildone_count == 0 and "" or "ﯩ " .. states.untildone_count,
+                                    col < 10 and " " .. col or col,
+                                    vim.fn.line("."),
+                                    vim.fn.line("$")
+                                )
                             end,
-                            icon = "",
                             padding = { left = 0, right = 1 },
                         },
-                    }
+                    },
                 },
                 inactive_sections = {
                     lualine_a = {},
@@ -150,9 +155,9 @@ return {
                     },
                     lualine_x = { { "location", color = "Normal" } },
                     lualine_y = {},
-                    lualine_z = {}
+                    lualine_z = {},
                 },
-                extensions = { "quickfix", "toggleterm" }
+                extensions = { "quickfix", "toggleterm" },
             })
         end,
     },

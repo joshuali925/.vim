@@ -1,7 +1,8 @@
 return {
     {
-        "rcarriga/nvim-notify", -- TODO https://github.com/folke/noice.nvim
+        "rcarriga/nvim-notify",
         config = function()
+            require("notify").setup({ timeout = 3000 })
             vim.api.nvim_create_user_command("NotificationsDismiss", function() require("notify").dismiss({ silent = true, pending = true }) end, {})
         end,
     },
@@ -68,7 +69,7 @@ return {
                     vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
                     vim.keymap.set("n", "i", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
                     vim.keymap.set("n", "r", [[<Cmd>execute 'lua require("nvim-tree.api").tree.reload()' <bar> if winwidth(0) >= &columns / 2 - 1 <bar> NvimTreeResize 30 <bar> endif<CR>]], opts("Refresh"))
-                    vim.keymap.set("n", "R", api.fs.rename_sub, opts("Rename: Path"))
+                    vim.keymap.set("n", "R", api.fs.rename, opts("Rename"))
                     vim.keymap.set("n", "x", api.fs.remove, opts("Delete"))
                     vim.keymap.set("n", "d", api.fs.cut, opts("Cut"))
                     vim.keymap.set("n", "y", api.fs.copy.node, opts("Copy"))
@@ -288,6 +289,7 @@ return {
             vim.g.quickui_border_style = 2
         end,
         config = function()
+            vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" })
             vim.fn["quickui#menu#switch"]("normal")
             vim.fn["quickui#menu#reset"]()
             vim.fn["quickui#menu#install"]("&Actions", {
@@ -303,6 +305,7 @@ return {
                 { "&Yank search matches", [[let @x = '' | %s//\=setreg('X', submatch(0), 'V')/gn | let @" = @x | let @x = '']], "Copy all strings matching current search pattern" },
                 { "Search non-ascii", [[let @/ = '[^\d0-\d127]' | set hlsearch]], [[Search all non-ascii characters, in command line: rg '[^\x00-\x7F]']] },
                 { "Search for red '&!'", [[RgNoRegex ❗]], [[Search for '❗' symbol]] },
+                { "Search in &buffers", [[execute 'cexpr []' | call feedkeys(":bufdo vimgrepadd //g % | copen\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Search a pattern in all buffers, add to quickfix" },
                 { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
                 { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
                 { "Enable colori&zer", [[CccHighlighterEnable]], "Enable colorizer" },

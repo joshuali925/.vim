@@ -15,7 +15,7 @@ return {
                 "hrsh7th/vim-vsnip",
                 init = function()
                     vim.g.vsnip_snippet_dir = vim.fn.expand("~/.vim/config/snippets") -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
-                    vim.g.vsnip_filetypes = { zsh = { "sh" }, typescript = { "javascript" }, typescriptreact = { "javascript" } }
+                    vim.g.vsnip_filetypes = { zsh = { "sh" }, typescript = { "javascript" }, typescriptreact = { "javascript", "typescript" } }
                 end,
             },
             {
@@ -163,7 +163,7 @@ return {
                                     buffers[vim.api.nvim_win_get_buf(win)] = true -- visible buffers only
                                 end
                                 return vim.tbl_filter(function(buffer)
-                                    return vim.api.nvim_buf_get_offset(buffer, vim.api.nvim_buf_line_count(buffer)) < 1048576 -- 1MB
+                                    return vim.api.nvim_buf_get_offset(buffer, vim.api.nvim_buf_line_count(buffer)) < require("states").size_threshold
                                 end, vim.tbl_keys(buffers))
                             end,
                         },

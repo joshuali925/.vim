@@ -1,0 +1,86 @@
+{
+  "UseState": {
+    "prefix": "useState",
+    "body": [
+      "const [${1:state}, set${1/(.*)/${1:/capitalize}/}] = useState($0);"
+    ]
+  },
+  "UseEffect": {
+    "prefix": "useEffect",
+    "body": ["useEffect(() => {", "\t$0", "}, []);"]
+  },
+  "UseMemo": {
+    "prefix": "useMemo",
+    "body": [
+      "const ${1:memorized} = useMemo(() => {",
+      "\treturn $2",
+      "}, [$0]);"
+    ]
+  },
+  "UseContext": {
+    "prefix": "useContext",
+    "body": [
+      "const ${1:service}Context = useContext(${1/(.*)/${1:/capitalize}/}Context)${2:!};$0"
+    ]
+  },
+  "Props": {
+    "prefix": "props",
+    "body": "$0={$0}"
+  },
+  "Props get set type": {
+    "prefix": "props-getter-setter",
+    "body": [
+      "${1:state}: ${0:string};",
+      "set${1/(.*)/${1:/capitalize}/}: React.Dispatch<React.SetStateAction<$0>>;"
+    ]
+  },
+  "UseFetchResources": {
+    "prefix": "useFetchResources",
+    "body": [
+      "import { Reducer, useEffect, useReducer, useState } from \"react\";",
+      "",
+      "interface State<T> {",
+      "\tdata?: T;",
+      "\tloading: boolean;",
+      "\terror?: Error;",
+      "}",
+      "",
+      "type Action<T> =",
+      "\t| { type: \"request\" }",
+      "\t| { type: \"success\"; payload: State<T>[\"data\"] }",
+      "\t| { type: \"failure\"; error: Required<State<T>[\"error\"]> };",
+      "",
+      "type GenericReducer<T = any> = Reducer<State<T>, Action<T>>;",
+      "const genericReducer: GenericReducer = (state, action) => {",
+      "\tswitch (action.type) {",
+      "\t\tcase \"request\":",
+      "\t\t\treturn { loading: true };",
+      "\t\tcase \"success\":",
+      "\t\t\treturn { loading: false, data: action.payload };",
+      "\t\tcase \"failure\":",
+      "\t\t\treturn { loading: false, error: action.error };",
+      "\t\tdefault:",
+      "\t\t\treturn state;",
+      "\t}",
+      "};",
+      "",
+      "export const useFetchURI = (uri: string) => {",
+      "\tconst reducer: GenericReducer<${0:unknown}> = genericReducer;",
+      "\tconst [state, dispatch] = useReducer(reducer, { loading: false });",
+      "\tconst [refresh, setRefresh] = useState({});",
+      "",
+      "\tuseEffect(() => {",
+      "\t\tconst abortController = new AbortController();",
+      "\t\tdispatch({ type: \"request\" });",
+      "\t\tfetch(uri, { signal: abortController.signal })",
+      "\t\t\t.then((payload) => dispatch({ type: \"success\", payload }))",
+      "\t\t\t.catch((error) => dispatch({ type: \"failure\", error }));",
+      "",
+      "\t\treturn () => abortController.abort();",
+      "\t}, [uri, refresh]);",
+      "",
+      "\treturn { ...state, refresh: () => setRefresh({}) };",
+      "};"
+    ]
+  }
+}

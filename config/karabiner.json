@@ -565,7 +565,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep Chrome && open -a 'Google Chrome') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep 'Orion' && open -a 'Orion') || (pgrep 'Firefox' && open -a 'Firefox')"
+              "shell_command": "(pgrep Chrome && open -a 'Google Chrome') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep Orion && open -a 'Orion') || (pgrep firefox && open -a 'Firefox')"
             }
           ]
         },
@@ -579,7 +579,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep firefox && open -a 'Firefox') || (pgrep 'Microsoft Outlook' && open -a 'Microsoft Outlook')"
+              "shell_command": "(pgrep Orion && open -a 'Orion') || (pgrep firefox && open -a 'Firefox') || (pgrep 'Microsoft Outlook' && open -a 'Microsoft Outlook')"
             }
           ]
         },
