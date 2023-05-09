@@ -16,7 +16,8 @@ function M.lsp_install_all()
         "cssls",
         "tsserver",
         "eslint",
-        "pylsp",
+        -- "pylsp", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
+        "pyright",
         "jdtls",
         "kotlin_language_server",
     }
@@ -122,6 +123,21 @@ function M.init()
                 init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
             })
         end,
+        pyright = function()
+            register_server("pyright", {
+                commands = {
+                    PythonOrganizeImports = {
+                        function()
+                            vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
+                                command = "pyright.organizeimports",
+                                arguments = { vim.uri_from_bufnr(0) },
+                            }, 3000)
+                        end,
+                        description = "Organize Imports",
+                    },
+                },
+            })
+        end,
     })
 
     local null_ls = require("null-ls")
@@ -176,6 +192,8 @@ function M.organize_imports_and_format()
     if vim.tbl_contains(active_clients, "tsserver") then
         local ok, resp = pcall(require("typescript").actions.organizeImports, { sync = true })
         if not ok then vim.notify(resp, vim.log.levels.ERROR, { title = "Organize imports failed" }) end
+    elseif vim.tbl_contains(active_clients, "pyright") then
+        vim.cmd("silent PythonOrganizeImports")
     end
     if not vim.tbl_isempty(vim.tbl_filter(function(name) return vim.tbl_contains(formatting_lsps, name) end, active_clients)) then
         vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsps, client.name) end, timeout_ms = 3000 })

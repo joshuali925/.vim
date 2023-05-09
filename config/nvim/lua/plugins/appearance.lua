@@ -39,9 +39,6 @@ return {
             { "Z]", "<Cmd>BufferLineCloseRight<CR>" },
         },
         opts = {
-            options = {
-                -- offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } }, -- taking too much space
-            },
             highlights = { buffer_selected = { bold = true, italic = false } },
         },
     },
@@ -116,7 +113,7 @@ return {
                         {
                             function()
                                 local reg = vim.fn.reg_recording()
-                                return reg == "" and "" or "recording @" .. reg
+                                return reg == "" and "" or "recording @" .. reg -- TODO https://github.com/neovim/neovim/issues/19193
                             end,
                             color = "Constant",
                         },

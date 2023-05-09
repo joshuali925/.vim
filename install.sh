@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 NODE_VERSION=14.21.3
+JDK_VERSION=adoptopenjdk-17.0.7+7
 BACKUP_DIR=$HOME/config-backup
 
 CYAN='\033[0;36m'
@@ -203,15 +204,13 @@ install_docker() {
 
 install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
   install_asdf
-  local jdk_version=adoptopenjdk-14.0.2+12
-  [ "$PLATFORM" == 'darwin' ] && [ "$ARCHITECTURE" == 'arm64' ] && jdk_version=adoptopenjdk-11.0.15+10
-  log "Installing java $jdk_version.."
+  log "Installing java $JDK_VERSION.."
   asdf plugin add java || true
-  asdf install java "$jdk_version"
-  asdf global java "$jdk_version"
+  asdf install java "$JDK_VERSION"
+  asdf global java "$JDK_VERSION"
   export JAVA_HOME="$(asdf where java)"
   echo "export JAVA_HOME=\"$(asdf where java)\"" | tee -a ~/.bashrc ~/.zshrc
-  log "Installed $jdk_version, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
+  log "Installed $JDK_VERSION, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
 }
 
 install_python() {  # environment for asdf install from source: https://github.com/pyenv/pyenv/wiki#suggested-build-environment

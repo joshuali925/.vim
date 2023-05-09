@@ -34,7 +34,7 @@ vim.o.softtabstop = 4
 vim.o.shiftwidth = 4
 vim.o.shiftround = true
 vim.o.complete = ".,w,b,u"
-vim.o.completeopt = "menuone,noselect"
+vim.o.completeopt = "menuone,noinsert"
 vim.o.completefunc = "funcs#complete_word"
 vim.o.shortmess = vim.o.shortmess .. "cAS"
 vim.o.spellsuggest = vim.o.spellsuggest .. ",10"
@@ -121,10 +121,10 @@ vim.keymap.set("n", "T", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, ''
 vim.keymap.set("x", "T", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, '', 'T', 'T')<CR>")
 vim.keymap.set("o", "T", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, '', 'T', 'T')<CR>")
 vim.keymap.set("n", ",", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>")
-vim.keymap.set("x", ",", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>")
+vim.keymap.set("x", ",", ":call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>")
 vim.keymap.set("o", ",", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ';')<CR>")
 vim.keymap.set("n", ";,", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
-vim.keymap.set("x", ";,", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
+vim.keymap.set("x", ";,", ":call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
 vim.keymap.set("o", ";,", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
 vim.keymap.set("n", "cx", "'<Cmd>set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@'", { expr = true, replace_keycodes = false })
 vim.keymap.set("x", "X", "<Cmd>call plugins#exchange#exchange_set(visualmode(), 1)<CR>")
@@ -176,7 +176,7 @@ vim.keymap.set("n", "ZX", function()
         if vim.bo[bufnr].buflisted and bufnr ~= cur and vim.b[bufnr].bufpersist ~= 1 then vim.fn["plugins#bbye#bdelete"]("bdelete", "", bufnr) end
     end
 end, { desc = "Close untouched buffers" })
-vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>silent! NotificationsDismiss<CR>")
+vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo <bar> silent! NotificationsDismiss<CR>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("x", "<C-c>", "<Esc>")
 vim.keymap.set("n", "<C-w><C-c>", "<Esc>")

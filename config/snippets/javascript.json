@@ -1,7 +1,7 @@
 {
   "Log": {
     "prefix": "cl",
-    "body": ["console.log('DEBUGGING ❗$0:', $0);"]
+    "body": ["console.log('DEBUGGING ❗$0:', $0)"]
   },
   "Log stringify": {
     "prefix": "cls",
@@ -20,6 +20,10 @@
       "$0",
       "console.timeEnd('${1:Performance test}');"
     ]
+  },
+  "Range": {
+    "prefix": "range",
+    "body": ["[...Array(${1:10}).keys()]$0"]
   },
   "Random string": {
     "prefix": "random-string",
