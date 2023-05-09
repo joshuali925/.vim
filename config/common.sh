@@ -668,17 +668,17 @@ ec2() {
       local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
       local config="Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n"
       if [ -z "$host" ]; then
-        ec2 start "$tag" && sleep 15 && ec2 ssh "$tag"
+        ec2 start "$tag" && sleep 17 && ec2 ssh "$tag"
         return $?
       fi
       echo "ssh to ec2: $host" >&2
       shift 2
       sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-      printf "$config" ec2-user >> ~/.ssh/ec2hosts
-      ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host" || {
+      printf "$config" ubuntu >> ~/.ssh/ec2hosts
+      ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ubuntu@$host" || {
         sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-        printf "$config" ubuntu >> ~/.ssh/ec2hosts
-        ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ubuntu@$host"
+        printf "$config" ec2-user >> ~/.ssh/ec2hosts
+        ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host"
       }
       return 0 ;;
     *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]" >&2; return 1 ;;

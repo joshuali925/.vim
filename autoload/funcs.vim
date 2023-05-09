@@ -142,6 +142,7 @@ function! funcs#print_variable(visual, printAbove) abort
   endif
 endfunction
 
+" TODO https://github.com/rcarriga/neotest
 function! funcs#jest_context() abort
   let pos = getcurpos()
   normal! $
@@ -171,7 +172,7 @@ function! funcs#get_run_command() abort
   if exists(':AsyncRun')
     let run_command['python'] = 'AsyncRun -raw python3 "$(VIM_FILEPATH)"'
     let run_command['javascript'] = 'AsyncRun -raw node "$(VIM_FILEPATH)"'
-    let run_command['typescript'] = 'AsyncRun -raw npx ts-node "$(VIM_FILEPATH)"'
+    let run_command['typescript'] = 'AsyncRun -raw npx ts-node --esm "$(VIM_FILEPATH)"'
     let run_command['c'] = 'AsyncRun -raw gcc "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
     let run_command['cpp'] = 'AsyncRun -raw g++ "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
     let run_command['java'] = 'AsyncRun -raw javac "$(VIM_FILEPATH)" && java -classpath "$(VIM_FILEDIR)" "$(VIM_FILENOEXT)"'

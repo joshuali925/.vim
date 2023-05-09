@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github restic restic/restic linux_amd64.bz2 linux_arm64.bz2 darwin_amd64.bz2 darwin_arm64.bz2 restic "$@"

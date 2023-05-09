@@ -3685,7 +3685,7 @@ map <expr> N sneak#is_sneaking() ? '<Plug>Sneak_,' : 'N'
 " =======================================================
 " cmdheight = 0
 vim.o.cmdheight = 0
-    components.active[3][6] = { -- TODO https://github.com/neovim/neovim/issues/19193
+    components.active[3][6] = {
         provider = function()
             return " recording @" .. vim.fn.reg_recording()
         end,
@@ -3910,7 +3910,7 @@ copy_cursor_y="${cursors[1]}"
 cursor_x="${cursors[2]}"
 cursor_y="${cursors[3]}"
 if [ "$copy_cursor_y" -lt "$cursor_y" ]; then
-  # TODO fix off by 1
+  # need to fix off by 1
   # steps = characters in lines above + number of physical lines crossed - target x + current x
   # if crossing lines, then wc counts correctly (+1 for each line)
   #                         wc -l = number of lines crossed
@@ -3964,6 +3964,13 @@ export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
 export MANROFFOPT='-c'
 
 " =======================================================
+    {
+        "akinsho/bufferline.nvim",
+        opts = {
+            options = { offsets = { { filetype = "NvimTree", text = "File Explorer", highlight = "Directory" } } }, -- taking too much space
+            ...
+        },
+    },
 " noice.nvim, distracting
     {
         "folke/noice.nvim",
@@ -3974,4 +3981,17 @@ export MANROFFOPT='-c'
             -- routes = { { filter = { event = "msg_show", find = "search hit" }, skip = true } }, -- filter seems to break long_message_to_split
         },
     },
-vim.keymap.set("n", "<C-c>", [[<Cmd>silent execute "normal! \<C-c>"<CR><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>silent! NotificationsDismiss<CR>]])
+" mini.nvim
+    {
+        "echasnovski/mini.nvim",
+        event = "VeryLazy",
+        keys = {
+            { "'", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.single_character) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>e", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.word_start) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
+        },
+        config = function()
+            require("mini.jump2d").setup({ { mappings = { start_jumping = "" } } })
+        end,
+    },

@@ -92,23 +92,22 @@ return {
                 TypeParameter = " ",
             }
             cmp.setup({
-                completion = { completeopt = "menuone,noselect" },
+                completion = { completeopt = "menuone,noinsert" },
                 snippet = { expand = function(args) vim.fn["vsnip#anonymous"](args.body) end },
                 window = {
-                    completion = vim.tbl_extend("force", require("cmp").config.window.bordered({ border = "single" }), { col_offset = -4 }),
+                    completion = vim.tbl_extend("force", cmp.config.window.bordered({ border = "single" }), { col_offset = -1 }),
                     documentation = cmp.config.window.bordered({ border = "single" }),
                 },
                 formatting = {
-                    fields = { "kind", "abbr", "menu" },
-                    format = function(_, vim_item)
-                        vim_item.menu = vim_item.kind
-                        vim_item.kind = cmp_kinds[vim_item.kind] or ""
-                        return vim_item
+                    format = function(_, item)
+                        item.kind = cmp_kinds[item.kind] .. item.kind
+                        return item
                     end,
                 },
+                experimental = { ghost_text = { hl_group = "LspCodeLens" } },
                 mapping = {
-                    ["<C-d>"] = cmp.mapping.scroll_docs(-4),
-                    ["<C-f>"] = cmp.mapping.scroll_docs(4),
+                    ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+                    ["<C-d>"] = cmp.mapping.scroll_docs(4),
                     ["<C-Space>"] = cmp.mapping.complete(),
                     ["<CR>"] = cmp.mapping.confirm(),
                     ["<C-e>"] = cmp.mapping.abort(),
@@ -123,11 +122,11 @@ return {
                             fallback()
                         end
                     end, { "i", "s" }),
-                    ["<Down>"] = cmp.mapping.select_next_item({ behavior = require("cmp.types").cmp.SelectBehavior.Select }),
-                    ["<Up>"] = cmp.mapping.select_prev_item({ behavior = require("cmp.types").cmp.SelectBehavior.Select }),
+                    ["<Down>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+                    ["<Up>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
                     ["<Tab>"] = cmp.mapping(function(fallback)
                         if cmp.visible() then
-                            cmp.select_next_item()
+                            cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
                         elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
                             vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
                         elseif require("neogen").jumpable() then
@@ -138,7 +137,7 @@ return {
                     end, { "i", "s" }),
                     ["<S-Tab>"] = cmp.mapping(function(fallback)
                         if cmp.visible() then
-                            cmp.select_prev_item()
+                            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
                         elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
                             vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
                         elseif require("neogen").jumpable(-1) then
@@ -171,6 +170,8 @@ return {
                 },
             })
             cmp.setup.cmdline(":", {
+                completion = { completeopt = "menuone,noselect" },
+                window = { completion = vim.tbl_extend("force", cmp.config.window.bordered({ border = "single" }), { col_offset = 0 }) },
                 mapping = cmp.mapping.preset.cmdline(),
                 sources = cmp.config.sources({ { name = "path" } }, { { name = "cmdline" } }),
             })

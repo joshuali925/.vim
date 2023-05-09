@@ -95,55 +95,6 @@ return {
         end,
     },
     {
-        "goolord/alpha-nvim",
-        lazy = vim.fn.argc() ~= 0 or vim.fn.line2byte("$") ~= -1,
-        config = function()
-            local theme = require("alpha.themes.startify")
-            theme.section.header.val = {
-                [[    ⢀⣀⣀⡀          ⣀⣀⣀                       ⢀⣀⣀⡀                      ⣤⣤    ]],
-                [[    ⣿⣿⣿⣿⣷⣄      ⣰⣿⠟⠛⢿⣷⡄                    ⣼⣿⠟⠛⠟                      ⣿⣿    ]],
-                [[⢠   ⠙⠻⠿⢿⣿⣿⡆    ⢰⣿⡏   ⣿⣷⢸⣿⣴⠿⣿⣧ ⢠⣾⠟⢿⣦⡀⢸⣷⡼⠿⣿⣦ ⢿⣿⣄   ⣴⣿⠿⣿⣦ ⠰⠿⠿⢿⣷⡀⣿⣧⡾⠿⢠⣾⡿⠿⠇⣿⣿⡾⠿⣿⣦]],
-                [[⣿⣶⣄⡀    ⠈⠻⡇ ⣶  ⢸⣿⡇   ⣿⣿⢸⣿⡇ ⢸⣿⡇⣿⣿⣤⣬⣿⡇⢸⣿⠁ ⢹⣿ ⠈⠛⢿⣷⣆⢰⣿⣧⣤⣼⣿⡇⢀⣤⣤⣼⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿]],
-                [[⠸⣿⣿⣿⣿⣷⣦    ⢀⡏  ⠈⣿⣧  ⢀⣿⡏⢸⣿⡇ ⢸⣿⡇⣿⣿⠉⠉⠉⠁⢸⣿  ⢸⣿    ⣻⣿⠸⣿⣏⠉⠉⠉⢱⣿⡟⠁⢸⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿]],
-                [[ ⠈⠻⢿⣿⡿⠏   ⣠⠟    ⠘⠿⣿⣾⡿⠟⠁⢸⣿⡟⢶⣿⠟ ⠘⠿⣷⣶⡾ ⠸⠿  ⠸⠿ ⠿⣷⣾⡿⠏ ⠙⢿⣶⣶⠾⠈⢿⣿⡶⠛⠿⠇⠿⠿  ⠘⠿⣷⣶⠇⠿⠿  ⠿⠿]],
-                [[     ⣀⣀⣠⡴⠞⠁            ⢸⣿⡇                                                  ]],
-                [[     ⠉⠁                ⠘⠛⠃                                                  ]],
-            }
-            theme.section.top_buttons.val = {}
-            theme.section.bottom_buttons.val = {
-                theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status<CR>]]),
-                theme.button("?", "Git diff", "<Cmd>DiffviewOpen<CR>"),
-                theme.button("+", "Git diff remote", "<Cmd>DiffviewOpen @{upstream}..HEAD<CR>"),
-                theme.button("~", "Git conflicts", "<Cmd>Git mergetool<CR>"),
-                theme.button("o", "Git log", "<Cmd>Flog<CR>"),
-                theme.button("f", "Find files", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>"),
-                theme.button("m", "Find MRU", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>"),
-                theme.button("c", "Edit vimrc", "<Cmd>edit $MYVIMRC<CR>"),
-                theme.button("\\", "Open quickui", "<Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('normal')<CR>"),
-                theme.button("s", "Open Lazy UI", "<Cmd>Lazy<CR>"),
-                theme.button("S", "Open Mason UI", "<Cmd>Mason<CR>"),
-                theme.button("U", "Update packages", "<Cmd>Lazy update<CR>"),
-                theme.button("E", "Load from previous session", "<Cmd>silent SessionLoad<CR>"),
-            }
-            theme.mru_opts.ignore = function(path, ext)
-                return string.find(path, "vim/.*/doc/.*%.txt") or string.find(path, "/.git/")
-            end
-            require("alpha").setup(theme.config)
-            vim.api.nvim_create_augroup("AlphaAutoCommands", {})
-            vim.api.nvim_create_autocmd("FileType", {
-                pattern = "alpha",
-                group = "AlphaAutoCommands",
-                callback = function()
-                    vim.b.RestoredCursor = 1 -- do not restore cursor position
-                    vim.keymap.set("n", "v", "<M-CR>", { buffer = true, remap = true })
-                    vim.keymap.set("n", "q", [[len(getbufinfo({"buflisted":1})) == 0 ? "<Cmd>quit<CR>" : "<Cmd>call plugins#bbye#bdelete('bdelete', '', '')<CR>"]], { buffer = true, expr = true, replace_keycodes = false })
-                    vim.keymap.set("n", "e", "<Cmd>enew<CR>", { buffer = true })
-                    vim.keymap.set("n", "i", "<Cmd>enew <bar> startinsert<CR>", { buffer = true })
-                end,
-            })
-        end,
-    },
-    {
         "nvim-telescope/telescope.nvim",
         dependencies = { "nvim-lua/plenary.nvim", { "nvim-telescope/telescope-fzf-native.nvim", build = "make" } },
         keys = {
@@ -156,7 +107,7 @@ return {
             { "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>" },
             { "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers({initial_mode = 'normal'})<CR>" },
             { "<leader>fu", "<Cmd>lua require('telescope.builtin')[require('lsp').is_active() and 'lsp_document_symbols' or 'treesitter']()<CR>" },
-            { "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_dynamic_workspace_symbols()<CR>" },
+            { "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_dynamic_workspace_symbols({ symbols = { 'Class', 'Function', 'Method', 'Constructor', 'Interface', 'Module', 'Struct', 'Trait', 'Field', 'Property' } })<CR>" },
             { "<leader>fg", ":RgRegex " },
             { "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>", mode = "x" },
             { "<leader>fj", ":RgRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>" },
@@ -231,6 +182,55 @@ return {
                 },
             })
             require("telescope").load_extension("fzf")
+        end,
+    },
+    {
+        "goolord/alpha-nvim",
+        lazy = vim.fn.argc() ~= 0 or vim.fn.line2byte("$") ~= -1,
+        config = function()
+            local theme = require("alpha.themes.startify")
+            theme.section.header.val = {
+                [[    ⢀⣀⣀⡀          ⣀⣀⣀                       ⢀⣀⣀⡀                      ⣤⣤    ]],
+                [[    ⣿⣿⣿⣿⣷⣄      ⣰⣿⠟⠛⢿⣷⡄                    ⣼⣿⠟⠛⠟                      ⣿⣿    ]],
+                [[⢠   ⠙⠻⠿⢿⣿⣿⡆    ⢰⣿⡏   ⣿⣷⢸⣿⣴⠿⣿⣧ ⢠⣾⠟⢿⣦⡀⢸⣷⡼⠿⣿⣦ ⢿⣿⣄   ⣴⣿⠿⣿⣦ ⠰⠿⠿⢿⣷⡀⣿⣧⡾⠿⢠⣾⡿⠿⠇⣿⣿⡾⠿⣿⣦]],
+                [[⣿⣶⣄⡀    ⠈⠻⡇ ⣶  ⢸⣿⡇   ⣿⣿⢸⣿⡇ ⢸⣿⡇⣿⣿⣤⣬⣿⡇⢸⣿⠁ ⢹⣿ ⠈⠛⢿⣷⣆⢰⣿⣧⣤⣼⣿⡇⢀⣤⣤⣼⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿]],
+                [[⠸⣿⣿⣿⣿⣷⣦    ⢀⡏  ⠈⣿⣧  ⢀⣿⡏⢸⣿⡇ ⢸⣿⡇⣿⣿⠉⠉⠉⠁⢸⣿  ⢸⣿    ⣻⣿⠸⣿⣏⠉⠉⠉⢱⣿⡟⠁⢸⣿⡇⣿⣿  ⣿⣿   ⣿⣿  ⣿⣿]],
+                [[ ⠈⠻⢿⣿⡿⠏   ⣠⠟    ⠘⠿⣿⣾⡿⠟⠁⢸⣿⡟⢶⣿⠟ ⠘⠿⣷⣶⡾ ⠸⠿  ⠸⠿ ⠿⣷⣾⡿⠏ ⠙⢿⣶⣶⠾⠈⢿⣿⡶⠛⠿⠇⠿⠿  ⠘⠿⣷⣶⠇⠿⠿  ⠿⠿]],
+                [[     ⣀⣀⣠⡴⠞⠁            ⢸⣿⡇                                                  ]],
+                [[     ⠉⠁                ⠘⠛⠃                                                  ]],
+            }
+            theme.section.top_buttons.val = {}
+            theme.section.bottom_buttons.val = {
+                theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status<CR>]]),
+                theme.button("?", "Git diff", "<Cmd>DiffviewOpen<CR>"),
+                theme.button("+", "Git diff remote", "<Cmd>DiffviewOpen @{upstream}..HEAD<CR>"),
+                theme.button("~", "Git conflicts", "<Cmd>Git mergetool<CR>"),
+                theme.button("o", "Git log", "<Cmd>Flog<CR>"),
+                theme.button("f", "Find files", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>"),
+                theme.button("m", "Find MRU", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>"),
+                theme.button("c", "Edit vimrc", "<Cmd>edit $MYVIMRC<CR>"),
+                theme.button("\\", "Open quickui", "<Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('normal')<CR>"),
+                theme.button("s", "Open Lazy UI", "<Cmd>Lazy<CR>"),
+                theme.button("S", "Open Mason UI", "<Cmd>Mason<CR>"),
+                theme.button("U", "Update packages", "<Cmd>Lazy update<CR>"),
+                theme.button("E", "Load from previous session", "<Cmd>silent SessionLoad<CR>"),
+            }
+            theme.mru_opts.ignore = function(path, ext)
+                return string.find(path, "vim/.*/doc/.*%.txt") or string.find(path, "/.git/")
+            end
+            require("alpha").setup(theme.config)
+            vim.api.nvim_create_augroup("AlphaAutoCommands", {})
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "alpha",
+                group = "AlphaAutoCommands",
+                callback = function()
+                    vim.b.RestoredCursor = 1 -- do not restore cursor position
+                    vim.keymap.set("n", "v", "<M-CR>", { buffer = true, remap = true })
+                    vim.keymap.set("n", "q", [[len(getbufinfo({"buflisted":1})) == 0 ? "<Cmd>quit<CR>" : "<Cmd>call plugins#bbye#bdelete('bdelete', '', '')<CR>"]], { buffer = true, expr = true, replace_keycodes = false })
+                    vim.keymap.set("n", "e", "<Cmd>enew<CR>", { buffer = true })
+                    vim.keymap.set("n", "i", "<Cmd>enew <bar> startinsert<CR>", { buffer = true })
+                end,
+            })
         end,
     },
     { "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = function() vim.g.asyncrun_open = 12 end },
