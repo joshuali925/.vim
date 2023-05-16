@@ -81,6 +81,8 @@ vim.keymap.set("x", "ae", "GoggV")
 vim.keymap.set("o", "ae", "<Cmd>normal vae<CR>")
 vim.keymap.set("x", "af", "v%va)obo")
 vim.keymap.set("o", "af", "<Cmd>normal vaf<CR>")
+vim.keymap.set("x", "a%", "iw%")
+vim.keymap.set("o", "a%", "<Cmd>normal va%<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
@@ -252,7 +254,7 @@ vim.api.nvim_create_autocmd("BufRead", {
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=jql" })
-vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>" })
+vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = "nnoremap <buffer> gf :argadd <C-r><C-p><CR>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })
 vim.api.nvim_create_autocmd("FileType", {
@@ -301,10 +303,10 @@ vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>
 vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
-vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | nnoremap <nowait> <buffer> d <C-d>| nnoremap <buffer> u <C-u>", {})
+vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
-    local filetype_map = { javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
+    local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
     local line1 = args.range == 0 and 0 or args.line1 - 1
     local line2 = args.range == 0 and -1 or args.line2

@@ -15,13 +15,8 @@ preview() {
 }
 
 if [ -n "$FULL_PREVIEW" ] && [ "$(file -Lb --mime-type -- "$1" | cut -d/ -f1)" = 'image' ]; then
-  if [ -n "$TMUX" ]; then
-    printf 'Press enter to copy print image command and detach tmux'; read REPLY; echo
-    echo " iterm-imgcat '$(realpath "$1")'; printf 'Press enter to continue'; read; echo; tmux attach" | y && tmux detach
-  else
-    iterm-imgcat "$1"; printf 'Press enter to continue'; read REPLY; echo
-  fi
-  exit "$?"
+  iterm-imgcat "$1"; read REPLY; echo
+  exit 0
 fi
 
 case "$1" in

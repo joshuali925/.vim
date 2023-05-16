@@ -192,8 +192,8 @@ api.unmap('r');
 api.mapkey('r', 'Toggle full screen', function() {
     if (window.location.hostname === 'www.bilibili.com') {
         if (window.location.pathname === '/') {
-            // 换一换, .roll-btn-wrap 旧版, .palette-button-wrap 新版
-            document.querySelectorAll('.roll-btn-wrap, .palette-button-wrap')[0].getElementsByTagName('button')[0].click();
+            // 换一换, .roll-btn-wrap 旧版, .palette-button-wrap 新版, .feed-roll-btn 内测
+            document.querySelectorAll('.feed-roll-btn, .palette-button-wrap, .roll-btn-wrap')[0].getElementsByTagName('button')[0].click();
             return;
         }
         // /video, /(medialist|festival), /bangumi

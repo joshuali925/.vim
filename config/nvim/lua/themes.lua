@@ -10,11 +10,13 @@ M.theme_list = {
     [-3] = "visual_studio_code",
     [-4] = "neovim-ayu",
     [-5] = "catppuccin",
+    [-6] = "nightfox.nvim",
     [0] = "tokyonight.nvim",
     [1] = "github-nvim-theme",
     [2] = "visual_studio_code",
     [3] = "neovim-ayu",
     [4] = "catppuccin",
+    [5] = "nightfox.nvim",
 }
 M.theme = M.theme_list[theme_index]
 
@@ -36,8 +38,7 @@ local themes = {
     ["github-nvim-theme"] = {
         config = function()
             require("github-theme").setup({ options = { darken = { sidebars = { list = sidebars } } } })
-            vim.cmd.colorscheme("github_" .. (theme_index < 0 and "dark_dimmed" or "light"))
-            vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = theme_index < 0 and "#4d5462" or "#bbbbbb" })
+            vim.cmd.colorscheme("github_" .. (theme_index < 0 and "dark_dimmed" or "light_high_contrast"))
         end,
     },
     ["visual_studio_code"] = {
@@ -46,8 +47,15 @@ local themes = {
             if theme_index < 0 then
                 vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
                 vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#4a4a4a" })
+                vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#484848" })
+                vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#484848" })
+                vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#484848" })
                 require("visual_studio_code.utils").hl.set("CursorLine", { bg = "#282828" })
             end
+            require("lualine").setup({
+                options = { component_separators = { left = "", right = "" }, section_separators = { left = "", right = "" }, globalstatus = true },
+                sections = require("visual_studio_code").get_lualine_sections(),
+            })
         end,
     },
     ["neovim-ayu"] = {
@@ -71,6 +79,15 @@ local themes = {
                 },
             })
             vim.cmd.colorscheme("catppuccin")
+        end,
+    },
+    ["nightfox.nvim"] = {
+        config = function()
+            require("nightfox").setup({
+                palettes = { dayfox = { bg1 = "#f2ede7", bg3 = "#ece6df" } },
+                groups = { dayfox = { LspReferenceText = { bg = "#e3dacf" }, LspReferenceRead = { bg = "#e3dacf" }, LspReferenceWrite = { bg = "#e3dacf" } } },
+            })
+            vim.cmd.colorscheme(theme_index < 0 and "carbonfox" or "dayfox")
         end,
     },
 }

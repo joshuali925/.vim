@@ -16,8 +16,7 @@ function M.lsp_install_all()
         "cssls",
         "tsserver",
         "eslint",
-        -- "pylsp", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
-        "pyright",
+        "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
         "jdtls",
         "kotlin_language_server",
     }
@@ -28,7 +27,7 @@ function M.lsp_install_all()
     else
         vim.cmd.Mason()
     end
-    vim.cmd.MasonInstall({ args = { "prettier", "shellcheck" } })
+    vim.cmd.MasonInstall({ args = { "prettier", "shellcheck", "black" } })
 end
 
 function M.init()
