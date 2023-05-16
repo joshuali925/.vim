@@ -87,8 +87,9 @@
     "prefix": "write-file",
     "body": [
       "const fs = require('fs');",
+      "fs.mkdirSync(`\\${__dirname}/`, { recursive: true });",
       "fs.writeFileSync(`\\${__dirname}/${1:fileName}`, ${0:str});",
-      "fs.appendFileSync(`\\${__dirname}/${1:fileName}`, ${0:str});"
+      "// fs.appendFileSync(`\\${__dirname}/${1:fileName}`, ${0:str});"
     ]
   },
   "Cypress delay": {

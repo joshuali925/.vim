@@ -1,4 +1,8 @@
 {
+  "UseRef": {
+    "prefix": "useRef",
+    "body": ["const ref = useRef<${0:HTMLInputElement}>(null);"]
+  },
   "UseState": {
     "prefix": "useState",
     "body": [

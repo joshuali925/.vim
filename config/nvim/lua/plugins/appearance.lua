@@ -7,6 +7,7 @@ return {
     { "askfiy/visual_studio_code", lazy = curr_theme ~= "visual_studio_code", config = config_theme },
     { "Shatur/neovim-ayu", lazy = curr_theme ~= "neovim-ayu", config = config_theme },
     { "catppuccin/nvim", name = "catppuccin", lazy = curr_theme ~= "catppuccin", config = config_theme },
+    { "EdenEast/nightfox.nvim", lazy = curr_theme ~= "nightfox.nvim", config = config_theme },
     { "kyazdani42/nvim-web-devicons" },
     {
         "lukas-reineke/indent-blankline.nvim",
@@ -47,10 +48,6 @@ return {
         event = "BufEnter",
         config = function()
             if curr_theme == "visual_studio_code" then
-                require("lualine").setup({
-                    options = { component_separators = { left = "", right = "" }, section_separators = { left = "", right = "" }, globalstatus = true },
-                    sections = require("visual_studio_code").get_lualine_sections(),
-                })
                 return
             end
             local states = require("states")

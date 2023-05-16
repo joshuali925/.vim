@@ -3995,3 +3995,8 @@ export MANROFFOPT='-c'
             require("mini.jump2d").setup({ { mappings = { start_jumping = "" } } })
         end,
     },
+" eyeliner insert mode doesn't always disable highlight, and https://github.com/jinh0/eyeliner.nvim/issues/35
+
+" =======================================================
+" tmux load average to percentage
+  set -g status-right "#[fg=colour237,bg=colour178,bold] #(uptime | awk -F ', ' -v nproc=$(nproc) '{sub(/.+load average: /,\"\"); for(i=0;i<NF;i++) printf \$i/nproc*100 \"%% \"}')#[fg=colour237,bg=colour117,bold] #(free | awk 'NR==2{printf \"%%.2f%%%%\", 100*$3/$2}') #[fg=colour237,bg=colour114,bold] %m/%d %I:%M %p #[default]"

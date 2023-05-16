@@ -48,7 +48,7 @@ alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vlf='\vim +Explore'
 alias vim='$EDITOR'
-alias venv='[ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
+alias venv='deactivate 2> /dev/null; [ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias gvenv='[ ! -d "$HOME/.local/lib/venv" ] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
@@ -675,10 +675,13 @@ ec2() {
       shift 2
       sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
       printf "$config" ubuntu >> ~/.ssh/ec2hosts
+      local start=$SECONDS
       ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ubuntu@$host" || {
-        sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-        printf "$config" ec2-user >> ~/.ssh/ec2hosts
-        ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host"
+        if [ $((($SECONDS - $start))) -lt 10 ]; then
+          sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
+          printf "$config" ec2-user >> ~/.ssh/ec2hosts
+          ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host"
+        fi
       }
       return 0 ;;
     *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]" >&2; return 1 ;;

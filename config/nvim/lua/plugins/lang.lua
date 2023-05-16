@@ -132,7 +132,7 @@ return {
             textobjects = {
                 select = {
                     enable = true,
-                    keymaps = { ["if"] = "@function.inner", ["aF"] = "@function.outer", ["ic"] = "@class.inner", ["ac"] = "@class.outer" },
+                    keymaps = { ["iF"] = "@function.inner", ["aF"] = "@function.outer", ["ic"] = "@class.inner", ["ac"] = "@class.outer" },
                 },
                 move = {
                     enable = true,
