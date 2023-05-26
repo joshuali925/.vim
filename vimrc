@@ -245,12 +245,12 @@ imap <leader>r <Esc><leader>r
 nnoremap <leader>r :execute funcs#get_run_command()<CR>
 nnoremap <C-p> :call plugins#zeef#files()<CR>
 xnoremap <C-p> :call plugins#zeef#files(funcs#get_visual_selection())<CR>
-nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
-xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
+nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=Dracula --plain --color=always {}"')<CR>
+xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=Dracula --plain --color=always {}"')<CR>
 nnoremap <leader>ff :VFind **<Left>
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
 nnoremap <leader>fm :call plugins#zeef#oldfiles()<CR>
-nnoremap <leader>fM :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' ' . g:dot_vim_dir . '/tmp/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^' . expand('%:p') . '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
+nnoremap <leader>fM :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' ' . g:dot_vim_dir . '/tmp/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^' . expand('%:p') . '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=Dracula --plain --color=always {}"')<CR>
 nnoremap <leader>fg :RgRegex<Space>
 xnoremap <leader>fg :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>
 nnoremap <leader>fj :RgRegex \b<C-r>=expand('<cword>')<CR>\b<CR>
@@ -299,7 +299,7 @@ augroup AutoCommands
   autocmd BufEnter * execute g:RooterCmd
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line('$') | execute "normal! g`\"" | endif
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
-  autocmd FileType * setlocal formatoptions=jql
+  autocmd FileType * setlocal formatoptions=rjql
   autocmd FileType json setlocal formatprg=python\ -m\ json.tool
   autocmd FileType help,man nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn:execute 'cd ' . b:netrw_curdir<CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q| nmap <buffer> a %

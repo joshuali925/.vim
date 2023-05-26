@@ -7,7 +7,7 @@ export EDITOR='nvim'
 export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER='\'
-export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top --info=inline'
+export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top --info=inline --scrollbar "▌▐"'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --hidden --exclude=.git --color=always'
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND --no-ignore || true)'"
@@ -92,7 +92,7 @@ alias gdw='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff --word-dif
 alias gf='git fetch'
 alias gfa='git fetch --all --prune'
 alias ggl='git pull origin $(gref)'
-alias gpf='git push fork $(gref)'
+alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork }; git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
 alias glr='git pull --rebase'

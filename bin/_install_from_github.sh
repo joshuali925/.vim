@@ -58,8 +58,8 @@ install-from-github() {
   [ -z "$package" ] && echo "package not found for '$executable' on $PLATFORM $ARCHITECTURE, exiting.." >&2 && return 1
 
   mkdir -p "$HOME/.local/bin"
-  url=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4)
-  [ -z "$url" ] && echo "Unable to get $repo url for $package" >&2 && return 1
+  url=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4) || true
+  [ -z "$url" ] && echo "Unable to find '$package' in results of curl 'https://api.github.com/repos/$repo/releases/latest'" >&2 && return 1
   install-archive-from-url "$url" "$executable" "$extract_flags" "$@"
 }
 

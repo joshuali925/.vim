@@ -3964,6 +3964,7 @@ export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
 export MANROFFOPT='-c'
 
 " =======================================================
+" eyeliner insert mode doesn't always disable highlight, and https://github.com/jinh0/eyeliner.nvim/issues/35
     {
         "akinsho/bufferline.nvim",
         opts = {
@@ -3992,10 +3993,12 @@ export MANROFFOPT='-c'
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
         },
         config = function()
-            require("mini.jump2d").setup({ { mappings = { start_jumping = "" } } })
+            require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
+            require("mini.pairs").setup({ mappings = { [" "] = { action = "open", pair = "  ", neigh_pattern = "[%(%[{][%)%]}]" } } }) -- doesn't support triple quotes
+            require('mini.surround').setup() -- doesn't support closest pair
+            require('mini.splitjoin').setup() -- regex based, doesn't support toggle javascript oneline function
         end,
     },
-" eyeliner insert mode doesn't always disable highlight, and https://github.com/jinh0/eyeliner.nvim/issues/35
 
 " =======================================================
 " tmux load average to percentage
