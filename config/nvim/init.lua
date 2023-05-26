@@ -253,7 +253,7 @@ vim.api.nvim_create_autocmd("BufRead", {
     callback = function() vim.api.nvim_create_autocmd({ "InsertEnter", "BufModifiedSet" }, { buffer = 0, once = true, callback = function(opts) vim.b[opts.buf].bufpersist = 1 end }) end
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
-vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=jql" })
+vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = "nnoremap <buffer> gf :argadd <C-r><C-p><CR>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })

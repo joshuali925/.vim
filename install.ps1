@@ -52,7 +52,7 @@ cmd /c mklink /H %USERPROFILE%\.gitconfig %USERPROFILE%\.vim\config\.gitconfig
 cmd /c mklink /H %USERPROFILE%\.tmux.conf %USERPROFILE%\.vim\config\.tmux.conf
 cmd /c mklink /H %APPDATA%\lazygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
 Copy-Item "$env:USERPROFILE\.vim\config\lfrc" "$env:LOCALAPPDATA\lf\lfrc"
-Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
+Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:USERPROFILE\scoop\apps\windows-terminal\current\settings\settings.json"
 cmd /c "echo set previewer '' >> %LOCALAPPDATA%\lf\lfrc"
 cmd /c "echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc"
 cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.bashrc"

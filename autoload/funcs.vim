@@ -1,11 +1,19 @@
+function! s:f(line, base) abort
+  let idx = match(a:line, '\V' . a:base)
+  if idx == -1
+    return ''
+  endif
+  return strpart(a:line, idx)
+endfunction
 function! funcs#complete_word(findstart, base)
   if a:findstart
     return match(getline('.'), '\S\+\%' . col('.') . 'c')
-  else
-    let words = split(join(getline(1, '$'), "\n"))
-    let matched = len(a:base) ? exists('*matchfuzzy') ? matchfuzzy(words, a:base) : filter(words, 'match(v:val, "\\V" . a:base) != -1') : words
-    return map(matched, '{"word": v:val, "kind": "[WORD]"}')
   endif
+  let lines = getline(1, '$')
+  let words = split(join(lines, "\n"))
+  let matched_words = len(a:base) ? exists('*matchfuzzy') ? matchfuzzy(words, a:base) : filter(words, 'match(v:val, "\\V" . a:base) != -1') : words
+  let matched_suffixes = map(lines, 's:f(v:val, a:base)')
+  return map(matched_words + matched_suffixes, '{"word": v:val, "kind": "[WORD]"}')
 endfunction
 
 function! funcs#simple_complete()

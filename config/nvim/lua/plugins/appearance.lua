@@ -19,7 +19,7 @@ return {
             buftype_exclude = vim.g.qs_buftype_blacklist,
         },
     },
-    { "dstein64/nvim-scrollview", config = true }, -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
+    { "dstein64/nvim-scrollview", opts = { signs_on_startup = { "" } } }, -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
     {
         "uga-rosa/ccc.nvim",
         cmd = "CccHighlighterEnable",

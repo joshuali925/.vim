@@ -100,6 +100,9 @@ function M.init()
                 },
             })
         end,
+        yamlls = function()
+            register_server("yamlls", { settings = { yaml = { keyOrdering = false } } })
+        end,
         lua_ls = function()
             register_server("lua_ls", {
                 settings = {
@@ -181,6 +184,7 @@ function M.init()
     vim.fn.sign_define("DiagnosticSignOther", { text = "󰗡", texthl = "DiagnosticOther", numhl = "DiagnosticOther" })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#666666", bg = vim.api.nvim_get_hl_by_name("Normal", true).background })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "DiagnosticVirtualTextHint" })
+    vim.diagnostic.config({ virtual_text = { prefix = "●" } })
     vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
 end
