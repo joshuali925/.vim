@@ -1,6 +1,7 @@
 # disable win+ctrl+shift+alt office key
 REG ADD HKCU\Software\Classes\ms-officeapp\Shell\Open\Command /t REG_SZ /d rundll32
 
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
 scoop install git
 scoop bucket add extras
@@ -10,7 +11,7 @@ scoop bucket add java
 scoop install openjdk14
 scoop install python
 reg import "$env:USERPROFILE\scoop\apps\python\current\install-pep-514.reg"
-scoop install nodejs@14.20.1
+scoop install nodejs@18.16.0
 npm install yarn -g
 echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"
 

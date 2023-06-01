@@ -23,12 +23,16 @@
   },
   "Curl POST JSON": {
     "prefix": "curl-post",
-    "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} -d \"\\$(jo ${0:key=\"val\"})\""
+    "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:http://localhost:8000} -d '{\"${2:key}\":\"${0:value}\"}'"
+  },
+  "Curl POST JSON jo": {
+    "prefix": "curl-post-jo",
+    "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:http://localhost:8000} -d \"\\$(jo ${0:key=\"val\"})\""
   },
   "Curl POST JSON heredoc": {
     "prefix": "curl-post-heredoc",
     "body": [
-      "curl -X POST -k -H 'Content-Type: application/json' ${1:https://example.com} --data-binary @- << 'EOF'",
+      "curl -X POST -k -H 'Content-Type: application/json' ${1:http://localhost:8000} --data-binary @- << 'EOF'",
       "{",
       "\t${0:\"key\": \"value\"}",
       "}",
@@ -37,7 +41,7 @@
   },
   "Curl POST data from stdin": {
     "prefix": "curl-post-stdin",
-    "body": "curl -X POST -k -H 'Content-Type: application/json' ${0:https://example.com} --data-binary @-"
+    "body": "curl -X POST -k -H 'Content-Type: application/json' ${0:http://localhost:8000} --data-binary @-"
   },
   "Compress and encrypt files": {
     "prefix": "tar-encrypt",

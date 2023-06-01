@@ -18,7 +18,6 @@ elseif has('win32') || has('win32unix')
   let $VIM_SYSTEM_CLIPBOARD=1
 endif
 
-let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100% --color=bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934'
 let &t_ut = ''  " https://github.com/microsoft/terminal/issues/832
 let &t_SI .= "\<Esc>[6 q"  " cursor shape
 let &t_EI .= "\<Esc>[2 q"
@@ -34,10 +33,14 @@ silent! colorscheme ayu
 let g:netrw_dirhistmax = 0
 let g:netrw_banner = 0
 let g:netrw_browse_split = 4
+let g:netrw_preview = 1
+let g:netrw_alto = 0
 let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
 let g:markdown_fenced_languages = [ 'javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c', 'bash=sh' ]
 let g:RooterCmd = 'Grt'
+let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --border=thinblock --preview-window=border-thinblock --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100% ' . (&background == 'dark' ?  '--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532' :  '--color=light,query:238,fg:238,bg:251,bg+:249,gutter:251,border:248,preview-bg:253')
+let g:bat_theme = &background == 'dark' ? 'Dracula' : 'GitHub'
 
 set backspace=eol,start,indent
 set whichwrap=<,>,[,]
@@ -130,10 +133,10 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
-xnoremap af v%va)obo
+xnoremap af v%va)ob
 onoremap <silent> af :normal vaf<CR>
-xnoremap a% iw%
-onoremap <silent> a% :normal va%<CR>
+xnoremap a5 iw%
+onoremap <silent> a5 :normal va5<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -245,19 +248,19 @@ imap <leader>r <Esc><leader>r
 nnoremap <leader>r :execute funcs#get_run_command()<CR>
 nnoremap <C-p> :call plugins#zeef#files()<CR>
 xnoremap <C-p> :call plugins#zeef#files(funcs#get_visual_selection())<CR>
-nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=Dracula --plain --color=always {}"')<CR>
-xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=Dracula --plain --color=always {}"')<CR>
+nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=' . g:bat_theme . ' --plain --color=always {}"')<CR>
+xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=' . g:bat_theme . ' --plain --color=always {}"')<CR>
 nnoremap <leader>ff :VFind **<Left>
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
 nnoremap <leader>fm :call plugins#zeef#oldfiles()<CR>
-nnoremap <leader>fM :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' ' . g:dot_vim_dir . '/tmp/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^' . expand('%:p') . '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=Dracula --plain --color=always {}"')<CR>
+nnoremap <leader>fM :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' ' . g:dot_vim_dir . '/tmp/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^' . expand('%:p') . '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=' . g:bat_theme . ' --plain --color=always {}"')<CR>
 nnoremap <leader>fg :RgRegex<Space>
 xnoremap <leader>fg :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>
 nnoremap <leader>fj :RgRegex \b<C-r>=expand('<cword>')<CR>\b<CR>
 xnoremap <leader>fj :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>
 nnoremap <leader>fu :call plugins#zeef#buffer_tags()<CR>
 nnoremap <leader>f/ :call plugins#zeef#buffer_lines()<CR>
-nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=Dracula --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"')<CR>
+nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=' . g:bat_theme . ' --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"')<CR>
 nnoremap <leader>ft :call plugins#zeef#filetype()<CR>
 nnoremap <leader>fT :call <SID>EditCallback('filetypes')<CR>
 nnoremap <leader>fy :registers<CR>:normal! "p<Left>
@@ -307,6 +310,7 @@ augroup AutoCommands
 augroup END
 
 command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
+command! CountSearch %s///gn
 command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute 'normal! ``'
 command! ShowHighlightGroups echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=' . &filetype . ' | read ++edit # | 0d_ | diffthis'
@@ -334,7 +338,9 @@ function! s:Oldfiles()
   set errorformat=%f
   cgetexpr plugins#zeef#filter_oldfiles()
   let &errorformat = saved_errorformat
+  let bufnr = bufnr('%')
   copen
+  execute 'nnoremap <buffer> <CR> <CR>:bwipeout ' . bufnr . '<bar>cclose<CR>'
 endfunction
 function! s:ToggleQuickfix()
   for i in range(1, winnr('$'))

@@ -7,7 +7,7 @@
 " commit: 195659ef40594dde249988622f50dde32ffd9007
 
 " Internal state {{{
-let s:has_matchfuzzy = exists('*matchfuzzy')
+let s:use_matchfuzzy = exists('*matchfuzzy')
 let s:use_rg = executable('rg')
 let s:use_find = !s:use_rg && !has('win32') && executable('find')
 let s:use_dir = !s:use_find && has('win32') && executable('dir')
@@ -84,6 +84,13 @@ fun! plugins#zeef#clear()
   let s:match_pos_stack = []
   let s:filter = ''
   return 0
+endf
+
+fun! plugins#zeef#toggle_fuzzy()
+  if exists('*matchfuzzy')
+    let s:use_matchfuzzy = 1 - s:use_matchfuzzy
+    call plugins#zeef#clear()
+  endif
 endf
 
 fun! plugins#zeef#close(action)
@@ -235,6 +242,7 @@ let s:default_keymap = extend({
       \ "\<c-x>":   function('plugins#zeef#accept_split'),
       \ "\<c-v>":   function('plugins#zeef#accept_vsplit'),
       \ "\<c-t>":   function('plugins#zeef#accept_tabnew'),
+      \ "\<c-f>":   function('plugins#zeef#toggle_fuzzy'),
       \ }, get(g:, "zeef_keymap", {}))
 " }}}
 " Main interface {{{
@@ -242,7 +250,7 @@ let s:default_keymap = extend({
 fun! s:redraw(prompt, match_positions)
   call matchadd('Comment', '\(\s*\d\+:\)\?\zs.*[/\\]\ze.*$') " Regex taken from habamax/vim-select
   if !empty(s:filter)
-    if !s:has_matchfuzzy
+    if !s:use_matchfuzzy
       call matchadd('ZeefMatch', '\c' . s:Regexp(s:filter))
     elseif s:ch >=# 0x20
       call add(s:match_pos_stack, flatten(map(a:match_positions, {line, cols -> map(cols, {_, col -> [line + 1, col + 1]})}), 1))
@@ -258,7 +266,7 @@ fun! s:redraw(prompt, match_positions)
 endf
 
 fun! plugins#zeef#statusline()
-  return '%#ZeefName# [' . s:label . '] %* %l of %L'
+  return '%#ZeefName# [' . s:label . ']' . (s:use_matchfuzzy ? '[Fuzzy]' : '') . ' %* %l of %L'
         \ . (empty(s:result) ? '' : printf(" (%d selected)", len(s:result)))
 endf
 
@@ -342,7 +350,7 @@ fun! plugins#zeef#open(items, callback, label, ...) abort
       endif
       let l:seq_old = get(undotree(), 'seq_cur', 0)
       try
-        if s:has_matchfuzzy
+        if s:use_matchfuzzy
           let [l:match_results, l:match_positions, l:scores] = matchfuzzypos(a:items, s:filter)
           %d _ | call setline(1, l:match_results)
         else

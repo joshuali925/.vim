@@ -5,7 +5,6 @@ function! fpc#init() abort
   let g:fpc_max_matches = get(g:, 'fpc_max_matches', 50)
   let g:fpc_max_file_size = get(g:, 'fpc_max_file_size', 500000)  " 500KB
   let g:fpc_use_all_buffers = get(g:, 'fpc_use_all_buffers', 1)
-  let g:fpc_use_cache = get(g:, 'fpc_use_cache', 1)
   let g:fpc_force_refresh_menu = get(g:, 'fpc_force_refresh_menu', 1)
   let g:fpc_select_first_match = get(g:, 'fpc_select_first_match', 1)  " use noinsert instead of noselect if available
   let g:fpc_omni_enabled_ft = get(g:, 'fpc_omni_enabled_ft', {'python': 1, 'javascript': 1})
@@ -62,9 +61,7 @@ function! s:OnBufEnter() abort
   augroup FpcEvents
     autocmd! * <buffer>
     autocmd TextChangedI <buffer> call s:DoCompletion()
-    if g:fpc_use_cache == 0
-      autocmd BufLeave <buffer> call s:RefreshBufWords({'type': 0})
-    endif
+    autocmd InsertEnter <buffer> call s:RefreshBufWords({'type': 0})
     if g:fpc_force_refresh_menu
       autocmd InsertCharPre <buffer> if pumvisible() && !s:omni_info.on | call feedkeys("\<C-e>", 'in') | endif
     endif
@@ -122,7 +119,7 @@ function! s:DoCompletion() abort
   endif
 
   if s:prev_base_start != base_start || s:prev_line != line
-    call s:RefreshBufWords({'type': g:fpc_use_cache, 'line': line, 'col': base_start - 2})
+    call s:RefreshBufWords({'type': 1, 'line': line, 'col': base_start - 2})
     let s:prev_line = line
     let s:prev_base_start = base_start
     let s:prev_base = '-'  " reset s:prev_base to disable cache on next match because word list is refreshed

@@ -57,10 +57,10 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
-xnoremap af v%va)obo
+xnoremap af v%va)ob
 onoremap <silent> af :normal vaf<CR>
-xnoremap a% iw%
-onoremap <silent> a% :normal va%<CR>
+xnoremap a5 iw%
+onoremap <silent> a5 :normal va5<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -171,6 +171,7 @@ nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', 
 
 nnoremap Z[ :call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
 nnoremap Z] :call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
+nnoremap ZX :call VSCodeNotify('workbench.action.closeOtherEditors')<CR>
 nnoremap [g :call VSCodeNotify('workbench.action.editor.previousChange')<CR>
 nnoremap ]g :call VSCodeNotify('workbench.action.editor.nextChange')<CR>
 nnoremap [a :call VSCodeNotify('editor.action.marker.prev')<CR>

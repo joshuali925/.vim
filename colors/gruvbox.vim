@@ -15,7 +15,7 @@ hi Directory term=bold ctermfg=142 guifg=#a9b665
 hi VertSplit term=reverse ctermfg=239 guifg=#5a524c
 hi Folded term=standout ctermfg=245 ctermbg=236 guifg=#928374 guibg=#32302f
 hi FoldColumn term=standout ctermfg=243 ctermbg=236 guifg=#7c6f64 guibg=#32302f
-hi IncSearch term=reverse ctermfg=235 ctermbg=167 guifg=#282828 guibg=#ea6962
+hi IncSearch term=reverse ctermfg=238 ctermbg=167 guifg=#564437 guibg=#ea6962
 hi LineNr cterm=none ctermfg=243 gui=none guifg=#7c6f64
 hi CursorLineNr cterm=none ctermfg=246 ctermbg=236 gui=none guifg=#a89984 guibg=#32302f
 hi MatchParen cterm=underline ctermbg=237 gui=underline guibg=#45403d
@@ -66,6 +66,7 @@ hi markdownItalic cterm=italic gui=italic
 " editor color
 hi link Whitespace SpecialKey
 hi link netrwTreeBar Comment
+hi link CurSearch IncSearch
 
 " syntax
 hi link Define Statement

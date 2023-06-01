@@ -24,3 +24,4 @@ nnoremap <C-c> :nohlsearch<CR>
 autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
 
 command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
+command! CountSearch %s///gn

@@ -12,16 +12,16 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/in
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"
 ```
 
-without downloading external binaries
+Without downloading external binaries
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)" -- --no-binary-downloads
 ```
 
 <details>
-<summary>without downloading anything</summary>
+<summary>Without downloading anything</summary>
 
-copy base64 on local machine from github
+Copy base64 on local machine from github
 
 ```bash
 curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C /tmp --exclude=bin/busybox --exclude=config/backup.vim --exclude=config/surfingkeys.js --exclude=config/karabiner.json --exclude=config/nvim
@@ -35,7 +35,7 @@ or copy from local ~/.vim directory
 echo "mkdir -p ~/.vim; base64 -d <<<$(cd ~/.vim > /dev/null 2>&1; git ls-files -- ':!bin/busybox' ':!config/backup.vim' ':!config/surfingkeys.js' ':!config/karabiner.json' ':!config/nvim' | tar cJf - -T - | base64 | tr -d '\r\n') | tar xvJ -C \"\$HOME/.vim\" && ~/.vim/bin/bashrc --no-binary-downloads" | pbcopy
 ```
 
-paste and run in target machine
+paste and run in target machine. To transfer through ssh, change `pbcopy` to `ssh <host> bash`.
 
 </details>
 
@@ -55,7 +55,7 @@ irm https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.ps1 | iex
 
 ### Mac OS
 
-- configs
+- Configs
 
 ```
 Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: command-option-t

@@ -177,9 +177,6 @@ return {
                     git_branches = { mappings = { i = { ["<C-e>"] = git_diff_ref } } },
                     git_commits = { mappings = { i = { ["<C-e>"] = git_diff_ref } } },
                 },
-                extensions = {
-                    fzf = { fuzzy = true, override_generic_sorter = true, override_file_sorter = true, case_mode = "smart_case" },
-                },
             })
             require("telescope").load_extension("fzf")
         end,
@@ -302,7 +299,7 @@ return {
                 { "Calculate line &=", [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]], "Calculate expression from previous '=' or current line" },
                 { "--", "" },
                 { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
-                { "Cou&nt occurrences", [[echo searchcount({'maxcount': 0})]], "Count occurrences of current search pattern (:%s/pattern//gn also works)" },
+                { "Cou&nt search", [[echo searchcount({'maxcount': 0})]], "Count occurrences of current search pattern (:%s/pattern//gn also works)" },
                 { "&Yank search matches", [[let @x = '' | %s//\=setreg('X', submatch(0), 'V')/gn | let @" = @x | let @x = '']], "Copy all strings matching current search pattern" },
                 { "Search non-ascii", [[let @/ = '[^\d0-\d127]' | set hlsearch]], [[Search all non-ascii characters, in command line: rg '[^\x00-\x7F]']] },
                 { "Search for red '&!'", [[RgNoRegex ❗]], [[Search for '❗' symbol]] },

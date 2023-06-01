@@ -71,6 +71,7 @@ hi markdownItalic guifg=#d19a66 ctermfg=173 gui=bold cterm=bold
 " editor color
 hi link Whitespace SpecialKey
 hi link netrwTreeBar Comment
+hi link CurSearch IncSearch
 
 " syntax
 hi link Define Statement
