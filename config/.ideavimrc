@@ -61,14 +61,14 @@ nnoremap dil v^og_d
 nnoremap yil v^og_y
 nnoremap <leader>yil v^og_"+y
 xnoremap al 0o$
-xnoremap af v%va)obo
+xnoremap af v%va)ob
 nnoremap caf %va)obc
 nnoremap daf %va)obd
 nnoremap yaf %va)oby
-xnoremap a% iw%
-nnoremap ca% viw%c
-nnoremap da% viw%d
-nnoremap ya% viw%y
+xnoremap a5 iw%
+nnoremap ca5 viw%c
+nnoremap da5 viw%d
+nnoremap ya5 viw%y
 nnoremap <leader>yae vGoggV"+y
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)
@@ -144,6 +144,7 @@ nmap <leader>tt <Action>(Terminal.OpenInTerminal)
 nmap ZH <Action>(HideActiveWindow)
 nmap Z[ <Action>(CloseAllToTheLeft)
 nmap Z] <Action>(CloseAllToTheRight)
+nmap ZX <Action>(CloseAllEditorsButActive)
 nmap [g <Action>(VcsShowPrevChangeMarker)
 nmap ]g <Action>(VcsShowNextChangeMarker)
 nmap [a <Action>(GotoPreviousError)

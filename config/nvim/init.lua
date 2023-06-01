@@ -8,6 +8,9 @@ vim.g.mapleader = ";"              -- lua/lsp.lua          plugins/lang.lua
 vim.g.maplocalleader = "|"         -- ginit.vim            plugins/git.lua
 vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/editing.lua
 vim.g.netrw_banner = 0
+vim.g.netrw_browse_split = 4
+vim.g.netrw_preview = 1
+vim.g.netrw_alto = 0
 vim.g.netrw_liststyle = 3
 vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
 vim.o.whichwrap = "<,>,[,]"
@@ -79,10 +82,10 @@ vim.keymap.set("x", "al", "0o$")
 vim.keymap.set("o", "al", "<Cmd>normal val<CR>")
 vim.keymap.set("x", "ae", "GoggV")
 vim.keymap.set("o", "ae", "<Cmd>normal vae<CR>")
-vim.keymap.set("x", "af", "v%va)obo")
+vim.keymap.set("x", "af", "v%va)ob")
 vim.keymap.set("o", "af", "<Cmd>normal vaf<CR>")
-vim.keymap.set("x", "a%", "iw%")
-vim.keymap.set("o", "a%", "<Cmd>normal va%<CR>")
+vim.keymap.set("x", "a5", "iw%")
+vim.keymap.set("o", "a5", "<Cmd>normal va5<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })

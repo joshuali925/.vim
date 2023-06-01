@@ -1,6 +1,6 @@
 source ~/.vim/config/z.sh
-source ~/.vim/config/colors-icons.sh  # LS_COLORS and LF_ICONS
-[ -s "$HOME/.asdf/asdf.sh" ] && ASDF_DIR=$HOME/.asdf source "$HOME/.asdf/asdf.sh"
+source ~/.vim/config/dircolors-lficons.sh  # LS_COLORS and LF_ICONS
+[ -s "$HOME/.asdf/asdf.sh" ] && ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR='nvim'
@@ -48,8 +48,10 @@ alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vlf='\vim +Explore'
 alias vim='$EDITOR'
+alias .env='env $(grep -v "^#" .env | xargs)'
 alias venv='deactivate 2> /dev/null; [ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
 alias gvenv='[ ! -d "$HOME/.local/lib/venv" ] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
+alias gnpm='npm --prefix ~/.local/lib/node-packages'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
 alias lzd='lazydocker'
@@ -73,11 +75,12 @@ alias gaa='git add --all'
 alias gb='git branch'
 alias gba='git branch -vv --sort=-committerdate -a'
 alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(HEAD)%(color:yellow)%(refname:short)|%(color:green)%(committerdate:relative)|%(color:red)%(objectname:short)%(color:reset) - %(subject) %(color:bold blue)<%(authorname)>%(color:reset)" --color | column -ts"|"'
-alias gc!='git commit -v --amend'
-alias gcs='git commit --signoff -m'
-alias gcs!='git commit --signoff --amend'
+alias gc!='gc --amend'
+alias gcs='gc --signoff'
+alias gcs!='gc --signoff --amend'
 alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcf='git config --list'
+alias gcl='git clone --filter=blob:none'
 alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
 alias gcp='git cherry-pick -x'
@@ -90,7 +93,7 @@ alias gdd='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
 alias gdf='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff'
 alias gdw='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff --word-diff=color --ignore-all-space'
 alias gf='git fetch'
-alias gfa='git fetch --all --prune'
+alias gfa='git remote | xargs -L1 git fetch --filter=blob:none --prune'
 alias ggl='git pull origin $(gref)'
 alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork }; git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'

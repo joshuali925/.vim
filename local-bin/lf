@@ -1,2 +1,6 @@
 #!/usr/bin/env bash
-exec vim +'execute "cd " . $PWD' +Explore
+target=$(realpath -s "${*:-$PWD}")
+if [ -d "$target" ]; then
+  exec vim +"cd $target" +Explore
+fi
+exec vim "$target"

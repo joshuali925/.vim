@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NODE_VERSION=14.21.3
+NODE_VERSION=18.16.0
 JDK_VERSION=adoptopenjdk-17.0.7+7
 BACKUP_DIR=$HOME/config-backup
 
@@ -122,11 +122,10 @@ install_development_tools() {
     log 'Disabled ApplePressAndHoldEnabled to support key repeats'
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew update && brew install --cask wezterm rectangle maccy karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
+    # brew update && brew install --cask wezterm rectangle maccy snipaste karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
-    # snipaste: https://www.snipaste.com/download.html
     # mousefix: https://mousefix.org
     # Orion: https://browser.kagi.com
     # coconutBattery: https://www.coconut-flavour.com/coconutbattery
@@ -236,11 +235,10 @@ install_node() {
   asdf install nodejs "$NODE_VERSION"
   asdf global nodejs "$NODE_VERSION"
   log 'Installing node packages..'
-  mkdir -p ~/.local/lib/node-packages && pushd ~/.local/lib/node-packages
-  [ ! -f package.json ] && echo '{}' >> package.json
-  npm install --cache npm-temp-cache yarn || true
-  rm -rf npm-temp-cache
-  popd
+  mkdir -p ~/.local/lib/node-packages
+  [ ! -f "$HOME/.local/lib/node-packages/package.json" ] && echo '{}' >> "$HOME/.local/lib/node-packages/package.json"
+  npm install --cache "$HOME/.local/lib/node-packages/npm-temp-cache" --prefix "$HOME/.local/lib/node-packages" yarn || true
+  rm -rf "$HOME/.local/lib/node-packages/npm-temp-cache"
   echo
 }
 
