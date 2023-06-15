@@ -12,11 +12,11 @@ M.theme_list = {
     [-5] = "catppuccin",
     [-6] = "nightfox.nvim",
     [0] = "tokyonight.nvim",
-    [1] = "github-nvim-theme",
-    [2] = "visual_studio_code",
-    [3] = "neovim-ayu",
-    [4] = "catppuccin",
-    [5] = "nightfox.nvim",
+    [1] = "nightfox.nvim",
+    [2] = "github-nvim-theme",
+    [3] = "visual_studio_code",
+    [4] = "neovim-ayu",
+    [5] = "catppuccin",
 }
 M.theme = M.theme_list[theme_index]
 

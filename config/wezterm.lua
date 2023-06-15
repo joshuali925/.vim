@@ -30,6 +30,9 @@ if wezterm.gui then
     table.insert(search_mode, { key = "w", mods = "CTRL", action = wezterm.action { CopyMode = "ClearPattern" } })
 end
 
+local tokyonight = wezterm.color.get_builtin_schemes()["tokyonight_storm"]
+tokyonight.brights[1] = "#717993"
+
 return {
     use_ime = true,
     font = wezterm.font("JetBrainsMono Nerd Font"),
@@ -50,27 +53,9 @@ return {
     audible_bell = "Disabled",
     exit_behavior = "Close",
     window_padding = { left = 0, right = 0, top = 0, bottom = 0 },
-    -- color_scheme = "AtomOneLight",
-    colors = {
-        -- derived from OneHalfDark
-        foreground = "#dcdfe4",
-        background = "#35353b",
-        cursor_bg = "#a3b3cc",
-        cursor_border = "#a3b3cc",
-        cursor_fg = "#dcdfe4",
-        selection_bg = "#474e5d",
-        selection_fg = "#dcdfe4",
-        ansi = { "#000000", "#e06c75", "#98c379", "#e5c07b", "#61afef", "#c678dd", "#56b6c2", "#dcdfe4" },
-        brights = { "#7a7a7a", "#e06c75", "#98c379", "#e5c07b", "#61afef", "#c678dd", "#56b6c2", "#dcdfe4" },
-        tab_bar = {
-            background = "#0b0022",
-            active_tab = { bg_color = "#202022", fg_color = "#c0c0c0" },
-            inactive_tab = { bg_color = "#101012", fg_color = "#808080" },
-            inactive_tab_hover = { bg_color = "#1b1032", fg_color = "#808080" },
-            new_tab = { bg_color = "#1b1032", fg_color = "#808080" },
-            new_tab_hover = { bg_color = "#1b1032", fg_color = "#808080" },
-        },
-    },
+    color_schemes = { tokyonight = tokyonight },
+    -- color_scheme = "Catppuccin Latte",
+    color_scheme = "tokyonight",
     keys = {
         { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
         { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = true }) },

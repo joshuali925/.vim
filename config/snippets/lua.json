@@ -6,5 +6,31 @@
       "$0",
       "print(string.format(\"Loop took %0.6f seconds to run\", os.clock() - start_time))"
     ]
+  },
+  "Object to string": {
+    "prefix": "object-to-string",
+    "body": [
+      "local function object_to_string(o)",
+      "\tif type(o) == \"table\" then",
+      "\t\tlocal s = \"{ \"",
+      "\t\tfor k, v in pairs(o) do",
+      "\t\t\ts = s .. '\"' .. k .. '\"' .. \": \" .. object_to_string(v) .. \", \"",
+      "\t\tend",
+      "\t\treturn s .. \" }\"",
+      "\telse",
+      "\t\treturn \"\\\"\" .. tostring(o) .. \"\\\"\"",
+      "\tend",
+      "end"
+    ]
+  },
+  "Write to file": {
+    "prefix": "write-file",
+    "body": [
+      "local file = io.open(\"${1:/tmp/lua.log}\", \"a\")",
+      "if file ~= nil then",
+      "\tfile:write(\"${0:content}\\n\")",
+      "\tfile:close()",
+      "end"
+    ]
   }
 }

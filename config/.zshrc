@@ -32,7 +32,7 @@ zinit depth=1 wait"0" lucid light-mode for \
 
 zinit depth=1 light-mode for \
   atload"!_zsh_autosuggest_start; \
-  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'; \
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'; \
   ZSH_AUTOSUGGEST_STRATEGY=(history completion); \
   ZSH_AUTOSUGGEST_HISTORY_IGNORE=\"?(#c150,)\"; \
   ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=50; \

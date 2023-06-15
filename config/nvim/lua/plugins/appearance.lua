@@ -63,7 +63,7 @@ return {
                         { "filename", file_status = false, path = 1 },
                     },
                     lualine_c = {
-                        function() return " " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") end,
+                        function() return " " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") end,
                         function()
                             local flags = ""
                             if vim.o.readonly then
@@ -95,7 +95,7 @@ return {
                                     if percentage > 70 then
                                         return string.format(" %%<%s %s %s (%s%%%%) ", "", title, msg, percentage)
                                     end
-                                    local spinners = { "", "", "", "" }
+                                    local spinners = { "󰪞 ", "󰪟 ", "󰪠 ", "󰪡 ", "󰪢 ", "󰪣 ", "󰪤 ", "󰪥" }
                                     local ms = math.floor(vim.loop.hrtime() / 120000000) -- 120ms
                                     local frame = ms % #spinners
                                     return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
