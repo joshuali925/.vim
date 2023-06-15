@@ -2,18 +2,24 @@ source ~/.vim/config/z.sh
 source ~/.vim/config/dircolors-lficons.sh  # LS_COLORS and LF_ICONS
 [ -s "$HOME/.asdf/asdf.sh" ] && ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh
 
+LIGHT_THEME=0
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
-export EDITOR='nvim'
+export EDITOR=nvim
 export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
+export BAT_THEME=OneHalfDark
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
-export FZF_COMPLETION_TRIGGER='\'
-export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top --info=inline --scrollbar "▌▐"'
+export FZF_COMPLETION_TRIGGER=\\
+export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top --info=inline --scrollbar "▌▐" --border=thinblock --preview-window=border-thinblock --color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --hidden --exclude=.git --color=always'
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND --no-ignore || true)'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)'"
-export FZF_PREVIEW_COMMAND='bat --color=always --style=numbers --theme=OneHalfDark --line-range :50 {}'
+export FZF_PREVIEW_COMMAND='bat --color=always --style=numbers --line-range :50 {}'
+if [ "$LIGHT_THEME" = 1 ]; then
+  export BAT_THEME=GitHub
+  export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:251,bg+:249,gutter:251,border:248,preview-bg:253"
+fi
 
 alias -- -='cd -'
 alias 1='cd -1'
@@ -466,7 +472,7 @@ rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to
       --bind="enter:execute($EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1} < /dev/tty)" \
       --bind='tab:down,btab:up' \
       --prompt='1. ripgrep> ' --delimiter=: \
-      --preview='bat --color=always --theme=Dracula --highlight-line {2} -- {1}' \
+      --preview='bat --color=always --highlight-line {2} -- {1}' \
       --preview-window='up,40%,border-bottom,+{2}+3/3,~3'
 }
 

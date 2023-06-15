@@ -54,7 +54,7 @@ __fzf_cd__() {
 # customized to show preview
 __fzf_history__() {
   local output opts script
-  opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} -n2..,.. --scheme=history --bind=\\\`:toggle-sort ${FZF_CTRL_R_OPTS-} +m --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --theme=OneHalfDark --color=always --plain' --preview-window='right,40%,wrap' --read0"
+  opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} -n2..,.. --scheme=history --bind=\\\`:toggle-sort ${FZF_CTRL_R_OPTS-} +m --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --color=always --plain' --preview-window='right,40%,wrap' --read0"
   script='BEGIN { getc; $/ = "\n\t"; $HISTCOUNT = $ENV{last_hist} + 1 } s/^[ *]//; print $HISTCOUNT - $. . "\t$_" if !$seen{$_}++'
   output=$(
     builtin fc -lnr -2147483648 |

@@ -22,7 +22,7 @@ let &t_ut = ''  " https://github.com/microsoft/terminal/issues/832
 let &t_SI .= "\<Esc>[6 q"  " cursor shape
 let &t_EI .= "\<Esc>[2 q"
 if has('termguicolors')
-  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum" " https://github.com/vim/vim/issues/3608#issuecomment-438487463
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"  " https://github.com/vim/vim/issues/3608#issuecomment-438487463
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
   set t_Co=256
   set termguicolors
@@ -39,8 +39,7 @@ let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
 let g:markdown_fenced_languages = [ 'javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c', 'bash=sh' ]
 let g:RooterCmd = 'Grt'
-let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --border=thinblock --preview-window=border-thinblock --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100% ' . (&background == 'dark' ?  '--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532' :  '--color=light,query:238,fg:238,bg:251,bg+:249,gutter:251,border:248,preview-bg:253')
-let g:bat_theme = &background == 'dark' ? 'Dracula' : 'GitHub'
+let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100%'
 
 set backspace=eol,start,indent
 set whichwrap=<,>,[,]
@@ -248,19 +247,19 @@ imap <leader>r <Esc><leader>r
 nnoremap <leader>r :execute funcs#get_run_command()<CR>
 nnoremap <C-p> :call plugins#zeef#files()<CR>
 xnoremap <C-p> :call plugins#zeef#files(funcs#get_visual_selection())<CR>
-nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=' . g:bat_theme . ' --plain --color=always {}"')<CR>
-xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=' . g:bat_theme . ' --plain --color=always {}"')<CR>
+nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
+xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat -plain --color=always {}"')<CR>
 nnoremap <leader>ff :VFind **<Left>
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
 nnoremap <leader>fm :call plugins#zeef#oldfiles()<CR>
-nnoremap <leader>fM :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' ' . g:dot_vim_dir . '/tmp/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^' . expand('%:p') . '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --theme=' . g:bat_theme . ' --plain --color=always {}"')<CR>
+nnoremap <leader>fM :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' ' . g:dot_vim_dir . '/tmp/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^' . expand('%:p') . '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
 nnoremap <leader>fg :RgRegex<Space>
 xnoremap <leader>fg :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>
 nnoremap <leader>fj :RgRegex \b<C-r>=expand('<cword>')<CR>\b<CR>
 xnoremap <leader>fj :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>
 nnoremap <leader>fu :call plugins#zeef#buffer_tags()<CR>
 nnoremap <leader>f/ :call plugins#zeef#buffer_lines()<CR>
-nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --theme=' . g:bat_theme . ' --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"')<CR>
+nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"')<CR>
 nnoremap <leader>ft :call plugins#zeef#filetype()<CR>
 nnoremap <leader>fT :call <SID>EditCallback('filetypes')<CR>
 nnoremap <leader>fy :registers<CR>:normal! "p<Left>

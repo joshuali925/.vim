@@ -6,7 +6,7 @@ pager() {
   if [ "$(wc -c < "$1")" -gt 2097152 ]; then # 2MB
     less -RiM "$1"
   else
-    bat --color=always --theme=OneHalfDark $BAT_OPTS "$1"
+    bat --color=always $BAT_OPTS "$1"
   fi
 }
 
