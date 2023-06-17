@@ -4,7 +4,7 @@
     "body": ["console.log('DEBUGGING ❗$0:', $0)"]
   },
   "Log stringify": {
-    "prefix": "cls",
+    "prefix": "clj",
     "body": ["console.log('DEBUGGING ❗$0:\\n' + JSON.stringify($0, null, 2));"]
   },
   "Logger": {

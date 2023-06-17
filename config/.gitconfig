@@ -29,11 +29,11 @@
 [core]
 	; pager = less -RiMXF
 	; pager = diff-so-fancy | less -RiMXF
-	pager = delta --line-numbers --navigate
+	pager = delta --line-numbers --navigate --features "${DELTA_THEME:-dark-theme}"
 
 [interactive]
 	; diffFilter = diff-so-fancy --patch
-	diffFilter = delta --line-numbers
+	diffFilter = delta --line-numbers --features "${DELTA_THEME:-dark-theme}"
 
 [fetch]
 	prune = true
@@ -46,7 +46,7 @@
 	tool = vimdiff
 
 [diff]
-	colorMoved = default
+	; colorMoved = default
 
 [rerere]
 	enabled = true
@@ -68,7 +68,6 @@
 	stripLeadingSymbols = false
 
 [delta]
-	syntax-theme = TwoDark
 	hunk-header-style = line-number syntax bold
 	hunk-header-line-number-style = white
 	hunk-header-decoration-style = "#4b5263" box
@@ -77,4 +76,12 @@
 	line-numbers-zero-style = "#4b5263"
 	line-numbers-left-format = "{nm:^4} "
 	line-numbers-right-format = "{np:^4} "
-	map-styles = bold purple => syntax "#330f29", bold blue => syntax "#271344", bold cyan => syntax "#0d3531", bold yellow => syntax "#222f14"
+
+[delta "light-theme"]
+	light = true
+	syntax-theme = GitHub
+
+[delta "dark-theme"]
+	light = false
+	syntax-theme = ansi
+	map-styles = bold purple => syntax "#330f29", bold blue => syntax "#271344", bold cyan => syntax "#0d3531", bold yellow => syntax "#222f14"  ; for colorMoved

@@ -3999,6 +3999,16 @@ export MANROFFOPT='-c'
             require('mini.splitjoin').setup() -- regex based, doesn't support toggle javascript oneline function
         end,
     },
+" https://github.com/pmizio/typescript-tools.nvim
+            {
+                "pmizio/typescript-tools.nvim",
+                dependencies = { "nvim-lua/plenary.nvim" },
+                opts = {
+                    settings = {
+                        init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
+                    },
+                },
+            },
 
 " =======================================================
 " tmux load average to percentage

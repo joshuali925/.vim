@@ -1,5 +1,6 @@
 -- icon: https://raw.githubusercontent.com/DinkDonk/kitty-icon/HEAD/kitty-dark.png
 local wezterm = require("wezterm")
+local light_theme = false
 
 -- wezterm.on("update-right-status", function(window, pane)
 --     local date = wezterm.strftime("%a %m/%d %I:%M %p")
@@ -54,8 +55,7 @@ return {
     exit_behavior = "Close",
     window_padding = { left = 0, right = 0, top = 0, bottom = 0 },
     color_schemes = { tokyonight = tokyonight },
-    -- color_scheme = "Catppuccin Latte",
-    color_scheme = "tokyonight",
+    color_scheme = light_theme and "Catppuccin Latte" or "tokyonight",
     keys = {
         { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
         { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = true }) },
@@ -70,4 +70,5 @@ return {
         { mods = "CTRL", key = "q", action = wezterm.action({ SendString = "\x11" }) }, -- https://github.com/wez/wezterm/issues/2630
     },
     key_tables = { search_mode = search_mode },
+    set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" },
 }

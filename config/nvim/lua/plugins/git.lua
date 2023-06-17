@@ -8,14 +8,13 @@ return {
     },
     {
         "lewis6991/gitsigns.nvim",
+        keys = {
+            { "[g", "<Cmd>lua require('gitsigns').prev_hunk()<CR>" },
+            { "]g", "<Cmd>lua require('gitsigns').next_hunk()<CR>" },
+            { "ig", ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
+        },
         opts = {
             signs = { add = { text = "▎" }, change = { text = "░" }, delete = { text = "▏" }, topdelete = { text = "▔" }, changedelete = { text = "▒" } },
-            keymaps = {
-                ["n [g"] = "<Cmd>lua require('gitsigns').prev_hunk()<CR>",
-                ["n ]g"] = "<Cmd>lua require('gitsigns').next_hunk()<CR>",
-                ["o ig"] = ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>",
-                ["x ig"] = ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>",
-            },
             update_debounce = 250,
             sign_priority = 11, -- higher priority than diagnostic signs
         },

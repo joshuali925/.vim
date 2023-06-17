@@ -15,7 +15,7 @@ return {
         dependencies = {
             "williamboman/mason-lspconfig.nvim",
             "neovim/nvim-lspconfig",
-            "jose-elias-alvarez/typescript.nvim",
+            "jose-elias-alvarez/typescript.nvim", -- TODO https://github.com/pmizio/typescript-tools.nvim
             "jose-elias-alvarez/null-ls.nvim",
             {
                 "glepnir/lspsaga.nvim",

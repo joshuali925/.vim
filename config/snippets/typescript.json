@@ -38,6 +38,12 @@
       "set${1/(.*)/${1:/capitalize}/}: React.Dispatch<React.SetStateAction<$0>>;"
     ]
   },
+  "Filter not undefined": {
+    "prefix": ".defined",
+    "body": [
+      ".filter(<T,>(v: T | null | undefined): v is T => v !== null && v !== undefined)"
+    ]
+  },
   "UseFetchResources": {
     "prefix": "useFetchResources",
     "body": [
