@@ -105,7 +105,7 @@ install_development_tools() {
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils
-    echo -e "export HOMEBREW_NO_AUTO_UPDATE=1\nexport PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
+    echo -e "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
     brew install grep && ln -s "$(which ggrep)" ~/.local/bin/grep
     brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
     brew install findutils && ln -s "$(which gxargs)" ~/.local/bin/xargs
@@ -122,14 +122,14 @@ install_development_tools() {
     log 'Disabled ApplePressAndHoldEnabled to support key repeats'
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew update && brew install --cask wezterm rectangle maccy snipaste karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
+    # brew install --cask wezterm rectangle maccy snipaste karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
     # mousefix: https://mousefix.org
     # Orion: https://browser.kagi.com
     # coconutBattery: https://www.coconut-flavour.com/coconutbattery
-    # update wezterm: brew update && brew upgrade --cask wezterm --no-quarantine --greedy-latest
+    # update wezterm: brew upgrade --cask wezterm --no-quarantine --greedy-latest
   fi
   install_asdf
 }

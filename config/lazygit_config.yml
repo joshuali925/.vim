@@ -3,14 +3,13 @@ git:
   paging:
     colorArg: always
     # pager: diff-so-fancy
-    pager: delta --dark --paging=never --24-bit-color=always
+    pager: delta --paging=never --24-bit-color=always
 gui:
   showCommandLog: false # @ to toggle
   showFileTree: false # ` to toggle
   showBottomLine: false
   showIcons: true
   theme:
-    lightTheme: false
     activeBorderColor:
       - cyan
       - bold

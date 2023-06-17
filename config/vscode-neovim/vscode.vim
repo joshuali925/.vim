@@ -9,9 +9,6 @@ if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/HEAD/plug.vim
 endif
 call plug#begin('~/.vim/config/vscode-neovim/plugged')
-" change these in plugged/vim-easymotion/autoload/EasyMotion.vim:1159 after installing easymotion to limit line range instead of whole file
-" let win_first_line = max([line('w0'), line('.') - 30]) " visible first line num
-" let win_last_line  = min([line('w$'), line('.') + 30]) " visible last line num
 Plug 'asvetliakov/vim-easymotion'
 Plug 'machakann/vim-swap'
 Plug 'machakann/vim-sandwich'
@@ -197,8 +194,8 @@ nnoremap <leader>a :call VSCodeNotify('editor.action.quickFix')<CR>
 nnoremap <leader>R :call VSCodeNotify('editor.action.rename')<CR>
 nnoremap <leader>d :call VSCodeNotify('references-view.findImplementations')<CR>
 
-nnoremap <leader>to :call VSCodeNotify('workbench.action.terminal.focus')<CR>
-nnoremap <leader>tt :call VSCodeNotify('workbench.action.terminal.newWithCwd', { 'cwd': '${fileDirname}' })<CR>
+nnoremap <leader>to :call VSCodeNotify('workbench.action.terminal.newWithCwd', { 'cwd': '${fileDirname}' })<CR>
+nnoremap <leader>tt :call VSCodeNotify('workbench.action.terminal.focus')<CR>
 nnoremap <leader>te :call VSCodeNotify('workbench.action.terminal.runSelectedText')<CR>
 xnoremap <leader>te <Cmd>call VSCodeNotifyRange('workbench.action.terminal.runSelectedText', line('v'), line('.'), 1)<CR>
 

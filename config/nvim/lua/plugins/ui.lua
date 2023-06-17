@@ -440,6 +440,7 @@ return {
                 { "&Format JSON", [['<,'>Prettier json]], "Use prettier to format selected text as JSON" },
                 { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
                 { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | execute 'S put x' | file base64_decode]], "Use base64 to decode selected text" },
+                { "Generate &snippet", [[let @x = substitute(escape(funcs#get_visual_selection(), '"$'), repeat(' ', &shiftwidth), '\\t', 'g') | execute 'S put x' | execute '%normal! gI"' | execute '%normal! A",' | file snippet_body]], "Generate vscode compatible snippet body from selected text" },
                 { "--", "" },
                 { "OSC &yank", [[lua require("utils").copy_with_osc_yank_script(require("utils").get_visual_selection())]], "Use oscyank script to copy" },
                 { "--", "" },

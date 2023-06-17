@@ -1,8 +1,7 @@
 source ~/.vim/config/z.sh
-source ~/.vim/config/dircolors-lficons.sh  # LS_COLORS and LF_ICONS
+source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS, LF_ICONS
 [ -s "$HOME/.asdf/asdf.sh" ] && ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh
 
-LIGHT_THEME=0
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR=nvim
 export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
@@ -18,7 +17,8 @@ export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+re
 export FZF_PREVIEW_COMMAND='bat --color=always --style=numbers --line-range :50 {}'
 if [ "$LIGHT_THEME" = 1 ]; then
   export BAT_THEME=GitHub
-  export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:251,bg+:249,gutter:251,border:248,preview-bg:253"
+  export DELTA_THEME=light-theme
+  export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:253,bg+:252,gutter:251,border:248,preview-bg:254"
 fi
 
 alias -- -='cd -'
@@ -54,8 +54,8 @@ alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vlf='\vim +Explore'
 alias vim='$EDITOR'
-alias .env='env $(grep -v "^#" .env | xargs)'
-alias venv='deactivate 2> /dev/null; [ ! -d venv ] && python3 -m venv venv; source venv/bin/activate'
+alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
+alias venv='deactivate 2> /dev/null; findup venv >&2 || python3 -m venv venv; source "$(findup venv)/bin/activate"'
 alias gvenv='[ ! -d "$HOME/.local/lib/venv" ] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
 alias gnpm='npm --prefix ~/.local/lib/node-packages'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
@@ -515,6 +515,16 @@ man() {
   fi
 }
 
+findup() {
+  if [ "$#" -ne 1 ]; then echo "Usage: $0 <file>" >&2; return 1; fi
+  local dir=$PWD result
+  while result=$(find "$dir" -maxdepth 1 -name "$@"); [ -z "$result" ] && [ "$dir" != "/" ]; do
+    dir=$(dirname "$dir")
+  done
+  [ -z "$result" ] && return 1
+  realpath -s --relative-to="$PWD" "$result"
+}
+
 envf() {
   local fzftemp
   fzftemp=$(printenv | cut -d= -f1 | fzf --bind='tab:down,btab:up' --query="${1:-}" --preview='printenv {}') && echo "$fzftemp=$(printenv "$fzftemp")"
@@ -571,12 +581,6 @@ set-env() {
   printf 'Write to .bashrc and .zshrc (y/N)? '
   read -r reply
   echo "$cmd" | if [[ "$reply" == [Yy] ]]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
-}
-
-.vim-disable-binary-downloads() {
-  export PATH="${PATH//.vim\/bin/.vim/local-bin}"
-  export FZF_DEFAULT_COMMAND="command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune -o -type f -print -o -type d -print -o -type l -print 2> /dev/null | cut -b3-"
-  export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 }
 
 tldr() {
@@ -737,6 +741,23 @@ os-get() {
   fi
   printf "\033[0;36m%s\033[0m\n" "Downloading from: $url" >&2
   wget "$url"
+}
+
+.vim-update-theme() {
+  if [ -n "$WEZTERM_EXECUTABLE" ]; then
+    grep -q 'local light_theme = false' ~/.vim/config/wezterm.lua && export LIGHT_THEME=1 || export LIGHT_THEME=0
+    sed -i "s/\(local light_theme = \)\(true\|false\)/\1$([ "$LIGHT_THEME" = 1 ] && echo 'true' || echo 'false')/" ~/.vim/config/wezterm.lua
+  else
+    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$(bash -c "read -rs -d \\\\ -p \$'\\e]11;?\\e\\\\' osc11 && printf %q \"\$osc11\" | awk '{match(\$0, /rgb:([0-9a-f]+)\\/([0-9a-f]+)\\/([0-9a-f]+)/, arr); if (strtonum(\"0x\"arr[1]) > 32639 && strtonum(\"0x\"arr[2]) > 32639 && strtonum(\"0x\"arr[3]) > 32639) print \"1\"; else print \"0\"}'")/" ~/.vim/config/colors.sh
+    unset LIGHT_THEME
+  fi
+  source ~/.vim/config/common.sh
+}
+
+.vim-disable-binary-downloads() {
+  export PATH="${PATH//.vim\/bin/.vim/local-bin}"
+  export FZF_DEFAULT_COMMAND="command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune -o -type f -print -o -type d -print -o -type l -print 2> /dev/null | cut -b3-"
+  export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 }
 
 [ -n "$DOT_VIM_LOCAL_BIN" ] && .vim-disable-binary-downloads

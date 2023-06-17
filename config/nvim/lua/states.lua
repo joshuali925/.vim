@@ -1,6 +1,10 @@
 vim.g.theme_index = -1
 -- keep theme_index at the top for substitution
 
+if vim.env.LIGHT_THEME == "1" and vim.g.theme_index < 0 then
+    vim.g.theme_index = 1
+end
+
 vim.g.qs_filetype_blacklist = {
     "help",
     "man",
