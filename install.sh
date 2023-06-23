@@ -270,6 +270,7 @@ install_neovim() {
   log "Installing neovim.."
   link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
   backup "$HOME/.local/lib/nvim"
+  backup "$HOME/.local/bin/nvim"
   nvim --version
   log 'Installed neovim, installing plugins..'
   timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true

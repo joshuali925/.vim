@@ -7,6 +7,29 @@
       "}}>❗TEST</button>"
     ]
   },
+  "Create react context": {
+    "prefix": "create-react-context",
+    "body": [
+      "interface I${1:Context} {",
+      "\t${2:state}: unknown;",
+      "}",
+      "export const ${1:Context} = React.createContext<I${1:Context} | null>(null);",
+      "",
+      "const ${1/(.*)/${1:/camelcase}/}Value: ${1:IContext} = useMemo(",
+      "\t() => ({",
+      "\t\t${2:state},",
+      "\t}),",
+      "\t[${2:state}]",
+      ");",
+      "",
+      "return (",
+      "\t<Context.Provider value={${1/(.*)/${1:/camelcase}/}Value}>",
+      "\t\t$0",
+      "\t</Context.Provider>",
+      ");",
+      ""
+    ]
+  },
   "Improved react functional component": {
     "prefix": "rfc",
     "body": [
@@ -33,7 +56,7 @@
     ]
   },
   "Jest template": {
-    "prefix": "jest",
+    "prefix": "template-jest",
     "body": [
       "/*",
       " * Copyright OpenSearch Contributors",

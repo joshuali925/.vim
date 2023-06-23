@@ -45,7 +45,7 @@
     ]
   },
   "UseFetchResources": {
-    "prefix": "useFetchResources",
+    "prefix": "template-use-fetch-resources",
     "body": [
       "import { Reducer, useEffect, useReducer, useState } from \"react\";",
       "",
@@ -58,7 +58,7 @@
       "type Action<T> =",
       "\t| { type: \"request\" }",
       "\t| { type: \"success\"; payload: State<T>[\"data\"] }",
-      "\t| { type: \"failure\"; error: Required<State<T>[\"error\"]> };",
+      "\t| { type: \"failure\"; error: NonNullable<State<T>[\"error\"]> };",
       "",
       "type GenericReducer<T = any> = Reducer<State<T>, Action<T>>;",
       "const genericReducer: GenericReducer = (state, action) => {",
@@ -90,6 +90,24 @@
       "\t}, [uri, refresh]);",
       "",
       "\treturn { ...state, refresh: () => setRefresh({}) };",
+      "};"
+    ]
+  },
+  "Typed object functions": {
+    "prefix": "template-typed-object-fn",
+    "body": [
+      "/**",
+      " * Unsafe functions that assume object does not contain additional keys and",
+      " * cast result based on object type.",
+      " * Taken from https://news.ycombinator.com/item?id=36457557#36459276.",
+      " */",
+      "export const ObjectTypedFn = {",
+      "\tkeys: Object.keys as <T>(obj: T) => Array<keyof T>,",
+      "\tentries: Object.entries as <T>(o: T) => Array<",
+      "\t\t{",
+      "\t\t\t[K in Exclude<keyof T, undefined>]: [K, T[K]];",
+      "\t\t}[Exclude<keyof T, undefined>]",
+      "\t>,",
       "};"
     ]
   }

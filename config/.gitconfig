@@ -39,7 +39,10 @@
 	prune = true
 
 [pull]
-	rebase = false
+	rebase = true
+
+[rebase]
+	autoStash = true
 
 [merge]
 	; conflictstyle = diff3

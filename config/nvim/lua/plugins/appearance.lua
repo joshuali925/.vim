@@ -147,11 +147,18 @@ return {
                         { "filetype", colored = true, icon_only = true, padding = { left = 1, right = 0 } },
                         { "filename", file_status = false, path = 1, color = "Normal" },
                     },
-                    lualine_x = { { "location", color = "Normal" } },
+                    lualine_x = {
+                        {
+                            function()
+                                return string.format("%s/%s", vim.fn.line("."), vim.fn.line("$"))
+                            end,
+                            color = "Normal",
+                        },
+                    },
                     lualine_y = {},
                     lualine_z = {},
                 },
-                extensions = { "quickfix", "toggleterm" },
+                extensions = { "nvim-tree", "aerial", "fugitive", "mundo" },
             })
         end,
     },
