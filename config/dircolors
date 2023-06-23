@@ -66,10 +66,9 @@ TERM xterm-color
 TERM xterm-debian
 
 # File types
-NORMAL 01;30
+NORMAL 00;38;5;244
 RESET 0
 FILE 00;00
-# FILE 00;38;5;252  # less bright for dark theme
 DIR 01;34
 OTHER_WRITABLE 01;04;34
 STICKY 00;37;44
@@ -137,31 +136,31 @@ CAPABILITY 01;30;41
 .zst 01;33
 
 # Ignores
-*# 01;30
-*dump 01;30
-*history 01;30
-*hst 01;30
-*hsts 01;30
-*ignore 01;30
-*~ 01;30
-.BAK 01;30
-.LOG 01;30
-.OLD 01;30
-.ORIG 01;30
-.bak 01;30
-.cache 01;30
-.class 01;30
-.log 01;30
-.o 01;30
-.old 01;30
-.orig 01;30
-.out 01;30
-.part 01;30
-.pyc 01;30
-.swo 01;30
-.swp 01;30
-.temp 01;30
-.tmp 01;30
+*# 00;38;5;244
+*dump 00;38;5;244
+*history 00;38;5;244
+*hst 00;38;5;244
+*hsts 00;38;5;244
+*ignore 00;38;5;244
+*~ 00;38;5;244
+.BAK 00;38;5;244
+.LOG 00;38;5;244
+.OLD 00;38;5;244
+.ORIG 00;38;5;244
+.bak 00;38;5;244
+.cache 00;38;5;244
+.class 00;38;5;244
+.log 00;38;5;244
+.o 00;38;5;244
+.old 00;38;5;244
+.orig 00;38;5;244
+.out 00;38;5;244
+.part 00;38;5;244
+.pyc 00;38;5;244
+.swo 00;38;5;244
+.swp 00;38;5;244
+.temp 00;38;5;244
+.tmp 00;38;5;244
 
 # Config
 *Dockerfile 00;32

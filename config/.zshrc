@@ -27,7 +27,7 @@ zinit depth=1 wait"0" lucid light-mode for \
   as"program" pick"$ZPFX/bin/git-*" src"etc/git-extras-completion.zsh" make"PREFIX=$ZPFX" tj/git-extras \
   atload"FAST_HIGHLIGHT[chroma-git]='chroma/-ogit.ch'\
   FAST_HIGHLIGHT[chroma-man]=" \
-  atclone"zsh -c 'source $HOME/.zinit/plugins/zdharma-continuum---fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh && fast-theme clean'" \
+  atclone"zsh -c 'source $HOME/.zinit/plugins/zdharma-continuum---fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh && fast-theme base16'" \
   zdharma-continuum/fast-syntax-highlighting
 
 zinit depth=1 light-mode for \

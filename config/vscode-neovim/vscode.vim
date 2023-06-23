@@ -54,10 +54,10 @@ xnoremap al 0o$
 onoremap <silent> al :normal val<CR>
 xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
-xnoremap af v%va)ob
+xnoremap if v%va)ob
+onoremap <silent> if :normal vif<CR>
+xnoremap af iw%
 onoremap <silent> af :normal vaf<CR>
-xnoremap a5 iw%
-onoremap <silent> a5 :normal va5<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -116,8 +116,8 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
-nnoremap _ <C-o>
-nnoremap + <C-i>
+nnoremap _ :call VSCodeNotify('workbench.action.navigateBack')<CR>
+nnoremap + :call VSCodeNotify('workbench.action.navigateForward')<CR>
 nnoremap Q q
 " yankstack needs nmap
 nmap Y y$
@@ -208,15 +208,6 @@ nnoremap zm :call VSCodeNotify('editor.foldAll')<CR>
 nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
 nnoremap zr :call VSCodeNotify('editor.unfoldAll')<CR>
 nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
-
-" nnoremap <C-d> :call VSCodeExtensionCall('scroll', 'halfPage', 'down')<CR>
-nmap <C-d> Lzz
-xnoremap <C-d> 15j
-" nnoremap <C-u> :call VSCodeExtensionCall('scroll', 'halfPage', 'up')<CR>
-nmap <C-u> Hzz
-xnoremap <C-u> 15k
-xnoremap H 10k
-xnoremap L 10j
 
 function! s:RunCode()
   if expand('%') =~ 'test.[tj]sx\?'

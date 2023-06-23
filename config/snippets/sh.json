@@ -184,6 +184,10 @@
     "prefix": "log",
     "body": "printf \"\\033[0;36m%s\\033[0m\\n\" \"$0\" >&2"
   },
+  "Trap": {
+    "prefix": "trap",
+    "body": "trap ${0:cleanup} TERM INT EXIT"
+  },
   "iSO date": {
     "prefix": "date-iso",
     "body": "date -u +'%Y-%m-%dT%H:%M:%SZ'"

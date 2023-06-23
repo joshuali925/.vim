@@ -3964,7 +3964,6 @@ export MANPAGER="sh -c 'col -bx | bat --language=man --plain'"
 export MANROFFOPT='-c'
 
 " =======================================================
-" eyeliner insert mode doesn't always disable highlight, and https://github.com/jinh0/eyeliner.nvim/issues/35
     {
         "akinsho/bufferline.nvim",
         opts = {

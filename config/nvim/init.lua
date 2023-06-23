@@ -82,10 +82,10 @@ vim.keymap.set("x", "al", "0o$")
 vim.keymap.set("o", "al", "<Cmd>normal val<CR>")
 vim.keymap.set("x", "ae", "GoggV")
 vim.keymap.set("o", "ae", "<Cmd>normal vae<CR>")
-vim.keymap.set("x", "af", "v%va)ob")
+vim.keymap.set("x", "if", "v%va)ob")
+vim.keymap.set("o", "if", "<Cmd>normal vif<CR>")
+vim.keymap.set("x", "af", "iw%")
 vim.keymap.set("o", "af", "<Cmd>normal vaf<CR>")
-vim.keymap.set("x", "a5", "iw%")
-vim.keymap.set("o", "a5", "<Cmd>normal va5<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
@@ -231,6 +231,8 @@ vim.keymap.set("c", "<BS>", [[':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[g
 vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
 vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { expr = true })
 vim.cmd("cnoreabbrev print <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua vim.print( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua vim.print( )' ? setcmdpos(15)[-1] : '')<CR>")
+vim.cmd("cnoreabbrev fd <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Fd' : 'fd')<CR>")
+vim.cmd("cnoreabbrev rg <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Rg' : 'rg')<CR>")
 vim.cmd("cnoreabbrev git <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>") -- fugitive
 
 -- autocmds {{{1
@@ -391,7 +393,7 @@ if require("states").small_file then
                 "indent-blankline.nvim",
                 "nvim-scrollview",
                 "gitsigns.nvim",
-                "quick-scope",
+                "eyeliner.nvim",
             }
             require("lazy").load({ plugins = plugins })
         end, 100)

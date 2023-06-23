@@ -144,18 +144,4 @@ function M.toggle_lf()
     lf_term:toggle()
 end
 
-function M.command_without_quickscope(command)
-    if vim.g.qs_enable == 1 then
-        vim.cmd.QuickScopeToggle()
-    end
-    if type(command) == "string" then
-        vim.cmd(command)
-    else
-        command()
-    end
-    if vim.g.qs_enable == 0 then
-        vim.cmd.QuickScopeToggle()
-    end
-end
-
 return M

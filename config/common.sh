@@ -104,7 +104,6 @@ alias ggl='git pull origin $(gref)'
 alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork }; git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
-alias glr='git pull --rebase'
 alias glg='git log --stat'
 alias glgg='git log --graph --pretty=fuller'
 alias glgga='git log --graph --pretty=fuller --all'
@@ -470,7 +469,7 @@ rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to
       --bind="ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($rg_prefix {q} || true)+rebind(change,ctrl-s)" \
       --bind="change:reload:sleep 0.2; $rg_prefix -- {q}" \
       --bind="enter:execute($EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1} < /dev/tty)" \
-      --bind='tab:down,btab:up' \
+      --bind='tab:up,btab:down' \
       --prompt='1. ripgrep> ' --delimiter=: \
       --preview='bat --color=always --highlight-line {2} -- {1}' \
       --preview-window='up,40%,border-bottom,+{2}+3/3,~3'
@@ -748,7 +747,7 @@ os-get() {
     grep -q 'local light_theme = false' ~/.vim/config/wezterm.lua && export LIGHT_THEME=1 || export LIGHT_THEME=0
     sed -i "s/\(local light_theme = \)\(true\|false\)/\1$([ "$LIGHT_THEME" = 1 ] && echo 'true' || echo 'false')/" ~/.vim/config/wezterm.lua
   else
-    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$(bash -c "read -rs -d \\\\ -p \$'\\e]11;?\\e\\\\' osc11 && printf %q \"\$osc11\" | awk '{match(\$0, /rgb:([0-9a-f]+)\\/([0-9a-f]+)\\/([0-9a-f]+)/, arr); if (strtonum(\"0x\"arr[1]) > 32639 && strtonum(\"0x\"arr[2]) > 32639 && strtonum(\"0x\"arr[3]) > 32639) print \"1\"; else print \"0\"}'")/" ~/.vim/config/colors.sh
+    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$(bash -c "[ -n \"\$TMUX\" ] && read -rs -d \\\\ -p \$'\\033Ptmux;\\033\\e]11;?\\e\\\\\\033\\\\' osc11 || read -rs -d \\\\ -p \$'\\e]11;?\\e\\\\' osc11 && printf %q \"\$osc11\" | awk '{match(\$0, /rgb:([0-9a-f]+)\\/([0-9a-f]+)\\/([0-9a-f]+)/, arr); if (strtonum(\"0x\"arr[1]) > 32639 && strtonum(\"0x\"arr[2]) > 32639 && strtonum(\"0x\"arr[3]) > 32639) print \"1\"; else print \"0\"}'")/" ~/.vim/config/colors.sh
     unset LIGHT_THEME
   fi
   source ~/.vim/config/common.sh
