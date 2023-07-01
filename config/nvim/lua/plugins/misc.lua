@@ -43,4 +43,28 @@ return {
             vim.api.nvim_create_user_command("RestNvimPreviewCurl", [[execute "normal \<Plug>RestNvimPreview"]], {})
         end,
     },
+    {
+        "echasnovski/mini.nvim",
+        keys = {
+            { "'", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.single_character) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>e", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.word_start) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>o", "<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0), false)<CR>", mode = { "n", "x", "o" } },
+        },
+        config = function()
+            require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
+            require("mini.files").setup({ mappings = { go_in_plus = "o", reveal_cwd = "<leader>b", show_help = "?", synchronize = "<CR>" } })
+            require("mini.move").setup({ mappings = { left = "", right = "", down = "<C-,>", up = "<C-.>", line_left = "", line_right = "", line_down = "<C-,>", line_up = "<C-.>" } })
+            require("mini.hipatterns").setup({
+                highlighters = {
+                    fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
+                    hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
+                    todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
+                    note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
+                    hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
+                },
+            })
+        end,
+    },
 }

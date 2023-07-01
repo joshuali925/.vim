@@ -3998,6 +3998,37 @@ export MANROFFOPT='-c'
             require('mini.splitjoin').setup() -- regex based, doesn't support toggle javascript oneline function
         end,
     },
+" hop.nvim
+    {
+        "phaazon/hop.nvim",
+        keys = {
+            { "'", "<Cmd>HopChar1<CR>", mode = { "n", "x", "o" } },
+            { "<leader>e", "<Cmd>HopWord<CR>", mode = { "n", "x", "o" } },
+            { "<leader>j", "<Cmd>HopLineAC<CR>", mode = { "n", "x", "o" } },
+            { "<leader>k", "<Cmd>HopLineBC<CR>", mode = { "n", "x", "o" } },
+        },
+        config = function()
+            require("hop").setup()
+            vim.api.nvim_set_hl(0, "HopNextKey", { link = "HopNextKey1" })
+            vim.api.nvim_set_hl(0, "HopNextKey2", { link = "HopNextKey1" })
+        end,
+    },
+" ccc.nvim
+    {
+        "uga-rosa/ccc.nvim",
+        cmd = "CccHighlighterEnable",
+        config = function()
+            local ccc = require("ccc")
+            ccc.setup({ highlighter = { auto_enable = true }, mappings = { ["<Tab>"] = ccc.mapping.toggle_input_mode } })
+        end,
+    },
+                    local ccc_state = require("lazy.core.config").plugins["ccc.nvim"]
+                    if ccc_state and ccc_state._.loaded then
+                        table.insert(content, { "&Color picker", "CccPick", "Open color picker, control: hjkl, 1-9" })
+                        table.insert(content, { "Color convert", "CccConvert", "Convert color between hex, rgb, hsl" })
+                        table.insert(content, { "--", "" })
+                    end
+                { "Enable colori&zer", [[CccHighlighterEnable]], "Enable colorizer" },
 " https://github.com/pmizio/typescript-tools.nvim
             {
                 "pmizio/typescript-tools.nvim",
@@ -4008,7 +4039,21 @@ export MANROFFOPT='-c'
                     },
                 },
             },
+" asyncrun
+    { "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = function() vim.g.asyncrun_open = 12 end },
+  if exists(':AsyncRun')
+    let run_command['python'] = 'AsyncRun -raw python3 "$(VIM_FILEPATH)"'
+    let run_command['javascript'] = 'AsyncRun -raw node "$(VIM_FILEPATH)"'
+    let run_command['typescript'] = 'AsyncRun -raw npx ts-node --esm "$(VIM_FILEPATH)"'
+    let run_command['c'] = 'AsyncRun -raw gcc "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
+    let run_command['cpp'] = 'AsyncRun -raw g++ "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
+    let run_command['java'] = 'AsyncRun -raw javac "$(VIM_FILEPATH)" && java -classpath "$(VIM_FILEDIR)" "$(VIM_FILENOEXT)"'
+    let run_command['html'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
+    let run_command['xhtml'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
 
 " =======================================================
 " tmux load average to percentage
   set -g status-right "#[fg=colour237,bg=colour178,bold] #(uptime | awk -F ', ' -v nproc=$(nproc) '{sub(/.+load average: /,\"\"); for(i=0;i<NF;i++) printf \$i/nproc*100 \"%% \"}')#[fg=colour237,bg=colour117,bold] #(free | awk 'NR==2{printf \"%%.2f%%%%\", 100*$3/$2}') #[fg=colour237,bg=colour114,bold] %m/%d %I:%M %p #[default]"
+
+" niz keyboard simple modifications
+      "simple_modifications": [ { "from": { "key_code": "escape" }, "to": [ { "key_code": "grave_accent_and_tilde" } ] }, { "from": { "key_code": "grave_accent_and_tilde" }, "to": [ { "key_code": "delete_or_backspace" } ] }, { "from": { "key_code": "left_command" }, "to": [ { "key_code": "left_option" } ] }, { "from": { "key_code": "left_option" }, "to": [ { "key_code": "left_command" } ] }, { "from": { "key_code": "right_option" }, "to": [ { "key_code": "right_command" } ] } ]

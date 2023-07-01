@@ -21,6 +21,10 @@
     "prefix": "heredoc-to-file",
     "body": ["tee -a ${1:file} > /dev/null <<EOF", "$0", "EOF"]
   },
+  "Curl JSON header": {
+    "prefix": "header-json",
+    "body": "-H 'Content-Type: application/json'"
+  },
   "Curl POST JSON": {
     "prefix": "curl-post",
     "body": "curl -X POST -k -H 'Content-Type: application/json' ${1:http://localhost:8000} -d '{\"${2:key}\":\"${0:value}\"}'"

@@ -143,7 +143,7 @@ return {
                     goto_previous_end = { ["[]"] = "@function.outer" },
                 },
             },
-            indent = { enable = true, disable = { "python", "java" } },
+            indent = { enable = true },
             context_commentstring = { enable = true, enable_autocmd = false }, -- for nvim-ts-context-commentstring
         },
         config = function(_, opts) require("nvim-treesitter.configs").setup(opts) end,

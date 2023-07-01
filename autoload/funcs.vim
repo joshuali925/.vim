@@ -172,24 +172,22 @@ function! funcs#get_run_command() abort
     return user_command
   endif
   if expand('%') =~ '\.test\.[tj]sx\?'
-    return 'TermExec size=' . max([10, &columns * 1/2]) . " direction=vertical cmd='yarn test " . expand('%') . ' -t ' . funcs#jest_context() . ' --coverage -u' . "'"
+    return 'TermExec size=' . max([10, &columns * 1/2]) . " direction=vertical cmd=' yarn test " . expand('%') . ' -t ' . funcs#jest_context() . ' --coverage -u' . "'"
   endif
   let run_command = {}
   let run_command['vim'] = 'source %'
   let run_command['lua'] = 'luafile %'
-  if exists(':AsyncRun')
-    let run_command['python'] = 'AsyncRun -raw python3 "$(VIM_FILEPATH)"'
-    let run_command['javascript'] = 'AsyncRun -raw node "$(VIM_FILEPATH)"'
-    let run_command['typescript'] = 'AsyncRun -raw npx ts-node --esm "$(VIM_FILEPATH)"'
-    let run_command['c'] = 'AsyncRun -raw gcc "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
-    let run_command['cpp'] = 'AsyncRun -raw g++ "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" -g && "$(VIM_FILEDIR)/$(VIM_FILENOEXT)"'
-    let run_command['java'] = 'AsyncRun -raw javac "$(VIM_FILEPATH)" && java -classpath "$(VIM_FILEDIR)" "$(VIM_FILENOEXT)"'
-    let run_command['html'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
-    let run_command['xhtml'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
+  if exists(':TermExec')
+    let run_command['python'] = "TermExec cmd=' python3 \"%\"'"
+    let run_command['javascript'] = "TermExec cmd=' node \"%\"'"
+    let run_command['typescript'] = "TermExec cmd=' npx ts-node --esm \"%\"'"
+    let run_command['java'] = "TermExec cmd=' javac \"%\" && java -classpath \"%:p:h\" \"%:t:r\"'"
   else
     let run_command['python'] = '!clear; python3 %'
     let run_command['javascript'] = '!clear; node %'
   endif
+  let run_command['html'] = 'silent !open "$(VIM_FILEPATH)"'
+  let run_command['xhtml'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['http'] = 'lua require("rest-nvim").run()'
   let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
   return get(run_command, &filetype, '') . get(b:, 'args', '')

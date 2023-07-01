@@ -21,21 +21,13 @@ return {
     },
     { "dstein64/nvim-scrollview", opts = { signs_max_per_row = 2, signs_column = 1 } }, -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
     {
-        "uga-rosa/ccc.nvim",
-        cmd = "CccHighlighterEnable",
-        config = function()
-            local ccc = require("ccc")
-            ccc.setup({ highlighter = { auto_enable = true }, mappings = { ["<Tab>"] = ccc.mapping.toggle_input_mode } })
-        end,
-    },
-    {
         "akinsho/bufferline.nvim",
         event = "BufEnter", -- VimEnter/UIEnter breaks '+<line>' argument in command line nvim when 'line' is large
         keys = {
             { "<BS>", "<Cmd>BufferLineCyclePrev<CR>" },
             { "\\", "<Cmd>BufferLineCycleNext<CR>" },
-            { "<C-w><BS>", "<Cmd>BufferLineMovePrev<CR><C-w>", remap = true },
-            { "<C-w>\\", "<Cmd>BufferLineMoveNext<CR><C-w>", remap = true },
+            { "<C-w><BS>", ":BufferLineMovePrev<CR><C-w>", remap = true },
+            { "<C-w>\\", ":BufferLineMoveNext<CR><C-w>", remap = true },
             { "Z[", "<Cmd>BufferLineCloseLeft<CR>" },
             { "Z]", "<Cmd>BufferLineCloseRight<CR>" },
         },
@@ -130,7 +122,7 @@ return {
                                 local col = vim.fn.col(".")
                                 return string.format(
                                     "%s %s %s/%s",
-                                    states.untildone_count == 0 and "" or "ﯩ " .. states.untildone_count,
+                                    states.untildone_count == 0 and "" or " " .. states.untildone_count,
                                     col < 10 and " " .. col or col,
                                     vim.fn.line("."),
                                     vim.fn.line("$")

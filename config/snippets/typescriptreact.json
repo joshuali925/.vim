@@ -8,7 +8,7 @@
     ]
   },
   "Create react context": {
-    "prefix": "create-react-context",
+    "prefix": "template-create-context",
     "body": [
       "interface I${1:Context} {",
       "\t${2:state}: unknown;",
@@ -28,6 +28,51 @@
       "\t</Context.Provider>",
       ");",
       ""
+    ]
+  },
+  "Create react reducer with context": {
+    "prefix": "template-create-reducer-context",
+    "body": [
+      "import React, { useContext, useMemo, useReducer } from 'react';",
+      "",
+      "interface ${1:State} {",
+      "\tdata: string;",
+      "}",
+      "",
+      "type $1Action = { type: 'reset' } | { type: 'set'; payload: string };",
+      "",
+      "interface I$1Context {",
+      "\t${1/(.*)/${1:/camelcase}/}: $1;",
+      "\t${1/(.*)/${1:/camelcase}/}Dispatch: React.Dispatch<$1Action>;",
+      "}",
+      "const $1Context = React.createContext<I$1Context | null>(null);",
+      "",
+      "const initialState: $1 = { data: '' };",
+      "",
+      "const ${1/(.*)/${1:/camelcase}/}Reducer: React.Reducer<$1, $1Action> = (state, action) => {",
+      "\tswitch (action.type) {",
+      "\t\tcase 'reset': {",
+      "\t\t\treturn initialState;",
+      "\t\t}",
+      "",
+      "\t\tcase 'set': {",
+      "\t\t\treturn { ...state, data: action.payload };",
+      "\t\t}",
+      "\t}",
+      "};",
+      "",
+      "export const $1Provider: React.FC = (props) => {",
+      "\tconst [${1/(.*)/${1:/camelcase}/}, ${1/(.*)/${1:/camelcase}/}Dispatch] = useReducer(${1/(.*)/${1:/camelcase}/}Reducer, initialState);",
+      "\tconst contextValue: I$1Context = useMemo(() => ({ ${1/(.*)/${1:/camelcase}/}, ${1/(.*)/${1:/camelcase}/}Dispatch }), [",
+      "\t\t${1/(.*)/${1:/camelcase}/},",
+      "\t]);",
+      "",
+      "\treturn (",
+      "\t\t<$1Context.Provider value={contextValue}>{props.children}</$1Context.Provider>",
+      "\t);",
+      "};",
+      "",
+      "export const use$1 = () => useContext($1Context)!;"
     ]
   },
   "Improved react functional component": {

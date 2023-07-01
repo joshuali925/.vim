@@ -40,7 +40,7 @@ return {
             { "<leader>te", "<Cmd>lua require('utils').send_to_toggleterm()<CR>g@" },
             { "<leader>tee", "<Cmd>ToggleTermSendCurrentLine<CR>" },
             { "<leader>te", "<Cmd>ToggleTermSendVisualSelection<CR>", mode = "x" },
-            { "<C-o>", "<Cmd>lua require('utils').toggle_lf()<CR>" },
+            { "<C-o>", "<Cmd>lua require('utils').lf()<CR>" },
         },
         opts = {
             on_open = function(_) vim.cmd.startinsert({ bang = true }) end,
@@ -102,7 +102,8 @@ return {
             { "<C-p>", "<Cmd>lua require('telescope.builtin').find_files()<CR>" },
             { "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = vim.fn['funcs#get_visual_selection']()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
             { "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>" },
-            { "<leader>fs", "<C-p>", remap = true },
+            { "<leader>fs", "<Cmd>lua require('utils').fzf()<CR>" },
+            { "<leader>fs", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
             { "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>" },
             { "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>" },
             { "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers({initial_mode = 'normal', ignore_current_buffer = true, only_cwd = false, sort_mru = true})<CR>" },
@@ -207,8 +208,8 @@ return {
                 theme.button("m", "Find MRU", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>"),
                 theme.button("c", "Edit vimrc", "<Cmd>edit $MYVIMRC<CR>"),
                 theme.button("\\", "Open quickui", "<Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('normal')<CR>"),
-                theme.button("s", "Open Lazy UI", "<Cmd>Lazy<CR>"),
-                theme.button("S", "Open Mason UI", "<Cmd>Mason<CR>"),
+                theme.button("p", "Open Lazy UI", "<Cmd>Lazy<CR>"),
+                theme.button("s", "Open Mason UI", "<Cmd>Mason<CR>"),
                 theme.button("U", "Update packages", "<Cmd>Lazy update<CR>"),
                 theme.button("E", "Load from previous session", "<Cmd>silent SessionLoad<CR>"),
             }
@@ -230,7 +231,6 @@ return {
             })
         end,
     },
-    { "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = function() vim.g.asyncrun_open = 12 end },
     {
         "skywind3000/vim-quickui",
         keys = {
@@ -270,12 +270,6 @@ return {
                         table.insert(content, { "Git conflict remove", "ConflictMarkerNone", "Remove conflict" })
                         table.insert(content, { "--", "" })
                     end
-                    local ccc_state = require("lazy.core.config").plugins["ccc.nvim"]
-                    if ccc_state and ccc_state._.loaded then
-                        table.insert(content, { "&Color picker", "CccPick", "Open color picker, control: hjkl, 1-9" })
-                        table.insert(content, { "Color convert", "CccConvert", "Convert color between hex, rgb, hsl" })
-                        table.insert(content, { "--", "" })
-                    end
                     table.insert(content, { "Built-in d&ocs", [[execute &filetype == "lua" ? "help " . expand('<cword>') : "normal! K"]], "Open vim built in help" })
                     vim.fn["quickui#context#open"](content, { index = vim.g["quickui#context#cursor"] or -1 })
                 end,
@@ -306,7 +300,6 @@ return {
                 { "Search in &buffers", [[execute 'cexpr []' | call feedkeys(":bufdo vimgrepadd //g % | copen\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Search a pattern in all buffers, add to quickfix" },
                 { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
                 { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
-                { "Enable colori&zer", [[CccHighlighterEnable]], "Enable colorizer" },
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },

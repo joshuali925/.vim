@@ -1,21 +1,7 @@
 return {
-    { "jinh0/eyeliner.nvim" },
+    { "unblevable/quick-scope", config = function() vim.g.qs_hi_priority = -1 end },
     { "max397574/better-escape.nvim", event = "InsertEnter", opts = { mapping = { "jk", "kj" }, timeout = 200, clear_empty_lines = true } },
     { "Wansmer/treesj", keys = { { "gS", "<Cmd>TSJSplit<CR>" }, { "gJ", "<Cmd>TSJJoin<CR>" } }, opts = { use_default_keymaps = false, max_join_length = 999 } },
-    {
-        "phaazon/hop.nvim",
-        keys = {
-            { "'", "<Cmd>HopChar1<CR>", mode = { "n", "x", "o" } },
-            { "<leader>e", "<Cmd>HopWord<CR>", mode = { "n", "x", "o" } },
-            { "<leader>j", "<Cmd>HopLineAC<CR>", mode = { "n", "x", "o" } },
-            { "<leader>k", "<Cmd>HopLineBC<CR>", mode = { "n", "x", "o" } },
-        },
-        config = function()
-            require("hop").setup()
-            vim.api.nvim_set_hl(0, "HopNextKey", { link = "HopNextKey1" })
-            vim.api.nvim_set_hl(0, "HopNextKey2", { link = "HopNextKey1" })
-        end,
-    },
     {
         "kylechui/nvim-surround",
         keys = { "y", "c", "d", { "s", mode = "x" }, { "yss", "ysiw", remap = true }, { "yS", "ysg_", remap = true } },

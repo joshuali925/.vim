@@ -393,7 +393,8 @@ if require("states").small_file then
                 "indent-blankline.nvim",
                 "nvim-scrollview",
                 "gitsigns.nvim",
-                "eyeliner.nvim",
+                "quick-scope",
+                "mini.nvim",
             }
             require("lazy").load({ plugins = plugins })
         end, 100)

@@ -91,9 +91,8 @@ alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: /
 alias gco='git checkout'
 alias gcp='git cherry-pick -x'
 alias gd='git diff'
-alias gds='git diff --stat'
+alias gds='echo -e "\e[1;32mStaged\e[0m"; git diff --stat --staged; echo -e "\n\e[1;31mUnstaged\e[0m"; git diff --stat'
 alias gdst='git diff --staged'
-alias gdsts='git diff --stat --staged'
 alias gdt='GIT_EXTERNAL_DIFF=difft git diff'
 alias gdd='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
 alias gdf='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff'
@@ -155,7 +154,7 @@ alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(object
 alias gforest='git foresta --style=10 | \less -RiMXF'
 alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --format=%h)'
 alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply patch.diff && rm patch.diff'
-alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen(%cr)%Creset =} %C(bold black)▏%Creset%s %C(bold blue)<%an>%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
+alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
@@ -742,7 +741,7 @@ os-get() {
   wget "$url"
 }
 
-.vim-update-theme() {
+theme() {  # locally toggles wezterm theme, remotely updates configs to match terminal theme
   if [ -n "$WEZTERM_EXECUTABLE" ]; then
     grep -q 'local light_theme = false' ~/.vim/config/wezterm.lua && export LIGHT_THEME=1 || export LIGHT_THEME=0
     sed -i "s/\(local light_theme = \)\(true\|false\)/\1$([ "$LIGHT_THEME" = 1 ] && echo 'true' || echo 'false')/" ~/.vim/config/wezterm.lua
@@ -765,8 +764,8 @@ os-get() {
 if [[ $OSTYPE = darwin* ]]; then
   alias idea='open -na "IntelliJ IDEA.app" --args'
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
-  alias clear-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
-  alias toggle-dark-theme='automator ~/.vim/config/macToggleDark.wflow'
+  alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
+  alias toggle-system-theme='automator ~/.vim/config/macToggleDark.wflow'
   browser-history() {
     local cols=$((COLUMNS / 3)) sep='{::}' fzftemp fzfprompt
     if [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then

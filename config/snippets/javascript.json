@@ -92,6 +92,16 @@
       "// fs.appendFileSync(`\\${__dirname}/${1:fileName}`, ${0:str});"
     ]
   },
+  "Dirname in esmodule": {
+    "prefix": "__dirname-in-module",
+    "body": [
+      "import path from 'path';",
+      "import { fileURLToPath } from 'url';",
+      "",
+      "const __filename = fileURLToPath(import.meta.url);",
+      "const __dirname = path.dirname(__filename);"
+    ]
+  },
   "Cypress delay": {
     "prefix": "cydelay",
     "body": ["cy.wait(delay);", "$0"]
