@@ -103,6 +103,20 @@ function M.copy_with_osc_yank_script(str)
     vim.notify(message .. "Copied " .. str:len() .. " characters.", vim.log.levels.INFO, { title = "osc52" })
 end
 
+function M.command_without_quickscope(command)
+    if vim.g.qs_enable == 1 then
+        vim.cmd.QuickScopeToggle()
+    end
+    if type(command) == "string" then
+        vim.cmd(command)
+    else
+        command()
+    end
+    if vim.g.qs_enable == 0 then
+        vim.cmd.QuickScopeToggle()
+    end
+end
+
 function M.send_to_toggleterm()
     do_action_over_motion(function(lines)
         local current_window = vim.api.nvim_get_current_win()
@@ -115,33 +129,48 @@ function M.send_to_toggleterm()
     end)
 end
 
-local lf_term, lf_height, lf_width
-function M.toggle_lf()
-    local curr_height = vim.o.lines - 7
-    local curr_width = math.ceil(vim.o.columns * 9 / 10)
-    if lf_term == nil or lf_height ~= curr_height or lf_width ~= curr_width then
-        local lf_selection_path = os.tmpname()
-        lf_term = require("toggleterm.terminal").Terminal:new({
-            cmd = ([[lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path="%s" "%s"]]):format(lf_selection_path, vim.fn.expand("%")),
-            direction = "float",
-            float_opts = { height = curr_height, width = curr_width },
-            on_close = function(_)
-                local handle = io.open(lf_selection_path, "r")
-                if handle ~= nil then
-                    local files = {}
-                    for line in handle:lines() do
-                        table.insert(files, vim.fn.fnameescape(line));
-                    end
-                    handle:close()
-                    os.remove(lf_selection_path)
-                    vim.schedule(function()
-                        vim.cmd.args(files)
-                    end)
+local function term_with_edit_callback(cmd, height, width, border)
+    local selection_path = os.tmpname()
+    return require("toggleterm.terminal").Terminal:new({
+        cmd = cmd:format(vim.fn.fnameescape(selection_path)),
+        direction = "float",
+        float_opts = { height = height, width = width, border = border or "curved" },
+        on_close = function(_)
+            local handle = io.open(selection_path, "r")
+            if handle ~= nil then
+                local files = {}
+                for line in handle:lines() do
+                    table.insert(files, vim.fn.fnameescape(line));
                 end
-            end,
-        })
+                handle:close()
+                os.remove(selection_path)
+                vim.schedule(function()
+                    vim.cmd.args(files)
+                end)
+            end
+        end,
+    })
+end
+
+local lf_term, fzf_term, prev_height, prev_width
+function M.lf()
+    local height = vim.o.lines - 7
+    local width = math.ceil(vim.o.columns * 9 / 10)
+    if lf_term == nil or prev_height ~= height or prev_width ~= width then
+        local cmd = ([[lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path="%s" "%s"]]):format("%s", vim.fn.expand("%"))
+        lf_term = term_with_edit_callback(cmd, height, width)
     end
     lf_term:toggle()
+end
+
+function M.fzf(visual)
+    local height = vim.o.lines - 6
+    local width = math.ceil(vim.o.columns * 9 / 10)
+    if visual or fzf_term == nil or prev_height ~= height or prev_width ~= width then
+        local cmd = ([[%s | FZF_DEFAULT_OPTS="%s %s" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}" ]]):format(vim.env.FZF_CTRL_T_COMMAND, vim.env.FZF_DEFAULT_OPTS .. " --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100%", vim.env.FZF_CTRL_T_OPTS):gsub("`", "\\`"):gsub("%%", "%%%%") .. (visual and "--query " .. M.get_visual_selection() .. " > %s" or "> %s")
+        fzf_term = term_with_edit_callback(cmd, height, width, "none")
+    end
+    fzf_term:toggle()
 end
 
 return M

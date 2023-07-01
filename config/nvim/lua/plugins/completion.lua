@@ -109,7 +109,8 @@ return {
                     ["<C-b>"] = cmp.mapping.scroll_docs(-4),
                     ["<C-d>"] = cmp.mapping.scroll_docs(4),
                     ["<C-Space>"] = cmp.mapping.complete(),
-                    ["<CR>"] = cmp.mapping.confirm(),
+                    ["<CR>"] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace }),
+                    ["<C-y>"] = cmp.mapping.confirm(),
                     ["<C-e>"] = cmp.mapping.abort(),
                     ["<C-k>"] = cmp.mapping(function(fallback)
                         if vim.fn["vsnip#expandable"]() == 1 then

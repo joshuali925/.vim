@@ -7,8 +7,9 @@ git:
 gui:
   showCommandLog: false # @ to toggle
   showFileTree: false # ` to toggle
+  showBranchCommitHash: true
   showBottomLine: false
-  showIcons: true
+  nerdFontsVersion: 3
   theme:
     activeBorderColor:
       - cyan
