@@ -156,7 +156,6 @@ alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --f
 alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply patch.diff && rm patch.diff'
 alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
-d() { [ "$#" -eq 0 ] && dirs -v | head -10 || dirs "$@"; }
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
 
 gc() {
@@ -263,9 +262,20 @@ gh-backport() {
 }
 
 size() {
-  [ "$1" = '--disk-usage' ] && { du -ah --max-depth=1 "${@:2}" | sort -hr; return $?; }
+  [ "$1" = '--on-disk' ] && { du -ah --max-depth=1 "${@:2}" | sort -hr; return $?; }
   [ "$1" = '--subdirs' ] && local args=("${@:2}") || local args=(--max-depth=1 "$@")
   du -ab "${args[@]}" | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
+}
+
+d() {  # show directory stack or download from URL (does not continue download): d [<URL> [output-dir]]
+  if [ "$#" -eq 0 ]; then dirs -v | head -10; return $?; fi
+  if builtin command -v wget > /dev/null 2>&1; then
+    wget --content-disposition --tries 3 --directory-prefix "${2:-.}" "$1"
+  elif builtin command -v curl > /dev/null 2>&1; then
+    curl -f -LO --remote-header-name --retry 3 --retry-delay 5 --create-dirs --output-dir "${2:-.}" "$1"
+  else
+    echo 'wget or curl not found, exiting..' >&2; return 1
+  fi
 }
 
 pscpu() {
@@ -446,7 +456,7 @@ vrg() {
     [[ ! $(fc -ln -1) =~ ^rg* ]] && echo 'Need a string to search for.' || eval "v$(fc -ln -1)"
     return 0
   fi
-  if [[ \ $*\  = *\ --fixed-strings\ * ]] || [[ \ $*\  = *\ -F\ * ]]; then
+  if [[ " $* " = *' --fixed-strings '* ]] || [[ " $* " = *' -F '* ]]; then
     $EDITOR -q <(rg "$@" --vimgrep) -c "/\V$1"  # use \V if rg is called with -F/--fixed-strings to search for string literal
   else
     $EDITOR -q <(rg "$@" --vimgrep) -c "/$1"

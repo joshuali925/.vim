@@ -151,7 +151,13 @@ return {
                 sources = {
                     { name = "nvim_lsp" },
                     { name = "nvim_lsp_signature_help" },
-                    { name = "vsnip" },
+                    {
+                        name = "vsnip",
+                        entry_filter = function()
+                            local context = require("cmp.config.context")
+                            return not context.in_treesitter_capture("string") and not context.in_syntax_group("String")
+                        end,
+                    },
                     { name = "path" },
                     { name = "nvim_lua" },
                     {

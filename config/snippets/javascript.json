@@ -1,7 +1,7 @@
 {
   "Log": {
     "prefix": "cl",
-    "body": ["console.log('DEBUGGING ❗$0:', $0)"]
+    "body": ["console.log('DEBUGGING ❗$0:', $0);"]
   },
   "Log stringify": {
     "prefix": "clj",

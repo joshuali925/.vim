@@ -41,7 +41,25 @@
   "Filter not undefined": {
     "prefix": ".defined",
     "body": [
-      ".filter(<T,>(v: T | null | undefined): v is T => v !== null && v !== undefined)"
+      ".filter(<T,>(${1:value}: T | null | undefined): $1 is T => $1 !== null && $1 !== undefined)"
+    ]
+  },
+  "Filter property not undefined": {
+    "prefix": ".definedProperty",
+    "body": [
+      ".filter((${1:value}): $1 is RequiredKey<typeof $1, '${2:property}'> => $1.$2 !== null && $1.$2 !== undefined)",
+      "",
+      "type RequiredKey<T, K extends keyof T> = T & Required<Pick<T, K>>;"
+    ]
+  },
+  "Jest describe": {
+    "prefix": "describe",
+    "body": [
+      "describe('${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}}', () => {",
+      "\tit('${2:should return true}', () => {",
+      "\t\texpect(true).toEqual(true);",
+      "\t});",
+      "});"
     ]
   },
   "UseFetchResources": {

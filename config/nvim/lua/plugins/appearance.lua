@@ -1,14 +1,11 @@
-local curr_theme = require("themes").theme
-local config_theme = require("themes").config
-
 return {
-    { "folke/tokyonight.nvim", lazy = curr_theme ~= "tokyonight.nvim", config = config_theme },
-    { "projekt0n/github-nvim-theme", lazy = curr_theme ~= "github-nvim-theme", config = config_theme },
-    { "askfiy/visual_studio_code", lazy = curr_theme ~= "visual_studio_code", config = config_theme },
-    { "Shatur/neovim-ayu", lazy = curr_theme ~= "neovim-ayu", config = config_theme },
-    { "catppuccin/nvim", name = "catppuccin", lazy = curr_theme ~= "catppuccin", config = config_theme },
-    { "EdenEast/nightfox.nvim", lazy = curr_theme ~= "nightfox.nvim", config = config_theme },
-    { "kyazdani42/nvim-web-devicons" },
+    { "folke/tokyonight.nvim", priority = 1000 },
+    { "projekt0n/github-nvim-theme", priority = 1000 },
+    { "askfiy/visual_studio_code", priority = 1000 },
+    { "Shatur/neovim-ayu", priority = 1000 },
+    { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+    { "EdenEast/nightfox.nvim", priority = 1000 },
+    { "nvim-tree/nvim-web-devicons" },
     {
         "lukas-reineke/indent-blankline.nvim",
         opts = {
@@ -31,15 +28,13 @@ return {
             { "Z[", "<Cmd>BufferLineCloseLeft<CR>" },
             { "Z]", "<Cmd>BufferLineCloseRight<CR>" },
         },
-        opts = {
-            highlights = { buffer_selected = { bold = true, italic = false } },
-        },
+        opts = { highlights = { buffer_selected = { bold = true, italic = false } } },
     },
     {
         "nvim-lualine/lualine.nvim",
         event = "BufEnter",
         config = function()
-            if curr_theme == "visual_studio_code" then
+            if require("themes").theme == "visual_studio_code" then
                 return
             end
             local states = require("states")

@@ -25,11 +25,10 @@ vim.g.qs_filetype_blacklist = {
 }
 vim.g.qs_buftype_blacklist = { "terminal" }
 
-local one_mb = 1048576
 local fsize = vim.fn.getfsize(vim.fn.expand("%:p:f")) -- buffer not initialized, read size from disk
 
 return {
     untildone_count = 0,
-    size_threshold = one_mb,
-    small_file = fsize == nil or fsize < one_mb,
+    size_threshold = 1048576, -- 1MB
+    small_file = fsize == nil or fsize < 1048576,
 }

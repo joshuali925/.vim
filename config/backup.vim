@@ -1580,7 +1580,6 @@ zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'
   # zinit light-mode as"program" from"gh-r" for mv"gdu* -> gdu" sbin dundee/gdu
   # zinit light-mode as"program" from"gh-r" for mv"hyperfine* -> hyperfine" sbin"hyperfine/hyperfine" @sharkdp/hyperfine
   # zinit light-mode as"program" from"gh-r" for mv"shellcheck* -> shellcheck" sbin"shellcheck/shellcheck" koalaman/shellcheck
-install-from-url vimv https://raw.githubusercontent.com/thameera/vimv/HEAD/vimv "$@"
 install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin '' btm "$@"
 install-from-github stylua JohnnyMorganz/StyLua linux '' macos '' '' "$@"
 install-from-github shellcheck koalaman/shellcheck linux.x86_64 linux.aarch64 darwin.x86_64 '' '--strip-components=1 --wildcards shellcheck*/shellcheck' "$@"
@@ -2863,7 +2862,7 @@ linedo() {
 curl -s https://github.com/neovim/neovim/releases/latest | sed 's#.*tag/\(.*\)\".*#\1#'
 
 " =======================================================
-" dap, buggy
+" dap, buggy. maybe https://theosteiner.de/debugging-javascript-frameworks-in-neovim
         use({ "mfussenegger/nvim-dap", event = "VimEnter" })
         use({
             "rcarriga/nvim-dap-ui",
@@ -3990,12 +3989,14 @@ export MANROFFOPT='-c'
             { "<leader>e", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.word_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>,", "<Cmd>lua MiniJump.jump(MiniJump.state.target, not MiniJump.state.backward, MiniJump.state.till, MiniJump.state.n_times)<CR><Cmd>lua MiniJump.state.backward = not MiniJump.state.backward<CR>", mode = { "n", "x", "o" } },
         },
         config = function()
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
             require("mini.pairs").setup({ mappings = { [" "] = { action = "open", pair = "  ", neigh_pattern = "[%(%[{][%)%]}]" } } }) -- doesn't support triple quotes
             require('mini.surround').setup() -- doesn't support closest pair
             require('mini.splitjoin').setup() -- regex based, doesn't support toggle javascript oneline function
+            require("mini.jump").setup({ mappings = { repeat_jump = "," }, delay = { highlight = 1500, idle_stop = 1500 }, silent = true }) -- auto smart jumps
         end,
     },
 " hop.nvim
@@ -4029,16 +4030,14 @@ export MANROFFOPT='-c'
                         table.insert(content, { "--", "" })
                     end
                 { "Enable colori&zer", [[CccHighlighterEnable]], "Enable colorizer" },
-" https://github.com/pmizio/typescript-tools.nvim
-            {
-                "pmizio/typescript-tools.nvim",
-                dependencies = { "nvim-lua/plenary.nvim" },
-                opts = {
-                    settings = {
-                        init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
-                    },
-                },
-            },
+            "jose-elias-alvarez/typescript.nvim",
+        tsserver = function()
+            register_server("tsserver", {
+                init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
+            })
+        end,
+        local ok, resp = pcall(require("typescript").actions.organizeImports, { sync = true })
+        if not ok then vim.notify(resp, vim.log.levels.ERROR, { title = "Organize imports failed" }) end
 " asyncrun
     { "skywind3000/asyncrun.vim", cmd = "AsyncRun", config = function() vim.g.asyncrun_open = 12 end },
   if exists(':AsyncRun')
@@ -4050,6 +4049,18 @@ export MANROFFOPT='-c'
     let run_command['java'] = 'AsyncRun -raw javac "$(VIM_FILEPATH)" && java -classpath "$(VIM_FILEDIR)" "$(VIM_FILENOEXT)"'
     let run_command['html'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
     let run_command['xhtml'] = 'AsyncRun -silent open "$(VIM_FILEPATH)"'
+" neoclip
+    {
+        "AckslD/nvim-neoclip.lua",
+        event = "TextYankPost",
+        -- dependencies = { "tami5/sqlite.lua" }, -- persistent history needs libsqlite3
+        opts = {
+            -- enable_persistent_history = true,
+            content_spec_column = true,
+            on_paste = { set_reg = true },
+            keys = { telescope = { n = { select = "yy", paste = "<CR>", replay = "Q" } } },
+        },
+    },
 
 " =======================================================
 " tmux load average to percentage
@@ -4057,3 +4068,18 @@ export MANROFFOPT='-c'
 
 " niz keyboard simple modifications
       "simple_modifications": [ { "from": { "key_code": "escape" }, "to": [ { "key_code": "grave_accent_and_tilde" } ] }, { "from": { "key_code": "grave_accent_and_tilde" }, "to": [ { "key_code": "delete_or_backspace" } ] }, { "from": { "key_code": "left_command" }, "to": [ { "key_code": "left_option" } ] }, { "from": { "key_code": "left_option" }, "to": [ { "key_code": "left_command" } ] }, { "from": { "key_code": "right_option" }, "to": [ { "key_code": "right_command" } ] } ]
+" dictation switch language, process reload is still needed
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_shift",
+            "modifiers": {
+              "mandatory": ["left_option"]
+            }
+          },
+          "to": [
+            {
+              "shell_command": "{ [ $(defaults read com.apple.speech.recognition.AppleSpeechRecognition.prefs DictationIMNetworkBasedLocaleIdentifier) = en_US ] && echo zh_CN || echo en_US; } | xargs -I@ sh -c \"defaults write com.apple.speech.recognition.AppleSpeechRecognition.prefs DictationIMNetworkBasedLocaleIdentifier @; osascript -e 'display notification \\\"Changed dictation to @\\\"'\""
+            }
+          ]
+        }

@@ -9,7 +9,7 @@ if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/HEAD/plug.vim
 endif
 call plug#begin('~/.vim/config/vscode-neovim/plugged')
-Plug 'asvetliakov/vim-easymotion'
+Plug 'phaazon/hop.nvim'
 Plug 'machakann/vim-swap'
 Plug 'machakann/vim-sandwich'
 Plug 'AndrewRadev/splitjoin.vim'
@@ -17,16 +17,17 @@ Plug 'machakann/vim-highlightedyank'
 Plug 'maxbrunsfeld/vim-yankstack'
 call plug#end()
 call yankstack#setup()
+lua require('hop').setup()
 
 set whichwrap+=<,>,[,]
 set ignorecase
 set smartcase
 
 let mapleader=';'
-map ' <Plug>(easymotion-bd-f)
-map <leader>e <Plug>(easymotion-bd-w)
-map <leader>j <Plug>(easymotion-sol-j)
-map <leader>k <Plug>(easymotion-sol-k)
+map ' :HopChar1<CR>
+map <leader>e :HopWord<CR>
+map <leader>j :HopLine<CR>
+map <leader>k :HopLine<CR>
 map gc <Plug>VSCodeCommentary
 nmap gcc <Plug>VSCodeCommentaryLine
 omap ia <Plug>(swap-textobject-i)

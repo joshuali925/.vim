@@ -51,8 +51,8 @@ return {
         },
     },
     {
-        "kyazdani42/nvim-tree.lua",
-        keys = { { "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile <bar> NvimTreeFocus<CR>'", expr = true, replace_keycodes = false } },
+        "nvim-tree/nvim-tree.lua",
+        keys = { { "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", expr = true, replace_keycodes = false } },
         config = function()
             require("nvim-tree").setup({
                 hijack_cursor = true,
@@ -122,7 +122,7 @@ return {
             { "<leader>f/", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>" },
             { "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>" },
             { "<leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>" },
-            { "<leader>fy", "<Cmd>lua require('telescope').extensions.neoclip.default({initial_mode = 'normal'})<CR>" },
+            { "<leader>fy", "<Cmd>lua require('telescope').extensions.yank_history.yank_history({initial_mode = 'normal'})<CR>" },
             { "<leader>fy", "dh<leader>fy", mode = "x", remap = true },
         },
         config = function()
@@ -315,7 +315,7 @@ return {
             })
             vim.fn["quickui#menu#install"]("&Git", { -- GBrowse loaded on command won't include line number in URL, need to explicitly load it. Similar issues for other fugitive commands.
                 { "Git checko&ut", [[Gread]], "Checkout current file from index and load as unsaved buffer (Gread)" },
-                { "Git checkout HEAD", [[Gread HEAD:%]], "Checkout current file from HEAD and load as unsaved buffer (Gread HEAD:%)" },
+                { "Git &checkout ref", [[call feedkeys(":Gread HEAD:%\<Left>\<Left>", "n")]], "Checkout current file from ref and load as unsaved buffer (Gread HEAD:%)" },
                 { "Git &blame", [[Git blame]], "Git blame of current file" },
                 { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
                 { "Git diff H&EAD", [[Gdiffsplit HEAD:%]], "Diff current file with last committed version (Gdiffsplit HEAD:%)" },
@@ -325,10 +325,10 @@ return {
                 { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
                 { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
                 { "Git toggle blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
-                { "Git hunks against HEAD", [[lua require("gitsigns").change_base("HEAD", true)]], "Show hunks based on HEAD instead of staged, to reset run :Gitsigns change_base" },
+                { "Git hunks since ref", [[call feedkeys(":Gitsigns change_base HEAD true\<left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Show hunks based on ref instead of staged, to reset run :Gitsigns change_base" },
                 { "--", "" },
                 { "Git &status", [[Git]], "Git status" },
-                { "Git &changes since ref", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | call feedkeys(":Git! difftool --name-status HEAD", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref)" },
+                { "Git changes since ref", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | call feedkeys(":Git! difftool --name-status HEAD", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref)" },
                 { "Diff&view", [[DiffviewOpen]], "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits" },
                 { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
                 { "--", "" },
@@ -357,6 +357,8 @@ return {
                 { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
             })
             vim.fn["quickui#menu#install"]("Ta&bles", {
+                { "&Venn ascii draw", [[lua require("utils").toggle_venn()]], "Toggle venn.nvim, use HJKL to draw arrow, select area and use v to draw box" },
+                { "--", "" },
                 { "Table &mode", [[TableModeToggle]], "Toggle TableMode" },
                 { "&Reformat table", [[TableModeRealign]], "Reformat table" },
                 { "&Format to table", [[Tableize]], "Format to table, use <leader>T to set delimiter" },

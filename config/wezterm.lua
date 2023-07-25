@@ -1,6 +1,13 @@
 -- icon: https://raw.githubusercontent.com/DinkDonk/kitty-icon/HEAD/kitty-dark.png
 local wezterm = require("wezterm")
 local light_theme = false
+local mux = wezterm.mux
+local config = wezterm.config_builder()
+
+wezterm.on("gui-startup", function(cmd)
+    local tab, pane, window = mux.spawn_window(cmd or {})
+    window:gui_window():maximize()
+end)
 
 -- wezterm.on("update-right-status", function(window, pane)
 --     local date = wezterm.strftime("%a %m/%d %I:%M %p")
@@ -34,41 +41,41 @@ end
 local tokyonight = wezterm.color.get_builtin_schemes()["tokyonight_storm"]
 tokyonight.brights[1] = "#717993"
 
-return {
-    use_ime = true,
-    font = wezterm.font("JetBrainsMono Nerd Font"),
-    font_size = 14,
-    use_fancy_tab_bar = false,
-    harfbuzz_features = { "calt=0", "clig=0", "liga=0" }, -- disable ligatures
-    warn_about_missing_glyphs = false,
-    -- custom_block_glyphs = false,
-    window_decorations = "RESIZE",
-    text_blink_rate = 0,
-    cursor_blink_rate = 0,
-    -- force_reverse_video_cursor = true,
-    initial_cols = 105,
-    initial_rows = 30,
-    scrollback_lines = 9999,
-    status_update_interval = 10000,
-    check_for_updates_interval_seconds = 864000,
-    audible_bell = "Disabled",
-    exit_behavior = "Close",
-    window_padding = { left = 0, right = 0, top = 0, bottom = 0 },
-    color_schemes = { tokyonight = tokyonight },
-    color_scheme = light_theme and "Catppuccin Latte" or "tokyonight",
-    keys = {
-        { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
-        { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = true }) },
-        { key = "d", mods = "CMD", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
-        { key = "d", mods = "CMD|SHIFT", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-        { key = "k", mods = "CMD", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
-        { key = "f", mods = "CMD", action = wezterm.action.Search({ CaseInSensitiveString = "" }) },
-        { key = "[", mods = "CMD", action = wezterm.action.MoveTabRelative(-1) },
-        { key = "]", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
-        { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
-        { key = "/", mods = "CTRL", action = wezterm.action.SendKey({ key = "/", mods = "CTRL" }) },
-        { mods = "CTRL", key = "q", action = wezterm.action({ SendString = "\x11" }) }, -- https://github.com/wez/wezterm/issues/2630
-    },
-    key_tables = { search_mode = search_mode },
-    set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" },
+config.use_ime = true
+config.font = wezterm.font("JetBrainsMono Nerd Font")
+config.font_size = 14
+config.use_fancy_tab_bar = false
+config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" } -- disable ligatures
+config.warn_about_missing_glyphs = false
+-- config.custom_block_glyphs = false
+config.window_decorations = "RESIZE"
+config.text_blink_rate = 0
+config.cursor_blink_rate = 0
+-- config.force_reverse_video_cursor = true
+config.initial_cols = 105
+config.initial_rows = 30
+config.scrollback_lines = 9999
+config.status_update_interval = 10000
+config.check_for_updates_interval_seconds = 864000
+config.audible_bell = "Disabled"
+config.exit_behavior = "Close"
+config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
+config.color_schemes = { tokyonight = tokyonight }
+config.color_scheme = light_theme and "Catppuccin Latte" or "tokyonight"
+config.keys = {
+    { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
+    { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = true }) },
+    { key = "d", mods = "CMD", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
+    { key = "d", mods = "CMD|SHIFT", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+    { key = "k", mods = "CMD", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
+    { key = "f", mods = "CMD", action = wezterm.action.Search({ CaseInSensitiveString = "" }) },
+    { key = "[", mods = "CMD", action = wezterm.action.MoveTabRelative(-1) },
+    { key = "]", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
+    { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
+    { key = "/", mods = "CTRL", action = wezterm.action.SendKey({ key = "/", mods = "CTRL" }) },
+    { mods = "CTRL", key = "q", action = wezterm.action({ SendString = "\x11" }) }, -- https://github.com/wez/wezterm/issues/2630
 }
+config.key_tables = { search_mode = search_mode }
+config.set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" }
+
+return config
