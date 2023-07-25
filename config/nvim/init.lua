@@ -199,8 +199,8 @@ vim.keymap.set({ "n", "t" }, "<M-k>", "<Cmd>call plugins#tmux_navigator#resize('
 vim.keymap.set({ "n", "t" }, "<M-l>", "<Cmd>call plugins#tmux_navigator#resize('l')<CR>")
 vim.keymap.set("n", "<C-f>", "<Cmd>lua require('lsp').organize_imports_and_format()<CR>")
 vim.keymap.set("x", "<C-f>", vim.lsp.buf.format)
-vim.keymap.set({ "n", "x" }, "<leader>p", [["0p]])
-vim.keymap.set({ "n", "x" }, "<leader>P", [["0P]])
+vim.keymap.set("x", "<leader>p", [["0p]])
+vim.keymap.set("x", "<leader>P", [["0P]])
 vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
 vim.keymap.set("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
 vim.keymap.set({ "n", "x" }, "<leader>y", [["+y]])
@@ -377,6 +377,7 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins", { defaults = { lazy = true } })
+require("themes").config()
 if require("states").small_file then
     vim.schedule(function()
         vim.defer_fn(function()

@@ -5,24 +5,24 @@ local theme_index = vim.g.theme_index or -1
 -- :S hi
 -- :source $VIMRUNTIME/syntax/hitest.vim
 M.theme_list = {
-    [-1] = "tokyonight.nvim",
-    [-2] = "github-nvim-theme",
-    [-3] = "visual_studio_code",
-    [-4] = "neovim-ayu",
+    [-1] = "tokyonight",
+    [-2] = "github",
+    [-3] = "vscode",
+    [-4] = "ayu",
     [-5] = "catppuccin",
-    [-6] = "nightfox.nvim",
-    [0] = "tokyonight.nvim",
-    [1] = "nightfox.nvim",
-    [2] = "github-nvim-theme",
-    [3] = "visual_studio_code",
-    [4] = "neovim-ayu",
+    [-6] = "nightfox",
+    [0] = "tokyonight",
+    [1] = "nightfox",
+    [2] = "github",
+    [3] = "vscode",
+    [4] = "ayu",
     [5] = "catppuccin",
 }
 M.theme = M.theme_list[theme_index]
 
 local sidebars = { "qf", "terminal", "lspsagaoutline", "aerial", "Mundo", "NvimTree" }
 local themes = {
-    ["tokyonight.nvim"] = {
+    ["tokyonight"] = {
         config = function()
             require("tokyonight").setup({
                 style = theme_index < 0 and "storm" or "day",
@@ -35,13 +35,13 @@ local themes = {
             vim.cmd.colorscheme("tokyonight")
         end,
     },
-    ["github-nvim-theme"] = {
+    ["github"] = {
         config = function()
             require("github-theme").setup({ options = { darken = { sidebars = { list = sidebars } } } })
             vim.cmd.colorscheme("github_" .. (theme_index < 0 and "dark_dimmed" or "light_high_contrast"))
         end,
     },
-    ["visual_studio_code"] = {
+    ["vscode"] = {
         config = function()
             require("visual_studio_code").setup({ mode = theme_index < 0 and "dark" or "light" })
             if theme_index < 0 then
@@ -59,7 +59,7 @@ local themes = {
             require("bufferline").setup({ options = { custom_areas = { right = require("visual_studio_code").get_bufferline_right() } } })
         end,
     },
-    ["neovim-ayu"] = {
+    ["ayu"] = {
         config = function()
             require("ayu").setup({ overrides = { Comment = { fg = "#69737d" } } })
             vim.cmd.colorscheme("ayu-" .. (theme_index < 0 and "mirage" or "light"))
@@ -82,7 +82,7 @@ local themes = {
             vim.cmd.colorscheme("catppuccin")
         end,
     },
-    ["nightfox.nvim"] = {
+    ["nightfox"] = {
         config = function()
             require("nightfox").setup({
                 palettes = { dayfox = { bg1 = "#f2ede7", bg3 = "#ece6df" } },
@@ -134,8 +134,8 @@ function M.switch(index)
     vim.g.theme_index = index
     theme_index = index
     M.theme = M.theme_list[index]
-    require("lazy").load({ plugins = M.theme })
     M.config()
+    M.config() -- some plugins like bufferline need a second config call
     vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { title = "Theme" })
 end
 

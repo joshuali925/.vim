@@ -1,4 +1,4 @@
-" commit: 24afe922e6a05891756ecf331f39a1f6743d3d5a
+" https://raw.githubusercontent.com/tpope/vim-repeat/24afe922e6a05891756ecf331f39a1f6743d3d5a/autoload/repeat.vim
 
 " repeat.vim - Let the repeat command repeat plugin maps
 " Maintainer:   Tim Pope

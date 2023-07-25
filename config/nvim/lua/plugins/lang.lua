@@ -15,10 +15,9 @@ return {
         dependencies = {
             "williamboman/mason-lspconfig.nvim",
             "neovim/nvim-lspconfig",
-            "jose-elias-alvarez/typescript.nvim", -- TODO https://github.com/pmizio/typescript-tools.nvim
             "jose-elias-alvarez/null-ls.nvim",
             {
-                "glepnir/lspsaga.nvim",
+                "nvimdev/lspsaga.nvim",
                 opts = {
                     ui = { winblend = 8 },
                     diagnostic = { on_insert = false },
@@ -29,12 +28,16 @@ return {
                     callhierarchy = { show_detail = true, keys = { jump = "<CR>", quit = "<Esc>" } },
                     symbol_in_winbar = { separator = "  " },
                 },
-                config = function(_, opts)
-                    require("lspsaga").setup(opts)
-                    if vim.g.theme_index >= 0 then -- seems to default to dark theme, re-config if using light background
-                        require("themes").config()
-                    end
-                end
+            },
+            {
+                "pmizio/typescript-tools.nvim",
+                ft = { "typescript", "typescriptreact" },
+                opts = {
+                    settings = {
+                        expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
+                        tsserver_file_preferences = { importModuleSpecifierPreference = "relative" },
+                    },
+                },
             },
         },
         cond = require("states").small_file, -- prevent LSP loading on keys for large file

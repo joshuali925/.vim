@@ -2,15 +2,26 @@ return {
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
     {
-        "AckslD/nvim-neoclip.lua",
+        "gbprod/yanky.nvim",
         event = "TextYankPost",
-        -- dependencies = { "tami5/sqlite.lua" }, -- persistent history needs libsqlite3
-        opts = {
-            -- enable_persistent_history = true,
-            content_spec_column = true,
-            on_paste = { set_reg = true },
-            keys = { telescope = { n = { select = "yy", paste = "<CR>", replay = "Q" } } },
+        keys = {
+            { "y", "<Plug>(YankyYank)", mode = { "n", "x" } },
+            { "p", "<Plug>(YankyPutAfter)", mode = { "n", "x" } },
+            { "P", "<Plug>(YankyPutBefore)", mode = { "n", "x" } },
+            { "[p", "<Plug>(YankyPutIndentBeforeLinewise)" },
+            { "[P", "<Plug>(YankyPutIndentBeforeLinewise)" },
+            { "]p", "<Plug>(YankyPutIndentAfterLinewise)" },
+            { "]P", "<Plug>(YankyPutIndentAfterLinewise)" },
+            { "<p", "<Plug>(YankyPutIndentAfterShiftLeft)" },
+            { "<P", "<Plug>(YankyPutIndentBeforeShiftLeft)" },
+            { ">p", "<Plug>(YankyPutIndentAfterShiftRight)" },
+            { ">P", "<Plug>(YankyPutIndentBeforeShiftRight)" },
+            { "=p", "<Plug>(YankyPutAfterFilter)" },
+            { "=P", "<Plug>(YankyPutBeforeFilter)" },
+            { "<leader>p", "<Plug>(YankyCycleForward)" },
+            { "<leader>P", "<Plug>(YankyCycleBackward)" },
         },
+        opts = { ring = { history_length = 500 }, system_clipboard = { sync_with_ring = false }, highlight = { on_yank = false, timer = 300 } },
     },
     { "will133/vim-dirdiff", cmd = "DirDiff" },
     {
@@ -36,6 +47,7 @@ return {
             vim.g.table_mode_corner = "|" -- markdown compatible tablemode
         end,
     },
+    { "jbyuki/venn.nvim", cmd = "VBox" },
     {
         "rest-nvim/rest.nvim",
         config = function()

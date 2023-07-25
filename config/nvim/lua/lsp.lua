@@ -1,8 +1,8 @@
 local M = {}
 
 local disabled_servers = {
-    -- "tsserver",
-    "eslint",
+    "tsserver", -- always disable and use typescript-tools instead
+    -- "eslint",
     -- "jdtls",
     -- "kotlin_language_server",
 }
@@ -54,11 +54,7 @@ function M.init()
     local function register_server(server, server_config)
         if not vim.tbl_contains(disabled_servers, server) then
             local config = vim.tbl_deep_extend("force", make_config(), server_config or {})
-            if server == "tsserver" then
-                require("typescript").setup({ server = config })
-            else
-                require("lspconfig")[server].setup(config)
-            end
+            require("lspconfig")[server].setup(config)
         end
     end
 
@@ -120,11 +116,6 @@ function M.init()
                 },
             })
         end,
-        tsserver = function()
-            register_server("tsserver", {
-                init_options = { preferences = { importModuleSpecifierPreference = "relative" } },
-            })
-        end,
         pyright = function()
             register_server("pyright", {
                 commands = {
@@ -146,6 +137,7 @@ function M.init()
     local null_ls_sources = {
         null_ls.builtins.code_actions.gitrebase,
         null_ls.builtins.code_actions.shellcheck,
+        null_ls.builtins.code_actions.eslint,
         null_ls.builtins.diagnostics.zsh,
         null_ls.builtins.formatting.prettier.with({
             filetypes = {
@@ -170,7 +162,6 @@ function M.init()
         }),
         null_ls.builtins.formatting.black,
         null_ls.builtins.formatting.sqlformat.with({ extra_args = { "-rsk", "upper" } }),
-        require("typescript.extensions.null-ls.code-actions"),
     }
     if require("mason-registry").is_installed("shellcheck") then
         table.insert(null_ls_sources, null_ls.builtins.diagnostics.shellcheck)
@@ -192,9 +183,8 @@ end
 local formatting_lsps = { "null-ls", "lua_ls" }
 function M.organize_imports_and_format()
     local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_active_clients({ bufnr = 0 }))
-    if vim.tbl_contains(active_clients, "tsserver") then
-        local ok, resp = pcall(require("typescript").actions.organizeImports, { sync = true })
-        if not ok then vim.notify(resp, vim.log.levels.ERROR, { title = "Organize imports failed" }) end
+    if vim.tbl_contains(active_clients, "typescript-tools") then
+        vim.cmd.TSToolsOrganizeImports("sync")
     elseif vim.tbl_contains(active_clients, "pyright") then
         vim.cmd("silent PythonOrganizeImports")
     end
@@ -202,6 +192,9 @@ function M.organize_imports_and_format()
         vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsps, client.name) end, timeout_ms = 3000 })
     else
         vim.cmd.Prettier()
+    end
+    if vim.tbl_contains(active_clients, "eslint") then
+        vim.cmd("undojoin | EslintFixAll")
     end
 end
 
