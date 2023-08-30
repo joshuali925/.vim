@@ -44,6 +44,7 @@ local themes = {
     ["vscode"] = {
         config = function()
             require("visual_studio_code").setup({ mode = theme_index < 0 and "dark" or "light" })
+            vim.cmd.colorscheme("visual_studio_code")
             if theme_index < 0 then
                 vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
                 vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#4a4a4a" })

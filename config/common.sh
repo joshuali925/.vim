@@ -86,7 +86,8 @@ alias gcs='gc --signoff'
 alias gcs!='gc --signoff --amend'
 alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcf='git config --list'
-alias gcl='git clone --filter=blob:none'
+alias gcl='git clone'
+alias gclo='git clone --filter=blob:none'
 alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
 alias gcp='git cherry-pick -x'
@@ -100,7 +101,7 @@ alias gdw='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff --word-dif
 alias gf='git fetch'
 alias gfa='git remote | xargs -L1 git fetch --filter=blob:none --prune'
 alias ggl='git pull origin $(gref)'
-alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork }; git push fork $(gref)'
+alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added remote: fork }; git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
 alias glg='git log --stat'
@@ -241,7 +242,7 @@ gr-toggle-url() {
 }
 
 gpr() {
-  if [ "$#" -ne 1 ]; then echo "Usage: $0 {PR-number|PR-URL}" >&2; return 1; fi
+  if [ "$#" -lt 1 ]; then echo "Usage: $0 {PR-number|PR-URL} [remote]" >&2; return 1; fi
   local pr=${1##*/}
   if ! git rev-parse --git-dir > /dev/null 2>&1; then
     local repo=${1%/pull/*}
@@ -249,7 +250,7 @@ gpr() {
     cd "${repo##*/}-$pr" > /dev/null || return 1
   fi
   git stash push --include-untracked --message 'git PR temporary stash'
-  git fetch origin "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
+  git fetch "${2:-origin}" "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
 }
 
 gh-backport() {
@@ -488,7 +489,7 @@ unalias z 2> /dev/null
 z() {
   local fzftemp
   if [ "$#" -eq 0 ]; then
-    fzftemp=$(_z -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -n -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$PWD\" '\$0~cwd {print \$1}')") && cd "$fzftemp"
+    fzftemp=$(_z -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --header='Press ` to search under cwd' --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -n -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$PWD\" '\$0~cwd {print \$1}')") && cd "$fzftemp"
   else
     _z 2>&1 "$@"
   fi
@@ -508,7 +509,7 @@ t() {  # create, restore, or switch tmux session
       } || tmux
     fi
   else
-    [ "$1" == a ] && tmux attach || tmux $change -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $change -t "$1")
+    [ "$1" == a ] && tmux attach 2> /dev/null || tmux $change -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $change -t "$1")
   fi
 }
 
@@ -760,6 +761,7 @@ theme() {  # locally toggles wezterm theme, remotely updates configs to match te
     unset LIGHT_THEME
   fi
   source ~/.vim/config/common.sh
+  [ -n "$TMUX" ] && tmux set-environment -g LIGHT_THEME "$LIGHT_THEME"
 }
 
 .vim-disable-binary-downloads() {
@@ -775,7 +777,7 @@ if [[ $OSTYPE = darwin* ]]; then
   alias idea='open -na "IntelliJ IDEA.app" --args'
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
   alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
-  alias toggle-system-theme='automator ~/.vim/config/macToggleDark.wflow'
+  alias toggle-dark-theme='automator ~/.vim/config/macToggleDark.wflow'
   browser-history() {
     local cols=$((COLUMNS / 3)) sep='{::}' fzftemp fzfprompt
     if [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
