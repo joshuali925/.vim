@@ -4061,6 +4061,17 @@ export MANROFFOPT='-c'
             keys = { telescope = { n = { select = "yy", paste = "<CR>", replay = "Q" } } },
         },
     },
+" harpoon
+    {
+        "ThePrimeagen/harpoon",
+        keys = {
+            { "<leader>m", "<Cmd>lua require('harpoon.mark').add_file()<CR>" },
+            { "<leader>h", "<Cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>" },
+            { "<leader>1", "<Cmd>lua require('harpoon.ui').nav_file(1)<CR>" },
+            { "<leader>2", "<Cmd>lua require('harpoon.ui').nav_file(2)<CR>" },
+            { "<leader>3", "<Cmd>lua require('harpoon.ui').nav_file(3)<CR>" },
+        },
+    },
 
 " =======================================================
 " tmux load average to percentage

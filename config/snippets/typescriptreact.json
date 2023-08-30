@@ -10,12 +10,20 @@
   "Create react context": {
     "prefix": "template-create-context",
     "body": [
-      "interface I${1:Context} {",
+      "import React, { useContext, useMemo } from 'react';",
+      "",
+      "interface I${1:Test}Context {",
       "\t${2:state}: unknown;",
       "}",
-      "export const ${1:Context} = React.createContext<I${1:Context} | null>(null);",
+      "export const ${1:Test}Context = React.createContext<I${1:Test}Context | null>(null);",
       "",
-      "const ${1/(.*)/${1:/camelcase}/}Value: ${1:IContext} = useMemo(",
+      "export const use${1:Test}Context = () => {",
+      "\tconst context = useContext(${1:Test}Context);",
+      "\tif (!context) throw new Error('${1:Test}Context is not set.');",
+      "\treturn context;",
+      "}",
+      "",
+      "const ${1/(.*)/${1:/camelcase}/}Value: I${1:Test}Context = useMemo(",
       "\t() => ({",
       "\t\t${2:state},",
       "\t}),",
@@ -23,11 +31,10 @@
       ");",
       "",
       "return (",
-      "\t<Context.Provider value={${1/(.*)/${1:/camelcase}/}Value}>",
+      "\t<${1:Test}Context.Provider value={${1/(.*)/${1:/camelcase}/}Value}>",
       "\t\t$0",
-      "\t</Context.Provider>",
-      ");",
-      ""
+      "\t</${1:Test}Context.Provider>",
+      ");"
     ]
   },
   "Create react reducer with context": {
@@ -72,7 +79,11 @@
       "\t);",
       "};",
       "",
-      "export const use$1 = () => useContext($1Context)!;"
+      "export const use$1 = () => {",
+      "\tconst context = useContext($1Context);",
+      "\tif (!context) throw new Error('$1Context is not set.');",
+      "\treturn context;",
+      "}"
     ]
   },
   "Improved react functional component": {

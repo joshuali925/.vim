@@ -114,9 +114,9 @@ return {
                     ["<C-e>"] = cmp.mapping.abort(),
                     ["<C-k>"] = cmp.mapping(function(fallback)
                         if vim.fn["vsnip#expandable"]() == 1 then
-                            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-expand)", true, true, true), "")
+                            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-expand)", true, true, true), "", true)
                         elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
-                            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
+                            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "", true)
                         elseif require("neogen").jumpable() then
                             require("neogen").jump_next()
                         else
@@ -129,7 +129,7 @@ return {
                         if cmp.visible() then
                             cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
                         elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
-                            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "")
+                            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "", true)
                         elseif require("neogen").jumpable() then
                             require("neogen").jump_next()
                         else
@@ -140,7 +140,7 @@ return {
                         if cmp.visible() then
                             cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
                         elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
-                            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
+                            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "", true)
                         elseif require("neogen").jumpable(-1) then
                             require("neogen").jump_prev()
                         else
@@ -150,7 +150,13 @@ return {
                 },
                 sources = {
                     { name = "nvim_lsp" },
-                    { name = "nvim_lsp_signature_help" },
+                    {
+                        name = "nvim_lsp_signature_help",
+                        entry_filter = function()
+                            local col = vim.api.nvim_win_get_cursor(0)[2]
+                            return vim.api.nvim_get_current_line():sub(col, col) ~= "," -- https://github.com/hrsh7th/cmp-nvim-lsp-signature-help/issues/41
+                        end,
+                    },
                     {
                         name = "vsnip",
                         entry_filter = function()

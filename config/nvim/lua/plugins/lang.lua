@@ -15,7 +15,8 @@ return {
         dependencies = {
             "williamboman/mason-lspconfig.nvim",
             "neovim/nvim-lspconfig",
-            "jose-elias-alvarez/null-ls.nvim",
+            "jose-elias-alvarez/null-ls.nvim", -- TODO https://github.com/mfussenegger/nvim-lint, https://github.com/stevearc/conform.nvim
+            { "pmizio/typescript-tools.nvim" },
             {
                 "nvimdev/lspsaga.nvim",
                 opts = {
@@ -27,16 +28,6 @@ return {
                     outline = { keys = { expand_or_jump = "<CR>" } },
                     callhierarchy = { show_detail = true, keys = { jump = "<CR>", quit = "<Esc>" } },
                     symbol_in_winbar = { separator = "  " },
-                },
-            },
-            {
-                "pmizio/typescript-tools.nvim",
-                ft = { "typescript", "typescriptreact" },
-                opts = {
-                    settings = {
-                        expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
-                        tsserver_file_preferences = { importModuleSpecifierPreference = "relative" },
-                    },
                 },
             },
         },

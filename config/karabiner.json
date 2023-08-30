@@ -233,7 +233,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.microsoft\\.edgemac$",
-                "^com\\.google\\.Chrome$"
+                "^com\\.google\\.Chrome$",
+                "^company\\.thebrowser\\.Browser$"
               ]
             }
           ]
@@ -257,7 +258,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.microsoft\\.edgemac$",
-                "^com\\.google\\.Chrome$"
+                "^com\\.google\\.Chrome$",
+                "^company\\.thebrowser\\.Browser$"
               ]
             }
           ]

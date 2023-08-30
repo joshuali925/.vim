@@ -5,6 +5,7 @@ set incfilter
 set info size
 set dircounts
 set icons
+set dupfilefmt '%f.%n'
 # for `<command> $fx` to work (defaults is '' which needs: `echo "$fx" | xargs -d '\n' <command>`)
 set ifs "\n"
 set previewer ~/.vim/config/lf-preview.sh
@@ -77,7 +78,7 @@ map i $FULL_PREVIEW=1 ~/.vim/config/lf-preview.sh "$f"
 
 cmd mkdir %mkdir -p "$@"
 cmd touch %touch "$@"
-cmd chmod %{{ chmod "$@" "$f"; lf -remote "send $id reload" }}
+cmd chmod %chmod "$@" "$f"; lf -remote "send $id reload"
 cmd chmod? %stat --printf "%a %n \n" "$f"
 cmd chown %sudo chown -R "$USER:$USER" "$f"
 cmd chown? %stat "$f" | grep '^Access: ('

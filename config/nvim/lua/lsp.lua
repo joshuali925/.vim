@@ -1,7 +1,7 @@
 local M = {}
 
 local disabled_servers = {
-    "tsserver", -- always disable and use typescript-tools instead
+    -- "tsserver",
     -- "eslint",
     -- "jdtls",
     -- "kotlin_language_server",
@@ -50,7 +50,7 @@ function M.init()
     if not present then
         return
     end
-    mason.setup()
+    mason.setup({ ui = { border = "rounded" } })
     local function register_server(server, server_config)
         if not vim.tbl_contains(disabled_servers, server) then
             local config = vim.tbl_deep_extend("force", make_config(), server_config or {})
@@ -95,6 +95,16 @@ function M.init()
                     java = { sources = { organizeImports = { starThreshold = 9999, staticStarThreshold = 9999 } } },
                 },
             })
+        end,
+        tsserver = function()
+            if not vim.tbl_contains(disabled_servers, "tsserver") then
+                require("typescript-tools").setup({
+                    settings = {
+                        expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
+                        tsserver_file_preferences = { importModuleSpecifierPreference = "relative" },
+                    },
+                })
+            end
         end,
         yamlls = function()
             register_server("yamlls", { settings = { yaml = { keyOrdering = false } } })
