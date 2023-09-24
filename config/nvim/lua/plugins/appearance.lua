@@ -8,12 +8,11 @@ return {
     { "nvim-tree/nvim-web-devicons" },
     {
         "lukas-reineke/indent-blankline.nvim",
+        main = "ibl",
         opts = {
-            char = "▏",
-            context_char = "▏",
-            show_current_context = true,
-            filetype_exclude = vim.g.qs_filetype_blacklist,
-            buftype_exclude = vim.g.qs_buftype_blacklist,
+            indent = { char = "▏" },
+            exclude = { filetypes = vim.g.qs_filetype_blacklist, buftypes = vim.g.qs_buftype_blacklist },
+            scope = { show_start = false, show_end = false },
         },
     },
     { "dstein64/nvim-scrollview", opts = { signs_max_per_row = 2, signs_column = 1 } }, -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed

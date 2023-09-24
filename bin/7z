@@ -9,4 +9,4 @@ case $PLATFORM in  # versions: https://www.7-zip.org/download.html
   *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2 ; exit 1 ;;
 esac
 
-install-archive-from-url "https://www.7-zip.org/a/7z$VERSION-$DISTRO.tar.xz" 7z "$executable && mv ~/.local/bin/$executable ~/.local/bin/7z"
+install-archive-from-url "https://www.7-zip.org/a/7z$VERSION-$DISTRO.tar.xz" 7z "$executable && mv ~/.local/bin/$executable ~/.local/bin/7z" "$@"

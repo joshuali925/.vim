@@ -17,8 +17,6 @@ if [ -n "$ZINIT_POST_INSTALL" ]; then
     https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg \
     https://github.com/sharkdp/fd/blob/master/contrib/completion/_fd \
     https://github.com/asdf-vm/asdf/blob/master/completions/_asdf \
-    https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker \
-    https://github.com/docker/compose/tree/master/contrib/completion/zsh/_docker-compose \
     https://github.com/gradle/gradle-completion/blob/master/_gradle \
     https://github.com/gradle/gradle-completion/blob/master/gradle-completion.plugin.zsh
 fi
@@ -132,6 +130,7 @@ run-lf () {
 }
 zle -N run-lf
 
+# https://github.com/marlonrichert/zsh-edit seems incompatible with zinit
 bindkey '^o' run-lf
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
