@@ -8,7 +8,7 @@ export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --L
 export BAT_THEME=OneHalfDark
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
-export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top --info=inline --scrollbar "▌▐" --border=thinblock --preview-window=border-thinblock --color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
+export FZF_DEFAULT_OPTS='--layout=reverse --height=40% --bind=change:top --info=inline --scrollbar "▌▐" --border=thinblock --preview-window=border-thinblock --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --hidden --exclude=.git --color=always'
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND --no-ignore || true)'"
@@ -158,6 +158,7 @@ alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && 
 alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
+st() { ssh -t "$@" '.vim/bin/tmux new -A -s 0' }
 
 gc() {
   [ "$#" -eq 0 ] && { git commit --signoff -v; return $?; }
@@ -246,7 +247,7 @@ gpr() {
   local pr=${1##*/}
   if ! git rev-parse --git-dir > /dev/null 2>&1; then
     local repo=${1%/pull/*}
-    git clone "$repo" "${repo##*/}-$pr"
+    git clone --filter=blob:none "$repo" "${repo##*/}-$pr"
     cd "${repo##*/}-$pr" > /dev/null || return 1
   fi
   git stash push --include-untracked --message 'git PR temporary stash'
@@ -726,11 +727,11 @@ os-get() {
   ver() {
     awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"
   }
-  if [ "$#" -eq 0 ]; then echo "Usage: $0 <3-digit-version> [{x64|arm64}]" >&2; return 1; fi
-  local version=$1 arch=${2:-$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64)} url selected
+  if [ "$#" -eq 0 ]; then echo "Usage: $0 <3-digit-version> [query]" >&2; return 1; fi
+  local version=$1 arch=$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64) url selected
   local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management')
   local artifacts=("${core[@]}" "${opensearch_plugin[@]}" "${es[@]}")
-  selected=$(printf "%s\n" "${artifacts[@]}" | fzf --bind='tab:down,btab:up') || return 1
+  selected=$(printf "%s\n" "${artifacts[@]}" | fzf --query="$2" --select-1 --bind='tab:down,btab:up') || return 1
   if printf '%s\0' "${es[@]}" | grep -q -x -z -F -- "$selected"; then
     [ "$arch" = 'x64' ] && arch=x86_64 || arch=aarch64
     url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
@@ -761,7 +762,7 @@ theme() {  # locally toggles wezterm theme, remotely updates configs to match te
     unset LIGHT_THEME
   fi
   source ~/.vim/config/common.sh
-  [ -n "$TMUX" ] && tmux set-environment -g LIGHT_THEME "$LIGHT_THEME"
+  if [ -n "$TMUX" ]; then tmux set-environment -ug LIGHT_THEME; fi
 }
 
 .vim-disable-binary-downloads() {

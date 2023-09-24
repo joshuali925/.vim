@@ -137,7 +137,7 @@ function M.toggle_venn()
         vim.api.nvim_buf_del_keymap(0, "n", "<C-v>")
     end
     vim.o.virtualedit = vim.b.venn_enabled and "all" or "block"
-    vim.cmd("IndentBlankline" .. (vim.b.venn_enabled and "Disable" or "Enable"))
+    vim.cmd("IBL" .. (vim.b.venn_enabled and "Disable" or "Enable"))
     vim.notify("Venn.nvim " .. (vim.b.venn_enabled and "enabled" or "disabled"))
 end
 

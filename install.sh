@@ -194,10 +194,7 @@ install_docker() {
   sudo usermod -aG docker "$USER" || true
   sudo systemctl restart docker || sudo service docker restart
   sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login, enable read write access for other groups now to work immediately
-  # TODO https://github.com/docker/compose/issues/8550, remove docker-compose and its zsh completion when 'docker compose <Tab>' completions are working
-  log 'Installing docker-compose..'
-  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
+  # TODO https://github.com/docker/docs/issues/16397, docker completion zsh > ~/.zinit/completions/_docker does not have argument descriptions
   log "Installed, run ${YELLOW}docker info${CYAN} for status"
 }
 
@@ -246,17 +243,16 @@ install_tmux() {
   log 'Installing tmux..'
   backup "$HOME/.local/bin/tmux"
   tmux -V
+  log 'Installing tmux plugins..'
   if [ ! -d "$HOME/.tmux" ]; then
-    log 'Installing tmux plugins..'
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth=1
-    ~/.tmux/plugins/tpm/bin/install_plugins || true
-    if [ -d "$HOME/.tmux/plugins/tmux-thumbs" ]; then
-      log 'Installing tmux-thumbs binaries..'
-      curl -L -o- "https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-$PLATFORM-$ARCHITECTURE.tar.gz" | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
-    fi
   else
-    log '~/.tmux directory exists, updating tmux plugins..'
     ~/.tmux/plugins/tpm/bin/update_plugins all || true
+  fi
+  ~/.tmux/plugins/tpm/bin/install_plugins || true
+  if [ -d "$HOME/.tmux/plugins/tmux-thumbs" ]; then
+    log 'Installing tmux-thumbs binaries..'
+    curl -L -o- "https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-$PLATFORM-$ARCHITECTURE.tar.gz" | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
   fi
   if [ ! -d "$HOME/.terminfo" ]; then
     curl -LO https://invisible-island.net/datafiles/current/terminfo.src.gz && gunzip terminfo.src.gz

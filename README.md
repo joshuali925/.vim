@@ -70,8 +70,7 @@ Maccy -> Preferences -> Hotkey -> control-shift-v
                      -> History size 999
                      -> Appearance -> Menu size 100
 
-Alt-tab -> Preferences -> Controls -> change "Hold option" to "Hold cmd"
-                                   -> change "Select previous window" to shift tab
+Alt-tab -> Preferences -> Controls -> change to cmd + tab
                        -> Appearance -> check Hide apps with no open window
 ```
 

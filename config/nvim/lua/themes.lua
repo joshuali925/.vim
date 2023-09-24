@@ -46,8 +46,8 @@ local themes = {
             require("visual_studio_code").setup({ mode = theme_index < 0 and "dark" or "light" })
             vim.cmd.colorscheme("visual_studio_code")
             if theme_index < 0 then
-                vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#353535" })
-                vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#4a4a4a" })
+                vim.api.nvim_set_hl(0, "IblIndent", { fg = "#353535" })
+                vim.api.nvim_set_hl(0, "IblScope", { fg = "#4a4a4a" })
                 vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#484848" })
                 vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#484848" })
                 vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#484848" })
@@ -96,8 +96,8 @@ local themes = {
 
 local function highlight_plugins()
     if theme_index < 0 then
-        vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#3b4261" })
-        vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#4f5778" })
+        vim.api.nvim_set_hl(0, "IblIndent", { fg = "#3b4261" })
+        vim.api.nvim_set_hl(0, "IblScope", { fg = "#4f5778" })
         vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#427266" })
         vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#364f49" })
         vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestors", { bg = "#383838" })
@@ -107,8 +107,8 @@ local function highlight_plugins()
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#ffbe6d" })
         vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = "#6eb9e6" })
     else
-        vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = "#d4d7d9" })
-        vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = "#c4c8cc" })
+        vim.api.nvim_set_hl(0, "IblIndent", { fg = "#d4d7d9" })
+        vim.api.nvim_set_hl(0, "IblScope", { fg = "#c4c8cc" })
         vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#7ed9ae" })
         vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#94ffcc" })
         vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestors", { bg = "#bfbfbf" })

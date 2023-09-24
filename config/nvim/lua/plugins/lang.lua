@@ -15,10 +15,10 @@ return {
         dependencies = {
             "williamboman/mason-lspconfig.nvim",
             "neovim/nvim-lspconfig",
-            "jose-elias-alvarez/null-ls.nvim", -- TODO https://github.com/mfussenegger/nvim-lint, https://github.com/stevearc/conform.nvim
+            "nvimtools/none-ls.nvim", -- TODO https://github.com/mfussenegger/nvim-lint, https://github.com/stevearc/conform.nvim
             { "pmizio/typescript-tools.nvim" },
             {
-                "nvimdev/lspsaga.nvim",
+                "nvimdev/lspsaga.nvim", -- TODO https://github.com/Bekaboo/dropbar.nvim
                 opts = {
                     ui = { winblend = 8 },
                     diagnostic = { on_insert = false },

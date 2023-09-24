@@ -303,7 +303,7 @@ return {
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },
-                { "&Refresh screen", [[execute "IndentBlanklineRefresh" | execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
+                { "&Refresh screen", [[execute "lua require('ibl').refresh()" | execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
                 { "--", "" },
                 { "Open &Alpha", [[Lazy! load alpha-nvim | Alpha]], "Open Alpha" },
                 { "&Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },
@@ -353,7 +353,7 @@ return {
                 { "Show cmdlin&e         %{&cmdheight==1 ? '[x]' : '[ ]'}", [[let &cmdheight = &cmdheight==1 ? 0 : 1]], "Toggle cmdheight" },
                 { "Reader &mode          %{get(g:, 'ReaderMode', 0) == 0 ? '[ ]' : '[x]'}", [[execute get(g:, "ReaderMode", 0) == 0 ? "nnoremap <nowait> d <C-d>\<bar>nnoremap u <C-u>" : "nunmap d\<bar>nunmap u" | let g:ReaderMode = 1 - get(g:, "ReaderMode", 0) | lua vim.notify("Reader mode " .. (vim.g.ReaderMode == 1 and "on" or "off"))]], "Toggle using 'd' and 'u' for '<C-d>' and '<C-u>' scrolling" },
                 { "--", "" },
-                { "&Indent line", [[IndentBlanklineToggle]], "Toggle indent lines" },
+                { "&Indent line", [[IBLToggle]], "Toggle indent lines" },
                 { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
             })
             vim.fn["quickui#menu#install"]("Ta&bles", {
