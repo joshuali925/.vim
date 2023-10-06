@@ -1,3 +1,5 @@
+" Compatible since CentOS7 vim7.4: docker run -it --rm -e TERM -v $HOME/.vim:/root/.vim thinca/vim:v7.4.629
+
 let g:dot_vim_dir=expand('<sfile>:p:h')
 
 " if empty(glob(g:dot_vim_dir . '/autoload/plug.vim'))
@@ -92,7 +94,7 @@ if has('folding')  " vim small does not have folding
   set foldlevel=99
   set foldexpr=max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth
   let &foldtext='getline(v:foldstart)." ⋯"'
-  let &fillchars='fold: '
+  let &fillchars='eob: ,fold: ,foldopen:,foldsep: ,foldclose:'
 endif
 set history=1000
 set undofile

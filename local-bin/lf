@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+while [ "$#" -ne 0 ] && [[ "$1" = -* ]]; do shift; done
 target=$(realpath -s "${*:-$PWD}")
 if [ -d "$target" ]; then
   exec vim +"cd $target" +Explore

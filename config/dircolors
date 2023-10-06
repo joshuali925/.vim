@@ -1,4 +1,4 @@
-# stored in ./colors.sh
+# source for $LS_COLORS in ./colors.sh
 
 # https://man7.org/linux/man-pages/man5/dir_colors.5.html, to use 256colors: 00;38;5;<0-255>
 # TERM

@@ -64,6 +64,7 @@ return {
         config = function()
             local cmp = require("cmp")
             vim.o.pumblend = 8
+            vim.o.pumheight = 15
             local cmp_kinds = {
                 Text = " ", -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
                 Method = " ",
