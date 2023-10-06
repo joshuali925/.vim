@@ -10,7 +10,7 @@ return {
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
         opts = {
-            indent = { char = "▏" },
+            indent = { char = "▏", tab_char = "▏" },
             exclude = { filetypes = vim.g.qs_filetype_blacklist, buftypes = vim.g.qs_buftype_blacklist },
             scope = { show_start = false, show_end = false },
         },

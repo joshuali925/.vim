@@ -1,19 +1,23 @@
 syntax enable
 set nocompatible
 set backspace=eol,start,indent
-set display=lastline
-set encoding=utf-8
-set lazyredraw
-set noswapfile
-set nobackup
-set nowritebackup
-set paste
 set hlsearch
 set ignorecase
 set smartcase
 set expandtab
 set softtabstop=2
 set shiftwidth=2
+set display=lastline
+set encoding=utf-8
+set timeout
+set timeoutlen=1500
+set ttimeoutlen=40
+set lazyredraw
+set noswapfile
+set nobackup
+set nowritebackup
+
+set paste
 
 noremap , ;
 noremap ;, ,

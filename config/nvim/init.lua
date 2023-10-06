@@ -387,7 +387,7 @@ if require("states").small_file then
             vim.o.foldmethod = "expr"
             vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
             vim.o.foldtext = "getline(v:foldstart).' ⋯'"
-            vim.o.fillchars = "fold: "
+            vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
             local plugins = { -- motions/text objects sometimes don't work if loaded on keys
                 "vim-illuminate",
                 "conflict-marker.vim",
