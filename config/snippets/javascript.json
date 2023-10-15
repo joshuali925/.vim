@@ -57,13 +57,13 @@
   },
   "Immediately-invoked async function": {
     "prefix": "async",
-    "body": ["(async () => {", "\t$0", "})();"]
+    "body": ["void (async () => {", "\t$0", "})();"]
   },
   "Promise then": {
     "prefix": "then",
     "body": [
       ".then((resp) => {",
-      "\t$0",
+      "\t$1",
       "})",
       ".catch((error) => {",
       "\t$0",

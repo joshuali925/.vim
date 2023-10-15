@@ -282,6 +282,9 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     callback = function()
         vim.bo.buflisted = false
         vim.bo.modifiable = true
+        vim.o.foldmethod = "expr"
+        vim.o.foldexpr = [[matchstr(getline(v:lnum),'^[^|]\+')==#matchstr(getline(v:lnum+1),'^[^|]\+')?1:'<1']]
+        vim.o.foldtext = [[matchstr(getline(v:foldstart),'^[^|]\+').'| ⋯']]
         vim.keymap.set("n", "<leader>w", [[<Cmd>let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>]], { buffer = true })
         vim.keymap.set("n", "<CR>", "<CR>", { buffer = true })
     end,

@@ -5,7 +5,6 @@ set incfilter
 set info size
 set dircounts
 set icons
-set dupfilefmt '%f.%n'
 # for `<command> $fx` to work (defaults is '' which needs: `echo "$fx" | xargs -d '\n' <command>`)
 set ifs "\n"
 set previewer ~/.vim/config/lf-preview.sh
