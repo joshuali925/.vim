@@ -90,6 +90,7 @@ function M.get_visual_selection()
     return table.concat(lines, "\n")
 end
 
+-- TODO use built-in osc52 for nvim >= 0.10
 function M.copy_with_osc_yank_script(str)
     local message = ""
     if str:len() > 70000 then

@@ -41,7 +41,7 @@ alias cp='cp -riv'
 alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
-alias l='exa -lF --git --color=always --color-scale --icons --header --group-directories-first --time-style=long-iso --all'
+alias l='eza -lF --git --color=always --color-scale --icons --header --group-directories-first --time-style=long-iso --all --smart-group'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
@@ -72,6 +72,7 @@ alias rg!="rg '❗'"
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
 alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database $HOME/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
+alias gradle-deps="./gradlew -q projects | rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
 
@@ -104,6 +105,7 @@ alias ggl='git pull origin $(gref)'
 alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added remote: fork }; git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
+alias glall='find . -type d -name .git -exec echo {} \; -exec git --git-dir={} --work-tree=$PWD/{} pull \;'
 alias glg='git log --stat'
 alias glgg='git log --graph --pretty=fuller'
 alias glgga='git log --graph --pretty=fuller --all'
@@ -130,14 +132,13 @@ alias greset-to-remote='git stash push --message "greset-to-remote temporary sta
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grv='git remote -v'
 alias gs='git status'
-alias gsall="find . -type d -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
+alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([ \$(pwd) == '\$PWD' ] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
 alias gss='git status -sb'
 alias gst='git stash'
 alias gsts='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
-alias gwt='git worktree'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gunignore='git update-index --no-assume-unchanged'
@@ -188,6 +189,11 @@ gcb() {
   else  # <branch> doesn't exist, create it
     git checkout --track "$remote"
   fi
+}
+
+gwt() {
+  local worktree
+  worktree=$(git worktree list | fzf | awk '{print $1}') && [ -d "$worktree" ] && cd "$worktree"
 }
 
 glof() {
@@ -780,18 +786,23 @@ if [[ $OSTYPE = darwin* ]]; then
   alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
   alias toggle-dark-theme='automator ~/.vim/config/macToggleDark.wflow'
   browser-history() {
-    local cols=$((COLUMNS / 3)) sep='{::}' fzftemp fzfprompt
-    if [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
-      fzfprompt='Edge> '
-      command cp -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" /tmp/browser-history-fzf-temp
-    elif [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
+    local cols=$((COLUMNS / 3)) sep='{::}' fzftemp fzfprompt histfile=/tmp/browser-history-fzf.db
+    if [ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]; then
       fzfprompt='Chrome> '
-      command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf-temp
+      histfile="$HOME/Library/Application Support/Google/Chrome/Default/browser-history-fzf.db"
+      [ ! -f "$histfile" ] && command cp "$HOME/Library/Application Support/Google/Chrome/Default/History" "$histfile"
+      command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf.db
+      sqlite3 "$histfile"  'attach "/tmp/browser-history-fzf.db" as toMerge; BEGIN;
+      delete from urls where id in (select a.id from urls as a join toMerge.urls as b on a.id = b.id where a.last_visit_time <> b.last_visit_time);
+      insert into urls select * from toMerge.urls where toMerge.urls.id not in (select id from urls); COMMIT; detach toMerge;'
+    elif [ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]; then
+      fzfprompt='Edge> '
+      command cp -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" /tmp/browser-history-fzf.db
     else
       echo "Chrome and Edge histories not found, exiting.."
       return 1
     fi
-    fzftemp=$(sqlite3 -separator $sep /tmp/browser-history-fzf-temp "select substr(title, 1, $cols), url from urls order by last_visit_time desc" |
+    fzftemp=$(sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), url from urls order by last_visit_time desc" |
       awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
       fzf --tiebreak=index --toggle-sort=\` --header='Press ` to toggle sort' --prompt="$fzfprompt" --ansi --multi) && \
       echo $fzftemp | sed 's#.*\(https*://\)#\1#' | xargs open

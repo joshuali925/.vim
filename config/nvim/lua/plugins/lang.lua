@@ -27,7 +27,6 @@ return {
                     rename = { quit = "<Esc>", in_select = false, whole_project = false },
                     outline = { keys = { expand_or_jump = "<CR>" } },
                     callhierarchy = { show_detail = true, keys = { jump = "<CR>", quit = "<Esc>" } },
-                    symbol_in_winbar = { separator = "  " },
                 },
             },
         },

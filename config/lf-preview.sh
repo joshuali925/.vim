@@ -14,7 +14,7 @@ preview() {
   [ -n "$FULL_PREVIEW" ] && less -RiM || head -n 150
 }
 
-if [ -n "$FULL_PREVIEW" ] && [ "$(file -Lb --mime-type -- "$1" | cut -d/ -f1)" = 'image' ]; then
+if [ -n "$FULL_PREVIEW" ] && file -Lb --mime-type -- "$1" | grep -qF image/; then
   iterm-imgcat "$1"; read REPLY; echo
   exit 0
 fi

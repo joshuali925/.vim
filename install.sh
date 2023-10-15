@@ -91,7 +91,7 @@ install_development_tools() {
     chsh -s zsh "$(whoami)"
     mkdir -p ~/temp && cd ~/temp
     wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip && unzip JetBrainsMono.zip
-    mv 'JetBrains Mono Regular Nerd Font Complete Mono.ttf' ~/.termux/font.ttf
+    mv JetBrainsMonoNLNerdFontMono-Regular.ttf ~/.termux/font.ttf
     git clone https://github.com/adi1090x/termux-style --depth=1 && cd termux-style && ./install && cd ~
     rm -rf ~/temp
   elif [ "$PLATFORM:$PACKAGE_MANAGER" == 'linux:yum' ]; then
