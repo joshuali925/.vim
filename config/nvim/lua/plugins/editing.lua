@@ -3,7 +3,7 @@ return {
     { "max397574/better-escape.nvim", event = "InsertEnter", opts = { mapping = { "jk", "kj" }, timeout = 200, clear_empty_lines = true } },
     { "Wansmer/treesj", keys = { { "gS", "<Cmd>TSJSplit<CR>" }, { "gJ", "<Cmd>TSJJoin<CR>" } }, opts = { use_default_keymaps = false, max_join_length = 999 } },
     {
-        "kylechui/nvim-surround", -- TODO https://github.com/boltlessengineer/smart-tab.nvim
+        "kylechui/nvim-surround",
         keys = { "y", "c", "d", { "s", mode = "x" }, { "yss", "ysiw", remap = true }, { "yS", "ysg_", remap = true } },
         opts = { keymaps = { normal_cur = "<NOP>", normal_line = "<NOP>", normal_cur_line = "ysl", visual = "s", } },
     },

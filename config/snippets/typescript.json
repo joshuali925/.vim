@@ -38,16 +38,16 @@
       "set${1/(.*)/${1:/capitalize}/}: React.Dispatch<React.SetStateAction<$0>>;"
     ]
   },
-  "Filter not undefined": {
-    "prefix": ".defined",
+  ".filter() array elements not undefined": {
+    "prefix": "defined",
     "body": [
-      ".filter(<T,>(${1:value}: T | null | undefined): $1 is T => $1 !== null && $1 !== undefined)"
+      "filter(<T,>(${1:value}: T | null | undefined): $1 is T => $1 !== null && $1 !== undefined)"
     ]
   },
-  "Filter property not undefined": {
-    "prefix": ".definedProperty",
+  ".filter() array of objects with property not undefined": {
+    "prefix": "definedProperty",
     "body": [
-      ".filter((${1:value}): $1 is RequiredKey<typeof $1, '${2:property}'> => $1.$2 !== null && $1.$2 !== undefined)",
+      "filter((${1:value}): $1 is RequiredKey<typeof $1, '${2:property}'> => $1.$2 !== null && $1.$2 !== undefined)",
       "",
       "type RequiredKey<T, K extends keyof T> = T & Required<Pick<T, K>>;"
     ]
@@ -101,6 +101,10 @@
       "\t\tconst abortController = new AbortController();",
       "\t\tdispatch({ type: \"request\" });",
       "\t\tfetch(uri, { signal: abortController.signal })",
+      "\t\t\t.then((response) => {",
+      "\t\t\t\tif (response.ok) return response.json();",
+      "\t\t\t\treturn Promise.reject(response);",
+      "\t\t\t})",
       "\t\t\t.then((payload) => dispatch({ type: \"success\", payload }))",
       "\t\t\t.catch((error) => dispatch({ type: \"failure\", error }));",
       "",
@@ -119,7 +123,7 @@
       " * cast result based on object type.",
       " * Taken from https://news.ycombinator.com/item?id=36457557#36459276.",
       " */",
-      "export const ObjectTypedFn = {",
+      "export const TypedObject = {",
       "\tkeys: Object.keys as <T>(obj: T) => Array<keyof T>,",
       "\tentries: Object.entries as <T>(o: T) => Array<",
       "\t\t{",

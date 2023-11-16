@@ -41,13 +41,15 @@ alias cp='cp -riv'
 alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
-alias l='eza -lF --git --color=always --color-scale --icons --header --group-directories-first --time-style=long-iso --all --smart-group'
+alias l='eza -lF --git --color=always --color-scale=size --icons --header --group-directories-first --time-style=long-iso --all --smart-group'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias chmod\?='stat --printf "%a %n \n"'
 alias bell='echo -n -e "\a"'
 alias escape="sed 's/\\([\"\\]\\)/\\\\\\1/g'"  # escape "\ with backslash
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
 alias sudo='sudo '
+alias watch='watch '
+alias xargs='xargs '
 alias less='less -RiM'
 alias v='$EDITOR'
 alias vi='\vim'
@@ -64,6 +66,7 @@ alias lzd='lazydocker'
 alias lf='lf -last-dir-path="$HOME/.vim/tmp/lf_dir"'
 alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/ctop/issues/263
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
+alias title='printf "$([ -n "$TMUX" ] && printf "\033Ptmux;\033")\e]0;%s\e\\$([ -n "$TMUX" ] && printf "\033\\")"'
 alias 0='[ -f "$HOME/.vim/tmp/lf_dir" ] && cd "$(cat "$HOME/.vim/tmp/lf_dir")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
@@ -162,7 +165,7 @@ tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├─
 st() { ssh -t "$@" '.vim/bin/tmux new -A -s 0'; }
 
 gc() {
-  [ "$#" -eq 0 ] && { git commit --signoff -v; return $?; }
+  [ "$#" -eq 0 ] && { git commit --signoff; return $?; }
   local args=() message
   for arg in "$@"; do
     [[ "$arg" != -* ]] && message+="$arg " || args+=("$arg")
@@ -192,6 +195,10 @@ gcb() {
 }
 
 gwt() {
+  if [ "$#" -gt 0 ]; then
+    git worktree add -f "$@"
+    return $?
+  fi
   local worktree
   worktree=$(git worktree list | fzf | awk '{print $1}') && [ -d "$worktree" ] && cd "$worktree"
 }
@@ -358,7 +365,18 @@ print-ascii() {
   echo ' 15 0F SI   31 1F US   47 2F /    63 3F ?  79 4F O  95 5F _  111 6F o  127 7F DEL'
 }
 
-print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 https://github.com/jbranchaud/til/blob/b1994cfe2144193f46f8c61f20f9a583085ca0aa/unix/display-all-the-terminal-colors.md
+  if [ "$1" = '--all' ]; then
+    for x in {0..8}; do
+      for i in {30..37}; do
+        for a in {40..47}; do
+          echo -ne "\e[$x;$i;$a""m\\\e[$x;$i;$a""m\e[0;37;40m "
+        done
+        echo
+      done
+    done
+    return
+  fi
   printf 'Foreground 8 colors\n'
   echo "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
   printf '\nBackground 8 colors\n'

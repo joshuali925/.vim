@@ -18,7 +18,7 @@ return {
             "nvimtools/none-ls.nvim", -- TODO https://github.com/mfussenegger/nvim-lint, https://github.com/stevearc/conform.nvim
             { "pmizio/typescript-tools.nvim" },
             {
-                "nvimdev/lspsaga.nvim", -- TODO https://github.com/Bekaboo/dropbar.nvim
+                "nvimdev/lspsaga.nvim", -- TODO nvim 0.10 https://github.com/Bekaboo/dropbar.nvim
                 opts = {
                     ui = { winblend = 8 },
                     diagnostic = { on_insert = false },

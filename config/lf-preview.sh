@@ -4,7 +4,7 @@
 pager() {
   [ -d "$1" ] && { printf "%s\n\n" "$1"; ls "$1" -AlhF --color=always; } | bat && return
   if [ "$(wc -c < "$1")" -gt 2097152 ]; then # 2MB
-    less -RiM "$1"
+    less -RiNM "$1"
   else
     bat --color=always $BAT_OPTS "$1"
   fi

@@ -1,9 +1,11 @@
+" https://raw.githubusercontent.com/tpope/vim-commentary/e87cd90dc09c2a203e13af9704bd0ef79303d755/plugin/commentary.vim
+
 " commentary.vim - Comment stuff out
 " Maintainer:   Tim Pope <http://tpo.pe/>
 " Version:      1.3
 " GetLatestVimScripts: 3695 1 :AutoInstall: commentary.vim
 
-if exists("g:loaded_custom_commentary") || v:version < 700
+if exists("g:loaded_custom_commentary") || v:version < 703
   finish
 endif
 let g:loaded_custom_commentary = 1
@@ -18,7 +20,7 @@ function! s:strip_white_space(l,r,line) abort
   if l[-1:] ==# ' ' && stridx(a:line,l) == -1 && stridx(a:line,l[0:-2]) == 0
     let l = l[:-2]
   endif
-  if r[0] ==# ' ' && a:line[-strlen(r):] != r && a:line[1-strlen(r):] == r[1:]
+  if r[0] ==# ' ' && (' ' . a:line)[-strlen(r)-1:] != r && a:line[-strlen(r):] == r[1:]
     let r = r[1:]
   endif
   return [l, r]

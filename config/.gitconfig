@@ -41,8 +41,12 @@
 [pull]
 	rebase = true
 
+[commit]
+	verbose = true
+
 [rebase]
 	autoStash = true
+	autoSquash = true
 
 [merge]
 	; conflictstyle = diff3
