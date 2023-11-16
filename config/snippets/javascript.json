@@ -1,11 +1,11 @@
 {
   "Log": {
     "prefix": "cl",
-    "body": ["console.log('DEBUGGING ❗$0:', $0);"]
+    "body": ["console.log('❗$0:', $0);"]
   },
   "Log stringify": {
     "prefix": "clj",
-    "body": ["console.log('DEBUGGING ❗$0:\\n' + JSON.stringify($0, null, 2));"]
+    "body": ["console.log('❗$0:\\n' + JSON.stringify($0, null, 2));"]
   },
   "Logger": {
     "prefix": "logger",
@@ -21,9 +21,13 @@
       "console.timeEnd('${1:Performance test}');"
     ]
   },
+  "UUID": {
+    "prefix": "uuid",
+    "body": ["crypto.randomUUID()"]
+  },
   "Range": {
     "prefix": "range",
-    "body": ["[...Array(${1:10}).keys()]$0"]
+    "body": ["Array(${1:10}).fill().map(Number.call, Number)"]
   },
   "Random string": {
     "prefix": "random-string",
@@ -51,9 +55,7 @@
   },
   "Timeout outside async": {
     "prefix": "sleep",
-    "body": [
-      "await new Promise((resolve) => setTimeout(resolve, ${1:1000}));$0"
-    ]
+    "body": ["await new Promise((resolve) => setTimeout(resolve, ${1:1000}));"]
   },
   "Immediately-invoked async function": {
     "prefix": "async",
@@ -67,18 +69,34 @@
       "})",
       ".catch((error) => {",
       "\t$0",
-      "})"
+      "});"
     ]
   },
   "Promise then log": {
     "prefix": "then-log",
     "body": [".then((resp) => {", "\tconsole.log(resp);", "})"]
   },
+  "POST with fetch": {
+    "prefix": "fetch-post",
+    "body": [
+      "const response = fetch(${1:uri}, {",
+      "\tmethod: \"POST\",",
+      "\theaders: {",
+      "\t\tAccept: 'application/json',",
+      "\t\t'Content-Type': 'application/json',",
+      "\t},",
+      "\tbody: JSON.stringify(${2:payload}),",
+      "}).then((response) => {",
+      "\tif (response.ok) return response.json();",
+      "\treturn response.text().then((text) => Promise.reject(text));",
+      "});"
+    ]
+  },
   "Read from file": {
     "prefix": "read-file",
     "body": [
-      "const fs = require('fs');",
-      "const lines = fs.readFileSync(`\\${__dirname}/${1:fileName}`, 'utf8')",
+      "const fs = require('node:fs/promises');",
+      "const lines = (await fs.readFile(`\\${__dirname}/${1:fileName}`, 'utf8'))",
       "\t.split(/\\r?\\n/)",
       "\t.filter(line => line.trim() !== '');"
     ]
@@ -86,10 +104,10 @@
   "Write to file": {
     "prefix": "write-file",
     "body": [
-      "const fs = require('fs');",
-      "fs.mkdirSync(`\\${__dirname}/`, { recursive: true });",
-      "fs.writeFileSync(`\\${__dirname}/${1:fileName}`, ${0:str});",
-      "// fs.appendFileSync(`\\${__dirname}/${1:fileName}`, ${0:str});"
+      "const fs = require('node:fs/promises');",
+      "await fs.mkdir(`\\${__dirname}/`, { recursive: true });",
+      "await fs.writeFile(`\\${__dirname}/${1:fileName}`, ${0:lines.join('\\n')});",
+      "// await fs.appendFile(`\\${__dirname}/${1:fileName}`, ${0:lines.join('\\n')});"
     ]
   },
   "Dirname in esmodule": {

@@ -1,4 +1,4 @@
-" https://raw.githubusercontent.com/tommcdo/vim-exchange/784d63083ad7d613aa96f00021cd0dfb126a781a/plugin/exchange.vim
+" https://raw.githubusercontent.com/tommcdo/vim-exchange/c8ea85e43dc2c6230b0c7ae8cc3345613b6a6a18/plugin/exchange.vim
 
 let s:enable_highlighting = 1
 

@@ -1,5 +1,5 @@
 {
-  "cli template": {
+  "CLI template": {
     "prefix": "template-cli",
     "body": [
       "#!/usr/bin/env python3",
@@ -9,7 +9,7 @@
       "",
       "if not sys.stdin.isatty():",
       "\tstdin = [line.rstrip() for line in sys.stdin]",
-      "\tprint(\"\\n\".join([\"Read from stdin:\"] + stdin))",
+      "\tprint(\"\\n\".join([\"Read from pipe:\"] + stdin))",
       "\t# json_data = json.loads(\"\".join(stdin))",
       "",
       "if len(sys.argv) > 1:",
@@ -21,7 +21,26 @@
       "\t\ttext=True,",
       "\t)",
       "\tprint(out.stdout)",
+      "\tprint(out.stderr)",
       "\tprint(f\"Process finished with status {out.returncode}\")"
     ]
+  },
+  "Performance test template": {
+    "prefix": "template-benchmark",
+    "body": [
+      "from timeit import timeit",
+      "",
+      "",
+      "def ${1:run}():",
+      "\t$0",
+      "",
+      "",
+      "result = timeit(\"$1()\", setup=\"from __main__ import ${1}\", number=${2:10})",
+      "print(f\"Average time: {result / ${2}:.6f} seconds\")"
+    ]
+  },
+  "Flatten 2d array": {
+    "prefix": "flatten",
+    "body": ["[i for j in ${1:arr} for i in j]"]
   }
 }

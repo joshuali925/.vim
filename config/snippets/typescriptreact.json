@@ -1,5 +1,5 @@
 {
-  "Test EuiButton": {
+  "Test button": {
     "prefix": "test",
     "body": [
       "<button style={{ border: 'solid red', padding: 3 }} onClick={() => {",

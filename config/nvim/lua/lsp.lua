@@ -194,7 +194,10 @@ local formatting_lsps = { "null-ls", "lua_ls" }
 function M.organize_imports_and_format()
     local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_active_clients({ bufnr = 0 }))
     if vim.tbl_contains(active_clients, "typescript-tools") then
-        vim.cmd.TSToolsOrganizeImports("sync")
+        local ok, res = pcall(require("typescript-tools.api").organize_imports, true)
+        if not ok then
+            vim.notify(res, vim.log.levels.WARN, { title = "Failed to organize imports" })
+        end
     elseif vim.tbl_contains(active_clients, "pyright") then
         vim.cmd("silent PythonOrganizeImports")
     end

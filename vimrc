@@ -187,6 +187,8 @@ nnoremap <expr> cx ':set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:co
 xnoremap X :<C-u>call plugins#exchange#exchange_set(visualmode(), 1)<CR>
 nnoremap <expr> cxx ':set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@_'
 nnoremap cxc :call plugins#exchange#exchange_clear()<CR>
+nnoremap <expr> cr plugins#abolish#coerce('iw')
+nnoremap <expr> crr plugins#abolish#coerce('')
 nnoremap <BS> :bprevious<CR>
 nnoremap \ :bnext<CR>
 nnoremap [\ :tab sbuffer<CR>
@@ -211,6 +213,7 @@ nnoremap q :call plugins#zeef#buffer({'unlisted': 0})<CR>
 nnoremap Q q
 xnoremap @q :normal! @q<CR>
 xnoremap @@ :normal! @@<CR>
+nnoremap c@ :call funcs#edit_register()<CR>
 nnoremap _ <C-o>
 nnoremap + <C-i>
 nnoremap Y y$
@@ -223,7 +226,6 @@ nnoremap gF gf
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
 xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>
 nnoremap <expr> zn v:count > 0 ? ':set foldlevel=' . v:count . '<CR>' : ':%foldclose<CR>'
-nnoremap cr :call funcs#edit_register()<CR>
 nnoremap Z[ :1,.- bdelete<CR>
 nnoremap Z] :.+,$ bdelete<CR>
 nnoremap ZX :%bdelete <bar> edit #<CR>

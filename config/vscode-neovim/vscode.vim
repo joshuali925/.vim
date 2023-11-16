@@ -108,6 +108,8 @@ nnoremap <expr> cx ':set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:co
 xnoremap X :<C-u>call plugins#exchange#exchange_set(visualmode(), 1)<CR>
 nnoremap <expr> cxx ':set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@_'
 nnoremap cxc :call plugins#exchange#exchange_clear()<CR>
+nnoremap <expr> cr plugins#abolish#coerce('iw')
+nnoremap <expr> crr plugins#abolish#coerce('')
 nmap <BS> gT
 nmap \ gt
 noremap <expr> 0 funcs#home()

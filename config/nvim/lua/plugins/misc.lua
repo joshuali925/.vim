@@ -62,7 +62,7 @@ return {
             { "<leader>e", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.word_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
-            { "<leader>o", "<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0), false)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>o", "<Cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0), false)<CR>" },
         },
         config = function()
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })

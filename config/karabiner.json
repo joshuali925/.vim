@@ -1981,8 +1981,29 @@
       ]
     },
     {
-      "description": "Applications: vim, dict, term, rectangle",
+      "description": "Applications: record, vim, dict, term, rectangle",
       "manipulators": [
+        {
+          "from": {
+            "key_code": "r",
+            "modifiers": {
+              "mandatory": [
+                "left_command",
+                "right_command",
+                "right_control",
+                "right_shift",
+                "right_option"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "5",
+              "modifiers": ["right_command", "right_shift"]
+            }
+          ],
+          "type": "basic"
+        },
         {
           "from": {
             "key_code": "v",

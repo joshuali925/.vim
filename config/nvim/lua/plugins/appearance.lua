@@ -1,5 +1,5 @@
 return {
-    { "folke/tokyonight.nvim", priority = 1000 },
+    { "folke/tokyonight.nvim", priority = 1000, commit = "e1e8ff2c8ff2bdc90ce35697291a5917adc8db5c" }, -- https://github.com/folke/tokyonight.nvim/issues/452
     { "projekt0n/github-nvim-theme", priority = 1000 },
     { "askfiy/visual_studio_code", priority = 1000 },
     { "Shatur/neovim-ayu", priority = 1000 },
@@ -10,7 +10,7 @@ return {
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
         opts = {
-            indent = { char = "▏", tab_char = "▏" },
+            indent = { char = "▏", tab_char = "█" },
             exclude = { filetypes = vim.g.qs_filetype_blacklist, buftypes = vim.g.qs_buftype_blacklist },
             scope = { show_start = false, show_end = false },
         },
@@ -150,7 +150,7 @@ return {
                     lualine_y = {},
                     lualine_z = {},
                 },
-                extensions = { "nvim-tree", "aerial", "fugitive", "mundo" },
+                extensions = { "aerial", "fugitive", "mundo" },
             })
         end,
     },

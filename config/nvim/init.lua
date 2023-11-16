@@ -1,13 +1,13 @@
 -- options {{{1
 vim.loader.enable()
-require("states")                  -- lua/states.lua       plugins/ui.lua
-vim.g.loaded_2html_plugin = 1      -- lua/themes.lua       plugins/appearance.lua
-vim.g.loaded_remote_plugins = 1    -- lua/utils.lua        plugins/misc.lua
+require("states")                  -- lua/states.lua       plugins/appearance.lua
+vim.g.loaded_2html_plugin = 1      -- lua/themes.lua       plugins/ui.lua
+vim.g.loaded_remote_plugins = 1    -- lua/lsp.lua          plugins/lang.lua
 vim.g.loaded_tutor_mode_plugin = 1 -- lua/rooter.lua       plugins/completion.lua
-vim.g.mapleader = ";"              -- lua/lsp.lua          plugins/lang.lua
-vim.g.maplocalleader = "|"         -- ginit.vim            plugins/git.lua
-vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/editing.lua
-vim.g.netrw_banner = 0
+vim.g.mapleader = ";"              -- lua/smart-tab.lua    plugins/editing.lua
+vim.g.maplocalleader = "|"         -- lua/utils.lua        plugins/misc.lua
+vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/git.lua
+vim.g.netrw_banner = 0             -- ginit.vim
 vim.g.netrw_browse_split = 4
 vim.g.netrw_preview = 1
 vim.g.netrw_alto = 0
@@ -136,6 +136,8 @@ vim.keymap.set("x", "X", "<Cmd>call plugins#exchange#exchange_set(visualmode(), 
 vim.keymap.set("n", "cxx", "'<Cmd>set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@_'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "cxc", "<Cmd>call plugins#exchange#exchange_clear()<CR>")
 vim.keymap.set("o", "gc", ":<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>")
+vim.keymap.set("n", "cr", "plugins#abolish#coerce('iw')", { expr = true })
+vim.keymap.set("n", "crr", "plugins#abolish#coerce('')", { expr = true })
 -- general {{{2
 vim.keymap.set("n", "[\\", "<Cmd>tab sbuffer<CR>")
 vim.keymap.set("n", "]\\", "<Cmd>enew<CR>")
@@ -163,12 +165,12 @@ vim.keymap.set("n", "+", "<C-i>")
 vim.keymap.set("n", "Q", "q")
 vim.keymap.set("x", "@q", ":normal! @q<CR>")
 vim.keymap.set("x", "@@", ":normal! @@<CR>")
+vim.keymap.set("n", "c@", "<Cmd>call funcs#edit_register()<CR>")
 vim.keymap.set("n", "U", "<Cmd>execute 'earlier ' . v:count1 . 'f'<CR>")
 vim.keymap.set("x", "<", "<gv")
 vim.keymap.set("x", ">", ">gv")
 vim.keymap.set("n", "gp", "`[v`]")
 vim.keymap.set("n", "zn", "v:count > 0 ? '<Cmd>set foldlevel=' . v:count . '<CR>' : '<Cmd>%foldclose<CR>'", { expr = true, replace_keycodes = false })
-vim.keymap.set("n", "cr", "<Cmd>call funcs#edit_register()<CR>")
 vim.keymap.set("n", "gf", "gF")
 vim.keymap.set("n", "gF", "gf")
 vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")

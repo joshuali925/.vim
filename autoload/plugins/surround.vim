@@ -1,4 +1,4 @@
-" commit: 81fc0ec460dd8b25a76346e09aecdbca2677f1a7
+" https://raw.githubusercontent.com/tpope/vim-surround/81fc0ec460dd8b25a76346e09aecdbca2677f1a7/plugin/surround.vim
 
 " surround.vim - Surroundings
 " Author:       Tim Pope <http://tpo.pe/>

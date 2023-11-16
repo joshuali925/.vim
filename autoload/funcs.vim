@@ -129,7 +129,7 @@ function! funcs#print_variable(visual, printAbove) abort
   let word = a:visual ? funcs#get_visual_selection() : expand('<cword>')
   let print = {}
   let print['python'] = "print('❗" . word . ":', " . word . ')'
-  let print['javascript'] = "console.info('❗" . word . ":', " . word . ');'
+  let print['javascript'] = "console.log('❗" . word . ":', " . word . ');'
   let print['typescript'] = print['javascript']
   let print['typescriptreact'] = print['javascript']
   let print['java'] = 'System.out.println("[" + getClass().getSimpleName() + " " + (' . word . ').getClass().getSimpleName() + "] ❗' . word . ': " + ' . word . ');'
