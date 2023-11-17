@@ -190,7 +190,7 @@ gcb() {
     local tracking="$(git rev-parse --abbrev-ref "${remote#[^\/]*/}@{upstream}" 2> /dev/null)"  # current tracking <remote'>/<branch'> for <branch>
     [ -n "$tracking" ] && [ "$tracking" != "$remote" ] && git checkout -b "${remote/\//-}" --track "$remote" || git checkout "${remote#[^\/]*/}"
   else  # <branch> doesn't exist, create it
-    git checkout --track "$remote"
+    git checkout "$remote"  # don't use --track, otherwise branch <prefix/name> becomes <name> tracking <prefix/name>
   fi
 }
 

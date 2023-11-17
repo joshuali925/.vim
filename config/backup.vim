@@ -3996,7 +3996,17 @@ export MANROFFOPT='-c'
             require("mini.pairs").setup({ mappings = { [" "] = { action = "open", pair = "  ", neigh_pattern = "[%(%[{][%)%]}]" } } }) -- doesn't support triple quotes
             require('mini.surround').setup() -- doesn't support closest pair
             require('mini.splitjoin').setup() -- regex based, doesn't support toggle javascript oneline function
-            require("mini.jump").setup({ mappings = { repeat_jump = "," }, delay = { highlight = 1500, idle_stop = 1500 }, silent = true }) -- auto smart jumps
+            require("mini.jump").setup({ mappings = { repeat_jump = "," }, delay = { highlight = 1500, idle_stop = 1500 }, silent = true }) -- doesn't support disable auto smart jumps
+            require("mini.sessions").setup({ -- doesn't restore scrollview
+                hooks = {
+                    pre = { read = function() vim.cmd.ScrollViewDisable() end, write = function() vim.cmd.ScrollViewDisable() end },
+                    post = { read = function() vim.cmd.ScrollViewEnable() end, write = function() vim.cmd.ScrollViewEnable() end },
+                },
+            })
+                " theme.button("E", "Load from session", "<Cmd>lua MiniSessions.select()<CR>"),
+                " theme.button("R", "Load from last session", "<Cmd>lua MiniSessions.read()<CR>"),
+                " { "&Save session", [[call feedkeys(":lua MiniSessions.write('temp')\<Left>\<Left>", "n")]], "Save session using mini.nvim" },
+                " { "Load s&ession", [[lua MiniSessions.select()]], "Load session using mini.nvim" },
         end,
     },
 " hop.nvim

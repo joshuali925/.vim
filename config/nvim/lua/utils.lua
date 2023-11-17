@@ -118,6 +118,12 @@ function M.command_without_quickscope(command)
     end
 end
 
+function M.git_change_base(commit)
+    require("lazy").load({ plugins = "vim-flog" })
+    vim.cmd.Git({ args = { "difftool --name-status " .. commit }, bang = true })
+    require("gitsigns").change_base(commit, true)
+end
+
 function M.toggle_venn()
     vim.b.venn_enabled = vim.b.venn_enabled == nil and true or nil
     if vim.b.venn_enabled then

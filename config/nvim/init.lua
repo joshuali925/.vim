@@ -1,13 +1,13 @@
 -- options {{{1
 vim.loader.enable()
-require("states")                  -- lua/states.lua       plugins/appearance.lua
-vim.g.loaded_2html_plugin = 1      -- lua/themes.lua       plugins/ui.lua
+require("states")                  -- lua/themes.lua       plugins/appearance.lua
+vim.g.loaded_2html_plugin = 1      -- lua/states.lua       plugins/ui.lua
 vim.g.loaded_remote_plugins = 1    -- lua/lsp.lua          plugins/lang.lua
 vim.g.loaded_tutor_mode_plugin = 1 -- lua/rooter.lua       plugins/completion.lua
-vim.g.mapleader = ";"              -- lua/smart-tab.lua    plugins/editing.lua
-vim.g.maplocalleader = "|"         -- lua/utils.lua        plugins/misc.lua
-vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/git.lua
-vim.g.netrw_banner = 0             -- ginit.vim
+vim.g.mapleader = ";"              -- lua/utils.lua        plugins/editing.lua
+vim.g.maplocalleader = "|"         -- autoload/funcs.vim   plugins/misc.lua
+vim.g.netrw_dirhistmax = 0         -- ginit.vim            plugins/git.lua
+vim.g.netrw_banner = 0
 vim.g.netrw_browse_split = 4
 vim.g.netrw_preview = 1
 vim.g.netrw_alto = 0
@@ -33,7 +33,7 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 vim.o.expandtab = true
 vim.o.tabstop = 4
-vim.o.softtabstop = 4
+vim.o.softtabstop = -1
 vim.o.shiftwidth = 4
 vim.o.shiftround = true
 vim.o.complete = ".,w,b,u"
@@ -289,6 +289,8 @@ vim.api.nvim_create_autocmd("BufReadPost", {
         vim.o.foldtext = [[matchstr(getline(v:foldstart),'^[^|]\+').'| ⋯']]
         vim.keymap.set("n", "<leader>w", [[<Cmd>let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>]], { buffer = true })
         vim.keymap.set("n", "<CR>", "<CR>", { buffer = true })
+        vim.keymap.set("n", "<leader>s", [[:cdo s/\<<C-r><C-w>\>/<C-r><C-w>/g<Left><Left>]], { buffer = true })
+        vim.keymap.set("x", "<leader>s", [["xy:cdo s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/g<Left><Left>]], { buffer = true })
     end,
 })
 vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
@@ -306,8 +308,10 @@ vim.api.nvim_create_user_command("SetArgs", "let b:args = <q-args> == '' ? '' : 
 vim.api.nvim_create_user_command("S", [[execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <range> != 0 | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr() . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | else | execute "put =execute('" . <q-args> . "')" | endif | 1d]], { complete = "command", nargs = "*", range = true, bang = true })
 vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee % > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute "botright terminal sudo `which nvim` +'1,$d' +startinsert %" | startinsert | endif]], { bang = true })
 vim.api.nvim_create_user_command("Grt", "Gcd", {})
-vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | mksession! " .. vim.fn.stdpath("cache") .. "/session.vim | silent! ScrollViewEnable | lua vim.notify('Session saved to " .. vim.fn.stdpath("cache") .. "/session.vim', vim.log.levels.INFO, { title = 'Session' })", {})
-vim.api.nvim_create_user_command("SessionLoad", "source " .. vim.fn.stdpath("cache") .. "/session.vim | lua vim.notify('Loaded session from " .. vim.fn.stdpath("cache") .. "/session.vim', vim.log.levels.INFO, { title = 'Session' })", {})
+vim.api.nvim_create_user_command("ProfileStart", "lua require('plenary.profile').start(vim.fn.stdpath('cache') .. '/profile.log')", {})
+vim.api.nvim_create_user_command("ProfileStop", [[execute "lua require('plenary.profile').stop()" | execute 'edit ' . stdpath('cache') . '/profile.log']], {})
+vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | execute 'mksession! ' . stdpath('data') . '/session_' . <q-args> . '.vim' | silent! ScrollViewEnable | lua vim.notify('Session saved to \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*" })
+vim.api.nvim_create_user_command("SessionLoad", "execute 'source ' . stdpath('data') . '/session_' . <q-args> . '.vim' | lua vim.notify('Loaded session from \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
 vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })

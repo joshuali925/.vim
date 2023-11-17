@@ -133,7 +133,7 @@ return {
                             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "", true)
                         elseif require("neogen").jumpable() then
                             require("neogen").jump_next()
-                        elseif require("smart-tab").smart_tab() == false then
+                        else
                             fallback()
                         end
                     end, { "i", "s" }),

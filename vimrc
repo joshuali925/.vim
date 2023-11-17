@@ -72,7 +72,7 @@ set autoindent
 set smarttab
 set expandtab
 set tabstop=4
-set softtabstop=2
+set softtabstop=-1
 set shiftwidth=2
 set shiftround
 set autoread
@@ -119,6 +119,10 @@ set cedit=<C-x>
 set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%{&fileencoding!=''&&&fileencoding!='utf-8'?'[fileencoding\:\ '.&fileencoding.']':''}%{&fileformat!='unix'?'[fileformat\:\ '.&fileformat.']':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
 set showtabline=2
 set tabline=%!BufferLine()
+set list
+" leadmultispace is available for >= 8.2.5066
+set listchars=tab:█\ ,nbsp:␣,trail:•
+let &listchars='tab:█ ,nbsp:␣,trail:•,leadmultispace:▏' . repeat(' ', &shiftwidth - 1)
 silent! set belloff=all
 
 let mapleader=';'
@@ -310,7 +314,8 @@ augroup AutoCommands
   autocmd FileType json setlocal formatprg=python\ -m\ json.tool
   autocmd FileType help,man nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn:execute 'cd ' . b:netrw_curdir<CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q| nmap <buffer> a %
-  autocmd BufReadPost quickfix setlocal nobuflisted modifiable foldmethod=expr foldexpr=matchstr(getline(v:lnum),'^[^\|]\\+')==#matchstr(getline(v:lnum+1),'^[^\|]\\+')?1:'<1' | let &foldtext='matchstr(getline(v:foldstart),"^[^|]\\+")."| ⋯"' | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> o <CR>:cclose<CR>
+  autocmd BufReadPost quickfix setlocal nobuflisted modifiable foldmethod=expr foldexpr=matchstr(getline(v:lnum),'^[^\|]\\+')==#matchstr(getline(v:lnum+1),'^[^\|]\\+')?1:'<1' | let &foldtext='matchstr(getline(v:foldstart),"^[^|]\\+")."| ⋯"' | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> o <CR>:cclose<CR>| nnoremap <buffer> <leader>s :cdo s/\<<C-r><C-w>\>/<C-r><C-w>/g<Left><Left>| xnoremap <leader>s "xy:cdo s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/g<Left><Left>
+  silent! autocmd OptionSet shiftwidth let &listchars='tab:█ ,nbsp:␣,trail:•,leadmultispace:▏' . repeat(' ', &shiftwidth - 1)
 augroup END
 
 command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
