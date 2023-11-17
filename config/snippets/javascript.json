@@ -21,6 +21,10 @@
       "console.timeEnd('${1:Performance test}');"
     ]
   },
+  "JSDoc link class": {
+    "prefix": "link",
+    "body": ["{@link ${1:Class}}"]
+  },
   "UUID": {
     "prefix": "uuid",
     "body": ["crypto.randomUUID()"]

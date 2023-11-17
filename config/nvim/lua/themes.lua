@@ -8,15 +8,17 @@ M.theme_list = {
     [-1] = "tokyonight",
     [-2] = "github",
     [-3] = "vscode",
-    [-4] = "ayu",
-    [-5] = "catppuccin",
-    [-6] = "nightfox",
+    [-4] = "kanagawa",
+    [-5] = "ayu",
+    [-6] = "catppuccin",
+    [-7] = "nightfox",
     [0] = "tokyonight",
     [1] = "nightfox",
     [2] = "github",
     [3] = "vscode",
-    [4] = "ayu",
-    [5] = "catppuccin",
+    [4] = "kanagawa",
+    [5] = "ayu",
+    [6] = "catppuccin",
 }
 M.theme = M.theme_list[theme_index]
 
@@ -90,6 +92,12 @@ local themes = {
                 groups = { dayfox = { LspReferenceText = { bg = "#e3dacf" }, LspReferenceRead = { bg = "#e3dacf" }, LspReferenceWrite = { bg = "#e3dacf" } } },
             })
             vim.cmd.colorscheme(theme_index < 0 and "carbonfox" or "dayfox")
+        end,
+    },
+    ["kanagawa"] = {
+        config = function()
+            require("kanagawa").setup({ compile = true })
+            vim.cmd.colorscheme("kanagawa")
         end,
     },
 }

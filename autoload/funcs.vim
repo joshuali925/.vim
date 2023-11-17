@@ -40,6 +40,10 @@ function! funcs#simple_complete()
   endif
 endfunction
 
+function! funcs#get_session_names(arg_lead, cmd_line, cursor_pos)
+  return map(glob(stdpath('data') . '/session_*.vim', 0, 1), 'substitute(v:val, stdpath("data") . "/session_", "", "")[0:-5]')
+endfunction
+
 function! funcs#grep(prg, pattern)
   let saved_errorformat = &errorformat
   set errorformat=%f:%l:%c:%m,%f:%l:%m,%f

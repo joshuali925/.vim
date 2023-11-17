@@ -57,26 +57,27 @@ return {
             require("nvim-tree").setup({
                 hijack_cursor = true,
                 hijack_netrw = false,
-                git = { ignore = false, show_on_open_dirs = false },
+                git = { show_on_open_dirs = false },
+                filters = { git_ignored = false },
                 actions = { open_file = { resize_window = false } },
-                renderer = { highlight_git = true, full_name = true },
+                renderer = { highlight_git = true, full_name = true, indent_markers = { enable = true } },
                 on_attach = function(bufnr)
                     local function opts(desc)
                         return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
                     end
+                    local api = require("nvim-tree.api")
                     local filters = require("nvim-tree.explorer.filters").config
-                    local function reset_filters(current)
+                    local function set_gitignore_filter(current)
                         if filters[current] then
                             if not filters.filter_git_ignored then
-                                require("nvim-tree.api").tree.toggle_gitignore_filter()
+                                api.tree.toggle_gitignore_filter()
                             end
-                            require("nvim-tree.api").tree.collapse_all()
-                            require("nvim-tree.api").tree.expand_all()
+                            api.tree.collapse_all()
+                            api.tree.expand_all()
                         elseif filters.filter_git_ignored then
-                            require("nvim-tree.api").tree.toggle_gitignore_filter()
+                            api.tree.toggle_gitignore_filter()
                         end
                     end
-                    local api = require("nvim-tree.api")
                     api.config.mappings.default_on_attach(bufnr)
                     vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
                     vim.keymap.set("n", "i", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
@@ -98,33 +99,33 @@ return {
                     vim.keymap.set("n", "]g", api.node.navigate.git.next, opts("Next Git"))
                     vim.keymap.set("n", "<BS>", function()
                         if not filters.filter_git_clean and not filters.filter_no_buffer then
-                            require("nvim-tree.api").tree.toggle_git_clean_filter()
-                            reset_filters("filter_git_clean")
+                            api.tree.toggle_git_clean_filter()
+                            set_gitignore_filter("filter_git_clean")
                             vim.cmd.file("Git")
                         elseif filters.filter_git_clean then
-                            require("nvim-tree.api").tree.toggle_git_clean_filter()
-                            require("nvim-tree.api").tree.toggle_no_buffer_filter()
-                            reset_filters("filter_no_buffer")
+                            api.tree.toggle_git_clean_filter()
+                            api.tree.toggle_no_buffer_filter()
+                            set_gitignore_filter("filter_no_buffer")
                             vim.cmd.file("Buffer")
                         else
-                            require("nvim-tree.api").tree.toggle_no_buffer_filter()
-                            reset_filters("filter_no_buffer")
+                            api.tree.toggle_no_buffer_filter()
+                            set_gitignore_filter("filter_no_buffer")
                             vim.cmd.file("NvimTree_1")
                         end
                     end, opts("Toggle Filter: Git Clean"))
                     vim.keymap.set("n", "\\", function()
                         if not filters.filter_git_clean and not filters.filter_no_buffer then
-                            require("nvim-tree.api").tree.toggle_no_buffer_filter()
-                            reset_filters("filter_no_buffer")
+                            api.tree.toggle_no_buffer_filter()
+                            set_gitignore_filter("filter_no_buffer")
                             vim.cmd.file("Buffer")
                         elseif filters.filter_no_buffer then
-                            require("nvim-tree.api").tree.toggle_no_buffer_filter()
-                            require("nvim-tree.api").tree.toggle_git_clean_filter()
-                            reset_filters("filter_git_clean")
+                            api.tree.toggle_no_buffer_filter()
+                            api.tree.toggle_git_clean_filter()
+                            set_gitignore_filter("filter_git_clean")
                             vim.cmd.file("Git")
                         else
-                            require("nvim-tree.api").tree.toggle_git_clean_filter()
-                            reset_filters("filter_git_clean")
+                            api.tree.toggle_git_clean_filter()
+                            set_gitignore_filter("filter_git_clean")
                             vim.cmd.file("NvimTree_1")
                         end
                     end, opts("Toggle Filter: No Buffer"))
@@ -264,7 +265,7 @@ return {
                 theme.button("p", "Open Lazy UI", "<Cmd>Lazy<CR>"),
                 theme.button("s", "Open Mason UI", "<Cmd>Mason<CR>"),
                 theme.button("U", "Update packages", "<Cmd>Lazy update<CR>"),
-                theme.button("E", "Load from previous session", "<Cmd>silent SessionLoad<CR>"),
+                theme.button("R", "Load session", "<Cmd>call feedkeys(':SessionLoad', 'n')<CR>"),
             }
             theme.mru_opts.ignore = function(path, ext)
                 return string.find(path, "vim/.*/doc/.*%.txt") or string.find(path, "/.git/")
@@ -359,8 +360,8 @@ return {
                 { "&Refresh screen", [[execute "lua require('ibl').refresh()" | execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
                 { "--", "" },
                 { "Open &Alpha", [[Lazy! load alpha-nvim | Alpha]], "Open Alpha" },
-                { "&Save session", [[SessionSave]], "Save session to .cache/nvim/session.vim, will overwrite" },
-                { "Load s&ession", [[SessionLoad]], "Load session from .cache/nvim/session.vim" },
+                { "&Save session", [[SessionSave]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
+                { "Load s&ession", [[call feedkeys(":SessionLoad", "n")]], "Load session from .cache/nvim/session_<name>.vim" },
                 { "--", "" },
                 { "Edit Vimr&c", [[edit $MYVIMRC]] },
                 { "GB18030 to utf-8", [[edit ++enc=GB18030 | set fileencoding=utf8]], "Edit as GB18030 (edit ++enc=GB18030) for Chinese characters and reset file format back to utf-8" },
@@ -378,10 +379,9 @@ return {
                 { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
                 { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
                 { "Git toggle blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
-                { "Git hunks since ref", [[call feedkeys(":Gitsigns change_base HEAD true\<left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Show hunks based on ref instead of staged, to reset run :Gitsigns change_base" },
                 { "--", "" },
                 { "Git &status", [[Git]], "Git status" },
-                { "Git &changes since ref", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | call feedkeys(":Git! difftool --name-status HEAD", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref)" },
+                { "Git &changes since ref", [[call feedkeys(":lua require('utils').git_change_base('HEAD')\<Left>\<Left>", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref), and show hunks based on ref instead of staged (to reset run :Gitsigns reset_base true)" },
                 { "Diff&view", [[DiffviewOpen]], "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits" },
                 { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
                 { "--", "" },

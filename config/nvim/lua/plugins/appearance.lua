@@ -5,6 +5,7 @@ return {
     { "Shatur/neovim-ayu", priority = 1000 },
     { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
     { "EdenEast/nightfox.nvim", priority = 1000 },
+    { "rebelot/kanagawa.nvim", priority = 1000 },
     { "nvim-tree/nvim-web-devicons" },
     {
         "lukas-reineke/indent-blankline.nvim",
@@ -37,7 +38,7 @@ return {
     },
     {
         "nvim-lualine/lualine.nvim",
-        event = "BufEnter",
+        event = "VeryLazy",
         config = function()
             if require("themes").theme == "visual_studio_code" then
                 return
