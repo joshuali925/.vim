@@ -1,7 +1,9 @@
-# [ -t 1 ] && exec zsh
+# shellcheck disable=1090,2015,2059,2148
+# [[ -t 1 ]] && exec zsh
 
+# shellcheck disable=1091
 [[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && alias get-completion='complete -F _longopt' \
-  && [ -z "$BASH_COMPLETION_VERSINFO" ] && . /usr/share/bash-completion/bash_completion
+  && [[ -z $BASH_COMPLETION_VERSINFO ]] && . /usr/share/bash-completion/bash_completion
 
 source ~/.vim/config/fzf/completion.bash
 source ~/.vim/config/fzf/key-bindings.bash
@@ -17,7 +19,8 @@ shopt -s dotglob
 
 HISTCONTROL=ignoreboth:erasedups:ignorespace
 
-if [ -t 1 ]; then
+# interactive settings. it's better to check interactive with [[ $- = *i* ]], but [[ -t 1 ]] is somewhat faster
+if [[ -t 1 ]]; then
   bind 'set show-all-if-ambiguous on'
   bind 'set completion-ignore-case on'
   bind 'set enable-bracketed-paste on'
@@ -37,18 +40,18 @@ if [ -t 1 ]; then
   stty werase undef  # unbind werase to C-w
   bind '"\C-w": unix-filename-rubout'
 
-  if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
-    # bash >= 4.0 needed for $READLINE_LINE
+  # tab to complete command or use fzf to change directory, incompatible with ble.sh
+  if [[ ${BASH_VERSINFO[0]} -ge 4 ]]; then  # bash >= 4.0 needed for $READLINE_LINE
     BINDED_COMPLETION=-1
     _check_tab_complete() {
-      if [ -n "$READLINE_LINE" ]; then
+      if [[ -n $READLINE_LINE ]]; then
         bind '"\301": menu-complete'
         bind 'TAB: menu-complete'
         BINDED_COMPLETION=1
       fi
     }
     _reset_tab() {
-      if [ $BINDED_COMPLETION != 0 ]; then
+      if [[ $BINDED_COMPLETION != 0 ]]; then
         bind '"\301": "\ec"'
         bind 'TAB: "\300\301"'
         BINDED_COMPLETION=0
@@ -67,11 +70,13 @@ if [ -t 1 ]; then
       bind '"\C-m": "\365\366"'
     }
     _restore_pushed_line() {
+      # shellcheck disable=2124
       READLINE_LINE="${READLINE_LINE_TEMP[@]: -1}"
+      # shellcheck disable=2124
       READLINE_POINT="${READLINE_POINT_TEMP[@]: -1}"
       unset 'READLINE_LINE_TEMP[${#READLINE_LINE_TEMP[@]}-1]'
       unset 'READLINE_POINT_TEMP[${#READLINE_POINT_TEMP[@]}-1]'
-      if [ "${#READLINE_LINE_TEMP[@]}" -eq 0 ]; then
+      if [[ ${#READLINE_LINE_TEMP[@]} -eq 0 ]]; then
         bind '"\C-m": accept-line'
       fi
     }
@@ -83,18 +88,18 @@ if [ -t 1 ]; then
 fi
 
 cd() {
-  if [ "$1" == "" ]; then
+  if [[ -z $1 ]]; then
     pushd "$HOME" > /dev/null || return
-  elif [ "$1" == "-" ]; then
+  elif [[ $1 = "-" ]]; then
     builtin cd "$OLDPWD" > /dev/null || return
-  elif [[ "$1" =~ ^-[0-9]+$ ]]; then
+  elif [[ $1 =~ ^-[0-9]+$ ]]; then
     pushd "+${1/-/}" > /dev/null || return
-  elif [ "$1" == "--" ]; then
+  elif [[ $1 = -- ]]; then
     pushd -- "${@:2}" > /dev/null || return
   else
     pushd "$@" > /dev/null || return
   fi
-  if [ "$(command ls | wc -l)" -lt 200 ]; then ls -AF --color=auto; fi
+  if [[ $(command ls | wc -l) -lt 200 ]]; then ls -AF --color=auto; fi
 }
 complete -d cd
 
@@ -103,17 +108,17 @@ _get_prompt_tail() {
   # git branch with prompt sign colored by exit code
   # takes optional arguments as separators between those two
   local _head_file _head _dir="$PWD" _tail _exit="$?"
-  [ $_exit != 0 ] && _tail="${*:- }"$'\001\e[38;5;9m\002$\001\e[0m\002 ' || _tail="${*:- }"$'\001\e[38;5;141m\002$\001\e[0m\002 '
-  while [ -n "$_dir" ]; do
+  [[ $_exit != 0 ]] && _tail="${*:- }"$'\001\e[38;5;9m\002$\001\e[0m\002 ' || _tail="${*:- }"$'\001\e[38;5;141m\002$\001\e[0m\002 '
+  while [[ -n $_dir ]]; do
     _head_file="$_dir/.git/HEAD"
-    if [ -f "$_dir/.git" ]; then
+    if [[ -f $_dir/.git ]]; then
       read -r _head_file < "$_dir/.git" && _head_file="${_head_file#gitdir: }/HEAD"
-      [ ! -e "$_head_file" ] && _head_file="$_dir/$_head_file" || break
+      [[ ! -e $_head_file ]] && _head_file="$_dir/$_head_file" || break
     fi
-    [ -e "$_head_file" ] && break
+    [[ -e $_head_file ]] && break
     _dir="${_dir%/*}"
   done
-  if [ -e "$_head_file" ]; then
+  if [[ -e $_head_file ]]; then
     read -r _head < "$_head_file" || return
     case "$_head" in
       ref:*) printf $'\001\e[38;5;130m\002'" (${_head#ref: refs/heads/})$_tail" ;;
@@ -127,6 +132,6 @@ _get_prompt_tail() {
 }
 
 .vim-disable-prompt-command() {
-  PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([ \$? != 0 ] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")$ \[\e[0m\]"
+  PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([[ \$? != 0 ]] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")$ \[\e[0m\]"
   PROMPT_COMMAND=
 }

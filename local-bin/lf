@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-while [ "$#" -ne 0 ] && [[ "$1" = -* ]]; do shift; done
+while [[ $# -ne 0 ]] && [[ $1 = -* ]]; do shift; done
 target=$(realpath -s "${*:-$PWD}")
-if [ -d "$target" ]; then
+if [[ -d $target ]]; then
   exec vim +"cd $target" +Explore
 fi
 exec vim "$target"

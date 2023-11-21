@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-if [ "$(readlink -f "$HOME/.tmux.conf")" != "$HOME/.vim/config/.tmux.conf" ]; then
-  [ -f "$HOME/.tmux.conf" ] && echo '~/.tmux.conf exists, renaming to ~/.tmux.conf.bak' >&2 && mv -iv ~/.tmux.conf ~/.tmux.conf.bak
+if [[ $(readlink -f "$HOME/.tmux.conf") != $HOME/.vim/config/.tmux.conf ]]; then
+  [[ -f $HOME/.tmux.conf ]] && echo '~/.tmux.conf exists, renaming to ~/.tmux.conf.bak' >&2 && mv -iv ~/.tmux.conf ~/.tmux.conf.bak
   ln -sv ~/.vim/config/.tmux.conf ~/.tmux.conf
 fi
 
@@ -14,5 +14,5 @@ case $PLATFORM:$ARCHITECTURE in
   *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2; exit 1 ;;
 esac
 
-[ -n "$url" ] && install-archive-from-url "$url" tmux '' "$@"
+[[ -n $url ]] && install-archive-from-url "$url" tmux '' "$@"
 run-if-exists "$0" "$@"

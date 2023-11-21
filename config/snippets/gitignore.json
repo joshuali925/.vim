@@ -1,0 +1,6 @@
+{
+  "Ignore everything but .gitignore template": {
+    "prefix": "template-gitkeep",
+    "body": ["*", "!.gitignore"]
+  }
+}

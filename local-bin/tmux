@@ -4,8 +4,8 @@ set -eo pipefail
 tmux_path=$(builtin command -v tmux)
 [[ $tmux_path = */.vim/*/tmux ]] && echo 'Tmux not installed.' >&2 && exit 1
 
-if [ "$(readlink -f "$HOME/.tmux.conf")" != "$HOME/.vim/config/.tmux.conf" ]; then
-  [ -f "$HOME/.tmux.conf" ] && echo '~/.tmux.conf exists, renaming to ~/.tmux.conf.bak' >&2 && mv -iv ~/.tmux.conf ~/.tmux.conf.bak
+if [[ $(readlink -f "$HOME/.tmux.conf") != $HOME/.vim/config/.tmux.conf ]]; then
+  [[ -f $HOME/.tmux.conf ]] && echo '~/.tmux.conf exists, renaming to ~/.tmux.conf.bak' >&2 && mv -iv ~/.tmux.conf ~/.tmux.conf.bak
   ln -sv ~/.vim/config/.tmux.conf ~/.tmux.conf
 fi
 exec tmux "$@"

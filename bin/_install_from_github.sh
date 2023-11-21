@@ -5,7 +5,7 @@ detect-env() {
 }
 
 run-if-exists() {
-  if [ "$#" -lt 1 ]; then
+  if [[ $# -lt 1 ]]; then
     echo "Usage: $0 <executable> [<args>]" >&2
     return 0
   fi
@@ -13,13 +13,13 @@ run-if-exists() {
   local executable=${1##*/}
   shift 1
 
-  if [ -x "$HOME/.local/bin/$executable" ]; then
+  if [[ -x $HOME/.local/bin/$executable ]]; then
     exec "$HOME/.local/bin/$executable" "$@"
   fi
 }
 
 install-from-url() {
-  if [ "$#" -lt 2 ]; then
+  if [[ $# -lt 2 ]]; then
     echo "Usage: $0 <executable> <url> [<args>]" >&2
     return 0
   fi
@@ -37,7 +37,7 @@ install-from-url() {
 }
 
 install-from-github() {
-  if [ "$#" -lt 7 ]; then
+  if [[ $# -lt 7 ]]; then
     echo "Usage: $0 <executable> <repo> <linux-x64-package-name> <linux-arm64-package-name> <macos-x64-package-name> <macos-arm64-package-name> <extract-command-flags> [<args>]" >&2
     return 0
   fi
@@ -53,18 +53,18 @@ install-from-github() {
     linux:arm64) package=$linux_arm ;;
     darwin:x86_64) package=$darwin_x64 ;;
     darwin:arm64) package=${darwin_arm:-$darwin_x64}
-      [ -z "$darwin_arm" ] && [ -n "$darwin_x64" ] && echo "darwin_arm package not found for '$executable', using darwin_x64 package.." >&2 ;;
+      [[ -z $darwin_arm ]] && [[ -n $darwin_x64 ]] && echo "darwin_arm package not found for '$executable', using darwin_x64 package.." >&2 ;;
   esac
-  [ -z "$package" ] && echo "package not found for '$executable' on $PLATFORM $ARCHITECTURE, exiting.." >&2 && return 1
+  [[ -z $package ]] && echo "package not found for '$executable' on $PLATFORM $ARCHITECTURE, exiting.." >&2 && return 1
 
   mkdir -p "$HOME/.local/bin"
   url=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4) || true
-  [ -z "$url" ] && echo "Unable to find '$package' in results of curl 'https://api.github.com/repos/$repo/releases/latest'" >&2 && return 1
+  [[ -z $url ]] && echo "Unable to find '$package' in results of curl 'https://api.github.com/repos/$repo/releases/latest'" >&2 && return 1
   install-archive-from-url "$url" "$executable" "$extract_flags" "$@"
 }
 
 install-archive-from-url() {
-  if [ "$#" -lt 3 ]; then
+  if [[ $# -lt 3 ]]; then
     echo "Usage: $0 <url> <executable> <extract-command-flags> [<args>]" >&2
     return 0
   fi
@@ -73,7 +73,7 @@ install-archive-from-url() {
   shift 3
 
   detect-env
-  if [ "$PLATFORM" == 'darwin' ]; then
+  if [[ $PLATFORM = darwin ]]; then
     if ! builtin command -V gtar > /dev/null 2>&1; then
       echo 'gnu-tar not installed, trying with tar' >&2
     else

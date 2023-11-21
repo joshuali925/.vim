@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ ! -f "$HOME/.config/lazygit/config.yml" ]; then
+if [[ ! -f $HOME/.config/lazygit/config.yml ]]; then
   mkdir -p ~/.config/lazygit
   ln -sv ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml
 fi

@@ -33,16 +33,16 @@ end)
 local search_mode = nil
 if wezterm.gui then
     search_mode = wezterm.gui.default_key_tables().search_mode
-    table.insert(search_mode, { key = "Enter", mods = "SHIFT", action = wezterm.action { CopyMode = "PriorMatch" } })
-    table.insert(search_mode, { key = "Enter", mods = "NONE", action = wezterm.action { CopyMode = "NextMatch" } })
-    table.insert(search_mode, { key = "w", mods = "CTRL", action = wezterm.action { CopyMode = "ClearPattern" } })
+    table.insert(search_mode, { key = "Enter", mods = "SHIFT", action = wezterm.action({ CopyMode = "PriorMatch" }) })
+    table.insert(search_mode, { key = "Enter", mods = "NONE", action = wezterm.action({ CopyMode = "NextMatch" }) })
+    table.insert(search_mode, { key = "w", mods = "CTRL", action = wezterm.action({ CopyMode = "ClearPattern" }) })
 end
 
 local tokyonight = wezterm.color.get_builtin_schemes()["tokyonight_storm"]
 tokyonight.brights[1] = "#717993"
 
 config.use_ime = true
-config.font = wezterm.font("JetBrainsMono Nerd Font")
+config.font = wezterm.font("JetBrainsMono Nerd Font", { weight = "Medium" })
 config.font_size = 14
 config.use_fancy_tab_bar = false
 config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" } -- disable ligatures
@@ -62,6 +62,9 @@ config.exit_behavior = "Close"
 config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 config.color_schemes = { tokyonight = tokyonight }
 config.color_scheme = light_theme and "Catppuccin Latte" or "tokyonight"
+config.quick_select_patterns = {
+    [[[\w\-.%/]*\.[\w~]+]],
+}
 config.keys = {
     { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
     { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = true }) },
@@ -71,8 +74,24 @@ config.keys = {
     { key = "f", mods = "CMD", action = wezterm.action.Search({ CaseInSensitiveString = "" }) },
     { key = "[", mods = "CMD", action = wezterm.action.MoveTabRelative(-1) },
     { key = "]", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
+    { key = "h", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Left") },
+    { key = "j", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Down") },
+    { key = "k", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Up") },
+    { key = "l", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Right") },
     { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
-    { key = "/", mods = "CTRL", action = wezterm.action.SendKey({ key = "/", mods = "CTRL" }) },
+    {
+        key = "'",
+        mods = "META",
+        action = wezterm.action.QuickSelectArgs({
+            scope_lines = 0,
+            action = wezterm.action_callback(function(window, pane)
+                local text = window:get_selection_text_for_pane(pane)
+                pane:send_text(text)
+                window:perform_action(wezterm.action.CopyTo("Clipboard"), pane)
+                window:perform_action(wezterm.action.ClearSelection, pane)
+            end),
+        })
+    },
 }
 config.key_tables = { search_mode = search_mode }
 config.set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" }
