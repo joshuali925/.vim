@@ -4,7 +4,7 @@ run-if-exists "$0" "$@"
 detect-env
 
 case $PLATFORM in  # versions: https://www.7-zip.org/download.html
-  linux) VERSION=2201; [ "$ARCHITECTURE" = 'x86_64' ] && DISTRO=linux-x64 || DISTRO=linux-arm64; executable=7zzs ;;
+  linux) VERSION=2201; [[ $ARCHITECTURE = x86_64 ]] && DISTRO=linux-x64 || DISTRO=linux-arm64; executable=7zzs ;;
   darwin) VERSION=2107; DISTRO=mac; executable=7zz ;;
   *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2 ; exit 1 ;;
 esac

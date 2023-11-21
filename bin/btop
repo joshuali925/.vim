@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ ! -f "$HOME/.config/btop/btop.conf" ]; then
+if [[ ! -f $HOME/.config/btop/btop.conf ]]; then
   mkdir -p ~/.config
   cp -rf ~/.vim/config/btop ~/.config
 fi

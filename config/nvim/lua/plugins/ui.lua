@@ -141,6 +141,7 @@ return {
     },
     {
         "nvim-telescope/telescope.nvim",
+        cmd = "Telescope",
         dependencies = { "nvim-lua/plenary.nvim", { "nvim-telescope/telescope-fzf-native.nvim", build = "make" } },
         keys = {
             { "q", "<Cmd>lua require('telescope.builtin').buffers({ignore_current_buffer = true, only_cwd = false, sort_mru = true})<CR>" },
@@ -167,7 +168,7 @@ return {
             { "<leader>f/", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>" },
             { "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>" },
             { "<leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>" },
-            { "<leader>fy", "<Cmd>lua require('telescope').extensions.yank_history.yank_history({initial_mode = 'normal'})<CR>" },
+            { "<leader>fy", "<Cmd>lua require('telescope').extensions.yank_history.yank_history({initial_mode = 'normal'})<CR>" }, -- yanky.nvim
             { "<leader>fy", "dh<leader>fy", mode = "x", remap = true },
         },
         config = function()

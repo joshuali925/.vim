@@ -97,7 +97,7 @@ fzf-cd-widget() {
   fi
   # =======================================================
   # customized: to support editing files, and run cd command in zle
-  if [[ -d "$dir" ]]; then
+  if [[ -d $dir ]]; then
     builtin cd -- "${(q)dir}"
   else
     $EDITOR "$dir" < /dev/tty

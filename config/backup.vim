@@ -4104,3 +4104,50 @@ export MANROFFOPT='-c'
             }
           ]
         }
+
+" =======================================================
+" use watchexec
+react() {
+  if [ "$#" -lt 2 ]; then echo "Usage: $0 <dir_to_watch> <command>, use {} as placeholder of modified files." >&2; return 1; fi
+  local changed
+  echo "Watching \"$1\", passing modified files to \"${*:2}\" command every 2 seconds." >&2
+  while true; do
+    changed=($(fd --base-directory "$1" --absolute-path --type=f --changed-within 2s))
+    if [ ${#changed[@]} -gt 0 ]; then
+      local cmd="${@:2}"
+      eval "${cmd//\{\}/${changed[@]}}"
+    fi
+    sleep 2
+  done
+}
+" fff
+start=$SECONDS
+install-from-github lf gokcehan/lf linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 '' "$@" || {
+  if [ $((($SECONDS - $start))) -lt 1 ]; then
+    if [ ! -x "$HOME/.vim/tmp/fff" ]; then
+      curl -sL -o "$HOME/.vim/tmp/fff" https://raw.githubusercontent.com/dylanaraps/fff/HEAD/fff
+      chmod +x "$HOME/.vim/tmp/fff"
+    fi
+    FFF_HIDDEN=1 FFF_CD_FILE=~/.vim/tmp/lf_dir FFF_KEY_MOVE=d FFF_KEY_TRASH=x FFF_KEY_RENAME=R FFF_KEY_REFRESH=r exec "$HOME/.vim/tmp/fff" "$@"
+  fi
+}
+" tmux-thumbs, use wezterm quick select and tmux-picker
+  set -g @plugin 'fcsonline/tmux-thumbs'        # <M-'>
+  set -g @thumbs-bg-color '#383A57'
+  set -g @thumbs-fg-color '#B695F3'
+  set -g @thumbs-hint-bg-color '#383A57'
+  set -g @thumbs-hint-fg-color '#F4BB78'
+  set -g @thumbs-select-bg-color '#383A57'
+  set -g @thumbs-select-fg-color '#85F789'
+  set -g @thumbs-command 'tmux set-buffer -- {} && tmux paste-buffer'
+  set -g @thumbs-upcase-command 'tmux new-window -c "#{pane_current_path}" "$EDITOR \"{}\""'
+  set -g @thumbs-regexp-1 '[\w\-.%/]*\.[\w~]+'
+  # set -g @thumbs-regexp-1 '\d+:[\w-]+'
+  # set -g @thumbs-regexp-2 'i-\w+'
+  # set -g @thumbs-regexp-3 '[\w\-.%/]*\.[\w~]+'
+  set -g @thumbs-reverse 'enabled'
+  set -g @thumbs-unique 'enabled'
+  if [ -d "$HOME/.tmux/plugins/tmux-thumbs" ]; then
+    log 'Installing tmux-thumbs binaries..'
+    curl -L -o- "https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-$PLATFORM-$ARCHITECTURE.tar.gz" | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
+  fi

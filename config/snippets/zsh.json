@@ -3,7 +3,7 @@
     "prefix": "prompt-one-key",
     "body": [
       "read -s -k '?${1:To abort press n.}'; echo",
-      "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
+      "if [[ \\$REPLY != \"\\${REPLY#[Nn]}\" ]]; then",
       "\t${0:return 0}",
       "fi"
     ]

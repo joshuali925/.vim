@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=2059,2086
 # https://github.com/kevinhwang91/dotfiles/blob/156c2e258c17677081b412675cef45b07a597a7c/script/shell/osc52send
 # https://medium.com/free-code-camp/tmux-in-practice-integration-with-system-clipboard-bcd72c62ff7b
 # https://sunaku.github.io/tmux-yank-osc52.html
@@ -11,11 +12,11 @@ maxlen=74994
 ppid=$PPID
 
 # if called from nvim terminal (:h v:servername), look upwards to find tty of the nvim process
-if [ -n "$NVIM" ]; then
-  while [ -n "$ppid" ]; do
+if [[ -n $NVIM ]]; then
+  while [[ -n $ppid ]]; do
     psout=$(ps -p "$ppid" -o ppid= -o tty= -o comm=)
-    if [[ "$(awk '{print $3}' <<<"$psout")" = */nvim ]]; then
-      otty="/dev/$(awk '{print $2}' <<<"$psout")" && [[ "$otty" != /dev/\?* ]] && break
+    if [[ $(awk '{print $3}' <<<"$psout") = */nvim ]]; then
+      otty="/dev/$(awk '{print $2}' <<<"$psout")" && [[ $otty != /dev/\?* ]] && break
     fi
     ppid=$(awk '{print $1}' <<<"$psout")
   done
@@ -23,23 +24,23 @@ fi
 
 otty="${otty:-$TTY}"
 # look upwards the process tree to find the first valid tty
-while [ -z "$otty" ] || [[ "$otty" = /dev/\?* ]] && [ -n "$ppid" ]; do
+while [[ -z $otty ]] || [[ $otty = /dev/\?* ]] && [[ -n $ppid ]]; do
   psout=$(ps -p "$ppid" -o ppid= -o tty= -o comm=)
   otty="/dev/$(awk '{print $2}' <<<"$psout")"
   ppid=$(awk '{print $1}' <<<"$psout")
 done
 
-if [ -z "$otty" ] || [[ "$otty" = /dev/\?* ]]; then
-  if [ -w /dev/fd/2 ]; then
+if [[ -z $otty ]] || [[ $otty = /dev/\?* ]]; then
+  if [[ -w /dev/fd/2 ]]; then
     otty='/dev/fd/2'
-  elif [ -w /dev/tty ]; then
+  elif [[ -w /dev/tty ]]; then
     otty='/dev/tty'
   else
     otty='/dev/stderr'
   fi
 fi
 
-if [ "$buflen" -le "$maxlen" ]; then
+if [[ $buflen -le $maxlen ]]; then
   esc="\033]52;c;$(printf %s "$buf" | base64 | tr -d '\r\n')\a"  # pipe into tr instead of `base64 -w0` for portability
   printf "$esc" > $otty
 else
@@ -47,8 +48,9 @@ else
     esc="\033]52;c;$(printf %s "$buf" | tail -c "$buflen" | head -c "$maxlen" | base64 | tr -d '\r\n')\a"
     printf "$esc" > $otty
     ((buflen -= maxlen))
-    if [ "$buflen" -gt 0 ]; then
+    if [[ $buflen -gt 0 ]]; then
       printf "input is %d bytes too long, needs %d more time" "$buflen" "$((buflen / maxlen + 1))" >&2
+      # shellcheck disable=2162
       read -p ', continue? (Y/n) ' -n 1 < $otty; echo
       [[ ! $REPLY =~ ^[Yy]?$ ]] && break
     else

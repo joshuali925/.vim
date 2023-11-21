@@ -50,7 +50,7 @@ return {
         end
     },
     {
-        "mg979/vim-visual-multi", -- TODO try https://github.com/smoka7/multicursors.nvim
+        "mg979/vim-visual-multi",
         keys = { { "<C-n>", "<Plug>(VM-Find-Under)" }, { "<C-n>", "<Plug>(VM-Find-Subword-Under)", mode = "x" }, "<leader><C-n>" },
         init = function()
             vim.g.VM_default_mappings = 0
@@ -67,11 +67,19 @@ return {
                 ["Select Operator"] = "v",
                 ["Case Conversion Menu"] = "s",
             }
-            vim.api.nvim_create_augroup("VisualMultiRemapBS", {}) -- for nvim_autopairs: https://github.com/mg979/vim-visual-multi/issues/172
+            vim.api.nvim_create_augroup("VisualMultiRemapBS", {})
             vim.api.nvim_create_autocmd("User", {
+                pattern = "visual_multi_start",
+                group = "VisualMultiRemapBS",
+                callback = function()
+                    require("nvim-autopairs").disable()
+                end,
+            })
+            vim.api.nvim_create_autocmd("User", { -- for nvim-autopairs: https://github.com/mg979/vim-visual-multi/issues/172
                 pattern = "visual_multi_exit",
                 group = "VisualMultiRemapBS",
                 callback = function()
+                    require("nvim-autopairs").enable()
                     vim.keymap.set("i", "<BS>", "v:lua.MPairs.autopairs_bs(" .. vim.fn.bufnr() .. ")", { buffer = true, expr = true, replace_keycodes = false })
                 end,
             })

@@ -7,13 +7,21 @@
     "prefix": "array",
     "body": "\"\\${${1:array}[@]}\"$0"
   },
+  "Benchmark": {
+    "prefix": "benchmark",
+    "body": [
+      "begin=\\$(( \\${EPOCHREALTIME/[^0-9]/} / 1000 ))",
+      "$0",
+      "echo Took: \\$((\\$(( \\${EPOCHREALTIME/[^0-9]/} / 1000 )) - begin)) ms"
+    ]
+  },
   "If": {
     "prefix": "if",
-    "body": ["if [ $1 ]; then", "\t$0", "fi"]
+    "body": ["if [[ $1 ]]; then", "\t$0", "fi"]
   },
   "If variable equals": {
     "prefix": "if-var",
-    "body": ["if [ \"\\$${1:VAR}\" = '${2:STRING}' ]; then", "\t$0", "fi"]
+    "body": ["if [[ \\$${1:VAR} = '${2:STRING}' ]]; then", "\t$0", "fi"]
   },
   "If command succeeds": {
     "prefix": "if-command",
@@ -29,7 +37,7 @@
   },
   "If variable exists": {
     "prefix": "if-var-exists",
-    "body": ["if [ -n \"\\$${1:VAR}\" ]; then", "\t$0", "fi"]
+    "body": ["if [[ -n \\$${1:VAR} ]]; then", "\t$0", "fi"]
   },
   "If glob": {
     "prefix": "if-glob",
@@ -46,7 +54,7 @@
   "If no arguments": {
     "prefix": "if-no-arguments",
     "body": [
-      "if [ \"\\$#\" -eq 0 ]; then",
+      "if [[ \\$# -eq 0 ]]; then",
       "\techo \"Usage: \\$0 <args>\" >&2",
       "\texit 1$0",
       "fi"
@@ -54,23 +62,35 @@
   },
   "If array is empty": {
     "prefix": "if-array-empty",
-    "body": ["if [ \\${#${1:array}[@]} -eq 0 ]; then", "\t$0", "fi"]
+    "body": ["if [[ \\${#${1:array}[@]} -eq 0 ]]; then", "\t$0", "fi"]
   },
-  "If array contains string": {
+  "If array contains regex": {
+    "prefix": "if-array-contains-regex",
+    "body": [
+      "if printf '%s\\0' \"\\${${1:array}[@]}\" | grep -q -x -z -F -- '${2:value}'; then",
+      "\t$0",
+      "fi"
+    ]
+  },
+  "If array contains glob": {
     "prefix": "if-array-contains",
-    "body": ["if printf '%s\\0' \"\\${${1:array}[@]}\" | grep -q -x -z -F -- '${2:value}'; then", "\t$0", "fi"]
+    "body": [
+      "if [[ \\${${1:array}[*]} = *${2:glob}* ]]; then",
+      "\t$0",
+      "fi"
+    ]
   },
   "If variable equals ignore case": {
     "prefix": "if-equals-ignore-case",
     "body": [
-      "if [ \"\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$${1:VAR}\")\" = '${2:string}' ]; then",
+      "if [[ \\$(tr '[:upper:]' '[:lower:]' <<< \"\\$${1:VAR}\") = '${2:string}' ]]; then",
       "\t$0",
       "fi"
     ]
   },
   "Else if": {
     "prefix": "elseif",
-    "body": ["elif [ ${1:\"\\$VAR\" = 'STRING'} ]; then", "\t$0"]
+    "body": ["elif [[ ${1:\\$VAR = 'STRING'} ]]; then", "\t$0"]
   },
   "For each element in array": {
     "prefix": "foreach",
@@ -86,7 +106,7 @@
   },
   "While argument": {
     "prefix": "while-arg",
-    "body": ["while [ \"\\$#\" -ne 0 ]; do", "\t$0", "\tshift", "done"]
+    "body": ["while [[ \\$# -ne 0 ]]; do", "\t$0", "\tshift", "done"]
   },
   "Loop lines": {
     "prefix": "while-read",
@@ -201,7 +221,7 @@
     "body": [
       "printf '${1:Continue} (Y/n)? '",
       "read -r REPLY",
-      "if [ -z \"\\$REPLY\" ] || [ \"\\$REPLY\" != \"\\${REPLY#[Yy]}\" ]; then",
+      "if [[ -z \\$REPLY ]] || [[ \\$REPLY != \"\\${REPLY#[Yy]}\" ]]; then",
       "\t${0:echo Yes}",
       "fi"
     ]
@@ -211,7 +231,7 @@
     "body": [
       "printf '${1:Continue} (y/N)? '",
       "read -r REPLY",
-      "if [[ \"\\$REPLY\" == [Yy] ]]; then",
+      "if [[ \\$REPLY = [Yy] ]]; then",
       "\t${0:echo Yes}",
       "fi"
     ]
@@ -220,7 +240,7 @@
     "prefix": "prompt-one-key",
     "body": [
       "read -p '${1:To abort press n.}' -n 1; echo",
-      "if [ \"\\$REPLY\" != \"\\${REPLY#[Nn]}\" ]; then",
+      "if [[ \\$REPLY != \"\\${REPLY#[Nn]}\" ]]; then",
       "\t${0:exit 0}",
       "fi"
     ]

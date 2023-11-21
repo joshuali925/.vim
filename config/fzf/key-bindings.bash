@@ -49,7 +49,7 @@ __fzf_cd__() {
     -o -type d -print 2> /dev/null | command cut -b3-"}"
   opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore --reverse --scheme=path ${FZF_DEFAULT_OPTS-} ${FZF_ALT_C_OPTS-} +m"
   # customized to allow editing files
-  dir=$(set +o pipefail; eval "$cmd" | FZF_DEFAULT_OPTS="$opts" $(__fzfcmd)) && if [ -d "$dir" ]; then printf 'builtin cd -- %q' "$dir"; else printf '%q %q' "$EDITOR" "$dir"; fi
+  dir=$(set +o pipefail; eval "$cmd" | FZF_DEFAULT_OPTS="$opts" $(__fzfcmd)) && if [[ -d $dir ]]; then printf 'builtin cd -- %q' "$dir"; else printf '%q %q' "$EDITOR" "$dir"; fi
 }
 
 # customized to show preview
