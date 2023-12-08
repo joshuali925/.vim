@@ -149,7 +149,7 @@ panes_src() {
     typeset -g first=''
     local panes_info,ttys,ps_info,ids,ex_session
     local nlwp='nlwp'
-    if [[ $(uname -s) == 'Darwin' ]]; then
+    if [[ $OSTYPE = darwin* ]]; then
         nlwp='wq'
     fi
     local cur_id="$1"

@@ -85,4 +85,10 @@ return {
             })
         end,
     },
+    {
+        "HakonHarnes/img-clip.nvim",
+        enabled = vim.env.SSH_CLIENT == nil,
+        keys = { { "<leader>p", "<ESC><Cmd>PasteImage<CR>", mode = "i" } },
+        opts = { use_cursor_in_template = false, insert_mode_after_paste = false, relative_to_current_file = true },
+    },
 }

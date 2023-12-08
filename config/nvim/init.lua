@@ -310,7 +310,7 @@ vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<
 vim.api.nvim_create_user_command("Grt", "Gcd", {})
 vim.api.nvim_create_user_command("ProfileStart", "lua require('plenary.profile').start(vim.fn.stdpath('cache') .. '/profile.log')", {})
 vim.api.nvim_create_user_command("ProfileStop", [[execute "lua require('plenary.profile').stop()" | execute 'edit ' . stdpath('cache') . '/profile.log']], {})
-vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | execute 'mksession! ' . stdpath('data') . '/session_' . <q-args> . '.vim' | silent! ScrollViewEnable | lua vim.notify('Session saved to \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*" })
+vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | execute 'mksession! ' . stdpath('data') . '/session_' . <q-args> . '.vim' | silent! ScrollViewEnable | lua vim.notify('Session saved to \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
 vim.api.nvim_create_user_command("SessionLoad", "execute 'source ' . stdpath('data') . '/session_' . <q-args> . '.vim' | lua vim.notify('Loaded session from \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
 vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>)", { nargs = "+" })

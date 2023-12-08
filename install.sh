@@ -10,6 +10,33 @@ YELLOW='\033[0;33m'
 BLACK='\033[1;30m'
 NC='\033[0m'
 
+usage() {
+  echo "usage: bash $0 [install <package> ...]"
+  echo '  package list: devtools, dotfiles, asdf, docker, java, python, node, tmux, neovim, swap, ssh-key'
+  exit 1
+}
+
+init() {
+  [[ -n $INSTALL_ENV_INIT ]] && return 0 || INSTALL_ENV_INIT=1
+  set -eo pipefail
+  cd
+  export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"
+  detect-env
+}
+
+install() {
+  [[ $# -eq 0 ]] && usage
+  init
+  for package in "$@"; do
+    case $package in
+      devtools) install_development_tools ;;
+      ssh-key) setup_ssh_key ;;
+      dotfiles|asdf|docker|java|python|node|tmux|neovim|swap) install_"$package" ;;
+      *) log "Unknown package \"$package\", skipping.." ;;
+    esac
+  done
+}
+
 detect-env() {
   case $(uname -m) in
     # mac shows i386 for x86_64
@@ -53,12 +80,6 @@ sudo() {
 
 log() {
   echo -e "${CYAN}${*}${NC}"
-}
-
-usage() {
-  echo "usage: bash $0 [install <package> ...]"
-  echo '  package list: devtools, dotfiles, asdf, docker, java, python, node, tmux, neovim, ssh-key'
-  exit 1
 }
 
 backup() {
@@ -187,7 +208,7 @@ install_docker() {
   elif [[ $PLATFORM = linux ]]; then
     curl -fsSL https://get.docker.com/ | sh
   else
-    log 'Unknown distro..'
+    log 'Unsupported platform..'
     return 0
   fi
   log 'Installed docker, adding user to docker group..'
@@ -206,7 +227,7 @@ install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEA
   asdf install java "$JDK_VERSION"
   asdf global java "$JDK_VERSION"
   export JAVA_HOME="$(asdf where java)"
-  echo "export JAVA_HOME=\"$(asdf where java)\"" | tee -a ~/.bashrc ~/.zshrc
+  echo "export JAVA_HOME=\"$JAVA_HOME\"" | tee -a ~/.bashrc ~/.zshrc
   log "Installed $JDK_VERSION, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
 }
 
@@ -219,7 +240,7 @@ install_python() {  # environment for asdf install from source: https://github.c
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apk ]]; then
     sudo apk add python3
   elif [[ $PLATFORM != darwin ]]; then
-    log 'Unknown distro..'
+    log 'Unsupported platform..'
     return 0
   fi
   curl https://bootstrap.pypa.io/get-pip.py | python3 && pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip'
@@ -275,38 +296,22 @@ install_neovim() {
   echo
 }
 
+install_swap() {
+  if [[ $PLATFORM != linux ]]; then
+    log 'Unsupported platform..'
+    return 0
+  fi
+  log "Installing 4G swapfile.."
+  sudo dd if=/dev/zero of=/swapfile count=4096 bs=1MiB && sudo chmod 600 /swapfile
+  sudo mkswap /swapfile && sudo swapon /swapfile
+  sudo sed -i '/^\/swapfile swap swap defaults 0 0$/d' /etc/fstab
+  echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+  free -h
+}
+
 setup_ssh_key() {
-  # ssh-keygen -t rsa -b 4096 -C '' -N '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub
   ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
-}
-
-install() {
-  [[ $# -eq 0 ]] && usage
-  init
-  for package in "$@"; do
-    case $package in
-      devtools)   install_development_tools ;;
-      dotfiles)   install_dotfiles ;;
-      asdf)       install_asdf ;;
-      docker)     install_docker ;;
-      java)       install_java ;;
-      python)     install_python ;;
-      node)       install_node ;;
-      tmux)       install_tmux ;;
-      neovim)     install_neovim ;;
-      ssh-key)    setup_ssh_key ;;
-      *)          log "Unknown package \"$package\", skipping.." ;;
-    esac
-  done
-}
-
-init() {
-  [[ -n $INSTALL_ENV_INIT ]] && return 0 || INSTALL_ENV_INIT=1
-  set -eo pipefail
-  cd "$HOME"
-  export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"
-  detect-env
 }
 
 default-install() {
