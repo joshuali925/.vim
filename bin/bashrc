@@ -7,25 +7,19 @@ if [[ -n $GET_BASHRC ]]; then
   [[ -f $HOME/.bashrc ]] && source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
 
   .vim-clear-env() {
-    local config_files=(~/.vim ~/.tmux ~/.zinit ~/.local/share/lf ~/.config/{lf,lazygit}) executable f
-    [[ $(readlink -f "$HOME/.tmux.conf") = $HOME/.vim/config/.tmux.conf ]] && config_files+=(~/.tmux.conf)
+    local config_paths=(~/.vim ~/.tmux ~/.zinit ~/.local/share/lf ~/.config/{lf,lazygit}) executable
+    [[ $(readlink -f "$HOME/.tmux.conf") = $HOME/.vim/config/.tmux.conf ]] && config_paths+=(~/.tmux.conf)
     for executable in ~/.local/bin/*; do
-      [[ -f $HOME/.vim/bin/${executable##*/} ]] && config_files+=("$HOME/.local/bin/${executable##*/}")
+      [[ -f $HOME/.vim/bin/${executable##*/} ]] && config_paths+=("$HOME/.local/bin/${executable##*/}")
     done
     echo 'This will revert ~/.bashrc changes and delete the following:'
-    for f in "${config_files[@]}"; do
-      if [[ -d $f ]]; then
-        find "$f" -maxdepth 1 2> /dev/null
-      elif [[ -e $f ]]; then
-        echo "$f"
-      fi
-    done
+    find "${config_paths[@]}" -maxdepth 1 2> /dev/null
     # shellcheck disable=2162
     read -p 'Confirm to delete? (y/N) ' -n 1
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       [[ -f $HOME/.bashrc ]] && sed -i '/\.vim\/bin\/bashrc/d' ~/.bashrc
-      rm -rf "${config_files[@]}"
+      rm -rf "${config_paths[@]}"
     fi
   }
   return 0
@@ -39,16 +33,9 @@ if [[ ! -f $HOME/.vim/config/.bashrc ]]; then
   fi
   mkdir -pv ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit} ~/.vim
   curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C "$HOME/.vim" --strip-components=1
-  # shellcheck disable=2162
-  read -p 'Downloaded configs, add to ~/.bashrc? (y/N) ' -n 1
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "exec ~/.vim/bin/bashrc$([[ -n $DOT_VIM_LOCAL_BIN ]] && echo ' --no-binary-downloads')" | tee -a ~/.bashrc
-    echo 'Appended to ~/.bashrc'
-  else
-    echo -e "\033[0;36mTo add to ~/.bashrc manually: \033[0;33mecho 'exec ~/.vim/bin/bashrc$([[ -n $DOT_VIM_LOCAL_BIN ]] && echo ' --no-binary-downloads')' >> ~/.bashrc\033[0m"
-  fi
+  echo "exec ~/.vim/bin/bashrc$([[ -n $DOT_VIM_LOCAL_BIN ]] && echo ' --no-binary-downloads')" | tee -a ~/.bashrc
+  echo -e "\033[0;36mAppended to ~/.bashrc\033[0m"
 fi
 
-[[ $1 = --no-binary-downloads ]] && shift && DOT_VIM_LOCAL_BIN=1
-DOT_VIM_LOCAL_BIN=$DOT_VIM_LOCAL_BIN GET_BASHRC=1 exec bash --rcfile "$HOME/.vim/bin/bashrc" "$@"
+[[ $1 = --no-binary-downloads ]] && shift && export DOT_VIM_LOCAL_BIN=1
+GET_BASHRC=1 exec bash --rcfile "$HOME/.vim/bin/bashrc" "$@"

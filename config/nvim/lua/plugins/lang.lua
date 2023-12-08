@@ -84,8 +84,12 @@ return {
             { "gc", "<Plug>kommentary_visual_default<Esc>", mode = "x" },
             { "gc", ":<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>", mode = "o" },
         },
-        init = function() vim.g.kommentary_create_default_mappings = false end,
+        init = function()
+            vim.g.kommentary_create_default_mappings = false
+            vim.g.skip_ts_context_commentstring_module = true -- skip backwards compatibility routines and speed up loading, https://github.com/JoosepAlviste/nvim-ts-context-commentstring/blob/5b02387b28a79c61b7d406c2a33d4db1d8454f53/README.md?plain=1#L40
+        end,
         config = function()
+            require("ts_context_commentstring").setup({ enable_autocmd = false })
             require("kommentary.config").configure_language("default", {
                 hook_function = function() require("ts_context_commentstring.internal").update_commentstring() end,
             })
@@ -137,7 +141,6 @@ return {
                 },
             },
             indent = { enable = true },
-            context_commentstring = { enable = true, enable_autocmd = false }, -- for nvim-ts-context-commentstring
         },
         config = function(_, opts) require("nvim-treesitter.configs").setup(opts) end,
     },

@@ -6,7 +6,7 @@
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh)"
 ```
 
-### Run one-time bash with configs
+### Run bash with configs
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"

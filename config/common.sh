@@ -304,7 +304,7 @@ d() {  # show directory stack or download from URL (does not continue download):
 
 pscpu() {
   local ps_out pids pid pstree_flags pstree_out
-  if [[ $(uname -s) = Darwin ]]; then
+  if [[ $OSTYPE = darwin* ]]; then
     ps_out=$(ps -rwwAo user,pid,ppid,pcpu,pmem,time,command)
     pstree_flags='-wp'
   else
@@ -329,7 +329,7 @@ pscpu() {
 
 psmem() {
   local ps_out
-  if [[ $(uname -s) = Darwin ]]; then
+  if [[ $OSTYPE = darwin* ]]; then
     ps_out=$(ps -mwwAo pid,rss,command)
   else
     ps_out=$(ps axwwo pid,rss,args --sort -size)
@@ -700,7 +700,7 @@ docker-shell() {
 }
 
 ec2() {
-  local instances ids curr_state
+  local instances ids curr_state user
   case $1 in
     start) curr_state=stopped ;;
     stop) curr_state=running ;;
@@ -718,16 +718,13 @@ ec2() {
       fi
       echo "ssh to ec2: $host" >&2
       shift 2
-      sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-      printf "$config" ubuntu >> ~/.ssh/ec2hosts
-      local start=$SECONDS
-      ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ubuntu@$host" || {
-        if [[ $((SECONDS - start)) -lt 10 ]]; then
-          sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-          printf "$config" ec2-user >> ~/.ssh/ec2hosts
-          ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "ec2-user@$host"
-        fi
-      }
+      for user in ubuntu ec2-user admin; do
+        sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
+        printf "$config" "$user" >> ~/.ssh/ec2hosts
+        local start=$SECONDS
+        ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "$user@$host" && break
+        [[ $((SECONDS - start)) -gt 10 ]] && break
+      done
       return 0 ;;
     *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]" >&2; return 1 ;;
   esac

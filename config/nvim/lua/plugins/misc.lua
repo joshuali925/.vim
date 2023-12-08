@@ -26,6 +26,7 @@ return {
     { "will133/vim-dirdiff", cmd = "DirDiff" },
     {
         "iamcco/markdown-preview.nvim",
+        enabled = vim.env.SSH_CLIENT == nil,
         build = "cd app && yarn install",
         ft = "markdown",
         init = function()
