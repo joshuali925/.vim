@@ -1,12 +1,5 @@
 return {
     {
-        "rcarriga/nvim-notify", -- TODO https://github.com/j-hui/fidget.nvim after https://github.com/j-hui/fidget.nvim/issues/149
-        config = function()
-            require("notify").setup({ timeout = 3000 })
-            vim.api.nvim_create_user_command("NotificationsDismiss", function() require("notify").dismiss({ silent = true, pending = true }) end, {})
-        end,
-    },
-    {
         "kevinhwang91/nvim-bqf",
         ft = "qf",
         opts = {
@@ -43,9 +36,7 @@ return {
             { "<C-o>", "<Cmd>lua require('utils').lf()<CR>" },
         },
         opts = {
-            on_open = function(_) vim.cmd.startinsert({ bang = true }) end,
             open_mapping = "<C-b>", -- <count><C-b> to open terminal in split
-            start_in_insert = false,
             auto_scroll = false,
             winbar = { enabled = true },
         },
@@ -297,7 +288,7 @@ return {
                     local content = {
                         { "Docu&mentation", "Lspsaga hover_doc", "Show documentation" },
                         { "&Preview definition", "Lspsaga peek_definition", "Preview definition" },
-                        { "Reference &finder", "Lspsaga lsp_finder", "Find references" },
+                        { "Reference &finder", "Lspsaga finder", "Find references" },
                         { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
                         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
                         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
@@ -361,7 +352,7 @@ return {
                 { "&Refresh screen", [[execute "lua require('ibl').refresh()" | execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
                 { "--", "" },
                 { "Open &Alpha", [[Lazy! load alpha-nvim | Alpha]], "Open Alpha" },
-                { "&Save session", [[SessionSave]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
+                { "&Save session", [[call feedkeys(":SessionSave", "n")]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
                 { "Load s&ession", [[call feedkeys(":SessionLoad", "n")]], "Load session from .cache/nvim/session_<name>.vim" },
                 { "--", "" },
                 { "Edit Vimr&c", [[edit $MYVIMRC]] },
@@ -489,7 +480,7 @@ return {
                 { "&Format JSON", [['<,'>Prettier json]], "Use prettier to format selected text as JSON" },
                 { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
                 { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | execute 'S put x' | file base64_decode]], "Use base64 to decode selected text" },
-                { "Generate &snippet", [[let @x = substitute(escape(funcs#get_visual_selection(), '"$'), repeat(' ', &shiftwidth), '\\t', 'g') | execute 'S put x' | execute '%normal! gI"' | execute '%normal! A",' | file snippet_body]], "Generate vscode compatible snippet body from selected text" },
+                { "Generate &snippet", [[let @x = substitute(escape(funcs#get_visual_selection(), '"$'), repeat(' ', &shiftwidth), '\\t', 'g') | execute 'S put x' | execute '%normal! gI"' | execute '%normal! A",' | execute 'normal! Gdd$x' | file snippet_body]], "Generate vscode compatible snippet body from selected text" },
                 { "--", "" },
                 { "OSC &yank", [[lua require("utils").copy_with_osc_yank_script(require("utils").get_visual_selection())]], "Use oscyank script to copy" },
                 { "--", "" },

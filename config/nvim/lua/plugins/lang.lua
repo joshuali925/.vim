@@ -10,12 +10,34 @@ return {
         config = function() vim.o.filetype = "csv" end,
     },
     {
+        "stevearc/conform.nvim",
+        opts = {
+            formatters_by_ft = {
+                javascript = { "prettier" },
+                javascriptreact = { "prettier" },
+                typescript = { "prettier" },
+                typescriptreact = { "prettier" },
+                css = { "prettier" },
+                scss = { "prettier" },
+                less = { "prettier" },
+                html = { "prettier" },
+                json = { "prettier" },
+                yaml = { "prettier" },
+                markdown = { "prettier" },
+                python = { "black" },
+                java = { "google-java-format" },
+                kotlin = { "ktlint" },
+                ["_"] = { "trim_whitespace" },
+            },
+        },
+    },
+    {
         "williamboman/mason.nvim",
         build = ":MasonUpdate",
         dependencies = {
             "williamboman/mason-lspconfig.nvim",
             "neovim/nvim-lspconfig",
-            "nvimtools/none-ls.nvim", -- TODO https://github.com/mfussenegger/nvim-lint, https://github.com/stevearc/conform.nvim
+            "nvimtools/none-ls.nvim", -- TODO https://github.com/mfussenegger/nvim-lint
             { "pmizio/typescript-tools.nvim" },
             {
                 "nvimdev/lspsaga.nvim", -- TODO nvim 0.10 https://github.com/Bekaboo/dropbar.nvim
@@ -28,6 +50,13 @@ return {
                     outline = { keys = { expand_or_jump = "<CR>" } },
                     callhierarchy = { show_detail = true, keys = { jump = "<CR>", quit = "<Esc>" } },
                 },
+            },
+            {
+                "j-hui/fidget.nvim",
+                config = function()
+                    require("fidget").setup({ integration = { ["nvim-tree"] = { enable = false } } })
+                    vim.api.nvim_create_user_command("Notifications", "lua require('fidget.notification').show_history()", {})
+                end
             },
         },
         cond = require("states").small_file, -- prevent LSP loading on keys for large file

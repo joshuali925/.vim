@@ -124,6 +124,29 @@
       "const __dirname = path.dirname(__filename);"
     ]
   },
+  "Shell template": {
+    "prefix": "template-shell",
+    "body": [
+      "const { exec } = require(\"child_process\");",
+      "const shell = (command, timeout = 90000, parseJSON = false) => {",
+      "\treturn new Promise((resolve, reject) =>",
+      "\t\texec(command, { timeout }, (error, stdout, stderr) => {",
+      "\t\t\tif (stderr) console.error(`stderr: \\${stderr.trim()}`);",
+      "\t\t\tif (error) {",
+      "\t\t\t\treject(error.message);",
+      "\t\t\t\treturn;",
+      "\t\t\t}",
+      "\t\t\tif (!parseJSON) resolve(stdout);",
+      "\t\t\ttry {",
+      "\t\t\t\tresolve(JSON.parse(stdout));",
+      "\t\t\t} catch (parseError) {",
+      "\t\t\t\treject(parseError);",
+      "\t\t\t}",
+      "\t\t}),",
+      "\t);",
+      "};"
+    ]
+  },
   "Cypress delay": {
     "prefix": "cydelay",
     "body": ["cy.wait(delay);", "$0"]

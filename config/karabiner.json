@@ -609,7 +609,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep Electron && open -a 'Visual Studio Code') || (ps p $(pgrep idea) | grep 'IDEA CE' && open -a 'IntelliJ IDEA CE') || (pgrep idea && open -a 'IntelliJ IDEA') || (ps p $(pgrep app_mode_loader) | grep -o '\\(Codespaces\\|code-server\\)\\( [0-9]\\)\\?.app' | xargs -I{} open -a '{}')"
+              "shell_command": "(pgrep Electron && open -a 'Visual Studio Code') || (ps p $(pgrep idea) | grep 'IDEA CE' && open -a 'IntelliJ IDEA CE') || (pgrep idea && open -a 'IntelliJ IDEA') || (ps -p $(pgrep jetbrains_client) -o comm= | grep -o '.*\\.app' | xargs -I{} open -a '{}')"
             }
           ]
         },
@@ -2019,7 +2019,7 @@
           },
           "to": [
             {
-              "shell_command": "osascript -e 'tell app \"Terminal\" to do script \"$HOME/.local/bin/gvim && killall Terminal\"'"
+              "shell_command": "/opt/homebrew/bin/wezterm -e -- zsh -ic '/Applications/neovide.app/Contents/MacOS/neovide --no-vsync'"
             }
           ],
           "type": "basic"

@@ -3,7 +3,6 @@ source ~/.vim/bin/_install_from_github.sh
 if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/gh ]]; then
   BIN_INIT=1 gh completion --shell zsh > ~/.zinit/completions/_gh || true
   BIN_INIT=1 gh extension install dlvhdr/gh-dash || true
-  BIN_INIT=1 gh extension install yusukebe/gh-markdown-preview || true
 fi
 
 detect-env

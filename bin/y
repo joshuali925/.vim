@@ -15,7 +15,7 @@ ppid=$PPID
 if [[ -n $NVIM ]]; then
   while [[ -n $ppid ]]; do
     psout=$(ps -p "$ppid" -o ppid= -o tty= -o comm=)
-    if [[ $(awk '{print $3}' <<<"$psout") = */nvim ]]; then
+    if [[ $(awk '{print $3}' <<<"$psout") = *nvim ]]; then
       otty="/dev/$(awk '{print $2}' <<<"$psout")" && [[ $otty != /dev/\?* ]] && break
     fi
     ppid=$(awk '{print $1}' <<<"$psout")

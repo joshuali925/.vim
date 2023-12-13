@@ -64,6 +64,9 @@ config.color_schemes = { tokyonight = tokyonight }
 config.color_scheme = light_theme and "Catppuccin Latte" or "tokyonight"
 config.quick_select_patterns = {
     [[[\w\-.%/]*\.[\w~]+]],
+    -- TODO remove
+    [[i-\w+]],
+    [[\d+:[\w-]+]],
 }
 config.keys = {
     { key = "t", mods = "CMD", action = wezterm.action.SpawnCommandInNewTab({ cwd = "" }) },
@@ -86,7 +89,7 @@ config.keys = {
             scope_lines = 0,
             action = wezterm.action_callback(function(window, pane)
                 local text = window:get_selection_text_for_pane(pane)
-                pane:send_text(text)
+                pane:send_text(text .. " ")
                 window:perform_action(wezterm.action.CopyTo("Clipboard"), pane)
                 window:perform_action(wezterm.action.ClearSelection, pane)
             end),

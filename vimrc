@@ -94,7 +94,8 @@ if has('folding')  " vim small does not have folding
   set foldlevel=99
   set foldexpr=max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth
   let &foldtext='getline(v:foldstart)." ⋯"'
-  let &fillchars='eob: ,fold: ,foldopen:,foldsep: ,foldclose:'
+  " invalid argument in windows git-bash
+  silent! set fillchars=eob:\ ,fold:\ ,foldopen:,foldsep:\ ,foldclose:
 endif
 set history=1000
 set undofile
@@ -121,7 +122,6 @@ set showtabline=2
 set tabline=%!BufferLine()
 set list
 " leadmultispace is available for >= 8.2.5066
-set listchars=tab:█\ ,nbsp:␣,trail:•
 let &listchars='tab:█ ,nbsp:␣,trail:•,leadmultispace:▏' . repeat(' ', &shiftwidth - 1)
 silent! set belloff=all
 
@@ -252,7 +252,8 @@ xmap <C-n> <leader>ncgn
 nnoremap <C-o> :call <SID>EditCallback('lf')<CR>
 noremap <leader>p "0p
 noremap <leader>P "0P
-imap <leader>r <Esc><leader>r
+" use ; to avoid typing delay if leader changed to ' '
+imap ;r <Esc><leader>r
 nnoremap <leader>r :execute funcs#get_run_command()<CR>
 nnoremap <C-p> :call plugins#zeef#files()<CR>
 xnoremap <C-p> :call plugins#zeef#files(funcs#get_visual_selection())<CR>
@@ -282,15 +283,17 @@ nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
 xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
 nmap <leader>c <leader>ncgn
 xmap <leader>c <leader>ncgn
+nnoremap <leader>tu <C-^>
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
 nnoremap <leader>L :call funcs#print_variable(0, 1)<CR>
 xnoremap <leader>L :<C-u>call funcs#print_variable(1, 1)<CR>
-inoremap <leader>w <Esc>:update<CR>
+" map ;w and ;q separately to support sudoedit (vim small)
 nnoremap ;w :update<CR>
-nnoremap <leader>W :wall<CR>
-" map ;q separately from <leader>q to support sudoedit (vim small)
 nnoremap ;q :quit<CR>
+inoremap ;w <Esc>:update<CR>
+nnoremap <leader>w :update<CR>
+nnoremap <leader>W :wall<CR>
 nnoremap <silent> <leader>q :call funcs#quit(0, 0)<CR>
 nnoremap <silent> <leader>Q :call funcs#quit(0, 1)<CR>
 nnoremap <silent> <leader>x :call funcs#quit(1, 0)<CR>

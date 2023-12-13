@@ -89,11 +89,6 @@
   "Improved react functional component": {
     "prefix": "rfc",
     "body": [
-      "/*",
-      " * Copyright OpenSearch Contributors",
-      " * SPDX-License-Identifier: Apache-2.0",
-      " */",
-      "",
       "import React from 'react';",
       "",
       "interface ${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}}Props {",
@@ -111,40 +106,35 @@
       ""
     ]
   },
-  "Jest template": {
-    "prefix": "template-jest",
+  "Jest react component": {
+    "prefix": "template-jest-react-component",
     "body": [
-      "/*",
-      " * Copyright OpenSearch Contributors",
-      " * SPDX-License-Identifier: Apache-2.0",
-      " */",
+      "import { fireEvent, render, waitFor } from '@testing-library/react';",
+      "import React, { ComponentProps } from 'react';",
       "",
-      "import { fireEvent, render } from '@testing-library/react';",
-      "import { configure, mount, shallow } from 'enzyme';",
-      "import Adapter from 'enzyme-adapter-react-16';",
-      "import React from 'react';",
+      "const render${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} = (",
+      "\toverrideProps: Partial<ComponentProps<typeof ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}>> = {}",
+      ") => {",
+      "\tconst props: ComponentProps<typeof ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}> = Object.assign(",
+      "\t\t{",
+      "\t\t\t$0",
+      "\t\t},",
+      "\t\toverrideProps",
+      "\t);",
+      "\tconst component = render(<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} {...props}/>);",
+      "\treturn { component, props };",
+      "};",
       "",
       "describe('<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} /> spec', () => {",
-      "\tconfigure({ adapter: new Adapter() });$0",
-      "",
-      "\tit('renders the component', () => {",
-      "\t\tconst utils = render(",
-      "\t\t\t<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}",
-      "",
-      "\t\t\t/>",
-      "\t\t);",
-      "\t\texpect(utils.container.firstChild).toMatchSnapshot();",
+      "\tit('should display texts', () => {",
+      "\t\tconst { component } = render${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}();",
+      "\t\tfireEvent.click(component.getByLabelText('run'));",
+      "\t\texpect(component.getByText('text')).toBeInTheDocument();",
       "\t});",
-      "",
-      "});",
-      ""
+      "});"
     ]
   },
-  "Jest fn": {
-    "prefix": "jestfn",
-    "body": ["const $0 = jest.fn();"]
-  },
-  "Jest waitfor": {
+  "Jest waitFor": {
     "prefix": "waitFor",
     "body": ["await waitFor(() => {", "\t$0", "});"]
   }

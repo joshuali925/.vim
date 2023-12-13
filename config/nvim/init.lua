@@ -183,6 +183,8 @@ vim.keymap.set("n", "ZX", function()
         if vim.bo[bufnr].buflisted and bufnr ~= cur and vim.b[bufnr].bufpersist ~= 1 then vim.fn["plugins#bbye#bdelete"]("bdelete", "", bufnr) end
     end
 end, { desc = "Close untouched buffers" })
+vim.keymap.set("i", "jk", "<Esc>")
+vim.keymap.set("i", "kj", "<Esc>")
 vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo <bar> silent! NotificationsDismiss<CR>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("x", "<C-c>", "<Esc>")
@@ -200,7 +202,7 @@ vim.keymap.set({ "n", "t" }, "<M-j>", "<Cmd>call plugins#tmux_navigator#resize('
 vim.keymap.set({ "n", "t" }, "<M-k>", "<Cmd>call plugins#tmux_navigator#resize('k')<CR>")
 vim.keymap.set({ "n", "t" }, "<M-l>", "<Cmd>call plugins#tmux_navigator#resize('l')<CR>")
 vim.keymap.set("n", "<C-f>", "<Cmd>lua require('lsp').organize_imports_and_format()<CR>")
-vim.keymap.set("x", "<C-f>", vim.lsp.buf.format)
+vim.keymap.set("x", "<C-f>", "<Cmd>Conform<CR>")
 vim.keymap.set("x", "<leader>p", [["0p]])
 vim.keymap.set("x", "<leader>P", [["0P]])
 vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
@@ -212,6 +214,7 @@ vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
 vim.keymap.set("x", "<leader>s", [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/gc<Left><Left><Left>]])
 vim.keymap.set({ "n", "x" }, "<leader>c", "<leader>ncgn", { remap = true })
+vim.keymap.set("n", "<leader>tu", "<C-^>")
 vim.keymap.set("n", "<leader>l", "<Cmd>call funcs#print_variable(0, 0)<CR>")
 vim.keymap.set("x", "<leader>l", ":<C-u>call funcs#print_variable(1, 0)<CR>")
 vim.keymap.set("n", "<leader>L", "<Cmd>call funcs#print_variable(0, 1)<CR>")
@@ -310,11 +313,11 @@ vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<
 vim.api.nvim_create_user_command("Grt", "Gcd", {})
 vim.api.nvim_create_user_command("ProfileStart", "lua require('plenary.profile').start(vim.fn.stdpath('cache') .. '/profile.log')", {})
 vim.api.nvim_create_user_command("ProfileStop", [[execute "lua require('plenary.profile').stop()" | execute 'edit ' . stdpath('cache') . '/profile.log']], {})
-vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | execute 'mksession! ' . stdpath('data') . '/session_' . <q-args> . '.vim' | silent! ScrollViewEnable | lua vim.notify('Session saved to \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
-vim.api.nvim_create_user_command("SessionLoad", "execute 'source ' . stdpath('data') . '/session_' . <q-args> . '.vim' | lua vim.notify('Loaded session from \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
+vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | execute 'mksession! ' . stdpath('data') . '/session_' . <q-args> . '.vim' | silent! ScrollViewEnable | lua vim.notify('Session saved to \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { annote = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
+vim.api.nvim_create_user_command("SessionLoad", "execute 'source ' . stdpath('data') . '/session_' . <q-args> . '.vim' | lua vim.notify('Loaded session from \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { annote = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
 vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>)", { nargs = "+" })
-vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = true, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
+vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = '<bang>' == '' and true or false, search = <q-args>, initial_mode = 'normal'})", { nargs = "*", bang = true })
 vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
@@ -328,9 +331,17 @@ vim.api.nvim_create_user_command("Prettier", function(args)
     if vim.api.nvim_get_vvar("shell_error") == 0 then
         vim.api.nvim_buf_set_lines(0, line1, line2, false, formatted)
     else
-        vim.notify(formatted, vim.log.levels.ERROR, { title = "Prettier failed" })
+        vim.notify(formatted, vim.log.levels.ERROR, { annote = "Prettier failed" })
     end
 end, { complete = "filetype", nargs = "*", range = true })
+vim.api.nvim_create_user_command("Conform", function(args)
+    local range = nil
+    if args.count ~= -1 then
+        local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+        range = { start = { args.line1, 0 }, ["end"] = { args.line2, end_line:len() } }
+    end
+    require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000, range = range })
+end, { range = true })
 
 -- overrides {{{1
 vim.filetype.add({
@@ -345,9 +356,12 @@ vim.filetype.add({
 })
 vim.notify = (function(overridden)
     return function(...)
-        local present, notify = pcall(require, "notify")
+        local present, fidget = pcall(require, "fidget")
         if present then
-            vim.notify = notify
+            vim.notify = function(msg, level, opts)
+                if opts and opts["title"] then opts["annote"] = opts["title"] end
+                return fidget.notify(msg, level, opts)
+            end
         else
             vim.notify = overridden
         end

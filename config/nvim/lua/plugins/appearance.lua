@@ -78,25 +78,6 @@ return {
                         end,
                         { "diff", symbols = { added = "  ", modified = "  ", removed = "  " } },
                         "diagnostics",
-                        {
-                            function()
-                                local lsp_progress = vim.lsp.util.get_progress_messages()[1]
-                                if lsp_progress then
-                                    local title = lsp_progress.title or ""
-                                    local percentage = lsp_progress.percentage or 0
-                                    local msg = lsp_progress.message or ""
-                                    if percentage > 70 then
-                                        return string.format(" %%<%s %s %s (%s%%%%) ", "", title, msg, percentage)
-                                    end
-                                    local spinners = { "󰪞 ", "󰪟 ", "󰪠 ", "󰪡 ", "󰪢 ", "󰪣 ", "󰪤 ", "󰪥" }
-                                    local ms = math.floor(vim.loop.hrtime() / 120000000) -- 120ms
-                                    local frame = ms % #spinners
-                                    return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
-                                end
-                                return ""
-                            end,
-                            color = "String",
-                        },
                     },
                     lualine_x = {
                         "%S",

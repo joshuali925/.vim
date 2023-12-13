@@ -28,11 +28,12 @@ return {
         "iamcco/markdown-preview.nvim",
         enabled = vim.env.SSH_CLIENT == nil,
         build = "cd app && yarn install",
-        ft = "markdown",
+        cmd = "MarkdownPreview",
         init = function()
             vim.g.mkdp_auto_close = 0
             vim.g.mkdp_preview_options = { disable_sync_scroll = 1 }
         end,
+        config = function() vim.cmd.doautocmd("FileType") end -- trigger autocmd to defined MarkdownPreview command for buffer
     },
     { "godlygeek/tabular", cmd = "Tabularize" },
     {
@@ -67,7 +68,7 @@ return {
         },
         config = function()
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
-            require("mini.files").setup({ mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
+            require("mini.files").setup({ options = { use_as_default_explorer = false }, mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
             require("mini.move").setup({ mappings = { left = "", right = "", down = "<C-,>", up = "<C-.>", line_left = "", line_right = "", line_down = "<C-,>", line_up = "<C-.>" } })
             require("mini.hipatterns").setup({
                 highlighters = {

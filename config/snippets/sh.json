@@ -41,7 +41,7 @@
   },
   "If glob": {
     "prefix": "if-glob",
-    "body": ["if [[ \\$${1:VAR} = *${2:STRING}* ]]; then", "\t$0", "fi"]
+    "body": ["if [[ \\$${1:VAR} = *'${2:STRING}'* ]]; then", "\t$0", "fi"]
   },
   "If regex": {
     "prefix": "if-regex",
@@ -60,6 +60,10 @@
       "fi"
     ]
   },
+  "If argument exists": {
+    "prefix": "if-argument-exists",
+    "body": ["if [[ \" \\$* \" = *' --${1:option} '* ]]; then", "\t$0", "fi"]
+  },
   "If array is empty": {
     "prefix": "if-array-empty",
     "body": ["if [[ \\${#${1:array}[@]} -eq 0 ]]; then", "\t$0", "fi"]
@@ -74,11 +78,7 @@
   },
   "If array contains glob": {
     "prefix": "if-array-contains",
-    "body": [
-      "if [[ \\${${1:array}[*]} = *${2:glob}* ]]; then",
-      "\t$0",
-      "fi"
-    ]
+    "body": ["if [[ \\${${1:array}[*]} = *${2:glob}* ]]; then", "\t$0", "fi"]
   },
   "If variable equals ignore case": {
     "prefix": "if-equals-ignore-case",

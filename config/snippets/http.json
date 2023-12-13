@@ -1,7 +1,7 @@
 {
   "Template": {
     "prefix": "template",
-    "description": "rest.nvim requests, define variables at top: \"BASE: https://httpbin.org/get\"",
+    "description": "rest.nvim request variables",
     "body": [
       "# ENV {{{",
       "# vim:foldmethod=marker",
