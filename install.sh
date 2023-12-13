@@ -83,7 +83,7 @@ log() {
 }
 
 backup() {
-  if [[ -e $1 ]]; then
+  if [[ -e $1 ]] || [[ -L $1 ]]; then
     mkdir -p "$BACKUP_DIR"
     \mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"  # .backup_$(date +%s) suffix won't be unique in this script
   fi
@@ -285,7 +285,7 @@ install_neovim() {
   link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
   backup "$HOME/.local/lib/nvim"
   backup "$HOME/.local/bin/nvim"
-  nvim --version
+  ~/.vim/bin/nvim --version
   log 'Installed neovim, installing plugins..'
   timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
   timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd.quitall() end, 27000)' || true

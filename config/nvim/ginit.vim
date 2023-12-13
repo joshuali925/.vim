@@ -7,12 +7,13 @@ endif
 
 if exists('g:neovide')
   " do not enable particles, https://github.com/neovide/neovide/issues/843
+  let g:neovide_cursor_vfx_mode = 'sonicboom'
   let g:neovide_refresh_rate = 30
   inoremap <D-v> <C-g>u<C-o>"+p
+  cnoremap <D-v> <C-r>+
+  tnoremap <D-v> <C-\><C-n>"+p
   nnoremap <D-v> "+p
   xnoremap <D-v> "+p
-  inoremap <D-z> <C-o>u
-  nnoremap <D-z> u
   noremap <D-Left> <Home>
   noremap! <D-Left> <Home>
   noremap <D-Right> <End>

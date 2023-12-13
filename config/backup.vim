@@ -4151,3 +4151,47 @@ install-from-github lf gokcehan/lf linux-amd64 linux-arm64 darwin-amd64 darwin-a
     log 'Installing tmux-thumbs binaries..'
     curl -L -o- "https://github.com/joshuali925/.vim/releases/download/binaries/tmux-thumbs-$PLATFORM-$ARCHITECTURE.tar.gz" | tar xz -C "$HOME/.tmux/plugins/tmux-thumbs"
   fi
+
+" =======================================================
+" null-ls formatter, doesn't work with prettier through conform
+                "sh",     -- prettier-plugin-sh (cd ~/.local/share/nvim/mason/packages/prettier; npm install prettier-plugin-sh)
+                "bash",
+                "java",   -- prettier-plugin-java
+                "kotlin", -- prettier-plugin-kotlin
+" nvim-notify replaced by fidget.nvim
+    {
+        "rcarriga/nvim-notify",
+        config = function()
+            require("notify").setup({ timeout = 3000 })
+            vim.api.nvim_create_user_command("NotificationsDismiss", function() require("notify").dismiss({ silent = true, pending = true }) end, {})
+        end,
+    },
+                        {
+                            function()
+                                local lsp_progress = vim.lsp.util.get_progress_messages()[1]
+                                if lsp_progress then
+                                    local title = lsp_progress.title or ""
+                                    local percentage = lsp_progress.percentage or 0
+                                    local msg = lsp_progress.message or ""
+                                    if percentage > 70 then
+                                        return string.format(" %%<%s %s %s (%s%%%%) ", "", title, msg, percentage)
+                                    end
+                                    local spinners = { "󰪞 ", "󰪟 ", "󰪠 ", "󰪡 ", "󰪢 ", "󰪣 ", "󰪤 ", "󰪥" }
+                                    local ms = math.floor(vim.loop.hrtime() / 120000000) -- 120ms
+                                    local frame = ms % #spinners
+                                    return string.format(" %%<%s %s %s (%s%%%%) ", spinners[frame + 1], title, msg, percentage)
+                                end
+                                return ""
+                            end,
+                            color = "String",
+                        },
+" better-escape
+    { "max397574/better-escape.nvim", event = "InsertEnter", opts = { mapping = { "jk", "kj" }, timeout = 200, clear_empty_lines = true } },
+
+" =======================================================
+" gh markdown preview, install as separate binary
+  BIN_INIT=1 gh extension install yusukebe/gh-markdown-preview || true
+
+" =======================================================
+" code-server karabiner focus
+ || (ps p $(pgrep app_mode_loader) | grep -o '\\(Codespaces\\|code-server\\)\\( [0-9]\\)\\?.app' | xargs -I{} open -a '{}')

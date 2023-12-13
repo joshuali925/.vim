@@ -56,7 +56,12 @@ local themes = {
                 require("visual_studio_code.utils").hl.set("CursorLine", { bg = "#282828" })
             end
             require("lualine").setup({
-                options = { component_separators = { left = "", right = "" }, section_separators = { left = "", right = "" }, globalstatus = true },
+                options = {
+                    theme = "visual_studio_code",
+                    component_separators = { left = "", right = "" },
+                    section_separators = { left = "", right = "" },
+                    globalstatus = true,
+                },
                 sections = require("visual_studio_code").get_lualine_sections(),
             })
             require("bufferline").setup({ options = { custom_areas = { right = require("visual_studio_code").get_bufferline_right() } } })
@@ -145,7 +150,7 @@ function M.switch(index)
     M.theme = M.theme_list[index]
     M.config()
     M.config() -- some plugins like bufferline need a second config call
-    vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { title = "Theme" })
+    vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { annote = "Theme" })
 end
 
 return M

@@ -137,5 +137,31 @@
       "\t>,",
       "};"
     ]
+  },
+  "Jest react hook": {
+    "prefix": "template-jest-react-hook",
+    "body": [
+      "import { renderHook } from '@testing-library/react-hooks';",
+      "import * as serviceExports from './service';",
+      "",
+      "describe('${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}', () => {",
+      "\tconst spy = jest.spyOn(serviceExports, 'request');",
+      "",
+      "\tbeforeEach(() => {",
+      "\t\tspy.mockResolvedValueOnce({ data: 'test' });",
+      "\t});",
+      "",
+      "\tafterEach(() => {",
+      "\t\tjest.clearAllMocks();",
+      "\t});",
+      "",
+      "\tit('should show loading', async () => {",
+      "\t\tconst { result, waitForNextUpdate } = renderHook(() => ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}());",
+      "\t\texpect(result.current.loading).toBe(true);",
+      "\t\tawait waitForNextUpdate();",
+      "\t\texpect(result.current.loading).toBe(false);$0",
+      "\t});",
+      "});"
+    ]
   }
 }

@@ -52,11 +52,10 @@ __fzf_cd__() {
   dir=$(set +o pipefail; eval "$cmd" | FZF_DEFAULT_OPTS="$opts" $(__fzfcmd)) && if [[ -d $dir ]]; then printf 'builtin cd -- %q' "$dir"; else printf '%q %q' "$EDITOR" "$dir"; fi
 }
 
-# customized to show preview
 if command -v perl > /dev/null; then
   __fzf_history__() {
     local output opts script
-    opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} -n2..,.. --scheme=history --bind=\\\`:toggle-sort ${FZF_CTRL_R_OPTS-} +m --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --color=always --plain' --preview-window='right,40%,wrap' --read0"
+    opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} -n2..,.. --scheme=history --bind=ctrl-r:toggle-sort ${FZF_CTRL_R_OPTS-} +m --read0"
     script='BEGIN { getc; $/ = "\n\t"; $HISTCOUNT = $ENV{last_hist} + 1 } s/^[ *]//; print $HISTCOUNT - $. . "\t$_" if !$seen{$_}++'
     output=$(
       set +o pipefail
@@ -80,7 +79,7 @@ else # awk - fallback for POSIX systems
       IFS=' .' read n x y z d <<< $(command mawk -W version 2> /dev/null)
       [[ $n == mawk ]] && (( d >= 20230302 && (x *1000 +y) *1000 +z >= 1003004 )) && __fzf_awk=mawk
     fi
-    opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} -n2..,.. --scheme=history --bind=\\\`:toggle-sort ${FZF_CTRL_R_OPTS-} +m --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --color=always --plain' --preview-window='right,40%,wrap' --read0"
+    opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} -n2..,.. --scheme=history --bind=ctrl-r:toggle-sort ${FZF_CTRL_R_OPTS-} +m --read0"
     [[ $(HISTTIMEFORMAT='' builtin history 1) =~ [[:digit:]]+ ]]    # how many history entries
     script='function P(b) { ++n; sub(/^[ *]/, "", b); if (!seen[b]++) { printf "%d\t%s%c", '$((BASH_REMATCH + 1))' - n, b, 0 } }
     NR==1 { b = substr($0, 2); next }

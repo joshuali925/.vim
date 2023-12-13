@@ -9,6 +9,7 @@ local disabled_servers = {
 function M.lsp_install_all()
     local required = {
         "lua_ls",
+        "bashls",
         "vimls",
         "jsonls",
         "yamlls",
@@ -32,17 +33,28 @@ end
 
 function M.init()
     local function make_config()
-        -- https://github.com/hrsh7th/cmp-nvim-lsp/blob/389f06d3101fb412db64cb49ca4f22a67882e469/lua/cmp_nvim_lsp/init.lua#L24
-        local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
-        capabilities.textDocument.completion.completionItem.deprecatedSupport = true
-        capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
-        capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
-        capabilities.textDocument.completion.completionItem.preselectSupport = true
-        capabilities.textDocument.completion.completionItem.resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } }
-        capabilities.textDocument.completion.completionItem.snippetSupport = true
-        capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
-        capabilities.textDocument.completion.completionItem.documentationFormat = { "markdown", "plaintext" }
+        -- https://github.com/hrsh7th/cmp-nvim-lsp/blob/5af77f54de1b16c34b23cba810150689a3a90312/lua/cmp_nvim_lsp/init.lua#L24
+        local capabilities = vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), {
+            textDocument = {
+                completion = {
+                    dynamicRegistration = false,
+                    completionItem = {
+                        snippetSupport = true,
+                        commitCharactersSupport = true,
+                        deprecatedSupport = true,
+                        preselectSupport = true,
+                        tagSupport = { valueSet = { 1 } },
+                        insertReplaceSupport = true,
+                        resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits", "sortText", "filterText", "insertText", "textEdit", "insertTextFormat", "insertTextMode" } },
+                        insertTextModeSupport = { valueSet = { 1, 2 } },
+                        labelDetailsSupport = true,
+                    },
+                    contextSupport = true,
+                    insertTextMode = 1,
+                    completionList = { itemDefaults = { "commitCharacters", "editRange", "insertTextFormat", "insertTextMode", "data" } },
+                },
+            },
+        })
         return { capabilities = capabilities, flags = { debounce_text_changes = 250 } }
     end
 
@@ -149,29 +161,6 @@ function M.init()
         null_ls.builtins.code_actions.shellcheck,
         null_ls.builtins.code_actions.eslint,
         null_ls.builtins.diagnostics.zsh,
-        null_ls.builtins.formatting.prettier.with({
-            filetypes = {
-                "javascript",
-                "javascriptreact",
-                "typescript",
-                "typescriptreact",
-                "vue",
-                "css",
-                "scss",
-                "less",
-                "html",
-                "json",
-                "yaml",
-                "markdown",
-                "graphql",
-                "sh",     -- prettier-plugin-sh (cd ~/.local/share/nvim/mason/packages/prettier; npm install prettier-plugin-sh)
-                "bash",
-                "java",   -- prettier-plugin-java
-                "kotlin", -- prettier-plugin-kotlin
-            },
-        }),
-        null_ls.builtins.formatting.black,
-        null_ls.builtins.formatting.sqlformat.with({ extra_args = { "-rsk", "upper" } }),
     }
     if require("mason-registry").is_installed("shellcheck") then
         table.insert(null_ls_sources, null_ls.builtins.diagnostics.shellcheck)
@@ -188,26 +177,27 @@ function M.init()
     vim.diagnostic.config({ virtual_text = { prefix = "●" } })
     vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
+    local severity = { "error", "warn", "info", "info" }
+    vim.lsp.handlers["window/showMessage"] = function(_, method, params, _) vim.notify(method.message, severity[params.type]) end
 end
 
-local formatting_lsps = { "null-ls", "lua_ls" }
 function M.organize_imports_and_format()
     local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_active_clients({ bufnr = 0 }))
     if vim.tbl_contains(active_clients, "typescript-tools") then
-        local ok, res = pcall(require("typescript-tools.api").organize_imports, true)
-        if not ok then
-            vim.notify(res, vim.log.levels.WARN, { title = "Failed to organize imports" })
+        if next(vim.tbl_filter(function(message) return message.name == "typescript-tools" and message.title == "Loading project" end,
+                vim.lsp.util.get_progress_messages())) ~= nil then
+            vim.notify("LSP loading in progress", vim.log.levels.WARN, { annote = "Failed to organize imports" })
+        else
+            local ok, res = pcall(require("typescript-tools.api").organize_imports, true)
+            if not ok then vim.notify(res, vim.log.levels.WARN, { annote = "Failed to organize imports" }) end
         end
     elseif vim.tbl_contains(active_clients, "pyright") then
         vim.cmd("silent PythonOrganizeImports")
     end
-    if not vim.tbl_isempty(vim.tbl_filter(function(name) return vim.tbl_contains(formatting_lsps, name) end, active_clients)) then
-        vim.lsp.buf.format({ filter = function(client) return vim.tbl_contains(formatting_lsps, client.name) end, timeout_ms = 3000 })
-    else
-        vim.cmd.Prettier()
-    end
     if vim.tbl_contains(active_clients, "eslint") then
-        vim.cmd("undojoin | EslintFixAll")
+        vim.schedule(function() vim.cmd("EslintFixAll") end)
+    else
+        require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000 })
     end
 end
 

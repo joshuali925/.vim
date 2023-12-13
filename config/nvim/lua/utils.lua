@@ -30,7 +30,7 @@ function M.restart_tmux_task()
             local result = handle:read("*a")
             handle:close()
             if result ~= "" then
-                vim.notify(result, vim.log.levels.ERROR, { title = "Restarting tmux task" })
+                vim.notify(result, vim.log.levels.ERROR, { annote = "Restarting tmux task" })
             end
         end, 500)
     end)
@@ -50,7 +50,7 @@ function M.untildone(command, should_restart_tmux_task, message)
             end
         end
         vim.notify("Number of jobs stoped: " .. jobs - #timers .. "\nNumber of jobs running: " .. #timers,
-            vim.log.levels.INFO, { title = "All loop stopped" })
+            vim.log.levels.INFO, { annote = "All loop stopped" })
         return
     end
 
@@ -59,14 +59,14 @@ function M.untildone(command, should_restart_tmux_task, message)
     id = id + 1
     timers[timer_id] = timer
     states.untildone_count = states.untildone_count + 1
-    vim.notify(command, vim.log.levels.INFO, { title = "Loop started" })
+    vim.notify(command, vim.log.levels.INFO, { annote = "Loop started" })
     timer:start(1000, 1000, function()
         local handle = assert(io.popen(command .. " 2>&1; echo $?"))
         local result = handle:read("*a")
         handle:close()
         if result:match(".*%D(%d+)") == "0" then
             states.untildone_count = states.untildone_count - 1
-            vim.notify(message or "Command succeeded", vim.log.levels.INFO, { title = "Loop stopped", icon = "" })
+            vim.notify(message or "Command succeeded", vim.log.levels.INFO, { annote = "Loop stopped", icon = "" })
             timer:close()
             table.remove(timers, timer_id)
         end
@@ -101,7 +101,7 @@ function M.copy_with_osc_yank_script(str)
     handle:write(str)
     handle:flush()
     handle:close()
-    vim.notify(message .. "Copied " .. str:len() .. " characters.", vim.log.levels.INFO, { title = "osc52" })
+    vim.notify(message .. "Copied " .. str:len() .. " characters.", vim.log.levels.INFO, { annote = "osc52" })
 end
 
 function M.command_without_quickscope(command)
@@ -198,7 +198,7 @@ function M.fzf(visual)
     local height = vim.o.lines - 6
     local width = math.ceil(vim.o.columns * 9 / 10)
     if visual or fzf_term == nil or prev_height ~= height or prev_width ~= width then
-        local cmd = ([[%s | FZF_DEFAULT_OPTS="%s %s" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}" ]]):format(vim.env.FZF_CTRL_T_COMMAND, vim.env.FZF_DEFAULT_OPTS .. " --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100%", vim.env.FZF_CTRL_T_OPTS):gsub("`", "\\`"):gsub("%%", "%%%%") .. (visual and "--query " .. M.get_visual_selection() .. " > %s" or "> %s")
+        local cmd = ([[FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --layout=default --height=100% --bind=tab:toggle-out,shift-tab:toggle-in --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}" ]]):gsub("`", "\\`"):gsub("%%", "%%%%") .. (visual and "--query " .. M.get_visual_selection() .. " > %s" or "> %s")
         fzf_term = term_with_edit_callback(cmd, height, width, "none")
     end
     fzf_term:toggle()

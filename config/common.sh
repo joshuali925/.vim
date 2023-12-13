@@ -1,7 +1,7 @@
 # shellcheck disable=1090,2015,2059,2148,2155,2164,2207
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS, LF_ICONS
-[[ -s $HOME/.asdf/asdf.sh ]] && ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh
+if [[ -s $HOME/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh; fi
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR=nvim
@@ -9,17 +9,16 @@ export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --L
 export BAT_THEME=OneHalfDark
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
-export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=40% --bind=change:top --info=inline --scrollbar "▌▐" --border=thinblock --preview-window=border-thinblock --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
+export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=40% --bind=change:first --info=inline --scrollbar "▌▐" --border=thinblock --preview-window=border-thinblock --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --hidden --exclude=.git --color=always'
-export FZF_CTRL_T_OPTS="--ansi --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND --no-ignore || true)'"
+export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(> )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)'"
+export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-k:unbind(change)+track' --header='Press \` to toggle sort, C-k C-u to show surrounding items' --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --color=always --plain' --preview-window='right,40%,wrap'"
 export FZF_PREVIEW_COMMAND='bat --color=always --style=numbers --line-range :50 {}'
 if [[ $LIGHT_THEME = 1 ]]; then
-  export BAT_THEME=GitHub
-  export DELTA_THEME=light-theme
-  export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:253,bg+:252,gutter:251,border:248,preview-bg:254"
+  export BAT_THEME=GitHub DELTA_THEME=light-theme FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:253,bg+:252,gutter:251,border:248,preview-bg:254"
 fi
 
 alias -- -='cd -'
@@ -100,7 +99,7 @@ alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: /
 alias gco='git checkout'
 alias gcp='git cherry-pick -x'
 alias gd='git diff'
-alias gds='echo -e "\e[1;32mStaged\e[0m"; git diff --stat --staged; echo -e "\n\e[1;31mUnstaged or provided ref\e[0m"; git diff --stat'
+alias gds='echo -e "\e[1;32mStaged\e[0m"; git diff --stat --staged; echo -e "\n\e[1;31mUnstaged or against given ref\e[0m"; git diff --stat'
 alias gdst='git diff --staged'
 alias gdt='GIT_EXTERNAL_DIFF=difft git diff'
 alias gdd='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
@@ -141,9 +140,8 @@ alias grset='git remote set-url'
 alias greset-to-remote='git stash push --message "greset-to-remote temporary stash"; git reset --hard @{upstream}'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grv='git remote -v'
-alias gs='git status'
+alias gs='git status -sb'
 alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([[ \$(pwd) = '\$PWD' ]] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
-alias gss='git status -sb'
 alias gst='git stash'
 alias gsts='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
@@ -215,7 +213,7 @@ gwt() {
 glof() {
   git log --graph --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
     fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
+    --header='Press ` to toggle sort, C-y to copy commit, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
@@ -225,9 +223,10 @@ glof() {
 grlf() {
   git reflog --color --date=human-local --pretty=format:"%Cred%h%Creset %C(037)%gD:%Creset %gs%Creset%C(auto)%d%Creset" "$@" | awk '!x[$1]++' |
     fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='Press ` to toggle sort, <C-y> to copy commit, <C-p> , . to control preview' \
+    --header='Press ` to toggle sort, C-e to diff from HEAD, C-y to copy commit, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
+    --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git diff HEAD | delta --line-numbers --navigate)' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
@@ -291,12 +290,15 @@ size() {
   du -ab "${args[@]}" | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
 }
 
-d() {  # show directory stack or download from URL (does not continue download): d [<URL> [output-dir]]
+d() {  # show directory stack or download from URL
   if [[ $# -eq 0 ]]; then dirs -v | head -10; return $?; fi
+  local wget_args=(--content-disposition) curl_args=(--remote-header-name)
+  if [[ $1 = '-c' ]] || [[ $1 = '--continue' ]]; then shift && local wget_args=(--continue) curl_args=(-C -); fi
+  if [[ $# -eq 0 ]] || [[ $1 = -* ]]; then echo "Usage: $0 [[-c/--continue] <URL> [output-dir]]" >&2; return 1; fi
   if builtin command -v wget > /dev/null 2>&1; then
-    wget --content-disposition --tries 3 --directory-prefix "${2:-.}" "$1"
+    wget "${wget_args[@]}" --tries 3 --directory-prefix "${2:-.}" "$1"
   elif builtin command -v curl > /dev/null 2>&1; then
-    curl -f -LO --remote-header-name --retry 3 --retry-delay 5 --create-dirs --output-dir "${2:-.}" "$1"
+    curl -f -LO "${curl_args[@]}" --retry 3 --retry-delay 5 --create-dirs --output-dir "${2:-.}" "$1"
   else
     echo 'wget or curl not found, exiting..' >&2; return 1
   fi
@@ -483,22 +485,14 @@ vf() {  # find files: vf; open files from pipe: fd | vf
 cdf() {
   local fzftemp
   fzftemp=$(FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --color=always --hidden --exclude=.git $*" fzf --ansi --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore $* || true)") && {
-    [[ -d $fzftemp ]] && cd "$fzftemp" || {
-      [[ -d $(dirname "$fzftemp" 2> /dev/null) ]] && cd "$(dirname "$fzftemp")"
-    }
+    [[ -d $fzftemp ]] && cd "$fzftemp" || { [[ -d $(dirname "$fzftemp" 2> /dev/null) ]] && cd "$(dirname "$fzftemp")"; }
   }
 }
 
 vrg() {
-  if [[ $# -eq 0 ]]; then
-    [[ ! $(fc -ln -1) =~ ^rg* ]] && echo 'Need a string to search for.' || eval "v$(fc -ln -1)"
-    return 0
-  fi
-  if [[ " $* " = *' --fixed-strings '* ]] || [[ " $* " = *' -F '* ]]; then
-    $EDITOR -q <(rg "$@" --vimgrep) -c "/\V$1"  # use \V if rg is called with -F/--fixed-strings to search for string literal
-  else
-    $EDITOR -q <(rg "$@" --vimgrep) -c "/$1"
-  fi
+  if [[ $# -eq 0 ]]; then [[ ! $(fc -ln -1) =~ ^rg* ]] && echo 'Need a string to search for.' >&2 || eval "v$(fc -ln -1)"; return $?; fi
+  if [[ " $* " = *' --fixed-strings '* ]] || [[ " $* " = *' -F '* ]]; then local pattern="/\V$1"; else local pattern="/$1"; fi
+  $EDITOR -q <(rg --vimgrep "$@") -c "$pattern"  # won't work on mac: https://github.com/neovim/neovim/issues/21756
 }
 
 # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration
@@ -506,47 +500,42 @@ fif() {  # find in file
   if [[ $# -eq 0 ]]; then echo 'Need a string to search for.'; return 1; fi
   rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 --max-columns 0 -- $(printf "%q " "$@"){+}" --bind="enter:execute($EDITOR -c \"/$1\" -- {+} < /dev/tty)"
 }
-rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags, <C-s> to switch to fzf filter
+rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags
   [[ $# -gt 0 ]] && [[ $1 != -* ]] && local init_query="$1" && shift 1
   local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "$@")"
   FZF_DEFAULT_COMMAND="$rg_prefix $(printf %q "${init_query:-}")" \
   fzf --ansi --layout=default --height=100% --disabled --query="${init_query:-}" \
-      --header='╱ <C-s> (fzf mode) ╱ <C-r> (reset ripgrep) ╱' \
-      --bind='ctrl-s:unbind(change,ctrl-s)+change-prompt(2. fzf> )+enable-search+clear-query+rebind(ctrl-r)' \
-      --bind="ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($rg_prefix {q} || true)+rebind(change,ctrl-s)" \
+      --header='Press C-s to toggle fzf' \
+      --bind='ctrl-s:transform:[[ {fzf:prompt} = "ripgrep> " ]] && echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query" || echo "change-prompt(ripgrep> )+disable-search+clear-query+reload('"$rg_prefix"' -- {q} || true)+rebind(change)"' \
       --bind="change:reload:sleep 0.2; $rg_prefix -- {q}" \
       --bind="enter:execute($EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1} < /dev/tty)" \
       --bind='tab:up,btab:down' \
-      --prompt='1. ripgrep> ' --delimiter=: \
+      --prompt='ripgrep> ' --delimiter=: \
       --preview='bat --color=always --highlight-line {2} -- {1}' \
       --preview-window='up,40%,border-bottom,+{2}+3/3,~3'
 }
 
-unalias z 2> /dev/null
 z() {
   local fzftemp
   if [[ $# -eq 0 ]]; then
-    fzftemp=$(_z -l 2>&1 | sed 's/^[0-9,.]* *//' | fzf --scheme=history --tac --header='Press ` to search under cwd' --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -n -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$PWD\" '\$0~cwd {print \$1}')") && cd "$fzftemp"
+    fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9,.]* *//' -e "\|^$PWD\$|d" | fzf --scheme=history --tac --header='Press ` to search under cwd' --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -n -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$PWD/\" '\$0~cwd {print \$1}')") && cd "$fzftemp"
   else
     _z 2>&1 "$@"
   fi
 }
 
 t() {  # create, restore, or switch tmux session
-  local change current fzftemp sessions
+  local change current fzftemp
   [[ -n $TMUX ]] && change='switch-client' && current=$(tmux display-message -p '#{session_name}') || change='attach-session'
-  if [[ $# -eq 0 ]]; then
-    fzftemp=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$current$/d" | fzf --prompt='attach> ' --bind='tab:down,btab:up' --select-1 --exit-0) && tmux $change -t "$fzftemp" || {
-      sessions=$(ls ~/.local/share/tmux/resurrect/tmux_resurrect_*.txt 2> /dev/null)
-      [[ -n $sessions ]] && fzftemp=$(echo "$sessions" | fzf --prompt='restore> ' --bind='ctrl-d:execute(mv {} {}.bak)' --bind='tab:down,btab:up' --tac --preview='cat {}') && {
-        ln -sf "$fzftemp" ~/.local/share/tmux/resurrect/last
-        tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
-        tmux attach-session
-      } || tmux
-    }
-  else
+  if [[ $# -gt 0 ]]; then
     [[ $1 = a ]] && tmux attach 2> /dev/null || tmux $change -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $change -t "$1")
+    return $?
   fi
+  fzftemp=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$current$/d" | fzf --prompt='attach> ' --bind='tab:down,btab:up' --select-1 --exit-0)
+  if [[ -n $fzftemp ]]; then tmux $change -t "$fzftemp"; return $?; fi
+  fzftemp=$(FZF_DEFAULT_COMMAND='find ~/.local/share/tmux/resurrect -name "tmux_resurrect_*.txt"' fzf --prompt='restore> ' --header='Press C-d to delete a session' --tac --preview='cat {}' --bind='ctrl-d:execute(mv {} {}.bak)+reload(find ~/.local/share/tmux/resurrect -name "tmux_resurrect_*.txt")' --bind='tab:down,btab:up' --exit-0)
+  if [[ -z $fzftemp ]]; then tmux; return $?; fi
+  ln -sf "$fzftemp" ~/.local/share/tmux/resurrect/last && tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" && tmux attach-session
 }
 
 man() {
@@ -745,10 +734,8 @@ ec2() {
 }
 
 os-get() {
-  ver() {
-    awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"
-  }
   if [[ $# -eq 0 ]]; then echo "Usage: $0 <3-digit-version> [query]" >&2; return 1; fi
+  ver() { awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"; }
   local version=$1 arch=$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64) url selected
   local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management')
   local artifacts=("${core[@]}" "${opensearch_plugin[@]}" "${es[@]}")
@@ -771,7 +758,7 @@ os-get() {
     fi
   fi
   printf "\033[0;36m%s\033[0m\n" "Downloading from: $url" >&2
-  wget "$url"
+  curl -fLO "$url"
 }
 
 theme() {  # locally toggles wezterm theme, remotely updates configs to match terminal theme
@@ -792,14 +779,14 @@ theme() {  # locally toggles wezterm theme, remotely updates configs to match te
   export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 }
 
-[[ -n $DOT_VIM_LOCAL_BIN ]] && .vim-disable-binary-downloads
+if [[ -n $DOT_VIM_LOCAL_BIN ]]; then .vim-disable-binary-downloads; fi
 
 # ====================== MacOS ==========================
 if [[ $OSTYPE = darwin* ]]; then
   alias idea='open -na "IntelliJ IDEA.app" --args'
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
   alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
-  alias toggle-dark-theme='automator ~/.vim/config/macToggleDark.wflow'
+  alias toggle-dark-theme="osascript -e 'tell application \"System Events\" to tell appearance preferences to set dark mode to not dark mode'"
   browser-history() {
     local cols=$((COLUMNS / 3)) sep='{::}' fzftemp fzfprompt histfile=/tmp/browser-history-fzf.db
     if [[ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]]; then
@@ -819,6 +806,6 @@ if [[ $OSTYPE = darwin* ]]; then
     fi
     sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), url from urls order by last_visit_time desc" |
       awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
-      fzf --tiebreak=index --toggle-sort=\` --header='Press ` to toggle sort' --prompt="$fzfprompt" --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs -r open
+      fzf --tiebreak=index --bind=\`:toggle-sort --bind='ctrl-k:unbind(change)+track' --header='Press ` to toggle sort, C-k C-u to show surrounding items' --prompt="$fzfprompt" --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs -r open
   }
 fi

@@ -1,4 +1,5 @@
-[[ -n $ZSHRC_INIT ]] && return || ZSHRC_INIT=1
+if [[ -n $ZSHRC_INIT ]]; then return; fi
+ZSHRC_INIT=1
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -7,7 +8,9 @@ if [[ -r ${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh ]]; 
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-[[ ! -f $HOME/.zinit/bin/zinit.zsh ]] && git clone https://github.com/zdharma-continuum/zinit --depth=1 ~/.zinit/bin && ZINIT_POST_INSTALL=1
+if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
+  git clone https://github.com/zdharma-continuum/zinit --depth=1 ~/.zinit/bin && ZINIT_POST_INSTALL=1
+fi
 source ~/.zinit/bin/zinit.zsh
 
 if [[ -n $ZINIT_POST_INSTALL ]]; then
