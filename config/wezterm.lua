@@ -42,7 +42,7 @@ local tokyonight = wezterm.color.get_builtin_schemes()["tokyonight_storm"]
 tokyonight.brights[1] = "#717993"
 
 config.use_ime = true
-config.font = wezterm.font("JetBrainsMono Nerd Font", { weight = "Medium" })
+config.font = wezterm.font_with_fallback({ { family = "JetBrainsMono Nerd Font", weight = "Medium" } })
 config.font_size = 14
 config.use_fancy_tab_bar = false
 config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" } -- disable ligatures

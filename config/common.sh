@@ -108,7 +108,7 @@ alias gdw='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff --word-dif
 alias gf='git fetch'
 alias gfa='git remote | xargs -L1 git fetch --filter=blob:none --prune'
 alias ggl='git pull origin $(gref)'
-alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added remote: fork }; git push fork $(gref)'
+alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added remote: fork; }; git push fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
 alias glall='find . -name .git -print -execdir git pull \;'
@@ -141,7 +141,7 @@ alias greset-to-remote='git stash push --message "greset-to-remote temporary sta
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grv='git remote -v'
 alias gs='git status -sb'
-alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([[ \$(pwd) = '\$PWD' ]] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
+alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([[ \$(pwd) = '\$PWD' ]] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
 alias gst='git stash'
 alias gsts='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
@@ -533,7 +533,7 @@ t() {  # create, restore, or switch tmux session
   fi
   fzftemp=$(tmux list-sessions -F '#{session_name}' 2> /dev/null | sed "/^$current$/d" | fzf --prompt='attach> ' --bind='tab:down,btab:up' --select-1 --exit-0)
   if [[ -n $fzftemp ]]; then tmux $change -t "$fzftemp"; return $?; fi
-  fzftemp=$(FZF_DEFAULT_COMMAND='find ~/.local/share/tmux/resurrect -name "tmux_resurrect_*.txt"' fzf --prompt='restore> ' --header='Press C-d to delete a session' --tac --preview='cat {}' --bind='ctrl-d:execute(mv {} {}.bak)+reload(find ~/.local/share/tmux/resurrect -name "tmux_resurrect_*.txt")' --bind='tab:down,btab:up' --exit-0)
+  fzftemp=$(FZF_DEFAULT_COMMAND='find ~/.local/share/tmux/resurrect -name "tmux_resurrect_*.txt" | sort -r' fzf --prompt='restore> ' --header='Press C-d to delete a session' --preview='cat {}' --bind='ctrl-d:execute(mv {} {}.bak)+reload(find ~/.local/share/tmux/resurrect -name "tmux_resurrect_*.txt")' --bind='tab:down,btab:up' --exit-0)
   if [[ -z $fzftemp ]]; then tmux; return $?; fi
   ln -sf "$fzftemp" ~/.local/share/tmux/resurrect/last && tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" && tmux attach-session
 }
@@ -579,7 +579,7 @@ untildone() {
   fi
   local i=1
   while true; do
-    echo "Try $i, $(date)." >&2
+    echo "Try $i, $(date +'%Y-%m-%dT%H:%M:%S%z')." >&2
     eval "$*" && break
     ((i+=1))
     sleep 1
@@ -737,7 +737,7 @@ os-get() {
   if [[ $# -eq 0 ]]; then echo "Usage: $0 <3-digit-version> [query]" >&2; return 1; fi
   ver() { awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"; }
   local version=$1 arch=$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64) url selected
-  local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management')
+  local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management' 'opensearch-knn' 'opensearch-flow-framework' 'opensearch-skills')
   local artifacts=("${core[@]}" "${opensearch_plugin[@]}" "${es[@]}")
   selected=$(printf "%s\n" "${artifacts[@]}" | fzf --query="$2" --select-1 --bind='tab:down,btab:up') || return 1
   if [[ ${es[*]} = *${selected}* ]]; then

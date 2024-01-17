@@ -250,24 +250,6 @@ function! s:MapAction(algorithm, key)
   execute 'nmap ' . a:key.a:key[strlen(a:key)-1] . ' <Plug>actionsLine' . a:algorithm
 endfunction
 
-function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
-  function! s:CopyWithOSCYankScript(str)
-    let @" = a:str
-    let buflen = len(a:str)
-    let copied = 0
-    while buflen > copied
-      if copied > 0 && input('Total: ' . buflen . ', copied: ' . copied . ', continue? [Y/n] ') =~ '^[Nn]$'
-        break
-      endif
-      call system('y', a:str[copied :copied + 74993])
-      let copied += 74994
-    endwhile
-    echomsg '[osc52] Copied ' . min([buflen, copied]) . ' characters.'
-  endfunction
-  call <SID>MapAction('CopyWithOSCYankScript', '<leader>y')
-  nmap <leader>Y <leader>y$
-endfunction
-
 function! funcs#map_copy_to_win_clip()
   function! s:CopyToWinClip(str)
     let @" = a:str

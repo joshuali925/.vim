@@ -1,5 +1,5 @@
 return {
-    { "folke/tokyonight.nvim", priority = 1000, commit = "e1e8ff2c8ff2bdc90ce35697291a5917adc8db5c" }, -- https://github.com/folke/tokyonight.nvim/issues/452
+    { "folke/tokyonight.nvim", priority = 1000 },
     { "projekt0n/github-nvim-theme", priority = 1000 },
     { "askfiy/visual_studio_code", priority = 1000 },
     { "Shatur/neovim-ayu", priority = 1000 },

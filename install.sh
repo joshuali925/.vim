@@ -160,7 +160,7 @@ install_dotfiles() {
   log '\nCloning dotfiles..'
   if [[ ! -f $HOME/.vim/config/.bashrc ]]; then
     backup "$HOME/.vim"
-    git clone https://github.com/joshuali925/.vim.git "$HOME/.vim" --depth=1
+    git clone --filter=blob:none https://github.com/joshuali925/.vim.git "$HOME/.vim"
   fi
   log '\nCreating directories..'
   mkdir -pv ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit} ~/.ssh
