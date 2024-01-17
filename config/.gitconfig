@@ -27,6 +27,7 @@
 	insteadOf = osd:
 
 [core]
+	longpaths = true
 	; pager = less -RiMXF
 	; pager = diff-so-fancy | less -RiMXF
 	pager = delta --line-numbers --navigate --features "${DELTA_THEME:-dark-theme}"

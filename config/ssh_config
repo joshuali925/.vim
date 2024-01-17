@@ -3,7 +3,7 @@ Host *
     ServerAliveCountMax 1200
     Compression yes
     ControlMaster auto
-    ControlPath ~/.ssh/master_%r_%h
+    ControlPath ~/.ssh/master_%r_%C  # TOKEN section under man ssh_config
 
 # Host *
 #     ControlPersist 10h

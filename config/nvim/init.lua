@@ -331,7 +331,7 @@ vim.api.nvim_create_user_command("Prettier", function(args)
     if vim.api.nvim_get_vvar("shell_error") == 0 then
         vim.api.nvim_buf_set_lines(0, line1, line2, false, formatted)
     else
-        vim.notify(formatted, vim.log.levels.ERROR, { annote = "Prettier failed" })
+        vim.notify(vim.inspect(formatted), vim.log.levels.ERROR, { annote = "Prettier failed" })
     end
 end, { complete = "filetype", nargs = "*", range = true })
 vim.api.nvim_create_user_command("Conform", function(args)

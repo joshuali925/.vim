@@ -23,8 +23,12 @@ endif
 let &t_ut = ''  " https://github.com/microsoft/terminal/issues/832
 let &t_SI .= "\<Esc>[6 q"  " cursor shape
 let &t_EI .= "\<Esc>[2 q"
+let &t_BE = "\<Esc>[?2004h"  " bracked paste, manually set for vim version < 9
+let &t_BD = "\<Esc>[?2004l"
+let &t_PS = "\<Esc>[200~"
+let &t_PE = "\<Esc>[201~"
 if has('termguicolors')
-  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"  " https://github.com/vim/vim/issues/3608#issuecomment-438487463
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"  " :h tmux-integration, https://github.com/vim/vim/issues/3608#issuecomment-438487463
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
   set t_Co=256
   set termguicolors
@@ -517,7 +521,10 @@ if $VIM_SYSTEM_CLIPBOARD != ''
   xnoremap <leader>y "+y
   nnoremap <leader>Y "+y$
 else
-  call funcs#map_copy_with_osc_yank_script()
+  nnoremap <expr> <leader>y plugins#oscyank#OSCYankOperator()
+  nmap <leader>yy <leader>y_
+  nmap <leader>Y <leader>y$
+  xnoremap <leader>y :call plugins#oscyank#OSCYankVisual()<CR>
 endif
 if $SSH_CLIENT != ''
   nnoremap gx :call system('y', expand('<cfile>'))<CR>

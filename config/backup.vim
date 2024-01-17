@@ -4195,3 +4195,23 @@ install-from-github lf gokcehan/lf linux-amd64 linux-arm64 darwin-amd64 darwin-a
 " =======================================================
 " code-server karabiner focus
  || (ps p $(pgrep app_mode_loader) | grep -o '\\(Codespaces\\|code-server\\)\\( [0-9]\\)\\?.app' | xargs -I{} open -a '{}')
+
+" =======================================================
+function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
+  function! s:CopyWithOSCYankScript(str)
+    let @" = a:str
+    let buflen = len(a:str)
+    let copied = 0
+    while buflen > copied
+      if copied > 0 && input('Total: ' . buflen . ', copied: ' . copied . ', continue? [Y/n] ') =~ '^[Nn]$'
+        break
+      endif
+      call system('y', a:str[copied :copied + 74993])
+      let copied += 74994
+    endwhile
+    echomsg '[osc52] Copied ' . min([buflen, copied]) . ' characters.'
+  endfunction
+  call <SID>MapAction('CopyWithOSCYankScript', '<leader>y')
+  nmap <leader>Y <leader>y$
+endfunction
+

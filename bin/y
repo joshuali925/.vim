@@ -30,7 +30,7 @@ while [[ -z $otty ]] || [[ $otty = /dev/\?* ]] && [[ -n $ppid ]]; do
   ppid=$(awk '{print $1}' <<<"$psout")
 done
 
-if [[ -z $otty ]] || [[ $otty = /dev/\?* ]]; then
+if [[ -z $otty ]] || [[ $otty =~ ^/dev/\?*$ ]]; then
   if [[ -w /dev/fd/2 ]]; then
     otty='/dev/fd/2'
   elif [[ -w /dev/tty ]]; then
