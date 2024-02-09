@@ -4215,3 +4215,24 @@ function! funcs#map_copy_with_osc_yank_script()  " doesn't work in neovim
   nmap <leader>Y <leader>y$
 endfunction
 
+" =======================================================
+" null-ls
+    local null_ls = require("null-ls")
+    local null_ls_sources = {
+        null_ls.builtins.code_actions.gitrebase,
+        null_ls.builtins.code_actions.shellcheck,
+        null_ls.builtins.code_actions.eslint,
+        null_ls.builtins.diagnostics.zsh,
+    }
+    if require("mason-registry").is_installed("shellcheck") then
+        table.insert(null_ls_sources, null_ls.builtins.diagnostics.shellcheck)
+    end
+    null_ls.setup({ sources = null_ls_sources })
+function M.is_active()
+    for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
+        if client.name ~= "null-ls" then
+            return true
+        end
+    end
+    return false
+end

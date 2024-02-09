@@ -62,6 +62,36 @@
       "});"
     ]
   },
+  "Promise pool": {
+    "prefix": "template-promise-pool",
+    "body": [
+      "type PromiseFunc<T = unknown> = () => Promise<T>;",
+      "",
+      "const createPromisePool = (limit: number) => {",
+      "\tconst queue: PromiseFunc[] = [];",
+      "\tconst jobs: Set<PromiseFunc> = new Set();",
+      "",
+      "\tconst next = () => {",
+      "\t\tif (jobs.size >= limit) return;",
+      "\t\tqueue.splice(0, limit - jobs.size).forEach((job) => {",
+      "\t\t\tjobs.add(job);",
+      "\t\t\tvoid job().finally(() => {",
+      "\t\t\t\tjobs.delete(job);",
+      "\t\t\t\tnext();",
+      "\t\t\t});",
+      "\t\t});",
+      "\t};",
+      "",
+      "\treturn {",
+      "\t\trun: <T>(func: () => Promise<T>): Promise<T> =>",
+      "\t\t\tnew Promise((resolve, reject) => {",
+      "\t\t\t\tqueue.push(() => func().then(resolve).catch(reject));",
+      "\t\t\t\tnext();",
+      "\t\t\t}),",
+      "\t};",
+      "};"
+    ]
+  },
   "UseFetchResources": {
     "prefix": "template-use-fetch-resources",
     "body": [

@@ -1,7 +1,13 @@
 {
   "Bash template": {
     "prefix": "template",
-    "body": ["#!/usr/bin/env bash", "set -eo pipefail", "", "$0"]
+    "body": [
+      "#!/usr/bin/env bash",
+      "# shellcheck disable=",
+      "set -eo pipefail",
+      "",
+      "$0"
+    ]
   },
   "Array": {
     "prefix": "array",
@@ -106,7 +112,15 @@
   },
   "While argument": {
     "prefix": "while-arg",
-    "body": ["while [[ \\$# -ne 0 ]]; do", "\t$0", "\tshift", "done"]
+    "body": [
+      "while [[ \\$# -ne 0 ]]; do",
+      "\tcase \\$1 in",
+      "\t\t${1:-h|--help}) $0 ;;",
+      "\t\t--) shift; break ;;",
+      "\t\t*) break ;;",
+      "\tesac",
+      "done"
+    ]
   },
   "Loop lines": {
     "prefix": "while-read",
@@ -120,10 +134,9 @@
     "prefix": "case",
     "body": [
       "case ${1:\\$(tr '[:upper:]' '[:lower:]' <<< \"\\$1\")} in",
-      "\t${3:-h|--help})",
+      "\t${3:option-*})",
       "\t\t$0",
       "\t\t;;",
-      "\t--) shift; break ;;",
       "\t*) echo \"Unsupported argument \\$${2:1}, exiting..\" >&2; exit 1 ;;",
       "esac"
     ]
@@ -135,6 +148,10 @@
   "Substring of variable": {
     "prefix": "var-substring",
     "body": "\"\\${${1:VAR}:${2:offset}:${0:length}}\""
+  },
+  "Slice array": {
+    "prefix": "var-slice-array",
+    "body": "\"\\${${1:VAR}[@]:${2:start}${0::items}}\""
   },
   "Length of variable": {
     "prefix": "var-length",

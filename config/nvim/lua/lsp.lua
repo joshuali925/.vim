@@ -155,18 +155,6 @@ function M.init()
         end,
     })
 
-    local null_ls = require("null-ls")
-    local null_ls_sources = {
-        null_ls.builtins.code_actions.gitrebase,
-        null_ls.builtins.code_actions.shellcheck,
-        null_ls.builtins.code_actions.eslint,
-        null_ls.builtins.diagnostics.zsh,
-    }
-    if require("mason-registry").is_installed("shellcheck") then
-        table.insert(null_ls_sources, null_ls.builtins.diagnostics.shellcheck)
-    end
-    null_ls.setup({ sources = null_ls_sources })
-
     vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError", numhl = "DiagnosticError" })
     vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticWarn", numhl = "DiagnosticWarn" })
     vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticInfo", numhl = "DiagnosticInfo" })
@@ -210,12 +198,7 @@ function M.toggle_diagnostics()
 end
 
 function M.is_active()
-    for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
-        if client.name ~= "null-ls" then
-            return true
-        end
-    end
-    return false
+    return next(vim.lsp.get_active_clients({ bufnr = 0 })) ~= nil
 end
 
 function M.quickfix_all_diagnostics(filter)

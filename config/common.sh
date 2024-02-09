@@ -147,6 +147,7 @@ alias gsts='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
+alias guntracked='git ls-files --others --exclude-standard'
 alias gignore='git update-index --assume-unchanged'
 alias gignored='git ls-files -v | grep "^[[:lower:]]"'
 alias gunignore='git update-index --no-assume-unchanged'
@@ -241,7 +242,7 @@ grg() {
       *) break ;;
     esac
   done
-  git "${cmd:-log}" --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case "${search:--S}" "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='$1'\" delta --line-numbers)"
+  git "${cmd:-log}" --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case "${search:--S}" "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern=\"'\"$1\"' delta --line-numbers)"
 }
 
 gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
@@ -281,7 +282,7 @@ gh-backport() {
   if [[ -f .github/PULL_REQUEST_TEMPLATE.md ]]; then
     args+=(--body-file .github/PULL_REQUEST_TEMPLATE.md)
   fi
-  git cherry-pick -x "$sha" && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
+  { git cherry-pick -x "$sha" || git cherry-pick --continue; } && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
 }
 
 size() {
@@ -731,34 +732,6 @@ ec2() {
     # shellcheck disable=2046,2086,2116
     aws ec2 stop-instances --instance-ids $(echo $ids)
   fi
-}
-
-os-get() {
-  if [[ $# -eq 0 ]]; then echo "Usage: $0 <3-digit-version> [query]" >&2; return 1; fi
-  ver() { awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"; }
-  local version=$1 arch=$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64) url selected
-  local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management' 'opensearch-knn' 'opensearch-flow-framework' 'opensearch-skills')
-  local artifacts=("${core[@]}" "${opensearch_plugin[@]}" "${es[@]}")
-  selected=$(printf "%s\n" "${artifacts[@]}" | fzf --query="$2" --select-1 --bind='tab:down,btab:up') || return 1
-  if [[ ${es[*]} = *${selected}* ]]; then
-    [[ $arch = x64 ]] && arch=x86_64 || arch=aarch64
-    url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
-  elif [[ ${core[*]} = *${selected}* ]]; then
-    if [[ $(ver "$version") -gt $(ver "$(curl -fsSL https://opensearch.org/ | rg -o 'Current Version: ([\d\.]+)' -r '$1')") ]]; then
-      url="https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/$selected-$version-linux-$arch.tar.gz"
-      printf "\033[0;36m%s\033[0m\n" "Manifest: https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/manifest.yml" >&2
-    else
-      url="https://artifacts.opensearch.org/releases/bundle/$selected/$version/$selected-$version-linux-$arch.tar.gz"
-    fi
-  elif [[ ${opensearch_plugin[*]} = *${selected}* ]]; then
-    if [[ $(ver "$version") -ge $(ver 1.3.2) ]]; then  # url changed after 1.3.2
-      url="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$version/latest/linux/$arch/tar/builds/opensearch/plugins/$selected-$version.0.zip"
-    else
-      url="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$version/latest/linux/$arch/builds/opensearch/plugins/$selected-$version.0.zip"
-    fi
-  fi
-  printf "\033[0;36m%s\033[0m\n" "Downloading from: $url" >&2
-  curl -fLO "$url"
 }
 
 theme() {  # locally toggles wezterm theme, remotely updates configs to match terminal theme

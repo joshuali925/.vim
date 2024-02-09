@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=1090,2015,2155
 
-NODE_VERSION=18.16.0
+NODE_VERSION=18.19.0
 JDK_VERSION=adoptopenjdk-17.0.7+7
 BACKUP_DIR=$HOME/config-backup
 

@@ -11,7 +11,7 @@ scoop bucket add java
 scoop install openjdk14
 scoop install python
 reg import "$env:USERPROFILE\scoop\apps\python\current\install-pep-514.reg"
-scoop install nodejs-lts@18.16.0
+scoop install nodejs-lts@18.19.0
 npm install yarn -g
 echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"
 
