@@ -125,6 +125,7 @@ set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\
 set showtabline=2
 set tabline=%!BufferLine()
 set list
+let &listchars='tab:█ ,nbsp:␣,trail:•'
 " leadmultispace is available for >= 8.2.5066
 let &listchars='tab:█ ,nbsp:␣,trail:•,leadmultispace:▏' . repeat(' ', &shiftwidth - 1)
 silent! set belloff=all

@@ -103,7 +103,8 @@ return {
                             function()
                                 local col = vim.fn.col(".")
                                 return string.format(
-                                    "%s %s %s/%s",
+                                    "%s %s %s %s/%s",
+                                    (vim.o.expandtab and " " or " ") .. vim.o.shiftwidth,
                                     states.untildone_count == 0 and "" or " " .. states.untildone_count,
                                     col < 10 and " " .. col or col,
                                     vim.fn.line("."),

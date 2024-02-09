@@ -45,8 +45,7 @@ return {
         dependencies = {
             "williamboman/mason-lspconfig.nvim",
             "neovim/nvim-lspconfig",
-            "nvimtools/none-ls.nvim", -- TODO https://github.com/mfussenegger/nvim-lint
-            { "pmizio/typescript-tools.nvim" },
+            "pmizio/typescript-tools.nvim",
             {
                 "nvimdev/lspsaga.nvim", -- TODO nvim 0.10 https://github.com/Bekaboo/dropbar.nvim
                 opts = {

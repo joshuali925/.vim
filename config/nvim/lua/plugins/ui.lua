@@ -245,7 +245,7 @@ return {
             }
             theme.section.top_buttons.val = {}
             theme.section.bottom_buttons.val = {
-                theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status<CR>]]),
+                theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status | args `git ls-files --others --exclude-standard`<CR>]]),
                 theme.button("?", "Git diff", "<Cmd>DiffviewOpen<CR>"),
                 theme.button("+", "Git diff remote", "<Cmd>DiffviewOpen @{upstream}..HEAD<CR>"),
                 theme.button("~", "Git conflicts", "<Cmd>Git mergetool<CR>"),
