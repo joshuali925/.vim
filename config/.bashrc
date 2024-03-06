@@ -5,8 +5,15 @@
 [[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && alias get-completion='complete -F _longopt' \
   && [[ -z $BASH_COMPLETION_VERSINFO ]] && . /usr/share/bash-completion/bash_completion
 
-source ~/.vim/config/fzf/completion.bash
-source ~/.vim/config/fzf/key-bindings.bash
+if [[ -f ~/.vim/config/fzf/shell.bash ]]; then
+  source ~/.vim/config/fzf/shell.bash
+  source ~/.vim/config/fzf/override.bash
+elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
+  _load_fzf() { ~/.vim/bin/fzf --version >/dev/null && source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash; }
+  bind -x '"\ec": _load_fzf'
+  bind -x '"\C-p": _load_fzf'
+  bind -x '"\C-r": _load_fzf'
+fi
 
 source ~/.vim/config/common.sh
 

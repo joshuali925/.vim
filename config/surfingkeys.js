@@ -200,20 +200,22 @@ api.mapkey('r', 'Toggle full screen', function() {
         document.querySelectorAll('.bilibili-player-iconfont-web-fullscreen-off, .bpx-player-ctrl-web-enter, .squirtle-video-pagefullscreen')[0].click();
         document.getElementById('playerControlBtn').style.visibility = 'hidden'
         document.getElementById('picinpicBtn').style.visibility = 'hidden'
-    } else if (/age.?fans/.test(window.location.hostname))
-        document.getElementsByClassName('fullscn')[0].click();
-    else
+    } else if (window.location.hostname === 'www.youtube.com') {
+        document.querySelectorAll('button[title="Default view (t)"]')[0]?.click();
+        setTimeout(() => document.getElementById('playerControlBtn').click(), 0);
+    } else {
         document.getElementById('playerControlBtn').click(); // https://greasyfork.org/en/scripts/4870-maximize-video, escape also works
+    }
 });
 api.map('yop', ';s'); // toggle pdf viewer
 api.mapkey('yoe', 'Toggle editable', function() { document.body.contentEditable = document.body.contentEditable === 'true' ? 'false' : 'true'; });
 api.mapkey('yot', 'Toggle dark theme', function() {
     const odmcss = `:root {
-	filter: invert(90%) hue-rotate(180deg) brightness(100%) contrast(100%);
-	background: #fff;
+    filter: invert(90%) hue-rotate(180deg) brightness(100%) contrast(100%);
+    background: #fff;
 }
 iframe, img, image, video, [style*="background-image"] {
-	filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
+    filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
 }`;
     const ee = document.getElementById("surfingkeys-dark-theme");
     if (null != ee) ee.parentNode.removeChild(ee);

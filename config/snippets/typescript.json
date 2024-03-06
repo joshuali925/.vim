@@ -62,6 +62,17 @@
       "});"
     ]
   },
+  "Custom error": {
+    "prefix": "template-error",
+    "body": [
+      "class ${1:Custom}Error extends Error {",
+      "\tconstructor(message?: string) {",
+      "\t\tsuper(message);",
+      "\t\tthis.name = '${1:Custom}Error';",
+      "\t}",
+      "}"
+    ]
+  },
   "Promise pool": {
     "prefix": "template-promise-pool",
     "body": [

@@ -1,5 +1,7 @@
 set -eo pipefail
 
+if [[ $DOT_VIM_LOCAL_BIN = 1 ]]; then echo 'Configured to local-bin only, exiting..' >&2; exit 1; fi
+
 detect-env() {
   source ~/.vim/install.sh detect-env
 }
