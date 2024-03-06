@@ -43,9 +43,21 @@ zinit depth=1 light-mode for \
   zsh-users/zsh-autosuggestions
 
 zinit snippet OMZ::lib/key-bindings.zsh
-source ~/.vim/config/fzf/key-bindings.zsh
-zinit snippet https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.zsh
-zinit depth=1 light-mode for Aloxaf/fzf-tab  # load fzf-tab after fzf/completion.zsh
+if [[ -f ~/.vim/config/fzf/shell.zsh ]]; then
+  source ~/.vim/config/fzf/shell.zsh
+  source ~/.vim/config/fzf/override.zsh
+elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
+  load-fzf() {
+    bindkey -r '^i'; bindkey -r '^r'; bindkey -r '^p'
+    ~/.vim/bin/fzf --version >/dev/null && source ~/.vim/config/fzf/shell.zsh && source ~/.vim/config/fzf/override.zsh
+  }
+  load-fzf-c-i() { load-fzf && zle tab-complete-or-cd; } && zle -N load-fzf-c-i
+  load-fzf-c-r() { load-fzf && zle fzf-history-widget; } && zle -N load-fzf-c-r
+  load-fzf-c-p() { load-fzf && zle fzf-file-widget; } && zle -N load-fzf-c-p
+  bindkey '^i' load-fzf-c-i
+  bindkey '^r' load-fzf-c-r
+  bindkey '^p' load-fzf-c-p
+fi
 
 source ~/.vim/config/common.sh
 
@@ -113,19 +125,6 @@ down-line-or-local-history() {
 }
 zle -N down-line-or-local-history
 
-# vim <tab>: files in current directory or args completion
-# vim <C-p>: all files in current and subdirectories, respects .gitignore
-# vim \<tab>: all files in current and subdirectories
-tab-complete-or-cd() {
-  if [[ -z $LBUFFER ]]; then
-    zle fzf-cd-widget
-  else
-    zle fzf-tab-complete
-    # zle fzf-completion  # zsh original tab complete
-  fi
-}
-zle -N tab-complete-or-cd
-
 run-lf () {
   lf -last-dir-path="$HOME/.vim/tmp/lf_dir" < /dev/tty
   zle reset-prompt
@@ -146,7 +145,6 @@ bindkey '^[[3;2~' backward-delete-char        # <S-Del>
 bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
 bindkey '^u' backward-kill-line
-bindkey '^i' tab-complete-or-cd
 bindkey -s '^z' '%^m'
 bindkey '\el' forward-char                    # unbind <Esc>l = ls from oh-my-zsh key-bindings
 

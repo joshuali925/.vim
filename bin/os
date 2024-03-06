@@ -28,6 +28,7 @@ run() {
   fi
 
   local opts=(--host 0.0.0.0)
+  if [[ -f opensearch_dashboards.json ]]; then cd ../..; fi  # cd up from plugins directory
   if [[ -d plugins/securityDashboards ]] || [[ -d plugins/security-dashboards-plugin ]]; then
     if ! grep -q '^opensearch.hosts' config/opensearch_dashboards.yml; then
       # https://github.com/opensearch-project/OpenSearch-Dashboards/blob/c2ac4c8ae102a76df4258e8e871375299b6ad008/src/dev/build/tasks/os_packages/docker_generator/resources/bin/opensearch-dashboards-docker
@@ -43,14 +44,21 @@ run() {
 }
 
 download() {
-  if [[ $# -eq 0 ]]; then echo "Usage: ${0##*/} get <3-digit-version> [filter]" >&2; return 1; fi
+  if [[ $# -eq 0 ]]; then echo "Usage: ${0##*/} download <3-digit-version> [filter] [-x|--extract]" >&2; return 1; fi
   ver() { awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"; }
 
-  local version=$1 arch=$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64) url selected
+  local version filter='' extract arch=$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64) url selected
+  while [[ $# -ne 0 ]]; do
+    case $1 in
+      *.*.*) version=$1; shift ;;
+      -x|--extract) extract=1; shift ;;
+      *) filter+=" $1"; shift ;;
+    esac
+  done
   local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management' 'opensearch-knn' 'opensearch-flow-framework' 'opensearch-skills')
   local artifacts=("${core[@]}" "${opensearch_plugin[@]}" "${es[@]}")
 
-  selected=$(printf "%s\n" "${artifacts[@]}" | fzf --query="$2" --select-1 --bind='tab:down,btab:up') || return 1
+  selected=$(printf "%s\n" "${artifacts[@]}" | fzf --query="${filter# }" --select-1 --bind='tab:down,btab:up') || return 1
   if [[ ${es[*]} = *${selected}* ]]; then
     [[ $arch = x64 ]] && arch=x86_64 || arch=aarch64
     url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
@@ -70,41 +78,32 @@ download() {
   fi
 
   printf "\033[0;36m%s\033[0m\n" "Downloading from: $url" >&2
-  curl -fLO "$url"
+  if [[ -n "$extract" ]] && [[ "$url" = *.tar.gz ]]; then curl -fL "$url" | tar xz; else curl -fLO "$url"; fi
 }
 
 get_endpoint() {
-  if [[ -n "$endpoint" ]]; then echo "$endpoint"; return 0; fi
-  if curl -fsSL localhost:9200 > /dev/null 2>&1; then
-    echo http://localhost:9200
-  else
-    echo https://admin:admin@localhost:9200
-  fi
-}
-
-query() {
-  curl -s -k -XPOST -H 'Content-Type: application/json' "$(get_endpoint)/_plugins/_$1" -d "$(jq -n --arg query "${*:2}" '$ARGS.named')" | jq -C | less -RiMXF
+  if [[ -n "$endpoint" ]]; then echo "${endpoint%%/}"
+  elif curl -fsSL localhost:9200 > /dev/null 2>&1; then echo http://localhost:9200
+  else echo https://admin:admin@localhost:9200; fi
 }
 
 request() {
-  local args=() method=$1 path="/${2#/}"
-  shift 2
-  case $method in
-    post) args+=(-XPOST -H 'Content-Type: application/json') ;;
-    put) args+=(-XPUT -H 'Content-Type: application/json') ;;
-    *) args+=(-X"${method^^}") ;;
-  esac
-  if [[ $1 = \{*\} ]]; then args+=(-d "$1"); shift; fi
-  curl -s -k "${args[@]}" "$(get_endpoint)$path" "$@"
+  local args=(-X "${1^^}") path="/${2##/}"
+  if [[ $3 = \{*\} ]]; then args+=(-H 'Content-Type: application/json' -d "$3"); shift; fi
+  curl -s -k "${args[@]}" "$(get_endpoint)$path" "${@:3}"
+}
+
+query() {
+  request post "/_plugins/_$1" "$(jq --compact-output -n --arg query "${*:2}" '$ARGS.named')" | jq -C | less -RiMXF
 }
 
 main() {
   case $1 in
-    run|download) "$1" "${@:2}" ;;
+    run|download) "$@" ;;
     d) download "${@:2}" ;;
     sql*|ppl*) query "$@" ;;
-    get|put|post) request "$@" ;;
-    *) echo "Usage: ${0##*/} run [args...] | download <3-digit-version> [filter] | {sql|ppl}[/path] <query> | {get|post|put} [path] [<body> [args...]]" >&2; exit 1 ;;
+    get|put|post|GET|PUT|POST) request "$@" ;;
+    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|post|put} [path] [<body> [args...]]" >&2; exit 1 ;;
   esac
 }
 

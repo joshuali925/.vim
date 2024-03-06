@@ -1,0 +1,14 @@
+{
+  "ssh config template": {
+    "prefix": "template",
+    "body": [
+      "# vim:ft=sshconfig",
+      "",
+      "Host ${1:alias}",
+      "\tHostName ${2:ip}",
+      "\tUser ${3:user}",
+      "\tPort 22",
+      "\tIdentityFile %d/.ssh/${4:ssh.pem}"
+    ]
+  }
+}

@@ -3990,6 +3990,12 @@ export MANROFFOPT='-c'
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>,", "<Cmd>lua MiniJump.jump(MiniJump.state.target, not MiniJump.state.backward, MiniJump.state.till, MiniJump.state.n_times)<CR><Cmd>lua MiniJump.state.backward = not MiniJump.state.backward<CR>", mode = { "n", "x", "o" } },
+            { "<leader>m", "<Cmd>lua require('mini.extra').pickers.visit_paths()<CR>" },
+            { "<leader>M", "<Cmd>lua require('mini.visits').add_label()<CR>" },
+            { "[m", "<Cmd>lua require('mini.visits').iterate_paths('backward')<CR>" },
+            { "]m", "<Cmd>lua require('mini.visits').iterate_paths('forward')<CR>" },
+            { "[M", "<Cmd>lua require('mini.visits').iterate_paths('first')<CR>" },
+            { "]M", "<Cmd>lua require('mini.visits').iterate_paths('last')<CR>" },
         },
         config = function()
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
@@ -4003,6 +4009,10 @@ export MANROFFOPT='-c'
                     post = { read = function() vim.cmd.ScrollViewEnable() end, write = function() vim.cmd.ScrollViewEnable() end },
                 },
             })
+            require("mini.pick").setup()
+            require("mini.extra").setup()
+            vim.ui.select = require("mini.pick").ui_select
+            require("mini.visits").setup() -- similar to oldfiles
                 " theme.button("E", "Load from session", "<Cmd>lua MiniSessions.select()<CR>"),
                 " theme.button("R", "Load from last session", "<Cmd>lua MiniSessions.read()<CR>"),
                 " { "&Save session", [[call feedkeys(":lua MiniSessions.write('temp')\<Left>\<Left>", "n")]], "Save session using mini.nvim" },

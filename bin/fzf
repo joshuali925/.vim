@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/fzf ]]; then
+  BIN_INIT=1 fzf --bash > ~/.vim/config/fzf/shell.bash || true
+  BIN_INIT=1 fzf --zsh > ~/.vim/config/fzf/shell.zsh || true
+fi
 install-from-github fzf junegunn/fzf linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 '' "$@"
