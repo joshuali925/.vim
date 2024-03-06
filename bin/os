@@ -11,10 +11,10 @@ run() {
     esac
   done
 
-  if [ -x bin/opensearch ]; then
-    if [ -d plugins/opensearch-security ]; then
-      [ -n "$nosec" ] && exec ./bin/opensearch -Eplugins.security.disabled=true
-      if [ ! -f config/kirk.pem ]; then
+  if [[ -x bin/opensearch ]]; then
+    if [[ -d plugins/opensearch-security ]]; then
+      [[ -n "$nosec" ]] && exec ./bin/opensearch -Eplugins.security.disabled=true
+      if [[ ! -f config/kirk.pem ]]; then
         OPENSEARCH_INITIAL_ADMIN_PASSWORD=myStrongPassword123@456 ./opensearch-tar-install.sh "$@" &
         pid=$!
         while ! curl -fsSL https://localhost:9200 -k -u admin:myStrongPassword123@456; do echo waiting for opensearch..; sleep 1; done
@@ -28,21 +28,21 @@ run() {
   fi
 
   local opts=(--host 0.0.0.0)
-  if [ -d plugins/securityDashboards ] || [ -d plugins/security-dashboards-plugin ]; then
+  if [[ -d plugins/securityDashboards ]] || [[ -d plugins/security-dashboards-plugin ]]; then
     if ! grep -q '^opensearch.hosts' config/opensearch_dashboards.yml; then
       # https://github.com/opensearch-project/OpenSearch-Dashboards/blob/c2ac4c8ae102a76df4258e8e871375299b6ad008/src/dev/build/tasks/os_packages/docker_generator/resources/bin/opensearch-dashboards-docker
       opts+=(--opensearch.hosts=https://localhost:9200 --opensearch.username=kibanaserver --opensearch.password=kibanaserver --opensearch.ssl.verificationMode=none --opensearch.requestHeadersWhitelist='["authorization", "securitytenant"]' --opensearch_security.multitenancy.enabled=true --opensearch_security.multitenancy.tenants.preferred='["Private", "Global"]' --opensearch_security.readonly_mode.roles='["kibana_read_only"]' --opensearch_security.cookie.secure=false)
     fi
   fi
-  if [ -x bin/opensearch-dashboards ]; then
+  if [[ -x bin/opensearch-dashboards ]]; then
     exec ./bin/opensearch-dashboards "${opts[@]}" "$@"
   fi
-  if [ -f opensearch_dashboards.d.ts ]; then
+  if [[ -f opensearch_dashboards.d.ts ]]; then
     exec yarn start --no-base-path --run-examples "${opts[@]}" "$@"
   fi
 }
 
-get() {
+download() {
   if [[ $# -eq 0 ]]; then echo "Usage: ${0##*/} get <3-digit-version> [filter]" >&2; return 1; fi
   ver() { awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"; }
 
@@ -74,7 +74,7 @@ get() {
 }
 
 get_endpoint() {
-  [ -n "$endpoint" ] && echo "$endpoint" && return 0
+  if [[ -n "$endpoint" ]]; then echo "$endpoint"; return 0; fi
   if curl -fsSL localhost:9200 > /dev/null 2>&1; then
     echo http://localhost:9200
   else
@@ -87,19 +87,24 @@ query() {
 }
 
 request() {
-  if [ $# -le 1 ]; then
-    curl -s -k "$(get_endpoint)/$*"
-    return $?
-  fi
-  curl -s -k -XPOST -H 'Content-Type: application/json' "$(get_endpoint)/$1" -d "$2" "${@:3}"
+  local args=() method=$1 path="/${2#/}"
+  shift 2
+  case $method in
+    post) args+=(-XPOST -H 'Content-Type: application/json') ;;
+    put) args+=(-XPUT -H 'Content-Type: application/json') ;;
+    *) args+=(-X"${method^^}") ;;
+  esac
+  if [[ $1 = \{*\} ]]; then args+=(-d "$1"); shift; fi
+  curl -s -k "${args[@]}" "$(get_endpoint)$path" "$@"
 }
 
 main() {
   case $1 in
-    run|get) "$1" "${@:2}" ;;
+    run|download) "$1" "${@:2}" ;;
+    d) download "${@:2}" ;;
     sql*|ppl*) query "$@" ;;
-    r|request) request "${@:2}" ;;
-    *) echo "Usage: ${0##*/} run [args...] | get <3-digit-version> [filter] | {sql|ppl}[/path] <query> | {r|request} <path> [<body> [args...]]" >&2; exit 1 ;;
+    get|put|post) request "$@" ;;
+    *) echo "Usage: ${0##*/} run [args...] | download <3-digit-version> [filter] | {sql|ppl}[/path] <query> | {get|post|put} [path] [<body> [args...]]" >&2; exit 1 ;;
   esac
 }
 
