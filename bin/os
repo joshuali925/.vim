@@ -12,7 +12,7 @@ run() {
   done
 
   if [[ -x bin/opensearch ]]; then
-    if [[ -d plugins/opensearch-security ]]; then
+    if [[ -d plugins/opensearch-security ]] && ! grep -q '^plugins.security.disabled: true' config/opensearch.yml; then
       [[ -n "$nosec" ]] && exec ./bin/opensearch -Eplugins.security.disabled=true
       if [[ ! -f config/kirk.pem ]]; then
         OPENSEARCH_INITIAL_ADMIN_PASSWORD=myStrongPassword123@456 ./opensearch-tar-install.sh "$@" &
@@ -102,8 +102,8 @@ main() {
     run|download) "$@" ;;
     d) download "${@:2}" ;;
     sql*|ppl*) query "$@" ;;
-    get|put|post|GET|PUT|POST) request "$@" ;;
-    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|post|put} [path] [<body> [args...]]" >&2; exit 1 ;;
+    get|put|post|delete|GET|PUT|POST|DELETE) request "$@" ;;
+    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|put|post|delete} [path] [<body> [args...]]" >&2; exit 1 ;;
   esac
 }
 

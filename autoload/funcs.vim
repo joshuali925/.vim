@@ -121,8 +121,8 @@ function! funcs#quit_netrw_and_dirs()
   endfor
   if &filetype == 'netrw'
     if get(g:, 'dot_vim_dir', '') != ''
-      call writefile([b:netrw_curdir], g:dot_vim_dir . '/tmp/lf_dir')
-      echo "lf_dir: '" . b:netrw_curdir . "'"
+      call writefile([b:netrw_curdir], g:dot_vim_dir . '/tmp/last_result')
+      echo "last_result: '" . b:netrw_curdir . "'"
     endif
     execute get(g:, 'should_quit_netrw', 0) ? 'quit' : 'bdelete'
   endif
@@ -192,7 +192,7 @@ function! funcs#get_run_command() abort
   endif
   let run_command['html'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'silent !open "$(VIM_FILEPATH)"'
-  let run_command['http'] = 'lua require("rest-nvim").run()'
+  let run_command['http'] = 'Rest run'
   let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
   return get(run_command, &filetype, '') . get(b:, 'args', '')
 endfunction
@@ -200,6 +200,9 @@ endfunction
 function! funcs#get_visual_selection()
   let [line_start, column_start] = getpos("'<")[1:2]
   let [line_end, column_end] = getpos("'>")[1:2]
+  if column_end > getcharpos("'>")[2]
+    let column_end = min([column_end + 2, v:maxcol])
+  endif
   let lines = getline(line_start, line_end)
   if len(lines) == 0
     return ''

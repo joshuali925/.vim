@@ -44,8 +44,7 @@ zinit depth=1 light-mode for \
 
 zinit snippet OMZ::lib/key-bindings.zsh
 if [[ -f ~/.vim/config/fzf/shell.zsh ]]; then
-  source ~/.vim/config/fzf/shell.zsh
-  source ~/.vim/config/fzf/override.zsh
+  source ~/.vim/config/fzf/shell.zsh && source ~/.vim/config/fzf/override.zsh
 elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
   load-fzf() {
     bindkey -r '^i'; bindkey -r '^r'; bindkey -r '^p'
@@ -126,7 +125,11 @@ down-line-or-local-history() {
 zle -N down-line-or-local-history
 
 run-lf () {
-  lf -last-dir-path="$HOME/.vim/tmp/lf_dir" < /dev/tty
+  local dir precmd
+  dir="$(command lf -print-last-dir < /dev/tty)" && if [[ "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  for precmd in $precmd_functions; do
+    $precmd
+  done
   zle reset-prompt
 }
 zle -N run-lf

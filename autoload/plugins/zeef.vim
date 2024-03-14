@@ -518,7 +518,7 @@ endf
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Doesn't seem possible to output to stdout in non-headless. https://vi.stackexchange.com/a/800
 fun! s:select_to_file(result)
-  call writefile(a:result, $HOME . '/.vim/tmp/lf_dir')
+  call writefile(a:result, $HOME . '/.vim/tmp/last_result')
   quit!
 endf
 fun! plugins#zeef#fuzzy_select()

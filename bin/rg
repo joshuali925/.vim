@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/rg ]]; then
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/rg ]] && [[ -d $HOME/.zinit ]]; then
   BIN_INIT=1 rg --generate complete-zsh > ~/.zinit/completions/_rg || true
 fi
 

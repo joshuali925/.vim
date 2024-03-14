@@ -1981,7 +1981,7 @@
       ]
     },
     {
-      "description": "Applications: record, vim, dict, term, rectangle",
+      "description": "Applications: record screen, vim, dict, term, rectangle",
       "manipulators": [
         {
           "from": {

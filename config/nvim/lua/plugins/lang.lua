@@ -29,7 +29,7 @@ return {
                 kotlin = { "ktlint" },
                 ["_"] = { "trim_whitespace" },
                 config = function(bufnr)
-                    if vim.fn.bufname(bufnr):match("Caddyfile$") ~= nil then return { "caddy" } end
+                    if vim.fn.bufname(bufnr):match("^Caddyfile") ~= nil then return { "caddy" } end
                     return {}
                 end,
             },

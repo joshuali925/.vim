@@ -390,7 +390,7 @@ function! s:EditCallback(command) abort
   let sink = 'edit '
   let tempfile = tempname()
   if a:command == 'lf'
-    execute 'silent !lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path="' . fnameescape(tempfile) . '" "' . expand('%') . '"'
+    execute 'silent !lf -last-dir-path="$HOME/.vim/tmp/last_result" -selection-path="' . fnameescape(tempfile) . '" "' . expand('%') . '"'
   elseif a:command == 'filetypes'
     let sink = 'set filetype='
     let $fzftemp = join(sort(map(globpath(&rtp, 'syntax/*.vim', 0, 1), 'fnamemodify(v:val, ":t:r")')), '\n')
