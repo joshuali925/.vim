@@ -62,13 +62,13 @@ alias gnpm='npm --prefix ~/.local/lib/node-packages'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
 alias lzd='lazydocker'
-alias lf='lf -last-dir-path="$HOME/.vim/tmp/lf_dir"'
 alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/ctop/issues/263
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
-alias 0='[[ -f $HOME/.vim/tmp/lf_dir ]] && cd "$(cat "$HOME/.vim/tmp/lf_dir")"'
+alias 0='[[ -f $HOME/.vim/tmp/last_result ]] && cd "$(cat "$HOME/.vim/tmp/last_result")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
+alias jqflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
@@ -92,8 +92,7 @@ alias gcs='gc --signoff'
 alias gcs!='gc --signoff --amend'
 alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcf='git config --list'
-alias gcl='git clone'
-alias gclo='git clone --filter=blob:none'
+alias gcl='git clone --filter=blob:none'
 alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
 alias gcp='git cherry-pick -x'
@@ -284,6 +283,11 @@ gh-backport() {
   { git cherry-pick -x "$sha" || git cherry-pick --continue; } && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
 }
 
+lf() {
+  local dir
+  dir="$(command lf -print-last-dir "$@")" && if [[ "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+}
+
 size() {
   [[ $1 = '--on-disk' ]] && { du -ah --max-depth=1 "${@:2}" | sort -hr; return $?; }
   [[ $1 = '--subdirs' ]] && local args=("${@:2}") || local args=(--max-depth=1 "$@")
@@ -294,7 +298,7 @@ d() {  # show directory stack or download from URL
   if [[ $# -eq 0 ]]; then dirs -v | head -10; return $?; fi
   local wget_args=(--content-disposition) curl_args=(--remote-header-name)
   if [[ $1 = '-c' ]] || [[ $1 = '--continue' ]]; then shift && local wget_args=(--continue) curl_args=(-C -); fi
-  if [[ $# -eq 0 ]] || [[ $1 = -* ]]; then echo "Usage: $0 [[-c/--continue] <URL> [output-dir]]" >&2; return 1; fi
+  if [[ $1 = -* ]]; then echo "Usage: $0 [[-c/--continue] <URL> [output-dir]]" >&2; return 1; fi
   if builtin command -v wget > /dev/null 2>&1; then
     wget "${wget_args[@]}" --tries 3 --directory-prefix "${2:-.}" "$1"
   elif builtin command -v curl > /dev/null 2>&1; then
@@ -351,7 +355,7 @@ sudorun() {
   fi
   case $cmd in
     v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
-    lf) EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.vim/tmp/lf_dir" -command 'set previewer' -command 'map i $less -RiM "$f"' "$@" ;;
+    lf) EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.vim/tmp/last_result" -command 'set previewer' -command 'map i $less -RiM "$f"' "$@" ;;
     *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which "$cmd")" "$@" ;;
   esac
 }
@@ -750,6 +754,7 @@ theme() {  # locally toggles wezterm theme, remotely updates configs to match te
   export PATH="${PATH//.vim\/bin/.vim/local-bin}"
   export FZF_DEFAULT_COMMAND="command find -L . -mindepth 1 \\( -path '*/.git' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune -o -type f -print -o -type l -print 2> /dev/null | cut -b3-"
   export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+  unset -f lf
 }
 
 if [[ -n $DOT_VIM_LOCAL_BIN ]]; then .vim-disable-binary-downloads; fi

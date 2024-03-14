@@ -24,6 +24,7 @@ if [[ -n $GET_BASHRC ]]; then
       [[ -f $HOME/.bashrc ]] && sed -i '/\.vim\/bin\/bashrc/d' ~/.bashrc
       rm -rf "${config_paths[@]}"
     fi
+    unset TMUX_NO_TPM DOT_VIM_LOCAL_BIN
   }
   return 0
 fi

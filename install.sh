@@ -144,7 +144,7 @@ install_development_tools() {
     log 'Disabled ApplePressAndHoldEnabled to support key repeats'
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask wezterm rectangle maccy snipaste karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
+    # brew install --cask wezterm rectangle maccy snipaste trex karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll

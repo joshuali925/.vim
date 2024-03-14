@@ -4246,3 +4246,12 @@ function M.is_active()
     end
     return false
 end
+
+" =======================================================
+# https://github.com/MrKai77/Loop
+Loop -> General -> check "Restore window frame on drag"
+     -> Preview -> uncheck "Show Preview when looping"
+     -> Keybindings -> Trigger key: left option
+                    -> Import: ~/.vim/config/loop.json
+     -> More -> check "Hide Loop until direction is chosen"
+loop.json: [{"direction":"Maximize","keybind":[126]},{"direction":"InitialFrame","keybind":[125]},{"direction":"LeftHalf","keybind":[123]},{"direction":"RightHalf","keybind":[124]},{"direction":"Smaller","keybind":[27]},{"direction":"Larger","keybind":[24]},{"direction":"Center","keybind":[56,8]},{"direction":"PreviousScreen","keybind":[56,123]},{"direction":"NextScreen","keybind":[56,124]}]

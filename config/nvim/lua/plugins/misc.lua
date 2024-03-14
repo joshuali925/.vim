@@ -50,13 +50,8 @@ return {
         end,
     },
     { "jbyuki/venn.nvim", cmd = "VBox" },
-    {
-        "rest-nvim/rest.nvim",
-        config = function()
-            require("rest-nvim").setup({ skip_ssl_verification = true })
-            vim.api.nvim_create_user_command("RestNvimPreviewCurl", [[execute "normal \<Plug>RestNvimPreview"]], {})
-        end,
-    },
+    { "vhyrro/luarocks.nvim", priority = 2000, config = true },
+    { "rest-nvim/rest.nvim", cmd = "Rest", dependencies = { "luarocks.nvim" }, opts = { skip_ssl_verification = true } },
     {
         "echasnovski/mini.nvim",
         keys = {

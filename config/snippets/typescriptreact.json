@@ -115,7 +115,10 @@
       "const render${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} = (",
       "\toverrideProps: Partial<ComponentProps<typeof ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}>> = {}",
       ") => {",
-      "\tconst props: ComponentProps<typeof ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}> = Object.assign(",
+      "\tconst props: jest.Mocked<ComponentProps<typeof ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}>> = Object.assign<",
+      "\t\tPartial<ComponentProps<typeof ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}>>,",
+      "\t\tComponentProps<typeof ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}>",
+      "\t>(",
       "\t\t{",
       "\t\t\t$0",
       "\t\t},",
@@ -130,6 +133,7 @@
       "\t\tconst { component } = render${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}();",
       "\t\tfireEvent.click(component.getByLabelText('run'));",
       "\t\texpect(component.getByText('text')).toBeInTheDocument();",
+      "\t\texpect(component.container).toMatchSnapshot();",
       "\t});",
       "});"
     ]

@@ -6,8 +6,7 @@
   && [[ -z $BASH_COMPLETION_VERSINFO ]] && . /usr/share/bash-completion/bash_completion
 
 if [[ -f ~/.vim/config/fzf/shell.bash ]]; then
-  source ~/.vim/config/fzf/shell.bash
-  source ~/.vim/config/fzf/override.bash
+  source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash
 elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
   _load_fzf() { ~/.vim/bin/fzf --version >/dev/null && source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash; }
   bind -x '"\ec": _load_fzf'
@@ -26,13 +25,18 @@ shopt -s dotglob
 
 HISTCONTROL=ignoreboth:erasedups:ignorespace
 
+__lf_cd__() {
+  local dir
+  dir="$(command lf -print-last-dir)" && if [[ "$dir" != "$PWD" ]]; then echo " builtin cd -- $dir"; fi
+}
+
 # interactive settings. it's better to check interactive with [[ $- = *i* ]], but [[ -t 1 ]] is somewhat faster
 if [[ -t 1 ]]; then
   bind 'set show-all-if-ambiguous on'
   bind 'set completion-ignore-case on'
   bind 'set enable-bracketed-paste on'
   bind 'TAB: menu-complete'
-  bind '"\e[Z":menu-complete-backward'
+  bind '"\e[Z": menu-complete-backward'
   bind '"\C-x\C-e": edit-and-execute-command'
   bind '"\C-xa": shell-expand-line'  # same as in zsh, 'C-x a' expands aliases
   bind '"\e[A": history-search-backward'
@@ -42,7 +46,12 @@ if [[ -t 1 ]]; then
   bind '"\e[1;5D": backward-word'
   bind '"\e[1;5C": forward-word'
   bind '"\e[3;2~": backward-delete-char'
-  bind -x '"\C-o":"lf"'
+  # somehow bind C-o will not trigger on mac. using bind -x, the prompt does not update
+  if [[ $OSTYPE = darwin* ]]; then
+    bind -x '"\C-o": "lf"'
+  else
+    bind '"\C-o": " \C-b\C-k \C-u `__lf_cd__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
+  fi
   stty -ixon  # disable Ctrl-S freeze
   stty werase undef  # unbind werase to C-w
   bind '"\C-w": unix-filename-rubout'
@@ -101,8 +110,6 @@ cd() {
     builtin cd "$OLDPWD" > /dev/null || return
   elif [[ $1 =~ ^-[0-9]+$ ]]; then
     pushd "+${1/-/}" > /dev/null || return
-  elif [[ $1 = -- ]]; then
-    pushd -- "${@:2}" > /dev/null || return
   else
     pushd "$@" > /dev/null || return
   fi

@@ -73,6 +73,7 @@ function M.untildone(command, should_restart_tmux_task, message)
     end)
 end
 
+-- TODO https://github.com/neovim/neovim/pull/27578
 function M.get_visual_selection()
     local s_start = vim.fn.getpos("'<")
     local s_end = vim.fn.getpos("'>")
@@ -188,7 +189,7 @@ function M.lf()
     local height = vim.o.lines - 7
     local width = math.ceil(vim.o.columns * 9 / 10)
     if lf_term == nil or prev_height ~= height or prev_width ~= width then
-        local cmd = ([[lf -last-dir-path="$HOME/.vim/tmp/lf_dir" -selection-path="%s" "%s"]]):format("%s", vim.fn.expand("%"))
+        local cmd = ([[lf -last-dir-path="$HOME/.vim/tmp/last_result" -selection-path="%s" "%s"]]):format("%s", vim.fn.expand("%"))
         lf_term = term_with_edit_callback(cmd, height, width)
     end
     lf_term:toggle()
