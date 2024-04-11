@@ -1,5 +1,6 @@
 return {
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
+    { "LunarVim/bigfile.nvim", lazy = false, opts = { filesize = 3 } }, -- pteroctopus/faster.nvim will disable treesitter globally
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
     {
         "gbprod/yanky.nvim",
@@ -35,7 +36,6 @@ return {
         end,
         config = function() vim.cmd.doautocmd("FileType") end -- trigger autocmd to defined MarkdownPreview command for buffer
     },
-    { "godlygeek/tabular", cmd = "Tabularize" },
     {
         "dhruvasagar/vim-table-mode",
         cmd = { "TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine" },
@@ -50,8 +50,12 @@ return {
         end,
     },
     { "jbyuki/venn.nvim", cmd = "VBox" },
-    { "vhyrro/luarocks.nvim", priority = 2000, config = true },
-    { "rest-nvim/rest.nvim", cmd = "Rest", dependencies = { "luarocks.nvim" }, opts = { skip_ssl_verification = true } },
+    {
+        "rest-nvim/rest.nvim",
+        ft = "http",
+        dependencies = { "vhyrro/luarocks.nvim", config = true }, -- https://github.com/vhyrro/luarocks.nvim?tab=readme-ov-file#requirements, needs lua-devel and libcurl-devel
+        config = function() require("rest-nvim").setup({ skip_ssl_verification = true }) end,
+    },
     {
         "echasnovski/mini.nvim",
         keys = {
@@ -60,6 +64,8 @@ return {
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
+            { "g<", "cxiacxiNag", remap = true },
+            { "g>", "cxiaviao<C-c>cxinag", remap = true },
         },
         config = function()
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
@@ -74,6 +80,11 @@ return {
                     hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
                 },
             })
+            require("mini.align").setup({ mappings = { start = "", start_with_preview = "gl" } })
+            require("mini.splitjoin").setup({ mappings = { toggle = "gs" } })
+            require("mini.ai").setup({ mappings = { around_last = "aN", inside_last = "iN", goto_left = "", goto_right = "" } })
+            require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
+            require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
         end,
     },
 }

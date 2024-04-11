@@ -15,13 +15,12 @@ vim.g.qs_filetype_blacklist = {
     "mason",
     "TelescopePrompt",
     "Mundo",
-    "NvimTree",
+    "neo-tree",
     "DiffviewFileHistory",
     "DiffviewFiles",
     "floggraph",
     "fugitiveblame",
-    "lspsagaoutline",
-    "lspsagafinder",
+    "aerial",
 }
 vim.g.qs_buftype_blacklist = { "terminal" }
 

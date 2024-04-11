@@ -27,7 +27,7 @@ HISTCONTROL=ignoreboth:erasedups:ignorespace
 
 __lf_cd__() {
   local dir
-  dir="$(command lf -print-last-dir)" && if [[ "$dir" != "$PWD" ]]; then echo " builtin cd -- $dir"; fi
+  dir="$(command lf -print-last-dir)" && if [[ -n "$dir" && "$dir" != "$PWD" ]]; then echo " builtin cd -- $dir"; fi
 }
 
 # interactive settings. it's better to check interactive with [[ $- = *i* ]], but [[ -t 1 ]] is somewhat faster

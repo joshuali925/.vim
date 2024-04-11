@@ -124,6 +124,7 @@ nnoremap + :call VSCodeNotify('workbench.action.navigateForward')<CR>
 nnoremap Q q
 " yankstack needs nmap
 nmap Y y$
+xnoremap . :normal .<CR>
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
@@ -166,8 +167,7 @@ nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
 nnoremap <leader>q :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
 nnoremap <leader>x :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
 " open current file in gvim
-" nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', {'text': "gvim '${file}'\u000D"})<CR>
-nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', {'text': "iterm \"vim '${file}' && exit\"\u000D"})<CR>
+nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', {'text': "gvim '${file}'\u000D"})<CR>
 
 " https://github.com/vscode-neovim/vscode-neovim/issues/1139, map plugs to avoid repeat.vim override mappings
 nmap <leader><C-u> <Plug>(RepeatUndo)

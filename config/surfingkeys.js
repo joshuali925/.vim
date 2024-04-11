@@ -296,7 +296,7 @@ api.mapkey('yrss', 'Copy rss', function() {
         api.Clipboard.write(window.location.href.replace(/\/$/, '') + '.rss');
     } else if (window.location.hostname === 'github.com') {
         if (/([^/]+)\/([^/]+)\/(issues|pull)\/(\d+)/.test(window.location.pathname)) { // issue comments
-            api.Clipboard.write('https://rsshub.app/github/comments' + window.location.pathname);
+            api.Clipboard.write('https://rsshub.app/github/comments' + window.location.pathname.replace(/\/(issues|pull)\//, '/'));
         } else if (/^\/([^/]+)\/([^/]+)\/?$/.test(window.location.pathname)) { // main page, commits
             api.Clipboard.write(window.location.href.replace(/\/$/, '') + '/commits.atom');
         } else { // /commits/<branch>.atom or /releases.atom
