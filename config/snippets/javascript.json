@@ -7,6 +7,10 @@
     "prefix": "clj",
     "body": ["console.log('❗$0:\\n' + JSON.stringify($0, null, 2));"]
   },
+  "Print stack trace": {
+    "prefix": "ct",
+    "body": ["console.trace();"]
+  },
   "Logger": {
     "prefix": "logger",
     "body": [

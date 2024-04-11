@@ -47,21 +47,14 @@ return {
             "neovim/nvim-lspconfig",
             "pmizio/typescript-tools.nvim",
             {
-                "nvimdev/lspsaga.nvim", -- TODO nvim 0.10 https://github.com/Bekaboo/dropbar.nvim
-                opts = {
-                    ui = { winblend = 8 },
-                    diagnostic = { on_insert = false },
-                    lightbulb = { enable = false, sign_priority = 6, virtual_text = false },
-                    code_action = { keys = { quit = "<Esc>" }, show_server_name = true },
-                    rename = { quit = "<Esc>", in_select = false },
-                    outline = { keys = { expand_or_jump = "<CR>" } },
-                    callhierarchy = { show_detail = true, keys = { jump = "<CR>", quit = "<Esc>" } },
-                },
+                "utilyre/barbecue.nvim", -- TODO nvim 0.10 https://github.com/Bekaboo/dropbar.nvim
+                dependencies = { "SmiteshP/nvim-navic", opt = { lsp = { auto_attach = true } } },
+                config = true,
             },
             {
                 "j-hui/fidget.nvim",
                 config = function()
-                    require("fidget").setup({ integration = { ["nvim-tree"] = { enable = false } } })
+                    require("fidget").setup()
                     vim.api.nvim_create_user_command("Notifications", "lua require('fidget.notification').show_history()", {})
                 end
             },
@@ -72,13 +65,13 @@ return {
             { "gD", vim.lsp.buf.type_definition },
             { "<leader>d", vim.lsp.buf.implementation },
             { "gr", vim.lsp.buf.references },
-            { "<leader>a", "<Cmd>Lspsaga code_action<CR>", mode = { "n", "x" } },
-            { "gh", "<Cmd>lua if vim.diagnostic.open_float({scope = 'cursor', border = 'single'}) == nil then vim.lsp.buf.hover() end<CR>" },
-            { "<leader>R", "<Cmd>Lspsaga rename<CR>" },
-            { "[a", "<Cmd>Lspsaga diagnostic_jump_prev<CR>" },
-            { "]a", "<Cmd>Lspsaga diagnostic_jump_next<CR>" },
-            { "[A", "<Cmd>lua require('lspsaga.diagnostic'):goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>" },
-            { "]A", "<Cmd>lua require('lspsaga.diagnostic'):goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>" },
+            { "<leader>a", "<Cmd>lua vim.lsp.buf.code_action()<CR>", mode = { "n", "x" } },
+            { "gh", "<Cmd>lua if vim.diagnostic.open_float({ scope = 'cursor', border = 'single' }) == nil then vim.lsp.buf.hover() end<CR>" },
+            { "<leader>R", "<Cmd>lua vim.lsp.buf.rename()<CR>" },
+            { "[a", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' } })<CR>" },
+            { "]a", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' } })<CR>" },
+            { "[A", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' }, severity = vim.diagnostic.severity.ERROR })<CR>" },
+            { "]A", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' }, severity = vim.diagnostic.severity.ERROR })<CR>" },
             { "<C-k>", vim.lsp.buf.signature_help, mode = "i" },
         },
         config = function() require("lsp").init() end,

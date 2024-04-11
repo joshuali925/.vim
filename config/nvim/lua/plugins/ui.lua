@@ -42,93 +42,145 @@ return {
         },
     },
     {
-        "nvim-tree/nvim-tree.lua",
-        keys = { { "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", expr = true, replace_keycodes = false } },
-        config = function()
-            require("nvim-tree").setup({
-                hijack_cursor = true,
-                hijack_netrw = false,
-                git = { show_on_open_dirs = false },
-                filters = { git_ignored = false },
-                actions = { open_file = { resize_window = false } },
-                renderer = { highlight_git = true, full_name = true, indent_markers = { enable = true } },
-                on_attach = function(bufnr)
-                    local function opts(desc)
-                        return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+        "MunifTanjim/nui.nvim",
+        config = function() -- https://github.com/MunifTanjim/nui.nvim/wiki/vim.ui, https://github.com/MunifTanjim/dotfiles/tree/8c13a4e05359bb12f9ade5abc1baca6fcec372db/private_dot_config/nvim/lua/plugins/lsp/custom
+            local function get_prompt_text(prompt, default_prompt)
+                local prompt_text = prompt or default_prompt
+                if prompt_text:sub(-1) == ":" then prompt_text = "[" .. prompt_text:sub(1, -2) .. "]" end
+                return prompt_text
+            end
+            local Input = require("nui.input")
+            local Menu = require("nui.menu")
+            local event = require("nui.utils.autocmd").event
+            local UIInput = Input:extend("UIInput")
+            local UISelect = Menu:extend("UISelect")
+            local input_ui = nil
+            local select_ui = nil
+            function UIInput:init(opts, on_done)
+                local border_top_text = get_prompt_text(opts.prompt, "[Input]")
+                local default_value = tostring(opts.default or "")
+                local params = vim.lsp.util.make_position_params()
+                UIInput.super.init(self, {
+                    relative = { type = "buf", position = { row = params.position.line, col = params.position.character } }, -- avoid cursor shifting before on_submit
+                    position = { row = 2, col = 0 },
+                    size = { width = math.max(20, vim.api.nvim_strwidth(default_value) + 7) },
+                    border = { style = "rounded", text = { top = border_top_text, top_align = "left" } },
+                    win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
+                }, {
+                    default_value = default_value,
+                    on_close = function() on_done(nil) end,
+                    on_submit = function(value) on_done(value) end,
+                })
+                self:on(event.BufLeave, function() on_done(nil) end, { once = true })
+                self:map("n", "<Esc>", function() on_done(nil) end, { noremap = true, nowait = true })
+                self:map("n", "q", function() on_done(nil) end, { noremap = true, nowait = true })
+            end
+
+            function UISelect:init(items, opts, on_done)
+                local border_top_text = get_prompt_text(opts.prompt, "[Select Item]")
+                local kind = opts.kind or "unknown"
+                local format_item = opts.format_item or function(item)
+                    return tostring(item.__raw_item or item)
+                end
+                local popup_options = {
+                    relative = "editor",
+                    position = "50%",
+                    border = { style = "rounded", text = { top = border_top_text, top_align = "left" } },
+                    win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
+                    zindex = 999,
+                }
+                if kind == "codeaction" then
+                    popup_options.relative = "cursor"
+                    popup_options.position = { row = 2, col = 0 }
+                end
+                local max_width = popup_options.relative == "editor" and vim.o.columns - 4 or vim.api.nvim_win_get_width(0) - 4
+                local max_height = popup_options.relative == "editor" and math.floor(vim.o.lines * 80 / 100) or vim.api.nvim_win_get_height(0)
+                local menu_items = {}
+                for index, item in ipairs(items) do
+                    if type(item) ~= "table" then
+                        item = { __raw_item = item }
                     end
-                    local api = require("nvim-tree.api")
-                    local filters = require("nvim-tree.explorer.filters").config
-                    local function set_gitignore_filter(current)
-                        if filters[current] then
-                            if not filters.filter_git_ignored then
-                                api.tree.toggle_gitignore_filter()
-                            end
-                            api.tree.collapse_all()
-                            api.tree.expand_all()
-                        elseif filters.filter_git_ignored then
-                            api.tree.toggle_gitignore_filter()
-                        end
-                    end
-                    api.config.mappings.default_on_attach(bufnr)
-                    vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
-                    vim.keymap.set("n", "i", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
-                    vim.keymap.set("n", "r", [[<Cmd>execute 'lua require("nvim-tree.api").tree.reload()' <bar> if winwidth(0) >= &columns / 2 - 1 <bar> NvimTreeResize 30 <bar> endif<CR>]], opts("Refresh"))
-                    vim.keymap.set("n", "R", api.fs.rename, opts("Rename"))
-                    vim.keymap.set("n", "x", api.fs.remove, opts("Delete"))
-                    vim.keymap.set("n", "d", api.fs.cut, opts("Cut"))
-                    vim.keymap.set("n", "y", api.fs.copy.node, opts("Copy"))
-                    vim.keymap.set("n", "Y", api.fs.copy.absolute_path, opts("Copy Absolute Path"))
-                    vim.keymap.set("n", "C", api.tree.change_root_to_node, opts("CD"))
-                    vim.keymap.set("n", "s", api.node.open.horizontal, opts("Open: Horizontal Split"))
-                    vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close Directory"))
-                    vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
-                    vim.keymap.set("n", "zc", api.node.navigate.parent_close, opts("Close Directory"))
-                    vim.keymap.set("n", "zo", api.node.open.edit, opts("Open"))
-                    vim.keymap.set("n", "zM", api.tree.collapse_all, opts("Collapse"))
-                    vim.keymap.set("n", "zR", api.tree.expand_all, opts("Expand"))
-                    vim.keymap.set("n", "[g", api.node.navigate.git.prev, opts("Prev Git"))
-                    vim.keymap.set("n", "]g", api.node.navigate.git.next, opts("Next Git"))
-                    vim.keymap.set("n", "<BS>", function()
-                        if not filters.filter_git_clean and not filters.filter_no_buffer then
-                            api.tree.toggle_git_clean_filter()
-                            set_gitignore_filter("filter_git_clean")
-                            vim.cmd.file("Git")
-                        elseif filters.filter_git_clean then
-                            api.tree.toggle_git_clean_filter()
-                            api.tree.toggle_no_buffer_filter()
-                            set_gitignore_filter("filter_no_buffer")
-                            vim.cmd.file("Buffer")
-                        else
-                            api.tree.toggle_no_buffer_filter()
-                            set_gitignore_filter("filter_no_buffer")
-                            vim.cmd.file("NvimTree_1")
-                        end
-                    end, opts("Toggle Filter: Git Clean"))
-                    vim.keymap.set("n", "\\", function()
-                        if not filters.filter_git_clean and not filters.filter_no_buffer then
-                            api.tree.toggle_no_buffer_filter()
-                            set_gitignore_filter("filter_no_buffer")
-                            vim.cmd.file("Buffer")
-                        elseif filters.filter_no_buffer then
-                            api.tree.toggle_no_buffer_filter()
-                            api.tree.toggle_git_clean_filter()
-                            set_gitignore_filter("filter_git_clean")
-                            vim.cmd.file("Git")
-                        else
-                            api.tree.toggle_git_clean_filter()
-                            set_gitignore_filter("filter_git_clean")
-                            vim.cmd.file("NvimTree_1")
-                        end
-                    end, opts("Toggle Filter: No Buffer"))
-                    vim.keymap.set("n", "q", "<Cmd>execute 'NvimTreeResize ' . winwidth(0) <bar> NvimTreeClose<CR>", opts("Close"))
-                    vim.keymap.set("n", "<Left>", "zh", opts("Scroll Left"))
-                    vim.keymap.set("n", "<Right>", "zl", opts("Scroll Right"))
-                    vim.keymap.set("n", "-", "$", opts("Scroll End"))
-                    vim.keymap.set("n", "H", "H", opts("Top"))
-                    vim.keymap.set("n", "<C-e>", "<C-e>", opts("Scroll down"))
-                end,
-            })
+                    item.index = index
+                    local item_text = string.sub(format_item(item), 0, max_width)
+                    menu_items[index] = Menu.item(item_text, item)
+                end
+                local menu_options = {
+                    min_width = vim.api.nvim_strwidth(border_top_text),
+                    max_width = max_width,
+                    max_height = max_height,
+                    lines = menu_items,
+                    on_close = function() on_done(nil, nil) end,
+                    on_submit = function(item) on_done(item.__raw_item or item, item.index) end,
+                }
+                UISelect.super.init(self, popup_options, menu_options)
+                self:on(event.BufLeave, function() on_done(nil, nil) end, { once = true })
+                self:map("n", "<Esc>", function() on_done(nil) end, { noremap = true, nowait = true })
+                self:map("n", "q", function() on_done(nil) end, { noremap = true, nowait = true })
+            end
+
+            vim.ui.input = function(opts, on_confirm)
+                assert(type(on_confirm) == "function", "missing on_confirm function")
+                if input_ui then
+                    vim.api.nvim_err_writeln("busy: another input is pending!")
+                    return
+                end
+                input_ui = UIInput(opts, function(value)
+                    if input_ui then input_ui:unmount() end
+                    on_confirm(value)
+                    input_ui = nil
+                end)
+                input_ui:mount()
+            end
+            vim.ui.select = function(items, opts, on_choice)
+                assert(type(on_choice) == "function", "missing on_choice function")
+                if select_ui then
+                    vim.api.nvim_err_writeln("busy: another select is pending!")
+                    return
+                end
+                select_ui = UISelect(items, opts, function(item, index)
+                    if select_ui then select_ui:unmount() end
+                    on_choice(item, index)
+                    select_ui = nil
+                end)
+                select_ui:mount()
+            end
         end,
+    },
+    {
+        "nvim-neo-tree/neo-tree.nvim",
+        branch = "v3.x",
+        dependencies = { "MunifTanjim/nui.nvim" },
+        keys = { { "<leader>b", "<Cmd>Neotree reveal<CR>" } },
+        opts = {
+            default_component_configs = { icon = { default = "" } },
+            close_if_last_window = true,
+            source_selector = { winbar = true, statusline = false },
+            window = {
+                mappings = {
+                    ["l"] = "open",
+                    ["h"] = "close_node",
+                    ["<BS>"] = "prev_source",
+                    ["\\"] = "next_source",
+                    ["P"] = { "toggle_preview", config = { use_float = true } },
+                    ["s"] = "open_split",
+                    ["<C-v>"] = "open_vsplit",
+                    ["zM"] = "close_all_nodes",
+                    ["zR"] = "expand_all_nodes",
+                    ["R"] = "rename",
+                    ["r"] = "refresh",
+                    ["x"] = "delete",
+                    ["d"] = "cut_to_clipboard",
+                    ["z"] = "none",
+                    ["H"] = "none",
+                    ["/"] = "none",
+                },
+            },
+            filesystem = {
+                filtered_items = { hide_dotfiles = false, hide_gitignored = false, hide_hidden = false },
+                hijack_netrw_behavior = "disabled",
+            },
+            git_status = { window = { position = "float", mappings = { ["a"] = "git_add_file" } } },
+        },
     },
     {
         "nvim-telescope/telescope.nvim",
@@ -205,7 +257,7 @@ return {
                     layout_config = { vertical = { preview_height = 0.3 } },
                     file_ignore_patterns = { ".git/", "node_modules/", "venv/", "vim/.*/doc/.*%.txt" },
                     dynamic_preview_title = true,
-                    path_display = { "truncate" },
+                    path_display = { "filename_first" },
                 },
                 pickers = {
                     buffers = { mappings = { n = { ["dd"] = actions.delete_buffer } } },
@@ -286,16 +338,13 @@ return {
                 "K",
                 function()
                     local content = {
-                        { "Docu&mentation", "Lspsaga hover_doc", "Show documentation" },
-                        { "&Preview definition", "Lspsaga peek_definition", "Preview definition" },
-                        { "Reference &finder", "Lspsaga finder", "Find references" },
+                        { "Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation" },
+                        { "References", "lua vim.lsp.buf.references()", "Show references" },
                         { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
                         { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
                         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
                         { "Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition" },
-                        { "Hover diagnostic", "Lspsaga show_line_diagnostics", "Show diagnostic of current line" },
-                        { "Incoming calls", "Lspsaga incoming_calls", "Run lsp callhierarchy incoming_calls" },
-                        { "Outgoing calls", "Lspsaga outgoing_calls", "Run lsp callhierarchy outgoing_calls" },
+                        { "Line diagnostic", "lua vim.diagnostic.open_float({ scope = 'line', border = 'single' })", "Show diagnostic of current line" },
                         { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
                         { "--", "" },
                         { "Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk" },
@@ -330,8 +379,8 @@ return {
             vim.fn["quickui#menu#switch"]("normal")
             vim.fn["quickui#menu#reset"]()
             vim.fn["quickui#menu#install"]("&Actions", {
-                { "Insert line", [[execute "lua require('lazy').load({plugins = 'kommentary'})" | execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]], "Insert a dividing line" },
                 { "Insert time", [[put=strftime('%x %X')]], "Insert MM/dd/yyyy hh:mm:ss tt" },
+                { "Insert line", [[execute "lua require('lazy').load({plugins = 'kommentary'})" | execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]], "Insert a dividing line" },
                 { "&Trim spaces", [[keeppatterns %s/\s\+$//e | silent! execute "normal! ``"]], "Remove trailing spaces" },
                 { "Squeeze blank lines", [[keeppatterns %s/\v(\n\n)\n+/\1/e | silent! execute "normal! ``"]], "Reduce consecutive blank lines" },
                 { "Ded&up lines", [[%!awk '\!x[$0]++']], "Remove duplicated lines and preserve order" },
@@ -370,7 +419,7 @@ return {
                 { "--", "" },
                 { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
                 { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
-                { "Git toggle blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
+                { "Git toggle line blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
                 { "--", "" },
                 { "Git &status", [[Git]], "Git status" },
                 { "Git &changes since ref", [[call feedkeys(":lua require('utils').git_change_base('HEAD')\<Left>\<Left>", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref), and show hunks based on ref instead of staged (to reset run :Gitsigns reset_base true)" },
@@ -414,16 +463,6 @@ return {
                 { "&Add formula", [[TableAddFormula]], "Add formula to current cell, i.e. Sum(r1,c1:r2,c2)" },
                 { "&Evaluate formula", [[TableEvalFormulaLine]], "Evaluate formula" },
                 { "--", "" },
-                { "Align using = (delimiter fixed)", [[Tabularize /=\zs]], [[Tabularize /=\zs]] },
-                { "Align using , (delimiter fixed)", [[Tabularize /,\zs]], [[Tabularize /,\zs]] },
-                { "Align using # (delimiter fixed)", [[Tabularize /\#\zs]], [[Tabularize /\#\zs]] },
-                { "Align using : (delimiter fixed)", [[Tabularize /:\zs]], [[Tabularize /:\zs]] },
-                { "--", "" },
-                { "Align using = (delimiter aligned)", [[Tabularize /=]], "Tabularize /=" },
-                { "Align using , (delimiter aligned)", [[Tabularize /,]], "Tabularize /," },
-                { "Align using # (delimiter aligned)", [[Tabularize /\#]], "Tabularize /\\#" },
-                { "Align using : (delimiter aligned)", [[Tabularize /:]], "Tabularize /:" },
-                { "--", "" },
                 { "&CSV show column", [[CSVWhatColumn!]], "Show column title under cursor" },
                 { "CSV arrange column", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | 1,$CSVArrangeColumn!]], "Align csv columns" },
                 { "CSV to table", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | CSVTabularize]], "Convert csv to table" },
@@ -445,6 +484,8 @@ return {
                 { "--", "" },
                 { "&Mason status", [[Mason]], "Mason status" },
                 { "Mason &install all", [[execute "lua require('lsp').lsp_install_all()"]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
+                { "--", "" },
+                { "Load indentscope", [[lua require("mini.indentscope").setup({ draw = { delay = 50 }, options = { try_as_border = true } })]], "Load mini.indentscope" },
             })
             local quickui_theme_list = {}
             local used_chars = "hjklqg"
@@ -497,16 +538,6 @@ return {
             vim.fn["quickui#menu#install"]("Ta&bles", {
                 { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },
                 { "Format to table", [['<,'>Tableize]], "Format to table, use <leader>T to set delimiter" },
-                { "--", "" },
-                { "Align using = (delimiter fixed)", [['<,'>Tabularize /=\zs]], "'<,'>Tabularize /=\\zs" },
-                { "Align using , (delimiter fixed)", [['<,'>Tabularize /,\zs]], "'<,'>Tabularize /,\\zs" },
-                { "Align using # (delimiter fixed)", [['<,'>Tabularize /\#\zs]], "'<,'>Tabularize /\\#\\zs" },
-                { "Align using : (delimiter fixed)", [['<,'>Tabularize /:\zs]], "'<,'>Tabularize /:\\zs" },
-                { "--", "" },
-                { "Align using = (delimiter aligned)", [['<,'>Tabularize /=]], "'<,'>Tabularize /=" },
-                { "Align using , (delimiter aligned)", [['<,'>Tabularize /,]], "'<,'>Tabularize /," },
-                { "Align using # (delimiter aligned)", [['<,'>Tabularize /\#]], "'<,'>Tabularize /\\#" },
-                { "Align using : (delimiter aligned)", [['<,'>Tabularize /:]], "'<,'>Tabularize /:" },
                 { "--", "" },
                 { "Sort asc", [['<,'>sort]], "Sort in ascending order (sort)" },
                 { "Sort desc", [['<,'>sort!]], "Sort in descending order (sort!)" },

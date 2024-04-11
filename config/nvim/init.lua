@@ -131,10 +131,6 @@ vim.keymap.set("o", ",", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:c
 vim.keymap.set("n", ";,", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
 vim.keymap.set("x", ";,", ":call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
 vim.keymap.set("o", ";,", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
-vim.keymap.set("n", "cx", "'<Cmd>set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@'", { expr = true, replace_keycodes = false })
-vim.keymap.set("x", "X", ":<C-u>call plugins#exchange#exchange_set(visualmode(), 1)<CR>")
-vim.keymap.set("n", "cxx", "'<Cmd>set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@_'", { expr = true, replace_keycodes = false })
-vim.keymap.set("n", "cxc", "<Cmd>call plugins#exchange#exchange_clear()<CR>")
 vim.keymap.set("o", "gc", ":<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>")
 vim.keymap.set("n", "cr", "plugins#abolish#coerce('iw')", { expr = true })
 vim.keymap.set("n", "crr", "plugins#abolish#coerce('')", { expr = true })
@@ -167,6 +163,7 @@ vim.keymap.set("x", "@q", ":normal! @q<CR>")
 vim.keymap.set("x", "@@", ":normal! @@<CR>")
 vim.keymap.set("n", "c@", "<Cmd>call funcs#edit_register()<CR>")
 vim.keymap.set("n", "U", "<Cmd>execute 'earlier ' . v:count1 . 'f'<CR>")
+vim.keymap.set("x", ".", ":normal .<CR>")
 vim.keymap.set("x", "<", "<gv")
 vim.keymap.set("x", ">", ">gv")
 vim.keymap.set("n", "gp", "`[v`]")
@@ -354,6 +351,20 @@ vim.filetype.add({
         Caddyfile = "config",
     },
 })
+vim.ui.input = (function(overridden)
+    return function(...)
+        local present = pcall(require, "nui.input")
+        if not present then vim.ui.input = overridden end
+        vim.ui.input(...)
+    end
+end)(vim.ui.input)
+vim.ui.select = (function(overridden)
+    return function(...)
+        local present = pcall(require, "nui.menu")
+        if not present then vim.ui.select = overridden end
+        vim.ui.select(...)
+    end
+end)(vim.ui.select)
 vim.notify = (function(overridden)
     return function(...)
         local present, fidget = pcall(require, "fidget")

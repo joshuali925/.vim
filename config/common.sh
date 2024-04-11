@@ -10,7 +10,7 @@ export BAT_THEME=OneHalfDark
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=40% --bind=change:first --walker-skip=.git --info=inline --scrollbar "▌▐" --border=thinblock --preview-window=border-thinblock --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
-export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --hidden --exclude=.git --color=always'
+export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(> )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)'"
@@ -65,7 +65,7 @@ alias lzd='lazydocker'
 alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/ctop/issues/263
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
-alias 0='[[ -f $HOME/.vim/tmp/last_result ]] && cd "$(cat "$HOME/.vim/tmp/last_result")"'
+alias 00='[[ -f $HOME/.vim/tmp/last_result ]] && cd "$(cat "$HOME/.vim/tmp/last_result")"'
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
 alias jqflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
@@ -285,7 +285,7 @@ gh-backport() {
 
 lf() {
   local dir
-  dir="$(command lf -print-last-dir "$@")" && if [[ "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  dir="$(command lf -print-last-dir "$@")" && if [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
 }
 
 size() {
@@ -487,10 +487,14 @@ vf() {  # find files: vf; open files from pipe: fd | vf
 }
 
 cdf() {
-  local fzftemp
-  fzftemp=$(FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --color=always --hidden --exclude=.git $*" fzf --ansi --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore $* || true)") && {
-    [[ -d $fzftemp ]] && cd "$fzftemp" || { [[ -d $(dirname "$fzftemp" 2> /dev/null) ]] && cd "$(dirname "$fzftemp")"; }
-  }
+  if [[ -d $1 ]]; then
+    cd "$1"
+  elif [[ -f $1 ]]; then
+    cd "$(dirname "$1")"
+  else
+    local fzftemp
+    fzftemp=$(FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --color=always --hidden --exclude=.git $*" fzf --ansi --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore $* || true)") && cdf "$fzftemp"
+  fi
 }
 
 vrg() {
@@ -754,7 +758,6 @@ theme() {  # locally toggles wezterm theme, remotely updates configs to match te
   export PATH="${PATH//.vim\/bin/.vim/local-bin}"
   export FZF_DEFAULT_COMMAND="command find -L . -mindepth 1 \\( -path '*/.git' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune -o -type f -print -o -type l -print 2> /dev/null | cut -b3-"
   export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
-  unset -f lf
 }
 
 if [[ -n $DOT_VIM_LOCAL_BIN ]]; then .vim-disable-binary-downloads; fi

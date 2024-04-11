@@ -227,6 +227,7 @@ nnoremap _ <C-o>
 nnoremap + <C-i>
 nnoremap Y y$
 nnoremap U :execute 'earlier ' . v:count1 . 'f'<CR>
+xnoremap . :normal .<CR>
 xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]

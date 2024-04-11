@@ -126,7 +126,7 @@ zle -N down-line-or-local-history
 
 run-lf () {
   local dir precmd
-  dir="$(command lf -print-last-dir < /dev/tty)" && if [[ "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  dir="$(command lf -print-last-dir < /dev/tty)" && if [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
   for precmd in $precmd_functions; do
     $precmd
   done

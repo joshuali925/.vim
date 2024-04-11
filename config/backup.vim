@@ -3998,10 +3998,8 @@ export MANROFFOPT='-c'
             { "]M", "<Cmd>lua require('mini.visits').iterate_paths('last')<CR>" },
         },
         config = function()
-            require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
             require("mini.pairs").setup({ mappings = { [" "] = { action = "open", pair = "  ", neigh_pattern = "[%(%[{][%)%]}]" } } }) -- doesn't support triple quotes
             require('mini.surround').setup() -- doesn't support closest pair
-            require('mini.splitjoin').setup() -- regex based, doesn't support toggle javascript oneline function
             require("mini.jump").setup({ mappings = { repeat_jump = "," }, delay = { highlight = 1500, idle_stop = 1500 }, silent = true }) -- doesn't support disable auto smart jumps
             require("mini.sessions").setup({ -- doesn't restore scrollview
                 hooks = {
@@ -4255,3 +4253,131 @@ Loop -> General -> check "Restore window frame on drag"
                     -> Import: ~/.vim/config/loop.json
      -> More -> check "Hide Loop until direction is chosen"
 loop.json: [{"direction":"Maximize","keybind":[126]},{"direction":"InitialFrame","keybind":[125]},{"direction":"LeftHalf","keybind":[123]},{"direction":"RightHalf","keybind":[124]},{"direction":"Smaller","keybind":[27]},{"direction":"Larger","keybind":[24]},{"direction":"Center","keybind":[56,8]},{"direction":"PreviousScreen","keybind":[56,123]},{"direction":"NextScreen","keybind":[56,124]}]
+
+" =======================================================
+" tabularize
+                { "--", "" },
+                { "Align using = (delimiter fixed)", [[Tabularize /=\zs]], [[Tabularize /=\zs]] },
+                { "Align using , (delimiter fixed)", [[Tabularize /,\zs]], [[Tabularize /,\zs]] },
+                { "Align using # (delimiter fixed)", [[Tabularize /\#\zs]], [[Tabularize /\#\zs]] },
+                { "Align using : (delimiter fixed)", [[Tabularize /:\zs]], [[Tabularize /:\zs]] },
+                { "--", "" },
+                { "Align using = (delimiter aligned)", [[Tabularize /=]], "Tabularize /=" },
+                { "Align using , (delimiter aligned)", [[Tabularize /,]], "Tabularize /," },
+                { "Align using # (delimiter aligned)", [[Tabularize /\#]], "Tabularize /\\#" },
+                { "Align using : (delimiter aligned)", [[Tabularize /:]], "Tabularize /:" },
+                { "--", "" },
+                { "Align using = (delimiter fixed)", [['<,'>Tabularize /=\zs]], "'<,'>Tabularize /=\\zs" },
+                { "Align using , (delimiter fixed)", [['<,'>Tabularize /,\zs]], "'<,'>Tabularize /,\\zs" },
+                { "Align using # (delimiter fixed)", [['<,'>Tabularize /\#\zs]], "'<,'>Tabularize /\\#\\zs" },
+                { "Align using : (delimiter fixed)", [['<,'>Tabularize /:\zs]], "'<,'>Tabularize /:\\zs" },
+                { "--", "" },
+                { "Align using = (delimiter aligned)", [['<,'>Tabularize /=]], "'<,'>Tabularize /=" },
+                { "Align using , (delimiter aligned)", [['<,'>Tabularize /,]], "'<,'>Tabularize /," },
+                { "Align using # (delimiter aligned)", [['<,'>Tabularize /\#]], "'<,'>Tabularize /\\#" },
+                { "Align using : (delimiter aligned)", [['<,'>Tabularize /:]], "'<,'>Tabularize /:" },
+" nvim-tree
+    {
+        "nvim-tree/nvim-tree.lua",
+        keys = { { "<leader>b", "expand('%') == '' ? '<Cmd>NvimTreeOpen<CR>' : '<Cmd>NvimTreeFindFile<CR>'", expr = true, replace_keycodes = false } },
+        config = function()
+            require("nvim-tree").setup({
+                hijack_cursor = true,
+                hijack_netrw = false,
+                git = { show_on_open_dirs = false },
+                filters = { git_ignored = false },
+                actions = { open_file = { resize_window = false } },
+                renderer = { highlight_git = true, full_name = true, indent_markers = { enable = true } },
+                on_attach = function(bufnr)
+                    local function opts(desc)
+                        return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+                    end
+                    local api = require("nvim-tree.api")
+                    local filters = require("nvim-tree.explorer.filters").config
+                    local function set_gitignore_filter(current)
+                        if filters[current] then
+                            if not filters.filter_git_ignored then
+                                api.tree.toggle_gitignore_filter()
+                            end
+                            api.tree.collapse_all()
+                            api.tree.expand_all()
+                        elseif filters.filter_git_ignored then
+                            api.tree.toggle_gitignore_filter()
+                        end
+                    end
+                    api.config.mappings.default_on_attach(bufnr)
+                    vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
+                    vim.keymap.set("n", "i", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
+                    vim.keymap.set("n", "r", [[<Cmd>execute 'lua require("nvim-tree.api").tree.reload()' <bar> if winwidth(0) >= &columns / 2 - 1 <bar> NvimTreeResize 30 <bar> endif<CR>]], opts("Refresh"))
+                    vim.keymap.set("n", "R", api.fs.rename, opts("Rename"))
+                    vim.keymap.set("n", "x", api.fs.remove, opts("Delete"))
+                    vim.keymap.set("n", "d", api.fs.cut, opts("Cut"))
+                    vim.keymap.set("n", "y", api.fs.copy.node, opts("Copy"))
+                    vim.keymap.set("n", "Y", api.fs.copy.absolute_path, opts("Copy Absolute Path"))
+                    vim.keymap.set("n", "C", api.tree.change_root_to_node, opts("CD"))
+                    vim.keymap.set("n", "s", api.node.open.horizontal, opts("Open: Horizontal Split"))
+                    vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close Directory"))
+                    vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
+                    vim.keymap.set("n", "zc", api.node.navigate.parent_close, opts("Close Directory"))
+                    vim.keymap.set("n", "zo", api.node.open.edit, opts("Open"))
+                    vim.keymap.set("n", "zM", api.tree.collapse_all, opts("Collapse"))
+                    vim.keymap.set("n", "zR", api.tree.expand_all, opts("Expand"))
+                    vim.keymap.set("n", "[g", api.node.navigate.git.prev, opts("Prev Git"))
+                    vim.keymap.set("n", "]g", api.node.navigate.git.next, opts("Next Git"))
+                    vim.keymap.set("n", "<BS>", function()
+                        if not filters.filter_git_clean and not filters.filter_no_buffer then
+                            api.tree.toggle_git_clean_filter()
+                            set_gitignore_filter("filter_git_clean")
+                            vim.cmd.file("Git")
+                        elseif filters.filter_git_clean then
+                            api.tree.toggle_git_clean_filter()
+                            api.tree.toggle_no_buffer_filter()
+                            set_gitignore_filter("filter_no_buffer")
+                            vim.cmd.file("Buffer")
+                        else
+                            api.tree.toggle_no_buffer_filter()
+                            set_gitignore_filter("filter_no_buffer")
+                            vim.cmd.file("NvimTree_1")
+                        end
+                    end, opts("Toggle Filter: Git Clean"))
+                    vim.keymap.set("n", "\\", function()
+                        if not filters.filter_git_clean and not filters.filter_no_buffer then
+                            api.tree.toggle_no_buffer_filter()
+                            set_gitignore_filter("filter_no_buffer")
+                            vim.cmd.file("Buffer")
+                        elseif filters.filter_no_buffer then
+                            api.tree.toggle_no_buffer_filter()
+                            api.tree.toggle_git_clean_filter()
+                            set_gitignore_filter("filter_git_clean")
+                            vim.cmd.file("Git")
+                        else
+                            api.tree.toggle_git_clean_filter()
+                            set_gitignore_filter("filter_git_clean")
+                            vim.cmd.file("NvimTree_1")
+                        end
+                    end, opts("Toggle Filter: No Buffer"))
+                    vim.keymap.set("n", "q", "<Cmd>execute 'NvimTreeResize ' . winwidth(0) <bar> NvimTreeClose<CR>", opts("Close"))
+                    vim.keymap.set("n", "<Left>", "zh", opts("Scroll Left"))
+                    vim.keymap.set("n", "<Right>", "zl", opts("Scroll Right"))
+                    vim.keymap.set("n", "-", "$", opts("Scroll End"))
+                    vim.keymap.set("n", "H", "H", opts("Top"))
+                    vim.keymap.set("n", "<C-e>", "<C-e>", opts("Scroll down"))
+                end,
+            })
+        end,
+    },
+" vim-swap and vim-exchange
+vim.keymap.set("n", "cx", "'<Cmd>set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@'", { expr = true, replace_keycodes = false })
+vim.keymap.set("x", "X", ":<C-u>call plugins#exchange#exchange_set(visualmode(), 1)<CR>")
+vim.keymap.set("n", "cxx", "'<Cmd>set operatorfunc=plugins#exchange#exchange_set<CR>' . (v:count1 == 1 ? '' : v:count1) . 'g@_'", { expr = true, replace_keycodes = false })
+vim.keymap.set("n", "cxc", "<Cmd>call plugins#exchange#exchange_clear()<CR>")
+    {
+        "machakann/vim-swap",
+        keys = {
+            { "ia", "<Plug>(swap-textobject-i)", mode = { "x", "o" } },
+            { "aa", "<Plug>(swap-textobject-a)", mode = { "x", "o" } },
+            { "g<", "<Plug>(swap-prev)" },
+            { "g>", "<Plug>(swap-next)" },
+            { "gs", "<Plug>(swap-interactive)", mode = { "n", "x" } },
+        },
+    },

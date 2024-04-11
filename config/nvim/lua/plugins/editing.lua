@@ -7,16 +7,6 @@ return {
         opts = { keymaps = { normal_cur = "<NOP>", normal_line = "<NOP>", normal_cur_line = "ysl", visual = "s", } },
     },
     {
-        "machakann/vim-swap",
-        keys = {
-            { "ia", "<Plug>(swap-textobject-i)", mode = { "x", "o" } },
-            { "aa", "<Plug>(swap-textobject-a)", mode = { "x", "o" } },
-            { "g<", "<Plug>(swap-prev)" },
-            { "g>", "<Plug>(swap-next)" },
-            { "gs", "<Plug>(swap-interactive)", mode = { "n", "x" } },
-        },
-    },
-    {
         "monaqa/dial.nvim",
         keys = {
             { "<C-a>", "<Plug>(dial-increment)", mode = { "n", "x" } },
