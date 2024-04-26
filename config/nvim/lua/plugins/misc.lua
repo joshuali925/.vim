@@ -85,6 +85,7 @@ return {
             require("mini.ai").setup({ mappings = { around_last = "aN", inside_last = "iN", goto_left = "", goto_right = "" } })
             require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
             require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
+            require("mini.operators").make_mappings("replace", { textobject = "cp", line = "", selection = "" })
         end,
     },
 }

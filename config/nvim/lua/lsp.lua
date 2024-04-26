@@ -190,6 +190,7 @@ function M.organize_imports_and_format()
 end
 
 function M.toggle_diagnostics()
+    -- TODO change logic to is_enabled for nvim 0.10
     if vim.diagnostic.is_disabled() then
         vim.diagnostic.enable()
     else

@@ -22,6 +22,7 @@ shopt -s autocd
 shopt -s cdspell
 shopt -s checkwinsize
 shopt -s dotglob
+shopt -s no_empty_cmd_completion
 
 HISTCONTROL=ignoreboth:erasedups:ignorespace
 
@@ -46,10 +47,10 @@ if [[ -t 1 ]]; then
   bind '"\e[1;5D": backward-word'
   bind '"\e[1;5C": forward-word'
   bind '"\e[3;2~": backward-delete-char'
-  # somehow bind C-o will not trigger on mac. using bind -x, the prompt does not update
   if [[ $OSTYPE = darwin* ]]; then
-    bind -x '"\C-o": "lf"'
+    bind -x '"\C-o": "lf; pwd"'  # somehow bind C-o will not trigger on mac. using bind -x the prompt will not update
   else
+    bind '"\er": redraw-current-line'
     bind '"\C-o": " \C-b\C-k \C-u `__lf_cd__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
   fi
   stty -ixon  # disable Ctrl-S freeze

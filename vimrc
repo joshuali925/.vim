@@ -104,7 +104,7 @@ endif
 set history=1000
 set undofile
 let &undodir=g:dot_vim_dir . '/tmp/undo'
-let &viminfo="'1000,<50,s10,h,n" . g:dot_vim_dir . '/tmp/viminfo'
+let &viminfo="'5000,<50,s10,h,n" . g:dot_vim_dir . '/tmp/viminfo'
 set isfname-==
 set path=.,,**5
 set wildignore=*/tags,*/\.git/*,*/dist/*,*/build/*,*/node_modules/*,*/venv/*,*/__pycache__/*
@@ -287,6 +287,7 @@ nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
 xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
+xnoremap <leader>S :s/\%V//g<Left><Left><Left>
 nmap <leader>c <leader>ncgn
 xmap <leader>c <leader>ncgn
 nnoremap <leader>tu <C-^>
@@ -323,7 +324,7 @@ augroup AutoCommands
   autocmd FileType json setlocal formatprg=python\ -m\ json.tool
   autocmd FileType help,man nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
   autocmd FileType netrw setlocal bufhidden=wipe | nmap <buffer> h [[<CR>^| nmap <buffer> l <CR>| nmap <buffer> C gn:execute 'cd ' . b:netrw_curdir<CR>| nnoremap <buffer> <C-l> <C-w>l| nnoremap <buffer> <nowait> q :call funcs#quit_netrw_and_dirs()<CR>| nmap <buffer> <leader>q q| nmap <buffer> a %
-  autocmd BufReadPost quickfix setlocal nobuflisted modifiable foldmethod=expr foldexpr=matchstr(getline(v:lnum),'^[^\|]\\+')==#matchstr(getline(v:lnum+1),'^[^\|]\\+')?1:'<1' | let &foldtext='matchstr(getline(v:foldstart),"^[^|]\\+")."| ⋯"' | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> o <CR>:cclose<CR>| nnoremap <buffer> <leader>s :cdo s/\<<C-r><C-w>\>/<C-r><C-w>/g<Left><Left>| xnoremap <leader>s "xy:cdo s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/g<Left><Left>
+  autocmd BufReadPost quickfix setlocal nobuflisted modifiable foldmethod=expr foldexpr=matchstr(getline(v:lnum),'^[^\|]\\+')==#matchstr(getline(v:lnum+1),'^[^\|]\\+')?1:'<1' | let &foldtext='matchstr(getline(v:foldstart),"^[^|]\\+")."| ⋯"' | nnoremap <buffer> <leader>w :let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m,%f' <bar> cgetbuffer <bar> bdelete! <bar> copen<CR>| nnoremap <buffer> o <CR>:cclose<CR>| nnoremap <buffer> <leader>s :cdo s/\<<C-r><C-w>\>/<C-r><C-w>/g<Left><Left>| xnoremap <leader>s "xy:cdo s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/g<Left><Left>| nnoremap < :colder<CR>| nnoremap > :cnewer<CR>
   silent! autocmd OptionSet shiftwidth let &listchars='tab:█ ,nbsp:␣,trail:•,leadmultispace:▏' . repeat(' ', &shiftwidth - 1)
 augroup END
 

@@ -17,9 +17,9 @@ return {
         },
     },
     {
-        "dstein64/nvim-scrollview", -- TODO try lewis6991/satellite.nvim or petertriho/nvim-scrollbar if https://github.com/petertriho/nvim-scrollbar/issues/6 is fixed
+        "dstein64/nvim-scrollview",
         config = function()
-            require("scrollview").setup({ signs_max_per_row = 2, signs_column = 1 })
+            require("scrollview").setup({ signs_max_per_row = 2, winblend_gui = 50 })
             require("scrollview.contrib.gitsigns").setup()
         end
     },

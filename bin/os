@@ -4,7 +4,7 @@ set -eo pipefail
 run() {
   while [[ $# -ne 0 ]]; do
     case $1 in
-      --no-sec) shift; local nosec=1 ;;
+      --no-sec|--nosec) shift; local nosec=1 ;;
       --debug) shift; export OPENSEARCH_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 ;;
       --) shift; break ;;
       *) break ;;

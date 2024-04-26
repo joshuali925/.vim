@@ -23,7 +23,7 @@ return {
     },
     {
         "akinsho/toggleterm.nvim",
-        cmd = "TermExec",
+        cmd = { "ToggleTerm", "TermExec" },
         keys = {
             { "<C-b>", "<Cmd>ToggleTerm<CR>" },
             { "<leader>to", "<Cmd>execute 'ToggleTerm dir=' . expand('%:p:h')<CR>" },
@@ -43,6 +43,22 @@ return {
     },
     {
         "MunifTanjim/nui.nvim",
+        init = function()
+            vim.ui.input = (function(overridden)
+                return function(...)
+                    local present = pcall(require, "nui.input")
+                    if not present then vim.ui.input = overridden end
+                    vim.ui.input(...)
+                end
+            end)(vim.ui.input)
+            vim.ui.select = (function(overridden)
+                return function(...)
+                    local present = pcall(require, "nui.menu")
+                    if not present then vim.ui.select = overridden end
+                    vim.ui.select(...)
+                end
+            end)(vim.ui.select)
+        end,
         config = function() -- https://github.com/MunifTanjim/nui.nvim/wiki/vim.ui, https://github.com/MunifTanjim/dotfiles/tree/8c13a4e05359bb12f9ade5abc1baca6fcec372db/private_dot_config/nvim/lua/plugins/lsp/custom
             local function get_prompt_text(prompt, default_prompt)
                 local prompt_text = prompt or default_prompt
@@ -149,38 +165,48 @@ return {
     {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
-        dependencies = { "MunifTanjim/nui.nvim" },
+        dependencies = { "MunifTanjim/nui.nvim", "antosha417/nvim-lsp-file-operations" },
         keys = { { "<leader>b", "<Cmd>Neotree reveal<CR>" } },
-        opts = {
-            default_component_configs = { icon = { default = "" } },
-            close_if_last_window = true,
-            source_selector = { winbar = true, statusline = false },
-            window = {
-                mappings = {
-                    ["l"] = "open",
-                    ["h"] = "close_node",
-                    ["<BS>"] = "prev_source",
-                    ["\\"] = "next_source",
-                    ["P"] = { "toggle_preview", config = { use_float = true } },
-                    ["s"] = "open_split",
-                    ["<C-v>"] = "open_vsplit",
-                    ["zM"] = "close_all_nodes",
-                    ["zR"] = "expand_all_nodes",
-                    ["R"] = "rename",
-                    ["r"] = "refresh",
-                    ["x"] = "delete",
-                    ["d"] = "cut_to_clipboard",
-                    ["z"] = "none",
-                    ["H"] = "none",
-                    ["/"] = "none",
+        config = function()
+            local function get_dir(state)
+                local node = state.tree:get_node()
+                return node.type == "file" and node:get_parent_id() or node.path
+            end
+            require("neo-tree").setup({
+                default_component_configs = { icon = { default = "" } },
+                close_if_last_window = true,
+                source_selector = { winbar = true, statusline = false },
+                window = {
+                    mappings = {
+                        ["l"] = "open",
+                        ["h"] = "close_node",
+                        ["<BS>"] = "prev_source",
+                        ["\\"] = "next_source",
+                        ["P"] = { "toggle_preview", config = { use_float = true } },
+                        ["s"] = "open_split",
+                        ["<C-v>"] = "open_vsplit",
+                        ["zM"] = "close_all_nodes",
+                        ["zR"] = "expand_all_nodes",
+                        ["R"] = "rename",
+                        ["r"] = "refresh",
+                        ["x"] = "delete",
+                        ["d"] = "cut_to_clipboard",
+                        ["<C-b>"] = { function(state) vim.cmd.ToggleTerm("dir=" .. get_dir(state)) end, desc = "open_term_at_node" },
+                        ["t"] = { function(state) require("telescope.builtin").find_files({ cwd = get_dir(state) }) end, desc = "find_files_at_node" },
+                        ["T"] = {
+                            function(state) require("telescope.builtin").find_files({ cwd = get_dir(state), no_ignore = true }) end,
+                            desc = "find_files_no_ignore_at_node",
+                        },
+                        ["<leader>fg"] = { function(state) require("telescope.builtin").live_grep({ cwd = get_dir(state) }) end, desc = "live_grep_at_node" },
+                        ["z"] = "none",
+                        ["H"] = "none",
+                        ["/"] = "none",
+                    },
                 },
-            },
-            filesystem = {
-                filtered_items = { hide_dotfiles = false, hide_gitignored = false, hide_hidden = false },
-                hijack_netrw_behavior = "disabled",
-            },
-            git_status = { window = { position = "float", mappings = { ["a"] = "git_add_file" } } },
-        },
+                filesystem = { filtered_items = { hide_dotfiles = false, hide_gitignored = false, hide_hidden = false }, hijack_netrw_behavior = "disabled" },
+            })
+            require("lsp-file-operations").setup({ timeout_ms = 180000 })
+        end,
     },
     {
         "nvim-telescope/telescope.nvim",
@@ -194,8 +220,9 @@ return {
             { "<leader>fs", "<Cmd>lua require('utils').fzf()<CR>" },
             { "<leader>fs", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
             { "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>" },
-            { "<leader>fM", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>" },
-            { "<leader>fb", "<Cmd>lua require('telescope.builtin').buffers({initial_mode = 'normal', ignore_current_buffer = true, only_cwd = false, sort_mru = true})<CR>" },
+            { "<leader>fM", "<Cmd>lua require('telescope.builtin').oldfiles({only_cwd = true})<CR>" },
+            { "<leader>f'", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>" },
+            { "<leader>fb", "<Cmd>lua require('telescope.builtin').live_grep({grep_open_files = true})<CR>" },
             { "<leader>fu", "<Cmd>lua require('telescope.builtin')[require('lsp').is_active() and 'lsp_document_symbols' or 'treesitter']()<CR>" },
             { "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_dynamic_workspace_symbols({ symbols = { 'Class', 'Function', 'Method', 'Constructor', 'Interface', 'Module', 'Struct', 'Trait', 'Field', 'Property' } })<CR>" },
             { "<leader>fg", ":RgRegex " },

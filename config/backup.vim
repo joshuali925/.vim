@@ -4139,6 +4139,9 @@ install-from-github lf gokcehan/lf linux-amd64 linux-arm64 darwin-amd64 darwin-a
     FFF_HIDDEN=1 FFF_CD_FILE=~/.vim/tmp/lf_dir FFF_KEY_MOVE=d FFF_KEY_TRASH=x FFF_KEY_RENAME=R FFF_KEY_REFRESH=r exec "$HOME/.vim/tmp/fff" "$@"
   fi
 }
+" vimv https://github.com/thameera/vimv/issues/39
+install-from-url vimv https://raw.githubusercontent.com/thameera/vimv/HEAD/vimv "$@"
+cmd vimv-bulk-rename ${{ vimv $fx; echo }}
 " tmux-thumbs, use wezterm quick select and tmux-picker
   set -g @plugin 'fcsonline/tmux-thumbs'        # <M-'>
   set -g @thumbs-bg-color '#383A57'

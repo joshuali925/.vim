@@ -1,10 +1,25 @@
 return {
     {
         "rbong/vim-flog",
-        dependencies = { "tpope/vim-fugitive", "tpope/vim-rhubarb" },
+        dependencies = {
+            "tpope/vim-fugitive",
+            "tpope/vim-rhubarb",
+            {
+                "ja-he/heat.nvim",
+                opts = { colors = { [1] = { value = 0, color = { 0, 0, 0 } }, [2] = { value = 0.95, color = { 1, 1, 1 } }, [3] = { value = 1, color = { 1, 1, 0.6 } } } },
+            },
+        },
         ft = "gitcommit", -- issue number omni-completion, does not work if cloned with url.replacement.insteadOf
         cmd = { "Git", "Gcd", "Ggrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog", "Flogsplit" },
-        config = function() vim.g.fugitive_summary_format = "%d %s (%cr) <%an>" end,
+        config = function()
+            vim.g.fugitive_summary_format = "%d %s (%cr) <%an>"
+            vim.cmd("cnoreabbrev git <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>")
+            vim.api.nvim_create_autocmd("User", {
+                pattern = "FugitiveIndex",
+                group = "AutoCommands",
+                callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
+            })
+        end,
     },
     {
         "lewis6991/gitsigns.nvim",
