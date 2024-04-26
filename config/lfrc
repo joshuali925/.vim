@@ -33,7 +33,6 @@ map mE sudoedit
 map mp paste-symlink --relative
 map mP paste-symlink
 map mr vidir-bulk-rename
-map mR vimv-bulk-rename
 map ms selected-size
 map mS cwd-size
 map mt tail
@@ -60,7 +59,7 @@ map J push hjl
 map `` push ''
 map c :clear; unselect
 map gs !clear && git status
-map glo !clear && git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit
+map glo !clear && git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit -- "$f"
 map gr cd-git-root
 map gvi :cd ~/.vim
 map gvd :cd ~/.local/state/nvim
@@ -99,7 +98,6 @@ cmd cwd-size %du -sb . | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum
 cmd edit-config $$EDITOR ~/.vim/config/lfrc
 cmd edit-selected $$EDITOR $fx
 cmd vidir-bulk-rename ${{ echo "$fx" | vidir - }}
-cmd vimv-bulk-rename ${{ vimv $fx; echo }}
 cmd cd-git-root %{{ lf -remote "send $id cd \"$(git rev-parse --show-toplevel || echo '.')\"" }}
 cmd copy-path %{{ realpath "$f" | y; echo "copied: $(realpath "$f")" }}
 cmd copy-file-name %{{
@@ -177,6 +175,24 @@ cmd zip ${{
       set -- "$@" "$(realpath --relative-to='.' "$filepath")"
     done
     zip -r "${1}.zip" "$@"  # positional arguments only available in subshell from pipe
+  }
+}}
+cmd 7z ${{
+  set -f
+  echo "$fx" | {
+    while IFS= read -r filepath; do
+      set -- "$@" "$(realpath --relative-to='.' "$filepath")"
+    done
+    7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on "${1}.7z" "$@"
+  }
+}}
+cmd 7zmax ${{
+  set -f
+  echo "$fx" | {
+    while IFS= read -r filepath; do
+      set -- "$@" "$(realpath --relative-to='.' "$filepath")"
+    done
+    7z a -t7z -mx=9 -mfb=273 -ms -md=31 -myx=9 -mtm=- -mmt -mmtf -md=1536m -mmf=bt3 -mmc=10000 -mpb=0 -mlc=0 -m0=LZMA2:27 "${1}.7z" "$@"
   }
 }}
 

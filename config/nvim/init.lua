@@ -51,7 +51,7 @@ vim.o.virtualedit = "block"
 vim.o.previewheight = 7
 vim.o.foldlevel = 99
 vim.o.jumpoptions = "view"
-vim.o.shada = "!,'1000,<50,s10,/20,@20,h"
+vim.o.shada = "!,'5000,<50,s10,/20,@20,h"
 vim.o.undofile = true
 vim.o.isfname = vim.o.isfname:gsub(",=", "")
 vim.o.path = ".,,**5"
@@ -159,6 +159,7 @@ vim.keymap.set("i", "<C-_>", "<C-o>u")
 vim.keymap.set("n", "_", "<C-o>")
 vim.keymap.set("n", "+", "<C-i>")
 vim.keymap.set("n", "Q", "q")
+-- TODO 0.10 default?
 vim.keymap.set("x", "@q", ":normal! @q<CR>")
 vim.keymap.set("x", "@@", ":normal! @@<CR>")
 vim.keymap.set("n", "c@", "<Cmd>call funcs#edit_register()<CR>")
@@ -170,6 +171,7 @@ vim.keymap.set("n", "gp", "`[v`]")
 vim.keymap.set("n", "zn", "v:count > 0 ? '<Cmd>set foldlevel=' . v:count . '<CR>' : '<Cmd>%foldclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "gf", "gF")
 vim.keymap.set("n", "gF", "gf")
+-- TODO 0.10 default?
 vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("n", "zh", "zhz", { remap = true })
@@ -210,6 +212,7 @@ vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch
 vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
 vim.keymap.set("x", "<leader>s", [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/gc<Left><Left><Left>]])
+vim.keymap.set("x", "<leader>S", [[:s/\%V//g<Left><Left><Left>]])
 vim.keymap.set({ "n", "x" }, "<leader>c", "<leader>ncgn", { remap = true })
 vim.keymap.set("n", "<leader>tu", "<C-^>")
 vim.keymap.set("n", "<leader>l", "<Cmd>call funcs#print_variable(0, 0)<CR>")
@@ -235,7 +238,6 @@ vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { e
 vim.cmd("cnoreabbrev print <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua vim.print( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua vim.print( )' ? setcmdpos(15)[-1] : '')<CR>")
 vim.cmd("cnoreabbrev fd <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Fd' : 'fd')<CR>")
 vim.cmd("cnoreabbrev rg <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Rg' : 'rg')<CR>")
-vim.cmd("cnoreabbrev git <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>") -- fugitive
 
 -- autocmds {{{1
 vim.api.nvim_create_augroup("AutoCommands", {})
@@ -262,8 +264,7 @@ vim.api.nvim_create_autocmd("BufRead", {
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
-vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = "nnoremap <buffer> gf :argadd <C-r><C-p><CR>" })
-vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })
+vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = [[nnoremap <buffer> gf :argadd <C-r><C-p><CR>| xnoremap <buffer> gf :<C-u>execute "'<,'>normal! :argadd \<lt>C-r>\<lt>C-p>\<lt>CR>"<CR>]] })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "netrw",
     group = "AutoCommands",
@@ -287,7 +288,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
         vim.o.foldmethod = "expr"
         vim.o.foldexpr = [[matchstr(getline(v:lnum),'^[^|]\+')==#matchstr(getline(v:lnum+1),'^[^|]\+')?1:'<1']]
         vim.o.foldtext = [[matchstr(getline(v:foldstart),'^[^|]\+').'| ⋯']]
-        vim.keymap.set("n", "<leader>w", [[<Cmd>let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>]], { buffer = true })
+        vim.keymap.set("n", "<leader>w", [[<Cmd>let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m,%f' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>]], { buffer = true })
         vim.keymap.set("n", "<CR>", "<CR>", { buffer = true })
         vim.keymap.set("n", "<leader>s", [[:cdo s/\<<C-r><C-w>\>/<C-r><C-w>/g<Left><Left>]], { buffer = true })
         vim.keymap.set("x", "<leader>s", [["xy:cdo s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/g<Left><Left>]], { buffer = true })
@@ -296,11 +297,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "term://*", group = "AutoCommands", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif]] })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "AutoCommands", callback = require("rooter").root })
-vim.api.nvim_create_autocmd("User", {
-    pattern = "FugitiveIndex", -- fugitive buffer :Git
-    group = "AutoCommands",
-    callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
-})
 
 -- commands {{{1
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
@@ -331,14 +327,6 @@ vim.api.nvim_create_user_command("Prettier", function(args)
         vim.notify(vim.inspect(formatted), vim.log.levels.ERROR, { annote = "Prettier failed" })
     end
 end, { complete = "filetype", nargs = "*", range = true })
-vim.api.nvim_create_user_command("Conform", function(args)
-    local range = nil
-    if args.count ~= -1 then
-        local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
-        range = { start = { args.line1, 0 }, ["end"] = { args.line2, end_line:len() } }
-    end
-    require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000, range = range })
-end, { range = true })
 
 -- overrides {{{1
 vim.filetype.add({
@@ -351,34 +339,6 @@ vim.filetype.add({
         Caddyfile = "config",
     },
 })
-vim.ui.input = (function(overridden)
-    return function(...)
-        local present = pcall(require, "nui.input")
-        if not present then vim.ui.input = overridden end
-        vim.ui.input(...)
-    end
-end)(vim.ui.input)
-vim.ui.select = (function(overridden)
-    return function(...)
-        local present = pcall(require, "nui.menu")
-        if not present then vim.ui.select = overridden end
-        vim.ui.select(...)
-    end
-end)(vim.ui.select)
-vim.notify = (function(overridden)
-    return function(...)
-        local present, fidget = pcall(require, "fidget")
-        if present then
-            vim.notify = function(msg, level, opts)
-                if opts and opts["title"] then opts["annote"] = opts["title"] end
-                return fidget.notify(msg, level, opts)
-            end
-        else
-            vim.notify = overridden
-        end
-        vim.notify(...)
-    end
-end)(vim.notify)
 vim.paste = (function(overridden) -- break undo before pasting in insert mode, :h vim.paste()
     return function(lines, phase)
         if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then

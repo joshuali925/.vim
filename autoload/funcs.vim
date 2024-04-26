@@ -96,7 +96,7 @@ function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
-  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'toggleterm']
+  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'toggleterm', 'aerial']
   if has_nvim && nvim_win_get_config(0).relative != ''  " floating window focused
     quit
   elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q

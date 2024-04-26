@@ -36,6 +36,10 @@
 	; diffFilter = diff-so-fancy --patch
 	diffFilter = delta --line-numbers --features "${DELTA_THEME:-dark-theme}"
 
+[diff]
+	renames = copies
+	renameLimit = 10000
+
 [fetch]
 	prune = true
 	writeCommitGraph = true
@@ -57,6 +61,9 @@
 [diff]
 	; colorMoved = default
 
+[blame]
+	coloring = highlightRecent
+
 [rerere]
 	enabled = true
 	autoupdate = true
@@ -72,6 +79,9 @@
 	old = red bold
 	new = green bold
 	whitespace = red reverse
+
+[color "blame"]
+	highlightRecent = 238, 36 month ago, 240, 24 month ago, 242, 12 month ago, 244, 6 month ago, 246, 2 month ago, 248, 1 month ago, 250, 3 weeks ago, 231, 2 weeks ago, 230, 1 week ago, 229, 3 days ago, 228, 1 day ago, 227
 
 [diff-so-fancy]
 	stripLeadingSymbols = false

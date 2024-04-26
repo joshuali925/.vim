@@ -11,33 +11,43 @@ return {
     },
     {
         "stevearc/conform.nvim",
-        opts = {
-            formatters_by_ft = {
-                javascript = { "prettier" },
-                javascriptreact = { "prettier" },
-                typescript = { "prettier" },
-                typescriptreact = { "prettier" },
-                css = { "prettier" },
-                scss = { "prettier" },
-                less = { "prettier" },
-                html = { "prettier" },
-                json = { "prettier" },
-                yaml = { "prettier" },
-                markdown = { "prettier" },
-                python = { "black" },
-                java = { "google-java-format" },
-                kotlin = { "ktlint" },
-                ["_"] = { "trim_whitespace" },
-                config = function(bufnr)
-                    if vim.fn.bufname(bufnr):match("^Caddyfile") ~= nil then return { "caddy" } end
-                    return {}
-                end,
-            },
-            formatters = {
-                prettier = { options = { ft_parsers = { json = "json", jsonc = "json" } } },
-                caddy = { command = "caddy", args = { "fmt", "-" }, stdin = true },
-            },
-        },
+        config = function()
+            require("conform").setup({
+                formatters_by_ft = {
+                    javascript = { "prettier" },
+                    javascriptreact = { "prettier" },
+                    typescript = { "prettier" },
+                    typescriptreact = { "prettier" },
+                    css = { "prettier" },
+                    scss = { "prettier" },
+                    less = { "prettier" },
+                    html = { "prettier" },
+                    json = { "prettier" },
+                    yaml = { "prettier" },
+                    markdown = { "prettier" },
+                    python = { "black" },
+                    java = { "google-java-format" },
+                    kotlin = { "ktlint" },
+                    ["_"] = { "trim_whitespace" },
+                    config = function(bufnr)
+                        if vim.fn.bufname(bufnr):match("^Caddyfile") ~= nil then return { "caddy" } end
+                        return {}
+                    end,
+                },
+                formatters = {
+                    prettier = { options = { ft_parsers = { json = "json", jsonc = "json" } } },
+                    caddy = { command = "caddy", args = { "fmt", "-" }, stdin = true },
+                },
+            })
+            vim.api.nvim_create_user_command("Conform", function(args)
+                local range = nil
+                if args.count ~= -1 then
+                    local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+                    range = { start = { args.line1, 0 }, ["end"] = { args.line2, end_line:len() } }
+                end
+                require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000, range = range })
+            end, { range = true })
+        end,
     },
     {
         "williamboman/mason.nvim",
@@ -53,10 +63,26 @@ return {
             },
             {
                 "j-hui/fidget.nvim",
+                init = function()
+                    vim.notify = (function(overridden)
+                        return function(...)
+                            local present, fidget = pcall(require, "fidget")
+                            if present then
+                                vim.notify = function(msg, level, opts)
+                                    if opts and opts["title"] then opts["annote"] = opts["title"] end
+                                    return fidget.notify(msg, level, opts)
+                                end
+                            else
+                                vim.notify = overridden
+                            end
+                            vim.notify(...)
+                        end
+                    end)(vim.notify)
+                end,
                 config = function()
                     require("fidget").setup()
                     vim.api.nvim_create_user_command("Notifications", "lua require('fidget.notification').show_history()", {})
-                end
+                end,
             },
         },
         cond = require("states").small_file, -- prevent LSP loading on keys for large file
@@ -167,6 +193,11 @@ return {
                     goto_next_end = { ["]["] = "@function.outer" },
                     goto_previous_start = { ["[["] = "@function.outer" },
                     goto_previous_end = { ["[]"] = "@function.outer" },
+                },
+                swap = {
+                    enable = true,
+                    swap_next = { ["g>"] = "@parameter.inner" },
+                    swap_previous = { ["g<"] = "@parameter.inner" },
                 },
             },
             indent = { enable = true },

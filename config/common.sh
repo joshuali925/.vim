@@ -5,19 +5,19 @@ if [[ -s $HOME/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.s
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR=nvim
-export BAT_PAGER="less -RiM"  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
-export BAT_THEME=OneHalfDark
+export BAT_PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
-export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=40% --bind=change:first --walker-skip=.git --info=inline --scrollbar "▌▐" --border=thinblock --preview-window=border-thinblock --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
+export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --border=thinblock --preview-window="border-thinblock,<40(up,30%)" --highlight-line --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
-export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(> )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"'"
+export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color=always --graph --pretty=format:\\\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\\\" --abbrev-commit -- \{})+change-preview-label(▏log▕)\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label(▏cat▕)\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
-export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)'"
-export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-k:unbind(change)+track' --header='Press \` to toggle sort, C-k C-u to show surrounding items' --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --color=always --plain' --preview-window='right,40%,wrap'"
-export FZF_PREVIEW_COMMAND='bat --color=always --style=numbers --line-range :50 {}'
+export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40%"
+export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current' --header='Press \` to toggle sort, C-t C-u to show surrounding items' --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
 if [[ $LIGHT_THEME = 1 ]]; then
   export BAT_THEME=GitHub DELTA_THEME=light-theme FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:253,bg+:252,gutter:251,border:248,preview-bg:254"
+else
+  export BAT_THEME=OneHalfDark DELTA_THEME=dark-theme
 fi
 
 alias -- -='cd -'
@@ -95,7 +95,7 @@ alias gcf='git config --list'
 alias gcl='git clone --filter=blob:none'
 alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
-alias gcp='git cherry-pick -x'
+alias gcp='git cherry-pick'
 alias gd='git diff'
 alias gds='echo -e "\e[1;32mStaged\e[0m"; git diff --stat --staged; echo -e "\n\e[1;31mUnstaged or against given ref\e[0m"; git diff --stat'
 alias gdst='git diff --staged'
@@ -106,7 +106,7 @@ alias gdw='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff --word-dif
 alias gf='git fetch'
 alias gfa='git remote | xargs -L1 git fetch --filter=blob:none --prune'
 alias ggl='git pull origin $(gref)'
-alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added remote: fork; }; git push fork $(gref)'
+alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added remote: fork; }; git push --force-with-lease fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
 alias glall='find . -name .git -print -execdir git pull \;'
@@ -115,7 +115,7 @@ alias glgg='git log --graph --pretty=fuller'
 alias glgga='git log --graph --pretty=fuller --all'
 alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 alias gloo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --max-count 10'
-alias gloa='git log --color --graph --abbrev-commit --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all'
+alias gloa='git log --color --graph --abbrev-commit --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all | \less -RiMXF -p $(git show -s --format=%h)'
 # shellcheck disable=2142
 alias glx="git log --all --graph --decorate=short --date-order --color --pretty=format:\"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)\" | awk '{ split(\$0,arr,\"§\"); match(arr[2], /(\\([0-9a-z ,]+\\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf(\"%*s    %s %s %s\\n\", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p \$(git show -s --format=%h)"
 alias gm='git merge'
@@ -146,12 +146,13 @@ alias gshow='git show --patch-with-stat --pretty=fuller'
 alias gcount='git shortlog -sn'
 alias gtree='git ls-files | tree --fromfile'
 alias guntracked='git ls-files --others --exclude-standard'
-alias gignore='git update-index --assume-unchanged'
-alias gignored='git ls-files -v | grep "^[[:lower:]]"'
-alias gunignore='git update-index --no-assume-unchanged'
+alias gignored='git ls-files --others --exclude-standard --ignored'
 alias gexclude='cat >> "$(git rev-parse --show-toplevel)/.git/info/exclude" <<<'
 alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclude"'
 gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
+alias gexclude2='git update-index --assume-unchanged'
+alias gexcluded2='git ls-files -v | grep "^[[:lower:]]"'
+alias gunexclude2='git update-index --no-assume-unchanged'
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo -e "\nRun \"git fetch --unshallow\" to fetch all history"'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m "--wip--"'
@@ -180,27 +181,27 @@ gc() {
 
 gcb() {
   if [[ $# -gt 0 ]]; then
-    git checkout -b "$@" || git checkout "$@"
+    git checkout -b "$@" || git checkout --ignore-other-worktrees "$@"
     return $?
   fi
   # shellcheck disable=2016
   local branch fzftemp=$(git branch --color --sort=-committerdate --all |
     awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
-    fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
+    fzf --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
     --header='Press ` to toggle sort' \
     --preview='git log -n 50 --color --graph --pretty=format:"%Cred%h%Creset - %Cgreen(%cr)%C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
   [[ -z $fzftemp ]] && return 1
   [[ $fzftemp = remotes/* ]] && local remote="${fzftemp#remotes/}" && branch="${remote#[^\/]*/}" || branch="$fzftemp"  # remote: <remote>/<branch>; branch: <branch>
   if git show-ref --verify --quiet "refs/heads/$branch"; then  # <branch> exists, switch if tracking <remote> or create as <remote>-<branch>
     local tracking="$(git rev-parse --abbrev-ref "$branch@{upstream}" 2> /dev/null)"  # current tracking <remote'>/<branch'> for <branch>
-    if [[ -z $remote ]] || [[ -z $tracking ]] || [[ $tracking = "$remote" ]]; then git checkout "$branch" && return $?; fi  # create <remote>-<branch> if <remote'> and <remote> are different, otherwise switch directly
+    if [[ -z $remote ]] || [[ -z $tracking ]] || [[ $tracking = "$remote" ]]; then git checkout --ignore-other-worktrees "$branch" && return $?; fi  # create <remote>-<branch> if <remote'> and <remote> are different, otherwise switch directly
     git show-ref --verify --quiet "refs/heads/${remote/\//-}" && git checkout "${remote/\//-}" || git checkout -b "${remote/\//-}" --track "$remote"
   else  # <branch> doesn't exist, create it
     [[ -n $remote ]] && git checkout --track "$remote" || git checkout "$branch"
   fi
 }
 
-gwt() {
+gwt() {  # with worktree add -f and checkout --ignore-other-worktrees, commits will be applied to all worktrees with the same branch (as they have the same .git file), but working directory won't automatically change
   if [[ $# -gt 0 ]]; then
     git worktree add -f "$@"
     return $?
@@ -211,7 +212,7 @@ gwt() {
 
 glof() {
   git log --graph --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
-    fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --toggle-sort=\` --multi \
+    fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
     --header='Press ` to toggle sort, C-y to copy commit, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
@@ -221,11 +222,11 @@ glof() {
 
 grlf() {
   git reflog --color --date=human-local --pretty=format:"%Cred%h%Creset %C(037)%gD:%Creset %gs%Creset%C(auto)%d%Creset" "$@" | awk '!x[$1]++' |
-    fzf --height=50% --min-height=20 --ansi --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='Press ` to toggle sort, C-e to diff from HEAD, C-y to copy commit, C-p , . to control preview' \
+    fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
+    --header='Press ` to toggle sort, C-e to diff to HEAD, C-y to copy commit, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
-    --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git diff HEAD | delta --line-numbers --navigate)' \
+    --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --line-numbers --navigate)' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
@@ -240,14 +241,14 @@ grg() {
       *) break ;;
     esac
   done
-  git "${cmd:-log}" --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case "${search:--S}" "$@" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern=\"'\"$1\"' delta --line-numbers)"
+  git "${cmd:-log}" --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case "${search:--S}" "$@" | fzf --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern=\"'\"$1\"' delta --line-numbers)"
 }
 
 gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
   local root=$(git rev-parse --show-toplevel || echo ".")
-  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --height=50% --min-height=20 --ansi --multi --preview='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- '"${root}"'/{}')
+  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --ansi --multi --preview='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- '"${root}"'/{}')
   if [[ -n $filepath ]]; then
-    local sha=$(git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- "${root}/${filepath}" | fzf --height=50% --min-height=20 --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- ${root}/${filepath} | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
+    local sha=$(git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --full-history -- "${root}/${filepath}" | fzf --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- ${root}/${filepath} | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
     if [[ -n $sha ]]; then
       echo -e "\033[0;35mgit show $sha:$filepath\033[0m" >&2
       git show "$sha:$filepath" | $EDITOR - -c "file $sha:$filepath" -c 'filetype detect'
@@ -506,7 +507,7 @@ vrg() {
 # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration
 fif() {  # find in file
   if [[ $# -eq 0 ]]; then echo 'Need a string to search for.'; return 1; fi
-  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up:60% --preview="rg --pretty --context 5 --max-columns 0 -- $(printf "%q " "$@"){+}" --bind="enter:execute($EDITOR -c \"/$1\" -- {+} < /dev/tty)"
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up,60% --preview="rg --pretty --context 5 --max-columns 0 -- $(printf "%q " "$@"){+}" --bind="enter:execute($EDITOR -c \"/$1\" -- {+} < /dev/tty)"
 }
 rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags
   [[ $# -gt 0 ]] && [[ $1 != -* ]] && local init_query="$1" && shift 1
@@ -549,7 +550,7 @@ t() {  # create, restore, or switch tmux session
 man() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
-    fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --prompt='man> ' --preview=$'echo {} | xargs -r man') && man "$(echo "$fzftemp" | awk -F' |,' '{print $1}')"
+    fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --preview=$'echo {} | xargs -r man') && man "$(echo "$fzftemp" | awk -F' |,' '{print $1}')"
   elif [[ $EDITOR = nvim ]]; then
     MANPAGER='nvim +Man\!' command man "$@"
   else
@@ -710,7 +711,7 @@ ec2() {
       local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
       local config="Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n"
       if [[ -z $host ]]; then
-        ec2 start "$tag" && sleep 17 && ec2 ssh "$tag"
+        ec2 start "$tag" && sleep 17 && ec2 "$@"
         return $?
       fi
       echo "ssh to ec2: $host" >&2
@@ -719,7 +720,7 @@ ec2() {
         sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
         printf "$config" "$user" >> ~/.ssh/ec2hosts
         local start=$SECONDS
-        ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$@" "$user@$host" && break
+        ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$user@$host" "$@" && break
         [[ $((SECONDS - start)) -gt 10 ]] && break
       done
       return 0 ;;
@@ -787,6 +788,6 @@ if [[ $OSTYPE = darwin* ]]; then
     fi
     sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), url from urls order by last_visit_time desc" |
       awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
-      fzf --tiebreak=index --bind=\`:toggle-sort --bind='ctrl-k:unbind(change)+track' --header='Press ` to toggle sort, C-k C-u to show surrounding items' --prompt="$fzfprompt" --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs -r open
+      fzf --tiebreak=index --bind=\`:toggle-sort --bind='ctrl-t:unbind(change)+track-current' --bind='ctrl-o:execute(sed "s#.*\(https*://\)#\1#" <<< {} | xargs -r open)' --header='Press ` to toggle sort, C-o to open, C-t C-u to show surrounding items' --prompt="$fzfprompt" --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs -r open
   }
 fi
