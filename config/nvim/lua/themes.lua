@@ -22,7 +22,7 @@ M.theme_list = {
 }
 M.theme = M.theme_list[theme_index]
 
-local sidebars = { "qf", "terminal", "aerial", "Mundo", "neo-tree" }
+local sidebars = { "qf", "terminal", "Mundo", "neo-tree" }
 local themes = {
     ["tokyonight"] = {
         config = function()

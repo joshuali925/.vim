@@ -115,9 +115,9 @@ return {
                     ["<C-e>"] = cmp.mapping.abort(),
                     ["<C-k>"] = cmp.mapping(function(fallback)
                         if vim.fn["vsnip#expandable"]() == 1 then
-                            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-expand)", true, true, true), "", true)
+                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-expand)"), "", true)
                         elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
-                            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "", true)
+                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-next)"), "", true)
                         elseif require("neogen").jumpable() then
                             require("neogen").jump_next()
                         else
@@ -130,7 +130,7 @@ return {
                         if cmp.visible() then
                             cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
                         elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
-                            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-next)", true, true, true), "", true)
+                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-next)"), "", true)
                         elseif require("neogen").jumpable() then
                             require("neogen").jump_next()
                         else
@@ -141,7 +141,7 @@ return {
                         if cmp.visible() then
                             cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
                         elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
-                            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "", true)
+                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-prev)"), "", true)
                         elseif require("neogen").jumpable(-1) then
                             require("neogen").jump_prev()
                         else

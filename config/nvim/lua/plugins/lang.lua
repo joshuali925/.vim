@@ -57,9 +57,37 @@ return {
             "neovim/nvim-lspconfig",
             "pmizio/typescript-tools.nvim",
             {
-                "utilyre/barbecue.nvim", -- TODO nvim 0.10 https://github.com/Bekaboo/dropbar.nvim
-                dependencies = { "SmiteshP/nvim-navic", opt = { lsp = { auto_attach = true } } },
-                config = true,
+                "Bekaboo/dropbar.nvim",
+                keys = { { "<leader>e", "<Cmd>lua require('dropbar.api').pick()<CR>" } },
+                init = function()
+                    vim.ui.select = (function(overridden)
+                        return function(...)
+                            local present, menu = pcall(require, "dropbar.utils.menu")
+                            vim.ui.select = present and menu.select or overridden
+                            vim.ui.select(...)
+                        end
+                    end)(vim.ui.select)
+                end,
+                opts = {
+                    general = {
+                        enable = function(buf, win, _)
+                            return vim.fn.win_gettype(win) == "" and vim.bo[buf].bt == "" and vim.fn.expand("%") ~= ""
+                        end,
+                    },
+                    menu = {
+                        keymaps = {
+                            ["h"] = "<C-w>q",
+                            ["l"] = function()
+                                local utils = require("dropbar.utils")
+                                local menu = utils.menu.get_current()
+                                if not menu then return end
+                                local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                                local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+                                if component then menu:click_on(component, nil, 1, "l") end
+                            end,
+                        },
+                    },
+                },
             },
             {
                 "j-hui/fidget.nvim",
@@ -102,19 +130,6 @@ return {
         },
         config = function() require("lsp").init() end,
     },
-    {
-        "stevearc/aerial.nvim",
-        keys = { { "<leader>v", "<Cmd>AerialToggle<CR>" }, { "<leader>V", "<Cmd>AerialNavToggle<CR>" } },
-        opts = {
-            keymaps = {
-                ["v"] = function()
-                    require("aerial.actions").close.callback()
-                    require("aerial").nav_open()
-                end,
-            },
-            nav = { preview = true, keymaps = { ["q"] = "actions.close" } },
-        },
-    },
     { "danymat/neogen", config = true },
     { "windwp/nvim-ts-autotag", ft = { "html", "javascript", "javascriptreact", "typescriptreact" }, config = true },
     {
@@ -137,7 +152,6 @@ return {
             { "gc", "<Plug>kommentary_motion_default" },
             { "gcc", "<Plug>kommentary_line_default" },
             { "gc", "<Plug>kommentary_visual_default<Esc>", mode = "x" },
-            { "gc", ":<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>", mode = "o" },
         },
         init = function()
             vim.g.kommentary_create_default_mappings = false
@@ -177,21 +191,27 @@ return {
             highlight = {
                 enable = true,
                 disable = function(_, buf)
-                    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+                    local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
                     return ok and stats and stats.size > require("states").size_threshold
                 end,
             },
             textobjects = {
                 select = {
                     enable = true,
-                    keymaps = { ["iF"] = "@function.inner", ["aF"] = "@function.outer", ["ic"] = "@class.inner", ["ac"] = "@class.outer" },
+                    keymaps = {
+                        ["af"] = "@call.outer",
+                        ["iF"] = "@function.inner",
+                        ["aF"] = "@function.outer",
+                        ["ic"] = "@class.inner",
+                        ["ac"] = "@class.outer",
+                    },
                 },
                 move = {
                     enable = true,
                     set_jumps = true,
                     goto_next_start = { ["]]"] = "@function.outer" },
-                    goto_next_end = { ["]["] = "@function.outer" },
-                    goto_previous_start = { ["[["] = "@function.outer" },
+                    goto_next_end = { ["]["] = "@function.outer", [")"] = "@parameter.inner" },
+                    goto_previous_start = { ["[["] = "@function.outer", ["("] = "@parameter.inner" },
                     goto_previous_end = { ["[]"] = "@function.outer" },
                 },
                 swap = {

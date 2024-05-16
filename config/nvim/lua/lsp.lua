@@ -83,7 +83,7 @@ function M.init()
                 -- https://astronvim.com/nightly/Recipes/advanced_lsp#java-nvim-jdtls
                 cmd = {     -- needs python3.9+ if not using custom cmd, or remove `action=argparse.BooleanOptionalAction` in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py
                     "java", -- needs java 17, or use :LspInstall jdtls@1.12.0
-                    -- vim.loop.os_homedir() .. "/.asdf/installs/java/corretto-17.0.4.8.1/bin/java",
+                    -- vim.uv.os_homedir() .. "/.asdf/installs/java/corretto-17.0.4.8.1/bin/java",
                     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
                     "-Dosgi.bundles.defaultStartLevel=4",
                     "-Declipse.product=org.eclipse.jdt.ls.core.product",
@@ -113,7 +113,15 @@ function M.init()
                 require("typescript-tools").setup({
                     settings = {
                         expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
-                        tsserver_file_preferences = { importModuleSpecifierPreference = "relative" },
+                        tsserver_file_preferences = {
+                            importModuleSpecifierPreference = "relative",
+                            includeInlayParameterNameHints = "all",
+                            includeInlayEnumMemberValueHints = true,
+                            includeInlayFunctionLikeReturnTypeHints = true,
+                            includeInlayFunctionParameterTypeHints = true,
+                            includeInlayPropertyDeclarationTypeHints = true,
+                            includeInlayVariableTypeHints = true,
+                        },
                     },
                 })
             end
@@ -155,30 +163,35 @@ function M.init()
         end,
     })
 
-    vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticError", numhl = "DiagnosticError" })
-    vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticWarn", numhl = "DiagnosticWarn" })
-    vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "DiagnosticInfo", numhl = "DiagnosticInfo" })
-    vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticHint", numhl = "DiagnosticHint" })
-    vim.fn.sign_define("DiagnosticSignOther", { text = "󰗡", texthl = "DiagnosticOther", numhl = "DiagnosticOther" })
-    vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#666666", bg = vim.api.nvim_get_hl_by_name("Normal", true).background })
+    vim.diagnostic.config({
+        virtual_text = { prefix = "●" },
+        severity_sort = true,
+        signs = {
+            text = {
+                [vim.diagnostic.severity.ERROR] = "",
+                [vim.diagnostic.severity.WARN] = "",
+                [vim.diagnostic.severity.HINT] = "",
+                [vim.diagnostic.severity.INFO] = "",
+            },
+            numhl = {
+                [vim.diagnostic.severity.ERROR] = "DiagnosticError",
+                [vim.diagnostic.severity.WARN] = "DiagnosticWarn",
+                [vim.diagnostic.severity.HINT] = "DiagnosticHint",
+                [vim.diagnostic.severity.INFO] = "DiagnosticInfo",
+            },
+        },
+    })
+    vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#666666", bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "DiagnosticVirtualTextHint" })
-    vim.diagnostic.config({ virtual_text = { prefix = "●" } })
     vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
-    local severity = { "error", "warn", "info", "info" }
-    vim.lsp.handlers["window/showMessage"] = function(_, method, params, _) vim.notify(method.message, severity[params.type]) end
 end
 
 function M.organize_imports_and_format()
-    local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_active_clients({ bufnr = 0 }))
+    local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
     if vim.tbl_contains(active_clients, "typescript-tools") then
-        if next(vim.tbl_filter(function(message) return message.name == "typescript-tools" and message.title == "Loading project" end,
-                vim.lsp.util.get_progress_messages())) ~= nil then
-            vim.notify("LSP loading in progress", vim.log.levels.WARN, { annote = "Failed to organize imports" })
-        else
-            local ok, res = pcall(require("typescript-tools.api").organize_imports, true)
-            if not ok then vim.notify(res, vim.log.levels.WARN, { annote = "Failed to organize imports" }) end
-        end
+        local ok, res = pcall(require("typescript-tools.api").organize_imports, true)
+        if not ok then vim.notify(res, vim.log.levels.WARN, { annote = "Failed to organize imports" }) end
     elseif vim.tbl_contains(active_clients, "pyright") then
         vim.cmd("silent PythonOrganizeImports")
     end
@@ -189,17 +202,8 @@ function M.organize_imports_and_format()
     end
 end
 
-function M.toggle_diagnostics()
-    -- TODO change logic to is_enabled for nvim 0.10
-    if vim.diagnostic.is_disabled() then
-        vim.diagnostic.enable()
-    else
-        vim.diagnostic.disable()
-    end
-end
-
 function M.is_active()
-    return next(vim.lsp.get_active_clients({ bufnr = 0 })) ~= nil
+    return next(vim.lsp.get_clients({ bufnr = 0 })) ~= nil
 end
 
 function M.quickfix_all_diagnostics(filter)

@@ -14,7 +14,6 @@ vim.g.netrw_alto = 0
 vim.g.netrw_liststyle = 3
 vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
 vim.o.whichwrap = "<,>,[,]"
-vim.o.termguicolors = true
 vim.o.mouse = "a"
 vim.o.cursorline = true
 vim.o.cursorlineopt = "number,screenline"
@@ -63,8 +62,6 @@ vim.o.synmaxcol = 1000
 vim.o.lazyredraw = true
 vim.o.writebackup = false
 vim.o.wildcharm = 26 -- <C-z>
-vim.o.grepprg = "rg --vimgrep"
-vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m,%f"
 vim.o.cedit = "<C-x>"
 
 -- mappings {{{1
@@ -84,8 +81,6 @@ vim.keymap.set("x", "ae", "GoggV")
 vim.keymap.set("o", "ae", "<Cmd>normal vae<CR>")
 vim.keymap.set("x", "if", "v%va)ob")
 vim.keymap.set("o", "if", "<Cmd>normal vif<CR>")
-vim.keymap.set("x", "af", "iw%")
-vim.keymap.set("o", "af", "<Cmd>normal vaf<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
@@ -131,7 +126,6 @@ vim.keymap.set("o", ",", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:c
 vim.keymap.set("n", ";,", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
 vim.keymap.set("x", ";,", ":call plugins#fanfingtastic#visual_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
 vim.keymap.set("o", ";,", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, plugins#fanfingtastic#get('fchar'), plugins#fanfingtastic#get('ff'), ',')<CR>")
-vim.keymap.set("o", "gc", ":<C-u>call plugins#commentary#textobject(get(v:, 'operator', '') ==# 'c')<CR>")
 vim.keymap.set("n", "cr", "plugins#abolish#coerce('iw')", { expr = true })
 vim.keymap.set("n", "crr", "plugins#abolish#coerce('')", { expr = true })
 -- general {{{2
@@ -159,9 +153,6 @@ vim.keymap.set("i", "<C-_>", "<C-o>u")
 vim.keymap.set("n", "_", "<C-o>")
 vim.keymap.set("n", "+", "<C-i>")
 vim.keymap.set("n", "Q", "q")
--- TODO 0.10 default?
-vim.keymap.set("x", "@q", ":normal! @q<CR>")
-vim.keymap.set("x", "@@", ":normal! @@<CR>")
 vim.keymap.set("n", "c@", "<Cmd>call funcs#edit_register()<CR>")
 vim.keymap.set("n", "U", "<Cmd>execute 'earlier ' . v:count1 . 'f'<CR>")
 vim.keymap.set("x", ".", ":normal .<CR>")
@@ -171,9 +162,6 @@ vim.keymap.set("n", "gp", "`[v`]")
 vim.keymap.set("n", "zn", "v:count > 0 ? '<Cmd>set foldlevel=' . v:count . '<CR>' : '<Cmd>%foldclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "gf", "gF")
 vim.keymap.set("n", "gF", "gf")
--- TODO 0.10 default?
-vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
-vim.keymap.set("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
 vim.keymap.set("n", "zh", "zhz", { remap = true })
 vim.keymap.set("n", "zl", "zlz", { remap = true })
 vim.keymap.set("n", "ZX", function()
@@ -184,7 +172,7 @@ vim.keymap.set("n", "ZX", function()
 end, { desc = "Close untouched buffers" })
 vim.keymap.set("i", "jk", "<Esc>")
 vim.keymap.set("i", "kj", "<Esc>")
-vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch <bar> silent! AsyncStop!<CR><Cmd>echo <bar> silent! NotificationsDismiss<CR>")
+vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch<CR>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("x", "<C-c>", "<Esc>")
 vim.keymap.set("n", "<C-w><C-c>", "<Esc>")
@@ -235,9 +223,9 @@ vim.keymap.set("c", "<C-Space>", [[':/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>'
 vim.keymap.set("c", "<BS>", [[':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
 vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { expr = true })
-vim.cmd("cnoreabbrev print <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua vim.print( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua vim.print( )' ? setcmdpos(15)[-1] : '')<CR>")
-vim.cmd("cnoreabbrev fd <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Fd' : 'fd')<CR>")
-vim.cmd("cnoreabbrev rg <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Rg' : 'rg')<CR>")
+vim.keymap.set("ca", "print", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'lua vim.print( )' : 'print')<CR><C-r>=(getcmdtype() == ':' && getcmdline() == 'lua vim.print( )' ? setcmdpos(15)[-1] : '')<CR>")
+vim.keymap.set("ca", "fd", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Fd' : 'fd')<CR>")
+vim.keymap.set("ca", "rg", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Rg' : 'rg')<CR>")
 
 -- autocmds {{{1
 vim.api.nvim_create_augroup("AutoCommands", {})
@@ -266,7 +254,7 @@ vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands",
 vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = [[nnoremap <buffer> gf :argadd <C-r><C-p><CR>| xnoremap <buffer> gf :<C-u>execute "'<,'>normal! :argadd \<lt>C-r>\<lt>C-p>\<lt>CR>"<CR>]] })
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = "netrw",
+    pattern = "netrw", -- netrw is needed for gf on URL
     group = "AutoCommands",
     callback = function()
         vim.bo.bufhidden = "wipe"
@@ -320,11 +308,11 @@ vim.api.nvim_create_user_command("Prettier", function(args)
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
     local line1 = args.range == 0 and 0 or args.line1 - 1
     local line2 = args.range == 0 and -1 or args.line2
-    local formatted = vim.fn.systemlist("prettier --parser " .. parser, vim.api.nvim_buf_get_lines(0, line1, line2, false))
-    if vim.api.nvim_get_vvar("shell_error") == 0 then
-        vim.api.nvim_buf_set_lines(0, line1, line2, false, formatted)
+    local result = vim.system({ "prettier", "--parser", parser }, { text = true, stdin = vim.api.nvim_buf_get_lines(0, line1, line2, false) }):wait()
+    if result.code == 0 then
+        vim.api.nvim_buf_set_lines(0, line1, line2, false, vim.split(result.stdout, "\n", { trimempty = true }))
     else
-        vim.notify(vim.inspect(formatted), vim.log.levels.ERROR, { annote = "Prettier failed" })
+        vim.notify(result.stderr, vim.log.levels.ERROR, { annote = "Prettier failed" })
     end
 end, { complete = "filetype", nargs = "*", range = true })
 
@@ -348,26 +336,29 @@ vim.paste = (function(overridden) -- break undo before pasting in insert mode, :
     end
 end)(vim.paste)
 if vim.env.SSH_CLIENT ~= nil then -- ssh session
-    local function copy(lines, _)
-        require("utils").copy_with_osc_yank_script(table.concat(lines, "\n"))
-    end
-    local function paste()
-        return { vim.fn.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") }
-    end
+    local function paste() return { vim.fn.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") } end
     vim.g.clipboard = {
         name = "osc52",
-        copy = { ["+"] = copy, ["*"] = copy },
-        paste = { ["+"] = paste, ["*"] = paste },
+        copy = { ["+"] = require("vim.ui.clipboard.osc52").copy("+"), ["*"] = require("vim.ui.clipboard.osc52").copy("*") },
+        paste = { ["+"] = paste, ["*"] = paste }, -- osc52 paste doesn't work in some terminal and can be blocking with yanky.nvim
     }
-    vim.keymap.set("n", "gx", "<Cmd>lua require('utils').copy_with_osc_yank_script(vim.fn.expand('<cfile>'))<CR>")
+    vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { annote = 'Link copied' })<CR>")
 elseif vim.fn.has("macunix") ~= 1 then -- WSL Vim
-    vim.fn["funcs#map_copy_to_win_clip"]()
+    vim.g.clipboard = {
+        name = "WslClipboard",
+        copy = { ["+"] = "clip.exe", ["*"] = "clip.exe" },
+        paste = {
+            ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+            ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+        },
+        cache_enabled = 0,
+    }
 end
 
 -- plugins {{{1
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-    vim.fn.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath })
+if not vim.uv.fs_stat(lazypath) then
+    vim.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath }, { text = true }):wait()
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins", { defaults = { lazy = true }, ui = { border = "rounded" } })

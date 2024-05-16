@@ -51,13 +51,6 @@ return {
                     vim.ui.input(...)
                 end
             end)(vim.ui.input)
-            vim.ui.select = (function(overridden)
-                return function(...)
-                    local present = pcall(require, "nui.menu")
-                    if not present then vim.ui.select = overridden end
-                    vim.ui.select(...)
-                end
-            end)(vim.ui.select)
         end,
         config = function() -- https://github.com/MunifTanjim/nui.nvim/wiki/vim.ui, https://github.com/MunifTanjim/dotfiles/tree/8c13a4e05359bb12f9ade5abc1baca6fcec372db/private_dot_config/nvim/lua/plugins/lsp/custom
             local function get_prompt_text(prompt, default_prompt)
@@ -66,12 +59,9 @@ return {
                 return prompt_text
             end
             local Input = require("nui.input")
-            local Menu = require("nui.menu")
             local event = require("nui.utils.autocmd").event
             local UIInput = Input:extend("UIInput")
-            local UISelect = Menu:extend("UISelect")
             local input_ui = nil
-            local select_ui = nil
             function UIInput:init(opts, on_done)
                 local border_top_text = get_prompt_text(opts.prompt, "[Input]")
                 local default_value = tostring(opts.default or "")
@@ -92,48 +82,6 @@ return {
                 self:map("n", "q", function() on_done(nil) end, { noremap = true, nowait = true })
             end
 
-            function UISelect:init(items, opts, on_done)
-                local border_top_text = get_prompt_text(opts.prompt, "[Select Item]")
-                local kind = opts.kind or "unknown"
-                local format_item = opts.format_item or function(item)
-                    return tostring(item.__raw_item or item)
-                end
-                local popup_options = {
-                    relative = "editor",
-                    position = "50%",
-                    border = { style = "rounded", text = { top = border_top_text, top_align = "left" } },
-                    win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
-                    zindex = 999,
-                }
-                if kind == "codeaction" then
-                    popup_options.relative = "cursor"
-                    popup_options.position = { row = 2, col = 0 }
-                end
-                local max_width = popup_options.relative == "editor" and vim.o.columns - 4 or vim.api.nvim_win_get_width(0) - 4
-                local max_height = popup_options.relative == "editor" and math.floor(vim.o.lines * 80 / 100) or vim.api.nvim_win_get_height(0)
-                local menu_items = {}
-                for index, item in ipairs(items) do
-                    if type(item) ~= "table" then
-                        item = { __raw_item = item }
-                    end
-                    item.index = index
-                    local item_text = string.sub(format_item(item), 0, max_width)
-                    menu_items[index] = Menu.item(item_text, item)
-                end
-                local menu_options = {
-                    min_width = vim.api.nvim_strwidth(border_top_text),
-                    max_width = max_width,
-                    max_height = max_height,
-                    lines = menu_items,
-                    on_close = function() on_done(nil, nil) end,
-                    on_submit = function(item) on_done(item.__raw_item or item, item.index) end,
-                }
-                UISelect.super.init(self, popup_options, menu_options)
-                self:on(event.BufLeave, function() on_done(nil, nil) end, { once = true })
-                self:map("n", "<Esc>", function() on_done(nil) end, { noremap = true, nowait = true })
-                self:map("n", "q", function() on_done(nil) end, { noremap = true, nowait = true })
-            end
-
             vim.ui.input = function(opts, on_confirm)
                 assert(type(on_confirm) == "function", "missing on_confirm function")
                 if input_ui then
@@ -146,19 +94,6 @@ return {
                     input_ui = nil
                 end)
                 input_ui:mount()
-            end
-            vim.ui.select = function(items, opts, on_choice)
-                assert(type(on_choice) == "function", "missing on_choice function")
-                if select_ui then
-                    vim.api.nvim_err_writeln("busy: another select is pending!")
-                    return
-                end
-                select_ui = UISelect(items, opts, function(item, index)
-                    if select_ui then select_ui:unmount() end
-                    on_choice(item, index)
-                    select_ui = nil
-                end)
-                select_ui:mount()
             end
         end,
     },
@@ -175,7 +110,16 @@ return {
             require("neo-tree").setup({
                 default_component_configs = { icon = { default = "" } },
                 close_if_last_window = true,
-                source_selector = { winbar = true, statusline = false },
+                source_selector = {
+                    winbar = true,
+                    statusline = false,
+                    sources = {
+                        { source = "filesystem", display_name = " 󰉓 File " },
+                        { source = "buffers", display_name = " 󰈚 Buf " },
+                        { source = "git_status", display_name = " 󰊢 Git " },
+                        { source = "document_symbols", display_name = "  Outline " },
+                    },
+                },
                 window = {
                     mappings = {
                         ["l"] = "open",
@@ -204,6 +148,8 @@ return {
                     },
                 },
                 filesystem = { filtered_items = { hide_dotfiles = false, hide_gitignored = false, hide_hidden = false }, hijack_netrw_behavior = "disabled" },
+                document_symbols = { window = { mappings = { ["x"] = "none", ["d"] = "none" } } },
+                sources = { "filesystem", "buffers", "git_status", "document_symbols" },
             })
             require("lsp-file-operations").setup({ timeout_ms = 180000 })
         end,
@@ -215,7 +161,7 @@ return {
         keys = {
             { "q", "<Cmd>lua require('telescope.builtin').buffers({ignore_current_buffer = true, only_cwd = false, sort_mru = true})<CR>" },
             { "<C-p>", "<Cmd>lua require('telescope.builtin').find_files()<CR>" },
-            { "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = vim.fn['funcs#get_visual_selection']()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
+            { "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = require('utils').get_visual_selection()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
             { "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>" },
             { "<leader>fs", "<Cmd>lua require('utils').fzf()<CR>" },
             { "<leader>fs", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
@@ -300,10 +246,10 @@ return {
     },
     {
         "goolord/alpha-nvim",
-        lazy = vim.fn.argc() ~= 0 or vim.fn.line2byte("$") ~= -1,
+        lazy = vim.fn.argc() ~= 0 or vim.fn.line2byte(vim.fn.line("$")) ~= -1,
         config = function()
             local theme = require("alpha.themes.startify")
-            theme.section.header.val = {
+            theme.section.header.val = { -- https://textart.sh/
                 [[          ██  ████████  ██                          ]],
                 [[          ████████████████                          ]],
                 [[          ██████████████████            ／l、       ]],
@@ -380,7 +326,7 @@ return {
                         { "Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk" },
                         { "Git buffer reset", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index" },
                         { "Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line" },
-                        { "Git &remote", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | if $SSH_CLIENT == "" | .GBrowse | else | let @x=split(execute(".GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
+                        { "Git &remote", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | if $SSH_CLIENT == "" | .GBrowse | else | let @+=split(execute(".GBrowse!"), "\n")[-1] | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
                         { "--", "" },
                     }
                     local conflict_state = vim.fn["funcs#get_conflict_state"]()
@@ -497,8 +443,9 @@ return {
             vim.fn["quickui#menu#install"]("L&SP", {
                 { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix (run :bufdo edit<CR> to load all buffers)" },
                 { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
-                { "&Toggle diagnostics", [[lua require("lsp").toggle_diagnostics()]], "Toggle LSP diagnostics" },
+                { "&Toggle diagnostics", [[lua vim.diagnostic.enable(not vim.diagnostic.is_enabled())]], "Toggle LSP diagnostics" },
                 { "Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })]], "Toggle LSP diagnostic virtual texts" },
+                { "Toggle &inlay hints", [[lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())]], "Toggle LSP inlay hints" },
                 { "--", "" },
                 { "Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
                 { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
@@ -546,11 +493,9 @@ return {
             vim.fn["quickui#menu#reset"]()
             vim.fn["quickui#menu#install"]("&Actions", {
                 { "&Format JSON", [['<,'>Prettier json]], "Use prettier to format selected text as JSON" },
-                { "Base64 &encode", [[let @x = system('base64 | tr -d "\r\n"', funcs#get_visual_selection()) | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
-                { "Base64 &decode", [[let @x = system('base64 --decode', funcs#get_visual_selection()) | execute 'S put x' | file base64_decode]], "Use base64 to decode selected text" },
+                { "Base64 &encode", [[execute "lua vim.fn.setreg('x', vim.base64.encode(require('utils').get_visual_selection()))" | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
+                { "Base64 &decode", [[execute "lua vim.fn.setreg('x', vim.base64.decode(require('utils').get_visual_selection()))" | execute 'S put x' | file base64_decode]], "Use base64 to decode selected text" },
                 { "Generate &snippet", [[let @x = substitute(escape(funcs#get_visual_selection(), '"$'), repeat(' ', &shiftwidth), '\\t', 'g') | execute 'S put x' | execute '%normal! gI"' | execute '%normal! A",' | execute 'normal! Gdd$x' | file snippet_body]], "Generate vscode compatible snippet body from selected text" },
-                { "--", "" },
-                { "OSC &yank", [[lua require("utils").copy_with_osc_yank_script(require("utils").get_visual_selection())]], "Use oscyank script to copy" },
                 { "--", "" },
                 { "Search in &buffers", [[execute 'cexpr []' | execute 'bufdo vimgrepadd /' . substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g') . '/g %' | copen]], "Grep current search pattern in all buffers, add to quickfix" },
                 { "Search in selection", [[call feedkeys('/\%>' . (line("'<") - 1) . 'l\%<' . (line("'>") + 1) . 'l')]], [[Search in selected lines, to search in previous visual selection use /\%V]] },
@@ -560,7 +505,7 @@ return {
                 { "Git l&og", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
                 { "Git &search", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | execute "Git log --all --name-status -S '" . substitute(funcs#get_visual_selection(), "'", "''", 'g') . "'"]], "Search selected in all committed versions of files" },
                 { "--", "" },
-                { "Git open &remote", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @x=split(execute("'<,'>GBrowse!"), "\n")[-1] | execute "lua require('utils').copy_with_osc_yank_script(vim.fn.getreg('x'))" | endif]], "Open remote url in browser" },
+                { "Git open &remote", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @+=split(execute("'<,'>GBrowse!"), "\n")[-1] | endif]], "Open remote url in browser" },
             })
             vim.fn["quickui#menu#install"]("Ta&bles", {
                 { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },

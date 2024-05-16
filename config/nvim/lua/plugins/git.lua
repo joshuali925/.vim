@@ -13,7 +13,7 @@ return {
         cmd = { "Git", "Gcd", "Ggrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog", "Flogsplit" },
         config = function()
             vim.g.fugitive_summary_format = "%d %s (%cr) <%an>"
-            vim.cmd("cnoreabbrev git <C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>")
+            vim.keymap.set("ca", "git", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>")
             vim.api.nvim_create_autocmd("User", {
                 pattern = "FugitiveIndex",
                 group = "AutoCommands",

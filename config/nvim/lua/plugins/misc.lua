@@ -60,16 +60,15 @@ return {
         "echasnovski/mini.nvim",
         keys = {
             { "'", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.single_character) end)<CR>", mode = { "n", "x", "o" } },
-            { "<leader>e", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.word_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
-            { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.word_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
             { "g<", "cxiacxiNag", remap = true },
             { "g>", "cxiaviao<C-c>cxinag", remap = true },
         },
         config = function()
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
-            require("mini.files").setup({ options = { use_as_default_explorer = false }, mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
+            require("mini.files").setup({ mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
             require("mini.move").setup({ mappings = { left = "", right = "", down = "<C-,>", up = "<C-.>", line_left = "", line_right = "", line_down = "<C-,>", line_up = "<C-.>" } })
             require("mini.hipatterns").setup({
                 highlighters = {
@@ -82,7 +81,7 @@ return {
             })
             require("mini.align").setup({ mappings = { start = "", start_with_preview = "gl" } })
             require("mini.splitjoin").setup({ mappings = { toggle = "gs" } })
-            require("mini.ai").setup({ mappings = { around_last = "aN", inside_last = "iN", goto_left = "", goto_right = "" } })
+            require("mini.ai").setup({ mappings = { around_last = "aN", inside_last = "iN" } })
             require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
             require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
             require("mini.operators").make_mappings("replace", { textobject = "cp", line = "", selection = "" })

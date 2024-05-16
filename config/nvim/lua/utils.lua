@@ -54,7 +54,7 @@ function M.untildone(command, should_restart_tmux_task, message)
         return
     end
 
-    local timer = vim.loop.new_timer()
+    local timer = vim.uv.new_timer()
     local timer_id = id
     id = id + 1
     timers[timer_id] = timer
@@ -73,36 +73,8 @@ function M.untildone(command, should_restart_tmux_task, message)
     end)
 end
 
--- TODO https://github.com/neovim/neovim/pull/27578
 function M.get_visual_selection()
-    local s_start = vim.fn.getpos("'<")
-    local s_end = vim.fn.getpos("'>")
-    local n_lines = math.abs(s_end[2] - s_start[2]) + 1
-    local lines = vim.api.nvim_buf_get_lines(0, s_start[2] - 1, s_end[2], false)
-    if next(lines) == nil then
-        return nil
-    end
-    lines[1] = string.sub(lines[1], s_start[3], -1)
-    if n_lines == 1 then
-        lines[n_lines] = string.sub(lines[n_lines], 1, s_end[3] - s_start[3] + 1)
-    else
-        lines[n_lines] = string.sub(lines[n_lines], 1, s_end[3])
-    end
-    return table.concat(lines, "\n")
-end
-
--- TODO use built-in osc52 for nvim >= 0.10
-function M.copy_with_osc_yank_script(str)
-    local message = ""
-    if str:len() > 70000 then
-        str = str:sub(1, 70000)
-        message = "String too large. "
-    end
-    local handle = assert(io.popen("y", "w"))
-    handle:write(str)
-    handle:flush()
-    handle:close()
-    vim.notify(message .. "Copied " .. str:len() .. " characters.", vim.log.levels.INFO, { annote = "osc52" })
+    return table.concat(vim.fn.getregion(vim.fn.getpos("'<"), vim.fn.getpos("'>"), { type = vim.fn.visualmode() }), "\n")
 end
 
 function M.command_without_quickscope(command)

@@ -20,7 +20,8 @@ vim.g.qs_filetype_blacklist = {
     "DiffviewFiles",
     "floggraph",
     "fugitiveblame",
-    "aerial",
+    "dropbar_menu",
+    "minifiles",
 }
 vim.g.qs_buftype_blacklist = { "terminal" }
 

@@ -4007,6 +4007,7 @@ export MANROFFOPT='-c'
                     post = { read = function() vim.cmd.ScrollViewEnable() end, write = function() vim.cmd.ScrollViewEnable() end },
                 },
             })
+            require("mini.diff").setup({ view = { style = "sign", signs = { add = "▎", change = "░", delete = "▏" } }, mappings = { apply = "<leader>ga", reset = "<leader>gu", textobject = "ig", goto_first = "[G", goto_prev = "[g", goto_next = "]g", goto_last = "]G" }, options = { wrap_goto = true } }) -- no floating hunk diff
             require("mini.pick").setup()
             require("mini.extra").setup()
             vim.ui.select = require("mini.pick").ui_select
@@ -4382,5 +4383,43 @@ vim.keymap.set("n", "cxc", "<Cmd>call plugins#exchange#exchange_clear()<CR>")
             { "g<", "<Plug>(swap-prev)" },
             { "g>", "<Plug>(swap-next)" },
             { "gs", "<Plug>(swap-interactive)", mode = { "n", "x" } },
+        },
+    },
+
+" =======================================================
+" 0.10 default
+vim.keymap.set("n", "gx", "<Cmd>call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>")
+vim.keymap.set("x", "gx", ":<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>")
+function! funcs#map_copy_to_win_clip()
+  function! s:CopyToWinClip(str)
+    let @" = a:str
+    call system('clip.exe', a:str)
+  endfunction
+  call <SID>MapAction('CopyToWinClip', '<leader>y')
+  nmap <leader>Y <leader>y$
+endfunction
+function M.copy_with_osc_yank_script(str)
+    local message = ""
+    if str:len() > 70000 then
+        str = str:sub(1, 70000)
+        message = "String too large. "
+    end
+    local handle = assert(io.popen("y", "w"))
+    handle:write(str)
+    handle:flush()
+    handle:close()
+    vim.notify(message .. "Copied " .. str:len() .. " characters.", vim.log.levels.INFO, { annote = "osc52" })
+end
+    {
+        "stevearc/aerial.nvim",
+        keys = { { "<leader>v", "<Cmd>AerialToggle<CR>" }, { "<leader>V", "<Cmd>AerialNavToggle<CR>" } },
+        opts = {
+            keymaps = {
+                ["v"] = function()
+                    require("aerial.actions").close.callback()
+                    require("aerial").nav_open()
+                end,
+            },
+            nav = { preview = true, keymaps = { ["q"] = "actions.close" } },
         },
     },
