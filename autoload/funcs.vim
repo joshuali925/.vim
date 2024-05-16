@@ -96,7 +96,7 @@ function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
-  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'toggleterm', 'aerial']
+  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'toggleterm']
   if has_nvim && nvim_win_get_config(0).relative != ''  " floating window focused
     quit
   elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q
@@ -251,15 +251,6 @@ function! s:MapAction(algorithm, key)
   execute 'nmap ' . a:key . '  <Plug>actions' . a:algorithm
   execute 'xmap ' . a:key . '  <Plug>actions' . a:algorithm
   execute 'nmap ' . a:key.a:key[strlen(a:key)-1] . ' <Plug>actionsLine' . a:algorithm
-endfunction
-
-function! funcs#map_copy_to_win_clip()
-  function! s:CopyToWinClip(str)
-    let @" = a:str
-    call system('clip.exe', a:str)
-  endfunction
-  call <SID>MapAction('CopyToWinClip', '<leader>y')
-  nmap <leader>Y <leader>y$
 endfunction
 
 function! funcs#map_vim_send_terminal()

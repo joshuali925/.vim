@@ -134,7 +134,6 @@ run-lf () {
 }
 zle -N run-lf
 
-# https://github.com/marlonrichert/zsh-edit seems incompatible with zinit
 bindkey '^o' run-lf
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
@@ -150,6 +149,7 @@ bindkey '^q' push-line-or-edit
 bindkey '^u' backward-kill-line
 bindkey -s '^z' '%^m'
 bindkey '\el' forward-char                    # unbind <Esc>l = ls from oh-my-zsh key-bindings
+bindkey '^[[1;5C' emacs-forward-word          # <C-Right> to next word end. https://github.com/marlonrichert/zsh-edit seems incompatible with zinit
 
 alias history='history -f 0'
 alias get-completion='compdef _gnu_generic'

@@ -19,7 +19,7 @@ return {
     {
         "dstein64/nvim-scrollview",
         config = function()
-            require("scrollview").setup({ signs_max_per_row = 2, winblend_gui = 50 })
+            require("scrollview").setup({ signs_on_startup = { "diagnostics", "search" }, signs_max_per_row = 2, winblend_gui = 50 })
             require("scrollview.contrib.gitsigns").setup()
         end
     },
@@ -84,14 +84,14 @@ return {
                         {
                             function()
                                 local reg = vim.fn.reg_recording()
-                                return reg == "" and "" or "recording @" .. reg -- TODO https://github.com/neovim/neovim/issues/19193
+                                return reg == "" and "" or "recording @" .. reg
                             end,
                             color = "Constant",
                         },
                         { "searchcount", color = "String" },
                         function()
                             local clients = {}
-                            for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
+                            for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
                                 clients[#clients + 1] = client.name
                             end
                             return #clients == 0 and "" or " " .. table.concat(clients, " ")
@@ -133,7 +133,7 @@ return {
                     lualine_y = {},
                     lualine_z = {},
                 },
-                extensions = { "aerial", "fugitive", "mundo" },
+                extensions = { "fugitive", "mundo" },
             })
         end,
     },
