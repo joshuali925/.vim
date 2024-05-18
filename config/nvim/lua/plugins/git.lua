@@ -31,7 +31,7 @@ return {
         opts = {
             signs = { add = { text = "▎" }, change = { text = "░" }, delete = { text = "▏" }, topdelete = { text = "▔" }, changedelete = { text = "▒" } },
             update_debounce = 250,
-            sign_priority = 11, -- higher priority than diagnostic signs
+            sign_priority = 13, -- higher priority than diagnostic signs
         },
     },
     {

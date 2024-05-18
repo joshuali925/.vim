@@ -1,5 +1,5 @@
 local M = {}
-local patterns = { ".git", "package.json", "gradlew", "Makefile" }
+local patterns = { ".git" }
 local whitelisted_buf_type = { "", "acwrite" }
 local enabled = true
 

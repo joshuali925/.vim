@@ -3990,12 +3990,14 @@ export MANROFFOPT='-c'
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>,", "<Cmd>lua MiniJump.jump(MiniJump.state.target, not MiniJump.state.backward, MiniJump.state.till, MiniJump.state.n_times)<CR><Cmd>lua MiniJump.state.backward = not MiniJump.state.backward<CR>", mode = { "n", "x", "o" } },
-            { "<leader>m", "<Cmd>lua require('mini.extra').pickers.visit_paths()<CR>" },
-            { "<leader>M", "<Cmd>lua require('mini.visits').add_label()<CR>" },
             { "[m", "<Cmd>lua require('mini.visits').iterate_paths('backward')<CR>" },
             { "]m", "<Cmd>lua require('mini.visits').iterate_paths('forward')<CR>" },
             { "[M", "<Cmd>lua require('mini.visits').iterate_paths('first')<CR>" },
             { "]M", "<Cmd>lua require('mini.visits').iterate_paths('last')<CR>" },
+            -- { "<leader>mm", "<Cmd>lua require('mini.extra').pickers.visit_paths()<CR>" },
+            -- { "<leader>mf", "<Cmd>lua require('mini.extra').pickers.visit_labels()<CR>" },
+            -- { "<leader>ma", "<Cmd>lua require('mini.visits').add_label()<CR>" },
+            -- { "<leader>md", "<Cmd>lua require('mini.visits').remove_label()<CR>" },
         },
         config = function()
             require("mini.pairs").setup({ mappings = { [" "] = { action = "open", pair = "  ", neigh_pattern = "[%(%[{][%)%]}]" } } }) -- doesn't support triple quotes
@@ -4385,6 +4387,24 @@ vim.keymap.set("n", "cxc", "<Cmd>call plugins#exchange#exchange_clear()<CR>")
             { "gs", "<Plug>(swap-interactive)", mode = { "n", "x" } },
         },
     },
+" https://github.com/tomasky/bookmarks.nvim/pull/15
+    {
+        "tomasky/bookmarks.nvim",
+        event = "VeryLazy",
+        keys = {
+            { "ma", "<Cmd>lua require('bookmarks').bookmark_ann()<CR>" },
+            { "mm", "<Cmd>lua require('bookmarks').bookmark_toggle()<CR>" },
+            { "mc", "<Cmd>lua require('bookmarks').bookmark_clean()<CR>" },
+            { "mC", "<Cmd>lua require('bookmarks').bookmark_clear_all()<CR>" },
+            { "mf", "<Cmd>lua require('bookmarks').bookmark_list()<CR>" },
+            { "mF", "<Cmd>lua require('telescope').extensions.bookmarks.list()<CR>" },
+        },
+        opts = {
+            sign_priority = 14,
+            save_file = vim.fn.stdpath("state") .. "/.bookmarks",
+            signs = { add = { hl = "BookMarksAdd", text = "󰈿" }, ann = { hl = "BookMarksAnn", text = "󱞂" } },
+        },
+    },
 
 " =======================================================
 " 0.10 default
@@ -4423,3 +4443,25 @@ end
             nav = { preview = true, keymaps = { ["q"] = "actions.close" } },
         },
     },
+
+" =======================================================
+fif() {  # find in file
+  if [[ $# -eq 0 ]]; then echo 'Need a string to search for.'; return 1; fi
+  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up,60% --preview="rg --pretty --context 5 --max-columns 0 -- $(printf "%q " "$@"){+}" --bind="enter:execute($EDITOR -c \"/$1\" -- {+} < /dev/tty)"
+}
+lazypm2() {
+  local IFS=$'\n' app_list map=() names ids status
+  app_list=$(pm2 list -m)
+  names=($(echo "$app_list" | awk '/^\+---/{sub("+--- ", ""); print}'))
+  ids=($(echo "$app_list" | awk '/^pm2 id : /{sub("pm2 id : ", ""); print}'))
+  status=($(echo "$app_list" | awk '/^status : /{sub("status : ", ""); print}'))
+  for i in "${!ids[@]}"; do
+    if [[ ${status[i]} = online ]]; then
+      map+=("${ids[i]} : \e[0;32m${names[i]}\e[0m")
+    else
+      map+=("${ids[i]} : \e[0;31m${names[i]} [${status[i]}]\e[0m")
+    fi
+  done
+  printf "%b\n" "${map[@]}" | fzf --ansi --height=100 --preview="awk '{print \$1}' <<< {} | xargs pm2 logs --raw --" --preview-window=80%,follow
+}
+                theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status | args `git ls-files --others --exclude-standard`<CR>]]),

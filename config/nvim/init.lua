@@ -66,21 +66,25 @@ vim.o.cedit = "<C-x>"
 
 -- mappings {{{1
 -- text objects {{{2
-local text_objects = { "<Space>", "_", ".", ":", ",", ";", "<bar>", "/", "<bslash>", "*", "+", "-", "#", "=", "&" }
+local text_objects = { "_", ".", ":", ",", ";", "<bar>", "/", "<bslash>", "*", "+", "-", "#", "=", "&" }
 for _, char in ipairs(text_objects) do
     vim.keymap.set("x", "i" .. char, ":<C-u>normal! T" .. char .. "vt" .. char .. "<CR>", { silent = true })
     vim.keymap.set("o", "i" .. char, "<Cmd>normal vi" .. char .. "<CR>", { silent = true })
     vim.keymap.set("x", "a" .. char, ":<C-u>normal! F" .. char .. "vt" .. char .. "<CR>", { silent = true })
     vim.keymap.set("o", "a" .. char, "<Cmd>normal va" .. char .. "<CR>", { silent = true })
 end
+vim.keymap.set("x", "i<Space>", "iW")
+vim.keymap.set("o", "i<Space>", "iW")
+vim.keymap.set("x", "a<Space>", "aW")
+vim.keymap.set("o", "a<Space>", "aW")
+vim.keymap.set("x", "a5", "iw%")
+vim.keymap.set("o", "a5", "<Cmd>normal va5<CR>")
 vim.keymap.set("x", "il", "^og_")
 vim.keymap.set("o", "il", "<Cmd>normal vil<CR>")
 vim.keymap.set("x", "al", "0o$")
 vim.keymap.set("o", "al", "<Cmd>normal val<CR>")
 vim.keymap.set("x", "ae", "GoggV")
 vim.keymap.set("o", "ae", "<Cmd>normal vae<CR>")
-vim.keymap.set("x", "if", "v%va)ob")
-vim.keymap.set("o", "if", "<Cmd>normal vif<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
@@ -201,7 +205,8 @@ vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
 vim.keymap.set("x", "<leader>s", [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/gc<Left><Left><Left>]])
 vim.keymap.set("x", "<leader>S", [[:s/\%V//g<Left><Left><Left>]])
-vim.keymap.set({ "n", "x" }, "<leader>c", "<leader>ncgn", { remap = true })
+vim.keymap.set("n", "c<C-n>", "<leader>ncgn", { remap = true })
+vim.keymap.set("x", "C", "<leader>ncgn", { remap = true })
 vim.keymap.set("n", "<leader>tu", "<C-^>")
 vim.keymap.set("n", "<leader>l", "<Cmd>call funcs#print_variable(0, 0)<CR>")
 vim.keymap.set("x", "<leader>l", ":<C-u>call funcs#print_variable(1, 0)<CR>")
@@ -298,8 +303,8 @@ vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | exe
 vim.api.nvim_create_user_command("SessionLoad", "execute 'source ' . stdpath('data') . '/session_' . <q-args> . '.vim' | lua vim.notify('Loaded session from \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { annote = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
 vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>)", { nargs = "+" })
-vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, use_regex = '<bang>' == '' and true or false, search = <q-args>, initial_mode = 'normal'})", { nargs = "*", bang = true })
-vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({path_display = {'smart'}, search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
+vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({use_regex = '<bang>' == '' and true or false, search = <q-args>, initial_mode = 'normal'})", { nargs = "*", bang = true })
+vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})

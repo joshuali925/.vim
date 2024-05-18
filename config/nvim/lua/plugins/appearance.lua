@@ -6,6 +6,7 @@ return {
     { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
     { "EdenEast/nightfox.nvim", priority = 1000 },
     { "rebelot/kanagawa.nvim", priority = 1000 },
+    { "yorik1984/newpaper.nvim", priority = 1000 },
     { "nvim-tree/nvim-web-devicons" },
     {
         "lukas-reineke/indent-blankline.nvim",

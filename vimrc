@@ -129,12 +129,16 @@ let &listchars='tab:█ ,nbsp:␣,trail:•,leadmultispace:▏' . repeat(' ', &s
 silent! set belloff=all
 
 let mapleader=';'
-for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
+for char in [ '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
   execute 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<CR>'
   execute 'onoremap i' . char . ' :normal vi' . char . '<CR>'
   execute 'xnoremap a' . char . ' :<C-u>normal! F' . char . 'vt' . char . '<CR>'
   execute 'onoremap a' . char . ' :normal va' . char . '<CR>'
 endfor
+xnoremap i<Space> iW
+onoremap i<Space> iW
+xnoremap a<Space> aW
+onoremap a<Space> aW
 xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$
@@ -143,8 +147,8 @@ xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
 xnoremap if v%va)ob
 onoremap <silent> if :normal vif<CR>
-xnoremap af iw%
-onoremap <silent> af :normal vaf<CR>
+xnoremap a5 iw%
+onoremap <silent> a5 :normal va5<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -265,15 +269,16 @@ nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAU
 xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat -plain --color=always {}"')<CR>
 nnoremap <leader>ff :VFind **<Left>
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
-nnoremap <leader>fm :call plugins#zeef#oldfiles()<CR>
+nnoremap <leader>fm :call plugins#zeef#oldfiles(0)<CR>
+nnoremap <Tab> :call plugins#zeef#oldfiles(1)<CR>
 nnoremap <leader>fM :call <SID>EditCallback('awk ''$1 == ">" {print $2}'' ' . g:dot_vim_dir . '/tmp/viminfo \| sed "s,^~/,$HOME/," \| grep -v "/vim/.*/doc/.*.txt\\|.*COMMIT_EDITMSG\\|^' . expand('%:p') . '$" \| while IFS= read -r file; do test -f "$file" && echo "$file"; done \| fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
 nnoremap <leader>fg :RgRegex<Space>
 xnoremap <leader>fg :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>
 nnoremap <leader>fj :RgRegex \b<C-r>=expand('<cword>')<CR>\b<CR>
 xnoremap <leader>fj :<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>
 nnoremap <leader>fu :call plugins#zeef#buffer_tags()<CR>
-nnoremap <leader>f/ :call plugins#zeef#buffer_lines()<CR>
-nnoremap <leader>fL :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --color=always {1} --highlight-line {2}" --preview-window="up,40\%,border-bottom,+{2}+3/3,~3"')<CR>
+nnoremap <leader>fL :call plugins#zeef#buffer_lines()<CR>
+nnoremap <leader>f/ :call <SID>EditCallback('FZF_DEFAULT_COMMAND="rg --column --line-number --no-heading --color=always \"\"" fzf --multi --ansi --disabled --bind="change:reload:sleep 0.2; rg --column --line-number --no-heading --color=always {q} \|\| true" --delimiter=: --preview="bat --color=always --highlight-line {2} -- {1}" --preview-window="up,+{2}+3/3,~3"')<CR>
 nnoremap <leader>ft :call plugins#zeef#filetype()<CR>
 nnoremap <leader>fT :call <SID>EditCallback('filetypes')<CR>
 nnoremap <leader>fy :registers<CR>:normal! "p<Left>
@@ -286,8 +291,8 @@ xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
 xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
 xnoremap <leader>S :s/\%V//g<Left><Left><Left>
-nmap <leader>c <leader>ncgn
-xmap <leader>c <leader>ncgn
+nmap c<C-n> <leader>ncgn
+xmap C <leader>ncgn
 nnoremap <leader>tu <C-^>
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
@@ -353,7 +358,7 @@ command! -nargs=+ RgNoRegex call funcs#grep('rg --vimgrep --fixed-strings', '-- 
 function! s:Oldfiles()
   let saved_errorformat = &errorformat
   set errorformat=%f
-  cgetexpr plugins#zeef#filter_oldfiles()
+  cgetexpr plugins#zeef#filter_oldfiles(0)
   let &errorformat = saved_errorformat
   let bufnr = bufnr('%')
   copen

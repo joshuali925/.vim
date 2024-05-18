@@ -65,8 +65,29 @@ return {
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
             { "g<", "cxiacxiNag", remap = true },
             { "g>", "cxiaviao<C-c>cxinag", remap = true },
+            { "ma", "<Cmd>lua require('mini.visits').add_label()<CR>" },
+            { "mf", function()
+                require("mini.extra").pickers.visit_labels({}, {
+                    mappings = {
+                        remove = {
+                            char = "<C-d>",
+                            func = function()
+                                require("mini.visits").remove_label(require("mini.pick").get_picker_matches().current)
+                                require("mini.pick").stop()
+                                vim.cmd.normal("mf")
+                            end,
+                        }
+                    },
+                })
+            end },
+            { "<Tab>", function()
+                local curr = vim.fn.expand("%:p")
+                require("mini.extra").pickers.visit_paths({ filter = function(path) return path.path ~= curr end })
+            end },
         },
         config = function()
+            require("mini.extra").setup()
+            require("mini.bufremove").setup()
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
             require("mini.files").setup({ mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
             require("mini.move").setup({ mappings = { left = "", right = "", down = "<C-,>", up = "<C-.>", line_left = "", line_right = "", line_down = "<C-,>", line_up = "<C-.>" } })
@@ -81,10 +102,15 @@ return {
             })
             require("mini.align").setup({ mappings = { start = "", start_with_preview = "gl" } })
             require("mini.splitjoin").setup({ mappings = { toggle = "gs" } })
-            require("mini.ai").setup({ mappings = { around_last = "aN", inside_last = "iN" } })
+            require("mini.ai").setup({
+                mappings = { around_next = "aN", inside_next = "iN", around_last = "aP", inside_last = "iP" },
+                custom_textobjects = { n = require("mini.extra").gen_ai_spec.number() },
+            })
             require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
             require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
             require("mini.operators").make_mappings("replace", { textobject = "cp", line = "", selection = "" })
+            require("mini.pick").setup()
+            require("mini.visits").setup()
         end,
     },
 }

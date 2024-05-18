@@ -142,6 +142,7 @@ function M.init()
                             library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true, [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
                         },
                         format = { enable = true, defaultConfig = { quote_style = "double", max_line_length = "unset", align_array_table = "false" } },
+                        hint = { enable = true },
                     },
                 },
             })

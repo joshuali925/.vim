@@ -12,6 +12,7 @@ M.theme_list = {
     [-5] = "ayu",
     [-6] = "catppuccin",
     [-7] = "nightfox",
+    [-8] = "newpaper",
     [0] = "tokyonight",
     [1] = "nightfox",
     [2] = "github",
@@ -19,6 +20,7 @@ M.theme_list = {
     [4] = "kanagawa",
     [5] = "ayu",
     [6] = "catppuccin",
+    [7] = "newpaper",
 }
 M.theme = M.theme_list[theme_index]
 
@@ -103,6 +105,11 @@ local themes = {
         config = function()
             require("kanagawa").setup({ compile = true })
             vim.cmd.colorscheme("kanagawa")
+        end,
+    },
+    ["newpaper"] = {
+        config = function()
+            require("newpaper").setup({ style = theme_index < 0 and "dark" or "light" })
         end,
     },
 }

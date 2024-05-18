@@ -107,7 +107,11 @@ function! funcs#quit(buffer_mode, force) abort
     endif
   " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; multiple windows but the other ones are sidebars
   elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (win_len > 1 && len(filter(range(1, win_len), 'v:val != winnr() && index(sidebars, getbufvar(winbufnr(v:val), "&filetype")) >= 0')) == win_len - 1 && (buf_len > 1 || bufname('%') != ''))
-    call plugins#bbye#bdelete('bdelete', (a:force ? '!' : ''), '')
+    if has_nvim
+      execute 'lua require("mini.bufremove").delete(0, ' . (a:force ? 'true' : 'false') . ')'
+    else
+      call plugins#bbye#bdelete('bdelete', (a:force ? '!' : ''), '')
+    endif
   else
     execute 'quit' . (a:force ? '!' : '')
   endif
