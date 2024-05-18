@@ -43,12 +43,16 @@ nmap cs <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)
 nmap css <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
 xmap s <Plug>(operator-sandwich-add)
 xmap s< <Plug>(operator-sandwich-add)t
-for char in [ '<Space>', '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
+for char in [ '_', '.', ':', ',', ';', '<bar>', '/', '<bslash>', '*', '+', '-', '#', '=', '&' ]
   execute 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<CR>'
   execute 'onoremap i' . char . ' :normal vi' . char . '<CR>'
   execute 'xnoremap a' . char . ' :<C-u>normal! F' . char . 'vt' . char . '<CR>'
   execute 'onoremap a' . char . ' :normal va' . char . '<CR>'
 endfor
+xnoremap i<Space> iW
+onoremap i<Space> iW
+xnoremap a<Space> aW
+onoremap a<Space> aW
 xnoremap il ^og_
 onoremap <silent> il :normal vil<CR>
 xnoremap al 0o$
@@ -57,8 +61,8 @@ xnoremap ae GoggV
 onoremap <silent> ae :normal vae<CR>
 xnoremap if v%va)ob
 onoremap <silent> if :normal vif<CR>
-xnoremap af iw%
-onoremap <silent> af :normal vaf<CR>
+xnoremap a5 iw%
+onoremap <silent> a5 :normal va5<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -155,8 +159,8 @@ nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
-nmap <leader>c <leader>ncgn
-xmap <leader>c <leader>ncgn
+nmap c<C-n> <leader>ncgn
+xmap C <leader>ncgn
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
 nnoremap <leader>L :call funcs#print_variable(0, 1)<CR>

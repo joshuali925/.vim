@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # add additional dependencies
 RUN apt-get update; DEBIAN_FRONTEND=noninteractive apt-get install -y curl sudo

@@ -7,6 +7,38 @@
       "}}>❗TEST</button>"
     ]
   },
+  "Log unmount": {
+    "prefix": "cl-unmount",
+    "body": [
+      "React.useEffect(() => () => console.log('❗${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} unmount'), []);"
+    ]
+  },
+  "Log changed props": {
+    "prefix": "why-rerender",
+    "body": [
+      "/**",
+      " * React.memo by default does a shallow comparison on each prop. If the",
+      " * reference of props[key] changed, the prop is no longer equal and the",
+      " * component will rerender. This function finds which ones changed. Source:",
+      " * https://stackoverflow.com/a/51082563",
+      " */",
+      "function useWhyRerender(props: object) {",
+      "\tconst prev = React.useRef(props);",
+      "\tReact.useEffect(() => {",
+      "\t\tconst changedProps = Object.entries(props).reduce((ps, [k, v]) => {",
+      "\t\t\tif (prev.current[k] !== v) {",
+      "\t\t\t\tps[k] = [prev.current[k], v];",
+      "\t\t\t}",
+      "\t\t\treturn ps;",
+      "\t\t}, {});",
+      "\t\tif (Object.keys(changedProps).length > 0) {",
+      "\t\t\tconsole.log('Changed props:', changedProps);",
+      "\t\t}",
+      "\t\tprev.current = props;",
+      "\t});",
+      "}"
+    ]
+  },
   "Create react context": {
     "prefix": "template-create-context",
     "body": [
@@ -117,7 +149,7 @@
       "const render${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} = (",
       "\toverrideProps: Partial<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props> = {}",
       ") => {",
-      "\tconst props: jest.Mocked<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props> = Object.assign<",
+      "\tconst props: ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props = Object.assign<",
       "\t\t${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props,",
       "\t\tPartial<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props>",
       "\t>(",
@@ -127,7 +159,7 @@
       "\t\toverrideProps",
       "\t);",
       "\tconst component = render(<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} {...props}/>);",
-      "\treturn { component, props };",
+      "\treturn { component, props: props as jest.MockedObjectDeep<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}Props> };",
       "};",
       "",
       "describe('<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} /> spec', () => {",

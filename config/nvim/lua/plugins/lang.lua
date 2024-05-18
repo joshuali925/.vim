@@ -11,6 +11,7 @@ return {
     },
     {
         "stevearc/conform.nvim",
+        cmd = "Conform",
         config = function()
             require("conform").setup({
                 formatters_by_ft = {
@@ -199,7 +200,7 @@ return {
                 select = {
                     enable = true,
                     keymaps = {
-                        ["af"] = "@call.outer",
+                        ["if"] = "@call.outer",
                         ["iF"] = "@function.inner",
                         ["aF"] = "@function.outer",
                         ["ic"] = "@class.inner",

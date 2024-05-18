@@ -6,6 +6,7 @@ run() {
     case $1 in
       --no-sec|--nosec) shift; local nosec=1 ;;
       --debug) shift; export OPENSEARCH_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 ;;
+      -b|--bootstrap) shift; local bootstrap=1 ;;
       --) shift; break ;;
       *) break ;;
     esac
@@ -13,7 +14,7 @@ run() {
 
   if [[ -x bin/opensearch ]]; then
     if [[ -d plugins/opensearch-security ]] && ! grep -q '^plugins.security.disabled: true' config/opensearch.yml; then
-      [[ -n "$nosec" ]] && exec ./bin/opensearch -Eplugins.security.disabled=true
+      [[ -n $nosec ]] && exec ./bin/opensearch -Eplugins.security.disabled=true
       if [[ ! -f config/kirk.pem ]]; then
         OPENSEARCH_INITIAL_ADMIN_PASSWORD=myStrongPassword123@456 ./opensearch-tar-install.sh "$@" &
         pid=$!
@@ -39,6 +40,7 @@ run() {
     exec ./bin/opensearch-dashboards "${opts[@]}" "$@"
   fi
   if [[ -f opensearch_dashboards.d.ts ]]; then
+    if [[ -n $bootstrap ]]; then yarn osd bootstrap; fi
     exec yarn start --no-base-path --run-examples "${opts[@]}" "$@"
   fi
 }
@@ -78,11 +80,11 @@ download() {
   fi
 
   printf "\033[0;36m%s\033[0m\n" "Downloading from: $url" >&2
-  if [[ -n "$extract" ]] && [[ "$url" = *.tar.gz ]]; then curl -fL "$url" | tar xz; else curl -fLO "$url"; fi
+  if [[ -n $extract ]] && [[ $url = *.tar.gz ]]; then curl -fL "$url" | tar xz; else curl -fLO "$url"; fi
 }
 
 get_endpoint() {
-  if [[ -n "$endpoint" ]]; then echo "${endpoint%%/}"
+  if [[ -n $endpoint ]]; then echo "${endpoint%%/}"
   elif curl -fsSL localhost:9200 > /dev/null 2>&1; then echo http://localhost:9200
   else echo https://admin:admin@localhost:9200; fi
 }
@@ -103,7 +105,7 @@ main() {
     d) download "${@:2}" ;;
     sql*|ppl*) query "$@" ;;
     get|put|post|delete|GET|PUT|POST|DELETE) request "$@" ;;
-    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|put|post|delete} [path] [<body> [args...]]" >&2; exit 1 ;;
+    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] [-b|--bootstrap] | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|put|post|delete} [path] [<body> [args...]]" >&2; exit 1 ;;
   esac
 }
 

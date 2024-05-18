@@ -41,6 +41,10 @@ let g:NERDTreeMapActivateNode = 'l'
 let g:NERDTreeMapCloseDir = 'h'
 
 """ Mappings --------------------------------
+xnoremap i<Space> iW
+onoremap i<Space> iW
+xnoremap a<Space> aW
+onoremap a<Space> aW
 nnoremap <BS> gT
 nnoremap \ gt
 noremap gw [w
@@ -65,10 +69,10 @@ xnoremap if v%va)ob
 nnoremap cif %va)obc
 nnoremap dif %va)obd
 nnoremap yif %va)oby
-xnoremap af iw%
-nnoremap caf viw%c
-nnoremap daf viw%d
-nnoremap yaf viw%y
+xnoremap a5 iw%
+nnoremap ca5 viw%c
+nnoremap da5 viw%d
+nnoremap ya5 viw%y
 nnoremap <leader>yae vGoggV"+y
 xmap v <Action>(EditorSelectWord)
 xmap <BS> <Action>(EditorUnSelectWord)
@@ -121,8 +125,8 @@ map <leader>ff <Action>(GotoAction)
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>n *N
 xnoremap <leader>n y/\V<C-r>"<CR>N
-nmap <leader>c <leader>ncgn
-xmap <leader>c <leader>ncgn
+nmap c<C-n> <leader>ncgn
+xmap C <leader>ncgn
 nmap <leader>tu <Action>(ReopenClosedTab)
 nmap <leader>b <Action>(SelectInProjectView)
 imap <leader>w <Esc><leader>w
@@ -183,11 +187,17 @@ omap ai <Plug>textobj-indent-aI
 xmap aI <Plug>textobj-indent-ai
 omap aI <Plug>textobj-indent-ai
 
-" java
-nnoremap <leader>l mx"xyiwoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
-xnoremap <leader>l mx"xyoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
-nnoremap <leader>L mx"xyiwOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
-xnoremap <leader>L mx"xyOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+" javascript
+nnoremap <leader>l mx"xyiwoconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+xnoremap <leader>l mx"xyoconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+nnoremap <leader>L mx"xyiwOconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+xnoremap <leader>L mx"xyOconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+
+" " java
+" nnoremap <leader>l mx"xyiwoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+" xnoremap <leader>l mx"xyoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+" nnoremap <leader>L mx"xyiwOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+" xnoremap <leader>L mx"xyOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
 
 " " kotlin
 " nnoremap <leader>l mx"xyiwoprintln("❗<C-r>x ${<C-r>x}")<Esc>`x

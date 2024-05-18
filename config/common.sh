@@ -8,12 +8,12 @@ export EDITOR=nvim
 export BAT_PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
-export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --border=thinblock --preview-window="border-thinblock,<40(up,30%)" --highlight-line --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
+export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --border=thinblock --preview-window="border-thinblock,<40(up,40%)" --highlight-line --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color=always --graph --pretty=format:\\\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\\\" --abbrev-commit -- \{})+change-preview-label(▏log▕)\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label(▏cat▕)\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40%"
-export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current' --header='Press \` to toggle sort, C-t C-u to show surrounding items' --preview='sed \"s/^[[:space:]]*[0-9]\+[[:space:]]\+//\" <<< {} | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
+export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
 if [[ $LIGHT_THEME = 1 ]]; then
   export BAT_THEME=GitHub DELTA_THEME=light-theme FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:253,bg+:252,gutter:251,border:248,preview-bg:254"
 else
@@ -144,6 +144,7 @@ alias gst='git stash'
 alias gsts='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
 alias gcount='git shortlog -sn'
+alias gwta='git worktree add -f'
 alias gtree='git ls-files | tree --fromfile'
 alias guntracked='git ls-files --others --exclude-standard'
 alias gignored='git ls-files --others --exclude-standard --ignored'
@@ -163,7 +164,7 @@ alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranc
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git foresta --style=10 | \less -RiMXF'
 alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --format=%h)'
-alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply patch.diff && rm patch.diff'
+alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply -3 patch.diff && rm patch.diff'
 alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
@@ -181,7 +182,7 @@ gc() {
 
 gcb() {
   if [[ $# -gt 0 ]]; then
-    git checkout -b "$@" || git checkout --ignore-other-worktrees "$@"
+    git checkout -b "$@" || git checkout --ignore-other-worktrees "$@"  # with worktree add -f and checkout --ignore-other-worktrees, commits will be applied to all worktrees with the same branch (as they have the same .git file), but the working directory won't automatically change
     return $?
   fi
   # shellcheck disable=2016
@@ -201,9 +202,9 @@ gcb() {
   fi
 }
 
-gwt() {  # with worktree add -f and checkout --ignore-other-worktrees, commits will be applied to all worktrees with the same branch (as they have the same .git file), but working directory won't automatically change
+gwt() {
   if [[ $# -gt 0 ]]; then
-    git worktree add -f "$@"
+    git worktree "$@"
     return $?
   fi
   local worktree
@@ -480,7 +481,6 @@ vf() {  # find files: vf; open files from pipe: fd | vf
     # shellcheck disable=2046
     $EDITOR "$@" -- $(cat)
   else
-    # shellcheck disable=2207
     local fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
     # shellcheck disable=2128
     [[ -n $fzftemp ]] && $EDITOR -- "${fzftemp[@]}"
@@ -505,24 +505,25 @@ vrg() {
 }
 
 # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration
-fif() {  # find in file
-  if [[ $# -eq 0 ]]; then echo 'Need a string to search for.'; return 1; fi
-  rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up,60% --preview="rg --pretty --context 5 --max-columns 0 -- $(printf "%q " "$@"){+}" --bind="enter:execute($EDITOR -c \"/$1\" -- {+} < /dev/tty)"
-}
 rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags
   [[ $# -gt 0 ]] && [[ $1 != -* ]] && local init_query="$1" && shift 1
   local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "$@")"
   FZF_DEFAULT_COMMAND="$rg_prefix $(printf %q "${init_query:-}")" \
-  fzf --ansi --layout=default --height=100% --disabled --query="${init_query:-}" \
-      --header='Press C-s to toggle fzf' \
+  fzf --ansi --layout=default --height=100% --border=none --disabled --query="${init_query:-}" \
+      --header="Press C-s to toggle fzf. Flags: $rg_prefix" --prompt='ripgrep> ' --delimiter=: \
       --bind='ctrl-s:transform:[[ {fzf:prompt} = "ripgrep> " ]] && echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query" || echo "change-prompt(ripgrep> )+disable-search+clear-query+reload('"$rg_prefix"' -- {q} || true)+rebind(change)"' \
       --bind="change:reload:sleep 0.2; $rg_prefix -- {q}" \
-      --bind="enter:execute($EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1} < /dev/tty)" \
+      --bind="enter:execute($EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1})" \
       --bind='tab:up,btab:down' \
-      --prompt='ripgrep> ' --delimiter=: \
       --preview='bat --color=always --highlight-line {2} -- {1}' \
-      --preview-window='up,40%,border-bottom,+{2}+3/3,~3'
+      --preview-window='up,+{2}+3/3,~3'
 }
+
+rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripgrep-multi-line-chunks, do not do livegrep as sed/perl processing is slow
+  for arg in "$@"; do [[ $arg != -* ]] && local search="-c 'let @/=\"$(printf '%q' "$arg")\"' -c 'set hlsearch'" && break; done
+  rg --pretty "$@" 2>&1 | sed ':a;N;$!ba;s/\n\n/\n\x00/g' | fzf --ansi --read0 --height=100% --border=none --bind="enter:execute(head -n 2 <<< {} | awk -F: 'NR==1 {file=\$1} NR==2 {print \"+\" \$1 \" -- \" file}' | xargs $EDITOR $search)" --bind='tab:down,btab:up'
+}
+
 
 z() {
   local fzftemp
@@ -765,7 +766,7 @@ if [[ -n $DOT_VIM_LOCAL_BIN ]]; then .vim-disable-binary-downloads; fi
 
 # ====================== MacOS ==========================
 if [[ $OSTYPE = darwin* ]]; then
-  alias idea='open -na "IntelliJ IDEA.app" --args'
+  alias idea='open -na "IntelliJ IDEA Ultimate.app" --args'
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
   alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
   alias toggle-dark-theme="osascript -e 'tell application \"System Events\" to tell appearance preferences to set dark mode to not dark mode'"

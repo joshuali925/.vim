@@ -490,14 +490,22 @@ fun! s:f(f) abort
   let p = expand(a:f)
   return stridx(p, s:d) < 0 && p != s:b && filereadable(p)
 endf
-fun! plugins#zeef#filter_oldfiles()
+fun! s:F(f, d) abort
+  let p = expand(a:f)
+  return stridx(p, s:d) < 0 && p != s:b && filereadable(p) && stridx(p, a:d) == 0
+endf
+fun! plugins#zeef#filter_oldfiles(cwd)
   let s:d = expand("$VIMRUNTIME") . (has("win32") ? '\' : '/') . "doc"
   let s:b = expand('%:p')
+  if a:cwd == 1
+    let d = getcwd()
+    return filter(copy(v:oldfiles), 's:F(v:val,d)')
+  endif
   return filter(copy(v:oldfiles), 's:f(v:val)')
 endf
 
-fun! plugins#zeef#oldfiles()
-  call plugins#zeef#args(plugins#zeef#filter_oldfiles(), 'MRU')
+fun! plugins#zeef#oldfiles(cwd)
+  call plugins#zeef#args(plugins#zeef#filter_oldfiles(a:cwd), 'MRU' . (a:cwd == 1 ? '_CWD' : ''))
 endf
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

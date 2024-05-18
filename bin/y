@@ -5,6 +5,7 @@
 # https://sunaku.github.io/tmux-yank-osc52.html
 # https://github.com/ojroques/vim-oscyank/issues/26: tmux >= 3.3 doesn't need OSC52 sequence to be wrapped
 # https://github.com/neovim/neovim/issues/8450
+# https://github.com/mikepqr/pbcopy-sh
 
 buf=$(cat "$@")
 buflen=$(printf %s "$buf" | wc -c)

@@ -124,6 +124,8 @@ return {
                     mappings = {
                         ["l"] = "open",
                         ["h"] = "close_node",
+                        ["-"] = "navigate_up",
+                        ["C"] = "set_root",
                         ["<BS>"] = "prev_source",
                         ["\\"] = "next_source",
                         ["P"] = { "toggle_preview", config = { use_float = true } },
@@ -136,12 +138,13 @@ return {
                         ["x"] = "delete",
                         ["d"] = "cut_to_clipboard",
                         ["<C-b>"] = { function(state) vim.cmd.ToggleTerm("dir=" .. get_dir(state)) end, desc = "open_term_at_node" },
-                        ["t"] = { function(state) require("telescope.builtin").find_files({ cwd = get_dir(state) }) end, desc = "find_files_at_node" },
+                        ["<C-p>"] = { function(state) require("telescope.builtin").fd({ cwd = get_dir(state) }) end, desc = "find_files_at_node" },
+                        ["t"] = { function(state) require("telescope.builtin").fd({ cwd = get_dir(state) }) end, desc = "find_files_at_node" },
                         ["T"] = {
-                            function(state) require("telescope.builtin").find_files({ cwd = get_dir(state), no_ignore = true }) end,
+                            function(state) require("telescope.builtin").fd({ cwd = get_dir(state), no_ignore = true }) end,
                             desc = "find_files_no_ignore_at_node",
                         },
-                        ["<leader>fg"] = { function(state) require("telescope.builtin").live_grep({ cwd = get_dir(state) }) end, desc = "live_grep_at_node" },
+                        ["<leader>f/"] = { function(state) require("telescope.builtin").live_grep({ cwd = get_dir(state) }) end, desc = "live_grep_at_node" },
                         ["z"] = "none",
                         ["H"] = "none",
                         ["/"] = "none",
@@ -160,8 +163,8 @@ return {
         dependencies = { "nvim-lua/plenary.nvim", { "nvim-telescope/telescope-fzf-native.nvim", build = "make" } },
         keys = {
             { "q", "<Cmd>lua require('telescope.builtin').buffers({ignore_current_buffer = true, only_cwd = false, sort_mru = true})<CR>" },
-            { "<C-p>", "<Cmd>lua require('telescope.builtin').find_files()<CR>" },
-            { "<C-p>", ":<C-u>lua require('telescope.builtin').find_files({initial_mode = 'normal', default_text = require('utils').get_visual_selection()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
+            { "<C-p>", "<Cmd>lua require('telescope.builtin').fd()<CR>" },
+            { "<C-p>", ":<C-u>lua require('telescope.builtin').fd({initial_mode = 'normal', default_text = require('utils').get_visual_selection()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
             { "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>" },
             { "<leader>fs", "<Cmd>lua require('utils').fzf()<CR>" },
             { "<leader>fs", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
@@ -175,15 +178,16 @@ return {
             { "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>", mode = "x" },
             { "<leader>fj", ":RgRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>" },
             { "<leader>fj", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>", mode = "x" },
+            { "<leader>f!", "<Cmd>lua require('telescope.builtin').git_status({initial_mode = 'normal'})<CR>" },
             { "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>" },
             { "<leader>fl", "<Cmd>lua require('telescope.builtin').loclist()<CR>" },
-            { "<leader>fL", "<Cmd>lua require('telescope.builtin').live_grep()<CR>" },
+            { "<leader>fL", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>" },
             { "<leader>fa", "<Cmd>lua require('telescope.builtin').commands()<CR>" },
             { "<leader>ft", "<Cmd>lua require('telescope.builtin').filetypes()<CR>" },
             { "<leader>ff", "<Cmd>lua require('telescope.builtin').builtin()<CR>" },
-            { "<leader>f/", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>" },
+            { "<leader>f/", "<Cmd>lua require('telescope.builtin').live_grep()<CR>" },
             { "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>" },
-            { "<leader>fh", "<Cmd>lua require('telescope.builtin').command_history()<CR>" },
+            { "<leader>f:", "<Cmd>lua require('telescope.builtin').command_history()<CR>" },
             { "<leader>fy", "<Cmd>lua require('telescope').extensions.yank_history.yank_history({initial_mode = 'normal'})<CR>" }, -- yanky.nvim
             { "<leader>fy", "dh<leader>fy", mode = "x", remap = true },
         },
@@ -270,13 +274,14 @@ return {
             }
             theme.section.top_buttons.val = {}
             theme.section.bottom_buttons.val = {
-                theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status | args `git ls-files --others --exclude-standard`<CR>]]),
+                theme.button("!", "Git changed files", "<Cmd>lua require('telescope.builtin').git_status({initial_mode = 'normal'})<CR>"),
                 theme.button("?", "Git diff", "<Cmd>DiffviewOpen<CR>"),
                 theme.button("+", "Git diff remote", "<Cmd>DiffviewOpen @{upstream}..HEAD<CR>"),
                 theme.button("~", "Git conflicts", "<Cmd>Git mergetool<CR>"),
                 theme.button("o", "Git log", "<Cmd>Flog<CR>"),
-                theme.button("f", "Find files", "<Cmd>lua require('telescope.builtin').find_files({hidden = true})<CR>"),
+                theme.button("f", "Find files", "<Cmd>lua require('telescope.builtin').fd({hidden = true})<CR>"),
                 theme.button("m", "Find MRU", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>"),
+                theme.button("M", "Find MRU in CWD", "<Cmd>lua require('telescope.builtin').oldfiles({only_cwd = true})<CR>"),
                 theme.button("c", "Edit vimrc", "<Cmd>edit $MYVIMRC<CR>"),
                 theme.button("\\", "Open quickui", "<Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('normal')<CR>"),
                 theme.button("p", "Open Lazy UI", "<Cmd>Lazy<CR>"),
@@ -382,8 +387,7 @@ return {
                 { "Open in &VSCode", [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]] },
             })
             vim.fn["quickui#menu#install"]("&Git", { -- GBrowse loaded on command won't include line number in URL, need to explicitly load it. Similar issues for other fugitive commands.
-                { "Git checko&ut", [[Gread]], "Checkout current file from index and load as unsaved buffer (Gread)" },
-                { "Git checkout ref", [[call feedkeys(":Gread HEAD:%\<Left>\<Left>", "n")]], "Checkout current file from ref and load as unsaved buffer (Gread HEAD:%)" },
+                { "Git checko&ut ref", [[call feedkeys(":Gread @:%\<Left>\<Left>", "n")]], "Checkout current file from ref and load as unsaved buffer (Gread HEAD:%)" },
                 { "Git &blame", [[Git blame]], "Git blame of current file" },
                 { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
                 { "Git diff H&EAD", [[Gdiffsplit HEAD:%]], "Diff current file with last committed version (Gdiffsplit HEAD:%)" },
@@ -395,7 +399,7 @@ return {
                 { "Git toggle line blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
                 { "--", "" },
                 { "Git &status", [[Git]], "Git status" },
-                { "Git &changes since ref", [[call feedkeys(":lua require('utils').git_change_base('HEAD')\<Left>\<Left>", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref), and show hunks based on ref instead of staged (to reset run :Gitsigns reset_base true)" },
+                { "Git &changes since ref", [[call feedkeys(":lua require('utils').git_change_base('@')\<Left>\<Left>", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref), and show hunks based on ref instead of staged (to reset run :Gitsigns reset_base true)" },
                 { "Diff&view", [[DiffviewOpen]], "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits" },
                 { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
                 { "--", "" },
@@ -459,7 +463,7 @@ return {
                 { "&Mason status", [[Mason]], "Mason status" },
                 { "Mason &install all", [[execute "lua require('lsp').lsp_install_all()"]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
                 { "--", "" },
-                { "Load indentscope", [[lua require("mini.indentscope").setup({ draw = { delay = 50 }, options = { try_as_border = true } })]], "Load mini.indentscope" },
+                { "Load indentscope", [[lua require("mini.indentscope").setup({ draw = { delay = 50 }, options = { try_as_border = true }, symbol = '▏' })]], "Load mini.indentscope" },
             })
             local quickui_theme_list = {}
             local used_chars = "hjklqg"
