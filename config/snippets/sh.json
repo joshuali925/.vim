@@ -122,6 +122,21 @@
       "done"
     ]
   },
+  "Process arguments": {
+    "prefix": "for-arg",
+    "body": [
+      "local rest=() skip_args=0",
+      "for arg in \"\\$@\"; do",
+      "\tif [[ \\$skip_args -eq 1 ]]; then rest+=(\"\\$arg\"); continue; fi",
+      "\tcase \\$arg in",
+      "\t\t${1:-h|--help}) $0 ;;",
+      "\t\t--) skip_args=1 ;;",
+      "\t\t*) rest+=(\"\\$arg\") ;;",
+      "\tesac",
+      "done",
+      "set -- \"\\${rest[@]}\"; unset rest skip_args"
+    ]
+  },
   "Loop lines": {
     "prefix": "while-read",
     "body": [
@@ -215,11 +230,7 @@
   },
   "Heredoc": {
     "prefix": "heredoc",
-    "body": [
-      "${1:cat >> multiline.txt} <<<EOF",
-      "$0",
-      "EOF"
-    ]
+    "body": ["${1:cat >> multiline.txt} <<<EOF", "$0", "EOF"]
   },
   "Script directory": {
     "prefix": "script-directory",

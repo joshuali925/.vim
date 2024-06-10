@@ -123,7 +123,7 @@ _get_prompt_tail() {
   # git branch with prompt sign colored by exit code
   # takes optional arguments as separators between those two
   local _head_file _head _dir="$PWD" _tail _exit="$?"
-  [[ $_exit != 0 ]] && _tail="${*:- }"$'\001\e[38;5;9m\002$\001\e[0m\002 ' || _tail="${*:- }"$'\001\e[38;5;141m\002$\001\e[0m\002 '
+  [[ $_exit != 0 ]] && _tail="${*:- }"$'\001\e[38;5;9m\002❯\001\e[0m\002 ' || _tail="${*:- }"$'\001\e[38;5;141m\002❯\001\e[0m\002 '
   while [[ -n $_dir ]]; do
     _head_file="$_dir/.git/HEAD"
     if [[ -f $_dir/.git ]]; then
@@ -147,6 +147,6 @@ _get_prompt_tail() {
 }
 
 .vim-disable-prompt-command() {
-  PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([[ \$? != 0 ]] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")$ \[\e[0m\]"
+  PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([[ \$? != 0 ]] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")❯ \[\e[0m\]"
   PROMPT_COMMAND=
 }

@@ -10,7 +10,13 @@ return {
             },
         },
         ft = "gitcommit", -- issue number omni-completion, does not work if cloned with url.replacement.insteadOf
-        cmd = { "Git", "Gcd", "Ggrep", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog", "Flogsplit" },
+        cmd = { "Git", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog" },
+        keys = {
+            { "<leader>gf", "<Cmd>.Flogsplit<CR>" },
+            { "<leader>gf", ":Flogsplit<CR>", mode = { "x" } },
+            { "<leader>gr", [[<Cmd>if $SSH_CLIENT == "" | .GBrowse | else | let @+=split(execute(".GBrowse!"), "\n")[-1] | endif<CR>]] },
+            { "<leader>gr", [[:<C-u>if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @+=split(execute("'<,'>GBrowse!"), "\n")[-1] | endif<CR>]], mode = { "x" } },
+        },
         config = function()
             vim.g.fugitive_summary_format = "%d %s (%cr) <%an>"
             vim.keymap.set("ca", "git", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>")
@@ -27,6 +33,11 @@ return {
             { "[g", "<Cmd>lua require('gitsigns').prev_hunk()<CR>" },
             { "]g", "<Cmd>lua require('gitsigns').next_hunk()<CR>" },
             { "ig", ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
+            { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
+            { "<leader>ga", "<Cmd>lua require('gitsigns').stage_hunk()<CR>" },
+            { "<leader>gu", "<Cmd>lua require('gitsigns').reset_hunk()<CR>" },
+            { "<leader>gU", "<Cmd>lua require('gitsigns').undo_stage_hunk()<CR>" },
+            { "<leader>gb", "<Cmd>lua require('gitsigns').blame_line({full = true, ignore_whitespace = true})<CR>" },
         },
         opts = {
             signs = { add = { text = "▎" }, change = { text = "░" }, delete = { text = "▏" }, topdelete = { text = "▔" }, changedelete = { text = "▒" } },

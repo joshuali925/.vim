@@ -80,7 +80,7 @@ return {
                     },
                 })
             end },
-            { "<Tab>", function()
+            { "<leader>fM", function()
                 local curr = vim.fn.expand("%:p")
                 require("mini.extra").pickers.visit_paths({ filter = function(path) return path.path ~= curr end })
             end },

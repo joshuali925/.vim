@@ -58,11 +58,6 @@ function M.init()
         return { capabilities = capabilities, flags = { debounce_text_changes = 250 } }
     end
 
-    local present, mason = pcall(require, "mason")
-    if not present then
-        return
-    end
-    mason.setup({ ui = { border = "rounded" } })
     local function register_server(server, server_config)
         if not vim.tbl_contains(disabled_servers, server) then
             local config = vim.tbl_deep_extend("force", make_config(), server_config or {})
@@ -70,6 +65,7 @@ function M.init()
         end
     end
 
+    require("mason").setup({ ui = { border = "rounded" } })
     require("mason-lspconfig").setup()
     require("mason-lspconfig").setup_handlers({
         register_server,
