@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-if [[ -z $BIN_INIT && ( ! -f $HOME/.vim/config/fzf/shell.bash || ! -x $HOME/.local/bin/fzf ) ]]; then
+if [[ -z $BIN_INIT && ( ! -s $HOME/.vim/config/fzf/shell.bash || ! -x $HOME/.local/bin/fzf ) ]]; then
   BIN_INIT=1 fzf --bash > ~/.vim/config/fzf/shell.bash || true
   BIN_INIT=1 fzf --zsh > ~/.vim/config/fzf/shell.zsh || true
 fi

@@ -90,8 +90,7 @@ hi link asciidocListingBlock NonText
 " git related plugins
 hi link DiffAdded DiffAdd
 hi link DiffNewFile DiffAdd
-hi link DiffFile DiffDelete
-hi link DiffRemoved DiffDelete
+hi link DiffRemoved Constant
 hi link DiffLine DiffText
 
 " markdown

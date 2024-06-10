@@ -157,6 +157,7 @@ vim.keymap.set("i", "<C-_>", "<C-o>u")
 vim.keymap.set("n", "_", "<C-o>")
 vim.keymap.set("n", "+", "<C-i>")
 vim.keymap.set("n", "Q", "q")
+vim.keymap.set("i", "<C-r>/", [[<Cmd>call nvim_put([substitute(@/, '^\\<\|\\>$', '', 'g')], '', v:false, v:true)<CR>]])
 vim.keymap.set("n", "c@", "<Cmd>call funcs#edit_register()<CR>")
 vim.keymap.set("n", "U", "<Cmd>execute 'earlier ' . v:count1 . 'f'<CR>")
 vim.keymap.set("x", ".", ":normal .<CR>")
@@ -223,6 +224,7 @@ vim.keymap.set("n", "yoq", "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cm
 vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight <bar> TSBufToggle indent<CR>")
 vim.keymap.set("n", "yog", "<Cmd>lua require('rooter').toggle()<CR>")
+vim.keymap.set("n", "yoR", "<Cmd>if get(g:, 'ReaderMode', 0) == 0 | nnoremap <nowait> d <C-d>| nnoremap u <C-u> | else | execute 'nunmap d' | execute 'nunmap u' | endif | let g:ReaderMode = 1 - get(g:, 'ReaderMode', 0) | lua vim.notify('Reader mode ' .. (vim.g.ReaderMode == 1 and 'on' or 'off'))<CR>")
 vim.keymap.set("t", "<C-u>", "<C-\\><C-n>")
 vim.keymap.set("c", "<C-Space>", [[':/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<BS>", [[':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
@@ -293,10 +295,8 @@ vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "AutoCommands",
 
 -- commands {{{1
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
-vim.api.nvim_create_user_command("SetArgs", "let b:args = <q-args> == '' ? '' : ' ' . <q-args>", { complete = "file", nargs = "*" })
 vim.api.nvim_create_user_command("S", [[execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <range> != 0 | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr() . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | else | execute "put =execute('" . <q-args> . "')" | endif | 1d]], { complete = "command", nargs = "*", range = true, bang = true })
 vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee % > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute "botright terminal sudo `which nvim` +'1,$d' +startinsert %" | startinsert | endif]], { bang = true })
-vim.api.nvim_create_user_command("Grt", "Gcd", {})
 vim.api.nvim_create_user_command("ProfileStart", "lua require('plenary.profile').start(vim.fn.stdpath('cache') .. '/profile.log')", {})
 vim.api.nvim_create_user_command("ProfileStop", [[execute "lua require('plenary.profile').stop()" | execute 'edit ' . stdpath('cache') . '/profile.log']], {})
 vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | execute 'mksession! ' . stdpath('data') . '/session_' . <q-args> . '.vim' | silent! ScrollViewEnable | lua vim.notify('Session saved to \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { annote = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
@@ -348,7 +348,7 @@ if vim.env.SSH_CLIENT ~= nil then -- ssh session
         paste = { ["+"] = paste, ["*"] = paste }, -- osc52 paste doesn't work in some terminal and can be blocking with yanky.nvim
     }
     vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { annote = 'Link copied' })<CR>")
-elseif vim.fn.has("macunix") ~= 1 then -- WSL Vim
+elseif vim.fn.has("wsl") == 1 then
     vim.g.clipboard = {
         name = "WslClipboard",
         copy = { ["+"] = "clip.exe", ["*"] = "clip.exe" },

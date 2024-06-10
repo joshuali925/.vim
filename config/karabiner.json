@@ -22,7 +22,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },
@@ -42,7 +45,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },
@@ -63,7 +69,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },
@@ -84,7 +93,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },
@@ -105,7 +117,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },
@@ -131,7 +146,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },
@@ -157,7 +175,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },
@@ -183,7 +204,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },
@@ -210,7 +234,10 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": ["com\\.microsoft\\.rdc\\.macos"]
+              "bundle_identifiers": [
+                "com\\.microsoft\\.rdc\\.macos",
+                "com\\.moonlight-stream\\.Moonlight"
+              ]
             }
           ]
         },

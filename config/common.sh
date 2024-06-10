@@ -141,7 +141,7 @@ alias grv='git remote -v'
 alias gs='git status -sb'
 alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([[ \$(pwd) = '\$PWD' ]] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
 alias gst='git stash'
-alias gsts='git stash; git stash apply'
+alias gst-save='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
 alias gcount='git shortlog -sn'
 alias gwta='git worktree add -f'
@@ -505,16 +505,20 @@ vrg() {
 }
 
 # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration
-rf() {  # livegrep: rf [pattern] [flags], pattern must be before flags
-  [[ $# -gt 0 ]] && [[ $1 != -* ]] && local init_query="$1" && shift 1
-  local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "$@")"
-  FZF_DEFAULT_COMMAND="$rg_prefix $(printf %q "${init_query:-}")" \
-  fzf --ansi --layout=default --height=100% --border=none --disabled --query="${init_query:-}" \
+rf() {  # livegrep: rf [pattern] [flags]
+  local rest=() skip_args=0
+  for arg in "$@"; do
+    if [[ $skip_args -eq 1 ]]; then rest+=("$arg"); continue; fi
+    case $arg in -*) rest+=("$arg") ;; *) local init_query="$arg"; skip_args=1 ;; esac
+  done
+  local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "${rest[@]}")"
+  fzf --ansi --multi --layout=default --height=100% --border=none --disabled --query="${init_query:-}" \
       --header="Press C-s to toggle fzf. Flags: $rg_prefix" --prompt='ripgrep> ' --delimiter=: \
       --bind='ctrl-s:transform:[[ {fzf:prompt} = "ripgrep> " ]] && echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query" || echo "change-prompt(ripgrep> )+disable-search+clear-query+reload('"$rg_prefix"' -- {q} || true)+rebind(change)"' \
+      --bind="start:reload:$rg_prefix $(printf %q "${init_query:-}")" \
       --bind="change:reload:sleep 0.2; $rg_prefix -- {q}" \
-      --bind="enter:execute($EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1})" \
-      --bind='tab:up,btab:down' \
+      --bind="enter:execute(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
+      --bind='tab:toggle+up,btab:toggle+down' \
       --preview='bat --color=always --highlight-line {2} -- {1}' \
       --preview-window='up,+{2}+3/3,~3'
 }

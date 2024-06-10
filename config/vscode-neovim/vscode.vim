@@ -199,10 +199,10 @@ nnoremap ]p o<C-r>"<Esc>
 
 nnoremap gD :call VSCodeNotify('editor.action.peekTypeDefinition')<CR>
 nnoremap gr :call VSCodeNotify('references-view.find')<CR>
-nnoremap Ku :call VSCodeNotify('git.revertSelectedRanges')<CR>
-nnoremap Ka :call VSCodeNotify('git.stageSelectedRanges')<CR>
-nmap Kd gh
-nnoremap Kr :call VSCodeNotify('openInGithub.openInGitHubFile')<CR>
+nnoremap <leader>gu :call VSCodeNotify('git.revertSelectedRanges')<CR>
+nnoremap <leader>ga :call VSCodeNotify('git.stageSelectedRanges')<CR>
+nmap <leader>gd gh
+nnoremap <leader>gr :call VSCodeNotify('openInGithub.openInGitHubFile')<CR>
 nnoremap <leader>a :call VSCodeNotify('editor.action.quickFix')<CR>
 nnoremap <leader>R :call VSCodeNotify('editor.action.rename')<CR>
 nnoremap <leader>d :call VSCodeNotify('references-view.findImplementations')<CR>
@@ -223,8 +223,10 @@ nnoremap zr :call VSCodeNotify('editor.unfoldAll')<CR>
 nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
 
 function! s:RunCode()
-  if expand('%') =~ 'test.[tj]sx\?'
+  if expand('%:t') =~ 'test.[tj]sx\?'
     call VSCodeNotify('extension.runJestAndUpdateSnapshots')
+  elseif expand('%:e') == 'http'
+    call VSCodeNotify('rest-client.request')
   else
     call VSCodeNotify('code-runner.run')
   endif

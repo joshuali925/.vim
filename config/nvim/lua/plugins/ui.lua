@@ -124,8 +124,6 @@ return {
                     mappings = {
                         ["l"] = "open",
                         ["h"] = "close_node",
-                        ["-"] = "navigate_up",
-                        ["C"] = "set_root",
                         ["<BS>"] = "prev_source",
                         ["\\"] = "next_source",
                         ["P"] = { "toggle_preview", config = { use_float = true } },
@@ -150,7 +148,11 @@ return {
                         ["/"] = "none",
                     },
                 },
-                filesystem = { filtered_items = { hide_dotfiles = false, hide_gitignored = false, hide_hidden = false }, hijack_netrw_behavior = "disabled" },
+                filesystem = {
+                    filtered_items = { hide_dotfiles = false, hide_gitignored = false, hide_hidden = false },
+                    hijack_netrw_behavior = "disabled",
+                    mappings = { ["-"] = "navigate_up", ["C"] = "set_root" },
+                },
                 document_symbols = { window = { mappings = { ["x"] = "none", ["d"] = "none" } } },
                 sources = { "filesystem", "buffers", "git_status", "document_symbols" },
             })
@@ -169,9 +171,10 @@ return {
             { "<leader>fs", "<Cmd>lua require('utils').fzf()<CR>" },
             { "<leader>fs", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
             { "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>" },
-            { "<leader>fM", "<Cmd>lua require('telescope.builtin').oldfiles({only_cwd = true})<CR>" },
+            { "<Tab>", "<Cmd>lua require('telescope.builtin').oldfiles({only_cwd = true})<CR>" },
             { "<leader>f'", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>" },
             { "<leader>fb", "<Cmd>lua require('telescope.builtin').live_grep({grep_open_files = true})<CR>" },
+            { "<leader>fb", ":<C-u>lua require('telescope.builtin').live_grep({grep_open_files = true, default_text = require('utils').get_visual_selection()})<CR>", mode = "x" },
             { "<leader>fu", "<Cmd>lua require('telescope.builtin')[require('lsp').is_active() and 'lsp_document_symbols' or 'treesitter']()<CR>" },
             { "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_dynamic_workspace_symbols({ symbols = { 'Class', 'Function', 'Method', 'Constructor', 'Interface', 'Module', 'Struct', 'Trait', 'Field', 'Property' } })<CR>" },
             { "<leader>fg", ":RgRegex " },
@@ -285,6 +288,7 @@ return {
                 theme.button("c", "Edit vimrc", "<Cmd>edit $MYVIMRC<CR>"),
                 theme.button("\\", "Open quickui", "<Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('normal')<CR>"),
                 theme.button("p", "Open Lazy UI", "<Cmd>Lazy<CR>"),
+                theme.button("P", "Open Lazy profile", "<Cmd>Lazy profile<CR>"),
                 theme.button("s", "Open Mason UI", "<Cmd>Mason<CR>"),
                 theme.button("U", "Update packages", "<Cmd>Lazy update<CR>"),
                 theme.button("R", "Load session", "<Cmd>call feedkeys(':SessionLoad', 'n')<CR>"),
@@ -317,21 +321,9 @@ return {
                 function()
                     local content = {
                         { "Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation" },
-                        { "References", "lua vim.lsp.buf.references()", "Show references" },
-                        { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
-                        { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
                         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
-                        { "Type definition", "lua vim.lsp.buf.type_definition()", "Go to type definition" },
                         { "Line diagnostic", "lua vim.diagnostic.open_float({ scope = 'line', border = 'single' })", "Show diagnostic of current line" },
                         { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
-                        { "--", "" },
-                        { "Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk" },
-                        { "Git hunk &undo", "lua require('gitsigns').reset_hunk()", "Git undo hunk" },
-                        { "Git hunk &add", "lua require('gitsigns').stage_hunk()", "Git stage hunk" },
-                        { "Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk" },
-                        { "Git buffer reset", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index" },
-                        { "Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line" },
-                        { "Git &remote", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | if $SSH_CLIENT == "" | .GBrowse | else | let @+=split(execute(".GBrowse!"), "\n")[-1] | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
                         { "--", "" },
                     }
                     local conflict_state = vim.fn["funcs#get_conflict_state"]()
@@ -339,7 +331,7 @@ return {
                         if conflict_state == "Ourselves" or conflict_state == "Themselves" then
                             table.insert(content, { "Git &conflict get", "ConflictMarker" .. conflict_state, "Get change from " .. conflict_state })
                         end
-                        table.insert(content, { "Git conflict get all", "ConflictMarkerBoth", "Get change from ours and theirs" })
+                        table.insert(content, { "Git conflict get &all", "ConflictMarkerBoth", "Get change from ours and theirs" })
                         table.insert(content, { "Git conflict remove", "ConflictMarkerNone", "Remove conflict" })
                         table.insert(content, { "--", "" })
                     end
@@ -373,6 +365,7 @@ return {
                 { "Search in &buffers", [[execute 'cexpr []' | call feedkeys(":bufdo vimgrepadd //g % | only | copen\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Search a pattern in all buffers, add to quickfix" },
                 { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
                 { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
+                { "Diff next buffer", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },
@@ -406,26 +399,6 @@ return {
                 { "Git search &all", [[call feedkeys(":Git log --all --name-status -S ''\<Left>", "n")]], "Search a string in all committed versions of files, command: git log -p --all -S '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
                 { "Git gre&p all", [[call feedkeys(":Git log --all --name-status -i -G ''\<Left>", "n")]], "Search a regex in all committed versions of files, command: git log -p --all -i -G '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
                 { "Git fi&nd files all", [[call feedkeys(":Git log --all --name-status -- '**'\<Left>\<Left>", "n")]], "Grep file names in all commits" },
-                { "Git root", [[Grt]], "Change current directory to git root" },
-            })
-            vim.fn["quickui#menu#install"]("&Toggle", {
-                { "Quickfix             %{empty(filter(getwininfo(), 'v:val.quickfix')) ? '[ ]' : '[x]'}", [[execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"]] },
-                { "Location list        %{empty(filter(getwininfo(), 'v:val.loclist')) ? '[ ]' : '[x]'}", [[execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"]] },
-                { "Set &diff             %{&diff ? '[x]' : '[ ]'}", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
-                { "Set scr&ollbind       %{&scrollbind ? '[x]' : '[ ]'}", [[execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"]], "Toggle scrollbind in current tab" },
-                { "Set &wrap             %{&wrap ? '[x]' : '[ ]'}", [[set wrap!]], "Toggle wrap lines" },
-                { "Set &paste            %{&paste ? '[x]' : '[ ]'}", [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]], "Toggle paste mode" },
-                { "Set &spelling         %{&spell ? '[x]' : '[ ]'}", [[set spell!]], "Toggle spell checker (z= to auto correct current word)" },
-                { "Set &virtualedit      %{&virtualedit=~#'all' ? '[x]' : '[ ]'}", [[execute &virtualedit=~#"all" ? "set virtualedit=block" : "set virtualedit=all"]], "Toggle virtualedit" },
-                { "Set preview          %{&completeopt=~'preview' ? '[x]' : '[ ]'}", [[execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"]], "Toggle function preview" },
-                { "Set &cursorline       %{&cursorline ? '[x]' : '[ ]'}", [[set cursorline!]], "Toggle cursorline" },
-                { "Set cursorcol&umn     %{&cursorcolumn ? '[x]' : '[ ]'}", [[set cursorcolumn!]], "Toggle cursorcolumn" },
-                { "Set light &background %{&background=~'light' ? '[x]' : '[ ]'}", [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
-                { "Show cmdlin&e         %{&cmdheight==1 ? '[x]' : '[ ]'}", [[let &cmdheight = &cmdheight==1 ? 0 : 1]], "Toggle cmdheight" },
-                { "Reader &mode          %{get(g:, 'ReaderMode', 0) == 0 ? '[ ]' : '[x]'}", [[execute get(g:, "ReaderMode", 0) == 0 ? "nnoremap <nowait> d <C-d>\<bar>nnoremap u <C-u>" : "nunmap d\<bar>nunmap u" | let g:ReaderMode = 1 - get(g:, "ReaderMode", 0) | lua vim.notify("Reader mode " .. (vim.g.ReaderMode == 1 and "on" or "off"))]], "Toggle using 'd' and 'u' for '<C-d>' and '<C-u>' scrolling" },
-                { "--", "" },
-                { "&Indent line", [[IBLToggle]], "Toggle indent lines" },
-                { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
             })
             vim.fn["quickui#menu#install"]("Ta&bles", {
                 { "&Venn ascii draw", [[lua require("utils").toggle_venn()]], "Toggle venn.nvim, use HJKL to draw arrow, select area and use v to draw box" },
@@ -508,8 +481,6 @@ return {
                 { "Git &file history", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
                 { "Git l&og", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
                 { "Git &search", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | execute "Git log --all --name-status -S '" . substitute(funcs#get_visual_selection(), "'", "''", 'g') . "'"]], "Search selected in all committed versions of files" },
-                { "--", "" },
-                { "Git open &remote", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @+=split(execute("'<,'>GBrowse!"), "\n")[-1] | endif]], "Open remote url in browser" },
             })
             vim.fn["quickui#menu#install"]("Ta&bles", {
                 { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },

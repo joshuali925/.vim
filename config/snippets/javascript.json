@@ -51,7 +51,7 @@
   },
   "Empty arrow function": {
     "prefix": "arrow",
-    "body": ["() => { }"]
+    "body": ["() => {}"]
   },
   "Timeout": {
     "prefix": "timeout",

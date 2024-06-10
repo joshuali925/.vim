@@ -3990,6 +3990,9 @@ export MANROFFOPT='-c'
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>,", "<Cmd>lua MiniJump.jump(MiniJump.state.target, not MiniJump.state.backward, MiniJump.state.till, MiniJump.state.n_times)<CR><Cmd>lua MiniJump.state.backward = not MiniJump.state.backward<CR>", mode = { "n", "x", "o" } },
+            { "<leader>gd", "<Cmd>lua require('mini.diff').toggle_overlay()<CR>" },
+            { "<leader>ga", "<leader>gAig", remap = true },
+            { "<leader>gu", "<leader>gUig", remap = true },
             { "[m", "<Cmd>lua require('mini.visits').iterate_paths('backward')<CR>" },
             { "]m", "<Cmd>lua require('mini.visits').iterate_paths('forward')<CR>" },
             { "[M", "<Cmd>lua require('mini.visits').iterate_paths('first')<CR>" },
@@ -3998,6 +4001,7 @@ export MANROFFOPT='-c'
             -- { "<leader>mf", "<Cmd>lua require('mini.extra').pickers.visit_labels()<CR>" },
             -- { "<leader>ma", "<Cmd>lua require('mini.visits').add_label()<CR>" },
             -- { "<leader>md", "<Cmd>lua require('mini.visits').remove_label()<CR>" },
+            { "<leader>gf", "<Cmd>lua require('mini.git').show_at_cursor()<CR>", mode = { "n", "x" } },
         },
         config = function()
             require("mini.pairs").setup({ mappings = { [" "] = { action = "open", pair = "  ", neigh_pattern = "[%(%[{][%)%]}]" } } }) -- doesn't support triple quotes
@@ -4018,6 +4022,7 @@ export MANROFFOPT='-c'
                 " theme.button("R", "Load from last session", "<Cmd>lua MiniSessions.read()<CR>"),
                 " { "&Save session", [[call feedkeys(":lua MiniSessions.write('temp')\<Left>\<Left>", "n")]], "Save session using mini.nvim" },
                 " { "Load s&ession", [[lua MiniSessions.select()]], "Load session using mini.nvim" },
+            require("mini.git").setup() -- show_at_cursor needs current file committed
         end,
     },
 " hop.nvim
@@ -4405,6 +4410,35 @@ vim.keymap.set("n", "cxc", "<Cmd>call plugins#exchange#exchange_clear()<CR>")
             signs = { add = { hl = "BookMarksAdd", text = "󰈿" }, ann = { hl = "BookMarksAnn", text = "󱞂" } },
         },
     },
+local function show_git_log_for_lines()
+    local current_file = vim.fn.expand("%:p")
+    local start_line = vim.fn.line("v")
+    local end_line = vim.fn.line(".")
+    local line_range = start_line .. "," .. end_line
+    local git_cmd = "git log --no-merges -n 1 -L " .. vim.fn.shellescape(line_range .. ":" .. current_file)
+    local git_log = vim.fn.systemlist(git_cmd)
+    local popup_bufnr = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_option_value("filetype", "git", { buf = popup_bufnr })
+    vim.api.nvim_buf_set_lines(popup_bufnr, 0, -1, true, git_log)
+    local popup_winnr = vim.api.nvim_open_win(popup_bufnr, false, {
+        width = 50,
+        height = #git_log,
+        relative = "cursor",
+        row = 0,
+        col = 0,
+        style = "minimal",
+        border = "rounded"
+    })
+    vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "WinLeave" }, {
+        pattern = "*",
+        group = "AutoCommands",
+        once = true,
+        callback = function()
+            vim.api.nvim_win_close(popup_winnr, true)
+            vim.cmd.bdelete(popup_bufnr, true)
+        end
+    })
+end
 
 " =======================================================
 " 0.10 default
@@ -4443,6 +4477,36 @@ end
             nav = { preview = true, keymaps = { ["q"] = "actions.close" } },
         },
     },
+                        { "References", "lua vim.lsp.buf.references()", "Show references" },
+                        { "&Signautre", "lua vim.lsp.buf.signature_help()", "Show function signature help" },
+                        { "Implementation", "lua vim.lsp.buf.implementation()", "Go to implementation" },
+                        { "--", "" },
+                        { "Git hunk &diff", "lua require('gitsigns').preview_hunk()", "Git preview hunk" },
+                        { "Git hunk &undo", "lua require('gitsigns').reset_hunk()", "Git undo hunk" },
+                        { "Git hunk &add", "lua require('gitsigns').stage_hunk()", "Git stage hunk" },
+                        { "Git hunk reset", "lua require('gitsigns').undo_stage_hunk()", "Git undo stage hunk" },
+                        { "Git buffer reset", "lua require('gitsigns').reset_buffer_index()", "Git reset buffer index" },
+                        { "Git &blame", "lua require('gitsigns').blame_line({full = true})", "Git blame of current line" },
+                        { "Git &remote", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | if $SSH_CLIENT == "" | .GBrowse | else | let @+=split(execute(".GBrowse!"), "\n")[-1] | endif]], "Open remote url in browser, or copy to clipboard if over ssh" },
+            vim.fn["quickui#menu#install"]("&Toggle", {
+                { "Quickfix             %{empty(filter(getwininfo(), 'v:val.quickfix')) ? '[ ]' : '[x]'}", [[execute empty(filter(getwininfo(), "v:val.quickfix")) ? "copen" : "cclose"]] },
+                { "Location list        %{empty(filter(getwininfo(), 'v:val.loclist')) ? '[ ]' : '[x]'}", [[execute empty(filter(getwininfo(), "v:val.loclist")) ? "lopen" : "lclose"]] },
+                { "Set &diff             %{&diff ? '[x]' : '[ ]'}", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
+                { "Set scr&ollbind       %{&scrollbind ? '[x]' : '[ ]'}", [[execute &scrollbind ? "windo set noscrollbind" : "windo set scrollbind"]], "Toggle scrollbind in current tab" },
+                { "Set &wrap             %{&wrap ? '[x]' : '[ ]'}", [[set wrap!]], "Toggle wrap lines" },
+                { "Set &paste            %{&paste ? '[x]' : '[ ]'}", [[execute &paste ? "set nopaste number mouse=a signcolumn=yes" : "set paste nonumber norelativenumber mouse= signcolumn=no"]], "Toggle paste mode" },
+                { "Set &spelling         %{&spell ? '[x]' : '[ ]'}", [[set spell!]], "Toggle spell checker (z= to auto correct current word)" },
+                { "Set &virtualedit      %{&virtualedit=~#'all' ? '[x]' : '[ ]'}", [[execute &virtualedit=~#"all" ? "set virtualedit=block" : "set virtualedit=all"]], "Toggle virtualedit" },
+                { "Set preview          %{&completeopt=~'preview' ? '[x]' : '[ ]'}", [[execute &completeopt=~"preview" ? "set completeopt-=preview \<bar> pclose" : "set completeopt+=preview"]], "Toggle function preview" },
+                { "Set &cursorline       %{&cursorline ? '[x]' : '[ ]'}", [[set cursorline!]], "Toggle cursorline" },
+                { "Set cursorcol&umn     %{&cursorcolumn ? '[x]' : '[ ]'}", [[set cursorcolumn!]], "Toggle cursorcolumn" },
+                { "Set light &background %{&background=~'light' ? '[x]' : '[ ]'}", [[let &background = &background=="dark" ? "light" : "dark"]], "Toggle background color" },
+                { "Show cmdlin&e         %{&cmdheight==1 ? '[x]' : '[ ]'}", [[let &cmdheight = &cmdheight==1 ? 0 : 1]], "Toggle cmdheight" },
+                { "Reader &mode          %{get(g:, 'ReaderMode', 0) == 0 ? '[ ]' : '[x]'}", [[execute get(g:, "ReaderMode", 0) == 0 ? "nnoremap <nowait> d <C-d>\<bar>nnoremap u <C-u>" : "nunmap d\<bar>nunmap u" | let g:ReaderMode = 1 - get(g:, "ReaderMode", 0) | lua vim.notify("Reader mode " .. (vim.g.ReaderMode == 1 and "on" or "off"))]], "Toggle using 'd' and 'u' for '<C-d>' and '<C-u>' scrolling" },
+                { "--", "" },
+                { "&Indent line", [[IBLToggle]], "Toggle indent lines" },
+                { "&Rooter", [[lua require("rooter").toggle()]], "Toggle automatically change root directory" },
+            })
 
 " =======================================================
 fif() {  # find in file
@@ -4465,3 +4529,42 @@ lazypm2() {
   printf "%b\n" "${map[@]}" | fzf --ansi --height=100 --preview="awk '{print \$1}' <<< {} | xargs pm2 logs --raw --" --preview-window=80%,follow
 }
                 theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status | args `git ls-files --others --exclude-standard`<CR>]]),
+
+" =======================================================
+local function show_git_log_for_lines() -- does not handle modified file correctly
+    local current_file = vim.fn.expand("%:p")
+    local git_cmd = "git log --no-merges -n 1 -L " .. vim.fn.shellescape(("%s,%s:%s"):format(vim.fn.line("v"), vim.fn.line("."), current_file))
+    local git_log = vim.fn.systemlist(git_cmd)
+    local max_width = 0
+    for _, line in ipairs(git_log) do
+        local width = vim.fn.strdisplaywidth(line)
+        if width > max_width then
+            max_width = width
+        end
+    end
+    local popup_bufnr = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_option_value("filetype", "git", { buf = popup_bufnr })
+    vim.api.nvim_buf_set_lines(popup_bufnr, 0, -1, true, git_log)
+    local popup_winnr = vim.api.nvim_open_win(popup_bufnr, false, {
+        width = max_width,
+        height = #git_log,
+        relative = "cursor",
+        row = 0,
+        col = 0,
+        style = "minimal",
+        border = "rounded"
+    })
+    vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "WinLeave" }, {
+        pattern = "*",
+        group = "AutoCommands",
+        once = true,
+        callback = function()
+            if vim.api.nvim_win_is_valid(popup_winnr) then
+                vim.api.nvim_win_close(popup_winnr, true)
+            end
+            if vim.api.nvim_buf_is_valid(popup_bufnr) then
+                vim.api.nvim_buf_delete(popup_bufnr, { force = true })
+            end
+        end
+    })
+end
