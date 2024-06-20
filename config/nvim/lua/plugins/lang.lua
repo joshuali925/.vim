@@ -90,29 +90,6 @@ return {
                     },
                 },
             },
-            {
-                "j-hui/fidget.nvim",
-                init = function()
-                    vim.notify = (function(overridden)
-                        return function(...)
-                            local present, fidget = pcall(require, "fidget")
-                            if present then
-                                vim.notify = function(msg, level, opts)
-                                    if opts and opts["title"] then opts["annote"] = opts["title"] end
-                                    return fidget.notify(msg, level, opts)
-                                end
-                            else
-                                vim.notify = overridden
-                            end
-                            vim.notify(...)
-                        end
-                    end)(vim.notify)
-                end,
-                config = function()
-                    require("fidget").setup()
-                    vim.api.nvim_create_user_command("Notifications", "lua require('fidget.notification').show_history()", {})
-                end,
-            },
         },
         cond = require("states").small_file, -- prevent LSP loading on keys for large file
         keys = {
@@ -202,7 +179,8 @@ return {
                 select = {
                     enable = true,
                     keymaps = {
-                        ["if"] = "@call.outer",
+                        ["if"] = "@call.inner",
+                        ["af"] = "@call.outer",
                         ["iF"] = "@function.inner",
                         ["aF"] = "@function.outer",
                         ["ic"] = "@class.inner",

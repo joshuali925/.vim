@@ -3,11 +3,11 @@ vim.loader.enable()
 require("states")                  -- lua/themes.lua       plugins/appearance.lua
 vim.g.loaded_2html_plugin = 1      -- lua/states.lua       plugins/ui.lua
 vim.g.loaded_remote_plugins = 1    -- lua/lsp.lua          plugins/lang.lua
-vim.g.loaded_tutor_mode_plugin = 1 -- lua/rooter.lua       plugins/completion.lua
-vim.g.mapleader = ";"              -- lua/utils.lua        plugins/editing.lua
-vim.g.maplocalleader = "|"         -- autoload/funcs.vim   plugins/misc.lua
-vim.g.netrw_dirhistmax = 0         -- ginit.vim            plugins/git.lua
-vim.g.netrw_banner = 0
+vim.g.loaded_tutor_mode_plugin = 1 -- lua/utils.lua        plugins/completion.lua
+vim.g.mapleader = ";"              -- lua/rooter.lua       plugins/editing.lua
+vim.g.maplocalleader = "|"         -- lua/bookmarks.lua    plugins/misc.lua
+vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/git.lua
+vim.g.netrw_banner = 0             -- ginit.vim
 vim.g.netrw_browse_split = 4
 vim.g.netrw_preview = 1
 vim.g.netrw_alto = 0
@@ -59,7 +59,6 @@ vim.o.listchars = "tab:» ,nbsp:␣,trail:•"
 vim.o.timeoutlen = 1500
 vim.o.ttimeoutlen = 40
 vim.o.synmaxcol = 1000
-vim.o.lazyredraw = true
 vim.o.writebackup = false
 vim.o.wildcharm = 26 -- <C-z>
 vim.o.cedit = "<C-x>"
@@ -176,7 +175,6 @@ vim.keymap.set("n", "ZX", function()
     end
 end, { desc = "Close untouched buffers" })
 vim.keymap.set("i", "jk", "<Esc>")
-vim.keymap.set("i", "kj", "<Esc>")
 vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch<CR>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("x", "<C-c>", "<Esc>")
@@ -249,12 +247,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.api.nvim_create_autocmd("BufReadPost", {
     pattern = "*",
     group = "AutoCommands",
-    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | endif | endif | let b:RestoredCursor = 1]],
-})
-vim.api.nvim_create_autocmd("BufRead", {
-    group = "AutoCommands",
-    pattern = "*",
-    callback = function() vim.api.nvim_create_autocmd({ "InsertEnter", "BufModifiedSet" }, { buffer = 0, once = true, callback = function(opts) vim.b[opts.buf].bufpersist = 1 end }) end
+    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | endif | let b:RestoredCursor = 1]],
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
@@ -291,7 +284,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 })
 vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "term://*", group = "AutoCommands", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif]] })
-vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "AutoCommands", callback = require("rooter").root })
+vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "AutoCommands", callback = require("rooter").root, nested = true })
 
 -- commands {{{1
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
@@ -378,16 +371,17 @@ if require("states").small_file then
             vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
             vim.o.foldtext = "getline(v:foldstart).' ⋯'"
             vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
-            local plugins = { -- motions/text objects sometimes don't work if loaded on keys
+            local plugins = {
                 "vim-illuminate",
-                "conflict-marker.vim",
                 "indent-blankline.nvim",
                 "nvim-scrollview",
                 "gitsigns.nvim",
+                "git-conflict.nvim",
                 "quick-scope",
-                "mini.nvim",
             }
             require("lazy").load({ plugins = plugins })
+            vim.cmd.doautocmd("BufReadPost") -- mason and git-conflict need this when delay loaded
+            require("bookmarks").setup()
         end, 100)
     end)
 end

@@ -52,12 +52,11 @@ return {
     { "jbyuki/venn.nvim", cmd = "VBox" },
     {
         "rest-nvim/rest.nvim",
-        ft = "http",
-        dependencies = { "vhyrro/luarocks.nvim", config = true }, -- https://github.com/vhyrro/luarocks.nvim?tab=readme-ov-file#requirements, needs lua-devel and libcurl-devel
+        commit = "2d7bd3d398940ce2692941e6cd052c072207b9f9", -- TODO mistweaverco/kulala.nvim, oysandvik94/curl.nvim
         config = function() require("rest-nvim").setup({ skip_ssl_verification = true }) end,
     },
     {
-        "echasnovski/mini.nvim",
+        "echasnovski/mini.nvim", -- loaded when icons are used
         keys = {
             { "'", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.single_character) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
@@ -65,26 +64,14 @@ return {
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
             { "g<", "cxiacxiNag", remap = true },
             { "g>", "cxiaviao<C-c>cxinag", remap = true },
-            { "ma", "<Cmd>lua require('mini.visits').add_label()<CR>" },
-            { "mf", function()
-                require("mini.extra").pickers.visit_labels({}, {
-                    mappings = {
-                        remove = {
-                            char = "<C-d>",
-                            func = function()
-                                require("mini.visits").remove_label(require("mini.pick").get_picker_matches().current)
-                                require("mini.pick").stop()
-                                vim.cmd.normal("mf")
-                            end,
-                        }
-                    },
-                })
-            end },
-            { "<leader>fM", function()
-                local curr = vim.fn.expand("%:p")
-                require("mini.extra").pickers.visit_paths({ filter = function(path) return path.path ~= curr end })
-            end },
         },
+        init = function()
+            package.preload["nvim-web-devicons"] = function()
+                package.loaded["nvim-web-devicons"] = {}
+                require("mini.icons").mock_nvim_web_devicons()
+                return package.loaded["nvim-web-devicons"]
+            end
+        end,
         config = function()
             require("mini.extra").setup()
             require("mini.bufremove").setup()
@@ -109,8 +96,6 @@ return {
             require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
             require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
             require("mini.operators").make_mappings("replace", { textobject = "cp", line = "", selection = "" })
-            require("mini.pick").setup()
-            require("mini.visits").setup()
         end,
     },
 }

@@ -1,13 +1,28 @@
+local theme = require("themes").theme
 return {
-    { "folke/tokyonight.nvim", priority = 1000 },
-    { "projekt0n/github-nvim-theme", priority = 1000 },
-    { "askfiy/visual_studio_code", priority = 1000 },
-    { "Shatur/neovim-ayu", priority = 1000 },
-    { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
-    { "EdenEast/nightfox.nvim", priority = 1000 },
-    { "rebelot/kanagawa.nvim", priority = 1000 },
-    { "yorik1984/newpaper.nvim", priority = 1000 },
-    { "nvim-tree/nvim-web-devicons" },
+    { "folke/tokyonight.nvim", priority = 1000, enabled = theme == "tokyonight" },
+    { "projekt0n/github-nvim-theme", priority = 1000, enabled = theme == "github" },
+    { "askfiy/visual_studio_code", priority = 1000, enabled = theme == "vscode" },
+    { "Shatur/neovim-ayu", priority = 1000, enabled = theme == "ayu" },
+    { "catppuccin/nvim", name = "catppuccin", priority = 1000, enabled = theme == "catppuccin" },
+    { "EdenEast/nightfox.nvim", priority = 1000, enabled = theme == "nightfox" },
+    { "rebelot/kanagawa.nvim", priority = 1000, enabled = theme == "kanagawa" },
+    { "yorik1984/newpaper.nvim", priority = 1000, enabled = theme == "newpaper" },
+    {
+        "folke/noice.nvim",
+        event = "VeryLazy", -- delay loading causes screen to flicker on startup
+        opts = {
+            lsp = {
+                override = {
+                    ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+                    ["vim.lsp.util.stylize_markdown"] = true,
+                    ["cmp.entry.get_documentation"] = true,
+                },
+            },
+            presets = { bottom_search = true, command_palette = true, long_message_to_split = true, lsp_doc_border = true },
+            views = { mini = { timeout = 3500 } },
+        },
+    },
     {
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",

@@ -670,7 +670,7 @@ bin-update() {
 
 docker-shell() {
   if [[ $1 != vim* ]]; then
-    local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}")
+    local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}" --height=100% --border=none --preview-window=up,follow --preview='docker logs --follow --tail=10000 {1}')
     if [[ -n $selected_id ]]; then
       printf "\n → %s\n" "$selected_id"
       selected_id=$(awk '{print $1}' <<< "$selected_id")

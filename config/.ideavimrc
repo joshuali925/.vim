@@ -99,7 +99,6 @@ xnoremap < <gv
 xnoremap > >gv
 nnoremap gp `[v`]
 inoremap jk <Esc>
-inoremap kj <Esc>
 nnoremap <C-c> :nohlsearch<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>

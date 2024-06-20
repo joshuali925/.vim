@@ -15,6 +15,14 @@
       "print(string.format(\"Loop took %s seconds to run\", vim.fn.reltimestr(vim.fn.reltime(start_time))))"
     ]
   },
+  "Tail to file": {
+    "prefix": "print-tail",
+    "body": [
+      "local function print(message)",
+      "\tvim.fn.writefile({ message }, vim.uv.os_homedir() .. \"/.vim/tmp/tail\", \"a\")",
+      "end"
+    ]
+  },
   "Object to string": {
     "prefix": "object-to-string",
     "body": [

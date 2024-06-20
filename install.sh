@@ -12,7 +12,7 @@ NC='\033[0m'
 
 usage() {
   echo "usage: bash $0 [install <package> ...]"
-  echo '  package list: devtools, dotfiles, asdf, docker, java, python, node, tmux, neovim, swap, ssh-key'
+  compgen -A function | awk '/^install_/ { sub(/^install_/, ""); if (length(output) == 0) output = $0; else output = output ", " $0 } END { print "  packages list: " output }'
   exit 1
 }
 
@@ -28,12 +28,11 @@ install() {
   [[ $# -eq 0 ]] && usage
   init
   for package in "$@"; do
-    case $package in
-      devtools) install_development_tools ;;
-      ssh-key) setup_ssh_key ;;
-      dotfiles|asdf|docker|java|python|node|tmux|neovim|swap) install_"$package" ;;
-      *) log "Unknown package \"$package\", skipping.." ;;
-    esac
+    if declare -F "install_$package" > /dev/null; then
+      "install_$package"
+    else
+      log "Unknown package \"$package\", skipping.."
+    fi
   done
 }
 
@@ -106,7 +105,7 @@ install_asdf() {
   fi
 }
 
-install_development_tools() {
+install_devtools() {
   log '\nInstalling development tools..'
   if [[ $OSTYPE = linux-android ]]; then
     pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd tmux bat git-delta neovim
@@ -309,7 +308,17 @@ install_swap() {
   free -h
 }
 
-setup_ssh_key() {
+install_pm2() {
+  if [[ $PLATFORM != linux ]]; then
+    log 'Unsupported platform..'
+    return 0
+  fi
+  npm --prefix ~/.local/lib/node-packages install pm2
+  pm2 set pm2:autodump true
+  sudo -E "$(asdf which node)" "$(which pm2)" startup systemd -u "$USER" --hp "$HOME"
+}
+
+install_ssh-key() {
   ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
 }

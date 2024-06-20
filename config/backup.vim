@@ -4001,6 +4001,25 @@ export MANROFFOPT='-c'
             -- { "<leader>mf", "<Cmd>lua require('mini.extra').pickers.visit_labels()<CR>" },
             -- { "<leader>ma", "<Cmd>lua require('mini.visits').add_label()<CR>" },
             -- { "<leader>md", "<Cmd>lua require('mini.visits').remove_label()<CR>" },
+            { "ma", "<Cmd>lua require('mini.visits').add_label()<CR>" },
+            { "mf", function()
+                require("mini.extra").pickers.visit_labels({}, {
+                    mappings = {
+                        remove = {
+                            char = "<C-d>",
+                            func = function()
+                                require("mini.visits").remove_label(require("mini.pick").get_picker_matches().current)
+                                require("mini.pick").stop()
+                                vim.cmd.normal("mf")
+                            end,
+                        }
+                    },
+                })
+            end },
+            { "<leader>fM", function()
+                local curr = vim.fn.expand("%:p")
+                require("mini.extra").pickers.visit_paths({ filter = function(path) return path.path ~= curr end })
+            end },
             { "<leader>gf", "<Cmd>lua require('mini.git').show_at_cursor()<CR>", mode = { "n", "x" } },
         },
         config = function()
@@ -4568,3 +4587,84 @@ local function show_git_log_for_lines() -- does not handle modified file correct
         end
     })
 end
+    {
+        "tristone13th/lspmark.nvim",
+        lazy = false,
+        keys = {
+            { "ma", "<Cmd>lua require('lspmark.bookmarks').toggle_bookmark({with_comment=false})<CR>" }
+        },
+        config = true,
+    },
+    " use noice.nvim
+vim.o.lazyredraw = true
+            {
+                "j-hui/fidget.nvim",
+                init = function()
+                    vim.notify = (function(overridden)
+                        return function(...)
+                            local present, fidget = pcall(require, "fidget")
+                            if present then
+                                vim.notify = function(msg, level, opts)
+                                    if opts and opts["title"] then opts["annote"] = opts["title"] end
+                                    return fidget.notify(msg, level, opts)
+                                end
+                            else
+                                vim.notify = overridden
+                            end
+                            vim.notify(...)
+                        end
+                    end)(vim.notify)
+                end,
+                config = function()
+                    require("fidget").setup()
+                    vim.api.nvim_create_user_command("Notifications", "lua require('fidget.notification').show_history()", {})
+                end,
+            },
+    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
+
+" =======================================================
+    {
+        "rhysd/conflict-marker.vim",
+        config = function()
+            vim.g.conflict_marker_enable_mappings = 0
+            vim.g.conflict_marker_begin = "^<<<<<<< .*$"
+            vim.g.conflict_marker_common_ancestors = "^||||||| .*$"
+            vim.g.conflict_marker_end = "^>>>>>>> .*$"
+            vim.g.conflict_marker_highlight_group = ""
+            vim.cmd.doautocmd("BufReadPost") -- refresh highlights when delay loaded after treesitter
+        end,
+    },
+function! funcs#get_conflict_state() abort  " conflict-marker.vim
+  let current_styles = map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+  if match(current_styles, '^Conflict') != -1
+    if len(current_styles) == 2 && match(current_styles, '^ConflictMarkerBegin$') != -1 || len(current_styles) == 1 && match(current_styles, '^ConflictMarker\(Begin\|Ours\)$') != -1
+      return 'Ourselves'
+    elseif len(current_styles) == 2 && match(current_styles, '^ConflictMarkerEnd$') != -1 || len(current_styles) == 1 && match(current_styles, '^ConflictMarker\(End\|Theirs\)$') != -1
+      return 'Themselves'
+    endif
+    return 'AncestorOrSeparator'
+  endif
+  return ''
+endfunction
+        vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#427266" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#364f49" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestors", { bg = "#383838" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestorsHunk", { bg = "#282828" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#3a4f67" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#234a78" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#7ed9ae" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#94ffcc" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestors", { bg = "#bfbfbf" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestorsHunk", { bg = "#e5e5e5" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#b9d1fa" })
+        vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#86abeb" })
+                    local conflict_state = vim.fn["funcs#get_conflict_state"]()
+                    if conflict_state ~= "" then
+                        if conflict_state == "Ourselves" or conflict_state == "Themselves" then
+                            table.insert(content, { "Git &conflict get", "ConflictMarker" .. conflict_state, "Get change from " .. conflict_state })
+                        end
+                        table.insert(content, { "Git conflict get &all", "ConflictMarkerBoth", "Get change from ours and theirs" })
+                        table.insert(content, { "Git conflict remove", "ConflictMarkerNone", "Remove conflict" })
+                        table.insert(content, { "--", "" })
+                    end

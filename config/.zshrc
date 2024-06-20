@@ -64,7 +64,7 @@ autoload -Uz compinit && compinit -u
 zinit cdreplay -q
 
 typeset -U path PATH
-WORDCHARS=${WORDCHARS/\/}
+WORDCHARS=${WORDCHARS/=\/}
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=1000000
 SAVEHIST=1000000

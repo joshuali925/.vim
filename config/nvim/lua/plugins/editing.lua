@@ -40,7 +40,12 @@ return {
     },
     {
         "mg979/vim-visual-multi",
-        keys = { { "<C-n>", "<Plug>(VM-Find-Under)" }, { "<C-n>", "<Plug>(VM-Find-Subword-Under)", mode = "x" }, "<leader><C-n>" },
+        keys = { -- bug? when noice is loaded, using vim-visual-multi for the first time triggers a <CR>
+            { "<C-Down>", "<Plug>(VM-Add-Cursor-Down)" },
+            { "<C-n>", "<Plug>(VM-Find-Under)" },
+            { "<C-n>", "<Plug>(VM-Find-Subword-Under)", mode = "x" },
+            "<leader><C-n>",
+        },
         init = function()
             vim.g.VM_default_mappings = 0
             vim.g.VM_exit_on_1_cursor_left = 1

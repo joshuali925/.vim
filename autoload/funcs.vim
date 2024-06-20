@@ -69,19 +69,6 @@ function! funcs#grep(prg, pattern)
   endif
 endfunction
 
-function! funcs#get_conflict_state() abort  " conflict-marker.vim
-  let current_styles = map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
-  if match(current_styles, '^Conflict') != -1
-    if len(current_styles) == 2 && match(current_styles, '^ConflictMarkerBegin$') != -1 || len(current_styles) == 1 && match(current_styles, '^ConflictMarker\(Begin\|Ours\)$') != -1
-      return 'Ourselves'
-    elseif len(current_styles) == 2 && match(current_styles, '^ConflictMarkerEnd$') != -1 || len(current_styles) == 1 && match(current_styles, '^ConflictMarker\(End\|Theirs\)$') != -1
-      return 'Themselves'
-    endif
-    return 'AncestorOrSeparator'
-  endif
-  return ''
-endfunction
-
 function! funcs#home() abort
   let start = match(getline('.'), '\S')
   return start == -1 && col('.') == col('$') - 1 || start == col('.') - 1 ? '0' : '^'
@@ -196,7 +183,7 @@ function! funcs#get_run_command() abort
   endif
   let run_command['html'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'silent !open "$(VIM_FILEPATH)"'
-  let run_command['http'] = 'Rest run'
+  let run_command['http'] = 'lua require("rest-nvim").run()'
   let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
   return get(run_command, &filetype, '') . get(b:, 'args', '')
 endfunction
