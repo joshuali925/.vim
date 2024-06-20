@@ -2,7 +2,6 @@ git:
   autofetch: false
   paging:
     colorArg: always
-    # pager: diff-so-fancy
     pager: delta --paging=never --24-bit-color=always
   branchLogCmd: 'git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit {{branchName}} --'
   allBranchesLogCmd: 'git log --color --graph --abbrev-commit --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all'

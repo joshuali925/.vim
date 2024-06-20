@@ -77,6 +77,12 @@ function M.get_visual_selection()
     return table.concat(vim.fn.getregion(vim.fn.getpos("'<"), vim.fn.getpos("'>"), { type = vim.fn.visualmode() }), "\n")
 end
 
+function M.base64_decode(str)
+    local decoded = vim.base64.decode(str)
+    local ok, lines = pcall(vim.fn.split, decoded, "\n")
+    return ok and lines or { decoded }
+end
+
 function M.command_without_quickscope(command)
     if vim.g.qs_enable == 1 then
         vim.cmd.QuickScopeToggle()

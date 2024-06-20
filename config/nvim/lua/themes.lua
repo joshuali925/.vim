@@ -30,13 +30,23 @@ local themes = {
         config = function()
             require("tokyonight").setup({
                 style = theme_index < 0 and "storm" or "day",
-                styles = { comments = "NONE", keywords = "NONE" },
-                sidebars = sidebars,
+                styles = { comments = { italic = false }, keywords = { italic = false } },
                 on_colors = function(colors)
                     colors.comment = "#717993"
                 end,
+                on_highlights = function(hl, c)
+                    local prompt = "#2d3149"
+                    hl.TelescopeNormal = { bg = c.bg_dark, fg = c.fg_dark }
+                    hl.TelescopeBorder = { bg = c.bg_dark, fg = c.bg_dark }
+                    hl.TelescopePromptNormal = { bg = prompt }
+                    hl.TelescopePromptBorder = { bg = prompt, fg = prompt }
+                    hl.TelescopePromptTitle = { bg = prompt, fg = prompt }
+                    hl.TelescopePreviewTitle = { bg = c.bg_dark, fg = c.bg_dark }
+                    hl.TelescopeResultsTitle = { bg = c.bg_dark, fg = c.bg_dark }
+                end,
             })
             vim.cmd.colorscheme("tokyonight")
+            vim.api.nvim_set_hl(0, "CmpItemKindVariable", { link = "CmpItemKindFunction" })
         end,
     },
     ["github"] = {
@@ -118,27 +128,15 @@ local function highlight_plugins()
     if theme_index < 0 then
         vim.api.nvim_set_hl(0, "IblIndent", { fg = "#3b4261" })
         vim.api.nvim_set_hl(0, "IblScope", { fg = "#4f5778" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#427266" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#364f49" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestors", { bg = "#383838" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestorsHunk", { bg = "#282828" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#3a4f67" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#234a78" })
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#ffbe6d" })
         vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = "#6eb9e6" })
     else
         vim.api.nvim_set_hl(0, "IblIndent", { fg = "#d4d7d9" })
         vim.api.nvim_set_hl(0, "IblScope", { fg = "#c4c8cc" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerBegin", { bg = "#7ed9ae" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerOurs", { bg = "#94ffcc" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestors", { bg = "#bfbfbf" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerCommonAncestorsHunk", { bg = "#e5e5e5" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerTheirs", { bg = "#b9d1fa" })
-        vim.api.nvim_set_hl(0, "ConflictMarkerEnd", { bg = "#86abeb" })
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#916100" })
         vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = "#005e7d" })
     end
-    vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" })
+    vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" }) -- quickui
 end
 
 function M.config()
@@ -155,8 +153,8 @@ function M.switch(index)
     vim.g.theme_index = index
     theme_index = index
     M.theme = M.theme_list[index]
-    M.config()
-    M.config() -- some plugins like bufferline need a second config call
+    pcall(M.config) -- ignore errors because the select theme plugin might not be enabled
+    pcall(M.config) -- some plugins like bufferline need a second config call
     vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { annote = "Theme" })
 end
 

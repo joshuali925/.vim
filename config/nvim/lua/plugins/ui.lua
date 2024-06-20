@@ -193,6 +193,8 @@ return {
             { "<leader>f:", "<Cmd>lua require('telescope.builtin').command_history()<CR>" },
             { "<leader>fy", "<Cmd>lua require('telescope').extensions.yank_history.yank_history({initial_mode = 'normal'})<CR>" }, -- yanky.nvim
             { "<leader>fy", "dh<leader>fy", mode = "x", remap = true },
+            { "mf", "<Cmd>lua require('telescope').extensions.bookmarks.bookmarks({initial_mode = 'normal'})<CR>" },               -- ../telescope/_extensions/bookmarks.lua
+            { "mF", "<Cmd>lua require('telescope').extensions.bookmarks.bookmarks({global = true})<CR>" },
         },
         config = function()
             local actions = require("telescope.actions")
@@ -216,6 +218,11 @@ return {
                             ["."] = actions.preview_scrolling_up,
                             ["o"] = actions.select_default,
                             ["q"] = actions.close,
+                            ["<Tab>"] = function(prompt_bufnr)
+                                local picker = action_state.get_current_picker(prompt_bufnr)
+                                vim.keymap.set("n", "<Tab>", "<Cmd>noautocmd lua vim.api.nvim_set_current_win(" .. picker.prompt_win .. ")<CR>", { buffer = picker.previewer.state.bufnr })
+                                vim.cmd("noautocmd lua vim.api.nvim_set_current_win(" .. picker.previewer.state.winid .. ")")
+                            end,
                         },
                         i = {
                             ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
@@ -234,7 +241,8 @@ return {
                     prompt_prefix = "   ",
                     selection_caret = "  ",
                     layout_strategy = "vertical",
-                    layout_config = { vertical = { preview_height = 0.3 } },
+                    layout_config = { vertical = { prompt_position = "top", preview_height = 0.3 } },
+                    sorting_strategy = "ascending",
                     file_ignore_patterns = { ".git/", "node_modules/", "venv/", "vim/.*/doc/.*%.txt" },
                     dynamic_preview_title = true,
                     path_display = { "filename_first" },
@@ -249,6 +257,7 @@ return {
                 },
             })
             require("telescope").load_extension("fzf")
+            require("telescope").load_extension("bookmarks") -- ../telescope/_extensions/bookmarks.lua
         end,
     },
     {
@@ -319,24 +328,14 @@ return {
             {
                 "K",
                 function()
-                    local content = {
+                    vim.fn["quickui#context#open"]({
                         { "Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation" },
                         { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
                         { "Line diagnostic", "lua vim.diagnostic.open_float({ scope = 'line', border = 'single' })", "Show diagnostic of current line" },
                         { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
                         { "--", "" },
-                    }
-                    local conflict_state = vim.fn["funcs#get_conflict_state"]()
-                    if conflict_state ~= "" then
-                        if conflict_state == "Ourselves" or conflict_state == "Themselves" then
-                            table.insert(content, { "Git &conflict get", "ConflictMarker" .. conflict_state, "Get change from " .. conflict_state })
-                        end
-                        table.insert(content, { "Git conflict get &all", "ConflictMarkerBoth", "Get change from ours and theirs" })
-                        table.insert(content, { "Git conflict remove", "ConflictMarkerNone", "Remove conflict" })
-                        table.insert(content, { "--", "" })
-                    end
-                    table.insert(content, { "Built-in d&ocs", [[execute &filetype == "lua" ? "help " . expand('<cword>') : "normal! K"]], "Open vim built in help" })
-                    vim.fn["quickui#context#open"](content, { index = vim.g["quickui#context#cursor"] or -1 })
+                        { "Built-in d&ocs", [[execute &filetype == "lua" ? "help " . expand('<cword>') : "normal! K"]], "Open vim built in help" },
+                    }, { index = vim.g["quickui#context#cursor"] or -1 })
                 end,
             },
         },
@@ -434,7 +433,7 @@ return {
                 { "Lazy &update", [[Lazy update]], "Lazy update plugins" },
                 { "--", "" },
                 { "&Mason status", [[Mason]], "Mason status" },
-                { "Mason &install all", [[execute "lua require('lsp').lsp_install_all()"]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
+                { "Mason &install all", [[lua require('lsp').lsp_install_all()]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
                 { "--", "" },
                 { "Load indentscope", [[lua require("mini.indentscope").setup({ draw = { delay = 50 }, options = { try_as_border = true }, symbol = '▏' })]], "Load mini.indentscope" },
             })
@@ -471,7 +470,7 @@ return {
             vim.fn["quickui#menu#install"]("&Actions", {
                 { "&Format JSON", [['<,'>Prettier json]], "Use prettier to format selected text as JSON" },
                 { "Base64 &encode", [[execute "lua vim.fn.setreg('x', vim.base64.encode(require('utils').get_visual_selection()))" | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
-                { "Base64 &decode", [[execute "lua vim.fn.setreg('x', vim.base64.decode(require('utils').get_visual_selection()))" | execute 'S put x' | file base64_decode]], "Use base64 to decode selected text" },
+                { "Base64 &decode", [[lua local temp = require("utils").base64_decode(require("utils").get_visual_selection()); vim.cmd.S(); vim.api.nvim_put(temp, "", false, true); vim.api.nvim_buf_set_name(0, "base64_decode"); temp = nil]], "Decode selected text with base64" },
                 { "Generate &snippet", [[let @x = substitute(escape(funcs#get_visual_selection(), '"$'), repeat(' ', &shiftwidth), '\\t', 'g') | execute 'S put x' | execute '%normal! gI"' | execute '%normal! A",' | execute 'normal! Gdd$x' | file snippet_body]], "Generate vscode compatible snippet body from selected text" },
                 { "--", "" },
                 { "Search in &buffers", [[execute 'cexpr []' | execute 'bufdo vimgrepadd /' . substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g') . '/g %' | copen]], "Grep current search pattern in all buffers, add to quickfix" },

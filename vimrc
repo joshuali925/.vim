@@ -244,7 +244,6 @@ nnoremap ZX :%bdelete <bar> edit #<CR>
 nmap zh zhz
 nmap zl zlz
 inoremap jk <Esc>
-inoremap kj <Esc>
 nnoremap <C-c> <C-c>:nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> redraw!<CR>
 inoremap <C-c> <Esc>
 xnoremap <C-c> <Esc>
@@ -320,7 +319,7 @@ augroup AutoCommands
   autocmd!
   autocmd StdinReadPre * let s:std_in=1
   autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | if &filetype == 'netrw' | let g:should_quit_netrw = 1 | else | nnoremap <silent> <buffer> <CR> :nunmap <buffer> <lt>CR><bar>call <SID>Oldfiles()<CR>| endif | endif
-  autocmd BufEnter * execute g:RooterCmd
+  autocmd BufEnter * ++nested execute g:RooterCmd
   autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line('$') | execute "normal! g`\"" | endif
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
   autocmd FileType * setlocal formatoptions=rjql

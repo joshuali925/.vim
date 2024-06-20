@@ -55,7 +55,7 @@
 	autoSquash = true
 
 [merge]
-	; conflictstyle = diff3
+	conflictstyle = diff3
 	tool = vimdiff
 
 [diff]

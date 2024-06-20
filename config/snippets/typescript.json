@@ -53,14 +53,22 @@
     ]
   },
   "Jest describe": {
-    "prefix": "describe",
+    "prefix": "desc",
     "body": [
       "describe('${1:${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}}', () => {",
-      "\tit('${2:should return true}', () => {",
+      "\tit('${2:should return true}', async () => {",
       "\t\texpect(true).toEqual(true);",
       "\t});",
       "});"
     ]
+  },
+  "Jest act": {
+    "prefix": "act",
+    "body": ["await act(async () => {", "\t$0", "});"]
+  },
+  "Jest clear all mocks": {
+    "prefix": "afterEach-clearAll",
+    "body": ["afterEach(() => {", "\tjest.clearAllMocks();", "});"]
   },
   "Custom error": {
     "prefix": "template-error",

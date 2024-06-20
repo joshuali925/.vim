@@ -43,7 +43,7 @@ run() {
     exec ./bin/opensearch-dashboards "${opts[@]}" "$@"
   fi
   if [[ -f opensearch_dashboards.d.ts ]]; then
-    if [[ -n $bootstrap ]]; then yarn osd bootstrap; fi
+    if [[ -n $bootstrap ]]; then yarn osd bootstrap || true; fi
     exec yarn start --no-base-path --run-examples "${opts[@]}" "$@"
   fi
 }
@@ -60,10 +60,14 @@ download() {
       *) filter+=" $1"; shift ;;
     esac
   done
-  local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management' 'opensearch-knn' 'opensearch-flow-framework' 'opensearch-skills')
-  local artifacts=("${core[@]}" "${opensearch_plugin[@]}" "${es[@]}")
+  local core=('opensearch' 'opensearch-dashboards') es=('elasticsearch' 'kibana') opensearch_plugin=('opensearch-security' 'opensearch-sql' 'opensearch-reports-scheduler' 'opensearch-observability' 'opensearch-job-scheduler' 'opensearch-alerting' 'opensearch-anomaly-detection' 'opensearch-ml' 'opensearch-notifications' 'opensearch-notifications-core' 'opensearch-index-management' 'opensearch-knn' 'opensearch-flow-framework' 'opensearch-skills') docker=('docker')
+  local artifacts=("${core[@]}" "${opensearch_plugin[@]}" "${es[@]}" "${docker[@]}")
 
   selected=$(printf "%s\n" "${artifacts[@]}" | fzf --query="${filter# }" --select-1 --bind='tab:down,btab:up') || return 1
+  if [[ ${docker[*]} = *${selected}* ]]; then
+    curl -fLO https://opensearch.org/samples/docker-compose.yml
+    return $?
+  fi
   if [[ ${es[*]} = *${selected}* ]]; then
     [[ $arch = x64 ]] && arch=x86_64 || arch=aarch64
     url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
