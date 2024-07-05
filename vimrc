@@ -149,6 +149,8 @@ xnoremap if v%va)ob
 onoremap <silent> if :normal vif<CR>
 xnoremap a5 iw%
 onoremap <silent> a5 :normal va5<CR>
+nnoremap gp `[v`]
+onoremap gp :silent normal gp<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -232,7 +234,6 @@ nnoremap U :execute 'earlier ' . v:count1 . 'f'<CR>
 xnoremap . :normal .<CR>
 xnoremap < <gv
 xnoremap > >gv
-nnoremap gp `[v`]
 nnoremap gf gF
 nnoremap gF gf
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
@@ -256,7 +257,7 @@ nmap <C-w><BS> :-tabmove<CR><C-w>
 nmap <C-w>\ :+tabmove<CR><C-w>
 nmap <C-n> <leader>ncgn
 xmap <C-n> <leader>ncgn
-nnoremap <C-o> :call <SID>EditCallback('lf')<CR>
+nnoremap <C-o> :call <SID>EditCallback('file_manager')<CR>
 noremap <leader>p "0p
 noremap <leader>P "0P
 " use ; to avoid typing delay if leader changed to ' '
@@ -290,7 +291,7 @@ xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
 xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
 xnoremap <leader>S :s/\%V//g<Left><Left><Left>
-nmap c<C-n> <leader>ncgn
+nmap cn <leader>ncgn
 xmap C <leader>ncgn
 nnoremap <leader>tu <C-^>
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
@@ -393,8 +394,8 @@ endfunction
 function! s:EditCallback(command) abort
   let sink = 'edit '
   let tempfile = tempname()
-  if a:command == 'lf'
-    execute 'silent !lf -last-dir-path="$HOME/.vim/tmp/last_result" -selection-path="' . fnameescape(tempfile) . '" "' . expand('%') . '"'
+  if a:command == 'file_manager'
+    execute 'silent !yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="' . fnameescape(tempfile) . '" "' . expand('%') . '"'
   elseif a:command == 'filetypes'
     let sink = 'set filetype='
     let $fzftemp = join(sort(map(globpath(&rtp, 'syntax/*.vim', 0, 1), 'fnamemodify(v:val, ":t:r")')), '\n')

@@ -149,9 +149,9 @@ endfunction
 function! funcs#jest_context() abort
   let pos = getcurpos()
   normal! $
-  let regex = '(''\zs[^'']\+\ze'
-  let desc_match = matchstr(getline(search('describe' . regex, 'cbnW')), 'describe' . regex)
-  let it_match = matchstr(getline(search('\(it\|test\)' . regex, 'cbnW')), '\(it\|test\)' . regex)
+  let regex = '([''"`]\zs[^''"`]\+\ze'
+  let desc_match = matchstr(getline(search('^\s*describe' . regex, 'cbnW')), 'describe' . regex)
+  let it_match = matchstr(getline(search('^\s*\(it\|test\)' . regex, 'cbnW')), '\(it\|test\)' . regex)
   call setpos('.', pos)
   return '"' . desc_match . ' ' . it_match . '"'
 endfunction

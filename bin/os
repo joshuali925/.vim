@@ -106,9 +106,13 @@ query() {
   request post "/_plugins/_$1" "$(jq --compact-output -n --arg query "${*:2}" '$ARGS.named')" | jq -C | less -RiMXF
 }
 
+sed() {
+  sd '("opensearchDashboardsVersion": ").*(",)' '${1}opensearchDashboards${2}' opensearch_dashboards.json
+}
+
 main() {
   case $1 in
-    run|download) "$@" ;;
+    run|download|sed) "$@" ;;
     d) download "${@:2}" ;;
     sql*|ppl*) query "$@" ;;
     get|put|post|delete|GET|PUT|POST|DELETE) request "$@" ;;

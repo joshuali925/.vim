@@ -1,6 +1,6 @@
 # shellcheck disable=1090,2015,2059,2148,2155,2164,2207
 source ~/.vim/config/z.sh
-source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS, LF_ICONS
+source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 if [[ -s $HOME/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh; fi
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
@@ -42,7 +42,7 @@ alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
 alias l='eza -lF --git --color=always --color-scale=size --icons --header --group-directories-first --time-style=long-iso --all --smart-group'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
-alias chmod\?='stat --printf "%a %n \n"'
+alias chmod\?='stat --printf "%a %n\n"'
 alias bell='echo -n -e "\a"'
 alias escape="sed 's/\\([\"\\]\\)/\\\\\\1/g'"  # escape "\ with backslash
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
@@ -53,7 +53,7 @@ alias less='less -RiM'
 alias v='$EDITOR'
 alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
-alias vlf='\vim +Explore'
+alias vtree='\vim +Explore'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
 alias venv='deactivate 2> /dev/null; findup venv >&2 || python3 -m venv venv; source "$(findup venv)/bin/activate"'
@@ -97,7 +97,6 @@ alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: /
 alias gco='git checkout'
 alias gcp='git cherry-pick'
 alias gd='git diff'
-alias gds='echo -e "\e[1;32mStaged\e[0m"; git diff --stat --staged; echo -e "\n\e[1;31mUnstaged or against given ref\e[0m"; git diff --stat'
 alias gdst='git diff --staged'
 alias gdt='GIT_EXTERNAL_DIFF=difft git diff'
 alias gdd='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
@@ -110,14 +109,12 @@ alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added 
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
 alias glall='find . -name .git -print -execdir git pull \;'
-alias glg='git log --stat'
-alias glgg='git log --graph --pretty=fuller'
-alias glgga='git log --graph --pretty=fuller --all'
+alias glg='git log --stat --graph --pretty=fuller'
+alias glga='git log --graph --pretty=fuller --all'
 alias glo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
 alias gloo='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --max-count 10'
 alias gloa='git log --color --graph --abbrev-commit --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ci)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)" --all | \less -RiMXF -p $(git show -s --format=%h)'
-# shellcheck disable=2142
-alias glx="git log --all --graph --decorate=short --date-order --color --pretty=format:\"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)\" | awk '{ split(\$0,arr,\"§\"); match(arr[2], /(\\([0-9a-z ,]+\\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf(\"%*s    %s %s %s\\n\", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p \$(git show -s --format=%h)"
+glx() { git log --all --graph --decorate=short --date-order --color --pretty=format:"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)" | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "${1:-$(git show -s --format=%h)}"; }
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmt='git mergetool --no-prompt'
@@ -125,7 +122,7 @@ alias gmerge-preview-log='git log --color --graph --pretty=format:"%Cred%h%Crese
 # shellcheck disable=2145
 gmerge-preview-diff() { git diff HEAD..."$@"; }  # diff between target and the common ancestor of HEAD and target
 # shellcheck disable=2145
-gmissing() { git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --cherry-pick --right-only HEAD..."$@"; }  # commits in target but not in HEAD and not cherry-picked to HEAD
+gmissing() { git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --cherry-pick --right-only HEAD..."$@"; }  # commits in target but not in HEAD and not cherry-picked to HEAD, similar to git cherry -v <target> HEAD
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
@@ -160,7 +157,6 @@ alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
-alias gwhere='echo -e "Previous tag:\n  $(git describe --tags --abbrev=0)\nBranches containing HEAD: $(git branch --color -a --contains HEAD)"'
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git foresta --style=10 | \less -RiMXF'
 alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --format=%h)'
@@ -169,6 +165,22 @@ alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
 st() { ssh -t "$@" '.vim/bin/tmux new -A -s 0'; }
+
+gds() {
+  if [[ $# -eq 0 ]]; then
+    echo -e "\e[1;32mStaged\e[0m"
+    git diff --stat --staged "$@"
+    echo -e "\n\e[1;31mUnstaged\e[0m"
+  fi
+  git diff --stat "$@"
+}
+
+gwhere() {
+  echo -en "\e[0;36mClosest tag before ${*:-HEAD}:\e[0m "
+  git describe --tags --abbrev=0 "${@:-HEAD}"
+  echo -e "\e[0;36mBranches containing ${*:-HEAD}:\e[0m"
+  git branch --color -a --contains "${@:-HEAD}"
+}
 
 gc() {
   [[ $# -eq 0 ]] && { git commit --signoff; return $?; }
@@ -212,10 +224,11 @@ gwt() {
 }
 
 glof() {
-  git log --graph --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit "$@" |
+  git log --graph --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all "$@" |
     fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='Press ` to toggle sort, C-y to copy commit, C-p , . to control preview' \
+    --header='Press ` to toggle sort, C-y to copy commit, C-t C-u to show surrounding items, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
+    --bind='ctrl-t:unbind(change)+track-current' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
@@ -224,8 +237,9 @@ glof() {
 grlf() {
   git reflog --color --date=human-local --pretty=format:"%Cred%h%Creset %C(037)%gD:%Creset %gs%Creset%C(auto)%d%Creset" "$@" | awk '!x[$1]++' |
     fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='Press ` to toggle sort, C-e to diff to HEAD, C-y to copy commit, C-p , . to control preview' \
+    --header='Press ` to toggle sort, C-e to diff to HEAD, C-y to copy commit, C-t C-u to show surrounding items, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
+    --bind='ctrl-t:unbind(change)+track-current' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --line-numbers --navigate)' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
@@ -242,7 +256,7 @@ grg() {
       *) break ;;
     esac
   done
-  git "${cmd:-log}" --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case "${search:--S}" "$@" | fzf --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern=\"'\"$1\"' delta --line-numbers)"
+  git "${cmd:-log}" --color --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --all --regexp-ignore-case "${search:--S}" "$@" | fzf --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never" --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern=\"'\"$'\022'$1\"' delta --line-numbers)"
 }
 
 gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
@@ -285,9 +299,11 @@ gh-backport() {
   { git cherry-pick -x "$sha" || git cherry-pick --continue; } && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
 }
 
-lf() {
-  local dir
-  dir="$(command lf -print-last-dir "$@")" && if [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+yy() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
+  yazi "$@" --cwd-file="$tmp"
+  if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  rm -f -- "$tmp"
 }
 
 size() {
@@ -357,7 +373,6 @@ sudorun() {
   fi
   case $cmd in
     v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
-    lf) EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which lf)" -last-dir-path="$HOME/.vim/tmp/last_result" -command 'set previewer' -command 'map i $less -RiM "$f"' "$@" ;;
     *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which "$cmd")" "$@" ;;
   esac
 }
@@ -427,21 +442,9 @@ print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f729679
 x() {
   for arg in "$@"; do
     if [[ -f $arg ]]; then
-      case $arg in
-        *.tar)                       tar xvf "$arg"     ;;
-        *.tar.gz | *.tgz)            tar xvzf "$arg"    ;;
-        *.tar.xz | *.xz)             tar xvJf "$arg"    ;;
-        *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$arg"    ;;
-        *.bz2)                       bunzip2 "$arg"     ;;
-        *.gz)                        gunzip "$arg"      ;;
-        *.zip)                       unzip "$arg"       ;;
-        *.rar)                       unrar x "$arg"     ;;
-        *.Z)                         uncompress "$arg"  ;;
-        *.7z)                        7z x "$arg"        ;;
-        *)                           echo "Unable to extract '$arg'" ;;
-      esac
+      xtract "$arg"
     else
-      tar czvf "$arg.tar.gz" "$arg"
+      tar czvf "${arg%%/}.tar.gz" "$arg"
     fi
   done
 }
@@ -453,10 +456,10 @@ X() {  # extract to a directory / compress without top directory
       local filename="$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)_$arg"
       command mkdir -pv "$dir"
       command mv -i "$arg" "$dir/$filename"
-      (cd "$dir" > /dev/null && x "$filename")
+      (cd "$dir" > /dev/null && xtract "$filename")
       command mv -n "$dir/$filename" "$arg"
     else
-      tar czvf "$arg.tar.gz" -C "$arg" .
+      tar czvf "${arg%%/}.tar.gz" -C "$arg" .
     fi
   done
 }

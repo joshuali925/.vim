@@ -63,6 +63,8 @@ xnoremap if v%va)ob
 onoremap <silent> if :normal vif<CR>
 xnoremap a5 iw%
 onoremap <silent> a5 :normal va5<CR>
+nnoremap gp `[v`]
+onoremap gp :silent normal gp<CR>
 xnoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
 onoremap <silent> ii :<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
 xnoremap <silent> ai :<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
@@ -131,7 +133,6 @@ nmap Y y$
 xnoremap . :normal .<CR>
 xnoremap < <gv
 xnoremap > >gv
-nnoremap gp `[v`]
 nnoremap <C-c> :nohlsearch<CR>
 nnoremap <C-f> :call VSCodeCall('editor.action.organizeImports') <bar> sleep 500m <bar> call VSCodeCall('editor.action.formatDocument')<CR>
 xnoremap <C-f> =
@@ -159,7 +160,7 @@ nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
-nmap c<C-n> <leader>ncgn
+nmap cn <leader>ncgn
 xmap C <leader>ncgn
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>

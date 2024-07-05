@@ -10,7 +10,7 @@ if [[ -n $GET_BASHRC ]]; then
   [[ -f $HOME/.bashrc ]] && source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
 
   .vim-clear-env() {
-    local config_paths=(~/.vim ~/.tmux ~/.zinit ~/.local/share/lf ~/.config/{lf,lazygit}) executable
+    local config_paths=(~/.vim ~/.tmux ~/.zinit ~/.local/share ~/.config/{yazi,lazygit}) executable
     [[ $(readlink -f "$HOME/.tmux.conf") = $HOME/.vim/config/.tmux.conf ]] && config_paths+=(~/.tmux.conf)
     for executable in ~/.local/bin/*; do
       [[ -f $HOME/.vim/bin/${executable##*/} ]] && config_paths+=("$HOME/.local/bin/${executable##*/}")
@@ -35,7 +35,7 @@ if [[ ! -f $HOME/.vim/config/.bashrc ]]; then
     echo '~/.vim already exists and is not empty, exiting..' >&2
     exit 1
   fi
-  mkdir -pv ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit} ~/.vim
+  mkdir -pv ~/.local/{bin,lib,share} ~/.vim
   curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C "$HOME/.vim" --strip-components=1
   if [[ -n $DOT_VIM_LOCAL_BIN ]]; then
     curl -fsSL https://raw.githubusercontent.com/junegunn/fzf/HEAD/shell/key-bindings.bash > ~/.vim/config/fzf/shell.bash && \

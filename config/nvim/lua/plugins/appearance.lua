@@ -36,7 +36,6 @@ return {
         "dstein64/nvim-scrollview",
         config = function()
             require("scrollview").setup({ signs_on_startup = { "diagnostics", "search" }, signs_max_per_row = 2, winblend_gui = 50 })
-            require("scrollview.contrib.gitsigns").setup()
         end
     },
     {

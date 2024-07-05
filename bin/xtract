@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+for arg in "$@"; do
+  case $arg in
+    *.tar)                       tar xvf "$arg"    ;;
+    *.tar.gz | *.tgz)            tar xvzf "$arg"   ;;
+    *.tar.xz | *.xz)             tar xvJf "$arg"   ;;
+    *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$arg"   ;;
+    *.bz2)                       bunzip2 "$arg"    ;;
+    *.gz)                        gunzip "$arg"     ;;
+    *.zip)                       unzip "$arg"      ;;
+    *.rar)                       unrar x "$arg"    ;;
+    *.Z)                         uncompress "$arg" ;;
+    *.7z)                        7z x "$arg"       ;;
+    *)                           echo "Unable to extract '$arg'" >&2 ;;
+  esac
+done

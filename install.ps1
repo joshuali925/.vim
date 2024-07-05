@@ -18,7 +18,7 @@ echo "To install and switch other versions: scoop install openjdk17; scoop reset
 scoop install ripgrep
 scoop install fzf
 scoop install fd
-scoop install lf
+scoop install yazi
 scoop install bat
 scoop install delta
 scoop install lazygit
@@ -53,13 +53,12 @@ Remove-Item "$env:USERPROFILE\zsh.zip"
 git clone --filter=blob:none https://github.com/joshuali925/.vim "$env:USERPROFILE\.vim"
 [Environment]::SetEnvironmentVariable("RIPGREP_CONFIG_PATH", "$env:USERPROFILE\.vim\config\.ripgreprc", "User")
 cmd /c mklink /J %USERPROFILE%\vimfiles %USERPROFILE%\.vim
-New-Item -ItemType Directory -Path "$env:APPDATA\lazygit", "$env:LOCALAPPDATA\lf", "$env:LOCALAPPDATA\Microsoft\Windows Terminal"
+New-Item -ItemType Directory -Path "$env:APPDATA\lazygit", "$env:LOCALAPPDATA\Microsoft\Windows Terminal"
 cmd /c mklink /H %USERPROFILE%\.gitconfig %USERPROFILE%\.vim\config\.gitconfig
 cmd /c mklink /H %USERPROFILE%\.tmux.conf %USERPROFILE%\.vim\config\.tmux.conf
 cmd /c mklink /H %APPDATA%\lazygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
-Copy-Item "$env:USERPROFILE\.vim\config\lfrc" "$env:LOCALAPPDATA\lf\lfrc"
+Copy-Item "$env:USERPROFILE\.vim\config\yazi" "$env:LOCALAPPDATA\yazi" -Recurse
 Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:USERPROFILE\scoop\apps\windows-terminal\current\settings\settings.json"
-cmd /c "echo set previewer '' >> %LOCALAPPDATA%\lf\lfrc"
 cmd /c "echo source ~/.vim/config/.zshrc >> %USERPROFILE%\.zshrc"
 cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.zshrc"
 cmd /c "echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc"

@@ -172,20 +172,20 @@
     "prefix": "var-length",
     "body": "\"\\${#${0:VAR}}\""
   },
-  "Remove first match in variable": {
-    "prefix": "var-remove-first-match",
+  "Remove prefix match in variable": {
+    "prefix": "var-remove-prefix-match",
     "body": "\"\\${${1:VAR}#${0:pattern}}\""
   },
-  "Remove first match in variable greedy": {
-    "prefix": "var-remove-first-match-greedy",
+  "Remove prefix match in variable greedy": {
+    "prefix": "var-remove-prefix-match-greedy",
     "body": "\"\\${${1:VAR}##${0:pattern}}\""
   },
-  "Remove last match in variable": {
-    "prefix": "var-remove-last-match",
+  "Remove suffix match in variable": {
+    "prefix": "var-remove-suffix-match",
     "body": "\"\\${${1:VAR}%${0:pattern}}\""
   },
-  "Remove last match in variable greedy": {
-    "prefix": "var-remove-last-match-greedy",
+  "Remove suffix match in variable greedy": {
+    "prefix": "var-remove-suffix-match-greedy",
     "body": "\"\\${${1:VAR}%%${0:pattern}}\""
   },
   "Substitute first match in variable": {

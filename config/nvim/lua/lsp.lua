@@ -122,11 +122,29 @@ function M.init()
                 })
             end
         end,
+        eslint = function()
+            register_server("eslint", {
+                on_attach = function(client, bufnr)
+                    local group = vim.api.nvim_create_augroup("LspFormatting", { clear = false })
+                    vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
+                    vim.api.nvim_create_autocmd("BufWritePre", { group = group, buffer = bufnr, command = "EslintFixAll" })
+                end,
+            })
+        end,
         yamlls = function()
             register_server("yamlls", { settings = { yaml = { keyOrdering = false } } })
         end,
         lua_ls = function()
             register_server("lua_ls", {
+                on_attach = function(client, bufnr)
+                    local group = vim.api.nvim_create_augroup("LspFormatting", { clear = false })
+                    vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
+                    vim.api.nvim_create_autocmd("BufWritePre", {
+                        group = group,
+                        buffer = bufnr,
+                        callback = function() require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000 }) end,
+                    })
+                end,
                 settings = {
                     Lua = {
                         runtime = { version = "LuaJIT", path = vim.split(package.path, ";") },

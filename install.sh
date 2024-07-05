@@ -108,7 +108,7 @@ install_asdf() {
 install_devtools() {
   log '\nInstalling development tools..'
   if [[ $OSTYPE = linux-android ]]; then
-    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd tmux bat git-delta neovim
+    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd lazygit tmux bat git-delta neovim
     chsh -s zsh "$(whoami)"
     mkdir -p ~/temp && cd ~/temp
     wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip && unzip JetBrainsMono.zip
@@ -139,8 +139,13 @@ install_devtools() {
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
     sed -i -e "1iFPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" ~/.zshrc
     log 'Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc'
+    defaults write -g com.apple.swipescrolldirection -bool false
     defaults write -g ApplePressAndHoldEnabled -bool false
-    log 'Disabled ApplePressAndHoldEnabled to support key repeats'
+    defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
+    defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
+    defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
+    defaults write -g NSAutomaticCapitalizationEnabled -bool false
+    log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
     # brew install --cask wezterm rectangle maccy snipaste trex karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
@@ -162,7 +167,7 @@ install_dotfiles() {
     git clone --filter=blob:none https://github.com/joshuali925/.vim.git "$HOME/.vim"
   fi
   log '\nCreating directories..'
-  mkdir -pv ~/.local/{bin,lib,share/lf} ~/.config/{lf,lazygit} ~/.ssh
+  mkdir -pv ~/.local/{bin,lib,share} ~/.config/lazygit ~/.ssh
   log '\nLinking configurations..'
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
   echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc
@@ -175,7 +180,7 @@ install_dotfiles() {
   link_file "$HOME/.vim/config/.tmux.conf" "$HOME/.tmux.conf" --relative
   link_file "$HOME/.vim/config/.gitconfig" "$HOME/.gitconfig" --relative
   link_file "$HOME/.vim/config/.ideavimrc" "$HOME/.ideavimrc" --relative
-  link_file "$HOME/.vim/config/lfrc" "$HOME/.config/lf/lfrc"
+  link_file "$HOME/.vim/config/yazi" "$HOME/.config/yazi"
   link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/.config/lazygit/config.yml"
   if [[ $PLATFORM = darwin ]]; then
     mkdir -p ~/Library/Application\ Support/lazygit "$HOME/.config/wezterm"
@@ -186,7 +191,7 @@ install_dotfiles() {
     link_file "$HOME/.vim/config/karabiner.json" "$HOME/.config/karabiner/assets/complex_modifications/karabiner.json"
   elif [[ $OSTYPE = linux-android ]]; then
     cat >> ~/.zshrc <<EOF
-export SSH_CLIENT=1 TMUX_NO_TPM=1 USER=$(whoami)  # https://github.com/gokcehan/lf/issues/108
+export SSH_CLIENT=1 TMUX_NO_TPM=1
 export EDITOR=vim
 
 bindkey '\ej' down-line-or-beginning-search

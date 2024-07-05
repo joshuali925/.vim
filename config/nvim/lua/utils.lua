@@ -97,12 +97,6 @@ function M.command_without_quickscope(command)
     end
 end
 
-function M.git_change_base(commit)
-    require("lazy").load({ plugins = "vim-flog" })
-    vim.cmd.Git({ args = { "difftool --name-status " .. commit }, bang = true })
-    require("gitsigns").change_base(commit, true)
-end
-
 function M.toggle_venn()
     vim.b.venn_enabled = vim.b.venn_enabled == nil and true or nil
     if vim.b.venn_enabled then
@@ -162,15 +156,15 @@ local function term_with_edit_callback(cmd, height, width, border)
     })
 end
 
-local lf_term, fzf_term, prev_height, prev_width
-function M.lf()
+local fm_term, fzf_term, prev_height, prev_width
+function M.file_manager()
     local height = vim.o.lines - 7
     local width = math.ceil(vim.o.columns * 9 / 10)
-    if lf_term == nil or prev_height ~= height or prev_width ~= width then
-        local cmd = ([[lf -last-dir-path="$HOME/.vim/tmp/last_result" -selection-path="%s" "%s"]]):format("%s", vim.fn.expand("%"))
-        lf_term = term_with_edit_callback(cmd, height, width)
+    if fm_term == nil or prev_height ~= height or prev_width ~= width then
+        local cmd = ([[yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="%s" "%s"]]):format("%s", vim.fn.expand("%"))
+        fm_term = term_with_edit_callback(cmd, height, width)
     end
-    lf_term:toggle()
+    fm_term:toggle()
 end
 
 function M.fzf(visual)

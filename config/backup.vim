@@ -3990,7 +3990,6 @@ export MANROFFOPT='-c'
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>,", "<Cmd>lua MiniJump.jump(MiniJump.state.target, not MiniJump.state.backward, MiniJump.state.till, MiniJump.state.n_times)<CR><Cmd>lua MiniJump.state.backward = not MiniJump.state.backward<CR>", mode = { "n", "x", "o" } },
-            { "<leader>gd", "<Cmd>lua require('mini.diff').toggle_overlay()<CR>" },
             { "<leader>ga", "<leader>gAig", remap = true },
             { "<leader>gu", "<leader>gUig", remap = true },
             { "[m", "<Cmd>lua require('mini.visits').iterate_paths('backward')<CR>" },
@@ -4032,7 +4031,6 @@ export MANROFFOPT='-c'
                     post = { read = function() vim.cmd.ScrollViewEnable() end, write = function() vim.cmd.ScrollViewEnable() end },
                 },
             })
-            require("mini.diff").setup({ view = { style = "sign", signs = { add = "▎", change = "░", delete = "▏" } }, mappings = { apply = "<leader>ga", reset = "<leader>gu", textobject = "ig", goto_first = "[G", goto_prev = "[g", goto_next = "]g", goto_last = "]G" }, options = { wrap_goto = true } }) -- no floating hunk diff
             require("mini.pick").setup()
             require("mini.extra").setup()
             vim.ui.select = require("mini.pick").ui_select
@@ -4042,6 +4040,37 @@ export MANROFFOPT='-c'
                 " { "&Save session", [[call feedkeys(":lua MiniSessions.write('temp')\<Left>\<Left>", "n")]], "Save session using mini.nvim" },
                 " { "Load s&ession", [[lua MiniSessions.select()]], "Load session using mini.nvim" },
             require("mini.git").setup() -- show_at_cursor needs current file committed
+            require("mini.statusline").setup({ -- refreshing too often
+                content = {
+                    active = function()
+                        local _, mode_hl  = MiniStatusline.section_mode({ trunc_width = 120 })
+                        local git         = MiniStatusline.section_git({ trunc_width = 40 })
+                        local diff        = MiniStatusline.section_diff({ trunc_width = 75 })
+                        local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+                        local lsp         = MiniStatusline.section_lsp({ trunc_width = 75 })
+                        local filename    = MiniStatusline.section_filename({ trunc_width = 140 })
+                        local fileinfo    = MiniStatusline.section_fileinfo({ trunc_width = 120 })
+                        local location    = MiniStatusline.section_location({ trunc_width = 75 })
+                        local search      = MiniStatusline.section_searchcount({ trunc_width = 75 })
+                        local clients     = {}
+                        for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+                            clients[#clients + 1] = client.name
+                        end
+                        local lsp_clients = #clients == 0 and "" or " " .. table.concat(clients, " ")
+                        return MiniStatusline.combine_groups({
+                            { hl = mode_hl, strings = { "󰀘" } },
+                            { hl = "MiniStatuslineFileinfo", strings = { filename } },
+                            "%<", -- Mark general truncate point
+                            { hl = "MiniStatuslineFilename", strings = { git, diff, diagnostics, lsp } },
+                            "%=", -- End left alignment
+                            { hl = "MiniStatuslineFilename", strings = { lsp_clients } },
+                            { hl = "MiniStatuslineDevinfo", strings = { fileinfo } },
+                            { hl = mode_hl, strings = { search, location } },
+                        })
+                    end
+                },
+                set_vim_settings = false,
+            })
         end,
     },
 " hop.nvim
@@ -4668,3 +4697,66 @@ endfunction
                         table.insert(content, { "Git conflict remove", "ConflictMarkerNone", "Remove conflict" })
                         table.insert(content, { "--", "" })
                     end
+" gitsigns
+    {
+        "lewis6991/gitsigns.nvim",
+        keys = {
+            { "[g", "<Cmd>lua require('gitsigns').prev_hunk()<CR>" },
+            { "]g", "<Cmd>lua require('gitsigns').next_hunk()<CR>" },
+            { "ig", ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
+            { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
+            { "<leader>ga", "<Cmd>lua require('gitsigns').stage_hunk()<CR>" },
+            { "<leader>gu", "<Cmd>lua require('gitsigns').reset_hunk()<CR>" },
+            { "<leader>gU", "<Cmd>lua require('gitsigns').undo_stage_hunk()<CR>" },
+            { "<leader>gb", "<Cmd>lua require('gitsigns').blame_line({full = true, ignore_whitespace = true})<CR>" },
+        },
+        opts = {
+            signs = { add = { text = "▎" }, change = { text = "░" }, delete = { text = "▏" }, topdelete = { text = "▔" }, changedelete = { text = "▒" } },
+            update_debounce = 250,
+            sign_priority = 13, -- higher priority than diagnostic signs
+        },
+    },
+            require("scrollview.contrib.gitsigns").setup()
+                { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
+                { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
+                { "Git toggle line blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
+                { "Git &changes since ref", [[call feedkeys(":lua require('utils').git_change_base('@')\<Left>\<Left>", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref), and show hunks based on ref instead of staged (to reset run :Gitsigns reset_base true)" },
+function M.git_change_base(commit)
+    require("lazy").load({ plugins = "vim-flog" })
+    vim.cmd.Git({ args = { "difftool --name-status " .. commit }, bang = true })
+    require("gitsigns").change_base(commit, true)
+end
+
+" async format on save
+local function setup_format_on_save(client, bufnr) -- https://sxyz.blog/nvim-async-formatting/, https://gist.github.com/sxyazi/b730a430e064c5eb59e7a0e76b587e38
+    local version = nil
+    local function on_formatted(err, result, ctx)
+        if err ~= nil then
+            require("vim.lsp.log").error(string.format("[%s] %d: %s", client.name, err.code, err.message))
+            return
+        end
+        if result == nil or not vim.api.nvim_buf_is_loaded(ctx.bufnr) or vim.api.nvim_buf_get_var(ctx.bufnr, "changedtick") ~= version then
+            return
+        end
+        vim.lsp.util.apply_text_edits(result, ctx.bufnr, "utf-16")
+        if vim.api.nvim_get_current_buf() == ctx.bufnr then
+            vim.b.format_saving = true
+            vim.cmd.update()
+            vim.b.format_saving = false
+        end
+    end
+    if client.supports_method("textDocument/formatting") then
+        local group = vim.api.nvim_create_augroup("LspFormatting", { clear = false })
+        vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
+        vim.api.nvim_create_autocmd("BufWritePost", {
+            group = group,
+            buffer = bufnr,
+            callback = function()
+                if vim.b.format_saving then return end
+                version = vim.api.nvim_buf_get_var(bufnr, "changedtick")
+                client.request("textDocument/formatting", vim.lsp.util.make_formatting_params(), on_formatted, bufnr)
+            end,
+        })
+    end
+end
+

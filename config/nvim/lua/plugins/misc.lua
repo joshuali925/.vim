@@ -64,6 +64,9 @@ return {
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
             { "g<", "cxiacxiNag", remap = true },
             { "g>", "cxiaviao<C-c>cxinag", remap = true },
+            { "<leader>gd", "<Cmd>lua require('mini.diff').toggle_overlay()<CR>" },
+            { "<leader>ga", "<leader>gAig", remap = true },
+            { "<leader>gu", "<leader>gUig", remap = true },
         },
         init = function()
             package.preload["nvim-web-devicons"] = function()
@@ -96,6 +99,11 @@ return {
             require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
             require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
             require("mini.operators").make_mappings("replace", { textobject = "cp", line = "", selection = "" })
+            require("mini.diff").setup({
+                view = { style = "sign", signs = { add = "▎", change = "░", delete = "▏" } },
+                mappings = { apply = "<leader>gA", reset = "<leader>gU", textobject = "ig", goto_first = "[G", goto_prev = "[g", goto_next = "]g", goto_last = "]G" },
+                options = { wrap_goto = true },
+            })
         end,
     },
 }

@@ -33,12 +33,13 @@ return {
             { "<leader>te", "<Cmd>lua require('utils').send_to_toggleterm()<CR>g@" },
             { "<leader>tee", "<Cmd>ToggleTermSendCurrentLine<CR>" },
             { "<leader>te", "<Cmd>ToggleTermSendVisualSelection<CR>", mode = "x" },
-            { "<C-o>", "<Cmd>lua require('utils').lf()<CR>" },
+            { "<C-o>", "<Cmd>lua require('utils').file_manager()<CR>" },
         },
         opts = {
             open_mapping = "<C-b>", -- <count><C-b> to open terminal in split
             auto_scroll = false,
             winbar = { enabled = true },
+            on_create = function() vim.o.signcolumn = "no" end,
         },
     },
     {
@@ -69,7 +70,7 @@ return {
                 UIInput.super.init(self, {
                     relative = { type = "buf", position = { row = params.position.line, col = params.position.character } }, -- avoid cursor shifting before on_submit
                     position = { row = 2, col = 0 },
-                    size = { width = math.max(20, vim.api.nvim_strwidth(default_value) + 7) },
+                    size = { width = math.max(20, vim.api.nvim_strwidth(default_value) + 15) },
                     border = { style = "rounded", text = { top = border_top_text, top_align = "left" } },
                     win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
                 }, {
@@ -151,7 +152,7 @@ return {
                 filesystem = {
                     filtered_items = { hide_dotfiles = false, hide_gitignored = false, hide_hidden = false },
                     hijack_netrw_behavior = "disabled",
-                    mappings = { ["-"] = "navigate_up", ["C"] = "set_root" },
+                    window = { mappings = { ["-"] = "navigate_up", ["C"] = "set_root" } },
                 },
                 document_symbols = { window = { mappings = { ["x"] = "none", ["d"] = "none" } } },
                 sources = { "filesystem", "buffers", "git_status", "document_symbols" },
@@ -225,6 +226,7 @@ return {
                             end,
                         },
                         i = {
+                            ["<C-s>"] = actions.to_fuzzy_refine,
                             ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
                             ["<Esc>"] = actions.close,
                             ["<C-u>"] = function() vim.cmd.stopinsert() end,
@@ -386,12 +388,7 @@ return {
                 { "Git file history", [[vsplit | execute "lua require('lazy').load({plugins = 'vim-flog'})" | 0Gclog]], "Browse previously committed versions of current file" },
                 { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
                 { "--", "" },
-                { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
-                { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
-                { "Git toggle line blame", [[lua require("gitsigns").toggle_current_line_blame()]], "Show blame of current line with gitsigns" },
-                { "--", "" },
                 { "Git &status", [[Git]], "Git status" },
-                { "Git &changes since ref", [[call feedkeys(":lua require('utils').git_change_base('@')\<Left>\<Left>", "n")]], "Load changed files since ref into quickfix (Git! difftool --name-status ref), and show hunks based on ref instead of staged (to reset run :Gitsigns reset_base true)" },
                 { "Diff&view", [[DiffviewOpen]], "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits" },
                 { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
                 { "--", "" },
