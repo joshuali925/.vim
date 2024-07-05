@@ -29,6 +29,7 @@ return {
                     python = { "black" },
                     java = { "google-java-format" },
                     kotlin = { "ktlint" },
+                    toml = { "taplo" },
                     ["_"] = { "trim_whitespace" },
                     config = function(bufnr)
                         if vim.fn.bufname(bufnr):match("^Caddyfile") ~= nil then return { "caddy" } end
@@ -38,6 +39,7 @@ return {
                 formatters = {
                     prettier = { options = { ft_parsers = { json = "json", jsonc = "json" } } },
                     caddy = { command = "caddy", args = { "fmt", "-" }, stdin = true },
+                    taplo = { args = { "format", "--option", "inline_table_expand=false", "-" } },
                 },
             })
             vim.api.nvim_create_user_command("Conform", function(args)
@@ -144,10 +146,11 @@ return {
             require("kommentary.config").configure_language("lua", { prefer_single_line_comments = true })
         end,
     },
+    { "nvim-treesitter/nvim-treesitter-context", keys = { { "yoC", "<Cmd>TSContextToggle<CR>" } }, opts = { enable = false, mode = "topline" } },
     {
         "nvim-treesitter/nvim-treesitter",
         build = ":TSUpdate",
-        dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
+        dependencies = "nvim-treesitter/nvim-treesitter-textobjects",
         opts = {
             ensure_installed = {
                 "lua",

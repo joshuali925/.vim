@@ -104,6 +104,7 @@ zstyle ':fzf-tab:*' popup-min-size 50 8
 
 compdef _dirs d
 compdef _command_names path
+compdef _git gds=git-diff
 compdef _git gc=git-commit
 compdef _git gwt=git-worktree
 
@@ -111,6 +112,11 @@ bracketed-paste() {
   zle .$WIDGET && LBUFFER=${LBUFFER%$'\n'}
 }
 zle -N bracketed-paste  # remove trailing new line in bracketed paste
+
+copy-line() {
+  echo -n $BUFFER | y
+}
+zle -N copy-line
 
 up-line-or-local-history() {
   zle set-local-history 1
@@ -125,20 +131,22 @@ down-line-or-local-history() {
 }
 zle -N down-line-or-local-history
 
-run-lf () {
-  local dir precmd
-  dir="$(command lf -print-last-dir < /dev/tty)" && if [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+run-file-manager () {
+  local precmd tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
+  yazi "$@" --cwd-file="$tmp" < /dev/tty
+  if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  rm -f -- "$tmp"
   for precmd in $precmd_functions; do
     $precmd
   done
   zle reset-prompt
 }
-zle -N run-lf
+zle -N run-file-manager
 
-bindkey '^o' run-lf
+bindkey '^o' run-file-manager
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
-bindkey '^[[H' beginning-of-line              # after exiting vim or lf started by zle,
+bindkey '^[[H' beginning-of-line              # after exiting vim started by zle,
 bindkey '^[[F' end-of-line                    # ^[OA (defined in oh-my-zsh keybindings) becomes ^[[A
 bindkey '^[[A' up-line-or-beginning-search
 bindkey '^[[B' down-line-or-beginning-search
@@ -148,6 +156,7 @@ bindkey '^[[3;2~' backward-delete-char        # <S-Del>
 bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
 bindkey '^u' backward-kill-line
+bindkey '^x^y' copy-line
 bindkey -s '^z' '%^m'
 bindkey '\el' forward-char                    # unbind <Esc>l = ls from oh-my-zsh key-bindings
 bindkey '^[[1;5C' emacs-forward-word          # <C-Right> to next word end. https://github.com/marlonrichert/zsh-edit seems incompatible with zinit

@@ -76,14 +76,16 @@ vim.keymap.set("x", "i<Space>", "iW")
 vim.keymap.set("o", "i<Space>", "iW")
 vim.keymap.set("x", "a<Space>", "aW")
 vim.keymap.set("o", "a<Space>", "aW")
-vim.keymap.set("x", "a5", "iw%")
-vim.keymap.set("o", "a5", "<Cmd>normal va5<CR>")
 vim.keymap.set("x", "il", "^og_")
 vim.keymap.set("o", "il", "<Cmd>normal vil<CR>")
 vim.keymap.set("x", "al", "0o$")
 vim.keymap.set("o", "al", "<Cmd>normal val<CR>")
 vim.keymap.set("x", "ae", "GoggV")
 vim.keymap.set("o", "ae", "<Cmd>normal vae<CR>")
+vim.keymap.set("x", "a5", "iw%")
+vim.keymap.set("o", "a5", "<Cmd>normal va5<CR>")
+vim.keymap.set("n", "gp", "`[v`]")
+vim.keymap.set("o", "gp", "<Cmd>normal gp<CR>")
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
@@ -162,7 +164,7 @@ vim.keymap.set("n", "U", "<Cmd>execute 'earlier ' . v:count1 . 'f'<CR>")
 vim.keymap.set("x", ".", ":normal .<CR>")
 vim.keymap.set("x", "<", "<gv")
 vim.keymap.set("x", ">", ">gv")
-vim.keymap.set("n", "gp", "`[v`]")
+vim.keymap.set("n", "gq", "gw")
 vim.keymap.set("n", "zn", "v:count > 0 ? '<Cmd>set foldlevel=' . v:count . '<CR>' : '<Cmd>%foldclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "gf", "gF")
 vim.keymap.set("n", "gF", "gf")
@@ -171,7 +173,7 @@ vim.keymap.set("n", "zl", "zlz", { remap = true })
 vim.keymap.set("n", "ZX", function()
     local cur = vim.api.nvim_get_current_buf()
     for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.bo[bufnr].buflisted and bufnr ~= cur and vim.b[bufnr].bufpersist ~= 1 then vim.fn["plugins#bbye#bdelete"]("bdelete", "", bufnr) end
+        if vim.bo[bufnr].buflisted and bufnr ~= cur and vim.b[bufnr].bufpersist ~= 1 then require("mini.bufremove").delete(bufnr, false) end
     end
 end, { desc = "Close untouched buffers" })
 vim.keymap.set("i", "jk", "<Esc>")
@@ -192,7 +194,7 @@ vim.keymap.set({ "n", "t" }, "<M-j>", "<Cmd>call plugins#tmux_navigator#resize('
 vim.keymap.set({ "n", "t" }, "<M-k>", "<Cmd>call plugins#tmux_navigator#resize('k')<CR>")
 vim.keymap.set({ "n", "t" }, "<M-l>", "<Cmd>call plugins#tmux_navigator#resize('l')<CR>")
 vim.keymap.set("n", "<C-f>", "<Cmd>lua require('lsp').organize_imports_and_format()<CR>")
-vim.keymap.set("x", "<C-f>", "<Cmd>Conform<CR>")
+vim.keymap.set("x", "<C-f>", "<Cmd>Conform<CR><Esc>")
 vim.keymap.set("x", "<leader>p", [["0p]])
 vim.keymap.set("x", "<leader>P", [["0P]])
 vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
@@ -204,7 +206,7 @@ vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
 vim.keymap.set("x", "<leader>s", [["xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/gc<Left><Left><Left>]])
 vim.keymap.set("x", "<leader>S", [[:s/\%V//g<Left><Left><Left>]])
-vim.keymap.set("n", "c<C-n>", "<leader>ncgn", { remap = true })
+vim.keymap.set("n", "cn", "<leader>ncgn", { remap = true })
 vim.keymap.set("x", "C", "<leader>ncgn", { remap = true })
 vim.keymap.set("n", "<leader>tu", "<C-^>")
 vim.keymap.set("n", "<leader>l", "<Cmd>call funcs#print_variable(0, 0)<CR>")
@@ -246,8 +248,8 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 vim.api.nvim_create_autocmd("BufReadPost", {
     pattern = "*",
-    group = "AutoCommands",
-    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | endif | let b:RestoredCursor = 1]],
+    group = "AutoCommands", -- do not restore cursor for fugitive (filetype git)
+    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") && &filetype != 'git' | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | endif | let b:RestoredCursor = 1]],
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
@@ -301,6 +303,7 @@ vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
+vim.api.nvim_create_user_command("JSON", "set filetype=json | Prettier", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
     local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
@@ -375,7 +378,6 @@ if require("states").small_file then
                 "vim-illuminate",
                 "indent-blankline.nvim",
                 "nvim-scrollview",
-                "gitsigns.nvim",
                 "git-conflict.nvim",
                 "quick-scope",
             }

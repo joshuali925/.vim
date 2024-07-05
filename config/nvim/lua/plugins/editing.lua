@@ -39,8 +39,8 @@ return {
         end
     },
     {
-        "mg979/vim-visual-multi",
-        keys = { -- bug? when noice is loaded, using vim-visual-multi for the first time triggers a <CR>
+        "mg979/vim-visual-multi", -- TODO try brenton-leighton/multiple-cursors.nvim, smoka7/multicursors.nvim
+        keys = {
             { "<C-Down>", "<Plug>(VM-Add-Cursor-Down)" },
             { "<C-n>", "<Plug>(VM-Find-Under)" },
             { "<C-n>", "<Plug>(VM-Find-Subword-Under)", mode = "x" },

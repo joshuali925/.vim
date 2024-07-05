@@ -26,11 +26,6 @@ shopt -s no_empty_cmd_completion
 
 HISTCONTROL=ignoreboth:erasedups:ignorespace
 
-__lf_cd__() {
-  local dir
-  dir="$(command lf -print-last-dir)" && if [[ -n "$dir" && "$dir" != "$PWD" ]]; then printf 'builtin cd -- %q' "$dir"; fi
-}
-
 # interactive settings. it's better to check interactive with [[ $- = *i* ]], but [[ -t 1 ]] is somewhat faster
 if [[ -t 1 ]]; then
   bind 'set show-all-if-ambiguous on'
@@ -47,12 +42,7 @@ if [[ -t 1 ]]; then
   bind '"\e[1;5D": backward-word'
   bind '"\e[1;5C": forward-word'
   bind '"\e[3;2~": backward-delete-char'
-  if [[ $OSTYPE = darwin* ]]; then
-    bind -x '"\C-o": "lf; pwd"'  # somehow bind C-o will not trigger on mac. using bind -x the prompt will not update
-  else
-    bind '"\er": redraw-current-line'
-    bind '"\C-o": " \C-b\C-k \C-u `__lf_cd__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
-  fi
+  bind -x '"\C-o": "_old_pwd=$PWD; yy; [[ $_old_pwd != $PWD ]] && pwd"'  # somehow bind C-o will not trigger on mac. need pwd because using bind -x the prompt will not update. __fzf_cd__ style won't allow opening vim in yazi
   stty -ixon  # disable Ctrl-S freeze
   stty werase undef  # unbind werase to C-w
   bind '"\C-w": unix-filename-rubout'

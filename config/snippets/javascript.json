@@ -128,6 +128,17 @@
       "const __dirname = path.dirname(__filename);"
     ]
   },
+  "Closure function": {
+    "prefix": "closure",
+    "body": [
+      "const ${1:func} = (() => {",
+      "\t${2:let local = 0;}",
+      "\treturn (${3:funcParam}) => {",
+      "\t\treturn ${4:local++};",
+      "\t};",
+      "})();"
+    ]
+  },
   "Promise pool": {
     "prefix": "template-promise-pool",
     "body": [

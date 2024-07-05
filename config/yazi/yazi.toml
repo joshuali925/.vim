@@ -1,0 +1,15 @@
+[manager]
+ratio = [1, 2, 3]
+sort_by = "natural"
+linemode = "size"
+show_hidden = true
+
+[preview]
+tab_size = 4
+
+[open]
+prepend_rules = [
+  { name = "*/", use = ["open", "reveal"] },
+  { mime = "{audio,video}/*", use = ["open", "reveal"] },
+  { name = "*", use = ["edit", "open", "reveal"] },
+]

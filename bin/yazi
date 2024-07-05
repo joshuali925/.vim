@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
+if [[ ! -f $HOME/.config/yazi/yazi.toml ]]; then
+  rm -rf ~/.config/yazi
+  ln -sv ~/.vim/config/yazi ~/.config/yazi
+fi
+
 source ~/.vim/bin/_install_from_github.sh
-install-from-github yazi sxyazi/yazi x86_64-unknown-linux-musl.zip aarch64-unknown-linux-musl.zip x86_64-apple-darwin aarch64-apple-darwin yazi-*/yazi "$@"
+# install-from-github yazi sxyazi/yazi x86_64-unknown-linux-musl.zip aarch64-unknown-linux-musl.zip x86_64-apple-darwin aarch64-apple-darwin yazi-*/yazi "$@"
+install-from-github yazi joshuali925/.vim yazi-linux-x86_64 yazi-linux-arm64 '' yazi-darwin-arm64 '' "$@"

@@ -3,10 +3,7 @@
     "prefix": "template",
     "description": "rest.nvim request variables",
     "body": [
-      "# ENV {{{",
-      "# vim:foldmethod=marker",
       "@BASE = ${1:localhost:8888}",
-      "# }}}",
       "",
       "$0",
       ""

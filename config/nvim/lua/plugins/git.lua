@@ -14,6 +14,7 @@ return {
         keys = {
             { "<leader>gf", "<Cmd>.Flogsplit<CR>" },
             { "<leader>gf", ":Flogsplit<CR>", mode = { "x" } },
+            { "<leader>gb", "<Cmd>0,.Git blame<CR>" },
             { "<leader>gr", [[<Cmd>if $SSH_CLIENT == "" | .GBrowse | else | let @+=split(execute(".GBrowse!"), "\n")[-1] | endif<CR>]] },
             { "<leader>gr", [[:<C-u>if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @+=split(execute("'<,'>GBrowse!"), "\n")[-1] | endif<CR>]], mode = { "x" } },
             { "<leader>gc", "<Cmd>Git commit --signoff<CR>" },
@@ -27,24 +28,6 @@ return {
                 callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
             })
         end,
-    },
-    {
-        "lewis6991/gitsigns.nvim",
-        keys = {
-            { "[g", "<Cmd>lua require('gitsigns').prev_hunk()<CR>" },
-            { "]g", "<Cmd>lua require('gitsigns').next_hunk()<CR>" },
-            { "ig", ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
-            { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
-            { "<leader>ga", "<Cmd>lua require('gitsigns').stage_hunk()<CR>" },
-            { "<leader>gu", "<Cmd>lua require('gitsigns').reset_hunk()<CR>" },
-            { "<leader>gU", "<Cmd>lua require('gitsigns').undo_stage_hunk()<CR>" },
-            { "<leader>gb", "<Cmd>lua require('gitsigns').blame_line({full = true, ignore_whitespace = true})<CR>" },
-        },
-        opts = {
-            signs = { add = { text = "▎" }, change = { text = "░" }, delete = { text = "▏" }, topdelete = { text = "▔" }, changedelete = { text = "▒" } },
-            update_debounce = 250,
-            sign_priority = 13, -- higher priority than diagnostic signs
-        },
     },
     { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },
     {

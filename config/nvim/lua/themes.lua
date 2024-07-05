@@ -31,17 +31,17 @@ local themes = {
             require("tokyonight").setup({
                 style = theme_index < 0 and "storm" or "day",
                 styles = { comments = { italic = false }, keywords = { italic = false } },
+                day_brightness = 0.2,
                 on_colors = function(colors)
                     colors.comment = "#717993"
                 end,
                 on_highlights = function(hl, c)
-                    local prompt = "#2d3149"
                     hl.TelescopeNormal = { bg = c.bg_dark, fg = c.fg_dark }
                     hl.TelescopeBorder = { bg = c.bg_dark, fg = c.bg_dark }
-                    hl.TelescopePromptNormal = { bg = prompt }
-                    hl.TelescopePromptBorder = { bg = prompt, fg = prompt }
-                    hl.TelescopePromptTitle = { bg = prompt, fg = prompt }
-                    hl.TelescopePreviewTitle = { bg = c.bg_dark, fg = c.bg_dark }
+                    hl.TelescopePromptNormal = { bg = c.bg_highlight }
+                    hl.TelescopePromptBorder = { bg = c.bg_highlight, fg = c.bg_highlight }
+                    hl.TelescopePromptTitle = { bg = c.blue, fg = c.bg_highlight, bold = true }
+                    hl.TelescopePreviewTitle = { bg = c.green, fg = c.bg_highlight, bold = true }
                     hl.TelescopeResultsTitle = { bg = c.bg_dark, fg = c.bg_dark }
                 end,
             })
