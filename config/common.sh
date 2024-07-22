@@ -161,6 +161,7 @@ alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(object
 alias gforest='git foresta --style=10 | \less -RiMXF'
 alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --format=%h)'
 alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply -3 patch.diff && rm patch.diff'
+alias grerere-forget='rm -rf .git/rr-cache'
 alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%Cred%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
@@ -299,7 +300,7 @@ gh-backport() {
   { git cherry-pick -x "$sha" || git cherry-pick --continue; } && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
 }
 
-yy() {
+yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yazi
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp"
   if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
