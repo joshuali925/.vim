@@ -4760,3 +4760,27 @@ local function setup_format_on_save(client, bufnr) -- https://sxyz.blog/nvim-asy
     end
 end
 
+" =======================================================
+" lfrc, use yazi
+# default shell is sh which doesn't support arrays and `<<<` herestring
+cmd zip ${{
+  set -f
+  echo "$fx" | {
+    while IFS= read -r filepath; do
+      set -- "$@" "$(realpath --relative-to='.' "$filepath")"
+    done
+    zip -r "${1}.zip" "$@"  # positional arguments only available in subshell from pipe
+  }
+}}
+" yazi get selected_or_hovered in plugin
+-- https://github.com/yazi-rs/plugins/tree/main/chmod.yazi
+local selected_or_hovered = ya.sync(function()
+    local tab, paths = cx.active, {}
+    for _, u in pairs(tab.selected) do
+        paths[#paths + 1] = tostring(u)
+    end
+    if #paths == 0 and tab.current.hovered then
+        paths[1] = tostring(tab.current.hovered.url)
+    end
+    return paths
+end)

@@ -200,7 +200,7 @@ return {
         config = function()
             local actions = require("telescope.actions")
             local action_state = require("telescope.actions.state")
-            local git_diff_ref = function(prompt_bufnr)
+            local function git_diff_ref(prompt_bufnr)
                 local selection = action_state.get_selected_entry()
                 if selection ~= nil then
                     actions.close(prompt_bufnr)
@@ -209,12 +209,20 @@ return {
                     end)
                 end
             end
-            -- TODO https://github.com/nvim-telescope/telescope.nvim/issues/416
+            local function scroll_results(direction)
+                return function(prompt_bufnr)
+                    local status = require("telescope.state").get_status(prompt_bufnr)
+                    local speed = status.picker.layout_config.scroll_speed or vim.api.nvim_win_get_height(status.results_win) / 2
+                    require("telescope.actions.set").shift_selection(prompt_bufnr, math.floor(speed) * direction)
+                end
+            end
             require("telescope").setup({
                 defaults = {
                     mappings = {
                         n = {
                             ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
+                            ["<C-d>"] = scroll_results(1),
+                            ["<C-u>"] = scroll_results(-1),
                             [","] = actions.preview_scrolling_down,
                             ["."] = actions.preview_scrolling_up,
                             ["o"] = actions.select_default,
@@ -242,6 +250,7 @@ return {
                     },
                     prompt_prefix = "   ",
                     selection_caret = "  ",
+                    multi_icon = "  ",
                     layout_strategy = "vertical",
                     layout_config = { vertical = { prompt_position = "top", preview_height = 0.3 } },
                     sorting_strategy = "ascending",

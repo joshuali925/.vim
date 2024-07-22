@@ -133,7 +133,7 @@ install_devtools() {
     brew install gawk && ln -s "$(which gawk)" ~/.local/bin/awk
     brew install gnu-tar && ln -s "$(which gtar)" ~/.local/bin/tar
     brew install wget
-    brew install bat fd shellcheck
+    brew install bat shellcheck
     brew tap homebrew/cask-fonts
     brew install font-jetbrains-mono-nerd-font
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
