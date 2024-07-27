@@ -42,8 +42,8 @@ return {
         "akinsho/bufferline.nvim",
         event = "BufEnter", -- VimEnter/UIEnter breaks '+<line>' argument in command line nvim when 'line' is large
         keys = {
-            { "<BS>", "<Cmd>BufferLineCyclePrev<CR>" },
-            { "\\", "<Cmd>BufferLineCycleNext<CR>" },
+            { "<BS>", "<Cmd>keepjumps BufferLineCyclePrev<CR>" },
+            { "\\", "<Cmd>keepjumps BufferLineCycleNext<CR>" },
             { "<C-w><BS>", ":BufferLineMovePrev<CR><C-w>", remap = true },
             { "<C-w>\\", ":BufferLineMoveNext<CR><C-w>", remap = true },
             { "Z[", "<Cmd>BufferLineCloseLeft<CR>" },
@@ -71,16 +71,13 @@ return {
                         { "filename", file_status = false, path = 1 },
                     },
                     lualine_c = {
-                        function() return " " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t") end,
+                        function() return " " .. vim.uv.cwd():match("^.+/(.+)$") end,
                         function()
                             local flags = ""
                             if vim.o.readonly then
                                 flags = flags .. "[RO]"
                             end
-                            if vim.o.paste then
-                                flags = flags .. "[paste]"
-                            end
-                            if vim.bo.fileencoding ~= "" and vim.bo.fileencoding ~= "utf-8" then
+                            if vim.bo.fileencoding ~= "utf-8" and vim.bo.fileencoding ~= "" then
                                 flags = flags .. "[fileencoding: " .. vim.bo.fileencoding .. "]"
                             end
                             if vim.bo.fileformat ~= "unix" then
@@ -91,7 +88,7 @@ return {
                             end
                             return ""
                         end,
-                        { "diff", symbols = { added = "  ", modified = "  ", removed = "  " } },
+                        { "diff", symbols = { added = " ", modified = " ", removed = " " } },
                         "diagnostics",
                     },
                     lualine_x = {
@@ -116,14 +113,15 @@ return {
                     lualine_z = {
                         {
                             function()
-                                local col = vim.fn.col(".")
+                                local cursor = vim.api.nvim_win_get_cursor(0)
+                                local col = cursor[2] + 1
                                 return string.format(
                                     "%s %s %s %s/%s",
                                     (vim.o.expandtab and " " or " ") .. vim.o.shiftwidth,
                                     states.untildone_count == 0 and "" or " " .. states.untildone_count,
                                     col < 10 and " " .. col or col,
-                                    vim.fn.line("."),
-                                    vim.fn.line("$")
+                                    cursor[1],
+                                    vim.api.nvim_buf_line_count(0)
                                 )
                             end,
                             padding = { left = 0, right = 1 },
@@ -140,7 +138,7 @@ return {
                     lualine_x = {
                         {
                             function()
-                                return string.format("%s/%s", vim.fn.line("."), vim.fn.line("$"))
+                                return string.format("%s/%s", vim.api.nvim_win_get_cursor(0)[1], vim.api.nvim_buf_line_count(0))
                             end,
                             color = "Normal",
                         },

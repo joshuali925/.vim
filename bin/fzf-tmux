@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-source ~/.vim/bin/_install_from_github.sh
-install-from-url fzf-tmux https://raw.githubusercontent.com/junegunn/fzf/HEAD/bin/fzf-tmux "$@"

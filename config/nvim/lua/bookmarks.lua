@@ -73,7 +73,8 @@ function M.create(annot)
     local file_name = vim.api.nvim_buf_get_name(0)
     if file_name == "" then return end
     if not M.bookmarks[file_name] then M.bookmarks[file_name] = {} end
-    local row, col = vim.fn.line(".") - 1, vim.fn.col(".") - 1
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local row, col = cursor[1] - 1, cursor[2] - 1
     local id = buf_set_extmark({ annot = annot, row = row, col = col })
     table.insert(M.bookmarks[file_name], {
         id = id,
@@ -90,7 +91,7 @@ function M.annote()
     local file_name = vim.api.nvim_buf_get_name(0)
     if file_name == "" then return end
     local prev_annot
-    local row = vim.fn.line(".") - 1
+    local row = vim.api.nvim_win_get_cursor(0)[1] - 1
     local extmarks = vim.api.nvim_buf_get_extmarks(0, ns_id, { row, 0 }, { row, -1 }, { details = true })
     for _, extmark in ipairs(extmarks) do
         local details = extmark[4]
@@ -119,7 +120,7 @@ end
 function M.delete(opts)
     opts = opts or {}
     local buf = opts.buf or 0
-    local row = opts.row or vim.fn.line(".") - 1
+    local row = opts.row or vim.api.nvim_win_get_cursor(0)[1] - 1
     local extmarks = vim.api.nvim_buf_get_extmarks(buf, ns_id, { row, 0 }, { row, -1 }, {})
     if #extmarks == 0 then
         return false

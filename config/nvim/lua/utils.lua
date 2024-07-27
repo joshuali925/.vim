@@ -161,7 +161,8 @@ function M.file_manager()
     local height = vim.o.lines - 7
     local width = math.ceil(vim.o.columns * 9 / 10)
     if fm_term == nil or prev_height ~= height or prev_width ~= width then
-        local cmd = ([[yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="%s" "%s"]]):format("%s", vim.fn.expand("%"))
+        local curr_file = vim.fn.expand("%")
+        local cmd = ([[yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="%s" "%s"]]):format("%s", curr_file ~= "" and curr_file or ".")
         fm_term = term_with_edit_callback(cmd, height, width)
     end
     fm_term:toggle()
