@@ -15,9 +15,8 @@ if has('gui_running')
   set guioptions=Mgt
   set guicursor+=a:blinkon0
   silent! set guifont=Consolas:h12:cANSI
-  let $VIM_SYSTEM_CLIPBOARD=1
-elseif has('win32') || has('win32unix')
-  let $VIM_SYSTEM_CLIPBOARD=1
+elseif !has('win32') && !has('win32unix')
+  let s:use_osc52=1
 endif
 
 let &t_ut = ''  " https://github.com/microsoft/terminal/issues/832
@@ -395,7 +394,11 @@ function! s:EditCallback(command) abort
   let sink = 'edit '
   let tempfile = tempname()
   if a:command == 'file_manager'
-    execute 'silent !yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="' . fnameescape(tempfile) . '" "' . expand('%') . '"'
+    let curr_file = expand('%')
+    if curr_file == ''
+      let curr_file = '.'
+    endif
+    execute 'silent !yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="' . fnameescape(tempfile) . '" "' . curr_file . '"'
   elseif a:command == 'filetypes'
     let sink = 'set filetype='
     let $fzftemp = join(sort(map(globpath(&rtp, 'syntax/*.vim', 0, 1), 'fnamemodify(v:val, ":t:r")')), '\n')
@@ -522,7 +525,7 @@ onoremap <silent> ia :call plugins#angry#list(',', 1, 0, v:count1)<CR>
 xnoremap <silent> ia :<C-u>call plugins#angry#list(',', 1, 0, v:count1, visualmode())<CR>
 onoremap <silent> aa :call plugins#angry#list(',', 1, 1, v:count1)<CR>
 xnoremap <silent> aa :<C-u>call plugins#angry#list(',', 1, 1, v:count1, visualmode())<CR>
-if $VIM_SYSTEM_CLIPBOARD != ''
+if !exists('s:use_osc52')
   nnoremap <leader>y "+y
   xnoremap <leader>y "+y
   nnoremap <leader>Y "+y$

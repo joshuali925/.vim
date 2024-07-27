@@ -6,7 +6,7 @@ return {
             "tpope/vim-rhubarb",
             {
                 "ja-he/heat.nvim",
-                opts = { colors = { [1] = { value = 0, color = { 0, 0, 0 } }, [2] = { value = 0.95, color = { 1, 1, 1 } }, [3] = { value = 1, color = { 1, 1, 0.6 } } } },
+                opts = { colors = { [1] = { value = 0, color = { 0, 0, 0 } }, [2] = { value = 0.95, color = { 0.7, 0.7, 0.7 } }, [3] = { value = 1, color = { 1, 1, 0.7 } } } },
             },
         },
         ft = "gitcommit", -- issue number omni-completion, does not work if cloned with url.replacement.insteadOf

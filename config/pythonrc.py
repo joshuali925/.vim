@@ -349,11 +349,8 @@ class ImprovedConsole(InteractiveConsole):
             # want to ignore the exception.
             pass
 
-        def append_history(len_at_start):
-            current_len = readline.get_current_history_length()
-            with open(config.HISTFILE, 'w') as fp:
-                pass
-            readline.append_history_file(current_len - len_at_start, config.HISTFILE)
+        def append_history():
+            readline.write_history_file(config.HISTFILE)
 
         if readline.get_current_history_length() == 0:
             # If no history was loaded, default to .python_history.
@@ -364,8 +361,7 @@ class ImprovedConsole(InteractiveConsole):
                 readline.read_history_file(config.HISTFILE)
             except IOError:
                 pass
-            len_at_start = readline.get_current_history_length()
-            atexit.register(append_history, len_at_start)
+            atexit.register(append_history)
 
         readline.set_history_length(config.HISTSIZE)
 

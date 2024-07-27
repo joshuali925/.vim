@@ -70,7 +70,7 @@ function M.init()
     require("mason-lspconfig").setup_handlers({
         register_server,
         jdtls = function()
-            local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+            local project_name = vim.fn.fnamemodify(vim.uv.cwd(), ":p:h:t")
             local workspace_dir = vim.fn.stdpath("cache") .. "/java/workspace/" .. project_name
             os.execute("mkdir -p " .. workspace_dir)
             local install_path = require("mason-registry").get_package("jdtls"):get_install_path()

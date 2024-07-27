@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github ya sxyazi/yazi x86_64-unknown-linux-musl.zip aarch64-unknown-linux-musl.zip x86_64-apple-darwin aarch64-apple-darwin 'yazi-*/ya yazi-*/yazi' "$@"

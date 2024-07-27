@@ -11,6 +11,7 @@ return {
             "hrsh7th/cmp-cmdline",
             "hrsh7th/cmp-vsnip",
             "rafamadriz/friendly-snippets",
+            { "Exafunction/codeium.nvim", config = true, enabled = vim.env.ENABLE_CODEIUM ~= nil },
             {
                 "hrsh7th/vim-vsnip",
                 init = function()
@@ -91,6 +92,7 @@ return {
                 Event = " ",
                 Operator = " ",
                 TypeParameter = " ",
+                Codeium = " ",
             }
             cmp.setup({
                 completion = { completeopt = "menuone,noinsert" },
@@ -150,6 +152,7 @@ return {
                     end, { "i", "s" }),
                 },
                 sources = {
+                    { name = "codeium" },
                     { name = "nvim_lsp" },
                     {
                         name = "nvim_lsp_signature_help",

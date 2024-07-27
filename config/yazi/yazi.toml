@@ -11,5 +11,4 @@ tab_size = 4
 prepend_rules = [
   { name = "*/", use = ["open", "reveal"] },
   { mime = "{audio,video}/*", use = ["open", "reveal"] },
-  { name = "*", use = ["edit", "open", "reveal"] },
 ]

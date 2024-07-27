@@ -261,8 +261,10 @@ return {
                 pickers = {
                     buffers = { mappings = { n = { ["dd"] = actions.delete_buffer } } },
                     find_files = { hidden = true, find_command = { "fd", "--type", "f", "--strip-cwd-prefix" } },
+                    oldfiles = { sorter = require("telescope.sorters").get_substr_matcher() },
                     filetypes = { theme = "dropdown" },
                     registers = { theme = "dropdown" },
+                    builtin = { theme = "dropdown" },
                     git_branches = { mappings = { i = { ["<C-e>"] = git_diff_ref } } },
                     git_commits = { mappings = { i = { ["<C-e>"] = git_diff_ref } } },
                 },
@@ -273,7 +275,7 @@ return {
     },
     {
         "goolord/alpha-nvim",
-        lazy = vim.fn.argc() ~= 0 or vim.fn.line2byte(vim.fn.line("$")) ~= -1,
+        lazy = vim.fn.argc() ~= 0 or vim.fn.line2byte(vim.api.nvim_buf_line_count(0)) ~= -1,
         config = function()
             local theme = require("alpha.themes.startify")
             theme.section.header.val = { -- https://textart.sh/

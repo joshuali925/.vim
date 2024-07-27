@@ -155,6 +155,7 @@ install_devtools() {
     # mousefix: https://mousefix.org
     # Orion: https://browser.kagi.com
     # coconutBattery: https://www.coconut-flavour.com/coconutbattery
+    # DarkModeBuddy: https://github.com/insidegui/DarkModeBuddy
     # update wezterm: brew upgrade --cask wezterm --no-quarantine --greedy-latest
   fi
   install_asdf

@@ -4784,3 +4784,18 @@ local selected_or_hovered = ya.sync(function()
     end
     return paths
 end)
+" auto set terminal background
+vim.api.nvim_create_autocmd({ "UIEnter", "ColorScheme" }, { -- https://www.reddit.com/r/neovim/comments/1ehidxy/you_can_remove_padding_around_neovim_instance
+    group = "AutoCommands",
+    callback = function()
+        local normal = vim.api.nvim_get_hl(0, { name = "Normal" })
+        if normal.bg then
+            local group = vim.api.nvim_create_augroup("ClearBG", {})
+            vim.api.nvim_create_autocmd("UILeave", { group = group, callback = function() io.write("\027]111\027\\") end })
+            io.write(string.format("\027]11;#%06x\027\\", normal.bg))
+        end
+    end,
+})
+" yazi follow file, doesn't normalize directory
+    local h = cx.active.current.hovered
+    if h.link_to ~= nil then return ya.manager_emit("reveal", { tostring(h.link_to) }) end
