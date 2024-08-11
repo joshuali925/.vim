@@ -92,7 +92,7 @@ install-archive-from-url() {
     *.tar.bz2 | *.tbz | *.tbz2)  extract_cmd="$tar_cmd xj -C $HOME/.local/bin"               ;;
     *.bz2)                       extract_cmd="bunzip2 | tee $HOME/.local/bin/$executable"    ;;
     *.gz)                        extract_cmd="gunzip | tee $HOME/.local/bin/$executable"     ;;
-    *.zip)                       extract_cmd="tee $HOME/.local/bin/${executable}.archive > /dev/null && unzip -j -d $HOME/.local/bin $HOME/.local/bin/${executable}.archive $extract_flags && rm $HOME/.local/bin/${executable}.archive; echo" ;;
+    *.zip)                       extract_cmd="tee $HOME/.local/bin/${executable}.archive > /dev/null && unzip -j -o -d $HOME/.local/bin $HOME/.local/bin/${executable}.archive $extract_flags && rm $HOME/.local/bin/${executable}.archive; echo" ;;
     *.7z)                        extract_cmd="tee $HOME/.local/bin/${executable}.archive > /dev/null && 7z e -o$HOME/.local/bin $HOME/.local/bin/${executable}.archive $extract_flags && rm $HOME/.local/bin/${executable}.archive; echo" ;;
     *.Z)                         extract_cmd="uncompress | tee $HOME/.local/bin/$executable" ;;
     *)                           extract_cmd="tee $HOME/.local/bin/$executable"              ;;

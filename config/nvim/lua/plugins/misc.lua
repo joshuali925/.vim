@@ -51,9 +51,11 @@ return {
     },
     { "jbyuki/venn.nvim", cmd = "VBox" },
     {
-        "rest-nvim/rest.nvim",
-        commit = "2d7bd3d398940ce2692941e6cd052c072207b9f9", -- TODO mistweaverco/kulala.nvim, oysandvik94/curl.nvim
-        config = function() require("rest-nvim").setup({ skip_ssl_verification = true }) end,
+        "mistweaverco/kulala.nvim",
+        config = function()
+            require("kulala").setup({ default_view = "headers_body", additional_curl_options = { "--insecure" } })
+            vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
+        end,
     },
     {
         "echasnovski/mini.nvim", -- loaded when icons are used

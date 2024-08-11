@@ -1,4 +1,4 @@
-vim.g.theme_index = -1
+vim.g.theme_index = -2
 -- keep theme_index at the top for substitution
 
 if vim.env.LIGHT_THEME == "1" and vim.g.theme_index < 0 then
@@ -22,6 +22,7 @@ vim.g.qs_filetype_blacklist = {
     "fugitiveblame",
     "dropbar_menu",
     "minifiles",
+    "noice",
 }
 vim.g.qs_buftype_blacklist = { "terminal" }
 

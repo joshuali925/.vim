@@ -153,7 +153,7 @@ alias gexclude2='git update-index --assume-unchanged'
 alias gexcluded2='git ls-files -v | grep "^[[:lower:]]"'
 alias gunexclude2='git update-index --no-assume-unchanged'
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
-alias gunshallow='git remote set-branches origin "*" && git fetch -v && echo -e "\nRun \"git fetch --unshallow\" to fetch all history"'
+alias gunshallow='if [[ "$(git config --local --get remote.origin.partialclonefilter)" = blob:none ]]; then git fetch --no-filter --refetch; else git remote set-branches origin "*" && git fetch -v && echo -e "\nRun \"git fetch --unshallow\" to fetch all history"; fi'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m "--wip--"'
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
@@ -204,7 +204,7 @@ gcb() {
     awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
     fzf --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
     --header='Press ` to toggle sort' \
-    --preview='git log -n 50 --color --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit $(sed "s/.* //" <<< {})' | sed "s/.* //")
+    --preview="git log -n 50 --color --graph --pretty=format:'$_GIT_LOG_FORMAT' --abbrev-commit \$(sed 's/.* //' <<< {})" | sed "s/.* //")
   [[ -z $fzftemp ]] && return 1
   [[ $fzftemp = remotes/* ]] && local remote="${fzftemp#remotes/}" && branch="${remote#[^\/]*/}" || branch="$fzftemp"  # remote: <remote>/<branch>; branch: <branch>
   if git show-ref --verify --quiet "refs/heads/$branch"; then  # <branch> exists, switch if tracking <remote> or create as <remote>-<branch>
@@ -284,15 +284,31 @@ gr-toggle-url() {
 }
 
 gpr() {
-  if [[ $# -lt 1 ]]; then echo "Usage: $0 {PR-number|PR-URL} [remote]" >&2; return 1; fi
-  local pr=${1##*/}
-  if ! git rev-parse --git-dir > /dev/null 2>&1; then
+  if [[ $# -lt 1 ]]; then echo "Usage: $0 [-d|--diff|-p|--patch] {<PR-number>|<PR-URL>} [<remote>]" >&2; return 1; fi
+  local rest=()
+  for arg in "$@"; do
+    case $arg in
+      -d|--diff) local reset=1 ;;
+      -p|--patch) local patch=1 ;;
+      *) rest+=("$arg") ;;
+    esac
+  done
+  set -- "${rest[@]}"
+  local pr=${1##*/} remote=${2:-origin}
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then  # clone a new directory for PR if not in git
     local repo=${1%/pull/*}
     git clone --filter=blob:none "$repo" "${repo##*/}-$pr"
     cd "${repo##*/}-$pr" > /dev/null || return 1
   fi
   git stash push --include-untracked --message 'git PR temporary stash'
-  git fetch "${2:-origin}" "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
+  if [[ -n $patch ]]; then  # directly patch the diff from PR
+    curl -fsSL "$(git remote get-url "$remote" | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//')/pull/${pr}.diff" | git apply -3
+    return $?
+  fi
+  git fetch "$remote" "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
+  if [[ -n $reset ]]; then  # reset to the common ancestor of HEAD and remote default branch
+    git reset "$(git merge-base HEAD "$remote"/HEAD)"
+  fi
 }
 
 gh-backport() {
@@ -562,6 +578,15 @@ t() {  # create, restore, or switch tmux session
   ln -sf "$fzftemp" ~/.local/share/tmux/resurrect/last && tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" && tmux attach-session
 }
 
+tmux-rerun() {
+  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <command>" >&2; return 1; fi
+  for pane in $(tmux list-panes -a -f "#{==:#{pane_current_command},$1}" -F '#D'); do  # for index-based ref use #S:#I.#P
+    tmux send-keys -t "${pane}" -X cancel 2>/dev/null
+    tmux send-keys -t "${pane}" c-c
+    tmux send-keys -t "${pane}" s-up enter
+  done
+}
+
 man() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
@@ -680,11 +705,11 @@ bin-update() {
 
 docker-shell() {
   if [[ $1 != vim* ]]; then
-    local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}" --height=100% --border=none --preview-window=up,follow --preview='docker logs --follow --tail=10000 {1}')
+    local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}" --height=100% --border=none --preview-window=up,70%,follow --preview='docker logs --follow --tail=10000 {1}')
     if [[ -n $selected_id ]]; then
       printf "\n → %s\n" "$selected_id"
       selected_id=$(awk '{print $1}' <<< "$selected_id")
-      docker exec -it "$selected_id" /bin/sh -c 'eval $(grep ^$(id -un): /etc/passwd | cut -d : -f 7-)' || docker exec -it "$selected_id" sh
+      docker exec -it "$selected_id" /bin/sh -c 'eval $(set -o pipefail; grep ^$(id -un): /etc/passwd | cut -d : -f 7- || echo sh)' || docker exec -it "$selected_id" sh
     fi
     return $?
   fi

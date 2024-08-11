@@ -6,11 +6,11 @@ return {
             "tpope/vim-rhubarb",
             {
                 "ja-he/heat.nvim",
-                opts = { colors = { [1] = { value = 0, color = { 0, 0, 0 } }, [2] = { value = 0.95, color = { 0.7, 0.7, 0.7 } }, [3] = { value = 1, color = { 1, 1, 0.7 } } } },
+                opts = { colors = { [1] = { value = 0, color = { 0, 0, 0 } }, [2] = { value = 0.95, color = { 0.75, 0.75, 0.75 } }, [3] = { value = 1, color = { 1, 1, 1 } } } },
             },
         },
         ft = "gitcommit", -- issue number omni-completion, does not work if cloned with url.replacement.insteadOf
-        cmd = { "Git", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Flog" },
+        cmd = { "Git", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Greset", "Flog" },
         keys = {
             { "<leader>gf", "<Cmd>.Flogsplit<CR>" },
             { "<leader>gf", ":Flogsplit<CR>", mode = { "x" } },
@@ -22,10 +22,19 @@ return {
         config = function()
             vim.g.fugitive_summary_format = "%d %s (%cr) <%an>"
             vim.keymap.set("ca", "git", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>")
+            vim.api.nvim_create_user_command("Greset", "Git reset %", {})
             vim.api.nvim_create_autocmd("User", {
                 pattern = "FugitiveIndex",
                 group = "AutoCommands",
                 callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
+            })
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "fugitiveblame", -- https://github.com/tpope/vim-fugitive/issues/543#issuecomment-1875806353
+                group = "AutoCommands",
+                callback = function()      -- '-' to reblame at commit, '~' to blame prior to commit, '_' to go back, '+' to go forward
+                    vim.keymap.set("n", "_", "<Cmd>quit<CR><C-o><Cmd>Git blame<CR>", { buffer = true })
+                    vim.keymap.set("n", "+", "<Cmd>quit<CR><C-i><Cmd>Git blame<CR>", { buffer = true })
+                end,
             })
         end,
     },

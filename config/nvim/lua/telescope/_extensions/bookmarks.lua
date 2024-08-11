@@ -10,19 +10,20 @@ local get_results = function(opts)
     for file, bookmarks in pairs(require("bookmarks").bookmarks) do
         local relative_path = vim.fn.fnamemodify(file, ":~:.")
         if opts.global or relative_path:match("^[/~]") == nil then
-            for i = #bookmarks, 1, -1 do
-                table.insert(items, { full_path = file, relative_path = relative_path, bookmark = bookmarks[i] })
+            for _, bookmark in ipairs(bookmarks) do
+                table.insert(items, { full_path = file, relative_path = relative_path, bookmark = bookmark })
             end
         end
     end
+    table.sort(items, function(a, b) return a.bookmark.time > b.bookmark.time end)
     return items
 end
 
 local entry_maker = function(item)
-    local displayer = entry_display.create({ separator = " │ ", items = { { width = 10 }, { width = 50 }, { remaining = true } } })
+    local displayer = entry_display.create({ separator = " │ ", items = { { width = 16 }, { width = 50 }, { remaining = true } } })
     local display = function(entry)
         return displayer({
-            { os.date("%m/%d/%Y", entry.time), "Comment" },
+            { os.date("%m/%d/%Y %H:%M", entry.time), "Comment" },
             entry.annot and { " " .. entry.annot, "DiagnosticOk" } or entry.text,
             utils.path_smart(entry.filename) .. ":" .. entry.lnum,
         })

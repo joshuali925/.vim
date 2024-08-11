@@ -1,19 +1,5 @@
 return {
     {
-        "kevinhwang91/nvim-bqf",
-        ft = "qf",
-        opts = {
-            func_map = {
-                prevfile = "",     -- to filter: :g/pattern/lua require('bqf.qfwin.handler').signToggle(1)
-                nextfile = "",     -- press zn to create new list with marked items
-                pscrolldown = ",", -- press zN to create new list excluding marked items
-                pscrollup = ".",   -- press < and > to switch between lists
-                ptoggleitem = "P", -- press z<Tab> to clear marks
-                ptoggleauto = "p",
-            },
-        }
-    },
-    {
         "simnalamburt/vim-mundo",
         keys = { { "<leader>u", "<Cmd>MundoToggle<CR>" } },
         config = function()
@@ -102,7 +88,7 @@ return {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
         dependencies = { "MunifTanjim/nui.nvim", "antosha417/nvim-lsp-file-operations" },
-        keys = { { "<leader>b", "<Cmd>Neotree reveal<CR>" } },
+        keys = { { "<leader>b", "<Cmd>Neotree reveal<CR>" }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
         config = function()
             local function get_dir(state)
                 local node = state.tree:get_node()
@@ -118,7 +104,7 @@ return {
                         { source = "filesystem", display_name = " 󰉓 File " },
                         { source = "buffers", display_name = " 󰈚 Buf " },
                         { source = "git_status", display_name = " 󰊢 Git " },
-                        { source = "document_symbols", display_name = "  Outline " },
+                        { source = "document_symbols", display_name = "  Tag " },
                     },
                 },
                 window = {
@@ -165,14 +151,13 @@ return {
         cmd = "Telescope",
         dependencies = { "nvim-lua/plenary.nvim", { "nvim-telescope/telescope-fzf-native.nvim", build = "make" } },
         keys = {
-            { "q", "<Cmd>lua require('telescope.builtin').buffers({ignore_current_buffer = true, only_cwd = false, sort_mru = true})<CR>" },
+            { "q", "<Cmd>lua require('telescope.cycle')()<CR>" },
             { "<C-p>", "<Cmd>lua require('telescope.builtin').fd()<CR>" },
             { "<C-p>", ":<C-u>lua require('telescope.builtin').fd({initial_mode = 'normal', default_text = require('utils').get_visual_selection()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
             { "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>" },
             { "<leader>fs", "<Cmd>lua require('utils').fzf()<CR>" },
             { "<leader>fs", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
             { "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>" },
-            { "<Tab>", "<Cmd>lua require('telescope.builtin').oldfiles({only_cwd = true})<CR>" },
             { "<leader>f'", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>" },
             { "<leader>fb", "<Cmd>lua require('telescope.builtin').live_grep({grep_open_files = true})<CR>" },
             { "<leader>fb", ":<C-u>lua require('telescope.builtin').live_grep({grep_open_files = true, default_text = require('utils').get_visual_selection()})<CR>", mode = "x" },
@@ -216,6 +201,7 @@ return {
                     require("telescope.actions.set").shift_selection(prompt_bufnr, math.floor(speed) * direction)
                 end
             end
+            local cycle = require("telescope.cycle")
             require("telescope").setup({
                 defaults = {
                     mappings = {
@@ -238,6 +224,7 @@ return {
                             ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
                             ["<Esc>"] = actions.close,
                             ["<C-u>"] = function() vim.cmd.stopinsert() end,
+                            ["`"] = function() cycle.next("`") end,
                         },
                     },
                     vimgrep_arguments = {
@@ -278,25 +265,115 @@ return {
         lazy = vim.fn.argc() ~= 0 or vim.fn.line2byte(vim.api.nvim_buf_line_count(0)) ~= -1,
         config = function()
             local theme = require("alpha.themes.startify")
-            theme.section.header.val = { -- https://textart.sh/
-                [[          ██  ████████  ██                          ]],
-                [[          ████████████████                          ]],
-                [[          ██████████████████            ／l、       ]],
-                [[        ████  ████  ██████████        （ﾟ､ ｡ ７      ]],
-                [[        ████████████████████████        l  ~ヽ      ]],
-                [[        ██████    ██████████████████    じしf_,)ノ  ]],
-                [[        ██  ██  ████  ████████████████████████████  ]],
-                [[        ████        ████████████████████████        ]],
-                [[        ████████████████████████████████████        ]],
-                [[        ████████████████████████████████████        ]],
-                [[        ████████████████████████████████████        ]],
-                [[        ████████████████████████████████████        ]],
-                [[        ██████████████████████████████████          ]],
-                [[          ████████████████████████████████          ]],
-                [[          ████    ████        ████    ████          ]],
-                [[          ████    ████        ████    ████          ]],
-                [[          ██      ██          ██      ██            ]],
-            }
+            if require("themes").theme == "catppuccin" then -- https://github.com/goolord/alpha-nvim/discussions/16#discussioncomment-10127079
+                local function get_len(str, start_pos)
+                    local byte = string.byte(str, start_pos)
+                    if not byte then return nil end
+                    return (byte < 0x80 and 1) or (byte < 0xE0 and 2) or (byte < 0xF0 and 3) or (byte < 0xF8 and 4) or 1
+                end
+                local function colorize(header, header_color_map, colors)
+                    for letter, color in pairs(colors) do
+                        local color_name = "AlphaHeader" .. letter
+                        vim.api.nvim_set_hl(0, color_name, color)
+                        colors[letter] = color_name
+                    end
+                    local colorized = {}
+                    for i, line in ipairs(header_color_map) do
+                        local colorized_line = {}
+                        local pos = 0
+                        for j = 1, #line do
+                            local start = pos
+                            pos = pos + get_len(header[i], start + 1)
+                            local color_name = colors[line:sub(j, j)]
+                            if color_name then table.insert(colorized_line, { color_name, start, pos }) end
+                        end
+                        table.insert(colorized, colorized_line)
+                    end
+                    return colorized
+                end
+                local header = {
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                    [[ ██████████████████████████████████████████████████████████████████████████████████████████████████████ ]],
+                }
+                local color_map = {
+                    [[ WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBWWWWWWWWWWWWWW ]],
+                    [[ RRRRWWWWWWWWWWWWWWWWRRRRRRRRRRRRRRRRWWWWWWWWWWWWWWWWBBPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPBBWWWWWWWWWWWW ]],
+                    [[ RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRBBPPPPPPHHHHHHHHHHHHHHHHHHHHHHHHHHPPPPPPBBWWWWWWWWWW ]],
+                    [[ RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRBBPPPPHHHHHHHHHHHHFFHHHHFFHHHHHHHHHHPPPPBBWWWWWWWWWW ]],
+                    [[ OOOORRRRRRRRRRRRRRRROOOOOOOOOOOOOOOORRRRRRRRRRRRRRBBPPHHHHFFHHHHHHHHHHHHHHHHHHHHHHHHHHHHPPBBWWWWWWWWWW ]],
+                    [[ OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBBPPHHHHHHHHHHHHHHHHHHHHBBBBHHHHFFHHHHPPBBWWBBBBWWWW ]],
+                    [[ OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBBPPHHHHHHHHHHHHHHHHHHBBMMMMBBHHHHHHHHPPBBBBMMMMBBWW ]],
+                    [[ YYYYOOOOOOOOOOOOOOOOYYYYYYYYYYYYYYYYOOBBBBBBBBOOOOBBPPHHHHHHHHHHHHFFHHHHBBMMMMMMBBHHHHHHPPBBMMMMMMBBWW ]],
+                    [[ YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYBBMMMMBBBBOOBBPPHHHHHHHHHHHHHHHHHHBBMMMMMMMMBBBBBBBBMMMMMMMMBBWW ]],
+                    [[ YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYBBBBMMMMBBBBBBPPHHHHHHFFHHHHHHHHHHBBMMMMMMMMMMMMMMMMMMMMMMMMBBWW ]],
+                    [[ GGGGYYYYYYYYYYYYYYYYGGGGGGGGGGGGGGGGYYYYBBBBMMMMBBBBPPHHHHHHHHHHHHHHFFBBMMMMMMMMMMMMMMMMMMMMMMMMMMMMBB ]],
+                    [[ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGBBBBMMMMBBPPHHFFHHHHHHHHHHHHBBMMMMMMCCBBMMMMMMMMMMCCBBMMMMBB ]],
+                    [[ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGBBBBBBBBPPHHHHHHHHHHHHHHHHBBMMMMMMBBBBMMMMMMBBMMBBBBMMMMBB ]],
+                    [[ UUUUGGGGGGGGGGGGGGGGUUUUUUUUUUUUUUUUGGGGGGGGGGGGBBBBPPHHHHHHHHHHFFHHHHBBMMRRRRMMMMMMMMMMMMMMMMMMRRRRBB ]],
+                    [[ UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUBBPPPPHHFFHHHHHHHHHHBBMMRRRRMMBBMMMMBBMMMMBBMMRRRRBB ]],
+                    [[ UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUBBPPPPPPHHHHHHHHHHHHHHBBMMMMMMBBBBBBBBBBBBBBMMMMBBWW ]],
+                    [[ VVVVUUUUUUUUUUUUUUUUVVVVVVVVVVVVVVVVUUUUUUUUUUUUBBBBBBPPPPPPPPPPPPPPPPPPPPBBMMMMMMMMMMMMMMMMMMMMBBWWWW ]],
+                    [[ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVBBMMMMMMBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBWWWWWW ]],
+                    [[ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVBBMMMMBBBBWWBBMMMMBBWWWWWWWWWWBBMMMMBBWWBBMMMMBBWWWWWWWW ]],
+                    [[ WWWWVVVVVVVVVVVVVVVVWWWWWWWWWWWWWWWWVVVVVVVVVVBBBBBBBBWWWWBBBBBBWWWWWWWWWWWWWWBBBBBBWWWWBBBBWWWWWWWWWW ]],
+                }
+                local palettes = require("catppuccin.palettes").get_palette(vim.g.theme_index < 0 and "macchiato" or "latte")
+                local colors = {
+                    ["W"] = { fg = palettes.base },     -- ["W"] = { fg = "#11305f" },
+                    ["C"] = { fg = palettes.text },     -- ["C"] = { fg = "#cad3f5" },
+                    ["B"] = { fg = palettes.crust },    -- ["B"] = { fg = "#181926" },
+                    ["R"] = { fg = palettes.red },      -- ["R"] = { fg = "#ed8796" },
+                    ["O"] = { fg = palettes.peach },    -- ["O"] = { fg = "#f5a97f" },
+                    ["Y"] = { fg = palettes.yellow },   -- ["Y"] = { fg = "#eed49f" },
+                    ["G"] = { fg = palettes.green },    -- ["G"] = { fg = "#a6da95" },
+                    ["U"] = { fg = palettes.blue },     -- ["U"] = { fg = "#8aadf4" },
+                    ["P"] = { fg = palettes.yellow },   -- ["P"] = { fg = "#eed49f" },
+                    ["H"] = { fg = palettes.pink },     -- ["H"] = { fg = "#f5bde6" },
+                    ["F"] = { fg = palettes.red },      -- ["F"] = { fg = "#ed8796" },
+                    ["M"] = { fg = palettes.overlay0 }, -- ["M"] = { fg = "#6e738d" },
+                    ["V"] = { fg = palettes.lavender }, -- ["V"] = { fg = "#b7bdf8" },
+                }
+                theme.section.header.val = header
+                theme.section.header.opts = { hl = colorize(header, color_map, colors) }
+            else
+                theme.section.header.val = { -- https://textart.sh/, https://dom111.github.io/image-to-ansi/
+                    [[          ██  ████████  ██                          ]],
+                    [[          ████████████████                          ]],
+                    [[          ██████████████████            ／l、       ]],
+                    [[        ████  ████  ██████████        （ﾟ､ ｡ ７      ]],
+                    [[        ████████████████████████        l  ~ヽ      ]],
+                    [[        ██████    ██████████████████    じしf_,)ノ  ]],
+                    [[        ██  ██  ████  ████████████████████████████  ]],
+                    [[        ████        ████████████████████████        ]],
+                    [[        ████████████████████████████████████        ]],
+                    [[        ████████████████████████████████████        ]],
+                    [[        ████████████████████████████████████        ]],
+                    [[        ████████████████████████████████████        ]],
+                    [[        ██████████████████████████████████          ]],
+                    [[          ████████████████████████████████          ]],
+                    [[          ████    ████        ████    ████          ]],
+                    [[          ████    ████        ████    ████          ]],
+                    [[          ██      ██          ██      ██            ]],
+                }
+            end
             theme.section.top_buttons.val = {}
             theme.section.bottom_buttons.val = {
                 theme.button("!", "Git changed files", "<Cmd>lua require('telescope.builtin').git_status({initial_mode = 'normal'})<CR>"),
@@ -420,8 +497,8 @@ return {
                 { "&Add formula", [[TableAddFormula]], "Add formula to current cell, i.e. Sum(r1,c1:r2,c2)" },
                 { "&Evaluate formula", [[TableEvalFormulaLine]], "Evaluate formula" },
                 { "--", "" },
-                { "&CSV show column", [[CSVWhatColumn!]], "Show column title under cursor" },
-                { "CSV arrange column", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | 1,$CSVArrangeColumn!]], "Align csv columns" },
+                { "CSV show column", [[CSVWhatColumn!]], "Show column title under cursor" },
+                { "&CSV arrange column", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | 1,$CSVArrangeColumn!]], "Align csv columns" },
                 { "CSV to table", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | CSVTabularize]], "Convert csv to table" },
             })
             vim.fn["quickui#menu#install"]("L&SP", {
@@ -444,6 +521,7 @@ return {
                 { "Mason &install all", [[lua require('lsp').lsp_install_all()]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
                 { "--", "" },
                 { "Load indentscope", [[lua require("mini.indentscope").setup({ draw = { delay = 50 }, options = { try_as_border = true }, symbol = '▏' })]], "Load mini.indentscope" },
+                { "Load mini.&pick", [[lua require("mini.pick").setup() require("mini.pick").builtin.files()]], "Load mini.pick" },
             })
             local quickui_theme_list = {}
             local used_chars = "hjklqg"

@@ -183,7 +183,7 @@ function! funcs#get_run_command() abort
   endif
   let run_command['html'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'silent !open "$(VIM_FILEPATH)"'
-  let run_command['http'] = 'lua require("rest-nvim").run()'
+  let run_command['http'] = 'lua require("kulala").run()'
   let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
   return get(run_command, &filetype, '') . get(b:, 'args', '')
 endfunction

@@ -1,6 +1,8 @@
 return {
     {
-        "hrsh7th/nvim-cmp",
+        -- "hrsh7th/nvim-cmp",
+        "yioneko/nvim-cmp",
+        branch = "perf", -- https://github.com/hrsh7th/nvim-cmp/pull/1980
         event = { "InsertEnter", "CmdlineEnter" },
         dependencies = {
             "hrsh7th/cmp-buffer",
@@ -11,7 +13,6 @@ return {
             "hrsh7th/cmp-cmdline",
             "hrsh7th/cmp-vsnip",
             "rafamadriz/friendly-snippets",
-            { "Exafunction/codeium.nvim", config = true, enabled = vim.env.ENABLE_CODEIUM ~= nil },
             {
                 "hrsh7th/vim-vsnip",
                 init = function()
@@ -60,6 +61,17 @@ return {
                     end
                 end,
             },
+            {
+                "monkoose/neocodeium",
+                enabled = vim.env.ENABLE_CODEIUM ~= nil,
+                config = function()
+                    local filetypes = { ["."] = false }
+                    for _, ft in ipairs(vim.g.qs_filetype_blacklist) do
+                        filetypes[ft] = false
+                    end
+                    require("neocodeium").setup({ filetypes = filetypes, silent = true, debounce = true })
+                end,
+            },
         },
         cond = require("states").small_file,
         config = function()
@@ -92,8 +104,8 @@ return {
                 Event = " ",
                 Operator = " ",
                 TypeParameter = " ",
-                Codeium = " ",
             }
+            local neocodeium = package.loaded["neocodeium"] and require("neocodeium")
             cmp.setup({
                 completion = { completeopt = "menuone,noinsert" },
                 snippet = { expand = function(args) vim.fn["vsnip#anonymous"](args.body) end },
@@ -107,7 +119,7 @@ return {
                         return item
                     end,
                 },
-                experimental = { ghost_text = { hl_group = "LspCodeLens" } },
+                -- experimental = neocodeium ~= nil and {} or { ghost_text = { hl_group = "LspCodeLens" } },
                 mapping = {
                     ["<C-b>"] = cmp.mapping.scroll_docs(-4),
                     ["<C-d>"] = cmp.mapping.scroll_docs(4),
@@ -117,22 +129,45 @@ return {
                     ["<C-e>"] = cmp.mapping.abort(),
                     ["<C-k>"] = cmp.mapping(function(fallback)
                         if vim.fn["vsnip#expandable"]() == 1 then
-                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-expand)"), "", true)
+                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-expand)"), "", false)
                         elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
-                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-next)"), "", true)
+                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-next)"), "", false)
                         elseif require("neogen").jumpable() then
                             require("neogen").jump_next()
                         else
                             fallback()
                         end
                     end, { "i", "s" }),
-                    ["<Down>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-                    ["<Up>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+                    ["<Down>"] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+                        elseif neocodeium ~= nil and neocodeium.visible() then
+                            neocodeium.cycle(1)
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s" }),
+                    ["<Up>"] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
+                        elseif neocodeium ~= nil and neocodeium.visible() then
+                            neocodeium.cycle(-1)
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s" }),
+                    ["<Right>"] = cmp.mapping(function()
+                        if neocodeium ~= nil and neocodeium.visible() then
+                            neocodeium.accept()
+                        else
+                            vim.api.nvim_feedkeys(vim.keycode("<Right>"), "n", false)
+                        end
+                    end, { "i", "s" }),
                     ["<Tab>"] = cmp.mapping(function(fallback)
                         if cmp.visible() then
                             cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
                         elseif vim.fn.call("vsnip#jumpable", { 1 }) == 1 then
-                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-next)"), "", true)
+                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-next)"), "", false)
                         elseif require("neogen").jumpable() then
                             require("neogen").jump_next()
                         else
@@ -143,7 +178,7 @@ return {
                         if cmp.visible() then
                             cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
                         elseif vim.fn.call("vsnip#jumpable", { -1 }) == 1 then
-                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-prev)"), "", true)
+                            vim.api.nvim_feedkeys(vim.keycode("<Plug>(vsnip-jump-prev)"), "", false)
                         elseif require("neogen").jumpable(-1) then
                             require("neogen").jump_prev()
                         else
@@ -152,7 +187,6 @@ return {
                     end, { "i", "s" }),
                 },
                 sources = {
-                    { name = "codeium" },
                     { name = "nvim_lsp" },
                     {
                         name = "nvim_lsp_signature_help",

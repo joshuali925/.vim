@@ -9,13 +9,21 @@
   },
   "Print stack trace": {
     "prefix": "ct",
-    "body": ["console.trace();"]
+    "body": [
+      "console.groupCollapsed('stack trace', $1);",
+      "console.trace();",
+      "console.groupEnd();"
+    ]
   },
   "Logger": {
     "prefix": "logger",
     "body": [
       "const log = (...args) => console.log(`[\\${new Date().toISOString()}]`, ...args);"
     ]
+  },
+  "Stringify": {
+    "prefix": "jstr",
+    "body": ["JSON.stringify($1, null, 2)"]
   },
   "Benchmark": {
     "prefix": "benchmark",
