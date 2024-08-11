@@ -3,7 +3,7 @@ Host *
     ServerAliveCountMax 120
     Compression yes
     ControlMaster auto
-    # TOKEN section under man ssh_config
+    # see TOKENS section under man ssh_config for formatting
     ControlPath ~/.ssh/master_%r_%C
     # ControlPersist 10h
     # ForwardAgent yes

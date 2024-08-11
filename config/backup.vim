@@ -4799,3 +4799,77 @@ vim.api.nvim_create_autocmd({ "UIEnter", "ColorScheme" }, { -- https://www.reddi
 " yazi follow file, doesn't normalize directory
     local h = cx.active.current.hovered
     if h.link_to ~= nil then return ya.manager_emit("reveal", { tostring(h.link_to) }) end
+
+" =======================================================
+" visual_studio_code theme
+            if require("themes").theme == "visual_studio_code" then
+                return
+            end
+    { "askfiy/visual_studio_code", priority = 1000, enabled = theme == "vscode" },
+            require("visual_studio_code").setup({ mode = theme_index < 0 and "dark" or "light" })
+            vim.cmd.colorscheme("visual_studio_code")
+            if theme_index < 0 then
+                vim.api.nvim_set_hl(0, "IblIndent", { fg = "#353535" })
+                vim.api.nvim_set_hl(0, "IblScope", { fg = "#4a4a4a" })
+                vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#484848" })
+                vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#484848" })
+                vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#484848" })
+                require("visual_studio_code.utils").hl.set("CursorLine", { bg = "#282828" })
+            end
+            require("lualine").setup({
+                options = {
+                    theme = "visual_studio_code",
+                    component_separators = { left = "", right = "" },
+                    section_separators = { left = "", right = "" },
+                    globalstatus = true,
+                },
+                sections = require("visual_studio_code").get_lualine_sections(),
+            })
+            require("bufferline").setup({ options = { custom_areas = { right = require("visual_studio_code").get_bufferline_right() } } })
+" use stevearc/quicker.nvim
+vim.keymap.set("n", "yoq", "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'", { expr = true, replace_keycodes = false })
+vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'", { expr = true, replace_keycodes = false })
+vim.api.nvim_create_autocmd("BufReadPost", {
+    pattern = "quickfix",
+    group = "AutoCommands",
+    callback = function()
+        vim.bo.buflisted = false
+        vim.bo.modifiable = true
+        vim.o.foldmethod = "expr"
+        vim.o.foldexpr = [[matchstr(getline(v:lnum),'^[^|]\+')==#matchstr(getline(v:lnum+1),'^[^|]\+')?1:'<1']]
+        vim.o.foldtext = [[matchstr(getline(v:foldstart),'^[^|]\+').'| ⋯']]
+        vim.keymap.set("n", "<leader>w", [[<Cmd>let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m,%f' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>]], { buffer = true })
+        vim.keymap.set("n", "<CR>", "<CR>", { buffer = true })
+        vim.keymap.set("n", "<leader>s", [[:cdo s/\<<C-r><C-w>\>/<C-r><C-w>/g<Left><Left>]], { buffer = true })
+        vim.keymap.set("x", "<leader>s", [["xy:cdo s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/g<Left><Left>]], { buffer = true })
+    end,
+})
+" codeium.vim
+            {
+                "Exafunction/codeium.vim",
+                enabled = vim.env.ENABLE_CODEIUM ~= nil,
+                config = function()
+                    vim.g.codeium_disable_bindings = 1
+                    vim.g.codeium_tab_fallback = "<Right>"
+                    local filetype_map = {}
+                    for _, filetype in ipairs(vim.g.qs_filetype_blacklist) do
+                        filetype_map[filetype] = false
+                    end
+                    vim.g.codeium_filetypes = filetype_map
+                    vim.keymap.set("i", "<Right>", function() return vim.fn["codeium#Accept"]() end, { expr = true })
+                    vim.keymap.set("i", "<Left>", function()
+                        if vim.b._codeium_completions == nil then return "<Left>" end
+                        return vim.fn["codeium#Clear"](-1)
+                    end, { expr = true })
+                end,
+            },
+    vim.api.nvim_set_hl(0, "CodeiumSuggestion", { link = "LspCodeLens" }) -- codeium
+                                local codeium = ""
+                                if vim.env.ENABLE_CODEIUM then
+                                    codeium = " " .. (vim.g.codeium_filetypes and vim.api.nvim_call_function("codeium#GetStatusString", {}) or "OFF") .. " "
+                                end
+" codeium.nvim
+            { "Exafunction/codeium.nvim", config = true, enabled = vim.env.ENABLE_CODEIUM ~= nil },
+                Codeium = " ",
+                    ["<C-n>"] = cmp.mapping.complete({ config = { sources = { { name = "codeium" } } } }),
+                    { name = "codeium" },

@@ -220,8 +220,6 @@ vim.keymap.set("n", "<leader>q", "<Cmd>call funcs#quit(0, 0)<CR>") -- close wind
 vim.keymap.set("n", "<leader>Q", "<Cmd>call funcs#quit(0, 1)<CR>") -- close tab
 vim.keymap.set("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>") -- close buffer and preserve layout
 vim.keymap.set("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
-vim.keymap.set("n", "yoq", "empty(filter(getwininfo(), 'v:val.quickfix')) ? '<Cmd>copen<CR>' : '<Cmd>cclose<CR>'", { expr = true, replace_keycodes = false })
-vim.keymap.set("n", "yol", "empty(filter(getwininfo(), 'v:val.loclist')) ? '<Cmd>lopen<CR>' : '<Cmd>lclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight <bar> TSBufToggle indent<CR>")
 vim.keymap.set("n", "yog", "<Cmd>lua require('rooter').toggle()<CR>")
 vim.keymap.set("n", "yoR", "<Cmd>if get(g:, 'ReaderMode', 0) == 0 | nnoremap <nowait> d <C-d>| nnoremap u <C-u> | else | execute 'nunmap d' | execute 'nunmap u' | endif | let g:ReaderMode = 1 - get(g:, 'ReaderMode', 0) | lua vim.notify('Reader mode ' .. (vim.g.ReaderMode == 1 and 'on' or 'off'))<CR>")
@@ -255,6 +253,7 @@ vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoComman
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = [[nnoremap <buffer> gf :argadd <C-r><C-p><CR>| xnoremap <buffer> gf :<C-u>execute "'<,'>normal! :argadd \<lt>C-r>\<lt>C-p>\<lt>CR>"<CR>]] })
+vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "netrw", -- netrw is needed for gf on URL
     group = "AutoCommands",
@@ -267,21 +266,6 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.keymap.set("n", "q", "<Cmd>call funcs#quit_netrw_and_dirs()<CR>", { buffer = true, nowait = true })
         vim.keymap.set("n", "<leader>q", "q", { remap = true, buffer = true })
         vim.keymap.set("n", "a", "%", { remap = true, buffer = true })
-    end,
-})
-vim.api.nvim_create_autocmd("BufReadPost", {
-    pattern = "quickfix",
-    group = "AutoCommands",
-    callback = function()
-        vim.bo.buflisted = false
-        vim.bo.modifiable = true
-        vim.o.foldmethod = "expr"
-        vim.o.foldexpr = [[matchstr(getline(v:lnum),'^[^|]\+')==#matchstr(getline(v:lnum+1),'^[^|]\+')?1:'<1']]
-        vim.o.foldtext = [[matchstr(getline(v:foldstart),'^[^|]\+').'| ⋯']]
-        vim.keymap.set("n", "<leader>w", [[<Cmd>let &l:errorformat='%f\|%l col %c\|%m,%f\|%l col %c%m,%f\|\|%m,%f' <bar> cgetbuffer <bar> silent! bdelete! <bar> copen<CR>]], { buffer = true })
-        vim.keymap.set("n", "<CR>", "<CR>", { buffer = true })
-        vim.keymap.set("n", "<leader>s", [[:cdo s/\<<C-r><C-w>\>/<C-r><C-w>/g<Left><Left>]], { buffer = true })
-        vim.keymap.set("x", "<leader>s", [["xy:cdo s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/g<Left><Left>]], { buffer = true })
     end,
 })
 vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
@@ -305,11 +289,11 @@ vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <n
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
 vim.api.nvim_create_user_command("JSON", "set filetype=json | Prettier", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
-    local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript" }
-    local parser = args.args ~= "" and args.args or (filetype_map[vim.bo.filetype] or vim.bo.filetype)
+    local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript", [""] = "json" }
+    local parser = args.args ~= "" and args.args or vim.bo.filetype
     local line1 = args.range == 0 and 0 or args.line1 - 1
     local line2 = args.range == 0 and -1 or args.line2
-    local result = vim.system({ "prettier", "--parser", parser }, { text = true, stdin = vim.api.nvim_buf_get_lines(0, line1, line2, false) }):wait()
+    local result = vim.system({ "prettier", "--parser", filetype_map[parser] or parser }, { text = true, stdin = vim.api.nvim_buf_get_lines(0, line1, line2, false) }):wait()
     if result.code == 0 then
         vim.api.nvim_buf_set_lines(0, line1, line2, false, vim.split(result.stdout, "\n", { trimempty = true }))
     else

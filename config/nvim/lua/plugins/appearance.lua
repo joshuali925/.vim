@@ -2,7 +2,6 @@ local theme = require("themes").theme
 return {
     { "folke/tokyonight.nvim", priority = 1000, enabled = theme == "tokyonight" },
     { "projekt0n/github-nvim-theme", priority = 1000, enabled = theme == "github" },
-    { "askfiy/visual_studio_code", priority = 1000, enabled = theme == "vscode" },
     { "Shatur/neovim-ayu", priority = 1000, enabled = theme == "ayu" },
     { "catppuccin/nvim", name = "catppuccin", priority = 1000, enabled = theme == "catppuccin" },
     { "EdenEast/nightfox.nvim", priority = 1000, enabled = theme == "nightfox" },
@@ -39,6 +38,34 @@ return {
         end
     },
     {
+        "kevinhwang91/nvim-bqf",
+        ft = "qf",
+        opts = {
+            func_map = {
+                prevfile = "",     -- to filter: :g/pattern/lua require('bqf.qfwin.handler').signToggle(1)
+                nextfile = "",     -- press zn to create new list with marked items
+                pscrolldown = ",", -- press zN to create new list excluding marked items
+                pscrollup = ".",   -- press < and > to switch between lists
+                ptoggleitem = "P", -- press z<Tab> to clear marks
+                ptoggleauto = "p",
+            },
+        }
+    },
+    {
+        "stevearc/quicker.nvim",
+        event = "FileType qf",
+        keys = {
+            { "yoq", function() require("quicker").toggle() end, desc = "Toggle quickfix" },
+            { "yol", function() require("quicker").toggle({ loclist = true }) end, desc = "Toggle loclist" },
+        },
+        opts = {
+            keys = {
+                { "}", function() require("quicker").expand({ before = 2, after = 2, add_to_existing = true }) end, desc = "Expand quickfix context" },
+                { "{", function() require("quicker").collapse() end, desc = "Collapse quickfix context" },
+            },
+        },
+    },
+    {
         "akinsho/bufferline.nvim",
         event = "BufEnter", -- VimEnter/UIEnter breaks '+<line>' argument in command line nvim when 'line' is large
         keys = {
@@ -55,9 +82,6 @@ return {
         "nvim-lualine/lualine.nvim",
         event = "VeryLazy",
         config = function()
-            if require("themes").theme == "visual_studio_code" then
-                return
-            end
             local states = require("states")
             require("lualine").setup({
                 options = {
@@ -102,11 +126,21 @@ return {
                         },
                         { "searchcount", color = "String" },
                         function()
-                            local clients = {}
-                            for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
-                                clients[#clients + 1] = client.name
+                            local clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
+                            local icon = #clients > 0 and " " or ""
+                            if package.loaded["neocodeium"] ~= nil then
+                                local serverstatus = require("neocodeium").get_status() -- https://www.reddit.com/r/neovim/comments/1fc34na/comment/lm5wr1j
+                                if serverstatus == 0 then
+                                    icon = " " -- Connected
+                                elseif serverstatus == 1 then
+                                    icon = "󰣻 " -- Connection Error
+                                elseif serverstatus == 2 then
+                                    icon = "󰣽 " -- Disconnected
+                                else
+                                    icon = "󰣼 " -- Unknown
+                                end
                             end
-                            return #clients == 0 and "" or " " .. table.concat(clients, " ")
+                            return icon .. table.concat(clients, " ")
                         end,
                     },
                     lualine_y = { { "branch", padding = { left = 0, right = 1 } } },

@@ -22,8 +22,12 @@
     ]
   },
   "If": {
-    "prefix": "if",
+    "prefix": "if-then",
     "body": ["if [[ $1 ]]; then", "\t$0", "fi"]
+  },
+  "Then": {
+    "prefix": "then",
+    "body": ["then", "\t$0", "fi"]
   },
   "If variable equals": {
     "prefix": "if-var",
@@ -123,7 +127,7 @@
     ]
   },
   "Process arguments": {
-    "prefix": "for-arg",
+    "prefix": "for-arg-loop",
     "body": [
       "local rest=() skip_args=0",
       "for arg in \"\\$@\"; do",

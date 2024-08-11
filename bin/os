@@ -31,7 +31,7 @@ run() {
     exec ./bin/opensearch "$@"
   fi
 
-  local opts=(--host 0.0.0.0)
+  local opts=(--host 0.0.0.0 --opensearch.ignoreVersionMismatch=true --server.maxPayloadBytes=99999999)
   if [[ -f opensearch_dashboards.json ]]; then cd ../..; fi  # cd up from plugins directory
   if [[ -d plugins/securityDashboards ]] || [[ -d plugins/security-dashboards-plugin ]]; then
     if ! grep -q '^opensearch.hosts' config/opensearch_dashboards.yml; then

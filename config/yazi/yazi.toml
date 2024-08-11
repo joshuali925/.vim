@@ -6,6 +6,7 @@ show_hidden = true
 
 [preview]
 tab_size = 4
+wrap = "yes"
 
 [open]
 prepend_rules = [

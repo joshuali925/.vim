@@ -39,9 +39,8 @@ local function git_root()
 end
 
 local function follow()
-    local output, err = Command("readlink"):args({ "-f", get_hovered_file() }):output()
-    local stdout = read_stdout(output, err)
-    if stdout ~= nil then ya.manager_emit("reveal", { stdout }) end
+    local h = cx.active.current.hovered
+    if h.link_to ~= nil then return ya.manager_emit("reveal", { tostring(h.link_to) }) end
 end
 
 local function fzf(type, arg) -- https://github.com/sxyazi/yazi/blob/main/yazi-plugin/preset/plugins/fzf.lua

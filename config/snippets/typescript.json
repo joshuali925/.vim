@@ -52,6 +52,27 @@
       "type RequiredKey<T, K extends keyof T> = T & Required<Pick<T, K>>;"
     ]
   },
+  "Expand type": {
+    "prefix": "expand-type",
+    "body": [
+      "type Expand<T> = T extends (...args: infer A) => infer R",
+      "\t? (...args: Expand<A>) => Expand<R>",
+      "\t: T extends infer O",
+      "\t\t? { [K in keyof O]: O[K] }",
+      "\t\t: never;",
+      "",
+      "type ExpandRecursive<T> = T extends (...args: infer A) => infer R",
+      "\t? (...args: ExpandRecursive<A>) => ExpandRecursive<R>",
+      "\t: T extends object",
+      "\t\t? T extends infer O",
+      "\t\t\t? { [K in keyof O]: ExpandRecursive<O[K]> }",
+      "\t\t\t: never",
+      "\t\t: T;",
+      "",
+      "type expanded = Expand<${1:Type}>;",
+      "type recursivelyExpanded = ExpandRecursive<${1:Type}>;"
+    ]
+  },
   "Jest describe": {
     "prefix": "desc",
     "body": [
@@ -72,23 +93,29 @@
   },
   "Jest expect partial object": {
     "prefix": "expect-object-containing",
-    "body": ["expect(${1:actual}).toEqual(expect.objectContaining(${2:expected}));"]
+    "body": [
+      "expect(${1:actual}).toEqual(expect.objectContaining(${2:expected}));"
+    ]
+  },
+  "Jest as mocked": {
+    "prefix": "as-mocked",
+    "body": ["const ${1:var}Mock = $1 as jest.Mocked<typeof $1>;"]
   },
   "Jest doMock": {
-    "prefix": "doMock",
+    "prefix": "template-mock",
     "body": [
       "const fn = jest.fn().mockImplementation((args) => {",
       "\treturn Promise.resolve();",
       "});",
       "",
       "jest.doMock('${1:./module}', () => {",
-      "\tconst actualModule = jest.requireActual('${1:./module}');",
       "\treturn {",
-      "\t\t...actualModule,",
+      "\t\t...jest.requireActual('${1:./module}'),",
       "\t\tutils: jest.fn(() => ({",
       "\t\t\tfn,",
       "\t\t})),",
       "\t};",
+      "\tComponent: (props: ComponentProps<typeof Component>) => <div />,",
       "});",
       ""
     ]

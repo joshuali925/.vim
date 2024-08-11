@@ -6,21 +6,19 @@ local theme_index = vim.g.theme_index or -1
 -- :source $VIMRUNTIME/syntax/hitest.vim
 M.theme_list = {
     [-1] = "tokyonight",
-    [-2] = "github",
-    [-3] = "vscode",
+    [-2] = "catppuccin",
+    [-3] = "github",
     [-4] = "kanagawa",
     [-5] = "ayu",
-    [-6] = "catppuccin",
-    [-7] = "nightfox",
-    [-8] = "newpaper",
+    [-6] = "nightfox",
+    [-7] = "newpaper",
     [0] = "tokyonight",
     [1] = "nightfox",
     [2] = "github",
-    [3] = "vscode",
-    [4] = "kanagawa",
-    [5] = "ayu",
-    [6] = "catppuccin",
-    [7] = "newpaper",
+    [3] = "kanagawa",
+    [4] = "ayu",
+    [5] = "catppuccin",
+    [6] = "newpaper",
 }
 M.theme = M.theme_list[theme_index]
 
@@ -55,30 +53,6 @@ local themes = {
             vim.cmd.colorscheme("github_" .. (theme_index < 0 and "dark_dimmed" or "light_high_contrast"))
         end,
     },
-    ["vscode"] = {
-        config = function()
-            require("visual_studio_code").setup({ mode = theme_index < 0 and "dark" or "light" })
-            vim.cmd.colorscheme("visual_studio_code")
-            if theme_index < 0 then
-                vim.api.nvim_set_hl(0, "IblIndent", { fg = "#353535" })
-                vim.api.nvim_set_hl(0, "IblScope", { fg = "#4a4a4a" })
-                vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#484848" })
-                vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#484848" })
-                vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#484848" })
-                require("visual_studio_code.utils").hl.set("CursorLine", { bg = "#282828" })
-            end
-            require("lualine").setup({
-                options = {
-                    theme = "visual_studio_code",
-                    component_separators = { left = "", right = "" },
-                    section_separators = { left = "", right = "" },
-                    globalstatus = true,
-                },
-                sections = require("visual_studio_code").get_lualine_sections(),
-            })
-            require("bufferline").setup({ options = { custom_areas = { right = require("visual_studio_code").get_bufferline_right() } } })
-        end,
-    },
     ["ayu"] = {
         config = function()
             require("ayu").setup({ overrides = { Comment = { fg = "#69737d" } } })
@@ -97,6 +71,7 @@ local themes = {
                     native_lsp = {
                         underlines = { errors = { "undercurl" }, hints = { "undercurl" }, warnings = { "undercurl" }, information = { "undercurl" } },
                     },
+                    telescope = { style = "nvchad" },
                 },
             })
             vim.cmd.colorscheme("catppuccin")
@@ -136,7 +111,8 @@ local function highlight_plugins()
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#916100" })
         vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = "#005e7d" })
     end
-    vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" }) -- quickui
+    vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" })               -- quickui
+    vim.api.nvim_set_hl(0, "NeoCodeiumSuggestion", { link = "LspCodeLens" }) -- neocodeium
 end
 
 function M.config()

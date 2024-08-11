@@ -29,4 +29,4 @@ Status._right = {
     { "position", id = 8, order = 5000 },
 }
 
-require("session"):setup({ sync_yanked = true })
+require("session"):setup({ sync_yanked = true }) -- enable cross instance yank paste

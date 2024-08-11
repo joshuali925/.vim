@@ -1,7 +1,7 @@
 local M = {}
 
 local disabled_servers = {
-    -- "tsserver",
+    -- "ts_ls",
     -- "eslint",
     -- "jdtls",
     -- "kotlin_language_server",
@@ -15,7 +15,7 @@ function M.lsp_install_all()
         "yamlls",
         "html",
         "cssls",
-        "tsserver",
+        "ts_ls",
         "eslint",
         "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
         "jdtls",
@@ -104,8 +104,8 @@ function M.init()
                 },
             })
         end,
-        tsserver = function()
-            if not vim.tbl_contains(disabled_servers, "tsserver") then
+        ts_ls = function()
+            if not vim.tbl_contains(disabled_servers, "ts_ls") then
                 require("typescript-tools").setup({
                     settings = {
                         expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
@@ -196,7 +196,7 @@ function M.init()
             },
         },
     })
-    vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#666666", bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg })
+    vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { link = "LspCodeLens" })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "DiagnosticVirtualTextHint" })
 end
 
