@@ -52,6 +52,18 @@ return {
     { "jbyuki/venn.nvim", cmd = "VBox" },
     {
         "mistweaverco/kulala.nvim",
+        init = function()
+            vim.api.nvim_create_augroup("KulalaAutoCommands", {})
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "http",
+                group = "KulalaAutoCommands",
+                callback = function(ev)
+                    vim.o.commentstring = "# %s"
+                    vim.keymap.set("n", "{", "<Cmd>lua require('kulala').jump_prev()<CR>", { buffer = ev.buf })
+                    vim.keymap.set("n", "}", "<Cmd>lua require('kulala').jump_next()<CR>", { buffer = ev.buf })
+                end
+            })
+        end,
         config = function()
             require("kulala").setup({ default_view = "headers_body", additional_curl_options = { "--insecure" } })
             vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
@@ -97,6 +109,7 @@ return {
             require("mini.ai").setup({
                 mappings = { around_next = "aN", inside_next = "iN", around_last = "aP", inside_last = "iP" },
                 custom_textobjects = { n = require("mini.extra").gen_ai_spec.number() },
+                n_lines = 999,
             })
             require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
             require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })

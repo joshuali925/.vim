@@ -247,13 +247,12 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.api.nvim_create_autocmd("BufReadPost", {
     pattern = "*",
     group = "AutoCommands", -- do not restore cursor for fugitive (filetype git)
-    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") && &filetype != 'git' | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | endif | let b:RestoredCursor = 1]],
+    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") && &filetype != 'gitcommit' | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | endif | let b:RestoredCursor = 1]],
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = [[nnoremap <buffer> gf :argadd <C-r><C-p><CR>| xnoremap <buffer> gf :<C-u>execute "'<,'>normal! :argadd \<lt>C-r>\<lt>C-p>\<lt>CR>"<CR>]] })
-vim.api.nvim_create_autocmd("FileType", { pattern = "http", group = "AutoCommands", command = "setlocal commentstring=#\\ %s" })
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "netrw", -- netrw is needed for gf on URL
     group = "AutoCommands",
@@ -287,7 +286,7 @@ vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
-vim.api.nvim_create_user_command("JSON", "set filetype=json | Prettier", {})
+vim.api.nvim_create_user_command("JSON", "set shiftwidth=2 filetype=json | Prettier", {})
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript", [""] = "json" }
     local parser = args.args ~= "" and args.args or vim.bo.filetype

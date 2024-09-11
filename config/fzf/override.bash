@@ -16,3 +16,5 @@ else
   bind -m emacs-standard -x '"\C-p": fzf-file-widget'
 fi
 bind -m emacs-standard '"\ec": " \C-b\C-k \C-u `__fzf_cd__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
+
+source ~/.vim/config/fzf/fzf-simple-completion.sh

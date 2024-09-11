@@ -9,7 +9,8 @@ GlobalSpeed.json (maybe try https://github.com/xxxily/h5player)
 yop toggle pdf viewer
 */
 
-chrome.storage.local.set({ noPdfViewer: 1 }); // disable pdf viewer, yop or ;s to toggle
+// https://github.com/brookhong/Surfingkeys/issues/2159
+// chrome.storage.local.set({ noPdfViewer: 1 }); // disable pdf viewer, yop or ;s to toggle
 settings.tabsThreshold = 0;
 settings.richHintsForKeystroke = 1500;
 settings.stealFocusOnLoad = false;
@@ -307,7 +308,8 @@ api.mapkey('yrss', 'Copy rss', function() {
     }
 }, {domain: /(github|reddit|weibo)\.com/i});
 
-api.unmap('gg');
+// https://github.com/brookhong/Surfingkeys/issues/2159
+/* api.unmap('gg');
 api.unmap('G');
 var scrollX, scrollY;
 api.mapkey('gg', 'Go to top', function() {
@@ -342,7 +344,7 @@ for (let i = 32; i < 127; ++i) { // don't use var to avoid closure referencing g
     api.mapkey(`\`${char}`, `Jump mark ${char}`, function() {
         api.Normal.jumpVIMark(char);
     });
-}
+} */
 
 // https://github.com/brookhong/Surfingkeys/wiki/Register-inline-query
 api.Front.registerInlineQuery({

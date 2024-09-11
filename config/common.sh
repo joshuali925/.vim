@@ -132,7 +132,7 @@ alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,^\(h
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
-alias greset-to-remote='git stash push --message "greset-to-remote temporary stash"; git reset --hard @{upstream}'
+alias greset-to-remote='git stash push --include-untracked --message "greset-to-remote temporary stash"; git reset --hard @{upstream}'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grv='git remote -v'
 alias grs='git reset'
@@ -161,7 +161,7 @@ alias gwhatsnew='git log --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-com
 alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 alias gforest='git foresta --style=10 | \less -RiMXF'
 alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --format=%h)'
-alias gpatch='\vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply -3 patch.diff && rm patch.diff'
+alias gpatch='if builtin command -v pbpaste > /dev/null 2>&1; then pbpaste | sed -e "\$a\\" | git apply -3; else \vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply -3 patch.diff && rm patch.diff; fi'
 alias grerere-forget='rm -rf .git/rr-cache'
 alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%C(yellow)%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
@@ -288,8 +288,8 @@ gpr() {
   local rest=()
   for arg in "$@"; do
     case $arg in
-      -d|--diff) local reset=1 ;;
-      -p|--patch) local patch=1 ;;
+      -d|--diff) local reset=1 ;;  # if --diff is specified, reset to the common ancestor of HEAD and remote default branch
+      -p|--patch) local patch=1 ;;  # if --patch is specified, directly apply the diff from PR
       *) rest+=("$arg") ;;
     esac
   done
@@ -301,12 +301,12 @@ gpr() {
     cd "${repo##*/}-$pr" > /dev/null || return 1
   fi
   git stash push --include-untracked --message 'git PR temporary stash'
-  if [[ -n $patch ]]; then  # directly patch the diff from PR
+  if [[ -n $patch ]]; then
     curl -fsSL "$(git remote get-url "$remote" | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//')/pull/${pr}.diff" | git apply -3
     return $?
   fi
   git fetch "$remote" "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
-  if [[ -n $reset ]]; then  # reset to the common ancestor of HEAD and remote default branch
+  if [[ -n $reset ]]; then
     git reset "$(git merge-base HEAD "$remote"/HEAD)"
   fi
 }
