@@ -43,7 +43,7 @@ run() {
     exec ./bin/opensearch-dashboards "${opts[@]}" "$@"
   fi
   if [[ -f opensearch_dashboards.d.ts ]]; then
-    if [[ -n $bootstrap ]]; then yarn osd bootstrap || true; fi
+    if [[ -n $bootstrap ]]; then yarn osd bootstrap --single-version=loose || true; fi
     exec yarn start --no-base-path --run-examples "${opts[@]}" "$@"
   fi
 }

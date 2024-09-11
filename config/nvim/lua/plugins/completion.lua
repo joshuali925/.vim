@@ -115,7 +115,12 @@ return {
                 },
                 formatting = {
                     format = function(_, item)
-                        item.kind = cmp_kinds[item.kind] .. item.kind
+                        local icon = cmp_kinds[item.kind]
+                        if icon == nil then
+                            vim.notify("Icon not found for kind: " .. item.kind, vim.log.levels.WARN, { annote = "Cmp" })
+                        else
+                            item.kind = icon .. item.kind
+                        end
                         return item
                     end,
                 },

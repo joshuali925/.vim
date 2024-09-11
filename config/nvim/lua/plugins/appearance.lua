@@ -48,6 +48,9 @@ return {
                 pscrollup = ".",   -- press < and > to switch between lists
                 ptoggleitem = "P", -- press z<Tab> to clear marks
                 ptoggleauto = "p",
+                vsplit = "",
+                tab = "",
+                tabb = "",
             },
         }
     },

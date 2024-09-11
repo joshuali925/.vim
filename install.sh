@@ -30,6 +30,8 @@ install() {
   for package in "$@"; do
     if declare -F "install_$package" > /dev/null; then
       "install_$package"
+    elif declare -F "install_${package%%-*}" > /dev/null; then
+      "install_${package%%-*}" "${package##*-}"
     else
       log "Unknown package \"$package\", skipping.."
     fi
@@ -241,14 +243,15 @@ install_python() {  # environment for asdf install from source: https://github.c
   if [[ $PLATFORM:$PACKAGE_MANAGER = linux:yum ]]; then
     sudo yum install -y python3-devel
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apt-get ]]; then
-    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-dev python3-venv
+    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-dev python3-venv python3-pip
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apk ]]; then
     sudo apk add python3
   elif [[ $PLATFORM != darwin ]]; then
     log 'Unsupported platform..'
     return 0
   fi
-  curl https://bootstrap.pypa.io/get-pip.py | python3 && pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip'
+  if ! builtin command -v pip3 > /dev/null 2>&1; then curl https://bootstrap.pypa.io/get-pip.py | python3; fi
+  PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip packages'
   log "To use pynvim regardless of venv, set ${YELLOW}vim.g.python3_host_prog = \"$(which python3)\""
 }
 
@@ -306,8 +309,9 @@ install_swap() {
     log 'Unsupported platform..'
     return 0
   fi
-  log "Installing 4G swapfile.."
-  sudo dd if=/dev/zero of=/swapfile count=4096 bs=1MiB && sudo chmod 600 /swapfile
+  local g="${1:-4}"
+  log "Installing ${g}G swapfile.."
+  sudo dd if=/dev/zero of=/swapfile count=$((g * 1024)) bs=1MiB && sudo chmod 600 /swapfile
   sudo mkswap /swapfile && sudo swapon /swapfile
   sudo sed -i '/^\/swapfile swap swap defaults 0 0$/d' /etc/fstab
   echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
