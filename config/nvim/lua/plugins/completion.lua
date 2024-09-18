@@ -1,8 +1,7 @@
 return {
     {
-        -- "hrsh7th/nvim-cmp",
-        "yioneko/nvim-cmp",
-        branch = "perf", -- https://github.com/hrsh7th/nvim-cmp/pull/1980
+        "iguanacucumber/magazine.nvim", -- https://github.com/hrsh7th/nvim-cmp/pull/1980, TODO try Saghen/blink.cmp
+        name = "nvim-cmp",
         event = { "InsertEnter", "CmdlineEnter" },
         dependencies = {
             "hrsh7th/cmp-buffer",
@@ -110,15 +109,15 @@ return {
                 completion = { completeopt = "menuone,noinsert" },
                 snippet = { expand = function(args) vim.fn["vsnip#anonymous"](args.body) end },
                 window = {
-                    completion = vim.tbl_extend("force", cmp.config.window.bordered({ border = "single" }), { col_offset = -1 }),
-                    documentation = cmp.config.window.bordered({ border = "single" }),
+                    -- completion = vim.tbl_extend("force", cmp.config.window.bordered({ border = "single" }), { col_offset = -1 }),
+                    -- documentation = cmp.config.window.bordered({ border = "single" }),
                 },
                 formatting = {
                     format = function(_, item)
                         local icon = cmp_kinds[item.kind]
                         if icon == nil then
                             vim.notify("Icon not found for kind: " .. item.kind, vim.log.levels.WARN, { annote = "Cmp" })
-                        else
+                        elseif item.kind ~= nil then
                             item.kind = icon .. item.kind
                         end
                         return item

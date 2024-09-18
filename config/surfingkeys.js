@@ -308,8 +308,7 @@ api.mapkey('yrss', 'Copy rss', function() {
     }
 }, {domain: /(github|reddit|weibo)\.com/i});
 
-// https://github.com/brookhong/Surfingkeys/issues/2159
-/* api.unmap('gg');
+api.unmap('gg');
 api.unmap('G');
 var scrollX, scrollY;
 api.mapkey('gg', 'Go to top', function() {
@@ -344,7 +343,7 @@ for (let i = 32; i < 127; ++i) { // don't use var to avoid closure referencing g
     api.mapkey(`\`${char}`, `Jump mark ${char}`, function() {
         api.Normal.jumpVIMark(char);
     });
-} */
+}
 
 // https://github.com/brookhong/Surfingkeys/wiki/Register-inline-query
 api.Front.registerInlineQuery({

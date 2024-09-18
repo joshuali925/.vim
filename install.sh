@@ -103,6 +103,7 @@ install_asdf() {
     log '\nInstalling asdf..'
     echo 'legacy_version_file = yes' > ~/.asdfrc
     git clone https://github.com/asdf-vm/asdf.git --depth=1 ~/.asdf
+    link_file ~/.asdf/completions/_asdf ~/.vim/config/zsh/completions/_asdf
     source ~/.asdf/asdf.sh
   fi
 }
@@ -110,7 +111,7 @@ install_asdf() {
 install_devtools() {
   log '\nInstalling development tools..'
   if [[ $OSTYPE = linux-android ]]; then
-    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd lazygit tmux bat git-delta neovim
+    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd ripgrep yazi lazygit tmux bat git-delta neovim
     chsh -s zsh "$(whoami)"
     mkdir -p ~/temp && cd ~/temp
     wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip && unzip JetBrainsMono.zip
@@ -129,11 +130,11 @@ install_devtools() {
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils
     echo -e "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
-    brew install grep && ln -s "$(which ggrep)" ~/.local/bin/grep
-    brew install gnu-sed && ln -s "$(which gsed)" ~/.local/bin/sed
-    brew install findutils && ln -s "$(which gxargs)" ~/.local/bin/xargs
-    brew install gawk && ln -s "$(which gawk)" ~/.local/bin/awk
-    brew install gnu-tar && ln -s "$(which gtar)" ~/.local/bin/tar
+    brew install grep && link_file "$(which ggrep)" ~/.local/bin/grep
+    brew install gnu-sed && link_file "$(which gsed)" ~/.local/bin/sed
+    brew install findutils && link_file "$(which gxargs)" ~/.local/bin/xargs
+    brew install gawk && link_file "$(which gawk)" ~/.local/bin/awk
+    brew install gnu-tar && link_file "$(which gtar)" ~/.local/bin/tar
     brew install wget
     brew install bat shellcheck
     brew tap homebrew/cask-fonts
@@ -150,11 +151,10 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask wezterm rectangle maccy snipaste trex karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
+    # brew install --cask wezterm rectangle linearmouse maccy snipaste trex karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
-    # mousefix: https://mousefix.org
     # Orion: https://browser.kagi.com
     # coconutBattery: https://www.coconut-flavour.com/coconutbattery
     # DarkModeBuddy: https://github.com/insidegui/DarkModeBuddy
@@ -173,10 +173,10 @@ install_dotfiles() {
   mkdir -pv ~/.local/{bin,lib,share} ~/.config/lazygit ~/.ssh
   log '\nLinking configurations..'
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
-  echo 'source ~/.vim/config/.zshrc' >> ~/.zshrc
+  echo 'source ~/.vim/config/zsh/.zshrc' >> ~/.zshrc
   echo 'skip_global_compinit=1' >> ~/.zshenv
   log "Appended 'source ~/.vim/config/.bashrc' to ~/.bashrc"
-  log "Appended 'source ~/.vim/config/.zshrc' to ~/.zshrc"
+  log "Appended 'source ~/.vim/config/zsh/.zshrc' to ~/.zshrc"
   log "Appended 'skip_global_compinit=1' to ~/.zshenv"
   echo 'Include ~/.vim/config/ssh_config' >> ~/.ssh/config
   echo 'Include ~/.ssh/ec2hosts' >> ~/.ssh/config
@@ -223,7 +223,8 @@ install_docker() {
   sudo usermod -aG docker "$USER" || true
   sudo systemctl restart docker || sudo service docker restart
   sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login, enable read write access for other groups now to work immediately
-  # TODO https://github.com/docker/docs/issues/16397, docker completion zsh > ~/.zinit/completions/_docker does not have argument descriptions
+  # TODO https://github.com/docker/docs/issues/16397, docker completion zsh > ~/.vim/config/zsh/completions/_docker does not have argument descriptions
+  curl -fsSL -o ~/.vim/config/zsh/completions/_docker https://raw.githubusercontent.com/docker/cli/HEAD/contrib/completion/zsh/_docker || true
   log "Installed, run ${YELLOW}docker info${CYAN} for status"
 }
 

@@ -34,7 +34,7 @@ fzf-cd-widget() {
 }
 # customized: change to ctrl-p
 bindkey -M emacs '^P' fzf-file-widget
-zinit depth=1 light-mode for Aloxaf/fzf-tab  # load fzf-tab after fzf/shell and before defining tab-complete-or-cd
+
 # vim <tab>: files in current directory or args completion
 # vim <C-p>: all files in current and subdirectories, respects .gitignore
 # vim \<tab>: all files in current and subdirectories

@@ -109,10 +109,6 @@ vim.keymap.set("x", "au", ":<C-u>call plugins#wordmotion#object(v:count1, 'x', 0
 vim.keymap.set("o", "au", "<Cmd>call plugins#wordmotion#object(v:count1, 'o', 0, 0)<CR>", { silent = true })
 vim.keymap.set("x", "v", ":<C-u>call plugins#expand_region#next('v', '+')<CR>", { silent = true })
 vim.keymap.set("x", "<BS>", ":<C-u>call plugins#expand_region#next('v', '-')<CR>", { silent = true })
-vim.keymap.set("o", "ib", "<Cmd>call plugins#expand_region#any_pair('o', 'i')<CR>", { silent = true })
-vim.keymap.set("x", "ib", ":<C-u>call plugins#expand_region#any_pair('v', 'i')<CR>", { silent = true })
-vim.keymap.set("o", "ab", "<Cmd>call plugins#expand_region#any_pair('o', 'a')<CR>", { silent = true })
-vim.keymap.set("x", "ab", ":<C-u>call plugins#expand_region#any_pair('v', 'a')<CR>", { silent = true })
 vim.keymap.set("n", "f", "<Cmd>call plugins#fanfingtastic#next_char(v:count1, '', 'f', 'f')<CR>")
 vim.keymap.set("x", "f", "<Cmd>call plugins#fanfingtastic#visual_next_char(v:count1, '', 'f', 'f')<CR>")
 vim.keymap.set("o", "f", "<Cmd>call plugins#fanfingtastic#operator_next_char(v:count1, '', 'f', 'f')<CR>")
@@ -354,7 +350,8 @@ if require("states").small_file then
         end, 30)
         vim.defer_fn(function()
             vim.o.foldmethod = "expr"
-            vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
+            -- vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
+            vim.o.foldexpr = "nvim_treesitter#foldexpr()"
             vim.o.foldtext = "getline(v:foldstart).' ⋯'"
             vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
             local plugins = {

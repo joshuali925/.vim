@@ -208,11 +208,7 @@ function M.organize_imports_and_format()
     elseif vim.tbl_contains(active_clients, "pyright") then
         vim.cmd("silent PythonOrganizeImports")
     end
-    if vim.tbl_contains(active_clients, "eslint") then
-        vim.schedule(function() vim.cmd("EslintFixAll") end)
-    else
-        require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000 })
-    end
+    require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000 })
 end
 
 function M.is_active()

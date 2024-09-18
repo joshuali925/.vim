@@ -486,7 +486,7 @@ return {
                 { "Git gre&p all", [[call feedkeys(":Git log --all --name-status -i -G ''\<Left>", "n")]], "Search a regex in all committed versions of files, command: git log -p --all -i -G '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
                 { "Git fi&nd files all", [[call feedkeys(":Git log --all --name-status -- '**'\<Left>\<Left>", "n")]], "Grep file names in all commits" },
             })
-            vim.fn["quickui#menu#install"]("Ta&bles", {
+            vim.fn["quickui#menu#install"]("&Tables", {
                 { "&Venn ascii draw", [[lua require("utils").toggle_venn()]], "Toggle venn.nvim, use HJKL to draw arrow, select area and use v to draw box" },
                 { "--", "" },
                 { "Table &mode", [[TableModeToggle]], "Toggle TableMode" },
