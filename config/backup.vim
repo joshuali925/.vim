@@ -4577,6 +4577,10 @@ lazypm2() {
   printf "%b\n" "${map[@]}" | fzf --ansi --height=100 --preview="awk '{print \$1}' <<< {} | xargs pm2 logs --raw --" --preview-window=80%,follow
 }
                 theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status | args `git ls-files --others --exclude-standard`<CR>]]),
+alias gvenv='[[ ! -d $HOME/.local/lib/venv ]] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
+install-from-github q harelba/q linux-q '' macos-q '' '' "$@"
+alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
+alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
 
 " =======================================================
 local function show_git_log_for_lines() -- does not handle modified file correctly
@@ -4873,3 +4877,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
                 Codeium = " ",
                     ["<C-n>"] = cmp.mapping.complete({ config = { sources = { { name = "codeium" } } } }),
                     { name = "codeium" },
+
+" =======================================================
+" karabiner switch window, too slow
+              "shell_command": "(pgrep Chrome && osascript -e 'tell application \"System Events\"' -e 'set isActive to (name of first application process whose frontmost is true) = \"Google Chrome\"' -e 'end tell' -e 'tell application \"Google Chrome\"' -e 'if isActive then' -e 'set windowCount to count of windows' -e 'if windowCount > 1 then' -e 'set currentWindow to index of front window' -e 'if currentWindow = windowCount then' -e 'set index of window 1 to 1' -e 'else' -e 'set index of window (currentWindow + 1) to (currentWindow + 1)' -e 'end if' -e 'end if' -e 'else' -e 'activate' -e 'end if' -e 'end tell') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep Orion && open -a 'Orion') || (pgrep '^Arc$' && open -a 'Arc')"

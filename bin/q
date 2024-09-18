@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-source ~/.vim/bin/_install_from_github.sh
-install-from-github q harelba/q linux-q '' macos-q '' '' "$@"

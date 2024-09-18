@@ -1,0 +1,6 @@
+{
+  "Sign off": {
+    "prefix": "signed-off-by",
+    "body": ["Signed-off-by: Joshua Li <joshuali925@gmail.com>"]
+  }
+}

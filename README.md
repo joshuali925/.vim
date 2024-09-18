@@ -24,7 +24,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bi
 Copy base64 on local machine from github
 
 ```bash
-curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C /tmp --exclude=bin/busybox --exclude=config/backup.vim --exclude=config/surfingkeys.js --exclude=config/karabiner.json --exclude=config/nvim
+curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C /tmp --exclude=bin/busybox --exclude=config/backup.vim --exclude=config/surfingkeys.js --exclude=config/karabiner.json --exclude=config/nvim --exclude=config/zsh
 echo "mkdir -p ~/.vim; base64 -d <<<$(tar cJf - -C /tmp .vim-master | base64 | tr -d '\r\n') | tar xvJ -C \"\$HOME/.vim\" --strip-components=1 && ~/.vim/bin/bashrc --no-binary-downloads" | pbcopy
 rm -rf /tmp/.vim-master
 ```
@@ -32,7 +32,7 @@ rm -rf /tmp/.vim-master
 or copy from local ~/.vim directory
 
 ```bash
-echo "mkdir -p ~/.vim; base64 -d <<<$(cd ~/.vim > /dev/null 2>&1; git ls-files -- ':!bin/busybox' ':!config/backup.vim' ':!config/surfingkeys.js' ':!config/karabiner.json' ':!config/nvim' | tar cJf - -T - | base64 | tr -d '\r\n') | tar xvJ -C \"\$HOME/.vim\" && ~/.vim/bin/bashrc --no-binary-downloads" | pbcopy
+echo "mkdir -p ~/.vim; base64 -d <<<$(cd ~/.vim > /dev/null 2>&1; git ls-files -- ':!bin/busybox' ':!config/backup.vim' ':!config/surfingkeys.js' ':!config/karabiner.json' ':!config/nvim' ':!config/zsh' | tar cJf - -T - | base64 | tr -d '\r\n') | tar xvJ -C \"\$HOME/.vim\" && ~/.vim/bin/bashrc --no-binary-downloads" | pbcopy
 ```
 
 paste and run in target machine. To transfer through ssh, change `pbcopy` to `ssh <host> bash`.

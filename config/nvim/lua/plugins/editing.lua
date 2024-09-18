@@ -4,7 +4,14 @@ return {
     {
         "kylechui/nvim-surround",
         keys = { "ys", "cs", "ds", { "s", mode = "x" }, { "yss", "ysiw", remap = true }, { "yS", "ysg_", remap = true } },
-        opts = { keymaps = { normal_cur = "<NOP>", normal_line = "<NOP>", normal_cur_line = "ysl", visual = "s", } },
+        opts = {
+            keymaps = { normal_cur = "<NOP>", normal_line = "<NOP>", normal_cur_line = "ysl", visual = "s", },
+            surrounds = {
+                ["j"] = { add = function() return { { "JSON.stringify(" }, { ")" } } end },
+                ["J"] = { add = function() return { { "JSON.stringify(" }, { ", null, 2)" } } end },
+                ["l"] = { add = function() return { { "console.log('❗', " }, { ")" } } end },
+            },
+        },
     },
     {
         "monaqa/dial.nvim",
@@ -39,7 +46,7 @@ return {
         end
     },
     {
-        "mg979/vim-visual-multi", -- TODO try brenton-leighton/multiple-cursors.nvim, smoka7/multicursors.nvim
+        "mg979/vim-visual-multi", -- TODO try brenton-leighton/multiple-cursors.nvim, smoka7/multicursors.nvim, jake-stewart/multicursor.nvim
         keys = {
             { "<C-Down>", "<Plug>(VM-Add-Cursor-Down)" },
             { "<C-n>", "<Plug>(VM-Find-Under)" },

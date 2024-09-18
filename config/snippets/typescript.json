@@ -52,6 +52,17 @@
       "type RequiredKey<T, K extends keyof T> = T & Required<Pick<T, K>>;"
     ]
   },
+  ".filter() fulfilled PromiseAllSettled results": {
+    "prefix": ".fulfilled",
+    "body": [
+      ".filter(",
+      "\t<T,>(",
+      "\t\tresult: PromiseSettledResult<T>,",
+      "\t): result is PromiseFulfilledResult<T> => result.status === 'fulfilled',",
+      ")",
+      ".map((result) => result.value)"
+    ]
+  },
   "Expand type": {
     "prefix": "expand-type",
     "body": [

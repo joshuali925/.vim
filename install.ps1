@@ -59,7 +59,7 @@ cmd /c mklink /H %USERPROFILE%\.tmux.conf %USERPROFILE%\.vim\config\.tmux.conf
 cmd /c mklink /H %APPDATA%\lazygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
 Copy-Item "$env:USERPROFILE\.vim\config\yazi" "$env:APPDATA\yazi\config" -Recurse
 Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:USERPROFILE\scoop\apps\windows-terminal\current\settings\settings.json"
-cmd /c "echo source ~/.vim/config/.zshrc >> %USERPROFILE%\.zshrc"
+cmd /c "echo source ~/.vim/config/zsh/.zshrc >> %USERPROFILE%\.zshrc"
 cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.zshrc"
 cmd /c "echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc"
 cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.bashrc"

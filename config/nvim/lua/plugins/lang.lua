@@ -102,8 +102,8 @@ return {
             { "<leader>a", "<Cmd>lua vim.lsp.buf.code_action()<CR>", mode = { "n", "x" } },
             { "gh", "<Cmd>lua if vim.diagnostic.open_float({ scope = 'cursor', border = 'single' }) == nil then vim.lsp.buf.hover() end<CR>" },
             { "<leader>R", "<Cmd>lua vim.lsp.buf.rename()<CR>" },
-            { "[a", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' }, severity = vim.diagnostic.severity.ERROR })<CR>" },
-            { "]a", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' }, severity = vim.diagnostic.severity.ERROR })<CR>" },
+            { "[a", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>" },
+            { "]a", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>" },
             { "[A", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' } })<CR>" },
             { "]A", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' } })<CR>" },
             { "g<C-k>", vim.lsp.buf.signature_help },
@@ -146,7 +146,14 @@ return {
             require("kommentary.config").configure_language("lua", { prefer_single_line_comments = true })
         end,
     },
-    { "nvim-treesitter/nvim-treesitter-context", keys = { { "yoC", "<Cmd>TSContextToggle<CR>" } }, opts = { enable = false, mode = "topline" } },
+    {
+        "nvim-treesitter/nvim-treesitter-context",
+        cmd = "TSContextToggle", -- treesitter-context throws errors when loaded on keys
+        init = function()
+            vim.keymap.set("n", "yoC", "<Cmd>TSContextToggle<CR>")
+        end,
+        opts = { enable = false, mode = "topline" }
+    },
     {
         "nvim-treesitter/nvim-treesitter",
         build = ":TSUpdate",

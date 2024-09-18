@@ -1,3 +1,5 @@
+# https://raw.githubusercontent.com/sxyazi/yazi/HEAD/yazi-config/preset/yazi.toml
+
 [manager]
 ratio = [1, 2, 3]
 sort_by = "natural"

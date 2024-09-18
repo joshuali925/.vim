@@ -7,6 +7,9 @@
 
 [alias]
 	open = "!git remote get-url origin | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//' | if command -v open > /dev/null 2>&1; then xargs open; else y; fi"
+	count = shortlog -sne
+	abort = "!$(git status | grep -o 'git \\(merge\\|cherry-pick\\|rebase\\|revert\\) --abort' | head -n 1)"
+	continue = "!$(git status | grep -o 'git \\(merge\\|cherry-pick\\|rebase\\|revert\\) --continue' | head -n 1)"
 
 ; [credential]
 ; 	helper = store

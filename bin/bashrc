@@ -10,7 +10,7 @@ if [[ -n $GET_BASHRC ]]; then
   [[ -f $HOME/.bashrc ]] && source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
 
   .vim-clear-env() {
-    local config_paths=(~/.vim ~/.tmux ~/.zinit ~/.local/share ~/.config/{yazi,lazygit}) executable
+    local config_paths=(~/.vim ~/.tmux ~/.local/{share,zim} ~/.config/{yazi,lazygit}) executable
     [[ $(readlink -f "$HOME/.tmux.conf") = $HOME/.vim/config/.tmux.conf ]] && config_paths+=(~/.tmux.conf)
     for executable in ~/.local/bin/*; do
       [[ -f $HOME/.vim/bin/${executable##*/} ]] && config_paths+=("$HOME/.local/bin/${executable##*/}")

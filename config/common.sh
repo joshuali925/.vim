@@ -58,7 +58,6 @@ alias vtree='\vim +Explore'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
 alias venv='deactivate 2> /dev/null; findup venv >&2 || python3 -m venv venv; source "$(findup venv)/bin/activate"'
-alias gvenv='[[ ! -d $HOME/.local/lib/venv ]] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
 alias gnpm='npm --prefix ~/.local/lib/node-packages'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
@@ -67,9 +66,8 @@ alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
 alias 00='[[ -f $HOME/.vim/tmp/last_result ]] && cd "$(cat "$HOME/.vim/tmp/last_result")"'
-alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
-alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
 alias jqflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
+alias json2csv='jq -r "(map(keys) | add | unique) as \$cols | map(. as \$row | \$cols | map(\$row[.])) as \$rows | \$cols, \$rows[] | @csv"'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
@@ -141,7 +139,6 @@ alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"
 alias gst='git stash'
 alias gst-save='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
-alias gcount='git shortlog -sn'
 alias gwta='git worktree add -f'
 alias gtree='git ls-files | tree --fromfile'
 alias guntracked='git ls-files --others --exclude-standard'
@@ -162,7 +159,7 @@ alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(object
 alias gforest='git foresta --style=10 | \less -RiMXF'
 alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --format=%h)'
 alias gpatch='if builtin command -v pbpaste > /dev/null 2>&1; then pbpaste | sed -e "\$a\\" | git apply -3; else \vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply -3 patch.diff && rm patch.diff; fi'
-alias grerere-forget='rm -rf .git/rr-cache'
+alias grerere-forget='rm -rf "$(git rev-parse --show-toplevel || echo ".")/.git/rr-cache"'
 alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%C(yellow)%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
@@ -329,6 +326,13 @@ yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yaz
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp"
   if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  rm -f -- "$tmp"
+}
+
+csvq() {
+  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <csv-file> [delimiter]" >&2; return 1; fi
+  local file=$1 delimiter="${2:-,}" tmp="$(mktemp -t "csvq.XXXXXX.db")"  # litecli .import does not automatically create table from csv, workaround needs temp db
+  sqlite3 "$tmp" -cmd '.mode csv' -cmd ".separator $delimiter" ".import $file t" && litecli --prompt "table t> " --auto-vertical-output "$tmp"
   rm -f -- "$tmp"
 }
 

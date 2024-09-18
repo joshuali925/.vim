@@ -167,7 +167,7 @@ function! funcs#get_run_command() abort
     return user_command
   endif
   if expand('%') =~ '\.test\.[tj]sx\?'
-    return 'TermExec size=' . max([10, &columns * 1/2]) . " direction=vertical cmd=' yarn test " . expand('%') . ' -t ' . funcs#jest_context() . ' --coverage -u' . "'"
+    return 'TermExec size=' . max([10, &columns * 1/2]) . " direction=vertical cmd=' yarn test:jest " . expand('%') . ' -t ' . funcs#jest_context() . ' --coverage --coverageReporters=text -u' . "'"
   endif
   let run_command = {}
   let run_command['vim'] = 'source %'

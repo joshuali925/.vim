@@ -51,7 +51,7 @@ return {
     },
     { "jbyuki/venn.nvim", cmd = "VBox" },
     {
-        "mistweaverco/kulala.nvim",
+        "mistweaverco/kulala.nvim", -- TODO mistweaverco/kulala-ls
         init = function()
             vim.api.nvim_create_augroup("KulalaAutoCommands", {})
             vim.api.nvim_create_autocmd("FileType", {
@@ -108,8 +108,17 @@ return {
             require("mini.splitjoin").setup({ mappings = { toggle = "gs" } })
             require("mini.ai").setup({
                 mappings = { around_next = "aN", inside_next = "iN", around_last = "aP", inside_last = "iP" },
-                custom_textobjects = { n = require("mini.extra").gen_ai_spec.number() },
-                n_lines = 999,
+                custom_textobjects = {
+                    b = { { "%b()", "%b[]", "%b{}", "%b''", '%b""', "%b``", "%b<>" }, "^.().*().$" },
+                    n = require("mini.extra").gen_ai_spec.number(),
+                    ["'"] = false,
+                    ['"'] = false,
+                    ["`"] = false,
+                    ["("] = false,
+                    [")"] = false,
+                    ["{"] = false,
+                    ["}"] = false,
+                },
             })
             require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
             require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
