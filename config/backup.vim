@@ -4581,6 +4581,9 @@ alias gvenv='[[ ! -d $HOME/.local/lib/venv ]] && python3 -m venv "$HOME/.local/l
 install-from-github q harelba/q linux-q '' macos-q '' '' "$@"
 alias q='q --output-header --pipe-delimited-output --beautify --delimiter=, --skip-header'
 alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * from -'\""
+alias gunshallow='if [[ "$(git config --local --get remote.origin.partialclonefilter)" = blob:none ]]; then git fetch --no-filter --refetch; else git remote set-branches origin "*" && git fetch -v && echo -e "\nRun \"git fetch --unshallow\" to fetch all history"; fi'
+alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([[ \$(pwd) = '\$PWD' ]] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
+alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%C(yellow)%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
 
 " =======================================================
 local function show_git_log_for_lines() -- does not handle modified file correctly

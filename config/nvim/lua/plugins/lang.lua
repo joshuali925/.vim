@@ -30,6 +30,7 @@ return {
                     java = { "google-java-format" },
                     kotlin = { "ktlint" },
                     toml = { "taplo" },
+                    awk = { "awk" },
                     ["_"] = { "trim_whitespace" },
                     config = function(bufnr)
                         if vim.fn.bufname(bufnr):match("^Caddyfile") ~= nil then return { "caddy" } end
@@ -72,7 +73,7 @@ return {
                     end)(vim.ui.select)
                 end,
                 opts = {
-                    general = {
+                    bar = {
                         enable = function(buf, win, _)
                             return vim.fn.win_gettype(win) == "" and vim.bo[buf].bt == "" and vim.fn.expand("%") ~= ""
                         end,
@@ -86,6 +87,14 @@ return {
                                 if not menu then return end
                                 local cursor = vim.api.nvim_win_get_cursor(menu.win)
                                 local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+                                if component then menu:click_on(component, nil, 1, "l") end
+                            end,
+                            ["o"] = function()
+                                local utils = require("dropbar.utils")
+                                local menu = utils.menu.get_current()
+                                if not menu then return end
+                                local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                                local component = menu.entries[cursor[1]]:next_clickable(cursor[2])
                                 if component then menu:click_on(component, nil, 1, "l") end
                             end,
                         },
@@ -113,19 +122,6 @@ return {
     },
     { "danymat/neogen", config = true },
     { "windwp/nvim-ts-autotag", ft = { "html", "javascript", "javascriptreact", "typescriptreact" }, config = true },
-    {
-        "RRethy/vim-illuminate",
-        keys = {
-            { "[m", "<Cmd>lua require('illuminate').goto_prev_reference()<CR>" },
-            { "]m", "<Cmd>lua require('illuminate').goto_next_reference()<CR>" },
-        },
-        config = function()
-            require("illuminate").configure({ filetypes_denylist = vim.g.qs_filetype_blacklist })
-            vim.api.nvim_set_hl(0, "IlluminatedWordText", { link = "LspReferenceText" })
-            vim.api.nvim_set_hl(0, "IlluminatedWordRead", { link = "LspReferenceRead" })
-            vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "LspReferenceWrite" })
-        end,
-    },
     {
         "b3nj5m1n/kommentary",
         dependencies = { "nvim-treesitter/nvim-treesitter", "JoosepAlviste/nvim-ts-context-commentstring" },

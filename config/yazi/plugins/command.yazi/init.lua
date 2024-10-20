@@ -97,6 +97,9 @@ return {
             ]])
         end
 
+        -- copy file (mac only)
+        if command:match("^copy$") then return shell('osascript -e "set the clipboard to (POSIX file \"$0\")"') end
+
         return shell(command, true)
     end
 }

@@ -5,8 +5,8 @@ local state = require("telescope.actions.state")
 
 local pickers = {
     function(opts) builtin.buffers(vim.tbl_extend("keep", opts, { ignore_current_buffer = true, only_cwd = false, sort_mru = true })) end,
-    function(opts) builtin.oldfiles(vim.tbl_extend("keep", opts, { only_cwd = true })) end,
-    builtin.oldfiles,
+    function(opts) builtin.oldfiles(vim.tbl_extend("keep", opts, { only_cwd = true, prompt_title = "Oldfiles (current directory)" })) end,
+    function(opts) builtin.oldfiles(vim.tbl_extend("keep", opts, { prompt_title = "Oldfiles (global)" })) end,
 }
 
 local index = 0

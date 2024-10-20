@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+# vim:ft=zsh
 
 zmodule romkatv/powerlevel10k --on-pull "$ZIM_HOME/modules/powerlevel10k/gitstatus/install"
 

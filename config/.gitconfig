@@ -6,10 +6,28 @@
 	name = Joshua Li
 
 [alias]
-	open = "!git remote get-url origin | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//' | if command -v open > /dev/null 2>&1; then xargs open; else y; fi"
 	count = shortlog -sne
-	abort = "!$(git status | grep -o 'git \\(merge\\|cherry-pick\\|rebase\\|revert\\) --abort' | head -n 1)"
-	continue = "!$(git status | grep -o 'git \\(merge\\|cherry-pick\\|rebase\\|revert\\) --continue' | head -n 1)"
+	untracked = ls-files --others --exclude-standard
+	ignored = ls-files --others --exclude-standard --ignored
+	abort = "!git merge --abort 2>/dev/null || git cherry-pick --abort 2>/dev/null || git rebase --abort 2>/dev/null || git revert --abort 2>/dev/null || git am --abort 2>/dev/null"
+	continue = "!git merge --continue 2>/dev/null || git cherry-pick --continue 2>/dev/null || git rebase --continue 2>/dev/null || git revert --continue 2>/dev/null || git am --continue 2>/dev/null"
+	rerere-forget = "!rm -rf .git/rr-cache"
+	unshallow = "!if [[ \"$(git config --local --get remote.origin.partialclonefilter)\" = blob:none ]]; then git fetch --no-filter --refetch; else git remote set-branches origin '*' && git fetch -v && printf '\\nRun \"git fetch --unshallow\" to fetch all history\\n'; fi"
+	where = "!f() { printf \"\\e[0;36mClosest tag before ${*:-HEAD}:\\e[0m \"; git describe --tags --abbrev=0 \"${@:-HEAD}\"; printf \"\\e[0;36mBranches containing ${*:-HEAD}:\\e[0m\\n\"; git branch --color -a --contains \"${@:-HEAD}\"; }; f"
+	size = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | sed -n 's/^blob //p' | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest"  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
+	tree = "!git ls-files | tree --fromfile"
+	ls = "!cd -- \"${GIT_PREFIX:-.}\"; { find . ! -path . -type d -maxdepth 1 | cut -d/ -f2- | xargs -I{} -P$(nproc) sh -c 'git log --color --format=\"$(ls -d -F --color \"{}\") § %C(bold black)▏%Creset%C(yellow)%h %Cgreen%cr%Creset § %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"{}\"' | sort; find . ! -type d -maxdepth 1 | cut -d/ -f2- | xargs -I{} -P$(nproc) sh -c 'git log --color --format=\"$(ls -d -F --color \"{}\") § %C(bold black)▏%Creset%C(yellow)%h %Cgreen%cr%Creset § %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"{}\"' | sed 'h;s/\\x1b[[0-9;]*m//g;G;s/\\n/\\t/' | sort | cut -f2-; } | awk -F'§' -vCOLUMNS=$(tput cols) '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = $i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", $i); len[NR,i] = l = length($i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { width = 0; for (col = 1; col < nf[row]; col++) { printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; width+=max[col]+1; } print substr(cell[row,nf[row]],1,COLUMNS-width+17); } }'"
+	pull-all = "!find . -name .git -print -execdir git pull \\;"
+	status-all = "!find -- \"${GIT_PREFIX:-.}\" -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"$([[ $(pwd) = '$PWD' ]] && echo $(basename $PWD) \"\\033[1;30m\"\\(current directory\\) || realpath --relative-to=\"'$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)\"\\033[1;30m\"$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
+	preview-merge-diff = "!f() { git diff HEAD...\"$@\"; }; f"  # diff between target and the common ancestor of HEAD and target
+	preview-merge-log = "!git log --color --graph --pretty=format:\"$_GIT_LOG_FORMAT\" --abbrev-commit HEAD.."  # commits in target but not in HEAD (will be merged with git merge target)
+	missing = "!f() { git log --color --graph --pretty=format:\"$_GIT_LOG_FORMAT\" --abbrev-commit --cherry-pick --right-only HEAD...\"$@\"; }; f"  # commits in target but not in HEAD and not cherry-picked to HEAD, similar to git cherry -v <target> HEAD
+	forest = "!f() { git foresta --style=10 \"$@\" | less -RiMXF -p $(git show -s --format=%h); }; f"
+	difft="!GIT_EXTERNAL_DIFF=difft git diff"
+	diff-side-by-side="!GIT_PAGER='delta --line-numbers --navigate --side-by-side' git diff"
+	diff-so-fancy="!GIT_PAGER='diff-so-fancy | less --tabs=4 -RiMXF' git diff"
+	diff-word="!GIT_PAGER='diff-so-fancy | less --tabs=4 -RiMXF' git diff --word-diff=color --ignore-all-space"
+	open = "!git remote get-url origin | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//' | if command -v open > /dev/null 2>&1; then xargs open; else y; fi"
 
 ; [credential]
 ; 	helper = store

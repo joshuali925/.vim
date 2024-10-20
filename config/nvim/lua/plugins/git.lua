@@ -3,7 +3,6 @@ return {
         "rbong/vim-flog",
         dependencies = {
             "tpope/vim-fugitive",
-            "tpope/vim-rhubarb",
             {
                 "ja-he/heat.nvim",
                 opts = { colors = { [1] = { value = 0, color = { 0, 0, 0 } }, [2] = { value = 0.95, color = { 0.75, 0.75, 0.75 } }, [3] = { value = 1, color = { 1, 1, 1 } } } },
@@ -15,8 +14,6 @@ return {
             { "<leader>gf", "<Cmd>.Flogsplit<CR>" },
             { "<leader>gf", ":Flogsplit<CR>", mode = { "x" } },
             { "<leader>gb", "<Cmd>0,.Git blame<CR>" },
-            { "<leader>gr", [[<Cmd>if $SSH_CLIENT == "" | .GBrowse | else | let @+=split(execute(".GBrowse!"), "\n")[-1] | endif<CR>]] },
-            { "<leader>gr", [[:<C-u>if $SSH_CLIENT == "" | '<,'>GBrowse | else | let @+=split(execute("'<,'>GBrowse!"), "\n")[-1] | endif<CR>]], mode = { "x" } },
             { "<leader>gc", "<Cmd>Git commit --signoff<CR>" },
         },
         config = function()

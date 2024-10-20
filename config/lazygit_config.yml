@@ -20,7 +20,7 @@ gui:
     optionsTextColor:
       - cyan
     selectedLineBgColor:
-      - default
+      - black
     selectedRangeBgColor:
       - cyan
     cherryPickedCommitBgColor:

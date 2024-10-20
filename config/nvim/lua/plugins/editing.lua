@@ -15,10 +15,6 @@ return {
     },
     {
         "monaqa/dial.nvim",
-        keys = {
-            { "<C-a>", "<Plug>(dial-increment)", mode = { "n", "x" } },
-            { "<C-x>", "<Plug>(dial-decrement)", mode = { "n", "x" } },
-        },
         config = function()
             local augend = require("dial.augend")
             require("dial.config").augends:register_group({
@@ -43,33 +39,64 @@ return {
                     augend.constant.new({ elements = { "prev_", "next_" }, word = false, cyclic = true, }),
                 },
             })
-        end
+        end,
     },
     {
-        "mg979/vim-visual-multi", -- TODO try brenton-leighton/multiple-cursors.nvim, smoka7/multicursors.nvim, jake-stewart/multicursor.nvim
+        "jake-stewart/multicursor.nvim",
         keys = {
-            { "<C-Down>", "<Plug>(VM-Add-Cursor-Down)" },
-            { "<C-n>", "<Plug>(VM-Find-Under)" },
-            { "<C-n>", "<Plug>(VM-Find-Subword-Under)", mode = "x" },
-            "<leader><C-n>",
+            { "<C-n>", "<Cmd>lua require('multicursor-nvim').matchAddCursor(1)<CR>", mode = { "n", "x" } },
+            { "<C-Down>", "<Cmd>lua require('multicursor-nvim').lineAddCursor(1)<CR>", mode = { "n", "x" } },
+            { "<C-Leftmouse>", "<Cmd>lua require('multicursor-nvim').handleMouse()<CR>" },
+            { "<leader>gv", "<Cmd>lua require('multicursor-nvim').restoreCursors()<CR>" },
+            {
+                "<C-a>",
+                function()
+                    if require("multicursor-nvim").hasCursors() then
+                        require("multicursor-nvim").matchAllAddCursors()
+                    else
+                        local isNormal = vim.fn.mode():match("^n.*")
+                        require("dial.map").manipulate("increment", isNormal and "normal" or "visual")
+                        if not isNormal then vim.cmd.normal({ "gv", bang = true }) end
+                    end
+                end,
+                mode = { "n", "x" },
+            },
+            {
+                "<C-x>",
+                function()
+                    if require("multicursor-nvim").hasCursors() then
+                        require("multicursor-nvim").matchSkipCursor(1)
+                    else
+                        local isNormal = vim.fn.mode():match("^n.*")
+                        require("dial.map").manipulate("decrement", isNormal and "normal" or "visual")
+                        if not isNormal then vim.cmd.normal({ "gv", bang = true }) end
+                    end
+                end,
+                mode = { "n", "x" },
+            },
+            { "<Tab>", function()
+                if require("multicursor-nvim").hasCursors() then
+                    require("multicursor-nvim").nextCursor()
+                else
+                    vim.api.nvim_feedkeys(vim.keycode("<Tab>"), "n", false)
+                end
+            end },
+            { "<S-Tab>", function()
+                if require("multicursor-nvim").hasCursors() then
+                    require("multicursor-nvim").prevCursor()
+                else
+                    vim.api.nvim_feedkeys(vim.keycode("<S-Tab>"), "n", false)
+                end
+            end },
+            { "<Esc>", function()
+                if not require("multicursor-nvim").cursorsEnabled() then
+                    require("multicursor-nvim").enableCursors()
+                elseif require("multicursor-nvim").hasCursors() then
+                    require("multicursor-nvim").clearCursors()
+                end
+            end },
         },
-        init = function()
-            vim.g.VM_default_mappings = 0
-            vim.g.VM_exit_on_1_cursor_left = 1
-            vim.g.VM_maps = {
-                -- <C-Down/Up> to add cursor
-                ["Select All"] = "<leader><C-n>",
-                ["Find Under"] = "<C-n>",
-                ["Find Subword Under"] = "<C-n>",
-                ["Remove Last Region"] = "<C-p>",
-                ["Skip Region"] = "<C-x>",
-                ["Switch Mode"] = "<C-c>",
-                ["Add Cursor At Pos"] = "<C-LeftMouse>", -- click to move to position first, then ctrl-click to add cursor
-                ["Select Operator"] = "v",
-                ["Case Conversion Menu"] = "s",
-                ["I BS"] = "", -- for nvim-autopairs: https://github.com/mg979/vim-visual-multi/issues/172
-            }
-        end,
+        config = true,
     },
     {
         "HakonHarnes/img-clip.nvim",

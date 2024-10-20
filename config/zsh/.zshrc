@@ -17,7 +17,12 @@ if [[ ! -e $ZIM_HOME/zimfw.zsh ]]; then
   curl -fsSL --create-dirs -o $ZIM_HOME/zimfw.zsh https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
 fi
 
-if [[ ! $ZIM_HOME/init.zsh -nt $ZDOTDIR/.zimrc ]]; then source $ZIM_HOME/zimfw.zsh init; fi
+if [[ ! $ZIM_HOME/init.zsh -nt $ZDOTDIR/.zimrc ]]; then
+  source $ZIM_HOME/zimfw.zsh init
+  if [[ $OSTYPE = linux-android ]]; then  # https://github.com/zimfw/zimfw/issues/482#issuecomment-1288943906
+    sed -i 's/#\?setopt NO_CASE_GLOB/#setopt NO_CASE_GLOB/' $ZIM_HOME/modules/completion/init.zsh
+  fi
+fi
 source $ZIM_HOME/init.zsh
 
 if [[ -f ~/.vim/config/fzf/shell.zsh ]]; then
@@ -36,6 +41,9 @@ elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
 fi
 
 source ~/.vim/config/common.sh
+
+# show timestamp of command in history, not fully accurate due to grep -F containing partial matches. another slower solution: https://github.com/junegunn/fzf/issues/1049#issuecomment-2241522977
+export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='{ tac ~/.zsh_history | grep -m 1 -F {2..} | awk -F: \"{print \\\$2}\" | xargs -I= date -u +%Y-%m-%dT%H:%M:%SZ -d @=; echo ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈; echo {2..}; } | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
 
 typeset -U path PATH
 WORDCHARS=${WORDCHARS/=\/}
@@ -76,6 +84,7 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -AF --color=always -1 $realpath'
 zstyle ':fzf-tab:*' switch-group '[' ']'
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 zstyle ':fzf-tab:*' popup-min-size 50 8
+zstyle ':fzf-tab:*' fzf-min-height 8
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 
 compdef _dirs d
@@ -83,6 +92,9 @@ compdef _command_names path
 compdef _git gds=git-diff
 compdef _git gc=git-commit
 compdef _git gwt=git-worktree
+_git-preview-merge-diff() { _git-diff; }
+_git-missing() { _git-log; }
+_git-forest() { _git-log; }
 
 bracketed-paste() {
   zle .$WIDGET && LBUFFER=${LBUFFER%$'\n'}
@@ -110,12 +122,12 @@ zle -N down-line-or-local-history
 run-file-manager () {
   local precmd tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp" < /dev/tty
-  if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then
+    cd -- "$dir" > /dev/null
+    for precmd in $precmd_functions; do $precmd; done
+    zle reset-prompt
+  fi
   rm -f -- "$tmp"
-  for precmd in $precmd_functions; do
-    $precmd
-  done
-  zle reset-prompt
 }
 zle -N run-file-manager
 
@@ -135,7 +147,7 @@ bindkey '^u' backward-kill-line
 bindkey '^x^y' copy-line
 bindkey -s '^z' '%^m'
 bindkey '\el' forward-char                    # unbind <Esc>l = ls from oh-my-zsh key-bindings
-bindkey '^[[1;5C' emacs-forward-word          # <C-Right> to next word end. TODO try https://github.com/marlonrichert/zsh-edit
+bindkey '^[[1;5C' emacs-forward-word          # <C-Right> to next word end. alternative: https://github.com/marlonrichert/zsh-edit
 
 alias history='history -f 0'
 alias get-completion='compdef _gnu_generic'

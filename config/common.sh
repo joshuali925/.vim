@@ -3,7 +3,7 @@ source ~/.vim/config/z.sh
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 if [[ -s $HOME/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh; fi
 
-_GIT_LOG_FORMAT="%C(yellow)%h %Cgreen⦗%cr⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset"
+export _GIT_LOG_FORMAT="%C(yellow)%h %Cgreen⦗%cr⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset"
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR=nvim
 export BAT_PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
@@ -90,37 +90,24 @@ alias gc!='gc --amend'
 alias gcs='gc --signoff'
 alias gcs!='gc --signoff --amend --no-verify --allow-empty'
 alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
-alias gcf='git config --list'
 alias gcl='git clone --filter=blob:none'
 alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
 alias gcp='git cherry-pick'
 alias gd='git diff'
 alias gdst='git diff --staged'
-alias gdt='GIT_EXTERNAL_DIFF=difft git diff'
-alias gdd='GIT_PAGER="delta --line-numbers --navigate --side-by-side" git diff'
-alias gdf='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff'
-alias gdw='GIT_PAGER="diff-so-fancy | \less --tabs=4 -RiMXF" git diff --word-diff=color --ignore-all-space'
 alias gf='git fetch'
 alias gfa='git remote | xargs -L1 git fetch --filter=blob:none --prune'
 alias ggl='git pull origin $(gref)'
 alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added remote: fork; }; git push --force-with-lease fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
-alias glall='find . -name .git -print -execdir git pull \;'
 alias glg='git log --stat --graph --pretty=fuller'
 alias glga='git log --graph --pretty=fuller --all'
 alias glo='git log --color --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit'
 alias gloo='git log --color --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --max-count 15'
 alias gloa='git log --color --graph --pretty=format:"%C(yellow)%h %Cgreen⦗%ci⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --abbrev-commit --all | \less -RiMXF -p $(git show -s --format=%h)'
-glx() { git log --all --graph --decorate=short --date-order --color --pretty=format:"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)" | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "${1:-$(git show -s --format=%h)}"; }
-alias gm='git merge'
-alias gmt='git mergetool --no-prompt'
-alias gmerge-preview-log='git log --color --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit HEAD..'  # commits in target but not in HEAD (will be merged with git merge target)
-# shellcheck disable=2145
-gmerge-preview-diff() { git diff HEAD..."$@"; }  # diff between target and the common ancestor of HEAD and target
-# shellcheck disable=2145
-gmissing() { git log --color --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --cherry-pick --right-only HEAD..."$@"; }  # commits in target but not in HEAD and not cherry-picked to HEAD, similar to git cherry -v <target> HEAD
+glx() { git log --graph --decorate=short --date-order --color --pretty=format:"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)" "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$(git show -s --format=%h)"; }
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
@@ -133,16 +120,11 @@ alias grset='git remote set-url'
 alias greset-to-remote='git stash push --include-untracked --message "greset-to-remote temporary stash"; git reset --hard @{upstream}'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grv='git remote -v'
-alias grs='git reset'
 alias gs='git status -sb'
-alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([[ \$(pwd) = '\$PWD' ]] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
 alias gst='git stash'
 alias gst-save='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
 alias gwta='git worktree add -f'
-alias gtree='git ls-files | tree --fromfile'
-alias guntracked='git ls-files --others --exclude-standard'
-alias gignored='git ls-files --others --exclude-standard --ignored'
 alias gexclude='cat >> "$(git rev-parse --show-toplevel)/.git/info/exclude" <<<'
 alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclude"'
 gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
@@ -150,17 +132,12 @@ alias gexclude2='git update-index --assume-unchanged'
 alias gexcluded2='git ls-files -v | grep "^[[:lower:]]"'
 alias gunexclude2='git update-index --no-assume-unchanged'
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
-alias gunshallow='if [[ "$(git config --local --get remote.origin.partialclonefilter)" = blob:none ]]; then git fetch --no-filter --refetch; else git remote set-branches origin "*" && git fetch -v && echo -e "\nRun \"git fetch --unshallow\" to fetch all history"; fi'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m "--wip--"'
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
-alias gsize='git rev-list --objects --all | git cat-file --batch-check="%(objecttype) %(objectname) %(objectsize) %(rest)" | sed -n "s/^blob //p" | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest'  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
-alias gforest='git foresta --style=10 | \less -RiMXF'
-alias gforesta='git foresta --style=10 --all | \less -RiMXF -p $(git show -s --format=%h)'
 alias gpatch='if builtin command -v pbpaste > /dev/null 2>&1; then pbpaste | sed -e "\$a\\" | git apply -3; else \vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply -3 patch.diff && rm patch.diff; fi'
-alias grerere-forget='rm -rf "$(git rev-parse --show-toplevel || echo ".")/.git/rr-cache"'
-alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%C(yellow)%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
+alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
 st() { ssh -t "$@" '.vim/bin/tmux new -A -s 0'; }
@@ -172,13 +149,6 @@ gds() {
     echo -e "\n\e[1;31mUnstaged\e[0m"
   fi
   git diff --stat "$@"
-}
-
-gwhere() {
-  echo -en "\e[0;36mClosest tag before ${*:-HEAD}:\e[0m "
-  git describe --tags --abbrev=0 "${@:-HEAD}"
-  echo -e "\e[0;36mBranches containing ${*:-HEAD}:\e[0m"
-  git branch --color -a --contains "${@:-HEAD}"
 }
 
 gc() {
@@ -261,7 +231,7 @@ grg() {
     --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never"
 }
 
-gvf() {  # find file in all commits, git log takes glob: gvf '*filename*'
+gfd() {  # find file in all commits, git log takes glob: gfd '*filename*'
   local root=$(git rev-parse --show-toplevel || echo ".")
   local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --ansi --multi --preview="git log --color --pretty=format:'$_GIT_LOG_FORMAT' --abbrev-commit --all --full-history -- '$root'/{}")
   if [[ -n $filepath ]]; then
@@ -304,6 +274,7 @@ gpr() {
   fi
   git fetch "$remote" "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
   if [[ -n $reset ]]; then
+    git fetch "$remote" HEAD
     git reset "$(git merge-base HEAD "$remote"/HEAD)"
   fi
 }
@@ -534,8 +505,7 @@ vrg() {
   $EDITOR -q <(rg --vimgrep "$@") -c "$pattern"  # won't work on mac: https://github.com/neovim/neovim/issues/21756
 }
 
-# https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration
-rf() {  # livegrep: rf [pattern] [flags]
+rf() {  # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration, livegrep: rf [pattern] [flags]
   local rest=() skip_args=0
   for arg in "$@"; do
     if [[ $skip_args -eq 1 ]]; then rest+=("$arg"); continue; fi

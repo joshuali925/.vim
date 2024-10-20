@@ -1,6 +1,5 @@
 return {
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
-    { "LunarVim/bigfile.nvim", lazy = false, opts = { filesize = 3 } }, -- pteroctopus/faster.nvim will disable treesitter globally
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
     {
         "gbprod/yanky.nvim",
@@ -34,7 +33,7 @@ return {
             vim.g.mkdp_auto_close = 0
             vim.g.mkdp_preview_options = { disable_sync_scroll = 1 }
         end,
-        config = function() vim.cmd.doautocmd("FileType") end -- trigger autocmd to defined MarkdownPreview command for buffer
+        config = function() vim.cmd.doautocmd("FileType") end, -- trigger autocmd to defined MarkdownPreview command for buffer
     },
     {
         "dhruvasagar/vim-table-mode",
@@ -61,13 +60,42 @@ return {
                     vim.o.commentstring = "# %s"
                     vim.keymap.set("n", "{", "<Cmd>lua require('kulala').jump_prev()<CR>", { buffer = ev.buf })
                     vim.keymap.set("n", "}", "<Cmd>lua require('kulala').jump_next()<CR>", { buffer = ev.buf })
-                end
+                end,
             })
         end,
         config = function()
             require("kulala").setup({ default_view = "headers_body", additional_curl_options = { "--insecure" } })
             vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
         end,
+    },
+    {
+        "folke/snacks.nvim",
+        priority = 1000,
+        lazy = false,
+        keys = {
+            { "[m", "<Cmd>lua require('snacks.words').jump(-1, true)<CR>" },
+            { "]m", "<Cmd>lua require('snacks.words').jump(1, true)<CR>" },
+            { "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>" },
+            {
+                "<leader>gr",
+                function()
+                    require("snacks.gitbrowse").open({
+                        open = function(url)
+                            url = ("%sL%s-L%s"):format(url:gsub("L%d+$", ""), vim.fn.getpos("'<")[2], vim.fn.getpos("'>")[2])
+                            if vim.env.SSH_CLIENT ~= nil then vim.fn.setreg("+", url) else vim.ui.open(url) end
+                        end,
+                    })
+                end,
+                mode = { "x" },
+            },
+        },
+        opts = {
+            bigfile = { enabled = true },
+            notifier = { enabled = false },
+            quickfile = { enabled = true },
+            statuscolumn = { enabled = true, left = { "sign" } },
+            words = { enabled = true },
+        },
     },
     {
         "echasnovski/mini.nvim", -- loaded when icons are used
@@ -127,6 +155,12 @@ return {
                 view = { style = "sign", signs = { add = "▎", change = "░", delete = "▏" } },
                 mappings = { apply = "<leader>gA", reset = "<leader>gU", textobject = "ig", goto_first = "[G", goto_prev = "[g", goto_next = "]g", goto_last = "]G" },
                 options = { wrap_goto = true },
+            })
+            vim.api.nvim_create_autocmd("User", {
+                pattern = "MiniFilesActionRename",
+                callback = function(event)
+                    require("snacks.rename").on_rename_file(event.data.from, event.data.to)
+                end,
             })
         end,
     },

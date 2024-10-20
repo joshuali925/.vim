@@ -242,8 +242,8 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 vim.api.nvim_create_autocmd("BufReadPost", {
     pattern = "*",
-    group = "AutoCommands", -- do not restore cursor for fugitive (filetype git)
-    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") && &filetype != 'gitcommit' | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | endif | let b:RestoredCursor = 1]],
+    group = "AutoCommands", -- do not restore cursor for git buffers like fugitive (ft: git), commit message (ft: gitcommit, doesn't really work because filetype is set afterwards)
+    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") && &filetype !~ '^git' | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | endif | let b:RestoredCursor = 1]],
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
@@ -355,7 +355,6 @@ if require("states").small_file then
             vim.o.foldtext = "getline(v:foldstart).' ⋯'"
             vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
             local plugins = {
-                "vim-illuminate",
                 "indent-blankline.nvim",
                 "nvim-scrollview",
                 "git-conflict.nvim",
