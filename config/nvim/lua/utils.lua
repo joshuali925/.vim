@@ -137,9 +137,16 @@ local function term_with_edit_callback(cmd, height, width, border)
     local selection_path = os.tmpname()
     return require("toggleterm.terminal").Terminal:new({
         cmd = cmd:format(vim.fn.fnameescape(selection_path)),
+        on_open = function(t)
+            vim.keymap.set("t", "<C-o>", function()
+                t:shutdown()
+                require("snacks.lazygit").open()
+                vim.schedule(function() vim.defer_fn(function() vim.cmd.startinsert() end, 100) end)
+            end, { buffer = true })
+        end,
         direction = "float",
         float_opts = { height = height, width = width, border = border or "curved" },
-        on_close = function(_)
+        on_close = function()
             local handle = io.open(selection_path, "r")
             if handle ~= nil then
                 local files = {}

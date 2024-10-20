@@ -1,6 +1,6 @@
 return {
     {
-        "iguanacucumber/magazine.nvim", -- https://github.com/hrsh7th/nvim-cmp/pull/1980, TODO try Saghen/blink.cmp
+        "iguanacucumber/magazine.nvim", -- TODO try Saghen/blink.cmp
         name = "nvim-cmp",
         event = { "InsertEnter", "CmdlineEnter" },
         dependencies = {
@@ -123,6 +123,7 @@ return {
                         return item
                     end,
                 },
+                performance = { debounce = 0, throttle = 0, max_view_entries = 50 },
                 -- experimental = neocodeium ~= nil and {} or { ghost_text = { hl_group = "LspCodeLens" } },
                 mapping = {
                     ["<C-b>"] = cmp.mapping.scroll_docs(-4),

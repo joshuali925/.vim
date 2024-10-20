@@ -103,7 +103,6 @@ install_asdf() {
     log '\nInstalling asdf..'
     echo 'legacy_version_file = yes' > ~/.asdfrc
     git clone https://github.com/asdf-vm/asdf.git --depth=1 ~/.asdf
-    link_file ~/.asdf/completions/_asdf ~/.vim/config/zsh/completions/_asdf
     source ~/.asdf/asdf.sh
   fi
 }

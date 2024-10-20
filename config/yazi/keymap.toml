@@ -27,7 +27,7 @@ prepend_keymap = [
   { on = "\\", run = "tab_switch 1 --relative", desc = "Switch to the next tab" },
   { on = "<C-o>", run = "shell lazygit --block --confirm", desc = "Open Lazygit" },
   { on = "i", run = "plugin --sync max-preview", desc = "Toggle max preview" },
-  { on = "I", run = '''shell '~/.vim/config/preview.sh "$0"' --block --confirm''', desc = "Preview" },
+  { on = "I", run = '''shell '~/.vim/config/yazi/preview.sh "$0"' --block --confirm''', desc = "Preview" },
   { on = "t", run = "plugin change-dir --args='fzf CTRL_T'", desc = "Find file with fzf" },
   { on = "T", run = "plugin change-dir --args='fzf CTRL_T --no-ignore'", desc = "Find fine with fzf --no-ignore" },
   { on = "<Tab>", run = "plugin change-dir --args='fzf ALT_C'", desc = "Focus file in current directory with fzf" },
@@ -53,7 +53,7 @@ prepend_keymap = [
   { on = ["s", "S"], run = ["sort size --reverse", "linemode size"], desc = "Sort by size (reverse)" },
 
   { on = ["g", "s"], run = '''shell 'tput smcup; git status; bash -c "read -n 1 -s _"; tput rmcup' --block --confirm''', desc = "Git status" },
-  { on = ["g", "o"], run = '''shell 'tput smcup; git log --color --graph --pretty=format:"%C(yellow)%h %Cgreen⦗%cr⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --abbrev-commit -- "$0" | less -RiM; tput rmcup' --block --confirm''', desc = "Git log of current file" },
+  { on = ["g", "o"], run = '''shell 'tput smcup; git log --color --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit -- "$0" | less -RiM; tput rmcup' --block --confirm''', desc = "Git log of current file" },
   { on = ["g", "d"], run = "cd ~/Downloads", desc = "Go to the downloads directory" },
   { on = ["g", "c"], run = "cd ~/.config", desc = "Go to the config directory" },
   { on = ["g", "l"], run = "cd ~/.local", desc = "Go to the ~/.local directory" },

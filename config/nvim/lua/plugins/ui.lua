@@ -87,12 +87,17 @@ return {
     {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
-        dependencies = { "MunifTanjim/nui.nvim", "antosha417/nvim-lsp-file-operations" },
+        dependencies = "MunifTanjim/nui.nvim",
         keys = { { "<leader>b", "<Cmd>Neotree reveal<CR>" }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
         config = function()
             local function get_dir(state)
                 local node = state.tree:get_node()
-                return node.type == "file" and node:get_parent_id() or node.path
+                local path = node.type == "file" and node:get_parent_id() or node.path
+                return require("plenary").path:new(path):make_relative()
+            end
+            local events = require("neo-tree.events")
+            local function on_move(data)
+                require("snacks").rename.on_rename_file(data.source, data.destination)
             end
             require("neo-tree").setup({
                 default_component_configs = { icon = { default = "" } },
@@ -123,13 +128,34 @@ return {
                         ["x"] = "delete",
                         ["d"] = "cut_to_clipboard",
                         ["<C-b>"] = { function(state) vim.cmd.ToggleTerm("dir=" .. get_dir(state)) end, desc = "open_term_at_node" },
-                        ["<C-p>"] = { function(state) require("telescope.builtin").fd({ cwd = get_dir(state) }) end, desc = "find_files_at_node" },
-                        ["t"] = { function(state) require("telescope.builtin").fd({ cwd = get_dir(state) }) end, desc = "find_files_at_node" },
+                        ["<C-p>"] = {
+                            function(state)
+                                local dir = get_dir(state)
+                                require("telescope.builtin").fd({ cwd = dir, prompt_title = "Find Files: " .. dir })
+                            end,
+                            desc = "find_files_at_node",
+                        },
+                        ["t"] = {
+                            function(state)
+                                local dir = get_dir(state)
+                                require("telescope.builtin").fd({ cwd = dir, prompt_title = "Find Files: " .. dir })
+                            end,
+                            desc = "find_files_at_node",
+                        },
                         ["T"] = {
-                            function(state) require("telescope.builtin").fd({ cwd = get_dir(state), no_ignore = true }) end,
+                            function(state)
+                                local dir = get_dir(state)
+                                require("telescope.builtin").fd({ cwd = dir, prompt_title = "Find Files (no ignore): " .. dir, no_ignore = true })
+                            end,
                             desc = "find_files_no_ignore_at_node",
                         },
-                        ["<leader>f/"] = { function(state) require("telescope.builtin").live_grep({ cwd = get_dir(state) }) end, desc = "live_grep_at_node" },
+                        ["<leader>f/"] = {
+                            function(state)
+                                local dir = get_dir(state)
+                                require("telescope.builtin").live_grep({ cwd = dir, prompt_title = "Live Grep: " .. dir })
+                            end,
+                            desc = "live_grep_at_node",
+                        },
                         ["z"] = "none",
                         ["H"] = "none",
                         ["/"] = "none",
@@ -142,8 +168,11 @@ return {
                 },
                 document_symbols = { window = { mappings = { ["x"] = "none", ["d"] = "none" } } },
                 sources = { "filesystem", "buffers", "git_status", "document_symbols" },
+                event_handlers = {
+                    { event = events.FILE_MOVED, handler = on_move },
+                    { event = events.FILE_RENAMED, handler = on_move },
+                },
             })
-            require("lsp-file-operations").setup({ timeout_ms = 180000 })
         end,
     },
     {
@@ -452,7 +481,7 @@ return {
                 { "&Yank search matches", [[let @x = '' | %s//\=setreg('X', submatch(0), 'V')/gn | let @" = @x | let @x = '']], "Copy all strings matching current search pattern" },
                 { "Search non-ascii", [[let @/ = '[^\d0-\d127]' | set hlsearch]], [[Search all non-ascii characters, in command line: rg '[^\x00-\x7F]']] },
                 { "Search for red '&!'", [[RgNoRegex ❗]], [[Search for '❗' symbol]] },
-                { "Search in &buffers", [[execute 'cexpr []' | call feedkeys(":bufdo vimgrepadd //g % | only | copen\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Search a pattern in all buffers, add to quickfix" },
+                { "Search in &buffers", [[execute 'cexpr []' | call feedkeys(":bufdo vimgrepadd //g % | only | copen\<Home>\<S-Right>\<S-Right>\<Right>\<Right>", "n")]], "Search a pattern in all buffers, add to quickfix" },
                 { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
                 { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
                 { "Diff next buffer", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
@@ -481,7 +510,7 @@ return {
                 { "Diff&view", [[DiffviewOpen]], "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits" },
                 { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
                 { "--", "" },
-                { "Git search current", [[call feedkeys(":Git log --all --name-status -S '' -- %\<Left>\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Search a string in all committed versions of current file, command: git log -p --all -S '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- %" },
+                { "Git search current", [[call feedkeys(":Git log --all --name-status -S '' -- %\<Left>\<S-Left>\<Left>\<Left>", "n")]], "Search a string in all committed versions of current file, command: git log -p --all -S '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- %" },
                 { "Git search &all", [[call feedkeys(":Git log --all --name-status -S ''\<Left>", "n")]], "Search a string in all committed versions of files, command: git log -p --all -S '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
                 { "Git gre&p all", [[call feedkeys(":Git log --all --name-status -i -G ''\<Left>", "n")]], "Search a regex in all committed versions of files, command: git log -p --all -i -G '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
                 { "Git fi&nd files all", [[call feedkeys(":Git log --all --name-status -- '**'\<Left>\<Left>", "n")]], "Grep file names in all commits" },

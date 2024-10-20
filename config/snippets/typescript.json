@@ -53,9 +53,9 @@
     ]
   },
   ".filter() fulfilled PromiseAllSettled results": {
-    "prefix": ".fulfilled",
+    "prefix": "fulfilled",
     "body": [
-      ".filter(",
+      "filter(",
       "\t<T,>(",
       "\t\tresult: PromiseSettledResult<T>,",
       "\t): result is PromiseFulfilledResult<T> => result.status === 'fulfilled',",

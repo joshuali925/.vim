@@ -67,6 +67,7 @@ local themes = {
             require("catppuccin").setup({
                 flavour = (theme_index < 0 and "macchiato" or "latte"),
                 custom_highlights = { Comment = { fg = "#717993" } },
+                no_italic = true,
                 integrations = {
                     native_lsp = {
                         underlines = { errors = { "undercurl" }, hints = { "undercurl" }, warnings = { "undercurl" }, information = { "undercurl" } },
