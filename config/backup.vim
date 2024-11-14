@@ -4880,7 +4880,51 @@ vim.api.nvim_create_autocmd("BufReadPost", {
                 Codeium = " ",
                     ["<C-n>"] = cmp.mapping.complete({ config = { sources = { { name = "codeium" } } } }),
                     { name = "codeium" },
+" blink.cmp - snippet regex not working
+    {
+        "saghen/blink.cmp",
+        version = "*",
+        event = "InsertEnter",
+        dependencies = {
+            "rafamadriz/friendly-snippets",
+            { "saghen/blink.compat", opts = {} },
+        },
+        opts_extend = { "sources.completion.enabled_providers", "sources.compat" },
+        opts = {
+            keymap = {
+                preset = "enter",
+                ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+                ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+                ["<C-k>"] = {
+                    function(cmp)
+                        if cmp.is_in_snippet() then return cmp.accept() end
+                        return cmp.select_and_accept()
+                    end,
+                    "snippet_forward",
+                    "fallback",
+                },
+            },
+            windows = {
+                autocomplete = { winblend = 8 },
+                documentation = { auto_show = true },
+                ghost_text = { enabled = true },
+            },
+            accept = { auto_brackets = { enabled = true } },
+            trigger = { signature_help = { enabled = false } },
+            sources = {
+                providers = {
+                    snippets = {
+                        opts = {
+                            search_paths = { vim.fn.expand("~/.vim/config/snippets") }, -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
+                            extended_filetypes = { zsh = { "sh" }, typescript = { "javascript" }, typescriptreact = { "javascript", "typescript" } },
+                        }
+                    },
+                },
+            },
+        },
+    },
 
 " =======================================================
 " karabiner switch window, too slow
               "shell_command": "(pgrep Chrome && osascript -e 'tell application \"System Events\"' -e 'set isActive to (name of first application process whose frontmost is true) = \"Google Chrome\"' -e 'end tell' -e 'tell application \"Google Chrome\"' -e 'if isActive then' -e 'set windowCount to count of windows' -e 'if windowCount > 1 then' -e 'set currentWindow to index of front window' -e 'if currentWindow = windowCount then' -e 'set index of window 1 to 1' -e 'else' -e 'set index of window (currentWindow + 1) to (currentWindow + 1)' -e 'end if' -e 'end if' -e 'else' -e 'activate' -e 'end if' -e 'end tell') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep Orion && open -a 'Orion') || (pgrep '^Arc$' && open -a 'Arc')"
+

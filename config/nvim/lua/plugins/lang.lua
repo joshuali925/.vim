@@ -73,12 +73,9 @@ return {
                     end)(vim.ui.select)
                 end,
                 opts = {
-                    bar = {
-                        enable = function(buf, win, _)
-                            return vim.fn.win_gettype(win) == "" and vim.bo[buf].bt == "" and vim.fn.expand("%") ~= ""
-                        end,
-                    },
+                    bar = { enable = function(buf, win, _) return vim.fn.win_gettype(win) == "" and vim.bo[buf].bt == "" end },
                     menu = {
+                        win_configs = { border = "single" },
                         keymaps = {
                             ["h"] = "<C-w>q",
                             ["l"] = function()
@@ -115,8 +112,8 @@ return {
             { "]a", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>" },
             { "[A", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' } })<CR>" },
             { "]A", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' } })<CR>" },
-            { "g<C-k>", vim.lsp.buf.signature_help },
-            { "<C-k>", vim.lsp.buf.signature_help, mode = "i" },
+            { "g<C-k>", "<Cmd>lua vim.lsp.buf.signature_help({ float = { border = 'single' } })<CR>" },
+            { "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help({ float = { border = 'single' } })<CR>", mode = { "i" } },
         },
         config = function() require("lsp").init() end,
     },

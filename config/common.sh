@@ -11,7 +11,7 @@ export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --border=thinblock --preview-window="border-thinblock,<40(up,40%)" --highlight-line --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
-export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color=always --graph --pretty=format:\\\"$_GIT_LOG_FORMAT\\\" --abbrev-commit -- \{})+change-preview-label(▏log▕)\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label(▏cat▕)\"'"
+export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=format:\\\"$_GIT_LOG_FORMAT\\\" --abbrev-commit -- \{})+change-preview-label(▏log▕)\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label(▏cat▕)\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40%"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
@@ -66,6 +66,7 @@ alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
 alias 00='[[ -f $HOME/.vim/tmp/last_result ]] && cd "$(cat "$HOME/.vim/tmp/last_result")"'
+alias view='nvim -c "lua Snacks.terminal.colorize()"'
 alias jqflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
 alias json2csv='jq -r "(map(keys) | add | unique) as \$cols | map(. as \$row | \$cols | map(\$row[.])) as \$rows | \$cols, \$rows[] | @csv"'
 alias rga='rg --text --no-ignore --search-zip --follow'
@@ -104,9 +105,9 @@ alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch 
 alias gl='git pull'
 alias glg='git log --stat --graph --pretty=fuller'
 alias glga='git log --graph --pretty=fuller --all'
-alias glo='git log --color --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit'
-alias gloo='git log --color --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --max-count 15'
-alias gloa='git log --color --graph --pretty=format:"%C(yellow)%h %Cgreen⦗%ci⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --abbrev-commit --all | \less -RiMXF -p $(git show -s --format=%h)'
+alias glo='git log --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit'
+alias gloo='git log --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --max-count 15'
+alias gloa='git log --graph --pretty=format:"%C(yellow)%h %Cgreen⦗%ci⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --abbrev-commit --all | \less -RiMXF -p $(git show -s --format=%h)'
 glx() { git log --graph --decorate=short --date-order --color --pretty=format:"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)" "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$(git show -s --format=%h)"; }
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
@@ -134,9 +135,8 @@ alias gunexclude2='git update-index --no-assume-unchanged'
 alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
 alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m "--wip--"'
 alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
-alias gwhatchanged='git log --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
-alias gwhatsnew='git log --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
-alias gpatch='if builtin command -v pbpaste > /dev/null 2>&1; then pbpaste | sed -e "\$a\\" | git apply -3; else \vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply -3 patch.diff && rm patch.diff; fi'
+alias gwhatchanged='git log --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
+alias gwhatsnew='git log --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
 alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }

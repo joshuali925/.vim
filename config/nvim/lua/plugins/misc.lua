@@ -75,26 +75,65 @@ return {
         keys = {
             { "[m", "<Cmd>lua require('snacks.words').jump(-1, true)<CR>" },
             { "]m", "<Cmd>lua require('snacks.words').jump(1, true)<CR>" },
-            { "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>" },
-            {
-                "<leader>gr",
-                function()
-                    require("snacks.gitbrowse").open({
-                        open = function(url)
-                            url = ("%sL%s-L%s"):format(url:gsub("L%d+$", ""), vim.fn.getpos("'<")[2], vim.fn.getpos("'>")[2])
-                            if vim.env.SSH_CLIENT ~= nil then vim.fn.setreg("+", url) else vim.ui.open(url) end
-                        end,
-                    })
-                end,
-                mode = { "x" },
-            },
+            { "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>", mode = { "n", "x" } },
         },
         opts = {
             bigfile = { enabled = true },
-            notifier = { enabled = false },
             quickfile = { enabled = true },
-            statuscolumn = { enabled = true, left = { "sign" } },
-            words = { enabled = true },
+            statuscolumn = { enabled = false, left = { "sign" }, git = { patterns = { "MiniDiffSign" } } },
+            words = { enabled = true, debounce = 150 },
+            dashboard = {
+                enabled = true,
+                preset = {
+                    header = table.concat({ -- https://textart.sh/, https://dom111.github.io/image-to-ansi/
+                        [[  ██  ████████  ██                        ]],
+                        [[  ████████████████                        ]],
+                        [[  ██████████████████           ／l、      ]],
+                        [[████  ████  ██████████       （ﾟ､ ｡７     ]],
+                        [[████████████████████████       l  ~ヽ     ]],
+                        [[██████    ██████████████████   じしf_,)ノ ]],
+                        [[██  ██  ████  ████████████████████████████]],
+                        [[████        ████████████████████████      ]],
+                        [[████████████████████████████████████      ]],
+                        [[████████████████████████████████████      ]],
+                        [[████████████████████████████████████      ]],
+                        [[████████████████████████████████████      ]],
+                        [[██████████████████████████████████        ]],
+                        [[  ████████████████████████████████        ]],
+                        [[  ████    ████        ████    ████        ]],
+                        [[  ████    ████        ████    ████        ]],
+                        [[  ██      ██          ██      ██          ]],
+                    }, "\n"),
+                    keys = {
+                        { icon = " ", key = "e", desc = "New File", action = ":enew" },
+                        { icon = " ", key = "i", desc = "Insert", action = ":enew | startinsert" },
+                        { icon = " ", key = "f", desc = "Find files", action = ":lua require('telescope.builtin').fd({hidden = true})" },
+                        { icon = " ", key = "m", desc = "Find MRU", action = ":lua require('telescope.builtin').oldfiles()" },
+                        { icon = " ", key = "M", desc = "Find MRU in CWD", action = ":lua require('telescope.builtin').oldfiles({only_cwd = true})" },
+                        { icon = " ", key = "'", desc = "Find bookmarks", action = ":lua require('telescope').extensions.bookmarks.bookmarks({initial_mode = 'normal'})" },
+                        { icon = "󰘬 ", key = "!", desc = "Git changed files", action = ":lua require('telescope.builtin').git_status({initial_mode = 'normal'})" },
+                        { icon = " ", key = "?", desc = "Git diff", action = ":DiffviewOpen" },
+                        { icon = " ", key = "+", desc = "Git diff remote", action = ":DiffviewOpen @{upstream}..HEAD" },
+                        { icon = " ", key = "~", desc = "Git conflicts", action = ":Git mergetool" },
+                        { icon = " ", key = "o", desc = "Git log", action = ":Flog" },
+                        { icon = "󰍜 ", key = "\\", desc = "Open quickui", action = ":Lazy load vim-quickui | call quickui#menu#open('normal')" },
+                        { icon = "󰒲 ", key = "p", desc = "Open Lazy UI", action = ":Lazy" },
+                        { icon = "󰄉 ", key = "P", desc = "Open Lazy profile", action = ":Lazy profile" },
+                        { icon = " ", key = "s", desc = "Open Mason UI", action = ":Mason" },
+                        { icon = "󰑓 ", key = "r", desc = "Load session", action = ":call feedkeys(':SessionLoad', 'n')" },
+                        { icon = " ", key = "c", desc = "Edit vimrc", action = ":edit $MYVIMRC" },
+                        { icon = " ", key = "q", desc = "Quit", action = ":quit" },
+                    },
+                },
+                sections = {
+                    { section = "header" },
+                    { icon = " ", title = "Recent files (current directory)", section = "recent_files", cwd = true, indent = 2, limit = 7, padding = 1 },
+                    { icon = " ", title = "Recent files", section = "recent_files", indent = 2, limit = 3, padding = 1 },
+                    { icon = " ", title = "Projects", section = "projects", limit = 3, indent = 2 },
+                    { pane = 2, section = "keys", gap = 1, padding = 1 },
+                    { pane = 2, section = "startup" },
+                },
+            },
         },
     },
     {
