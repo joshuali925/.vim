@@ -45,6 +45,7 @@ return {
         "jake-stewart/multicursor.nvim",
         keys = {
             { "<C-n>", "<Cmd>lua require('multicursor-nvim').matchAddCursor(1)<CR>", mode = { "n", "x" } },
+            { "<leader><C-n>", "<Cmd>lua require('multicursor-nvim').deleteCursor()<CR>", mode = { "n", "x" } },
             { "<C-Down>", "<Cmd>lua require('multicursor-nvim').lineAddCursor(1)<CR>", mode = { "n", "x" } },
             { "<C-Leftmouse>", "<Cmd>lua require('multicursor-nvim').handleMouse()<CR>" },
             { "<leader>gv", "<Cmd>lua require('multicursor-nvim').restoreCursors()<CR>" },
@@ -74,20 +75,28 @@ return {
                 end,
                 mode = { "n", "x" },
             },
-            { "<Tab>", function()
-                if require("multicursor-nvim").hasCursors() then
-                    require("multicursor-nvim").nextCursor()
-                else
-                    vim.api.nvim_feedkeys(vim.keycode("<Tab>"), "n", false)
-                end
-            end },
-            { "<S-Tab>", function()
-                if require("multicursor-nvim").hasCursors() then
-                    require("multicursor-nvim").prevCursor()
-                else
-                    vim.api.nvim_feedkeys(vim.keycode("<S-Tab>"), "n", false)
-                end
-            end },
+            {
+                "<Tab>",
+                function()
+                    if require("multicursor-nvim").hasCursors() then
+                        require("multicursor-nvim").nextCursor()
+                    else
+                        vim.api.nvim_feedkeys(vim.keycode("<Tab>"), "n", false)
+                    end
+                end,
+                mode = { "n", "x" },
+            },
+            {
+                "<S-Tab>",
+                function()
+                    if require("multicursor-nvim").hasCursors() then
+                        require("multicursor-nvim").prevCursor()
+                    else
+                        vim.api.nvim_feedkeys(vim.keycode("<S-Tab>"), "n", false)
+                    end
+                end,
+                mode = { "n", "x" },
+            },
             { "<Esc>", function()
                 if not require("multicursor-nvim").cursorsEnabled() then
                     require("multicursor-nvim").enableCursors()

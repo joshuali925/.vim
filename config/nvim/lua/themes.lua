@@ -30,10 +30,12 @@ local themes = {
                 style = theme_index < 0 and "storm" or "day",
                 styles = { comments = { italic = false }, keywords = { italic = false } },
                 day_brightness = 0.2,
-                on_colors = function(colors)
-                    colors.comment = "#717993"
+                on_colors = function(c)
+                    c.comment = "#717993"
                 end,
                 on_highlights = function(hl, c)
+                    hl.LineNr = { fg = c.git.ignore }
+                    hl.DiagnosticUnnecessary = { fg = c.comment }
                     hl.TelescopeNormal = { bg = c.bg_dark, fg = c.fg_dark }
                     hl.TelescopeBorder = { bg = c.bg_dark, fg = c.bg_dark }
                     hl.TelescopePromptNormal = { bg = c.bg_highlight }

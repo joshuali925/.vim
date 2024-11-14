@@ -24,7 +24,6 @@ return {
                 config = function()
                     local npairs = require("nvim-autopairs")
                     npairs.setup({ ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=], fast_wrap = { map = "<C-l>" } })
-                    require("cmp").event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
                     local Rule = require("nvim-autopairs.rule")
                     local cond = require("nvim-autopairs.conds")
                     local brackets = { { "(", ")" }, { "[", "]" }, { "{", "}" } }
@@ -109,8 +108,8 @@ return {
                 completion = { completeopt = "menuone,noinsert" },
                 snippet = { expand = function(args) vim.fn["vsnip#anonymous"](args.body) end },
                 window = {
-                    -- completion = vim.tbl_extend("force", cmp.config.window.bordered({ border = "single" }), { col_offset = -1 }),
-                    -- documentation = cmp.config.window.bordered({ border = "single" }),
+                    completion = vim.tbl_extend("force", cmp.config.window.bordered({ border = "single" }), { col_offset = -1 }),
+                    documentation = cmp.config.window.bordered({ border = "single" }),
                 },
                 formatting = {
                     format = function(_, item)
@@ -128,7 +127,7 @@ return {
                 mapping = {
                     ["<C-b>"] = cmp.mapping.scroll_docs(-4),
                     ["<C-d>"] = cmp.mapping.scroll_docs(4),
-                    ["<C-Space>"] = cmp.mapping.complete(),
+                    ["<C-Space>"] = cmp.mapping.complete({ config = { sources = { { name = "nvim_lsp" } } } }),
                     ["<CR>"] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace }),
                     ["<C-y>"] = cmp.mapping.confirm(),
                     ["<C-e>"] = cmp.mapping.abort(),
@@ -194,13 +193,6 @@ return {
                 sources = {
                     { name = "nvim_lsp" },
                     {
-                        name = "nvim_lsp_signature_help",
-                        entry_filter = function()
-                            local col = vim.api.nvim_win_get_cursor(0)[2]
-                            return vim.api.nvim_get_current_line():sub(col, col) ~= "," -- https://github.com/hrsh7th/cmp-nvim-lsp-signature-help/issues/41
-                        end,
-                    },
-                    {
                         name = "vsnip",
                         entry_filter = function()
                             local context = require("cmp.config.context")
@@ -231,6 +223,7 @@ return {
                 mapping = cmp.mapping.preset.cmdline(),
                 sources = cmp.config.sources({ { name = "path" } }, { { name = "cmdline" } }),
             })
+            cmp.event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
         end,
     },
 }

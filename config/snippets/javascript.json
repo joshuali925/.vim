@@ -204,7 +204,7 @@
   },
   "Cypress click": {
     "prefix": "cyclick",
-    "body": ["cy.contains('$0').click({ force: true });"]
+    "body": ["cy.contains('$0').click();"]
   },
   "Cypress text exists": {
     "prefix": "cyexists",
