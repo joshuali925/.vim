@@ -1,6 +1,7 @@
 return {
     { "unblevable/quick-scope", config = function() vim.g.qs_hi_priority = -1 end },
     { "Wansmer/treesj", keys = { { "gS", "<Cmd>TSJSplit<CR>" }, { "gJ", "<Cmd>TSJJoin<CR>" } }, opts = { use_default_keymaps = false, max_join_length = 999 } },
+    { "MagicDuck/grug-far.nvim", keys = { { "g/", "<Cmd>lua require('grug-far').open()<CR>", mode = { "n", "x" } } }, opts = { keymaps = { close = { n = "<leader>q" } } } },
     {
         "kylechui/nvim-surround",
         keys = { "ys", "cs", "ds", { "s", mode = "x" }, { "yss", "ysiw", remap = true }, { "yS", "ysg_", remap = true } },
@@ -10,8 +11,31 @@ return {
                 ["j"] = { add = function() return { { "JSON.stringify(" }, { ")" } } end },
                 ["J"] = { add = function() return { { "JSON.stringify(" }, { ", null, 2)" } } end },
                 ["l"] = { add = function() return { { "console.log('❗', " }, { ")" } } end },
+                ["v"] = { add = function() return { { "${" }, { "}" } } end },
             },
         },
+    },
+    {
+        "gbprod/yanky.nvim",
+        event = "TextYankPost",
+        keys = {
+            { "y", "<Plug>(YankyYank)", mode = { "n", "x" } },
+            { "p", "<Plug>(YankyPutAfter)", mode = { "n", "x" } },
+            { "P", "<Plug>(YankyPutBefore)", mode = { "n", "x" } },
+            { "[p", "<Plug>(YankyPutIndentBeforeLinewise)" },
+            { "[P", "<Plug>(YankyPutIndentBeforeLinewise)" },
+            { "]p", "<Plug>(YankyPutIndentAfterLinewise)" },
+            { "]P", "<Plug>(YankyPutIndentAfterLinewise)" },
+            { "<p", "<Plug>(YankyPutIndentAfterShiftLeft)" },
+            { "<P", "<Plug>(YankyPutIndentBeforeShiftLeft)" },
+            { ">p", "<Plug>(YankyPutIndentAfterShiftRight)" },
+            { ">P", "<Plug>(YankyPutIndentBeforeShiftRight)" },
+            { "=p", "<Plug>(YankyPutAfterFilter)" },
+            { "=P", "<Plug>(YankyPutBeforeFilter)" },
+            { "<leader>p", "<Plug>(YankyCycleForward)" },
+            { "<leader>P", "<Plug>(YankyCycleBackward)" },
+        },
+        opts = { ring = { history_length = 500 }, system_clipboard = { sync_with_ring = false }, highlight = { on_yank = false, timer = 300 } },
     },
     {
         "monaqa/dial.nvim",
@@ -20,7 +44,7 @@ return {
             require("dial.config").augends:register_group({
                 default = {
                     augend.integer.alias.binary,
-                    augend.integer.alias.decimal_int,
+                    augend.integer.alias.decimal,
                     augend.integer.alias.hex,
                     augend.constant.alias.bool,
                     augend.semver.alias.semver,
@@ -110,7 +134,7 @@ return {
     {
         "HakonHarnes/img-clip.nvim",
         enabled = vim.env.SSH_CLIENT == nil,
-        keys = { { "<leader>p", "<ESC><Cmd>PasteImage<CR>", mode = "i" } },
+        keys = { { "<leader>p", "<Esc><Cmd>PasteImage<CR>", mode = "i" } },
         opts = { default = { use_cursor_in_template = false, insert_mode_after_paste = false, relative_to_current_file = true } },
     },
 }

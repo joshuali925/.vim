@@ -54,7 +54,6 @@ alias less='less -RiM'
 alias v='$EDITOR'
 alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
-alias vtree='\vim +Explore'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
 alias venv='deactivate 2> /dev/null; findup venv >&2 || python3 -m venv venv; source "$(findup venv)/bin/activate"'
@@ -97,6 +96,7 @@ alias gco='git checkout'
 alias gcp='git cherry-pick'
 alias gd='git diff'
 alias gdst='git diff --staged'
+gds() { if [[ $# -eq 0 ]]; then echo -e "\e[1;32mStaged\e[0m"; git diff --stat --staged; echo -e "\n\e[1;31mUnstaged\e[0m"; fi; git diff --stat "$@"; }
 alias gf='git fetch'
 alias gfa='git remote | xargs -L1 git fetch --filter=blob:none --prune'
 alias ggl='git pull origin $(gref)'
@@ -107,7 +107,7 @@ alias glg='git log --stat --graph --pretty=fuller'
 alias glga='git log --graph --pretty=fuller --all'
 alias glo='git log --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit'
 alias gloo='git log --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --max-count 15'
-alias gloa='git log --graph --pretty=format:"%C(yellow)%h %Cgreen⦗%ci⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --abbrev-commit --all | \less -RiMXF -p $(git show -s --format=%h)'
+alias gloa='git log --color --graph --pretty=format:"%C(yellow)%h %Cgreen⦗%ci⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --abbrev-commit --all | \less -RiMXF -p $(git show -s --format=%h)'
 glx() { git log --graph --decorate=short --date-order --color --pretty=format:"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)" "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$(git show -s --format=%h)"; }
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
@@ -118,38 +118,24 @@ alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,^\(h
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
-alias greset-to-remote='git stash push --include-untracked --message "greset-to-remote temporary stash"; git reset --hard @{upstream}'
 alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
 alias grv='git remote -v'
 alias gs='git status -sb'
 alias gst='git stash'
 alias gst-save='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
-alias gwta='git worktree add -f'
 alias gexclude='cat >> "$(git rev-parse --show-toplevel)/.git/info/exclude" <<<'
 alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclude"'
 gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
 alias gexclude2='git update-index --assume-unchanged'
 alias gexcluded2='git ls-files -v | grep "^[[:lower:]]"'
 alias gunexclude2='git update-index --no-assume-unchanged'
-alias gpristine='git stash push --include-untracked --message "gpristine temporary stash"; git reset --hard && git clean -fdx'
-alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m "--wip--"'
-alias gunwip='git log -n 1 | grep -q -c -- "--wip--" && git reset HEAD~1'
 alias gwhatchanged='git log --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
 alias gwhatsnew='git log --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
 alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
 st() { ssh -t "$@" '.vim/bin/tmux new -A -s 0'; }
-
-gds() {
-  if [[ $# -eq 0 ]]; then
-    echo -e "\e[1;32mStaged\e[0m"
-    git diff --stat --staged "$@"
-    echo -e "\n\e[1;31mUnstaged\e[0m"
-  fi
-  git diff --stat "$@"
-}
 
 gc() {
   [[ $# -eq 0 ]] && { git commit --signoff; return $?; }
@@ -183,15 +169,6 @@ gcb() {
   fi
 }
 
-gwt() {
-  if [[ $# -gt 0 ]]; then
-    git worktree "$@"
-    return $?
-  fi
-  local worktree
-  worktree=$(git worktree list | fzf | awk '{print $1}') && [[ -d $worktree ]] && cd "$worktree"
-}
-
 glof() {
   git log --graph --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --all "$@" |
     fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
@@ -213,41 +190,6 @@ grlf() {
     --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --line-numbers --navigate)' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
-}
-
-grg() {
-  if [[ $# -eq 0 ]]; then echo "Usage: $0 [--reflog] [--regex] <text> [<git-log-args>]" >&2; return 1; fi
-  while [[ $# -ne 0 ]]; do
-    case $1 in
-      --reflog) local cmd=reflog; shift ;;
-      --regex) local search=-G; shift ;;
-      --) shift; break ;;
-      *) break ;;
-    esac
-  done
-  git "${cmd:-log}" --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --all --regexp-ignore-case "${search:--S}" "$@" |
-    fzf --ansi --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' \
-    --bind="enter:execute(grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\"$BAT_PAGER --pattern='\"$'\022'$1\"'\" delta --line-numbers)" \
-    --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never"
-}
-
-gfd() {  # find file in all commits, git log takes glob: gfd '*filename*'
-  local root=$(git rev-parse --show-toplevel || echo ".")
-  local filepath=$(git log --pretty=format: --name-only --all "$@" | awk NF | sort -u | fzf --ansi --multi --preview="git log --color --pretty=format:'$_GIT_LOG_FORMAT' --abbrev-commit --all --full-history -- '$root'/{}")
-  if [[ -n $filepath ]]; then
-    local sha=$(git log --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --all --full-history -- "${root}/${filepath}" | fzf --ansi --preview="grep -o \"[a-f0-9]\\{7,\\}\" <<< {} | xargs -I{} git show {} -- ${root}/${filepath} | delta --paging=never" --bind=',:preview-down,.:preview-up' | grep -o "[a-f0-9]\{7,\}")
-    if [[ -n $sha ]]; then
-      echo -e "\033[0;35mgit show $sha:$filepath\033[0m" >&2
-      git show "$sha:$filepath" | $EDITOR - -c "file $sha:$filepath" -c 'filetype detect'
-    fi
-  fi
-}
-
-gr-toggle-url() {
-  local pattern='s,^\(https://\|git@\)\([^:/]\+\)[:/],' remote="${1:-origin}" url="$(git remote get-url "${1:-origin}")"
-  grep -q '^https://' <<< "$url" && pattern="${pattern}git@\\2:," || pattern="${pattern}https://\\2/,"
-  git remote set-url "$remote" "$(sed "$pattern" <<< "$url")"
-  git remote -v
 }
 
 gpr() {
@@ -281,11 +223,11 @@ gpr() {
 
 gh-backport() {
   if [[ $# -ne 1 ]]; then echo "Usage: $0 <SHA>" >&2; return 1; fi
-  local sha=$1 args=()
+  local sha=$1 args=() ref=$(git symbolic-ref --short HEAD)
   if [[ -f .github/PULL_REQUEST_TEMPLATE.md ]]; then
     args+=(--body-file .github/PULL_REQUEST_TEMPLATE.md)
   fi
-  { git cherry-pick -x "$sha" || git cherry-pick --continue; } && git push fork "$(gref)" -f && gh pr create --title "[$(gref)] $(git log -n 1 --pretty=format:%s "$sha")" --base "$(gref)" "${args[@]}"
+  { git cherry-pick -x "$sha" || git cherry-pick --continue; } && git push fork "$ref" -f && gh pr create --title "[$ref] $(git log -n 1 --pretty=format:%s "$sha")" --base "$ref" "${args[@]}"
 }
 
 convert() {
@@ -362,12 +304,11 @@ psmem() {
 
 sudorun() {
   if [[ $# -eq 0 ]]; then echo 'Need a command to run.'; return 1; fi
-  local cmd=$1
-  shift
+  local cmd=$1; shift
   if [[ ! -x $(command -v "$cmd") ]] && type "$cmd" | grep -q "$cmd is a \(shell \)\?function"; then
     echo -e "Running as bash function..\n" >&2
     sudo bash -c "$(declare -f "$cmd"); $cmd $*"
-    return 0
+    return $?
   fi
   case $cmd in
     v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
@@ -396,33 +337,29 @@ print-ascii() {
 }
 
 print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 https://github.com/jbranchaud/til/blob/b1994cfe2144193f46f8c61f20f9a583085ca0aa/unix/display-all-the-terminal-colors.md
-  if [[ $1 = --all ]]; then
-    for x in {0..8}; do
-      for i in {30..37}; do
-        for a in {40..47}; do
-          echo -ne "\e[$x;$i;$a""m\\\e[$x;$i;$a""m\e[0;37;40m "
-        done
-        echo
+  for x in {0..8}; do
+    for i in {30..37}; do
+      for a in {40..47}; do
+        printf "\e[$x;$i;$a""m\\\e[$x;$i;$a""m\e[0;37;40m "
       done
+      echo
     done
-    return
-  fi
-  printf 'Foreground 8 colors\n'
-  echo "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
-  printf '\nBackground 8 colors\n'
-  echo "$(tput setab 0) black $(tput setab 1) red $(tput setaf 0)$(tput setab 2) green $(tput setab 3) yellow $(tput setaf 7)$(tput setab 4) blue $(tput setab 5) magenta $(tput setaf 0)$(tput setab 6) cyan $(tput setab 7) white $(tput sgr 0)"
-  printf '\nANSI 16 colors\n'
-  echo -e ' \e[0;30mblack="\\e[0;30m" \e[0;31mred="\\e[0;31m"     \e[0;32mgreen="\\e[0;32m" \e[0;33myellow="\\e[0;33m"'
-  echo -e ' \e[0;34mblue="\\e[0;34m"  \e[0;35mmagenta="\\e[0;35m" \e[0;36mcyan="\\e[0;36m"  \e[0;37mwhite="\\e[0;37m"'
-  echo -e ' \e[0mno_color="\\e[0m"       \u2191 original 8 colors      \u2193 lighter 8 colors'
-  echo -e ' \e[1;30mblack="\\e[1;30m" \e[1;31mred="\\e[1;31m"     \e[1;32mgreen="\\e[1;32m" \e[1;33myellow="\\e[1;33m"'
-  echo -e ' \e[1;34mblue="\\e[1;34m"  \e[1;35mmagenta="\\e[1;35m" \e[1;36mcyan="\\e[1;36m"  \e[1;37mwhite="\\e[1;37m"\e[0m'
+  done
+  printf '\e[0m\n\nForeground 8 colors\n'
+  printf "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
+  printf '\n\nBackground 8 colors\n'
+  printf "$(tput setab 0) black $(tput setab 1) red $(tput setaf 0)$(tput setab 2) green $(tput setab 3) yellow $(tput setaf 7)$(tput setab 4) blue $(tput setab 5) magenta $(tput setaf 0)$(tput setab 6) cyan $(tput setab 7) white $(tput sgr 0)"
+  printf '\n\nANSI 16 colors\n'
+  printf ' \e[0;30mblack="\\e[0;30m" \e[0;31mred="\\e[0;31m"     \e[0;32mgreen="\\e[0;32m" \e[0;33myellow="\\e[0;33m"\n'
+  printf ' \e[0;34mblue="\\e[0;34m"  \e[0;35mmagenta="\\e[0;35m" \e[0;36mcyan="\\e[0;36m"  \e[0;37mwhite="\\e[0;37m"\n'
+  printf ' \e[0mno_color="\\e[0m"       \u2191 original 8 colors      \u2193 lighter 8 colors\n'
+  printf ' \e[1;30mblack="\\e[1;30m" \e[1;31mred="\\e[1;31m"     \e[1;32mgreen="\\e[1;32m" \e[1;33myellow="\\e[1;33m"\n'
+  printf ' \e[1;34mblue="\\e[1;34m"  \e[1;35mmagenta="\\e[1;35m" \e[1;36mcyan="\\e[1;36m"  \e[1;37mwhite="\\e[1;37m"\e[0m\n'
   printf '\nForeground 256 colors\n'
   for i in {0..255}; do printf '\e[38;5;%dm%3d ' "$i" "$i"; (((i+3) % 18)) || printf '\e[0m\n'; done
   printf '\n\nBackground 256 colors\n'
   for i in {0..255}; do printf '\e[48;5;%dm%3d ' "$i" "$i"; (((i+3) % 18)) || printf '\e[0m\n'; done
-  printf '\e[0m\n\n'
-  awk -v term_cols="${width:-$(tput cols || echo 80)}" 'BEGIN{
+  awk -v term_cols="$(tput cols || echo 80)" 'BEGIN{
     s="/\\";
     for (colnum = 0; colnum<term_cols; colnum++) {
       r = 255-(colnum*255/term_cols);
@@ -471,6 +408,16 @@ path() {
   fi
 }
 
+findup() {
+  if [[ $# -ne 1 ]]; then echo "Usage: $0 <file>" >&2; return 1; fi
+  local dir=$PWD result
+  while result=$(find "$dir" -maxdepth 1 -name "$@"); [[ -z $result ]] && [[ $dir != / ]]; do
+    dir=$(dirname "$dir")
+  done
+  [[ -z $result ]] && return 1
+  realpath -s --relative-to="$PWD" "$result"
+}
+
 vx() {
   if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <vim-commands>\nRun vim commands in pipe: echo foo | $0 '%s/foo/bar' 'put=execute(\\\"echo &tabstop\\\")'" >&2; return 1; fi
   ex -sn "${@/#/+}" +'%write! /dev/stdout | quit!' /dev/stdin
@@ -485,17 +432,6 @@ vf() {  # find files: vf; open files from pipe: fd | vf
     local fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
     # shellcheck disable=2128
     [[ -n $fzftemp ]] && $EDITOR -- "${fzftemp[@]}"
-  fi
-}
-
-cdf() {
-  if [[ -d $1 ]]; then
-    cd "$1"
-  elif [[ -f $1 ]]; then
-    cd "$(dirname "$1")"
-  else
-    local fzftemp
-    fzftemp=$(FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --color=always --hidden --exclude=.git $*" fzf --ansi --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git --no-ignore $* || true)") && cdf "$fzftemp"
   fi
 }
 
@@ -528,14 +464,16 @@ rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripg
   rg --pretty "$@" 2>&1 | sed ':a;N;$!ba;s/\n\n/\n\x00/g' | fzf --ansi --read0 --height=100% --border=none --bind="enter:execute(head -n 2 <<< {} | awk -F: 'NR==1 {file=\$1} NR==2 {print \"+\" \$1 \" -- \" file}' | xargs $EDITOR $search)" --bind='tab:down,btab:up'
 }
 
-
 z() {
-  local fzftemp
   if [[ $# -eq 0 ]]; then
-    fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9,.]* *//' -e "\|^$PWD\$|d" | fzf --scheme=history --tac --header='Press ` to search under cwd' --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -n -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$PWD/\" '\$0~cwd {print \$1}')") && cd "$fzftemp"
-  else
-    _z 2>&1 "$@"
-  fi
+    local fzftemp
+    fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9,.]* *//' -e "\|^$PWD\$|d" | fzf --ansi --scheme=history --tac \
+      --header='Press ` for recent directories under cwd, or C-a for all directories' --bind='tab:down,btab:up' \
+      --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD/\" '\$0~cwd {print \$1}')" \
+      --bind='ctrl-a:reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)') && z "$fzftemp"
+  elif [[ -d $1 ]]; then cd "$1"
+  elif [[ -f $1 ]]; then cd "$(dirname "$1")"
+  else _z "$@"; fi
 }
 
 t() {  # create, restore, or switch tmux session
@@ -564,7 +502,7 @@ tmux-rerun() {
 man() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
-    fzftemp=$(man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --preview=$'echo {} | xargs -r man') && man "$(echo "$fzftemp" | awk -F' |,' '{print $1}')"
+    fzftemp=$(command man -k . 2> /dev/null | awk 'BEGIN {FS=OFS="- "} /\([1|4]\)/ {gsub(/\([0-9]\)/, "", $1); if (!seen[$0]++) { print }}' | fzf --bind='tab:down,btab:up' --preview=$'echo {} | xargs -r man' --bind='enter:become(echo {1})') && man "$fzftemp"
   elif [[ $EDITOR = nvim ]]; then
     MANPAGER='nvim +Man\!' command man "$@"
   else
@@ -572,19 +510,10 @@ man() {
   fi
 }
 
-findup() {
-  if [[ $# -ne 1 ]]; then echo "Usage: $0 <file>" >&2; return 1; fi
-  local dir=$PWD result
-  while result=$(find "$dir" -maxdepth 1 -name "$@"); [[ -z $result ]] && [[ $dir != / ]]; do
-    dir=$(dirname "$dir")
-  done
-  [[ -z $result ]] && return 1
-  realpath -s --relative-to="$PWD" "$result"
-}
-
-envf() {
-  local fzftemp
-  fzftemp=$(printenv | cut -d= -f1 | fzf --bind='tab:down,btab:up' --query="${1:-}" --preview='printenv {}') && echo "$fzftemp=$(printenv "$fzftemp")"
+env() {
+  if [[ $# -ne 0 ]]; then command env "$@"; return $?; fi
+  # shellcheck disable=2016
+  printenv | cut -d= -f1 | fzf --multi --preview='printenv {}' | xargs -r -I{} sh -c 'echo "{}=$(printenv "{}")"'
 }
 
 jo() {  # basic implementation of https://github.com/jpmens/jo
@@ -615,8 +544,8 @@ set-env() {
   local cmd reply
   while [[ $# != 0 ]]; do
     case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
-      java_home|javahome) cmd="export JAVA_HOME=\"$(asdf where java)\""; shift 1 ;;
-      path) cmd="export PATH=\"$PWD:\$PATH\""; shift 1 ;;
+      java_home|javahome) cmd="export JAVA_HOME=\"$(asdf where java)\""; shift ;;
+      path) cmd="export PATH=\"$PWD:\$PATH\""; shift ;;
       *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
     esac
   done
@@ -626,9 +555,7 @@ set-env() {
   echo "$cmd" | if [[ $reply = [Yy] ]]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
 }
 
-tldr() {
-  curl "https://cheat.sh/${*// /+}"
-}
+tldr() { curl "https://cheat.sh/${*// /+}"; }
 
 getip() {
   if [[ $# -gt 1 ]]; then
@@ -641,25 +568,6 @@ getip() {
     curl -s "http://ip-api.com/line/$1"
   else
     curl -s "https://dns.google.com/resolve?name=$1" | if builtin command -v python > /dev/null 2>&1; then python -m json.tool; else cat; fi
-  fi
-}
-
-croc() {
-  local line phrase
-  if [[ $# -eq 0 ]]; then
-    command croc
-  elif grep -q '^[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<< "$1"; then
-    command croc --curve p256 --yes "$@"
-  elif [[ -e $1 ]] || [[ $1 = send ]]; then
-    [[ $1 = send ]] && shift 1
-    timeout 60 croc send "$@" 2>&1 | {
-      while read -r line; do
-        echo "$line"
-        [[ -z $phrase ]] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<< "$line") && echo -n " command croc --curve p256 --yes $phrase" | y
-      done
-    }
-  else
-    command croc "$@"
   fi
 }
 
@@ -712,40 +620,34 @@ docker-shell() {
 }
 
 ec2() {
-  local instances ids curr_state user
+  local ids curr_state user
   case $1 in
     start) curr_state=stopped ;;
     stop) curr_state=running ;;
     refresh)
       aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
-      return 0 ;;
+      return $? ;;
     ssh)
       local tag=${2:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')}
       [[ -z $tag ]] && return 1
+      [[ -n "$2" ]] && shift; shift
       local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
-      local config="Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n"
       if [[ -z $host ]]; then
-        ec2 start "$tag" && sleep 17 && ec2 "$@"
+        ec2 start "$tag" && sleep 17 && ec2 ssh "$tag" "$@"
         return $?
       fi
       echo "ssh to ec2: $host" >&2
-      shift 2
       for user in ubuntu ec2-user admin; do
         sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-        printf "$config" "$user" >> ~/.ssh/ec2hosts
+        printf "Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n" "$user" >> ~/.ssh/ec2hosts
         local start=$SECONDS
         ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$user@$host" "$@" && break
         [[ $((SECONDS - start)) -gt 10 ]] && break
       done
-      return 0 ;;
+      return $? ;;
     *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]" >&2; return 1 ;;
   esac
-  instances=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text)
-  if [[ -n $2 ]]; then
-    ids=$(echo "$instances" | grep "^$2\s" | awk '{print $2}')
-  else
-    ids=$(echo "$instances" | fzf --multi | awk '{print $2}')
-  fi
+  ids=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | if [[ -n $2 ]]; then grep "^$2\s"; else fzf --multi; fi | awk '{print $2}')
   [[ -z $ids ]] && return 1
   if [[ $curr_state = stopped ]]; then
     # shellcheck disable=2046,2086,2116
@@ -783,6 +685,7 @@ if [[ $OSTYPE = darwin* ]]; then
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
   alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
   alias toggle-dark-theme="osascript -e 'tell application \"System Events\" to tell appearance preferences to set dark mode to not dark mode'"
+  tarcopy() { printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | pbcopy; }
   browser-history() {
     local cols=$((COLUMNS - 26)) sep='{::}' fzftemp fzfprompt histfile=/tmp/browser-history-fzf.db
     if [[ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]]; then

@@ -74,7 +74,7 @@ return {
                         require("git-conflict").choose(actions[mark.opts.hl_group])
                     end, { buffer = e.buf })
                     vim.keymap.set("n", "<leader>gC", "<Cmd>lua require('git-conflict').choose('none')<CR>", { buffer = e.buf })
-                end
+                end,
             })
         end,
     },

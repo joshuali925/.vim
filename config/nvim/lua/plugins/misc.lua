@@ -1,40 +1,7 @@
 return {
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
-    {
-        "gbprod/yanky.nvim",
-        event = "TextYankPost",
-        keys = {
-            { "y", "<Plug>(YankyYank)", mode = { "n", "x" } },
-            { "p", "<Plug>(YankyPutAfter)", mode = { "n", "x" } },
-            { "P", "<Plug>(YankyPutBefore)", mode = { "n", "x" } },
-            { "[p", "<Plug>(YankyPutIndentBeforeLinewise)" },
-            { "[P", "<Plug>(YankyPutIndentBeforeLinewise)" },
-            { "]p", "<Plug>(YankyPutIndentAfterLinewise)" },
-            { "]P", "<Plug>(YankyPutIndentAfterLinewise)" },
-            { "<p", "<Plug>(YankyPutIndentAfterShiftLeft)" },
-            { "<P", "<Plug>(YankyPutIndentBeforeShiftLeft)" },
-            { ">p", "<Plug>(YankyPutIndentAfterShiftRight)" },
-            { ">P", "<Plug>(YankyPutIndentBeforeShiftRight)" },
-            { "=p", "<Plug>(YankyPutAfterFilter)" },
-            { "=P", "<Plug>(YankyPutBeforeFilter)" },
-            { "<leader>p", "<Plug>(YankyCycleForward)" },
-            { "<leader>P", "<Plug>(YankyCycleBackward)" },
-        },
-        opts = { ring = { history_length = 500 }, system_clipboard = { sync_with_ring = false }, highlight = { on_yank = false, timer = 300 } },
-    },
     { "will133/vim-dirdiff", cmd = "DirDiff" },
-    {
-        "iamcco/markdown-preview.nvim",
-        enabled = vim.env.SSH_CLIENT == nil,
-        build = "cd app && yarn install",
-        cmd = "MarkdownPreview",
-        init = function()
-            vim.g.mkdp_auto_close = 0
-            vim.g.mkdp_preview_options = { disable_sync_scroll = 1 }
-        end,
-        config = function() vim.cmd.doautocmd("FileType") end, -- trigger autocmd to defined MarkdownPreview command for buffer
-    },
     {
         "dhruvasagar/vim-table-mode",
         cmd = { "TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine" },
@@ -81,7 +48,7 @@ return {
             bigfile = { enabled = true },
             quickfile = { enabled = true },
             statuscolumn = { enabled = false, left = { "sign" }, git = { patterns = { "MiniDiffSign" } } },
-            words = { enabled = true, debounce = 150 },
+            words = { enabled = true },
             dashboard = {
                 enabled = true,
                 preset = {
@@ -105,33 +72,33 @@ return {
                         [[  ██      ██          ██      ██          ]],
                     }, "\n"),
                     keys = {
-                        { icon = " ", key = "e", desc = "New File", action = ":enew" },
-                        { icon = " ", key = "i", desc = "Insert", action = ":enew | startinsert" },
+                        { icon = " ", key = "e", desc = "New File", action = ":enew", hidden = true },
+                        { icon = " ", key = "i", desc = "Insert", action = ":enew | startinsert", hidden = true },
                         { icon = " ", key = "f", desc = "Find files", action = ":lua require('telescope.builtin').fd({hidden = true})" },
-                        { icon = " ", key = "m", desc = "Find MRU", action = ":lua require('telescope.builtin').oldfiles()" },
-                        { icon = " ", key = "M", desc = "Find MRU in CWD", action = ":lua require('telescope.builtin').oldfiles({only_cwd = true})" },
+                        { icon = " ", key = "m", desc = "Find MRU (CWD only: 'M')", action = ":lua require('telescope.builtin').oldfiles()" },
+                        { icon = " ", key = "M", desc = "Find MRU in CWD", action = ":lua require('telescope.builtin').oldfiles({only_cwd = true})", hidden = true },
                         { icon = " ", key = "'", desc = "Find bookmarks", action = ":lua require('telescope').extensions.bookmarks.bookmarks({initial_mode = 'normal'})" },
                         { icon = "󰘬 ", key = "!", desc = "Git changed files", action = ":lua require('telescope.builtin').git_status({initial_mode = 'normal'})" },
-                        { icon = " ", key = "?", desc = "Git diff", action = ":DiffviewOpen" },
+                        { icon = " ", key = "d", desc = "Git diff (conflicts: '~')", action = ":DiffviewOpen" },
                         { icon = " ", key = "+", desc = "Git diff remote", action = ":DiffviewOpen @{upstream}..HEAD" },
-                        { icon = " ", key = "~", desc = "Git conflicts", action = ":Git mergetool" },
-                        { icon = " ", key = "o", desc = "Git log", action = ":Flog" },
+                        { icon = " ", key = "~", desc = "Git conflicts", action = ":Git mergetool", hidden = true },
                         { icon = "󰍜 ", key = "\\", desc = "Open quickui", action = ":Lazy load vim-quickui | call quickui#menu#open('normal')" },
-                        { icon = "󰒲 ", key = "p", desc = "Open Lazy UI", action = ":Lazy" },
-                        { icon = "󰄉 ", key = "P", desc = "Open Lazy profile", action = ":Lazy profile" },
-                        { icon = " ", key = "s", desc = "Open Mason UI", action = ":Mason" },
+                        { icon = "󰒲 ", key = "p", desc = "Open Lazy (update: 'u', profile: 'P')", action = ":Lazy" },
+                        { icon = "󰄉 ", key = "P", desc = "Open Lazy profile", action = ":Lazy profile", hidden = true },
+                        { icon = "󰚰 ", key = "u", desc = "Update plugins", action = ":Lazy update", hidden = true },
+                        { icon = " ", key = "s", desc = "Open Mason", action = ":Mason" },
                         { icon = "󰑓 ", key = "r", desc = "Load session", action = ":call feedkeys(':SessionLoad', 'n')" },
                         { icon = " ", key = "c", desc = "Edit vimrc", action = ":edit $MYVIMRC" },
-                        { icon = " ", key = "q", desc = "Quit", action = ":quit" },
+                        { icon = " ", key = "q", desc = "Quit", action = ":quit", hidden = true },
                     },
                 },
                 sections = {
                     { section = "header" },
-                    { icon = " ", title = "Recent files (current directory)", section = "recent_files", cwd = true, indent = 2, limit = 7, padding = 1 },
-                    { icon = " ", title = "Recent files", section = "recent_files", indent = 2, limit = 3, padding = 1 },
-                    { icon = " ", title = "Projects", section = "projects", limit = 3, indent = 2 },
+                    { icon = " ", title = "Recent files (current directory)", section = "recent_files", cwd = true, indent = 2, limit = 5, padding = 1 },
+                    { icon = " ", title = "Recent files", section = "recent_files", indent = 2, limit = 3 },
                     { pane = 2, section = "keys", gap = 1, padding = 1 },
-                    { pane = 2, section = "startup" },
+                    { pane = 2, section = "startup", padding = 1 },
+                    { pane = 2, icon = " ", title = "Projects", section = "projects", limit = 5, indent = 2 },
                 },
             },
         },
@@ -148,6 +115,17 @@ return {
             { "<leader>gd", "<Cmd>lua require('mini.diff').toggle_overlay()<CR>" },
             { "<leader>ga", "<leader>gAig", remap = true },
             { "<leader>gu", "<leader>gUig", remap = true },
+            { "<leader>fs", "<Cmd>lua require('mini.pick').builtin.files()<CR>" },
+            {
+                "<leader>fs",
+                function()                                -- https://github.com/echasnovski/mini.nvim/issues/513#issuecomment-1762785125
+                    vim.cmd.execute([["normal! \<Esc>"]]) -- escape visual mode to update '< and '> marks
+                    local prompt = require("utils").get_visual_selection()
+                    vim.schedule(function() require("mini.pick").set_picker_query(vim.split(prompt, "")) end)
+                    require("mini.pick").builtin.files()
+                end,
+                mode = { "x" },
+            },
         },
         init = function()
             package.preload["nvim-web-devicons"] = function()
@@ -158,6 +136,7 @@ return {
         end,
         config = function()
             require("mini.extra").setup()
+            require("mini.pick").setup()
             require("mini.bufremove").setup()
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
             require("mini.files").setup({ mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })

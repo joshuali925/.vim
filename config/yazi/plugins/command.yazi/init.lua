@@ -97,8 +97,9 @@ return {
             ]])
         end
 
-        -- copy file (mac only)
-        if command:match("^copy$") then return shell([[osascript -e 'set the clipboard to (POSIX file "$0")']]) end
+        -- copy file reference (mac only)
+        if command:match("^copy$") then return shell('osascript -e "on run args" -e "set the clipboard to POSIX file (first item of args)" -e end "$0"') end
+        if command:match("^sftp$") then return shell([[y <<<" echo \"$0\" | sftp -r "]]) end
 
         return shell(command, true)
     end

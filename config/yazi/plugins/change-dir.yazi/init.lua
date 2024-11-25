@@ -57,8 +57,8 @@ end
 local function z()
     ya.hide()
     local output, err = Command("fzf")
-        :env("FZF_DEFAULT_COMMAND", "sort -nr -k 3 -t '|' ~/.z | awk -F '|' '{print $1}'")
-        :env("FZF_DEFAULT_OPTS", os.getenv("FZF_DEFAULT_OPTS") .. [[ --scheme=history --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -nr -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$PWD\" '\$0~cwd {print \$1}')"]])
+        :env("FZF_DEFAULT_COMMAND", "sort -nrk 3 -t '|' ~/.z | awk -F '|' '{print $1}'")
+        :env("FZF_DEFAULT_OPTS", os.getenv("FZF_DEFAULT_OPTS") .. [[ --scheme=history --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -nr -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD\" '\$0~cwd {print \$1}')"]])
         :stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):output()
 
     local stdout = read_stdout(output, err)

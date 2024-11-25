@@ -110,6 +110,7 @@ nmap <C-w><BS> :tabmove -1<CR><C-w>
 nmap <C-w>\ :tabmove +1<CR><C-w>
 noremap <leader>y "+y
 nnoremap <leader>Y "+y$
+nmap yc yygccp$
 noremap <leader>p "0p
 noremap <leader>P "0P
 map <leader>fs <Action>(GotoFile)

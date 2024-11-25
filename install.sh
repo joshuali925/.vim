@@ -11,8 +11,8 @@ BLACK='\033[1;30m'
 NC='\033[0m'
 
 usage() {
-  echo "usage: bash $0 [install <package> ...]"
-  compgen -A function | awk '/^install_/ { sub(/^install_/, ""); if (length(output) == 0) output = $0; else output = output ", " $0 } END { print "  packages list: " output }'
+  echo "usage: bash $0 [install <package> ...]" >&2
+  compgen -A function | awk '/^install_/ { sub(/^install_/, ""); if (length(output) == 0) output = $0; else output = output ", " $0 } END { print "  packages list: " output }' >&2
   exit 1
 }
 
@@ -80,7 +80,7 @@ sudo() {
 }
 
 log() {
-  echo -e "${CYAN}${*}${NC}"
+  echo -e "${CYAN}${*}${NC}" >&2
 }
 
 backup() {
@@ -104,6 +104,7 @@ install_asdf() {
     echo 'legacy_version_file = yes' > ~/.asdfrc
     git clone https://github.com/asdf-vm/asdf.git --depth=1 ~/.asdf
     source ~/.asdf/asdf.sh
+    link_file ~/.asdf/completions/_asdf ~/.vim/config/zsh/completions/_asdf || true
   fi
 }
 
@@ -204,7 +205,7 @@ bindkey "\e'" end-of-line
 bindkey '\eu' undo
 EOF
   fi
-  echo
+  log
 }
 
 install_docker() {
@@ -215,16 +216,16 @@ install_docker() {
     curl -fsSL https://get.docker.com/ | sh
   else
     log 'Unsupported platform..'
-    return 0
+    return 1
   fi
-  log 'Installed docker, adding user to docker group..'
+  log 'Adding user to docker group..'
   sudo groupadd docker || true
   sudo usermod -aG docker "$USER" || true
   sudo systemctl restart docker || sudo service docker restart
   sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login, enable read write access for other groups now to work immediately
   # TODO https://github.com/docker/docs/issues/16397, docker completion zsh > ~/.vim/config/zsh/completions/_docker does not have argument descriptions
   curl -fsSL -o ~/.vim/config/zsh/completions/_docker https://raw.githubusercontent.com/docker/cli/HEAD/contrib/completion/zsh/_docker || true
-  log "Installed, run ${YELLOW}docker info${CYAN} for status"
+  log "Installed docker, run ${YELLOW}docker info${CYAN} for status"
 }
 
 install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
@@ -248,7 +249,7 @@ install_python() {  # environment for asdf install from source: https://github.c
     sudo apk add python3
   elif [[ $PLATFORM != darwin ]]; then
     log 'Unsupported platform..'
-    return 0
+    return 1
   fi
   if ! builtin command -v pip3 > /dev/null 2>&1; then curl https://bootstrap.pypa.io/get-pip.py | python3; fi
   PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip packages'
@@ -266,7 +267,7 @@ install_node() {
   [[ ! -f $HOME/.local/lib/node-packages/package.json ]] && echo '{}' >> "$HOME/.local/lib/node-packages/package.json"
   npm install --cache "$HOME/.local/lib/node-packages/npm-temp-cache" --prefix "$HOME/.local/lib/node-packages" yarn || true
   rm -rf "$HOME/.local/lib/node-packages/npm-temp-cache"
-  echo
+  log
 }
 
 install_tmux() {
@@ -285,7 +286,7 @@ install_tmux() {
     tic -xe tmux-256color terminfo.src && rm terminfo.src
     log 'Installed tmux-256colors terminfo to ~/.terminfo'
   fi
-  echo
+  log
 }
 
 install_neovim() {
@@ -301,13 +302,12 @@ install_neovim() {
     nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall
   fi
   log "\nInstalled neovim plugins"
-  echo
 }
 
 install_swap() {
   if [[ $PLATFORM != linux ]]; then
     log 'Unsupported platform..'
-    return 0
+    return 1
   fi
   local g="${1:-4}"
   log "Installing ${g}G swapfile.."
@@ -321,7 +321,7 @@ install_swap() {
 install_pm2() {
   if [[ $PLATFORM != linux ]]; then
     log 'Unsupported platform..'
-    return 0
+    return 1
   fi
   npm --prefix ~/.local/lib/node-packages install pm2
   pm2 set pm2:autodump true

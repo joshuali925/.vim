@@ -10,6 +10,17 @@ return {
         config = function() vim.o.filetype = "csv" end,
     },
     {
+        "iamcco/markdown-preview.nvim",
+        enabled = vim.env.SSH_CLIENT == nil,
+        build = "cd app && yarn install",
+        cmd = "MarkdownPreview",
+        init = function()
+            vim.g.mkdp_auto_close = 0
+            vim.g.mkdp_preview_options = { disable_sync_scroll = 1 }
+        end,
+        config = function() vim.cmd.doautocmd("FileType") end, -- trigger autocmd to define MarkdownPreview command for buffer
+    },
+    {
         "stevearc/conform.nvim",
         cmd = "Conform",
         config = function()
@@ -30,7 +41,7 @@ return {
                     java = { "google-java-format" },
                     kotlin = { "ktlint" },
                     toml = { "taplo" },
-                    awk = { "awk" },
+                    awk = { "gawk" },
                     ["_"] = { "trim_whitespace" },
                     config = function(bufnr)
                         if vim.fn.bufname(bufnr):match("^Caddyfile") ~= nil then return { "caddy" } end
@@ -145,7 +156,7 @@ return {
         init = function()
             vim.keymap.set("n", "yoC", "<Cmd>TSContextToggle<CR>")
         end,
-        opts = { enable = false, mode = "topline" }
+        opts = { enable = false, mode = "topline" },
     },
     {
         "nvim-treesitter/nvim-treesitter",

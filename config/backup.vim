@@ -1583,9 +1583,28 @@ zinit snippet 'https://github.com/BurntSushi/ripgrep/blob/master/complete/_rg'
 install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin '' btm "$@"
 install-from-github stylua JohnnyMorganz/StyLua linux '' macos '' '' "$@"
 install-from-github shellcheck koalaman/shellcheck linux.x86_64 linux.aarch64 darwin.x86_64 '' '--strip-components=1 --wildcards shellcheck*/shellcheck' "$@"
+install-from-github croc schollz/croc Linux-64bit.tar.gz Linux-ARM64.tar.gz macOS-64bit macOS-ARM64 croc "$@"
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
     btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
+croc() {
+  local line phrase
+  if [[ $# -eq 0 ]]; then
+    command croc
+  elif grep -q '^[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<< "$1"; then
+    command croc --curve p256 --yes "$@"
+  elif [[ -e $1 ]] || [[ $1 = send ]]; then
+    [[ $1 = send ]] && shift 1
+    timeout 60 croc send "$@" 2>&1 | {
+      while read -r line; do
+        echo "$line"
+        [[ -z $phrase ]] && phrase=$(grep -o '[0-9]\{4\}-[a-z]\+-[a-z]\+-[a-z]\+$' <<< "$line") && echo -n " command croc --curve p256 --yes $phrase" | y
+      done
+    }
+  else
+    command croc "$@"
+  fi
+}
 
 
 " =======================================================
@@ -4880,7 +4899,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
                 Codeium = " ",
                     ["<C-n>"] = cmp.mapping.complete({ config = { sources = { { name = "codeium" } } } }),
                     { name = "codeium" },
-" blink.cmp - snippet regex not working
+" blink.cmp - snippet variable transformation not working https://github.com/neovim/neovim/issues/25696
     {
         "saghen/blink.cmp",
         version = "*",
