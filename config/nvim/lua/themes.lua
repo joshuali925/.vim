@@ -59,9 +59,6 @@ local themes = {
         config = function()
             require("ayu").setup({ overrides = { Comment = { fg = "#69737d" } } })
             vim.cmd.colorscheme("ayu-" .. (theme_index < 0 and "mirage" or "light"))
-            vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#30364f" })
-            vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#30364f" })
-            vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#30364f" })
         end,
     },
     ["catppuccin"] = {
@@ -116,11 +113,11 @@ local function highlight_plugins()
     end
     vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" })               -- quickui
     vim.api.nvim_set_hl(0, "NeoCodeiumSuggestion", { link = "LspCodeLens" }) -- neocodeium
+    vim.g.quickui_color_scheme = "papercol-" .. vim.o.background
 end
 
 function M.config()
     vim.o.background = theme_index < 0 and "dark" or "light"
-    vim.g.quickui_color_scheme = "papercol-" .. vim.o.background
     vim.api.nvim_create_augroup("PluginsHighlights", {})
     vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", group = "PluginsHighlights", callback = highlight_plugins })
     themes[M.theme].config()

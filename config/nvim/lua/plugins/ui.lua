@@ -184,8 +184,8 @@ return {
             { "<C-p>", "<Cmd>lua require('telescope.builtin').fd()<CR>" },
             { "<C-p>", ":<C-u>lua require('telescope.builtin').fd({initial_mode = 'normal', default_text = require('utils').get_visual_selection()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
             { "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>" },
-            { "<leader>fs", "<Cmd>lua require('utils').fzf()<CR>" },
-            { "<leader>fs", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
+            { "<leader>fS", "<Cmd>lua require('utils').fzf()<CR>" },
+            { "<leader>fS", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
             { "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>" },
             { "<leader>f'", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>" },
             { "<leader>fb", "<Cmd>lua require('telescope.builtin').live_grep({grep_open_files = true})<CR>" },
@@ -198,8 +198,8 @@ return {
             { "<leader>fj", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>", mode = "x" },
             { "<leader>f!", "<Cmd>lua require('telescope.builtin').git_status({initial_mode = 'normal'})<CR>" },
             { "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>" },
-            { "<leader>fl", "<Cmd>lua require('telescope.builtin').loclist()<CR>" },
-            { "<leader>fL", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>" },
+            { "<leader>fl", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>" },
+            { "<leader>fL", "<Cmd>lua require('telescope.builtin').loclist()<CR>" },
             { "<leader>fa", "<Cmd>lua require('telescope.builtin').commands()<CR>" },
             { "<leader>ft", "<Cmd>lua require('telescope.builtin').filetypes()<CR>" },
             { "<leader>ff", "<Cmd>lua require('telescope.builtin').builtin()<CR>" },
@@ -401,7 +401,6 @@ return {
                 { "Mason &install all", [[lua require('lsp').lsp_install_all()]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
                 { "--", "" },
                 { "Load indentscope", [[lua require("mini.indentscope").setup({ draw = { delay = 50 }, options = { try_as_border = true }, symbol = '▏' })]], "Load mini.indentscope" },
-                { "Load mini.&pick", [[lua require("mini.pick").setup() require("mini.pick").builtin.files()]], "Load mini.pick" },
             })
             local quickui_theme_list = {}
             local used_chars = "hjklqg"

@@ -15,11 +15,16 @@
 	abort = "!git merge --abort 2>/dev/null || git cherry-pick --abort 2>/dev/null || git rebase --abort 2>/dev/null || git revert --abort 2>/dev/null || git am --abort 2>/dev/null"
 	continue = "!git merge --continue 2>/dev/null || git cherry-pick --continue 2>/dev/null || git rebase --continue 2>/dev/null || git revert --continue 2>/dev/null || git am --continue 2>/dev/null"
 	rerere-forget = "!rm -rf .git/rr-cache"
+	nuke = "!git stash push --include-untracked --message 'git nuke backup'; git reset --hard && git clean -fdx"
+	reset-to-remote = "!git stash push --include-untracked --message 'git reset-to-remote backup'; git reset --hard @{upstream}"
+	wt = "!f() { if [[ $# -gt 0 ]]; then if [[ $1 = add ]]; then git worktree add -f \"${@:2}\"; else git worktree \"$@\"; fi; return $?; fi; local worktree; worktree=$(git worktree list | fzf | awk '{print $1}') && [[ -d $worktree ]] && cd \"$worktree\"; }; f"
+	wip = "!git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m '--wip--'"
+	unwip = "!git log -n 1 | grep -q -c -- '--wip--' && git reset HEAD~1"
 	unshallow = "!if [[ \"$(git config --local --get remote.origin.partialclonefilter)\" = blob:none ]]; then git fetch --no-filter --refetch; else git remote set-branches origin '*' && git fetch -v && printf '\\nRun \"git fetch --unshallow\" to fetch all history\\n'; fi"
 	where = "!f() { printf \"\\e[0;36mClosest tag before ${*:-HEAD}:\\e[0m \"; git describe --tags --abbrev=0 \"${@:-HEAD}\"; printf \"\\e[0;36mBranches containing ${*:-HEAD}:\\e[0m\\n\"; git branch --color -a --contains \"${@:-HEAD}\"; }; f"
 	size = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | sed -n 's/^blob //p' | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest"  # use "git obliterate <filepath>; git gc --prune=now --aggressive" to remove, or https://rtyley.github.io/bfg-repo-cleaner
 	tree = "!git ls-files | tree --fromfile"
-	ls = "!cd -- \"${GIT_PREFIX:-.}\"; { find . -maxdepth 1 ! -path . -type d | cut -d/ -f2- | xargs -I{} -P$(nproc) sh -c 'git log --color --format=\"$(ls -d -F --color \"{}\")§%C(bold black)▕ %Creset%C(yellow)%h %Cgreen%cr%Creset§%C(bold black)▕ %C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"{}\"' | sort; find . ! -type d -maxdepth 1 | cut -d/ -f2- | xargs -I{} -P$(nproc) sh -c 'git log --color --format=\"$(ls -d -F --color \"{}\")§%C(bold black)▕ %Creset%C(yellow)%h %Cgreen%cr%Creset§%C(bold black)▕ %C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"{}\"' | sed 'h;s/\\x1b[[0-9;]*m//g;G;s/\\n/\\t/' | sort | cut -f2-; } | awk -F'§' -vCOLUMNS=$(tput cols) '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = $i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", $i); len[NR,i] = l = length($i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { width = 0; for (col = 1; col < nf[row]; col++) { printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; width+=max[col]+1; } print substr(cell[row,nf[row]],1,COLUMNS-width+17); } }'"
+	ls = "!cd -- \"${GIT_PREFIX:-.}\"; { find . -maxdepth 1 ! -path . -type d | cut -d/ -f2- | xargs -I{} -P$(nproc) sh -c 'git log --color --format=\"$(ls -d -F --color \"{}\")§%C(bold black)▕ %Creset%C(yellow)%h %Cgreen%cr%Creset§%C(bold black)▕ %C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"{}\"' | sort; find . -maxdepth 1 ! -type d | cut -d/ -f2- | xargs -I{} -P$(nproc) sh -c 'git log --color --format=\"$(ls -d -F --color \"{}\")§%C(bold black)▕ %Creset%C(yellow)%h %Cgreen%cr%Creset§%C(bold black)▕ %C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"{}\"' | sed 'h;s/\\x1b[[0-9;]*m//g;G;s/\\n/\\t/' | sort | cut -f2-; } | awk -F'§' -vCOLUMNS=$(tput cols || echo 80) '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = $i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", $i); len[NR,i] = l = length($i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { width = 0; for (col = 1; col < nf[row]; col++) { printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; width+=max[col]+1; } print substr(cell[row,nf[row]],1,COLUMNS-width+17); } }'"
 	pull-all = "!find . -name .git -print -execdir git pull \\;"
 	status-all = "!find -- \"${GIT_PREFIX:-.}\" -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"$([[ $(pwd) = '$PWD' ]] && echo $(basename $PWD) \"\\033[1;30m\"\\(current directory\\) || realpath --relative-to=\"'$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)\"\\033[1;30m\"$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
 	preview-merge-diff = "!f() { git diff HEAD...\"$@\"; }; f"  # diff between target and the common ancestor of HEAD and target
@@ -28,10 +33,13 @@
 	forest = "!f() { git foresta --style=10 \"$@\" | less -RiMXF -p $(git show -s --format=%h); }; f"
 	patch = "!if builtin command -v pbpaste > /dev/null 2>&1; then pbpaste | sed -e '$a\\' | git apply -3; else vim -u ~/.vim/config/mini.vim -i NONE +startinsert patch.diff && git apply -3 patch.diff && rm patch.diff; fi"
 	difft="!GIT_EXTERNAL_DIFF=difft git diff"
+	diffw="!GIT_PAGER='diff-so-fancy | less --tabs=4 -RiMXF' git diff --word-diff=color --ignore-all-space"
 	diff-side-by-side="!GIT_PAGER='delta --line-numbers --navigate --side-by-side' git diff"
 	diff-so-fancy="!GIT_PAGER='diff-so-fancy | less --tabs=4 -RiMXF' git diff"
-	diff-word="!GIT_PAGER='diff-so-fancy | less --tabs=4 -RiMXF' git diff --word-diff=color --ignore-all-space"
 	open = "!git remote get-url origin | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//' | if command -v open > /dev/null 2>&1; then xargs open; else y; fi"
+	toggle-url = "!f() { local pattern='s,^\\(https://\\|git@\\)\\([^:/]\\+\\)[:/],' remote=\"${1:-origin}\" url=\"$(git remote get-url \"${1:-origin}\")\"; grep -q '^https://' <<< \"$url\" && pattern=\"${pattern}git@\\\\2:,\" || pattern=\"${pattern}https://\\\\2/,\"; git remote set-url \"$remote\" \"$(sed \"$pattern\" <<< \"$url\")\"; git remote -v; }; f"
+	rg = "!f() { if [[ $# -eq 0 ]]; then echo \"Usage: git rg [--reflog] [--regex] <text> [<git-log-args>]\" >&2; return 1; fi; while [[ $# -ne 0 ]]; do case $1 in --reflog) local cmd=reflog; shift ;; --regex) local search=-G; shift ;; --) shift; break ;; *) break ;; esac done; local pattern=$'\\022'$1; git \"${cmd:-log}\" --color --pretty=format:\"$_GIT_LOG_FORMAT\" --abbrev-commit --all --regexp-ignore-case \"${search:--S}\" \"$@\" | fzf --ansi --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind=\"enter:execute(grep -o \\\"[a-f0-9]\\\\{7,\\\\}\\\" <<< {} | head -n 1 | xargs -I{} git show --patch-with-stat --color {} | DELTA_PAGER=\\\"$BAT_PAGER --pattern=\\\\\\\"$pattern\\\\\\\"\\\" delta --line-numbers)\" --preview=\"grep -o \\\"[a-f0-9]\\\\{7,\\\\}\\\" <<< {} | head -n 1 | xargs git show --patch-with-stat --color | delta --paging=never\"; }; f"
+	fd = "!f() { local root=$(git rev-parse --show-toplevel || echo \".\"); local filepath=$(git log --pretty=format: --name-only --all \"$@\" | awk NF | sort -u | fzf --ansi --multi --header=\"Find file in all commits, git log takes glob: git fd '*filename*'\" --preview=\"git log --color --pretty=format:'$_GIT_LOG_FORMAT' --abbrev-commit --all --full-history -- '$root'/{}\"); if [[ -n $filepath ]]; then local sha=$(git log --color --pretty=format:\"$_GIT_LOG_FORMAT\" --abbrev-commit --all --full-history -- \"${root}/${filepath}\" | fzf --ansi --preview=\"grep -o \\\"[a-f0-9]\\\\{7,\\\\}\\\" <<< {} | head -n 1 | xargs -I{} git show {} -- ${root}/${filepath} | delta --paging=never\" --bind=',:preview-down,.:preview-up' | grep -o \"[a-f0-9]\\{7,\\}\" | head -n 1); if [[ -n $sha ]]; then printf \"\\033[0;35mgit show $sha:$filepath\\033[0m\\n\" >&2; git show \"$sha:$filepath\" | $EDITOR - -c \"file $sha:$filepath\" -c 'filetype detect'; fi; fi; }; f"
 
 [url "https://github.com/"]
 	insteadOf = gh:
@@ -81,7 +89,8 @@
 	tool = vimdiff
 
 [diff]
-	; colorMoved = default
+	colorMoved = default
+	algorithm = histogram
 
 [blame]
 	coloring = highlightRecent

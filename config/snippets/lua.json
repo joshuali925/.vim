@@ -1,4 +1,8 @@
 {
+  "Feedkey": {
+    "prefix": "feedkey",
+    "body": ["vim.api.nvim_feedkeys(vim.keycode(\"${1:<Esc>}\"), \"n\", false)"]
+  },
   "Benchmark": {
     "prefix": "benchmark",
     "body": [

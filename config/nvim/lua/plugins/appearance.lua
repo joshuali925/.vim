@@ -130,7 +130,7 @@ return {
                         { "searchcount", color = "String" },
                         function()
                             local clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
-                            local icon = #clients > 0 and " " or ""
+                            local icon = #clients > 0 and " " or ""
                             if package.loaded["neocodeium"] ~= nil then
                                 local serverstatus = require("neocodeium").get_status() -- https://www.reddit.com/r/neovim/comments/1fc34na/comment/lm5wr1j
                                 if serverstatus == 0 then
@@ -155,7 +155,7 @@ return {
                                 return string.format(
                                     "%s %s %s %s/%s",
                                     (vim.o.expandtab and " " or " ") .. vim.o.shiftwidth,
-                                    states.untildone_count == 0 and "" or " " .. states.untildone_count,
+                                    states.untildone_count == 0 and "󰉡" or " " .. states.untildone_count,
                                     col < 10 and " " .. col or col,
                                     cursor[1],
                                     vim.api.nvim_buf_line_count(0)

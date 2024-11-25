@@ -91,7 +91,7 @@ compdef _dirs d
 compdef _command_names path
 compdef _git gds=git-diff
 compdef _git gc=git-commit
-compdef _git gwt=git-worktree
+_git-wt() { _git-worktree; }
 _git-preview-merge-diff() { _git-diff; }
 _git-missing() { _git-log; }
 _git-forest() { _git-log; }

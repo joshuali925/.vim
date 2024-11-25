@@ -139,7 +139,7 @@ xnoremap <C-f> =
 nnoremap <leader>r :call <SID>RunCode()<CR>
 noremap <leader>y "+y
 nnoremap <leader>Y "+y$
-nnoremap yc :call setreg('+', getreg('"'))<CR>
+nmap yc yygccp$
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nnoremap <C-p> :call VSCodeNotify('workbench.action.quickOpen')<CR>
