@@ -9,9 +9,7 @@
   },
   "Log unmount": {
     "prefix": "cl-unmount",
-    "body": [
-      "React.useEffect(() => () => console.log('❗${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} unmount'), []);"
-    ]
+    "body": "React.useEffect(() => () => console.log('❗${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} unmount'), []);"
   },
   "Log changed props": {
     "prefix": "why-rerender",

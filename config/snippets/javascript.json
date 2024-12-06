@@ -1,11 +1,11 @@
 {
   "Log": {
     "prefix": "cl",
-    "body": ["console.log('❗$0:', $0);"]
+    "body": "console.log('❗$0:', $0);"
   },
   "Log stringify": {
     "prefix": "clj",
-    "body": ["console.log('❗$0:\\n' + JSON.stringify($0, null, 2));"]
+    "body": "console.log('❗$0:\\n' + JSON.stringify($0, null, 2));"
   },
   "Print stack trace": {
     "prefix": "ct",
@@ -17,9 +17,7 @@
   },
   "Logger": {
     "prefix": "logger",
-    "body": [
-      "const log = (...args) => console.log(`[\\${new Date().toISOString()}]`, ...args);"
-    ]
+    "body": "const log = (...args) => console.log(`[\\${new Date().toISOString()}]`, ...args);"
   },
   "Benchmark": {
     "prefix": "benchmark",
@@ -31,21 +29,19 @@
   },
   "JSDoc link class": {
     "prefix": "link",
-    "body": ["{@link ${1:Class}}"]
+    "body": "{@link ${1:Class}}"
   },
   "UUID": {
     "prefix": "uuid",
-    "body": ["crypto.randomUUID()"]
+    "body": "crypto.randomUUID()"
   },
   "Range": {
     "prefix": "range",
-    "body": ["Array(${1:10}).fill().map(Number.call, Number)"]
+    "body": "Array(${1:10}).fill().map(Number.call, Number)"
   },
   "Random string": {
     "prefix": "random-string",
-    "body": [
-      "const randString = () => Math.random().toString(36).substring(2);"
-    ]
+    "body": "const randString = () => Math.random().toString(36).substring(2);"
   },
   "Random integer": {
     "prefix": "random-int",
@@ -55,7 +51,7 @@
   },
   "Empty arrow function": {
     "prefix": "arrow",
-    "body": ["() => {}"]
+    "body": "() => {}"
   },
   "Timeout": {
     "prefix": "timeout",
@@ -67,7 +63,7 @@
   },
   "Timeout outside async": {
     "prefix": "sleep",
-    "body": ["await new Promise((resolve) => setTimeout(resolve, ${1:1000}));"]
+    "body": "await new Promise((resolve) => setTimeout(resolve, ${1:1000}));"
   },
   "Immediately-invoked async function": {
     "prefix": "async",
@@ -175,9 +171,10 @@
     "prefix": "template-shell",
     "body": [
       "const { exec } = require(\"child_process\");",
-      "const shell = (command, timeout = 90000, parseJSON = false) => {",
+      "const shell = (command, options = {}) => {",
+      "\tconst { timeoutMs = 90000, parseJSON = false } = options;",
       "\treturn new Promise((resolve, reject) =>",
-      "\t\texec(command, { timeout }, (error, stdout, stderr) => {",
+      "\t\texec(command, { timeout: timeoutMs }, (error, stdout, stderr) => {",
       "\t\t\tif (stderr) console.error(`stderr: \\${stderr.trim()}`);",
       "\t\t\tif (error) {",
       "\t\t\t\treject(error.message);",
@@ -187,7 +184,7 @@
       "\t\t\ttry {",
       "\t\t\t\tresolve(JSON.parse(stdout));",
       "\t\t\t} catch (parseError) {",
-      "\t\t\t\treject(parseError);",
+      "\t\t\t\treject(parseError + '\nReceived: ' + stdout);",
       "\t\t\t}",
       "\t\t}),",
       "\t);",
@@ -200,14 +197,14 @@
   },
   "Cypress test id": {
     "prefix": "cytestid",
-    "body": ["cy.get('[data-test-subj=\"$1\"]')$0"]
+    "body": "cy.get('[data-test-subj=\"$1\"]')$0"
   },
   "Cypress click": {
     "prefix": "cyclick",
-    "body": ["cy.contains('$0').click();"]
+    "body": "cy.contains('$0').click();"
   },
   "Cypress text exists": {
     "prefix": "cyexists",
-    "body": ["cy.contains('$0').should('exist');"]
+    "body": "cy.contains('$0').should('exist');"
   }
 }

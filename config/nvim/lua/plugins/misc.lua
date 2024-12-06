@@ -49,6 +49,15 @@ return {
             quickfile = { enabled = true },
             statuscolumn = { enabled = false, left = { "sign" }, git = { patterns = { "MiniDiffSign" } } },
             words = { enabled = true },
+            indent = {
+                enabled = true,
+                animate = { enabled = false },
+                indent = { char = "▏" },
+                scope = { char = "▏" },
+                filter = function(buf)
+                    return vim.bo[buf].buftype == "" and require("states").qs_disabled_filetypes[vim.bo[buf].filetype] ~= false
+                end,
+            },
             dashboard = {
                 enabled = true,
                 preset = {

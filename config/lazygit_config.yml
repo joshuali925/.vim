@@ -3,8 +3,8 @@ git:
   paging:
     colorArg: always
     pager: delta --paging=never --24-bit-color=always
-  branchLogCmd: 'git log --color --graph --pretty=format:"%C(yellow)%h %Cgreen⦗%cr⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --abbrev-commit {{branchName}} --'
-  allBranchesLogCmd: 'git log --color --graph --abbrev-commit --format=format:"%C(yellow)%h %Cgreen⦗%ci⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --all'
+  branchLogCmd: 'git log --color --graph --pretty=simple {{branchName}} --'
+  allBranchesLogCmd: 'git log --color --graph --format=simple-iso --all'
 gui:
   showCommandLog: false # @ to toggle
   showFileTree: false # ` to toggle

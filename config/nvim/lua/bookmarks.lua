@@ -10,7 +10,6 @@ local function min(a, b)
 end
 
 local function buf_set_extmark(opts)
-    opts = opts or {}
     local extmark_opts = { sign_text = "", sign_hl_group = "DiagnosticOk" }
     if opts.annot ~= nil then
         extmark_opts.sign_text = ""
@@ -75,7 +74,7 @@ function M.create(annot)
     if not M.bookmarks[file_name] then M.bookmarks[file_name] = {} end
     local cursor = vim.api.nvim_win_get_cursor(0)
     local row, col = cursor[1] - 1, cursor[2] - 1
-    local id = buf_set_extmark({ annot = annot, row = row, col = col })
+    local id = buf_set_extmark({ row = row, col = col, annot = annot })
     table.insert(M.bookmarks[file_name], {
         id = id,
         row = row,
@@ -148,7 +147,7 @@ function M.load_disk()
     local content = file:read("*a")
     file:close()
     if not content then return end
-    M.bookmarks = vim.fn.json_decode(content)
+    M.bookmarks = vim.json.decode(content)
 
     for _, buf in ipairs(vim.tbl_filter(function(buf)
         return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf })
@@ -161,14 +160,14 @@ function M.dump_disk()
     if not modified then return end
     local filtered = {}
     for file, bookmarks in pairs(M.bookmarks) do
-        if #bookmarks > 0 then
+        if #bookmarks > 0 and vim.fn.filereadable(file) == 1 then
             for _, bookmark in ipairs(bookmarks) do
                 bookmark.id = nil
             end
             filtered[file] = bookmarks
         end
     end
-    vim.fn.writefile({ vim.fn.json_encode(filtered) }, data_file)
+    vim.fn.writefile({ vim.json.encode(filtered) }, data_file)
 end
 
 function M.setup()
@@ -177,6 +176,7 @@ function M.setup()
     vim.keymap.set("n", "ms", function()
         vim.notify(vim.inspect(M.bookmarks))
         vim.cmd.Noice()
+        vim.schedule(function() vim.cmd("$") end)
     end)
     vim.api.nvim_create_augroup("Bookmarks", {})
     vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", pattern = "*", callback = function() M.dump_disk() end })

@@ -1584,6 +1584,7 @@ install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-un
 install-from-github stylua JohnnyMorganz/StyLua linux '' macos '' '' "$@"
 install-from-github shellcheck koalaman/shellcheck linux.x86_64 linux.aarch64 darwin.x86_64 '' '--strip-components=1 --wildcards shellcheck*/shellcheck' "$@"
 install-from-github croc schollz/croc Linux-64bit.tar.gz Linux-ARM64.tar.gz macOS-64bit macOS-ARM64 croc "$@"
+alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'  # doesn't support arm64
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
     btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
@@ -4603,6 +4604,43 @@ alias q-="up -c \"\\\\\$(alias q | sed \"s/[^']*'\\(.*\\)'/\\1/\") 'select * fro
 alias gunshallow='if [[ "$(git config --local --get remote.origin.partialclonefilter)" = blob:none ]]; then git fetch --no-filter --refetch; else git remote set-branches origin "*" && git fetch -v && echo -e "\nRun \"git fetch --unshallow\" to fetch all history"; fi'
 alias gsall="find . -name .git -execdir bash -c 'echo -e \"\\033[1;32m\"repo: \"\\033[1;34m\"\$([[ \$(pwd) = '\$PWD' ]] && echo \$(basename \$PWD) \"\\033[1;30m\"\(current directory\) || realpath --relative-to=\"'\$PWD'\" .) \"\\033[1;30m\"- \"\\033[1;33m\"\$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)\"\\033[1;30m\"\$(git log --pretty=format:\" (%cr)\" --max-count 1)\"\\033[0m\"; git status -s' \\;"
 alias gls="\ls -A --group-directories-first -1 | while IFS= read -r line; do git log --color --format=\"\$(\ls -d -F --color \"\$line\") =} %C(bold black)▏%Creset%C(yellow)%h %Cgreen%cr%Creset =} %C(bold black)▏%C(bold blue)%an %Creset%s%Creset\" --abbrev-commit --max-count 1 HEAD -- \"\$line\"; done | awk -F'=}' '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = \$i; gsub(/\033\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", \$i); len[NR,i] = l = length(\$i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { for (col = 1; col < nf[row]; col++) printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; print cell[row,nf[row]]; } }'"
+gpr() {
+  if [[ $# -lt 1 ]]; then echo "Usage: $0 [-d|--diff|-p|--patch] {<PR-number>|<PR-URL>} [<remote>]" >&2; return 1; fi
+  local rest=()
+  for arg in "$@"; do
+    case $arg in
+      -d|--diff) local reset=1 ;;  # if --diff is specified, reset to the common ancestor of HEAD and remote default branch
+      -p|--patch) local patch=1 ;;  # if --patch is specified, directly apply the diff from PR
+      *) rest+=("$arg") ;;
+    esac
+  done
+  set -- "${rest[@]}"
+  local pr=${1##*/} remote=${2:-origin}
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then  # clone a new directory for PR if not in git
+    local repo=${1%/pull/*}
+    git clone --filter=blob:none "$repo" "${repo##*/}-$pr"
+    cd "${repo##*/}-$pr" > /dev/null || return 1
+  fi
+  git stash push --include-untracked --message 'git PR temporary stash'
+  if [[ -n $patch ]]; then
+    curl -fsSL "$(git remote get-url "$remote" | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//')/pull/${pr}.diff" | git apply -3
+    return $?
+  fi
+  git fetch "$remote" "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
+  if [[ -n $reset ]]; then
+    git fetch "$remote" HEAD
+    git reset "$(git merge-base HEAD "$remote"/HEAD)"
+  fi
+}
+gh-backport() {
+  if [[ $# -ne 1 ]]; then echo "Usage: $0 <SHA>" >&2; return 1; fi
+  local sha=$1 args=() ref=$(git symbolic-ref --short HEAD)
+  if [[ -f .github/PULL_REQUEST_TEMPLATE.md ]]; then
+    args+=(--body-file .github/PULL_REQUEST_TEMPLATE.md)
+  fi
+  { git cherry-pick -x "$sha" || git cherry-pick --continue; } && git push fork "$ref" -f && gh pr create --title "[$ref] $(git log -n 1 --pretty=format:%s "$sha")" --base "$ref" "${args[@]}"
+}
+
 
 " =======================================================
 local function show_git_log_for_lines() -- does not handle modified file correctly
@@ -4942,6 +4980,22 @@ vim.api.nvim_create_autocmd("BufReadPost", {
             },
         },
     },
+" csv.vim
+    {
+        "chrisbra/csv.vim",
+        cmd = "CSVWhatColumn",
+        init = function()
+            vim.g.csv_nomap_cr = 1
+            vim.g.csv_nomap_bs = 1
+        end,
+        config = function() vim.o.filetype = "csv" end,
+    },
+                { "--", "" },
+                { "CSV show column", [[CSVWhatColumn!]], "Show column title under cursor" },
+                { "&CSV arrange column", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | 1,$CSVArrangeColumn!]], "Align csv columns" },
+                { "CSV to table", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | CSVTabularize]], "Convert csv to table" },
+" grug-far
+    { "MagicDuck/grug-far.nvim", keys = { { "g/", "<Cmd>lua require('grug-far').open()<CR>", mode = { "n", "x" } } }, opts = { keymaps = { close = { n = "<leader>q" } } } },
 
 " =======================================================
 " karabiner switch window, too slow

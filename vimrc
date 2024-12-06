@@ -535,7 +535,7 @@ else
   nmap <leader>Y <leader>y$
   xnoremap <leader>y :call plugins#oscyank#OSCYankVisual()<CR>
 endif
-nmap yc yygccp$
+nmap yc yygccp
 if $SSH_CLIENT != ''
   nnoremap gx :call system('y', expand('<cfile>'))<CR>
 endif

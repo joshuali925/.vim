@@ -3,7 +3,6 @@ source ~/.vim/config/z.sh
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 if [[ -s $HOME/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh; fi
 
-export _GIT_LOG_FORMAT="%C(yellow)%h %Cgreen⦗%cr⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset"
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR=nvim
 export BAT_PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
@@ -11,7 +10,7 @@ export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --border=thinblock --preview-window="border-thinblock,<40(up,40%)" --highlight-line --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
-export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=format:\\\"$_GIT_LOG_FORMAT\\\" --abbrev-commit -- \{})+change-preview-label(▏log▕)\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label(▏cat▕)\"'"
+export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label(▏log▕)\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label(▏cat▕)\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40%"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
@@ -61,13 +60,15 @@ alias gnpm='npm --prefix ~/.local/lib/node-packages'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
 alias lzd='lazydocker'
-alias ctop='TERM="${TERM/#tmux/screen}" ctop'  # TODO https://github.com/bcicen/ctop/issues/263
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
 alias 00='[[ -f $HOME/.vim/tmp/last_result ]] && cd "$(cat "$HOME/.vim/tmp/last_result")"'
 alias view='nvim -c "lua Snacks.terminal.colorize()"'
-alias jqflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
+# shellcheck disable=2154
+alias jsonflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
+# shellcheck disable=2154
 alias json2csv='jq -r "(map(keys) | add | unique) as \$cols | map(. as \$row | \$cols | map(\$row[.])) as \$rows | \$cols, \$rows[] | @csv"'
+alias jsonl2csv='json2csv -s'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
@@ -85,7 +86,7 @@ alias gau='git add -u'
 alias gaa='git add --all'
 alias gb='git branch'
 alias gba='git branch -vv --sort=-committerdate -a'
-alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(HEAD)%(color:yellow)%(refname:short)|%(color:green)%(committerdate:relative)|%(color:red)%(objectname:short)%(color:reset) - %(subject) %(color:bold blue)<%(authorname)>%(color:reset)" --color | column -ts"|"'
+alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(align:50,left)%(HEAD)%(color:red)%(refname:short)%(end)%(color:yellow)%(objectname:short) %(color:green)⦗%(committerdate:relative)⦘%(color:reset) - %(subject) %(color:bold blue)❪%(authorname)❫%(color:reset)"'
 alias gc!='gc --amend'
 alias gcs='gc --signoff'
 alias gcs!='gc --signoff --amend --no-verify --allow-empty'
@@ -105,20 +106,20 @@ alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch 
 alias gl='git pull'
 alias glg='git log --stat --graph --pretty=fuller'
 alias glga='git log --graph --pretty=fuller --all'
-alias glo='git log --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit'
-alias gloo='git log --graph --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --max-count 15'
-alias gloa='git log --color --graph --pretty=format:"%C(yellow)%h %Cgreen⦗%ci⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset" --abbrev-commit --all | \less -RiMXF -p $(git show -s --format=%h)'
+alias glo='git log --graph --pretty=simple'
+alias gloo='git log --graph --pretty=simple --max-count 15'
+alias gloa='git log --color --graph --pretty=simple-iso --all | \less -RiMXF -p $(git show -s --format=%h)'
 glx() { git log --graph --decorate=short --date-order --color --pretty=format:"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)" "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$(git show -s --format=%h)"; }
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
-alias grl='git reflog --color --date=human-local --pretty=format:"%C(yellow)%h%Creset %Cgreen%gD:%Creset %gs%Creset%C(auto)%d%Creset"'
+alias grl='git reflog --color --date=human-local --pretty=simple-ref'
 alias gra='git remote add'
 alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,^\(https://\|git@\)\([^:/]\+\)[:/][^/]\+/\([^/]\+\)/\?$,git@\2:joshuali925/\3,')\"; git remote -v"
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
-alias grt='cd $(git rev-parse --show-toplevel || echo ".")'
+alias grt='cd "$(git rev-parse --show-toplevel || echo ".")"'
 alias grv='git remote -v'
 alias gs='git status -sb'
 alias gst='git stash'
@@ -130,8 +131,6 @@ gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.gi
 alias gexclude2='git update-index --assume-unchanged'
 alias gexcluded2='git ls-files -v | grep "^[[:lower:]]"'
 alias gunexclude2='git update-index --no-assume-unchanged'
-alias gwhatchanged='git log --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat $(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})..HEAD  # what will be pushed'
-alias gwhatsnew='git log --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --stat ORIG_HEAD...HEAD  # what was pulled'
 alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
 
 tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
@@ -157,7 +156,7 @@ gcb() {
     awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
     fzf --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
     --header='Press ` to toggle sort' \
-    --preview="git log -n 50 --color --graph --pretty=format:'$_GIT_LOG_FORMAT' --abbrev-commit \$(sed 's/.* //' <<< {})" | sed "s/.* //")
+    --preview="git log -n 50 --color --graph --pretty=simple \$(sed 's/.* //' <<< {})" | sed "s/.* //")
   [[ -z $fzftemp ]] && return 1
   [[ $fzftemp = remotes/* ]] && local remote="${fzftemp#remotes/}" && branch="${remote#[^\/]*/}" || branch="$fzftemp"  # remote: <remote>/<branch>; branch: <branch>
   if git show-ref --verify --quiet "refs/heads/$branch"; then  # <branch> exists, switch if tracking <remote> or create as <remote>-<branch>
@@ -170,7 +169,7 @@ gcb() {
 }
 
 glof() {
-  git log --graph --color --pretty=format:"$_GIT_LOG_FORMAT" --abbrev-commit --all "$@" |
+  git log --graph --color --pretty=simple --all "$@" |
     fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
     --header='Press ` to toggle sort, C-y to copy commit, C-t C-u to show surrounding items, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
@@ -181,7 +180,7 @@ glof() {
 }
 
 grlf() {
-  git reflog --color --date=human-local --pretty=format:"%C(yellow)%h%Creset %Cgreen%gD:%Creset %gs%Creset%C(auto)%d%Creset" "$@" | awk '!x[$1]++' |
+  git reflog --color --date=human-local --pretty=simple-ref "$@" | awk '!x[$1]++' |
     fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
     --header='Press ` to toggle sort, C-e to diff to HEAD, C-y to copy commit, C-t C-u to show surrounding items, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
@@ -192,44 +191,6 @@ grlf() {
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
 
-gpr() {
-  if [[ $# -lt 1 ]]; then echo "Usage: $0 [-d|--diff|-p|--patch] {<PR-number>|<PR-URL>} [<remote>]" >&2; return 1; fi
-  local rest=()
-  for arg in "$@"; do
-    case $arg in
-      -d|--diff) local reset=1 ;;  # if --diff is specified, reset to the common ancestor of HEAD and remote default branch
-      -p|--patch) local patch=1 ;;  # if --patch is specified, directly apply the diff from PR
-      *) rest+=("$arg") ;;
-    esac
-  done
-  set -- "${rest[@]}"
-  local pr=${1##*/} remote=${2:-origin}
-  if ! git rev-parse --git-dir > /dev/null 2>&1; then  # clone a new directory for PR if not in git
-    local repo=${1%/pull/*}
-    git clone --filter=blob:none "$repo" "${repo##*/}-$pr"
-    cd "${repo##*/}-$pr" > /dev/null || return 1
-  fi
-  git stash push --include-untracked --message 'git PR temporary stash'
-  if [[ -n $patch ]]; then
-    curl -fsSL "$(git remote get-url "$remote" | sed -e 's,git@\\([^:]\\+\\):,https://\\1/,' -e 's/\\.git$//')/pull/${pr}.diff" | git apply -3
-    return $?
-  fi
-  git fetch "$remote" "pull/$pr/head" && { git branch "pr/$pr" 2> /dev/null; git checkout "pr/$pr" && git reset --hard FETCH_HEAD; }
-  if [[ -n $reset ]]; then
-    git fetch "$remote" HEAD
-    git reset "$(git merge-base HEAD "$remote"/HEAD)"
-  fi
-}
-
-gh-backport() {
-  if [[ $# -ne 1 ]]; then echo "Usage: $0 <SHA>" >&2; return 1; fi
-  local sha=$1 args=() ref=$(git symbolic-ref --short HEAD)
-  if [[ -f .github/PULL_REQUEST_TEMPLATE.md ]]; then
-    args+=(--body-file .github/PULL_REQUEST_TEMPLATE.md)
-  fi
-  { git cherry-pick -x "$sha" || git cherry-pick --continue; } && git push fork "$ref" -f && gh pr create --title "[$ref] $(git log -n 1 --pretty=format:%s "$sha")" --base "$ref" "${args[@]}"
-}
-
 convert() {
   if [[ $# -ne 2 ]]; then echo "Usage: $0 <file> <format>" >&2; return 1; fi
   ffmpeg -i "$1" -codec copy "${1%.*}.$2"
@@ -238,7 +199,7 @@ convert() {
 yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yazi
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp"
-  if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  if dir="$(cat -- "$tmp")" && [[ -n $dir && $dir != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
   rm -f -- "$tmp"
 }
 
@@ -337,14 +298,7 @@ print-ascii() {
 }
 
 print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 https://github.com/jbranchaud/til/blob/b1994cfe2144193f46f8c61f20f9a583085ca0aa/unix/display-all-the-terminal-colors.md
-  for x in {0..8}; do
-    for i in {30..37}; do
-      for a in {40..47}; do
-        printf "\e[$x;$i;$a""m\\\e[$x;$i;$a""m\e[0;37;40m "
-      done
-      echo
-    done
-  done
+  for x in {0..8}; do for i in {30..37}; do for a in {40..47}; do printf "\e[$x;$i;$a""m\\\e[$x;$i;$a""m\e[0;37;40m "; done; echo; done; done
   printf '\e[0m\n\nForeground 8 colors\n'
   printf "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
   printf '\n\nBackground 8 colors\n'
@@ -471,8 +425,8 @@ z() {
       --header='Press ` for recent directories under cwd, or C-a for all directories' --bind='tab:down,btab:up' \
       --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD/\" '\$0~cwd {print \$1}')" \
       --bind='ctrl-a:reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)') && z "$fzftemp"
-  elif [[ -d $1 ]]; then cd "$1"
-  elif [[ -f $1 ]]; then cd "$(dirname "$1")"
+  elif [[ -d $1 ]]; then cd -- "$1"
+  elif [[ -f $1 ]]; then cd -- "$(dirname "$1")"
   else _z "$@"; fi
 }
 
@@ -526,15 +480,19 @@ jo() {  # basic implementation of https://github.com/jpmens/jo
 
 untildone() {
   if [[ $# -eq 0 ]]; then
-    echo -e "Usage: $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour\n\t$0 ! ps <pid>; ./run  # run after pid exits" >&2
+    echo -e "Usage: UNTILDONE_MAX_TRIES=<n> UNTILDONE_INTERVAL=<sec> $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour\n\t$0 ! ps <pid>; ./run  # run after pid exits" >&2
     return 1
   fi
-  local i=1
+  local i=1 max_tries=${UNTILDONE_MAX_TRIES:-0} interval=${UNTILDONE_INTERVAL:-1}
   while true; do
     echo "Try $i, $(date +'%Y-%m-%dT%H:%M:%S%z')." >&2
     eval "$*" && break
     ((i+=1))
-    sleep 1
+    if [[ $max_tries -gt 0 && $i -gt $max_tries ]]; then
+      echo "Max tries ($UNTILDONE_MAX_TRIES) reached. Exiting." >&2
+      return 1
+    fi
+    sleep "$interval"
     echo >&2
   done
 }
@@ -585,13 +543,26 @@ bin-update() {
   done
 }
 
+dc() {
+  unset -f dc
+  local cmd=$(builtin command -v docker-compose > /dev/null && echo docker-compose || echo docker compose)
+  # shellcheck disable=2139
+  alias dc="$cmd"
+  $cmd "$@"
+}
+
 docker-shell() {
   if [[ $1 != vim* ]]; then
     local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}" --height=100% --border=none --preview-window=up,70%,follow --preview='docker logs --follow --tail=10000 {1}')
     if [[ -n $selected_id ]]; then
       printf "\n → %s\n" "$selected_id"
       selected_id=$(awk '{print $1}' <<< "$selected_id")
-      docker exec -it "$selected_id" /bin/sh -c 'eval $(set -o pipefail; grep ^$(id -un): /etc/passwd | cut -d : -f 7- || echo sh)' || docker exec -it "$selected_id" sh
+      docker exec -it "$selected_id" /bin/sh -c 'eval $(set -o pipefail; grep ^$(id -un): /etc/passwd | cut -d : -f 7- || echo sh)' || docker exec -it "$selected_id" sh || {
+        printf '[docker-shell] sh failed, install busybox (y/N)? '; read -r REPLY
+        if [[ $REPLY = [Yy] ]]; then
+          docker cp ~/.vim/bin/busybox "$selected_id":/busybox && docker exec -it "$selected_id" /busybox --install /bin && docker exec -it "$selected_id" sh
+        fi
+      }
     fi
     return $?
   fi
@@ -630,7 +601,7 @@ ec2() {
     ssh)
       local tag=${2:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')}
       [[ -z $tag ]] && return 1
-      [[ -n "$2" ]] && shift; shift
+      [[ -n $2 ]] && shift; shift
       local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
       if [[ -z $host ]]; then
         ec2 start "$tag" && sleep 17 && ec2 ssh "$tag" "$@"

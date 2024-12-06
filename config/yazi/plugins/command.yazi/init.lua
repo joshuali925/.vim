@@ -36,10 +36,10 @@ local function chown_stat()
 end
 
 return {
-    entry = function(_, args)
+    entry = function(_, job)
         local command
-        if type(args[1]) == "string" then
-            command = args[1]
+        if type(job.args[1]) == "string" then
+            command = job.args[1]
         else
             local cmd, event = ya.input({ title = "Command:", position = { "top-center", y = 3, w = 60 } })
             if event ~= 1 then return end
@@ -99,8 +99,8 @@ return {
 
         -- copy file reference (mac only)
         if command:match("^copy$") then return shell('osascript -e "on run args" -e "set the clipboard to POSIX file (first item of args)" -e end "$0"') end
-        if command:match("^sftp$") then return shell([[y <<<" echo \"$0\" | sftp -r "]]) end
+        if command:match("^sftp$") then return shell('echo " echo \"$0\" | sftp -r " | y') end
 
         return shell(command, true)
-    end
+    end,
 }

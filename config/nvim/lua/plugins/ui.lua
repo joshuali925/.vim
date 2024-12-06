@@ -64,9 +64,10 @@ return {
                     on_close = function() on_done(nil) end,
                     on_submit = function(value) on_done(value) end,
                 })
-                self:on(event.BufLeave, function() on_done(nil) end, { once = true })
+                self:map("n", "<CR>", function(value) on_done(value) end, { noremap = true, nowait = true })
                 self:map("n", "<Esc>", function() on_done(nil) end, { noremap = true, nowait = true })
                 self:map("n", "q", function() on_done(nil) end, { noremap = true, nowait = true })
+                self:on(event.BufLeave, function() on_done(nil) end, { once = true })
             end
 
             vim.ui.input = function(opts, on_confirm)
@@ -152,6 +153,7 @@ return {
                         ["<leader>f/"] = {
                             function(state)
                                 local dir = get_dir(state)
+                                vim.cmd.execute([["normal! \<C-w>w"]]) -- blur neo-tree to allow jumping to the selected line
                                 require("telescope.builtin").live_grep({ cwd = dir, prompt_title = "Live Grep: " .. dir })
                             end,
                             desc = "live_grep_at_node",
@@ -178,10 +180,22 @@ return {
     {
         "nvim-telescope/telescope.nvim",
         cmd = "Telescope",
-        dependencies = { "nvim-lua/plenary.nvim", { "nvim-telescope/telescope-fzf-native.nvim", build = "make" } },
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+            { "danielfalk/smart-open.nvim", dependencies = "kkharji/sqlite.lua" },
+        },
         keys = {
-            { "q", "<Cmd>lua require('telescope.cycle')()<CR>" },
-            { "<C-p>", "<Cmd>lua require('telescope.builtin').fd()<CR>" },
+            { "q", "<Cmd>lua require('telescope.cycle')('mru')<CR>" },
+            { "<C-p>", function()
+                if vim.fn.executable("sqlite3") == 1 then
+                    vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.cycle')('smart_open')<CR>")
+                    require("telescope.cycle")("smart_open")
+                else
+                    vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.builtin').fd()<CR>")
+                    require("telescope.builtin").fd()
+                end
+            end },
             { "<C-p>", ":<C-u>lua require('telescope.builtin').fd({initial_mode = 'normal', default_text = require('utils').get_visual_selection()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
             { "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>" },
             { "<leader>fS", "<Cmd>lua require('utils').fzf()<CR>" },
@@ -286,6 +300,7 @@ return {
                 },
             })
             require("telescope").load_extension("fzf")
+            require("telescope").load_extension("smart_open")
             require("telescope").load_extension("bookmarks") -- ../telescope/_extensions/bookmarks.lua
         end,
     },
@@ -337,7 +352,7 @@ return {
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },
-                { "&Refresh screen", [[execute "lua require('ibl').refresh()" | execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
+                { "&Refresh screen", [[execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
                 { "--", "" },
                 { "Open d&ashboard", [[lua require('snacks.dashboard')()]], "Open dashboard" },
                 { "&Save session", [[call feedkeys(":SessionSave", "n")]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
@@ -376,10 +391,6 @@ return {
                 { "--", "" },
                 { "&Add formula", [[TableAddFormula]], "Add formula to current cell, i.e. Sum(r1,c1:r2,c2)" },
                 { "&Evaluate formula", [[TableEvalFormulaLine]], "Evaluate formula" },
-                { "--", "" },
-                { "CSV show column", [[CSVWhatColumn!]], "Show column title under cursor" },
-                { "&CSV arrange column", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | 1,$CSVArrangeColumn!]], "Align csv columns" },
-                { "CSV to table", [[execute "lua require('lazy').load({plugins = 'csv.vim'})" | CSVTabularize]], "Convert csv to table" },
             })
             vim.fn["quickui#menu#install"]("L&SP", {
                 { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix (run :bufdo edit<CR> to load all buffers)" },
@@ -398,9 +409,7 @@ return {
                 { "Lazy &update", [[Lazy update]], "Lazy update plugins" },
                 { "--", "" },
                 { "&Mason status", [[Mason]], "Mason status" },
-                { "Mason &install all", [[lua require('lsp').lsp_install_all()]], "Install commonly used servers (LspInstallAll) + linters, formatters" },
-                { "--", "" },
-                { "Load indentscope", [[lua require("mini.indentscope").setup({ draw = { delay = 50 }, options = { try_as_border = true }, symbol = '▏' })]], "Load mini.indentscope" },
+                { "Mason &install all", [[lua require('lsp').lsp_install_all()]], "Install commonly used servers, linters, and formatters" },
             })
             local quickui_theme_list = {}
             local used_chars = "hjklqg"
@@ -433,7 +442,7 @@ return {
             vim.fn["quickui#menu#switch"]("visual")
             vim.fn["quickui#menu#reset"]()
             vim.fn["quickui#menu#install"]("&Actions", {
-                { "&Format JSON", [['<,'>Prettier json]], "Use prettier to format selected text as JSON" },
+                { "&Minimize JSON", [['<,'>!jq -c .]], "Use jq to minimize selected JSON" },
                 { "Base64 &encode", [[execute "lua vim.fn.setreg('x', vim.base64.encode(require('utils').get_visual_selection()))" | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
                 { "Base64 &decode", [[lua local temp = require("utils").base64_decode(require("utils").get_visual_selection()); vim.cmd.S(); vim.api.nvim_put(temp, "", false, true); vim.api.nvim_buf_set_name(0, "base64_decode"); temp = nil]], "Decode selected text with base64" },
                 { "Generate &snippet", [[let @x = substitute(escape(funcs#get_visual_selection(), '"$'), repeat(' ', &shiftwidth), '\\t', 'g') | execute 'S put x' | execute '%normal! gI"' | execute '%normal! A",' | execute 'normal! Gdd$x' | file snippet_body]], "Generate vscode compatible snippet body from selected text" },

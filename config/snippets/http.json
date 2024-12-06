@@ -10,7 +10,7 @@
   },
   "Authorization header": {
     "prefix": "authorization",
-    "body": ["Authorization: Basic ${1:username}:${2:password}"]
+    "body": "Authorization: Basic ${1:username}:${2:password}"
   },
   "GET request": {
     "prefix": "get-request",
