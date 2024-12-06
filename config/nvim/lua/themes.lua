@@ -101,13 +101,13 @@ local themes = {
 
 local function highlight_plugins()
     if theme_index < 0 then
-        vim.api.nvim_set_hl(0, "IblIndent", { fg = "#3b4261" })
-        vim.api.nvim_set_hl(0, "IblScope", { fg = "#4f5778" })
+        vim.api.nvim_set_hl(0, "SnacksIndent", { fg = "#3b4261" })
+        vim.api.nvim_set_hl(0, "SnacksIndentScope", { fg = "#4f5778" })
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#ffbe6d" })
         vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = "#6eb9e6" })
     else
-        vim.api.nvim_set_hl(0, "IblIndent", { fg = "#d4d7d9" })
-        vim.api.nvim_set_hl(0, "IblScope", { fg = "#c4c8cc" })
+        vim.api.nvim_set_hl(0, "SnacksIndent", { fg = "#d4d7d9" })
+        vim.api.nvim_set_hl(0, "SnacksIndentScope", { fg = "#c4c8cc" })
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#916100" })
         vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = "#005e7d" })
     end
@@ -118,9 +118,8 @@ end
 
 function M.config()
     vim.o.background = theme_index < 0 and "dark" or "light"
-    vim.api.nvim_create_augroup("PluginsHighlights", {})
-    vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", group = "PluginsHighlights", callback = highlight_plugins })
     themes[M.theme].config()
+    highlight_plugins() -- autocmd might not trigger for some colorschemes
 end
 
 function M.switch(index)

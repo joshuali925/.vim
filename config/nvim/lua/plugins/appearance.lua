@@ -23,19 +23,10 @@ return {
         },
     },
     {
-        "lukas-reineke/indent-blankline.nvim",
-        main = "ibl",
-        opts = {
-            indent = { char = "▏", tab_char = "█" },
-            exclude = { filetypes = vim.g.qs_filetype_blacklist, buftypes = vim.g.qs_buftype_blacklist },
-            scope = { show_start = false, show_end = false },
-        },
-    },
-    {
         "dstein64/nvim-scrollview",
         config = function()
             require("scrollview").setup({ signs_on_startup = { "diagnostics", "search" }, signs_max_per_row = 2, winblend_gui = 50 })
-        end
+        end,
     },
     {
         "kevinhwang91/nvim-bqf",
@@ -52,7 +43,7 @@ return {
                 tab = "",
                 tabb = "",
             },
-        }
+        },
     },
     {
         "stevearc/quicker.nvim",

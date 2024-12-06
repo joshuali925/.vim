@@ -119,6 +119,7 @@ function! funcs#quit_netrw_and_dirs()
   endif
 endfunction
 
+" TODO https://github.com/Goose97/timber.nvim
 function! funcs#print_variable(visual, printAbove) abort
   let new_line = 'normal! ' . (a:printAbove ? 'O' : 'o') . "\<Space>\<BS>"
   let word = a:visual ? funcs#get_visual_selection() : expand('<cword>')

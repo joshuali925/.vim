@@ -93,7 +93,7 @@ config.keys = {
                 window:perform_action(wezterm.action.CopyTo("Clipboard"), pane)
                 window:perform_action(wezterm.action.ClearSelection, pane)
             end),
-        })
+        }),
     },
 }
 config.key_tables = { search_mode = search_mode }

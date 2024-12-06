@@ -1,7 +1,7 @@
 {
   "include": {
     "prefix": "include",
-    "body": ["Include ~/.ssh/${1:my_config}"]
+    "body": "Include ~/.ssh/${1:my_config}"
   },
   "ssh config template": {
     "prefix": "template",

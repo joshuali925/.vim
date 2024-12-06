@@ -41,6 +41,6 @@
   },
   "Flatten 2d array": {
     "prefix": "flatten",
-    "body": ["[i for j in ${1:arr} for i in j]"]
+    "body": "[i for j in ${1:arr} for i in j]"
   }
 }

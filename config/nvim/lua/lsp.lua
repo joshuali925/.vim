@@ -31,7 +31,7 @@ function M.lsp_install_all()
     vim.cmd.MasonInstall({ args = { "prettier", "shellcheck", "black" } })
 end
 
-function M.init()
+function M.setup()
     local function make_config()
         -- https://github.com/hrsh7th/cmp-nvim-lsp/blob/5af77f54de1b16c34b23cba810150689a3a90312/lua/cmp_nvim_lsp/init.lua#L24
         local capabilities = vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), {
@@ -108,6 +108,7 @@ function M.init()
             if not vim.tbl_contains(disabled_servers, "ts_ls") then
                 require("typescript-tools").setup({
                     settings = {
+                        jsx_close_tag = { enable = true },
                         expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
                         tsserver_file_preferences = {
                             importModuleSpecifierPreference = "relative",
@@ -155,7 +156,15 @@ function M.init()
                             -- library = vim.api.nvim_get_runtime_file("", true), -- index library files
                             library = { [vim.fn.expand("$VIMRUNTIME/lua")] = true, [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true },
                         },
-                        format = { enable = true, defaultConfig = { quote_style = "double", max_line_length = "unset", align_array_table = "false" } },
+                        format = {
+                            enable = true,
+                            defaultConfig = { -- https://github.com/CppCXY/EmmyLuaCodeStyle/blob/master/docs/format_config.md
+                                quote_style = "double",
+                                max_line_length = "unset",
+                                align_array_table = "false",
+                                trailing_table_separator = "smart",
+                            },
+                        },
                         hint = { enable = true },
                     },
                 },

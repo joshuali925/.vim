@@ -197,7 +197,7 @@ vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
 vim.keymap.set("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
 vim.keymap.set({ "n", "x" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+y$]])
-vim.keymap.set("n", "yc", "yygccp$", { remap = true })
+vim.keymap.set("n", "yc", "yygccp", { remap = true })
 vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
@@ -356,7 +356,6 @@ if require("states").small_file then
             vim.o.foldtext = "getline(v:foldstart).' ⋯'"
             vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
             local plugins = {
-                "indent-blankline.nvim",
                 "nvim-scrollview",
                 "git-conflict.nvim",
                 "quick-scope",

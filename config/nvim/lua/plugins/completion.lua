@@ -34,7 +34,7 @@ return {
                                 return vim.tbl_contains({
                                     brackets[1][1] .. brackets[1][2],
                                     brackets[2][1] .. brackets[2][2],
-                                    brackets[3][1] .. brackets[3][2]
+                                    brackets[3][1] .. brackets[3][2],
                                 }, pair)
                             end)
                             :with_move(cond.none())
@@ -45,9 +45,9 @@ return {
                                 return vim.tbl_contains({
                                     brackets[1][1] .. "  " .. brackets[1][2],
                                     brackets[2][1] .. "  " .. brackets[2][2],
-                                    brackets[3][1] .. "  " .. brackets[3][2]
+                                    brackets[3][1] .. "  " .. brackets[3][2],
                                 }, context)
-                            end)
+                            end),
                     })
                     for _, bracket in ipairs(brackets) do
                         Rule("", " " .. bracket[2])
@@ -62,13 +62,7 @@ return {
             {
                 "monkoose/neocodeium",
                 enabled = vim.env.ENABLE_CODEIUM ~= nil,
-                config = function()
-                    local filetypes = { ["."] = false }
-                    for _, ft in ipairs(vim.g.qs_filetype_blacklist) do
-                        filetypes[ft] = false
-                    end
-                    require("neocodeium").setup({ filetypes = filetypes, silent = true, debounce = true })
-                end,
+                opts = { filetypes = require("states").qs_disabled_filetypes, silent = true, debounce = true },
             },
         },
         cond = require("states").small_file,

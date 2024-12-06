@@ -284,5 +284,9 @@
       "\t${0:exit 0}",
       "fi"
     ]
+  },
+  "Disable shellcheck": {
+    "prefix": "shellcheck-disable",
+    "body": "# shellcheck disable="
   }
 }

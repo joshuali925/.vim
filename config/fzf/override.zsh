@@ -14,7 +14,7 @@ zle -N fzf-redraw-prompt
 fzf-cd-widget() {
   setopt localoptions pipefail no_aliases 2> /dev/null
   local dir="$(FZF_DEFAULT_COMMAND=${FZF_ALT_C_COMMAND:-} FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --walker=dir,follow,hidden --scheme=path --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} ${FZF_ALT_C_OPTS-}" $(__fzfcmd) +m < /dev/tty)"
-  if [[ -z "$dir" ]]; then
+  if [[ -z $dir ]]; then
     zle redisplay
     return 0
   fi

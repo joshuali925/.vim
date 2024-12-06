@@ -18,6 +18,7 @@ vim.g.qs_filetype_blacklist = {
     "DiffviewFileHistory",
     "DiffviewFiles",
     "floggraph",
+    "git",
     "fugitiveblame",
     "dropbar_menu",
     "minifiles",
@@ -26,10 +27,16 @@ vim.g.qs_filetype_blacklist = {
 }
 vim.g.qs_buftype_blacklist = { "terminal" }
 
+local qs_disabled_filetypes = { ["."] = false }
+for _, ft in ipairs(vim.g.qs_filetype_blacklist) do
+    qs_disabled_filetypes[ft] = false
+end
+
 local fsize = vim.fn.getfsize(vim.fn.expand("%:p:f")) -- buffer not initialized, read size from disk
 
 return {
     untildone_count = 0,
     size_threshold = 1048576, -- 1MB
     small_file = fsize == nil or fsize < 1048576,
+    qs_disabled_filetypes = qs_disabled_filetypes,
 }

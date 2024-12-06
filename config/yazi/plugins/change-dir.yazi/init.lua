@@ -15,32 +15,10 @@ local function read_stdout(output, err)
     if stdout ~= "" then return stdout end
 end
 
-local get_hovered_file = ya.sync(function() return tostring(cx.active.current.hovered.url) end)
-
-local function parent(offset)
-    local parent = cx.active.parent
-    if not parent then return end
-
-    local start = parent.cursor + 1 + offset
-    local end_ = offset < 0 and 1 or #parent.files
-    local step = offset < 0 and -1 or 1
-    for i = start, end_, step do
-        local target = parent.files[i]
-        if target and target.cha.is_dir then
-            return ya.manager_emit("cd", { target.url })
-        end
-    end
-end
-
 local function git_root()
     local output, err = Command("git"):args({ "rev-parse", "--show-toplevel" }):output()
     local stdout = read_stdout(output, err)
     if stdout ~= nil then ya.manager_emit("cd", { stdout }) end
-end
-
-local function follow()
-    local h = cx.active.current.hovered
-    if h.link_to ~= nil then return ya.manager_emit("reveal", { tostring(h.link_to) }) end
 end
 
 local function fzf(type, arg) -- https://github.com/sxyazi/yazi/blob/main/yazi-plugin/preset/plugins/fzf.lua
@@ -66,11 +44,9 @@ local function z()
 end
 
 return {
-    entry = function(_, args)
-        if args[1] == "parent" then return parent(tonumber(args[2])) end
-        if args[1] == "git_root" then return git_root() end
-        if args[1] == "follow" then return follow() end
-        if args[1] == "fzf" then return fzf(args[2], args[3]) end
-        if args[1] == "z" then return z() end
+    entry = function(_, job)
+        if job.args[1] == "git_root" then return git_root() end
+        if job.args[1] == "fzf" then return fzf(job.args[2], job.args[3]) end
+        if job.args[1] == "z" then return z() end
     end,
 }

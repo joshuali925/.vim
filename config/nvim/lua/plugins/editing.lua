@@ -1,12 +1,11 @@
 return {
     { "unblevable/quick-scope", config = function() vim.g.qs_hi_priority = -1 end },
     { "Wansmer/treesj", keys = { { "gS", "<Cmd>TSJSplit<CR>" }, { "gJ", "<Cmd>TSJJoin<CR>" } }, opts = { use_default_keymaps = false, max_join_length = 999 } },
-    { "MagicDuck/grug-far.nvim", keys = { { "g/", "<Cmd>lua require('grug-far').open()<CR>", mode = { "n", "x" } } }, opts = { keymaps = { close = { n = "<leader>q" } } } },
     {
         "kylechui/nvim-surround",
         keys = { "ys", "cs", "ds", { "s", mode = "x" }, { "yss", "ysiw", remap = true }, { "yS", "ysg_", remap = true } },
         opts = {
-            keymaps = { normal_cur = "<NOP>", normal_line = "<NOP>", normal_cur_line = "ysl", visual = "s", },
+            keymaps = { normal_cur = "<NOP>", normal_line = "<NOP>", normal_cur_line = "ysl", visual = "s" },
             surrounds = {
                 ["j"] = { add = function() return { { "JSON.stringify(" }, { ")" } } end },
                 ["J"] = { add = function() return { { "JSON.stringify(" }, { ", null, 2)" } } end },
@@ -57,10 +56,10 @@ return {
                     augend.date.alias["%H:%M"],
                     augend.constant.new({ elements = { "&&", "||" }, word = false, cyclic = true }),
                     augend.constant.new({ elements = { "and", "or" }, word = true, cyclic = true }),
-                    augend.constant.new({ elements = { "True", "False" }, word = true, cyclic = true, }),
-                    augend.constant.new({ elements = { "prev", "next" }, word = true, cyclic = true, }),
-                    augend.constant.new({ elements = { "_prev", "_next" }, word = false, cyclic = true, }),
-                    augend.constant.new({ elements = { "prev_", "next_" }, word = false, cyclic = true, }),
+                    augend.constant.new({ elements = { "True", "False" }, word = true, cyclic = true }),
+                    augend.constant.new({ elements = { "prev", "next" }, word = true, cyclic = true }),
+                    augend.constant.new({ elements = { "_prev", "_next" }, word = false, cyclic = true }),
+                    augend.constant.new({ elements = { "prev_", "next_" }, word = false, cyclic = true }),
                 },
             })
         end,
@@ -77,6 +76,7 @@ return {
                 "<C-a>",
                 function()
                     if require("multicursor-nvim").hasCursors() then
+                        require("multicursor-nvim").clearCursors()
                         require("multicursor-nvim").matchAllAddCursors()
                     else
                         local isNormal = vim.fn.mode():match("^n.*")
