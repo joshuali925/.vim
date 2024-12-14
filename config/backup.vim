@@ -1584,6 +1584,7 @@ install-from-github btm ClementTsang/bottom x86_64-unknown-linux-musl aarch64-un
 install-from-github stylua JohnnyMorganz/StyLua linux '' macos '' '' "$@"
 install-from-github shellcheck koalaman/shellcheck linux.x86_64 linux.aarch64 darwin.x86_64 '' '--strip-components=1 --wildcards shellcheck*/shellcheck' "$@"
 install-from-github croc schollz/croc Linux-64bit.tar.gz Linux-ARM64.tar.gz macOS-64bit macOS-ARM64 croc "$@"
+install-from-github dep-tree gabotechs/dep-tree linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 dep-tree "$@"
 alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'  # doesn't support arm64
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
@@ -4937,37 +4938,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
                 Codeium = " ",
                     ["<C-n>"] = cmp.mapping.complete({ config = { sources = { { name = "codeium" } } } }),
                     { name = "codeium" },
-" blink.cmp - snippet variable transformation not working https://github.com/neovim/neovim/issues/25696
-    {
-        "saghen/blink.cmp",
-        version = "*",
-        event = "InsertEnter",
-        dependencies = {
-            "rafamadriz/friendly-snippets",
-            { "saghen/blink.compat", opts = {} },
-        },
-        opts_extend = { "sources.completion.enabled_providers", "sources.compat" },
-        opts = {
-            keymap = {
-                preset = "enter",
-                ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
-                ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
-                ["<C-k>"] = {
-                    function(cmp)
-                        if cmp.is_in_snippet() then return cmp.accept() end
-                        return cmp.select_and_accept()
-                    end,
-                    "snippet_forward",
-                    "fallback",
-                },
-            },
-            windows = {
-                autocomplete = { winblend = 8 },
-                documentation = { auto_show = true },
-                ghost_text = { enabled = true },
-            },
-            accept = { auto_brackets = { enabled = true } },
-            trigger = { signature_help = { enabled = false } },
+" blink.cmp - vim.snippet variable transformation not working https://github.com/neovim/neovim/issues/25696
             sources = {
                 providers = {
                     snippets = {
@@ -4978,8 +4949,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
                     },
                 },
             },
-        },
-    },
 " csv.vim
     {
         "chrisbra/csv.vim",
@@ -5001,3 +4970,53 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 " karabiner switch window, too slow
               "shell_command": "(pgrep Chrome && osascript -e 'tell application \"System Events\"' -e 'set isActive to (name of first application process whose frontmost is true) = \"Google Chrome\"' -e 'end tell' -e 'tell application \"Google Chrome\"' -e 'if isActive then' -e 'set windowCount to count of windows' -e 'if windowCount > 1 then' -e 'set currentWindow to index of front window' -e 'if currentWindow = windowCount then' -e 'set index of window 1 to 1' -e 'else' -e 'set index of window (currentWindow + 1) to (currentWindow + 1)' -e 'end if' -e 'end if' -e 'else' -e 'activate' -e 'end if' -e 'end tell') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep Orion && open -a 'Orion') || (pgrep '^Arc$' && open -a 'Arc')"
 
+" =======================================================
+" multi-grep https://github.com/tjdevries/advent-of-nvim/blob/13d4ec68a2a81f27264f3cc73dd7cd8c047aab87/nvim/lua/config/telescope/multigrep.lua
+return function(opts)
+    opts = opts or {}
+    require("telescope.pickers").new(opts, {
+        finder = require("telescope.finders").new_job(function(prompt)
+            if not prompt or prompt == "" then return nil end
+            local parts = vim.split(prompt, "  ")
+            local args = { "rg", "--color=never", "--no-heading", "--with-filename", "--line-number", "--column" } -- vimgrep_arguments
+            if parts[2] then
+                for _, glob in ipairs(vim.split(parts[2], ",")) do
+                    table.insert(args, "-g")
+                    table.insert(args, glob)
+                end
+            end
+            if parts[1] then
+                table.insert(args, "-e")
+                table.insert(args, parts[1])
+            end
+            return args
+        end, require("telescope.make_entry").gen_from_vimgrep(opts), opts.max_results, opts.cwd or vim.uv.cwd()),
+        prompt_title = "Multi Grep",
+        previewer = require("telescope.config").values.grep_previewer(opts),
+        sorter = require("telescope.sorters").highlighter_only(opts),
+        push_cursor_on_edit = true,
+    }):find()
+end
+
+" =======================================================
+" wezterm status bar
+wezterm.on("update-right-status", function(window, pane)
+    local date = wezterm.strftime("%a %m/%d %I:%M %p")
+    local battery = ""
+    for _, b in ipairs(wezterm.battery_info()) do
+        local icon
+        if b.state_of_charge > 0.90 then
+            icon = "  "
+        elseif b.state_of_charge > 0.75 then
+            icon = "  "
+        elseif b.state_of_charge > 0.5 then
+            icon = "  "
+        elseif b.state_of_charge > 0.25 then
+            icon = "  "
+        elseif b.state_of_charge > 0.05 then
+            icon = "  "
+        end
+        battery = string.format("%.0f%%", b.state_of_charge * 100) .. icon
+    end
+    window:set_right_status(wezterm.format({ { Text = battery .. "   " .. date } }))
+end)

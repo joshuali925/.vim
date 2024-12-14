@@ -7,8 +7,10 @@ linemode = "size"
 show_hidden = true
 
 [preview]
-tab_size = 4
 wrap = "yes"
+tab_size = 4
+max_width = 1600
+max_height = 1900
 
 [open]
 prepend_rules = [

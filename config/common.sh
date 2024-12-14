@@ -1,7 +1,7 @@
 # shellcheck disable=1090,2015,2059,2148,2155,2164,2207
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
-if [[ -s $HOME/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh; fi
+if [[ -s ~/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh; fi
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR=nvim
@@ -62,7 +62,7 @@ alias lg='lazygit'
 alias lzd='lazydocker'
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
-alias 00='[[ -f $HOME/.vim/tmp/last_result ]] && cd "$(cat "$HOME/.vim/tmp/last_result")"'
+alias 00='[[ -f ~/.vim/tmp/last_result ]] && cd "$(cat ~/.vim/tmp/last_result)"'
 alias view='nvim -c "lua Snacks.terminal.colorize()"'
 # shellcheck disable=2154
 alias jsonflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
@@ -73,7 +73,7 @@ alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
 alias fpp='if [[ -t 0 ]] && [[ $# -eq 0 ]] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
-alias http.server='filebrowser --database $HOME/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
+alias http.server='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
 # shellcheck disable=2142
@@ -109,7 +109,7 @@ alias glga='git log --graph --pretty=fuller --all'
 alias glo='git log --graph --pretty=simple'
 alias gloo='git log --graph --pretty=simple --max-count 15'
 alias gloa='git log --color --graph --pretty=simple-iso --all | \less -RiMXF -p $(git show -s --format=%h)'
-glx() { git log --graph --decorate=short --date-order --color --pretty=format:"%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)" "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$(git show -s --format=%h)"; }
+glx() { git log --graph --decorate=short --date-order --color --pretty=format:'%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)' "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$(git show -s --format=%h)"; }
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
@@ -193,7 +193,7 @@ grlf() {
 
 convert() {
   if [[ $# -ne 2 ]]; then echo "Usage: $0 <file> <format>" >&2; return 1; fi
-  ffmpeg -i "$1" -codec copy "${1%.*}.$2"
+  ffmpeg -i "$1" -codec copy "${1%.*}.$2" || ffmpeg -y -i "$1" "${1%.*}.$2"
 }
 
 yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yazi
@@ -272,7 +272,7 @@ sudorun() {
     return $?
   fi
   case $cmd in
-    v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u "$HOME/.vim/config/mini.vim" "$@" ;;
+    v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u ~/.vim/config/mini.vim "$@" ;;
     *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which "$cmd")" "$@" ;;
   esac
 }
@@ -537,7 +537,7 @@ bin-update() {
       echo "$executable not found, skipping.." >&2; continue
     fi
     "$bin" --version || "$bin" -version || "$bin" -V || "$bin" version
-    mkdir -p "$HOME/config-backup"
+    mkdir -p ~/config-backup
     command mv -v "$bin" "$HOME/config-backup/$executable.backup_$(date +%s)"
     "$vim_bin" --version || "$vim_bin" -version || "$vim_bin" -V || "$vim_bin" version
   done
@@ -585,8 +585,8 @@ docker-shell() {
     echo 'Starting stopped container..'; docker start -ai "$container_name"
   else
     echo "Starting new container ($container_name) with host network and docker socket mapped.."
-    mkdir -p "$HOME/.local/docker-share"
-    docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v "$HOME/.local/docker-share":/docker-share -it --name "$container_name" ubuntu_vim
+    mkdir -p ~/.local/docker-share
+    docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v ~/.local/docker-share:/docker-share -it --name "$container_name" ubuntu_vim
   fi
 }
 

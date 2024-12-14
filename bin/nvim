@@ -10,9 +10,9 @@ case $PLATFORM:$ARCHITECTURE in
   *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2; exit 1 ;;
 esac
 
-[[ -d $HOME/.local/lib/nvim ]] && command mv -v ~/.local/lib/nvim "$HOME/config-backup/nvim-install.backup_$(date +%s)"
+[[ -d ~/.local/lib/nvim ]] && command mv -v ~/.local/lib/nvim "$HOME/config-backup/nvim-install.backup_$(date +%s)"
 curl -L -o- "$url" | tar xz -C ~/.local/lib
 command mv -v ~/.local/lib/nvim-* ~/.local/lib/nvim 2> /dev/null || true
-[[ ! -x $HOME/.local/bin/nvim ]] && ln -svf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
+[[ ! -x ~/.local/bin/nvim ]] && ln -svf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
 
 run-if-exists "$0" "$@"

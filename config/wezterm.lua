@@ -1,6 +1,6 @@
 -- icon: https://raw.githubusercontent.com/DinkDonk/kitty-icon/HEAD/kitty-dark.png
 local wezterm = require("wezterm")
-local light_theme = false
+local light_theme = false -- sync with system theme: https://wezfurlong.org/wezterm/config/lua/window/get_appearance.html
 local mux = wezterm.mux
 local config = wezterm.config_builder()
 
@@ -8,27 +8,6 @@ wezterm.on("gui-startup", function(cmd)
     local tab, pane, window = mux.spawn_window(cmd or {})
     window:gui_window():maximize()
 end)
-
--- wezterm.on("update-right-status", function(window, pane)
---     local date = wezterm.strftime("%a %m/%d %I:%M %p")
---     local battery = ""
---     for _, b in ipairs(wezterm.battery_info()) do
---         local icon
---         if b.state_of_charge > 0.90 then
---             icon = "  "
---         elseif b.state_of_charge > 0.75 then
---             icon = "  "
---         elseif b.state_of_charge > 0.5 then
---             icon = "  "
---         elseif b.state_of_charge > 0.25 then
---             icon = "  "
---         elseif b.state_of_charge > 0.05 then
---             icon = "  "
---         end
---         battery = string.format("%.0f%%", b.state_of_charge * 100) .. icon
---     end
---     window:set_right_status(wezterm.format({ { Text = battery .. "   " .. date } }))
--- end)
 
 local search_mode = nil
 if wezterm.gui then
@@ -44,6 +23,7 @@ tokyonight.brights[1] = "#717993"
 config.use_ime = true
 config.font = wezterm.font_with_fallback({ { family = "JetBrainsMono Nerd Font", weight = "Medium" } })
 config.font_size = 14
+config.line_height = 1.1
 config.use_fancy_tab_bar = false
 config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" } -- disable ligatures
 config.warn_about_missing_glyphs = false
@@ -51,7 +31,7 @@ config.warn_about_missing_glyphs = false
 config.window_decorations = "RESIZE"
 config.text_blink_rate = 0
 config.cursor_blink_rate = 0
--- config.force_reverse_video_cursor = true
+config.force_reverse_video_cursor = light_theme
 config.initial_cols = 105
 config.initial_rows = 30
 config.scrollback_lines = 9999
@@ -98,5 +78,26 @@ config.keys = {
 }
 config.key_tables = { search_mode = search_mode }
 config.set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" }
+
+local tabline = wezterm.plugin.require("https://github.com/michaelbrusegard/tabline.wez") -- install path: wezterm.plugin.list()
+tabline.setup({
+    options = {
+        -- tabs_enabled = false, -- can't set title if enabled https://github.com/michaelbrusegard/tabline.wez/issues/56
+        theme = config.color_scheme,
+        section_separators = { left = wezterm.nerdfonts.ple_right_half_circle_thick, right = wezterm.nerdfonts.ple_left_half_circle_thick },
+        component_separators = { left = wezterm.nerdfonts.ple_right_half_circle_thin, right = wezterm.nerdfonts.ple_left_half_circle_thin },
+        tab_separators = { left = wezterm.nerdfonts.ple_right_half_circle_thick, right = wezterm.nerdfonts.ple_left_half_circle_thick },
+    },
+    sections = {
+        tabline_a = {},
+        tabline_b = {},
+        tabline_c = {},
+        tab_active = { "process" },
+        tab_inactive = { "process" },
+        tabline_x = { "cpu" },
+        tabline_y = { "battery" },
+        tabline_z = { { "datetime", style = "%I:%M %p" } },
+    },
+})
 
 return config

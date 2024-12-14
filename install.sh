@@ -86,7 +86,7 @@ log() {
 backup() {
   if [[ -e $1 ]] || [[ -L $1 ]]; then
     mkdir -p "$BACKUP_DIR"
-    \mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"  # .backup_$(date +%s) suffix won't be unique in this script
+    mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"  # .backup_$(date +%s) suffix won't be unique in this script
   fi
 }
 
@@ -99,13 +99,13 @@ link_file() {
 }
 
 install_asdf() {
-  if [[ ! -s $HOME/.asdf/asdf.sh ]]; then
+  if [[ ! -s ~/.asdf/asdf.sh ]]; then
     log '\nInstalling asdf..'
     echo 'legacy_version_file = yes' > ~/.asdfrc
     git clone https://github.com/asdf-vm/asdf.git --depth=1 ~/.asdf
     source ~/.asdf/asdf.sh
-    link_file ~/.asdf/completions/_asdf ~/.vim/config/zsh/completions/_asdf || true
   fi
+  [[ ! -f ~/.vim/config/zsh/completions/_asdf ]] && link_file ~/.asdf/completions/_asdf ~/.vim/config/zsh/completions/_asdf
 }
 
 install_devtools() {
@@ -151,7 +151,7 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask wezterm rectangle linearmouse maccy snipaste trex karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
+    # brew install --cask wezterm rectangle linearmouse maccy snipaste trex jordanbaird-ice karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
@@ -165,9 +165,9 @@ install_devtools() {
 
 install_dotfiles() {
   log '\nCloning dotfiles..'
-  if [[ ! -f $HOME/.vim/config/.bashrc ]]; then
-    backup "$HOME/.vim"
-    git clone --filter=blob:none https://github.com/joshuali925/.vim.git "$HOME/.vim"
+  if [[ ! -f ~/.vim/config/.bashrc ]]; then
+    backup ~/.vim
+    git clone --filter=blob:none https://github.com/joshuali925/.vim.git ~/.vim
   fi
   log '\nCreating directories..'
   mkdir -pv ~/.local/{bin,lib,share} ~/.config/lazygit ~/.ssh
@@ -180,18 +180,19 @@ install_dotfiles() {
   log "Appended 'skip_global_compinit=1' to ~/.zshenv"
   echo 'Include ~/.vim/config/ssh_config' >> ~/.ssh/config
   echo 'Include ~/.ssh/ec2hosts' >> ~/.ssh/config
-  link_file "$HOME/.vim/config/.tmux.conf" "$HOME/.tmux.conf" --relative
-  link_file "$HOME/.vim/config/.gitconfig" "$HOME/.gitconfig" --relative
-  link_file "$HOME/.vim/config/.ideavimrc" "$HOME/.ideavimrc" --relative
-  link_file "$HOME/.vim/config/yazi" "$HOME/.config/yazi"
-  link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/.config/lazygit/config.yml"
+  link_file ~/.vim/config/.tmux.conf ~/.tmux.conf --relative
+  link_file ~/.vim/config/.gitconfig ~/.gitconfig --relative
+  link_file ~/.vim/config/.ideavimrc ~/.ideavimrc --relative
+  link_file ~/.vim/config/yazi ~/.config/yazi
+  link_file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml
+  [[ -f ~/.asdf/completions/_asdf ]] && link_file ~/.asdf/completions/_asdf ~/.vim/config/zsh/completions/_asdf
   if [[ $PLATFORM = darwin ]]; then
-    mkdir -p ~/Library/Application\ Support/lazygit "$HOME/.config/wezterm"
+    mkdir -p ~/Library/Application\ Support/lazygit ~/.config/wezterm
     ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport
-    link_file "$HOME/.vim/config/lazygit_config.yml" "$HOME/Library/ApplicationSupport/lazygit/config.yml"
-    link_file "$HOME/.vim/config/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
+    link_file ~/.vim/config/lazygit_config.yml ~/Library/ApplicationSupport/lazygit/config.yml
+    link_file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
     mkdir -p ~/.config/karabiner/assets/complex_modifications
-    link_file "$HOME/.vim/config/karabiner.json" "$HOME/.config/karabiner/assets/complex_modifications/karabiner.json"
+    link_file ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
   elif [[ $OSTYPE = linux-android ]]; then
     cat >> ~/.zshrc <<EOF
 export SSH_CLIENT=1 TMUX_NO_TPM=1
@@ -264,24 +265,24 @@ install_node() {
   asdf global nodejs "$NODE_VERSION"
   log 'Installing node packages..'
   mkdir -p ~/.local/lib/node-packages
-  [[ ! -f $HOME/.local/lib/node-packages/package.json ]] && echo '{}' >> "$HOME/.local/lib/node-packages/package.json"
-  npm install --cache "$HOME/.local/lib/node-packages/npm-temp-cache" --prefix "$HOME/.local/lib/node-packages" yarn || true
-  rm -rf "$HOME/.local/lib/node-packages/npm-temp-cache"
+  [[ ! -f ~/.local/lib/node-packages/package.json ]] && echo '{}' >> ~/.local/lib/node-packages/package.json
+  npm install --cache ~/.local/lib/node-packages/npm-temp-cache --prefix ~/.local/lib/node-packages yarn || true
+  rm -rf ~/.local/lib/node-packages/npm-temp-cache
   log
 }
 
 install_tmux() {
   log 'Installing tmux..'
-  backup "$HOME/.local/bin/tmux"
+  backup ~/.local/bin/tmux
   tmux -V
   log 'Installing tmux plugins..'
-  if [[ ! -d $HOME/.tmux ]]; then
+  if [[ ! -d ~/.tmux ]]; then
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth=1
   else
     ~/.tmux/plugins/tpm/bin/update_plugins all || true
   fi
   ~/.tmux/plugins/tpm/bin/install_plugins || true
-  if [[ ! -d $HOME/.terminfo ]]; then
+  if [[ ! -d ~/.terminfo ]]; then
     curl -LO https://invisible-island.net/datafiles/current/terminfo.src.gz && gunzip terminfo.src.gz
     tic -xe tmux-256color terminfo.src && rm terminfo.src
     log 'Installed tmux-256colors terminfo to ~/.terminfo'
@@ -291,9 +292,9 @@ install_tmux() {
 
 install_neovim() {
   log "Installing neovim.."
-  link_file "$HOME/.vim/config/nvim" "$HOME/.config/nvim"
-  backup "$HOME/.local/lib/nvim"
-  backup "$HOME/.local/bin/nvim"
+  link_file ~/.vim/config/nvim ~/.config/nvim
+  backup ~/.local/lib/nvim
+  backup ~/.local/bin/nvim
   ~/.vim/bin/nvim --version
   log 'Installed neovim, installing plugins..'
   timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
@@ -329,8 +330,10 @@ install_pm2() {
 }
 
 install_ssh-key() {
-  ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
-  log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
+  if [[ ! -f ~/.ssh/id_ed25519 ]]; then
+    ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
+    log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
+  fi
 }
 
 default-install() {
@@ -350,7 +353,8 @@ default-install() {
   install ssh-key
 
   sudo chsh -s "$(which zsh)" "$(whoami)" || true
-  log '\nChanged default shell to zsh, try the following if it did not work'
+  log '\nDefault shell will be zsh after re-login, try the following if it did not work'
+  log "${YELLOW}SHELL=$(which zsh) exec zsh  ${BLACK}# run zsh now"
   log "${YELLOW}sed -i -e '1i[[ -t 1 ]] && exec zsh\' ~/.bashrc  ${BLACK}# run zsh when bash starts"
   log "${YELLOW}sudo vipw  ${BLACK}# then edit login shell for user"
 

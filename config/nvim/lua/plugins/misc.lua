@@ -1,7 +1,9 @@
 return {
+    { "eandrju/cellular-automaton.nvim", cmd = "CellularAutomaton", enabled = false },
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
     { "will133/vim-dirdiff", cmd = "DirDiff" },
+    { "jbyuki/venn.nvim", cmd = "VBox" },
     {
         "dhruvasagar/vim-table-mode",
         cmd = { "TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine" },
@@ -15,7 +17,6 @@ return {
             vim.g.table_mode_corner = "|" -- markdown compatible tablemode
         end,
     },
-    { "jbyuki/venn.nvim", cmd = "VBox" },
     {
         "mistweaverco/kulala.nvim", -- TODO mistweaverco/kulala-ls
         init = function()
@@ -40,8 +41,8 @@ return {
         priority = 1000,
         lazy = false,
         keys = {
-            { "[m", "<Cmd>lua require('snacks.words').jump(-1, true)<CR>" },
-            { "]m", "<Cmd>lua require('snacks.words').jump(1, true)<CR>" },
+            { "[m", "<Cmd>lua require('snacks.words').jump(-vim.v.count1, true)<CR>" },
+            { "]m", "<Cmd>lua require('snacks.words').jump(vim.v.count1, true)<CR>" },
             { "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>", mode = { "n", "x" } },
         },
         opts = {

@@ -535,7 +535,7 @@ else
   nmap <leader>Y <leader>y$
   xnoremap <leader>y :call plugins#oscyank#OSCYankVisual()<CR>
 endif
-nmap yc yygccp
+nmap yc "xyygcc"xp
 if $SSH_CLIENT != ''
   nnoremap gx :call system('y', expand('<cfile>'))<CR>
 endif
@@ -543,7 +543,7 @@ endif
 if has('terminal')
   augroup VimTerminal
     autocmd!
-    silent! autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no | nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>
+    silent! autocmd TerminalWinOpen * setlocal nonumber norelativenumber signcolumn=no | nnoremap <buffer> <nowait> d <C-d>| nnoremap <buffer> u <C-u>| nnoremap <buffer> gf :argadd <C-r><C-p><CR>| xnoremap <buffer> gf :<C-u>execute "'<,'>normal! :argadd \<lt>C-r>\<lt>C-p>\<lt>CR>"<CR>
   augroup END
   tnoremap <C-u> <C-\><C-n>
   tnoremap <silent> <C-h> <C-w>:call plugins#tmux_navigator#navigate('h')<CR>

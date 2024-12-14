@@ -7,13 +7,13 @@ if [[ -n $GET_BASHRC ]]; then
   source ~/.vim/config/.bashrc
   unset GET_BASHRC
   export EDITOR=vim TMUX_NO_TPM=1
-  [[ -f $HOME/.bashrc ]] && source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
+  [[ -f ~/.bashrc ]] && source <(awk 'f;/exec ~\/.vim\/bin\/bashrc/{f=1}' ~/.bashrc)  # source lines after 'exec ~/.vim/bin/bashrc' in ~/.bashrc
 
   .vim-clear-env() {
     local config_paths=(~/.vim ~/.tmux ~/.local/{share,zim} ~/.config/{yazi,lazygit}) executable
-    [[ $(readlink -f "$HOME/.tmux.conf") = $HOME/.vim/config/.tmux.conf ]] && config_paths+=(~/.tmux.conf)
+    [[ $(readlink -f ~/.tmux.conf) = ~/.vim/config/.tmux.conf ]] && config_paths+=(~/.tmux.conf)
     for executable in ~/.local/bin/*; do
-      [[ -f $HOME/.vim/bin/${executable##*/} ]] && config_paths+=("$HOME/.local/bin/${executable##*/}")
+      [[ -f ~/.vim/bin/${executable##*/} ]] && config_paths+=("$HOME/.local/bin/${executable##*/}")
     done
     echo 'This will revert ~/.bashrc changes and delete the following:'
     find "${config_paths[@]}" -maxdepth 1 2> /dev/null
@@ -21,7 +21,7 @@ if [[ -n $GET_BASHRC ]]; then
     read -p 'Confirm to delete? (y/N) ' -n 1
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-      [[ -f $HOME/.bashrc ]] && sed -i '/\.vim\/bin\/bashrc/d' ~/.bashrc
+      [[ -f ~/.bashrc ]] && sed -i '/\.vim\/bin\/bashrc/d' ~/.bashrc
       rm -rf "${config_paths[@]}"
     fi
     unset TMUX_NO_TPM DOT_VIM_LOCAL_BIN
@@ -29,14 +29,14 @@ if [[ -n $GET_BASHRC ]]; then
   return 0
 fi
 
-if [[ ! -f $HOME/.vim/config/.bashrc ]]; then
-  if [[ -d $HOME/.vim ]] && [[ -n $(command ls -A "$HOME/.vim") ]]; then
+if [[ ! -f ~/.vim/config/.bashrc ]]; then
+  if [[ -d ~/.vim ]] && [[ -n $(command ls -A ~/.vim) ]]; then
     # shellcheck disable=2088
     echo '~/.vim already exists and is not empty, exiting..' >&2
     exit 1
   fi
   mkdir -pv ~/.local/{bin,lib,share} ~/.vim
-  curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C "$HOME/.vim" --strip-components=1
+  curl -L -o- https://github.com/joshuali925/.vim/archive/master.tar.gz | tar xz -C ~/.vim --strip-components=1
   if [[ -n $DOT_VIM_LOCAL_BIN ]]; then
     curl -fsSL https://raw.githubusercontent.com/junegunn/fzf/HEAD/shell/key-bindings.bash > ~/.vim/config/fzf/shell.bash && \
       curl -fsSL https://raw.githubusercontent.com/junegunn/fzf/HEAD/shell/completion.bash >> ~/.vim/config/fzf/shell.bash
@@ -45,4 +45,4 @@ if [[ ! -f $HOME/.vim/config/.bashrc ]]; then
   echo -e "\033[0;36mAppended to ~/.bashrc. To setup git remote, run: \033[0;33mgit -C ~/.vim init && git -C ~/.vim remote add origin https://github.com/joshuali925/.vim && git -C ~/.vim fetch --depth=1 && git -C ~/.vim checkout -f master && git pull\033[0m"
 fi
 
-GET_BASHRC=1 exec bash --rcfile "$HOME/.vim/bin/bashrc" "$@"
+GET_BASHRC=1 exec bash --rcfile ~/.vim/bin/bashrc "$@"

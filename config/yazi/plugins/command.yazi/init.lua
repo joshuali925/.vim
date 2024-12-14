@@ -54,7 +54,7 @@ return {
         if command:match("^chown%?$") then return chown_stat() end
         if command:match("^sudorm$") then return shell('sudo rm -r "$@"') end
         if command:match("^size$") then return shell([[du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }']], true) end
-        if command:match("^mp3$") then return shell('ffmpeg -i "$0" -codec copy "${0%.*}.mp3"') end
+        if command:match("^wav$") then return shell('ffmpeg -i "$0" -codec copy "${0%.*}.wav"') end
 
         local function compress_cmd(cmd, ext)
             return ('for file in "$@"; do set -- "$@" "$(realpath --relative-to="." "$file")"; shift; done; %s "${1}.%s" "$@"'):format(cmd, ext)
@@ -99,7 +99,7 @@ return {
 
         -- copy file reference (mac only)
         if command:match("^copy$") then return shell('osascript -e "on run args" -e "set the clipboard to POSIX file (first item of args)" -e end "$0"') end
-        if command:match("^sftp$") then return shell('echo " echo \"$0\" | sftp -r " | y') end
+        if command:match("^sftp$") then return shell([[echo " echo \"reget '$0'\" | sftp -r " | y]]) end
 
         return shell(command, true)
     end,

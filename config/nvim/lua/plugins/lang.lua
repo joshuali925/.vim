@@ -1,6 +1,14 @@
 return {
     { "MTDL9/vim-log-highlighting", ft = "log" },
-    { "hat0uma/csvview.nvim", cmd = "CsvViewToggle", opts = { view = { display_mode = "border" } } },
+    {
+        "hat0uma/csvview.nvim",
+        cmd = "CsvViewToggle",
+        config = function()
+            vim.opt_local.wrap = false
+            vim.fn.setreg("/", ",")
+            require("csvview").setup({ view = { display_mode = "border" } })
+        end,
+    },
     {
         "iamcco/markdown-preview.nvim",
         enabled = vim.env.SSH_CLIENT == nil,
@@ -12,7 +20,24 @@ return {
         end,
         config = function() vim.cmd.doautocmd("FileType") end, -- trigger autocmd to define MarkdownPreview command for buffer
     },
-    { "danymat/neogen", config = true },
+    {
+        "danymat/neogen",
+        config = function()
+            vim.keymap.set("i", "<Tab>", function()
+                if require("neogen").jumpable() then return require("neogen").jump_next() end
+                vim.api.nvim_feedkeys(vim.keycode("<Tab>"), "n", false)
+            end)
+            vim.keymap.set("i", "<S-Tab>", function()
+                if require("neogen").jumpable(-1) then return require("neogen").jump_prev() end
+                vim.api.nvim_feedkeys(vim.keycode("<S-Tab>"), "n", false)
+            end)
+            vim.keymap.set("i", "<C-k>", function()
+                if require("neogen").jumpable() then return require("neogen").jump_next() end
+                vim.lsp.buf.signature_help()
+            end)
+            require("neogen").setup()
+        end,
+    },
     {
         "b3nj5m1n/kommentary",
         dependencies = { "nvim-treesitter/nvim-treesitter", "JoosepAlviste/nvim-ts-context-commentstring" },
@@ -207,8 +232,8 @@ return {
             { "]a", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>" },
             { "[A", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' } })<CR>" },
             { "]A", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' } })<CR>" },
-            { "g<C-k>", "<Cmd>lua vim.lsp.buf.signature_help({ float = { border = 'single' } })<CR>" },
-            { "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help({ float = { border = 'single' } })<CR>", mode = { "i" } },
+            { "g<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>" },
+            { "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>", mode = { "i" } },
         },
         config = function() require("lsp").setup() end,
     },
