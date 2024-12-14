@@ -26,4 +26,9 @@ function M.toggle()
     vim.notify("Current directory: " .. vim.fn.fnamemodify(vim.uv.cwd(), ":~"), vim.log.levels.INFO, { annote = "Rooter is " .. (enabled and "enabled" or "disabled"), icon = "" })
 end
 
+function M.setup()
+    vim.api.nvim_create_augroup("Rooter", {})
+    vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "Rooter", callback = require("rooter").root, nested = true })
+end
+
 return M

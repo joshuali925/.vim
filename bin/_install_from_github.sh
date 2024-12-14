@@ -15,7 +15,7 @@ run-if-exists() {
   local executable=${1##*/}
   shift 1
 
-  if [[ -x $HOME/.local/bin/$executable ]]; then
+  if [[ -x ~/.local/bin/$executable ]]; then
     exec "$HOME/.local/bin/$executable" "$@"
   fi
 }
@@ -31,7 +31,7 @@ install-from-url() {
 
   run-if-exists "$executable" "$@"
 
-  mkdir -p "$HOME/.local/bin"
+  mkdir -p ~/.local/bin
   echo "Installing $executable from $url" >&2
   curl -sL -o "$HOME/.local/bin/$executable" "$url"
   chmod +x "$HOME/.local/bin/$executable"
@@ -59,7 +59,7 @@ install-from-github() {
   esac
   [[ -z $package ]] && echo "package not found for '$executable' on $PLATFORM $ARCHITECTURE, exiting.." >&2 && return 1
 
-  mkdir -p "$HOME/.local/bin"
+  mkdir -p ~/.local/bin
   url=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4) || true
   [[ -z $url ]] && echo "Unable to find '$package' in results of curl 'https://api.github.com/repos/$repo/releases/latest'" >&2 && return 1
   install-archive-from-url "$url" "$executable" "$extract_flags" "$@"

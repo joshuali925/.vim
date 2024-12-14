@@ -15,28 +15,6 @@ return {
         },
     },
     {
-        "gbprod/yanky.nvim",
-        event = "TextYankPost",
-        keys = {
-            { "y", "<Plug>(YankyYank)", mode = { "n", "x" } },
-            { "p", "<Plug>(YankyPutAfter)", mode = { "n", "x" } },
-            { "P", "<Plug>(YankyPutBefore)", mode = { "n", "x" } },
-            { "[p", "<Plug>(YankyPutIndentBeforeLinewise)" },
-            { "[P", "<Plug>(YankyPutIndentBeforeLinewise)" },
-            { "]p", "<Plug>(YankyPutIndentAfterLinewise)" },
-            { "]P", "<Plug>(YankyPutIndentAfterLinewise)" },
-            { "<p", "<Plug>(YankyPutIndentAfterShiftLeft)" },
-            { "<P", "<Plug>(YankyPutIndentBeforeShiftLeft)" },
-            { ">p", "<Plug>(YankyPutIndentAfterShiftRight)" },
-            { ">P", "<Plug>(YankyPutIndentBeforeShiftRight)" },
-            { "=p", "<Plug>(YankyPutAfterFilter)" },
-            { "=P", "<Plug>(YankyPutBeforeFilter)" },
-            { "<leader>p", "<Plug>(YankyCycleForward)" },
-            { "<leader>P", "<Plug>(YankyCycleBackward)" },
-        },
-        opts = { ring = { history_length = 500 }, system_clipboard = { sync_with_ring = false }, highlight = { on_yank = false, timer = 300 } },
-    },
-    {
         "monaqa/dial.nvim",
         config = function()
             local augend = require("dial.augend")

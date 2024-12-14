@@ -1,7 +1,7 @@
 local M = {}
 
 M.bookmarks = {}
-local data_file = vim.fn.stdpath("data") .. "/.bookmarks"
+local data_file = vim.fn.stdpath("data") .. "/bookmarks.msgpack"
 local ns_id = vim.api.nvim_create_namespace("bookmarks")
 local modified = false
 
@@ -141,13 +141,9 @@ function M.toggle()
 end
 
 function M.load_disk()
-    local file = io.open(data_file, "r")
-    if not file then return end
-
-    local content = file:read("*a")
-    file:close()
-    if not content then return end
-    M.bookmarks = vim.json.decode(content)
+    local fd = vim.uv.fs_open(data_file, "r", 438)
+    if not fd then return end
+    M.bookmarks = vim.mpack.decode(assert(vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)))
 
     for _, buf in ipairs(vim.tbl_filter(function(buf)
         return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf })
@@ -167,7 +163,10 @@ function M.dump_disk()
             filtered[file] = bookmarks
         end
     end
-    vim.fn.writefile({ vim.json.encode(filtered) }, data_file)
+    local file = io.open(data_file, "w")
+    if not file then return end
+    file:write(vim.mpack.encode(filtered))
+    file:close()
 end
 
 function M.setup()
@@ -179,13 +178,13 @@ function M.setup()
         vim.schedule(function() vim.cmd("$") end)
     end)
     vim.api.nvim_create_augroup("Bookmarks", {})
-    vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", pattern = "*", callback = function() M.dump_disk() end })
+    vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", pattern = "*", callback = M.dump_disk })
     vim.api.nvim_create_autocmd("BufUnload", { group = "Bookmarks", pattern = "*", callback = function(e) M.dump_cache(e.buf, e.match) end })
     vim.api.nvim_create_autocmd("BufReadPost", { group = "Bookmarks", pattern = "*", callback = function(e) M.load_cache(e.buf, e.match) end })
     if vim.v.vim_did_enter == 1 then
         M.load_disk()
     else
-        vim.api.nvim_create_autocmd("VimEnter", { group = "Bookmarks", pattern = "*", once = true, callback = function() M.load_disk() end })
+        vim.api.nvim_create_autocmd("VimEnter", { group = "Bookmarks", pattern = "*", once = true, callback = M.load_disk })
     end
 end
 

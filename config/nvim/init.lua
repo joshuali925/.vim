@@ -1,13 +1,13 @@
 -- options {{{1
 vim.loader.enable()
-require("states")                  -- lua/themes.lua       plugins/appearance.lua
-vim.g.loaded_2html_plugin = 1      -- lua/states.lua       plugins/ui.lua
-vim.g.loaded_remote_plugins = 1    -- lua/lsp.lua          plugins/lang.lua
-vim.g.loaded_tutor_mode_plugin = 1 -- lua/utils.lua        plugins/completion.lua
-vim.g.mapleader = ";"              -- lua/rooter.lua       plugins/editing.lua
-vim.g.maplocalleader = "'"         -- lua/bookmarks.lua    plugins/misc.lua
-vim.g.netrw_dirhistmax = 0         -- autoload/funcs.vim   plugins/git.lua
-vim.g.netrw_banner = 0             -- ginit.vim
+require("states")
+vim.g.loaded_2html_plugin = 1
+vim.g.loaded_remote_plugins = 1
+vim.g.loaded_tutor_mode_plugin = 1
+vim.g.mapleader = ";"
+vim.g.maplocalleader = "'"
+vim.g.netrw_dirhistmax = 0
+vim.g.netrw_banner = 0
 vim.g.netrw_browse_split = 4
 vim.g.netrw_preview = 1
 vim.g.netrw_alto = 0
@@ -191,13 +191,13 @@ vim.keymap.set({ "n", "t" }, "<M-k>", "<Cmd>call plugins#tmux_navigator#resize('
 vim.keymap.set({ "n", "t" }, "<M-l>", "<Cmd>call plugins#tmux_navigator#resize('l')<CR>")
 vim.keymap.set("n", "<C-f>", "<Cmd>lua require('lsp').organize_imports_and_format()<CR>")
 vim.keymap.set("x", "<C-f>", "<Cmd>Conform<CR><Esc>")
-vim.keymap.set("x", "<leader>p", [["0p]])
-vim.keymap.set("x", "<leader>P", [["0P]])
+vim.keymap.set({ "n", "x" }, "<leader>p", [["0p]])
+vim.keymap.set({ "n", "x" }, "<leader>P", [["0P]])
 vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
 vim.keymap.set("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
 vim.keymap.set({ "n", "x" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+y$]])
-vim.keymap.set("n", "yc", "yygccp", { remap = true })
+vim.keymap.set("n", "yc", '"xyygcc"xp', { remap = true })
 vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]])
@@ -243,8 +243,8 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 vim.api.nvim_create_autocmd("BufReadPost", {
     pattern = "*",
-    group = "AutoCommands", -- do not restore cursor for git buffers like fugitive (ft: git), commit message (ft: gitcommit, doesn't really work because filetype is set afterwards)
-    command = [[if !exists('b:RestoredCursor') && line("'\"") > 0 && line("'\"") <= line("$") && &filetype !~ '^git' | execute "normal! g`\"" | if index(g:qs_filetype_blacklist, &filetype) == -1 | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | endif | let b:RestoredCursor = 1]],
+    group = "AutoCommands",
+    command = [[if !exists('b:cursor_restored') && line("'\"") > 0 && line("'\"") <= line("$") && index(g:qs_filetype_blacklist, &filetype) == -1 | execute "normal! g`\"" | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | let b:cursor_restored = 1]],
 })
 vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
 vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
@@ -266,7 +266,6 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
 vim.api.nvim_create_autocmd("BufEnter", { pattern = "term://*", group = "AutoCommands", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif]] })
-vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "AutoCommands", callback = require("rooter").root, nested = true })
 
 -- commands {{{1
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
@@ -343,7 +342,8 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins", { defaults = { lazy = true }, ui = { border = "rounded" } })
-require("themes").config()
+require("themes").setup()
+require("rooter").setup()
 if require("states").small_file then
     vim.schedule(function()
         vim.defer_fn(function()
@@ -363,6 +363,7 @@ if require("states").small_file then
             require("lazy").load({ plugins = plugins })
             vim.cmd.doautocmd("BufReadPost") -- mason and git-conflict need this when delay loaded
             require("bookmarks").setup()
+            require("clips").setup()
         end, 100)
     end)
 end

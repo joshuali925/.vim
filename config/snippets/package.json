@@ -1,0 +1,29 @@
+{
+  "name": "personal-snippets",
+  "contributes": {
+    "snippets": [
+      { "language": "gitcommit", "path": "./gitcommit.json" },
+      { "language": "gitignore", "path": "./gitignore.json" },
+      { "language": "http", "path": "./http.json" },
+      { "language": "java", "path": "./java.json" },
+      {
+        "language": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "path": "./javascript.json"
+      },
+      { "language": "lua", "path": "./lua.json" },
+      { "language": "markdown", "path": "./markdown.json" },
+      { "language": "python", "path": "./python.json" },
+      { "language": ["sh", "bash", "zsh"], "path": "./sh.json" },
+      { "language": "sshconfig", "path": "./sshconfig.json" },
+      { "language": ["typescript", "typescriptreact"], "path": "./typescript.json" },
+      { "language": "typescriptreact", "path": "./typescriptreact.json" },
+      { "language": "vim", "path": "./vim.json" },
+      { "language": "zsh", "path": "./zsh.json" }
+    ]
+  }
+}

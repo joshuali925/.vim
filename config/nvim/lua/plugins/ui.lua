@@ -40,24 +40,21 @@ return {
             end)(vim.ui.input)
         end,
         config = function() -- https://github.com/MunifTanjim/nui.nvim/wiki/vim.ui, https://github.com/MunifTanjim/dotfiles/tree/8c13a4e05359bb12f9ade5abc1baca6fcec372db/private_dot_config/nvim/lua/plugins/lsp/custom
-            local function get_prompt_text(prompt, default_prompt)
-                local prompt_text = prompt or default_prompt
+            local function get_prompt_text(prompt)
+                local prompt_text = prompt or "[Input]"
                 if prompt_text:sub(-1) == ":" then prompt_text = "[" .. prompt_text:sub(1, -2) .. "]" end
                 return prompt_text
             end
-            local Input = require("nui.input")
-            local event = require("nui.utils.autocmd").event
-            local UIInput = Input:extend("UIInput")
+            local UIInput = require("nui.input"):extend("UIInput")
             local input_ui = nil
             function UIInput:init(opts, on_done)
-                local border_top_text = get_prompt_text(opts.prompt, "[Input]")
                 local default_value = tostring(opts.default or "")
                 local params = vim.lsp.util.make_position_params()
                 UIInput.super.init(self, {
-                    relative = { type = "buf", position = { row = params.position.line, col = params.position.character } }, -- avoid cursor shifting before on_submit
+                    relative = { type = "buf", position = { row = params.position.line, col = params.position.character } }, -- use buf to avoid cursor shifting before on_submit
                     position = { row = 2, col = 0 },
                     size = { width = math.max(20, vim.api.nvim_strwidth(default_value) + 15) },
-                    border = { style = "rounded", text = { top = border_top_text, top_align = "left" } },
+                    border = { style = "rounded", text = { top = get_prompt_text(opts.prompt), top_align = "left" } },
                     win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
                 }, {
                     default_value = default_value,
@@ -67,7 +64,7 @@ return {
                 self:map("n", "<CR>", function(value) on_done(value) end, { noremap = true, nowait = true })
                 self:map("n", "<Esc>", function() on_done(nil) end, { noremap = true, nowait = true })
                 self:map("n", "q", function() on_done(nil) end, { noremap = true, nowait = true })
-                self:on(event.BufLeave, function() on_done(nil) end, { once = true })
+                self:on(require("nui.utils.autocmd").event.BufLeave, function() on_done(nil) end, { once = true })
             end
 
             vim.ui.input = function(opts, on_confirm)
@@ -183,7 +180,14 @@ return {
         dependencies = {
             "nvim-lua/plenary.nvim",
             { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-            { "danielfalk/smart-open.nvim", dependencies = "kkharji/sqlite.lua" },
+            {
+                "danielfalk/smart-open.nvim",
+                dependencies = "kkharji/sqlite.lua",
+                event = "VeryLazy", -- load at start to record recent files
+                config = function() -- load_extension("smart_open") is unnecessary and causes error when sqlite3 doesn't exist
+                    if vim.fn.executable("sqlite3") == 1 then require("smart-open").setup({ match_algorithm = "fzf" }) end
+                end,
+            },
         },
         keys = {
             { "q", "<Cmd>lua require('telescope.cycle')('mru')<CR>" },
@@ -220,9 +224,9 @@ return {
             { "<leader>f/", "<Cmd>lua require('telescope.builtin').live_grep()<CR>" },
             { "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>" },
             { "<leader>f:", "<Cmd>lua require('telescope.builtin').command_history()<CR>" },
-            { "<leader>fy", "<Cmd>lua require('telescope').extensions.yank_history.yank_history({initial_mode = 'normal'})<CR>" }, -- yanky.nvim
-            { "<leader>fy", "dh<leader>fy", mode = "x", remap = true },
-            { "mf", "<Cmd>lua require('telescope').extensions.bookmarks.bookmarks({initial_mode = 'normal'})<CR>" },               -- ../telescope/_extensions/bookmarks.lua
+            { "<leader>fy", "<Cmd>lua require('telescope').extensions.clips.clips({initial_mode = 'normal'})<CR>" },
+            { "<leader>fy", '"xdh<leader>fy', mode = "x", remap = true },
+            { "mf", "<Cmd>lua require('telescope').extensions.bookmarks.bookmarks({initial_mode = 'normal'})<CR>" }, -- ../telescope/_extensions/bookmarks.lua
             { "mF", "<Cmd>lua require('telescope').extensions.bookmarks.bookmarks({global = true})<CR>" },
         },
         config = function()
@@ -232,9 +236,7 @@ return {
                 local selection = action_state.get_selected_entry()
                 if selection ~= nil then
                     actions.close(prompt_bufnr)
-                    vim.schedule(function()
-                        vim.cmd.Gdiffsplit(selection.value .. ":%")
-                    end)
+                    vim.schedule(function() vim.cmd.Gdiffsplit(selection.value .. ":%") end)
                 end
             end
             local function scroll_results(direction)
@@ -300,7 +302,6 @@ return {
                 },
             })
             require("telescope").load_extension("fzf")
-            require("telescope").load_extension("smart_open")
             require("telescope").load_extension("bookmarks") -- ../telescope/_extensions/bookmarks.lua
         end,
     },
@@ -402,6 +403,8 @@ return {
                 { "Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
                 { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
                 { "Remove folder from workspace", [[lua vim.lsp.buf.remove_workspace_folder()]], "Remove folder from workspace for LSP" },
+                { "--", "" },
+                { "Clear LSP logs", [[lua vim.fn.writefile({}, vim.lsp.get_log_path())]], "Empty lsp.log" },
             })
             vim.fn["quickui#menu#install"]("&Packages", {
                 { "Lazy &status", [[Lazy]], "Lazy status" },

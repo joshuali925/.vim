@@ -25,7 +25,7 @@ M.theme = M.theme_list[theme_index]
 local sidebars = { "qf", "terminal", "Mundo", "neo-tree" }
 local themes = {
     ["tokyonight"] = {
-        config = function()
+        setup = function()
             require("tokyonight").setup({
                 style = theme_index < 0 and "storm" or "day",
                 styles = { comments = { italic = false }, keywords = { italic = false } },
@@ -50,19 +50,19 @@ local themes = {
         end,
     },
     ["github"] = {
-        config = function()
+        setup = function()
             require("github-theme").setup({ options = { darken = { sidebars = { list = sidebars } } } })
             vim.cmd.colorscheme("github_" .. (theme_index < 0 and "dark_dimmed" or "light_high_contrast"))
         end,
     },
     ["ayu"] = {
-        config = function()
+        setup = function()
             require("ayu").setup({ overrides = { Comment = { fg = "#69737d" } } })
             vim.cmd.colorscheme("ayu-" .. (theme_index < 0 and "mirage" or "light"))
         end,
     },
     ["catppuccin"] = {
-        config = function()
+        setup = function()
             require("catppuccin").setup({
                 flavour = (theme_index < 0 and "macchiato" or "latte"),
                 custom_highlights = { Comment = { fg = "#717993" } },
@@ -78,7 +78,7 @@ local themes = {
         end,
     },
     ["nightfox"] = {
-        config = function()
+        setup = function()
             require("nightfox").setup({
                 palettes = { dayfox = { bg1 = "#f2ede7", bg3 = "#ece6df" } },
                 groups = { dayfox = { LspReferenceText = { bg = "#e3dacf" }, LspReferenceRead = { bg = "#e3dacf" }, LspReferenceWrite = { bg = "#e3dacf" } } },
@@ -87,13 +87,13 @@ local themes = {
         end,
     },
     ["kanagawa"] = {
-        config = function()
+        setup = function()
             require("kanagawa").setup({ compile = true })
             vim.cmd.colorscheme("kanagawa")
         end,
     },
     ["newpaper"] = {
-        config = function()
+        setup = function()
             require("newpaper").setup({ style = theme_index < 0 and "dark" or "light" })
         end,
     },
@@ -116,9 +116,9 @@ local function highlight_plugins()
     vim.g.quickui_color_scheme = "papercol-" .. vim.o.background
 end
 
-function M.config()
+function M.setup()
     vim.o.background = theme_index < 0 and "dark" or "light"
-    themes[M.theme].config()
+    themes[M.theme].setup()
     highlight_plugins() -- autocmd might not trigger for some colorschemes
 end
 
@@ -128,8 +128,8 @@ function M.switch(index)
     vim.g.theme_index = index
     theme_index = index
     M.theme = M.theme_list[index]
-    pcall(M.config) -- ignore errors because the select theme plugin might not be enabled
-    pcall(M.config) -- some plugins like bufferline need a second config call
+    pcall(M.setup) -- ignore errors because the select theme plugin might not be enabled
+    pcall(M.setup) -- some plugins like bufferline need a second config call
     vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { annote = "Theme" })
 end
 

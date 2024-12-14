@@ -27,6 +27,24 @@
       "end"
     ]
   },
+  "Write to file": {
+    "prefix": "write-file",
+    "body": [
+      "local file = io.open(vim.uv.os_homedir() .. \"/.vim/tmp/lua.log\", \"a\")",
+      "if not file then return end",
+      "file:write(\"${0:content}\\n\")",
+      "file:close()"
+    ]
+  },
+  "Read from file": {
+    "prefix": "read-file",
+    "body": [
+      "local fd = vim.uv.fs_open(${1:path}, \"r\", 438)",
+      "if not fd then return end",
+      "local content = vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)",
+      "if not content then return end"
+    ]
+  },
   "Object to string": {
     "prefix": "object-to-string",
     "body": [
@@ -40,16 +58,6 @@
       "\telse",
       "\t\treturn \"\\\"\" .. tostring(o) .. \"\\\"\"",
       "\tend",
-      "end"
-    ]
-  },
-  "Write to file": {
-    "prefix": "write-file",
-    "body": [
-      "local file = io.open(\"${1:/tmp/lua.log}\", \"a\")",
-      "if file ~= nil then",
-      "\tfile:write(\"${0:content}\\n\")",
-      "\tfile:close()",
       "end"
     ]
   }
