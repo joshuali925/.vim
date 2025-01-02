@@ -8,7 +8,7 @@ if [[ -r ${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh ]]; 
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-fpath=($fpath ~/.vim/config/zsh/completions)
+fpath=(~/.vim/config/zsh/completions $fpath)
 zstyle ':zim:zmodule' use 'degit'
 ZDOTDIR=~/.vim/config/zsh
 ZIM_HOME=~/.local/zim
@@ -41,6 +41,8 @@ elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
 fi
 
 source ~/.vim/config/common.sh
+# TODO validate after v0.16.0 releases. ref: https://github.com/ohmyzsh/ohmyzsh/blob/d82669199b5d900b50fd06dd3518c277f0def869/plugins/asdf/asdf.plugin.zsh#L25
+if [[ -e ~/.asdf/internal/completions/asdf.zsh ]]; then source ~/.asdf/internal/completions/asdf.zsh; fi
 
 # show timestamp of command in history, not fully accurate due to grep -F containing partial matches. another slower solution: https://github.com/junegunn/fzf/issues/1049#issuecomment-2241522977
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='{ tac ~/.zsh_history | grep -m 1 -F {2..} | awk -F: \"{print \\\$2}\" | xargs -I= date -u +%Y-%m-%dT%H:%M:%SZ -d @=; echo ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈; echo {2..}; } | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"

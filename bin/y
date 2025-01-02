@@ -7,6 +7,10 @@
 # https://github.com/neovim/neovim/issues/8450
 # https://github.com/mikepqr/pbcopy-sh
 
+if builtin command -v pbcopy > /dev/null 2>&1; then
+  exec pbcopy
+fi
+
 buf=$(cat "$@")
 buflen=$(printf %s "$buf" | wc -c)
 maxlen=74994

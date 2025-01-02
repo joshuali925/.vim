@@ -11,18 +11,18 @@ M.theme_list = {
     [-4] = "kanagawa",
     [-5] = "ayu",
     [-6] = "nightfox",
-    [-7] = "newpaper",
+    [-7] = "vscode",
     [0] = "tokyonight",
     [1] = "nightfox",
     [2] = "github",
     [3] = "kanagawa",
     [4] = "ayu",
     [5] = "catppuccin",
-    [6] = "newpaper",
+    [6] = "vscode",
 }
 M.theme = M.theme_list[theme_index]
 
-local sidebars = { "qf", "terminal", "Mundo", "neo-tree" }
+local sidebars = { "qf", "terminal", "neo-tree" }
 local themes = {
     ["tokyonight"] = {
         setup = function()
@@ -36,13 +36,6 @@ local themes = {
                 on_highlights = function(hl, c)
                     hl.LineNr = { fg = c.git.ignore }
                     hl.DiagnosticUnnecessary = { fg = c.comment }
-                    hl.TelescopeNormal = { bg = c.bg_dark, fg = c.fg_dark }
-                    hl.TelescopeBorder = { bg = c.bg_dark, fg = c.bg_dark }
-                    hl.TelescopePromptNormal = { bg = c.bg_highlight }
-                    hl.TelescopePromptBorder = { bg = c.bg_highlight, fg = c.bg_highlight }
-                    hl.TelescopePromptTitle = { bg = c.blue, fg = c.bg_highlight, bold = true }
-                    hl.TelescopePreviewTitle = { bg = c.green, fg = c.bg_highlight, bold = true }
-                    hl.TelescopeResultsTitle = { bg = c.bg_dark, fg = c.bg_dark }
                 end,
             })
             vim.cmd.colorscheme("tokyonight")
@@ -71,7 +64,6 @@ local themes = {
                     native_lsp = {
                         underlines = { errors = { "undercurl" }, hints = { "undercurl" }, warnings = { "undercurl" }, information = { "undercurl" } },
                     },
-                    telescope = { style = "nvchad" },
                 },
             })
             vim.cmd.colorscheme("catppuccin")
@@ -83,7 +75,7 @@ local themes = {
                 palettes = { dayfox = { bg1 = "#f2ede7", bg3 = "#ece6df" } },
                 groups = { dayfox = { LspReferenceText = { bg = "#e3dacf" }, LspReferenceRead = { bg = "#e3dacf" }, LspReferenceWrite = { bg = "#e3dacf" } } },
             })
-            vim.cmd.colorscheme(theme_index < 0 and "carbonfox" or "dayfox")
+            vim.cmd.colorscheme(theme_index < 0 and "nordfox" or "dayfox")
         end,
     },
     ["kanagawa"] = {
@@ -92,9 +84,9 @@ local themes = {
             vim.cmd.colorscheme("kanagawa")
         end,
     },
-    ["newpaper"] = {
+    ["vscode"] = {
         setup = function()
-            require("newpaper").setup({ style = theme_index < 0 and "dark" or "light" })
+            vim.cmd.colorscheme("vscode")
         end,
     },
 }
@@ -111,8 +103,9 @@ local function highlight_plugins()
         vim.api.nvim_set_hl(0, "QuickScopePrimary", { fg = "#916100" })
         vim.api.nvim_set_hl(0, "QuickScopeSecondary", { fg = "#005e7d" })
     end
-    vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" })               -- quickui
-    vim.api.nvim_set_hl(0, "NeoCodeiumSuggestion", { link = "LspCodeLens" }) -- neocodeium
+    vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" }) -- quickui
+    vim.api.nvim_set_hl(0, "NeoCodeiumSuggestion", { link = "LspCodeLens" })
+    vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { link = "LspCodeLens" })
     vim.g.quickui_color_scheme = "papercol-" .. vim.o.background
 end
 

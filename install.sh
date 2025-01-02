@@ -105,7 +105,6 @@ install_asdf() {
     git clone https://github.com/asdf-vm/asdf.git --depth=1 ~/.asdf
     source ~/.asdf/asdf.sh
   fi
-  [[ ! -f ~/.vim/config/zsh/completions/_asdf ]] && link_file ~/.asdf/completions/_asdf ~/.vim/config/zsh/completions/_asdf
 }
 
 install_devtools() {
@@ -185,7 +184,6 @@ install_dotfiles() {
   link_file ~/.vim/config/.ideavimrc ~/.ideavimrc --relative
   link_file ~/.vim/config/yazi ~/.config/yazi
   link_file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml
-  [[ -f ~/.asdf/completions/_asdf ]] && link_file ~/.asdf/completions/_asdf ~/.vim/config/zsh/completions/_asdf
   if [[ $PLATFORM = darwin ]]; then
     mkdir -p ~/Library/Application\ Support/lazygit ~/.config/wezterm
     ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport

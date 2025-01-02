@@ -5,7 +5,7 @@
 if [[ -n $PS1 ]]; then
   if [[ -f /usr/share/bash-completion/bash_completion ]]; then
      # shellcheck disable=1091
-     # TODO change to -z BASH_COMPLETION_VERSINFO when it is always set
+     # TODO change to -z BASH_COMPLETION_VERSINFO when it is always set by bash_completion to determine if it's already loaded
      [[ -z $BASH_COMPLETION_LOADED ]] && . /usr/share/bash-completion/bash_completion && BASH_COMPLETION_LOADED=1
      alias get-completion='complete -F _longopt'
   fi

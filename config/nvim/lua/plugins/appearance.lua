@@ -6,7 +6,7 @@ return {
     { "catppuccin/nvim", name = "catppuccin", priority = 1000, enabled = theme == "catppuccin" },
     { "EdenEast/nightfox.nvim", priority = 1000, enabled = theme == "nightfox" },
     { "rebelot/kanagawa.nvim", priority = 1000, enabled = theme == "kanagawa" },
-    { "yorik1984/newpaper.nvim", priority = 1000, enabled = theme == "newpaper" },
+    { "Mofiqul/vscode.nvim", priority = 1000, enabled = theme == "vscode" },
     {
         "folke/noice.nvim",
         event = "VeryLazy", -- delay loading causes screen to flicker on startup
@@ -174,7 +174,7 @@ return {
                     lualine_y = {},
                     lualine_z = {},
                 },
-                extensions = { "fugitive", "mundo" },
+                extensions = { "fugitive" },
             })
         end,
     },

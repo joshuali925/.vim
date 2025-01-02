@@ -1,6 +1,7 @@
 return {
     { "eandrju/cellular-automaton.nvim", cmd = "CellularAutomaton", enabled = false },
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
+    { "nvim-lua/plenary.nvim" },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
     { "will133/vim-dirdiff", cmd = "DirDiff" },
     { "jbyuki/venn.nvim", cmd = "VBox" },
@@ -44,6 +45,32 @@ return {
             { "[m", "<Cmd>lua require('snacks.words').jump(-vim.v.count1, true)<CR>" },
             { "]m", "<Cmd>lua require('snacks.words').jump(vim.v.count1, true)<CR>" },
             { "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>", mode = { "n", "x" } },
+            { "q", "<Cmd>lua require('snacks.picker').buffers({layout = {preset = 'vscode'}, current = false})<CR>" },
+            { "<leader><C-p>", "<Cmd>lua require('snacks.picker').resume()<CR>" },
+            { "<leader>fm", "<Cmd>lua require('snacks.picker').recent({layout = {preset = 'vscode'}})<CR>" },
+            { "<leader>f'", "<Cmd>lua require('snacks.picker').jumps({on_show = function() vim.cmd.stopinsert() end})<CR>" },
+            { "<leader>fb", "<Cmd>lua require('snacks.picker').grep_buffers()<CR>" },
+            { "<leader>fb", ":<C-u>lua require('snacks.picker').grep_buffers({regex = false, live = false, search = require('utils').get_visual_selection()})<CR>", mode = "x" },
+            { "<leader>fu", "<Cmd>lua require('snacks.picker').lsp_symbols()<CR>" },
+            { "<leader>fg", ":RgRegex " },
+            { "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>", mode = "x" },
+            { "<leader>fj", ":RgRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>" },
+            { "<leader>fj", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>", mode = "x" },
+            { "<leader>f!", "<Cmd>lua require('snacks.picker').git_status({on_show = function() vim.cmd.stopinsert() end})<CR>" },
+            { "<leader>fq", "<Cmd>lua require('snacks.picker').qflist()<CR>" },
+            { "<leader>fl", "<Cmd>lua require('snacks.picker').lines()<CR>" },
+            { "<leader>fL", "<Cmd>lua require('snacks.picker').loclist()<CR>" },
+            { "<leader>fa", "<Cmd>lua require('snacks.picker').commands({layout = {preset = 'vscode'}})<CR>" },
+            { "<leader>ff", "<Cmd>lua require('snacks.picker')({layout = {preset = 'vscode'}})<CR>" },
+            { "<leader>f/", "<Cmd>lua require('snacks.picker').grep({hidden = true})<CR>" },
+            { "<leader>fr", "<Cmd>lua require('snacks.picker').registers()<CR>" },
+            { "<leader>f:", "<Cmd>lua require('snacks.picker').command_history()<CR>" },
+            { "<leader>u", "<Cmd>lua require('snacks.picker').undo({layout = {preset = 'default'}, on_show = function() vim.cmd.stopinsert() end})<CR>" },
+            { "<leader>ft", "<Cmd>lua require('utils').pick_filetypes()<CR>" },
+            { "<leader>fy", "<Cmd>lua require('clips').pick({on_show = function() vim.cmd.stopinsert() end})<CR>" },
+            { "<leader>fy", '"xd<leader>fy', mode = "x", remap = true },
+            { "mf", "<Cmd>lua require('bookmarks').pick({on_show = function() vim.cmd.stopinsert() end})<CR>" },
+            { "mF", "<Cmd>lua require('bookmarks').pick({filter = {cwd = false}, on_show = function() vim.cmd.stopinsert() end})<CR>" },
         },
         opts = {
             bigfile = { enabled = true },
@@ -84,11 +111,11 @@ return {
                     keys = {
                         { icon = " ", key = "e", desc = "New File", action = ":enew", hidden = true },
                         { icon = " ", key = "i", desc = "Insert", action = ":enew | startinsert", hidden = true },
-                        { icon = " ", key = "f", desc = "Find files", action = ":lua require('telescope.builtin').fd({hidden = true})" },
-                        { icon = " ", key = "m", desc = "Find MRU (CWD only: 'M')", action = ":lua require('telescope.builtin').oldfiles()" },
-                        { icon = " ", key = "M", desc = "Find MRU in CWD", action = ":lua require('telescope.builtin').oldfiles({only_cwd = true})", hidden = true },
-                        { icon = " ", key = "'", desc = "Find bookmarks", action = ":lua require('telescope').extensions.bookmarks.bookmarks({initial_mode = 'normal'})" },
-                        { icon = "󰘬 ", key = "!", desc = "Git changed files", action = ":lua require('telescope.builtin').git_status({initial_mode = 'normal'})" },
+                        { icon = " ", key = "f", desc = "Find files", action = ":lua require('snacks.picker').files({hidden = true, layout = {preset = 'vscode'}})" },
+                        { icon = " ", key = "m", desc = "Find MRU (CWD only: 'M')", action = ":lua require('snacks.picker').recent({layout = {preset = 'vscode'}})" },
+                        { icon = " ", key = "M", desc = "Find MRU in CWD", action = ":lua require('snacks.picker').recent({layout = {preset = 'vscode'}, filter = {cwd = true}})", hidden = true },
+                        { icon = " ", key = "'", desc = "Find bookmarks", action = ":lua require('bookmarks').pick({on_show = function() vim.cmd.stopinsert() end})" },
+                        { icon = "󰘬 ", key = "!", desc = "Git changed files", action = ":lua require('snacks.picker').git_status({on_show = function() vim.cmd.stopinsert() end})" },
                         { icon = " ", key = "d", desc = "Git diff (conflicts: '~')", action = ":DiffviewOpen" },
                         { icon = " ", key = "+", desc = "Git diff remote", action = ":DiffviewOpen @{upstream}..HEAD" },
                         { icon = " ", key = "~", desc = "Git conflicts", action = ":Git mergetool", hidden = true },
@@ -111,6 +138,22 @@ return {
                     { pane = 2, icon = " ", title = "Projects", section = "projects", limit = 5, indent = 2 },
                 },
             },
+            picker = {
+                ui_select = false,
+                formatters = { file = { filename_first = true } },
+                layout = { preset = "dropdown" },
+                win = {
+                    input = {
+                        keys = {
+                            ["<Esc>"] = { "close", mode = { "i", "n" } },
+                            [","] = "preview_scroll_down",
+                            ["."] = "preview_scroll_up",
+                            ["<c-s>"] = { "toggle_live", mode = { "i", "n" } }, -- this is case sensitive
+                            ["`"] = { "toggle_ignored", mode = { "i", "n" } },
+                        },
+                    },
+                },
+            },
         },
     },
     {
@@ -125,9 +168,9 @@ return {
             { "<leader>gd", "<Cmd>lua require('mini.diff').toggle_overlay()<CR>" },
             { "<leader>ga", "<leader>gAig", remap = true },
             { "<leader>gu", "<leader>gUig", remap = true },
-            { "<leader>fs", "<Cmd>lua require('mini.pick').builtin.files()<CR>" },
+            { "<leader>fd", "<Cmd>lua require('mini.pick').builtin.files()<CR>" },
             {
-                "<leader>fs",
+                "<leader>fd",
                 function()                                -- https://github.com/echasnovski/mini.nvim/issues/513#issuecomment-1762785125
                     vim.cmd.execute([["normal! \<Esc>"]]) -- escape visual mode to update '< and '> marks
                     local prompt = require("utils").get_visual_selection()

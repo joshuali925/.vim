@@ -1,13 +1,5 @@
 return {
     {
-        "simnalamburt/vim-mundo",
-        keys = { { "<leader>u", "<Cmd>MundoToggle<CR>" } },
-        config = function()
-            vim.g.mundo_preview_bottom = 1
-            vim.g.mundo_width = 30
-        end,
-    },
-    {
         "akinsho/toggleterm.nvim",
         cmd = { "ToggleTerm", "TermExec" },
         keys = {
@@ -127,34 +119,18 @@ return {
                         ["d"] = "cut_to_clipboard",
                         ["<C-b>"] = { function(state) vim.cmd.ToggleTerm("dir=" .. get_dir(state)) end, desc = "open_term_at_node" },
                         ["<C-p>"] = {
-                            function(state)
-                                local dir = get_dir(state)
-                                require("telescope.builtin").fd({ cwd = dir, prompt_title = "Find Files: " .. dir })
-                            end,
+                            function(state) require("snacks.picker").files({ hidden = true, layout = { preset = "vscode" }, cwd = get_dir(state) }) end,
                             desc = "find_files_at_node",
                         },
                         ["t"] = {
-                            function(state)
-                                local dir = get_dir(state)
-                                require("telescope.builtin").fd({ cwd = dir, prompt_title = "Find Files: " .. dir })
-                            end,
+                            function(state) require("snacks.picker").files({ hidden = true, layout = { preset = "vscode" }, cwd = get_dir(state) }) end,
                             desc = "find_files_at_node",
                         },
                         ["T"] = {
-                            function(state)
-                                local dir = get_dir(state)
-                                require("telescope.builtin").fd({ cwd = dir, prompt_title = "Find Files (no ignore): " .. dir, no_ignore = true })
-                            end,
+                            function(state) require("snacks.picker").files({ hidden = true, layout = { preset = "vscode" }, cwd = get_dir(state), ignored = true }) end,
                             desc = "find_files_no_ignore_at_node",
                         },
-                        ["<leader>f/"] = {
-                            function(state)
-                                local dir = get_dir(state)
-                                vim.cmd.execute([["normal! \<C-w>w"]]) -- blur neo-tree to allow jumping to the selected line
-                                require("telescope.builtin").live_grep({ cwd = dir, prompt_title = "Live Grep: " .. dir })
-                            end,
-                            desc = "live_grep_at_node",
-                        },
+                        ["<leader>f/"] = { function(state) require("snacks.picker").grep({ cwd = get_dir(state) }) end, desc = "live_grep_at_node" },
                         ["z"] = "none",
                         ["H"] = "none",
                         ["/"] = "none",
@@ -172,137 +148,6 @@ return {
                     { event = events.FILE_RENAMED, handler = on_move },
                 },
             })
-        end,
-    },
-    {
-        "nvim-telescope/telescope.nvim",
-        cmd = "Telescope",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-            {
-                "danielfalk/smart-open.nvim",
-                dependencies = "kkharji/sqlite.lua",
-                event = "VeryLazy", -- load at start to record recent files
-                config = function() -- load_extension("smart_open") is unnecessary and causes error when sqlite3 doesn't exist
-                    if vim.fn.executable("sqlite3") == 1 then require("smart-open").setup({ match_algorithm = "fzf" }) end
-                end,
-            },
-        },
-        keys = {
-            { "q", "<Cmd>lua require('telescope.cycle')('mru')<CR>" },
-            { "<C-p>", function()
-                if vim.fn.executable("sqlite3") == 1 then
-                    vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.cycle')('smart_open')<CR>")
-                    require("telescope.cycle")("smart_open")
-                else
-                    vim.keymap.set("n", "<C-p>", "<Cmd>lua require('telescope.builtin').fd()<CR>")
-                    require("telescope.builtin").fd()
-                end
-            end },
-            { "<C-p>", ":<C-u>lua require('telescope.builtin').fd({initial_mode = 'normal', default_text = require('utils').get_visual_selection()})<CR>", mode = "x", silent = true }, -- TODO https://github.com/nvim-telescope/telescope.nvim/pull/2092
-            { "<leader><C-p>", "<Cmd>lua require('telescope.builtin').resume({initial_mode = 'normal'})<CR>" },
-            { "<leader>fS", "<Cmd>lua require('utils').fzf()<CR>" },
-            { "<leader>fS", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
-            { "<leader>fm", "<Cmd>lua require('telescope.builtin').oldfiles()<CR>" },
-            { "<leader>f'", "<Cmd>lua require('telescope.builtin').jumplist({initial_mode = 'normal'})<CR>" },
-            { "<leader>fb", "<Cmd>lua require('telescope.builtin').live_grep({grep_open_files = true})<CR>" },
-            { "<leader>fb", ":<C-u>lua require('telescope.builtin').live_grep({grep_open_files = true, default_text = require('utils').get_visual_selection()})<CR>", mode = "x" },
-            { "<leader>fu", "<Cmd>lua require('telescope.builtin')[require('lsp').is_active() and 'lsp_document_symbols' or 'treesitter']()<CR>" },
-            { "<leader>fU", "<Cmd>lua require('telescope.builtin').lsp_dynamic_workspace_symbols({ symbols = { 'Class', 'Function', 'Method', 'Constructor', 'Interface', 'Module', 'Struct', 'Trait', 'Field', 'Property' } })<CR>" },
-            { "<leader>fg", ":RgRegex " },
-            { "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>", mode = "x" },
-            { "<leader>fj", ":RgRegex \\b<C-r>=expand('<cword>')<CR>\\b<CR>" },
-            { "<leader>fj", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR><CR>", mode = "x" },
-            { "<leader>f!", "<Cmd>lua require('telescope.builtin').git_status({initial_mode = 'normal'})<CR>" },
-            { "<leader>fq", "<Cmd>lua require('telescope.builtin').quickfix()<CR>" },
-            { "<leader>fl", "<Cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>" },
-            { "<leader>fL", "<Cmd>lua require('telescope.builtin').loclist()<CR>" },
-            { "<leader>fa", "<Cmd>lua require('telescope.builtin').commands()<CR>" },
-            { "<leader>ft", "<Cmd>lua require('telescope.builtin').filetypes()<CR>" },
-            { "<leader>ff", "<Cmd>lua require('telescope.builtin').builtin()<CR>" },
-            { "<leader>f/", "<Cmd>lua require('telescope.builtin').live_grep()<CR>" },
-            { "<leader>fr", "<Cmd>lua require('telescope.builtin').registers()<CR>" },
-            { "<leader>f:", "<Cmd>lua require('telescope.builtin').command_history()<CR>" },
-            { "<leader>fy", "<Cmd>lua require('telescope').extensions.clips.clips({initial_mode = 'normal'})<CR>" },
-            { "<leader>fy", '"xdh<leader>fy', mode = "x", remap = true },
-            { "mf", "<Cmd>lua require('telescope').extensions.bookmarks.bookmarks({initial_mode = 'normal'})<CR>" }, -- ../telescope/_extensions/bookmarks.lua
-            { "mF", "<Cmd>lua require('telescope').extensions.bookmarks.bookmarks({global = true})<CR>" },
-        },
-        config = function()
-            local actions = require("telescope.actions")
-            local action_state = require("telescope.actions.state")
-            local function git_diff_ref(prompt_bufnr)
-                local selection = action_state.get_selected_entry()
-                if selection ~= nil then
-                    actions.close(prompt_bufnr)
-                    vim.schedule(function() vim.cmd.Gdiffsplit(selection.value .. ":%") end)
-                end
-            end
-            local function scroll_results(direction)
-                return function(prompt_bufnr)
-                    local status = require("telescope.state").get_status(prompt_bufnr)
-                    local speed = status.picker.layout_config.scroll_speed or vim.api.nvim_win_get_height(status.results_win) / 2
-                    require("telescope.actions.set").shift_selection(prompt_bufnr, math.floor(speed) * direction)
-                end
-            end
-            local cycle = require("telescope.cycle")
-            require("telescope").setup({
-                defaults = {
-                    mappings = {
-                        n = {
-                            ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
-                            ["<C-d>"] = scroll_results(1),
-                            ["<C-u>"] = scroll_results(-1),
-                            [","] = actions.preview_scrolling_down,
-                            ["."] = actions.preview_scrolling_up,
-                            ["o"] = actions.select_default,
-                            ["q"] = actions.close,
-                            ["<Tab>"] = function(prompt_bufnr)
-                                local picker = action_state.get_current_picker(prompt_bufnr)
-                                vim.keymap.set("n", "<Tab>", "<Cmd>noautocmd lua vim.api.nvim_set_current_win(" .. picker.prompt_win .. ")<CR>", { buffer = picker.previewer.state.bufnr })
-                                vim.cmd("noautocmd lua vim.api.nvim_set_current_win(" .. picker.previewer.state.winid .. ")")
-                            end,
-                        },
-                        i = {
-                            ["<C-s>"] = actions.to_fuzzy_refine,
-                            ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
-                            ["<Esc>"] = actions.close,
-                            ["<C-u>"] = function() vim.cmd.stopinsert() end,
-                            ["`"] = function() cycle.next("`") end,
-                        },
-                    },
-                    vimgrep_arguments = {
-                        "rg",
-                        "--color=never",
-                        "--no-heading",
-                        "--with-filename",
-                        "--line-number",
-                        "--column",
-                    },
-                    prompt_prefix = "   ",
-                    selection_caret = "  ",
-                    multi_icon = "  ",
-                    layout_strategy = "vertical",
-                    layout_config = { vertical = { prompt_position = "top", preview_height = 0.3 } },
-                    sorting_strategy = "ascending",
-                    file_ignore_patterns = { ".git/", "node_modules/", "venv/", "vim/.*/doc/.*%.txt" },
-                    dynamic_preview_title = true,
-                    path_display = { "filename_first" },
-                },
-                pickers = {
-                    buffers = { mappings = { n = { ["dd"] = actions.delete_buffer } } },
-                    find_files = { hidden = true, find_command = { "fd", "--type", "f", "--strip-cwd-prefix" } },
-                    oldfiles = { sorter = require("telescope.sorters").get_substr_matcher() },
-                    filetypes = { theme = "dropdown" },
-                    registers = { theme = "dropdown" },
-                    builtin = { theme = "dropdown" },
-                    git_branches = { mappings = { i = { ["<C-e>"] = git_diff_ref } } },
-                    git_commits = { mappings = { i = { ["<C-e>"] = git_diff_ref } } },
-                },
-            })
-            require("telescope").load_extension("fzf")
-            require("telescope").load_extension("bookmarks") -- ../telescope/_extensions/bookmarks.lua
         end,
     },
     {

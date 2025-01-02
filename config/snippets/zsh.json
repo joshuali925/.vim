@@ -1,6 +1,15 @@
 {
+  "Benchmark": {
+    "prefix": "benchmark-zsh",
+    "body": [
+      "begin=\\${EPOCHREALTIME/[^0-9]/}",
+      "$0",
+      "end=\\${EPOCHREALTIME/[^0-9]/}",
+      "echo Took: \\$((\\$((\\$end - begin)) / 1000000)).\\$((\\$((\\$end - begin)) % 1000000)) ms"
+    ]
+  },
   "Read one character": {
-    "prefix": "prompt-one-key",
+    "prefix": "prompt-one-key-zsh",
     "body": [
       "read -s -k '?${1:To abort press n.}'; echo",
       "if [[ \\$REPLY != \"\\${REPLY#[Nn]}\" ]]; then",

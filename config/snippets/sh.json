@@ -16,9 +16,10 @@
   "Benchmark": {
     "prefix": "benchmark",
     "body": [
-      "begin=\\$(( \\${EPOCHREALTIME/[^0-9]/} / 1000 ))",
+      "begin=\\${EPOCHREALTIME/[^0-9]/}",
       "$0",
-      "echo Took: \\$((\\$(( \\${EPOCHREALTIME/[^0-9]/} / 1000 )) - begin)) ms"
+      "end=\\${EPOCHREALTIME/[^0-9]/}",
+      "echo Took: \\$((\\$((\\$end - begin)) / 1000)).\\$((\\$((\\$end - begin)) % 1000)) ms"
     ]
   },
   "If": {

@@ -174,8 +174,6 @@ vim.keymap.set("n", "ZX", function()
 end, { desc = "Close untouched buffers" })
 vim.keymap.set("i", "jk", "<Esc>")
 vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch<CR>")
-vim.keymap.set("i", "<C-c>", "<Esc>")
-vim.keymap.set("x", "<C-c>", "<Esc>")
 vim.keymap.set("n", "<C-w><C-c>", "<Esc>")
 vim.keymap.set("n", "<C-w><", "<C-w><<C-w>", { remap = true })
 vim.keymap.set("n", "<C-w>>", "<C-w>><C-w>", { remap = true })
@@ -195,8 +193,6 @@ vim.keymap.set({ "n", "x" }, "<leader>p", [["0p]])
 vim.keymap.set({ "n", "x" }, "<leader>P", [["0P]])
 vim.keymap.set("i", "<leader>r", "<Esc><leader>r", { remap = true })
 vim.keymap.set("n", "<leader>r", "<Cmd>execute funcs#get_run_command()<CR>")
-vim.keymap.set({ "n", "x" }, "<leader>y", [["+y]])
-vim.keymap.set("n", "<leader>Y", [["+y$]])
 vim.keymap.set("n", "yc", '"xyygcc"xp', { remap = true })
 vim.keymap.set("n", "<leader>n", [[:let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>]], { silent = true })
 vim.keymap.set("x", "<leader>n", [["xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>]], { silent = true })
@@ -232,27 +228,47 @@ vim.keymap.set("ca", "rg", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Rg
 -- autocmds {{{1
 vim.api.nvim_create_augroup("AutoCommands", {})
 vim.api.nvim_create_autocmd("BufLeave", {
-    pattern = "*",
     group = "AutoCommands",
     command = "if !exists('w:SavedBufView') | let w:SavedBufView = {} | endif | let w:SavedBufView[bufnr()] = winsaveview()",
 })
 vim.api.nvim_create_autocmd("BufEnter", {
-    pattern = "*",
     group = "AutoCommands",
     command = "let b:SavedBufnr = bufnr() | if exists('w:SavedBufView') && has_key(w:SavedBufView, b:SavedBufnr) | let b:SavedBufView = winsaveview() | if b:SavedBufView.lnum == 1 && b:SavedBufView.col == 0 && !&diff | call winrestview(w:SavedBufView[b:SavedBufnr]) | endif | unlet w:SavedBufView[b:SavedBufnr] | endif",
 })
 vim.api.nvim_create_autocmd("BufReadPost", {
-    pattern = "*",
     group = "AutoCommands",
-    command = [[if !exists('b:cursor_restored') && line("'\"") > 0 && line("'\"") <= line("$") && index(g:qs_filetype_blacklist, &filetype) == -1 | execute "normal! g`\"" | setlocal winbar=%f | execute "autocmd InsertEnter,BufModifiedSet <buffer=0> ++once let b:bufpersist = 1" | endif | let b:cursor_restored = 1]],
+    callback = function(args)
+        if vim.b.cursor_restored or require("states").qs_disabled_filetypes[vim.o.filetype] == false then return end
+        vim.b.cursor_restored = true
+        pcall(vim.api.nvim_win_set_cursor, 0, vim.api.nvim_buf_get_mark(args.buf, '"'))
+        vim.opt_local.winbar = "%f"
+        vim.api.nvim_create_autocmd({ "InsertEnter", "BufModifiedSet" }, { once = true, buffer = args.buf, command = "let b:bufpersist = 1" })
+    end,
 })
-vim.api.nvim_create_autocmd("TextYankPost", { pattern = "*", group = "AutoCommands", callback = function() vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 }) end })
-vim.api.nvim_create_autocmd("FileType", { pattern = "*", group = "AutoCommands", command = "setlocal formatoptions=rjql" })
-vim.api.nvim_create_autocmd("FileType", { pattern = { "help", "man", "toggleterm" }, group = "AutoCommands", command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
-vim.api.nvim_create_autocmd("FileType", { pattern = "toggleterm", group = "AutoCommands", command = [[nnoremap <buffer> gf :argadd <C-r><C-p><CR>| xnoremap <buffer> gf :<C-u>execute "'<,'>normal! :argadd \<lt>C-r>\<lt>C-p>\<lt>CR>"<CR>]] })
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "netrw", -- netrw is needed for gf on URL
+local cursorPreYank
+vim.keymap.set({ "n", "x" }, "y", function()
+    cursorPreYank = vim.api.nvim_win_get_cursor(0)
+    return "y"
+end, { expr = true })
+vim.keymap.set("n", "Y", function()
+    cursorPreYank = vim.api.nvim_win_get_cursor(0)
+    return "y$"
+end, { expr = true })
+vim.keymap.set({ "n", "x" }, "<leader>y", '"+y', { remap = true })
+vim.keymap.set("n", "<leader>Y", '"+y$', { remap = true })
+vim.api.nvim_create_autocmd("TextYankPost", {
     group = "AutoCommands",
+    callback = function()
+        if vim.v.event.operator == "y" and cursorPreYank then vim.api.nvim_win_set_cursor(0, cursorPreYank) end
+        vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
+    end,
+})
+vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", command = "setlocal formatoptions=rjql" })
+vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "toggleterm" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
+vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = "toggleterm", command = [[nnoremap <buffer> gf :argadd <C-r><C-p><CR>| xnoremap <buffer> gf :<C-u>execute "'<,'>normal! :argadd \<lt>C-r>\<lt>C-p>\<lt>CR>"<CR>]] })
+vim.api.nvim_create_autocmd("FileType", {
+    group = "AutoCommands",
+    pattern = "netrw", -- netrw is needed for gf on URL
     callback = function()
         vim.bo.bufhidden = "wipe"
         vim.keymap.set("n", "h", "[[<CR>^", { remap = true, buffer = true })
@@ -264,8 +280,8 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.keymap.set("n", "a", "%", { remap = true, buffer = true })
     end,
 })
-vim.api.nvim_create_autocmd("CmdwinEnter", { pattern = "*", group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
-vim.api.nvim_create_autocmd("BufEnter", { pattern = "term://*", group = "AutoCommands", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif]] })
+vim.api.nvim_create_autocmd("CmdwinEnter", { group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
+vim.api.nvim_create_autocmd("BufEnter", { group = "AutoCommands", pattern = "term://*", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'v:val != ""')) == 0 | startinsert | endif]] })
 
 -- commands {{{1
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
@@ -277,8 +293,8 @@ vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | exe
 vim.api.nvim_create_user_command("SessionLoad", "execute 'source ' . stdpath('data') . '/session_' . <q-args> . '.vim' | lua vim.notify('Loaded session from \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { annote = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
 vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>)", { nargs = "+" })
-vim.api.nvim_create_user_command("RgRegex", "lua require('telescope.builtin').grep_string({use_regex = '<bang>' == '' and true or false, search = <q-args>, initial_mode = 'normal'})", { nargs = "*", bang = true })
-vim.api.nvim_create_user_command("RgNoRegex", "lua require('telescope.builtin').grep_string({search = <q-args>, initial_mode = 'normal'})", { nargs = "*" })
+vim.api.nvim_create_user_command("RgRegex", "lua require('snacks.picker').grep({hidden = true, regex = '<bang>' == '' and true or false, live = false, on_show = function() vim.cmd.stopinsert() end, search = <q-args>})", { nargs = "*", bang = true })
+vim.api.nvim_create_user_command("RgNoRegex", "lua require('snacks.picker').grep({hidden = true, regex = false, live = false, on_show = function() vim.cmd.stopinsert() end, search = <q-args>})", { nargs = "*" })
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
@@ -289,11 +305,8 @@ vim.api.nvim_create_user_command("Prettier", function(args)
     local line1 = args.range == 0 and 0 or args.line1 - 1
     local line2 = args.range == 0 and -1 or args.line2
     local result = vim.system({ "prettier", "--parser", filetype_map[parser] or parser }, { text = true, stdin = vim.api.nvim_buf_get_lines(0, line1, line2, false) }):wait()
-    if result.code == 0 then
-        vim.api.nvim_buf_set_lines(0, line1, line2, false, vim.split(result.stdout, "\n", { trimempty = true }))
-    else
-        vim.notify(result.stderr, vim.log.levels.ERROR, { annote = "Prettier failed" })
-    end
+    if result.code ~= 0 then return vim.notify(result.stderr, vim.log.levels.ERROR, { annote = "Prettier failed" }) end
+    vim.api.nvim_buf_set_lines(0, line1, line2, false, vim.split(result.stdout, "\n", { trimempty = true }))
 end, { complete = "filetype", nargs = "*", range = true })
 
 -- overrides {{{1
@@ -353,13 +366,9 @@ if require("states").small_file then
             vim.o.foldmethod = "expr"
             -- vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
             vim.o.foldexpr = "nvim_treesitter#foldexpr()"
-            vim.o.foldtext = "getline(v:foldstart).' ⋯'"
+            vim.o.foldtext = ""
             vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
-            local plugins = {
-                "nvim-scrollview",
-                "git-conflict.nvim",
-                "quick-scope",
-            }
+            local plugins = { "nvim-scrollview", "git-conflict.nvim", "quick-scope" }
             require("lazy").load({ plugins = plugins })
             vim.cmd.doautocmd("BufReadPost") -- mason and git-conflict need this when delay loaded
             require("bookmarks").setup()

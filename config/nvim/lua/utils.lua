@@ -121,6 +121,20 @@ function M.toggle_venn()
     vim.notify("Venn.nvim " .. (vim.b.venn_enabled and "enabled" or "disabled"))
 end
 
+function M.pick_filetypes(opts)
+    opts = opts or {}
+    require("snacks.picker")(vim.tbl_extend("force", {
+        title = "filetypes",
+        format = "text",
+        items = vim.tbl_map(function(val) return { text = vim.fn.fnamemodify(val, ":t:r") } end, vim.fn.globpath(vim.o.runtimepath, "syntax/*.vim", false, true)),
+        layout = { preset = "vscode" },
+        confirm = function(picker, item)
+            picker:close()
+            if item then vim.o.filetype = item.text end
+        end,
+    }, opts))
+end
+
 function M.send_to_toggleterm()
     do_action_over_motion(function(lines)
         local current_window = vim.api.nvim_get_current_win()
@@ -163,7 +177,7 @@ local function term_with_edit_callback(cmd, height, width, border)
     })
 end
 
-local fm_term, fzf_term, prev_height, prev_width
+local fm_term, prev_height, prev_width
 function M.file_manager()
     local height = vim.o.lines - 7
     local width = math.ceil(vim.o.columns * 9 / 10)
@@ -173,16 +187,6 @@ function M.file_manager()
         fm_term = term_with_edit_callback(cmd, height, width)
     end
     fm_term:toggle()
-end
-
-function M.fzf(visual)
-    local height = vim.o.lines - 6
-    local width = math.ceil(vim.o.columns * 9 / 10)
-    if visual or fzf_term == nil or prev_height ~= height or prev_width ~= width then
-        local cmd = ([[FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --layout=default --height=100% --bind=tab:toggle-out,shift-tab:toggle-in --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}" ]]):gsub("`", "\\`"):gsub("%%", "%%%%") .. (visual and "--query " .. M.get_visual_selection() .. " > %s" or "> %s")
-        fzf_term = term_with_edit_callback(cmd, height, width, "none")
-    end
-    fzf_term:toggle()
 end
 
 return M
