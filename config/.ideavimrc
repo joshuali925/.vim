@@ -100,8 +100,6 @@ xnoremap < <gv
 xnoremap > >gv
 inoremap jk <Esc>
 nnoremap <C-c> :nohlsearch<CR>
-inoremap <C-c> <Esc>
-xnoremap <C-c> <Esc>
 nnoremap <C-h> :NERDTree<CR>
 nmap <C-j> <Action>(ActiveToolwindowGroup)
 nnoremap <C-k> <C-w>k

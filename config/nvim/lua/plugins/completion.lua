@@ -4,7 +4,7 @@ return {
         event = "InsertEnter",
         config = function()
             local npairs = require("nvim-autopairs")
-            npairs.setup({ ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=], fast_wrap = { map = "<C-l>" } })
+            npairs.setup({ disable_filetype = vim.g.qs_filetype_blacklist, ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=], fast_wrap = { map = "<C-l>" } })
             local Rule = require("nvim-autopairs.rule")
             local cond = require("nvim-autopairs.conds")
             local brackets = { { "(", ")" }, { "[", "]" }, { "{", "}" } }
@@ -78,18 +78,11 @@ return {
             },
         },
         opts = {
-            snippets = {
-                expand = function(snippet) require("luasnip").lsp_expand(snippet) end,
-                active = function(filter)
-                    if filter and filter.direction then return require("luasnip").jumpable(filter.direction) end
-                    return require("luasnip").in_snippet()
-                end,
-                jump = function(direction) require("luasnip").jump(direction) end,
-            },
-            sources = { default = { "lsp", "path", "luasnip", "buffer" } },
+            snippets = { preset = "luasnip" },
             completion = {
                 documentation = { auto_show = true, auto_show_delay_ms = 150 },
-                list = { selection = function(ctx) return ctx.mode == "cmdline" and "auto_insert" or "preselect" end },
+                menu = { draw = { treesitter = { "lsp" } } },
+                list = { selection = { preselect = function(ctx) return ctx.mode ~= "cmdline" end, auto_insert = function(ctx) return ctx.mode == "cmdline" end } },
             },
             keymap = {
                 preset = "enter",
@@ -99,12 +92,13 @@ return {
                 ["<C-k>"] = {
                     function(cmp)
                         if cmp.snippet_active() then return cmp.snippet_forward() end
-                        return cmp.select_and_accept()
+                        return cmp.show({ providers = { "snippets" } })
                     end,
                     "fallback",
                 },
                 cmdline = {
                     preset = "default",
+                    ["<C-space>"] = {},
                     ["<Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_next() end end, "fallback" },
                     ["<S-Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_prev() end end, "fallback" },
                 },

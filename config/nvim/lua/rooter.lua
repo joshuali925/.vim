@@ -23,12 +23,12 @@ function M.toggle()
     else -- set working directory to directory of current file or directory where nvim was started. do not use uv.chdir, otherwise file path will be incorrect if vim is opened in a subdirectory
         vim.api.nvim_set_current_dir(vim.fn.expand("%") == "" and vim.env.PWD or vim.fn.expand("%:p:h"))
     end
-    vim.notify("Current directory: " .. vim.fn.fnamemodify(vim.uv.cwd(), ":~"), vim.log.levels.INFO, { annote = "Rooter is " .. (enabled and "enabled" or "disabled"), icon = "" })
+    vim.notify("Current directory: " .. vim.fn.fnamemodify(vim.uv.cwd() or ".", ":~"), vim.log.levels.INFO, { annote = "Rooter is " .. (enabled and "enabled" or "disabled"), icon = "" })
 end
 
 function M.setup()
     vim.api.nvim_create_augroup("Rooter", {})
-    vim.api.nvim_create_autocmd("BufEnter", { pattern = "*", group = "Rooter", callback = require("rooter").root, nested = true })
+    vim.api.nvim_create_autocmd("BufEnter", { group = "Rooter", callback = require("rooter").root, nested = true })
 end
 
 return M

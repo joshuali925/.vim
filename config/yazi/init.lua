@@ -1,4 +1,5 @@
 require("session"):setup({ sync_yanked = true }) -- enable cross instance yank paste
+require("folder-rules"):setup()
 
 -- https://yazi-rs.github.io/docs/tips#user-group-in-status
 Status:children_add(function()

@@ -25,7 +25,6 @@ set smartcase
 
 let mapleader=';'
 map ' :HopChar1<CR>
-map <leader>e :HopWord<CR>
 map <leader>j :HopLine<CR>
 map <leader>k :HopLine<CR>
 map gc <Plug>VSCodeCommentary
@@ -143,8 +142,8 @@ nmap yc "xyygcc"xp
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 nnoremap <C-p> :call VSCodeNotify('workbench.action.quickOpen')<CR>
-nnoremap <leader>fs :call VSCodeNotify('workbench.action.quickOpen')<CR>
-nnoremap <leader>fd :call VSCodeNotify('breadcrumbs.focus')<CR>
+nnoremap <leader>e :call VSCodeNotify('breadcrumbs.focus')<CR>
+nnoremap <leader>fd :call VSCodeNotify('workbench.action.quickOpen')<CR>
 nnoremap <leader>fm :call VSCodeNotify('workbench.action.openRecent')<CR>
 nnoremap <leader>fb :call VSCodeNotify('workbench.explorer.openEditorsView.toggleVisibility')<CR>
 nnoremap <leader>fu :call VSCodeNotify('workbench.action.gotoSymbol')<CR>

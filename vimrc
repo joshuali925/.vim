@@ -245,8 +245,6 @@ nmap zh zhz
 nmap zl zlz
 inoremap jk <Esc>
 nnoremap <C-c> <C-c>:nohlsearch <bar> syntax sync fromstart <bar> diffupdate <bar> redraw!<CR>
-inoremap <C-c> <Esc>
-xnoremap <C-c> <Esc>
 nnoremap <C-w><C-c> <Esc>
 nmap <C-w>< <C-w><<C-w>
 nmap <C-w>> <C-w>><C-w>
@@ -264,8 +262,8 @@ imap ;r <Esc><leader>r
 nnoremap <leader>r :execute funcs#get_run_command()<CR>
 nnoremap <C-p> :call plugins#zeef#files()<CR>
 xnoremap <C-p> :call plugins#zeef#files(funcs#get_visual_selection())<CR>
-nnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
-xnoremap <leader>fs :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat -plain --color=always {}"')<CR>
+nnoremap <leader>fd :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}"')<CR>
+xnoremap <leader>fd :call <SID>EditCallback($FZF_CTRL_T_COMMAND . ' ' . shellescape(funcs#get_visual_selection()) . ' \| FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind=",:preview-down,.:preview-up" --preview="bat -plain --color=always {}"')<CR>
 nnoremap <leader>ff :VFind **<Left>
 nnoremap <leader>fb :buffers<CR>:buffer<Space>
 nnoremap <leader>fm :call plugins#zeef#oldfiles(0)<CR>

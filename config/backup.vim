@@ -5020,3 +5020,31 @@ wezterm.on("update-right-status", function(window, pane)
     end
     window:set_right_status(wezterm.format({ { Text = battery .. "   " .. date } }))
 end)
+
+" =======================================================
+" https://stackoverflow.com/questions/13630849/git-difference-between-assume-unchanged-and-skip-worktree
+alias gexclude='cat >> "$(git rev-parse --show-toplevel)/.git/info/exclude" <<<'
+alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclude"'
+gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
+alias gexclude2='git update-index --assume-unchanged'
+alias gexcluded2='git ls-files -v | grep "^[[:lower:]]"'
+alias gunexclude2='git update-index --no-assume-unchanged'
+" mise
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/mise ]]; then
+  BIN_INIT=1 mise complete zsh > ~/.vim/config/zsh/completions/_mise || true
+fi
+install-from-github mise jdx/mise linux-x64-musl.tar.xz linux-arm64-musl.tar.xz macos-x64.tar.xz macos-arm64.tar.xz '--strip-components=2 mise/bin/mise' "$@"
+
+" =======================================================
+" nvim fzf
+function M.fzf(visual)
+    local height = vim.o.lines - 6
+    local width = math.ceil(vim.o.columns * 9 / 10)
+    if visual or fzf_term == nil or prev_height ~= height or prev_width ~= width then
+        local cmd = ([[FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --layout=default --height=100% --bind=tab:toggle-out,shift-tab:toggle-in --bind=",:preview-down,.:preview-up" --preview="bat --plain --color=always {}" ]]):gsub("`", "\\`"):gsub("%%", "%%%%") .. (visual and "--query " .. M.get_visual_selection() .. " > %s" or "> %s")
+        fzf_term = term_with_edit_callback(cmd, height, width, "none")
+    end
+    fzf_term:toggle()
+end
+            { "<leader>fS", "<Cmd>lua require('utils').fzf()<CR>" },
+            { "<leader>fS", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },

@@ -184,7 +184,7 @@
       "\t\t\ttry {",
       "\t\t\t\tresolve(JSON.parse(stdout));",
       "\t\t\t} catch (parseError) {",
-      "\t\t\t\treject(parseError + '\nReceived: ' + stdout);",
+      "\t\t\t\treject(parseError + '\\nReceived: ' + stdout);",
       "\t\t\t}",
       "\t\t}),",
       "\t);",

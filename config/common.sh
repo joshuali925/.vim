@@ -15,9 +15,9 @@ export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40%"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
 if [[ $LIGHT_THEME = 1 ]]; then
-  export BAT_THEME=GitHub DELTA_THEME=light-theme FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:253,bg+:252,gutter:251,border:248,preview-bg:254"
+  export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:253,bg+:252,gutter:251,border:248,preview-bg:254"
 else
-  export BAT_THEME=OneHalfDark DELTA_THEME=dark-theme
+  export BAT_THEME=OneHalfDark
 fi
 
 alias -- -='cd -'
@@ -67,7 +67,7 @@ alias view='nvim -c "lua Snacks.terminal.colorize()"'
 # shellcheck disable=2154
 alias jsonflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
 # shellcheck disable=2154
-alias json2csv='jq -r "(map(keys) | add | unique) as \$cols | map(. as \$row | \$cols | map(\$row[.])) as \$rows | \$cols, \$rows[] | @csv"'
+alias json2csv='jq -r "def flatten_object: . as \$in | reduce paths(scalars) as \$path ({}; . + { (\$path | join(\".\")): \$in | getpath(\$path) }); map(flatten_object) | (.[0] | keys) as \$cols | \$cols, (.[] | [.[\$cols[]]]) | @csv"'
 alias jsonl2csv='json2csv -s'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
@@ -82,7 +82,7 @@ alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
 
 alias ga='git add'
-alias gau='git add -u'
+alias gau='git add --all --intent-to-add'
 alias gaa='git add --all'
 alias gb='git branch'
 alias gba='git branch -vv --sort=-committerdate -a'
@@ -125,16 +125,7 @@ alias gs='git status -sb'
 alias gst='git stash'
 alias gst-save='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
-alias gexclude='cat >> "$(git rev-parse --show-toplevel)/.git/info/exclude" <<<'
-alias gexcluded='grep -v "^# " "$(git rev-parse --show-toplevel)/.git/info/exclude"'
-gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.git/info/exclude"; local r=$?; gexcluded; return $r; }
-alias gexclude2='git update-index --assume-unchanged'
-alias gexcluded2='git ls-files -v | grep "^[[:lower:]]"'
-alias gunexclude2='git update-index --no-assume-unchanged'
 alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
-
-tre() { find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"; }
-st() { ssh -t "$@" '.vim/bin/tmux new -A -s 0'; }
 
 gc() {
   [[ $# -eq 0 ]] && { git commit --signoff; return $?; }
@@ -191,6 +182,18 @@ grlf() {
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
 
+tre() {
+  find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"
+}
+
+st() {
+  ssh -t "$@" '.vim/bin/tmux new -A -s 0'
+}
+
+tarcopy() {
+  printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | tee >(y) | wc -c | xargs echo Characters copied:
+}
+
 convert() {
   if [[ $# -ne 2 ]]; then echo "Usage: $0 <file> <format>" >&2; return 1; fi
   ffmpeg -i "$1" -codec copy "${1%.*}.$2" || ffmpeg -y -i "$1" "${1%.*}.$2"
@@ -206,7 +209,7 @@ yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yaz
 csvq() {
   if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <csv-file> [delimiter]" >&2; return 1; fi
   local file=$1 delimiter="${2:-,}" tmp="$(mktemp -t "csvq.XXXXXX.db")"  # litecli .import does not automatically create table from csv, workaround needs temp db
-  sqlite3 "$tmp" -cmd '.mode csv' -cmd ".separator $delimiter" ".import $file t" && litecli --prompt "table t> " --auto-vertical-output "$tmp"
+  sqlite3 "$tmp" -cmd '.mode csv' -cmd ".separator $delimiter" ".import $file t" && litecli --prompt "table:t> " --auto-vertical-output "$tmp"
   rm -f -- "$tmp"
 }
 
@@ -656,7 +659,6 @@ if [[ $OSTYPE = darwin* ]]; then
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
   alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
   alias toggle-dark-theme="osascript -e 'tell application \"System Events\" to tell appearance preferences to set dark mode to not dark mode'"
-  tarcopy() { printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | pbcopy; }
   browser-history() {
     local cols=$((COLUMNS - 26)) sep='{::}' fzftemp fzfprompt histfile=/tmp/browser-history-fzf.db
     if [[ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]]; then
@@ -675,7 +677,7 @@ if [[ $OSTYPE = darwin* ]]; then
       return 1
     fi
     sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), datetime((last_visit_time/1000000) - 11644473600, 'unixepoch', 'localtime'), url from urls order by last_visit_time desc" | awk -F $sep '{printf "%-'$cols's \x1b[32m%s\n\x1b[36m%s\x1b[m\0", $1, $2, $3}' |
-      fzf --ansi --read0 --multi --tiebreak=index --scheme=history --prompt="$fzfprompt" \
+      fzf --ansi --read0 --multi --height=100% --border=none --tiebreak=index --scheme=history --prompt="$fzfprompt" \
       --header='Press ` to toggle sort, C-o to open, C-t C-u to show surrounding items' \
       --bind=\`:toggle-sort \
       --bind='ctrl-t:unbind(change)+track-current' \

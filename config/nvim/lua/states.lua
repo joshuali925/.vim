@@ -12,8 +12,6 @@ vim.g.qs_filetype_blacklist = {
     "netrw",
     "lazy",
     "mason",
-    "TelescopePrompt",
-    "Mundo",
     "neo-tree",
     "DiffviewFileHistory",
     "DiffviewFiles",
@@ -24,6 +22,7 @@ vim.g.qs_filetype_blacklist = {
     "minifiles",
     "noice",
     "snacks_dashboard",
+    "snacks_picker_input",
 }
 vim.g.qs_buftype_blacklist = { "terminal" }
 

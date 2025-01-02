@@ -16,6 +16,7 @@ return {
     },
     {
         "monaqa/dial.nvim",
+        keys = { { "<C-a>", "<Plug>(dial-increment)", mode = { "n", "x" } } },
         config = function()
             local augend = require("dial.augend")
             require("dial.config").augends:register_group({
@@ -38,6 +39,7 @@ return {
                     augend.constant.new({ elements = { "prev", "next" }, word = true, cyclic = true }),
                     augend.constant.new({ elements = { "_prev", "_next" }, word = false, cyclic = true }),
                     augend.constant.new({ elements = { "prev_", "next_" }, word = false, cyclic = true }),
+                    augend.constant.new({ elements = { "[ ]", "[x]" }, word = false, cyclic = true }),
                 },
             })
         end,
@@ -46,24 +48,32 @@ return {
         "jake-stewart/multicursor.nvim",
         keys = {
             { "<C-n>", "<Cmd>lua require('multicursor-nvim').matchAddCursor(1)<CR>", mode = { "n", "x" } },
-            { "<leader><C-n>", "<Cmd>lua require('multicursor-nvim').deleteCursor()<CR>", mode = { "n", "x" } },
-            { "<C-Down>", "<Cmd>lua require('multicursor-nvim').lineAddCursor(1)<CR>", mode = { "n", "x" } },
-            { "<C-Leftmouse>", "<Cmd>lua require('multicursor-nvim').handleMouse()<CR>" },
-            { "<leader>gv", "<Cmd>lua require('multicursor-nvim').restoreCursors()<CR>" },
             {
-                "<C-a>",
+                "<leader><C-n>",
+                function()
+                    require("multicursor-nvim").clearCursors()
+                    require("multicursor-nvim").matchAllAddCursors()
+                end,
+                mode = { "n", "x" },
+            },
+            {
+                "<C-p>",
                 function()
                     if require("multicursor-nvim").hasCursors() then
-                        require("multicursor-nvim").clearCursors()
-                        require("multicursor-nvim").matchAllAddCursors()
+                        require("multicursor-nvim").deleteCursor()
+                    elseif not vim.fn.mode():match("^n.*") then
+                        vim.cmd.execute([["normal! \<Esc>"]])
+                        require("snacks.picker").files({ hidden = true, layout = { preset = "vscode" }, on_show = function() vim.cmd.stopinsert() end, search = require("utils").get_visual_selection() })
                     else
-                        local isNormal = vim.fn.mode():match("^n.*")
-                        require("dial.map").manipulate("increment", isNormal and "normal" or "visual")
-                        if not isNormal then vim.cmd.normal({ "gv", bang = true }) end
+                        require("snacks.picker").smart({ hidden = false, layout = { preset = "vscode" }, filter = { cwd = true } }) -- TODO fixme: not preserving '" mark with hidden = true
                     end
                 end,
                 mode = { "n", "x" },
             },
+            { "<C-Down>", "<Cmd>lua require('multicursor-nvim').lineAddCursor(1)<CR>", mode = { "n", "x" } },
+            { "<C-Up>", "<Cmd>lua require('multicursor-nvim').lineAddCursor(-1)<CR>", mode = { "n", "x" } },
+            { "<C-Leftmouse>", "<Cmd>lua require('multicursor-nvim').handleMouse()<CR>" },
+            { "<leader>gv", "<Cmd>lua require('multicursor-nvim').restoreCursors()<CR>" },
             {
                 "<C-x>",
                 function()

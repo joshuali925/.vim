@@ -24,10 +24,10 @@ function M.setup()
     vim.api.nvim_create_autocmd("TextYankPost", {
         group = "Clips",
         callback = function()
-            local reg_content = vim.fn.getreg(vim.v.event.regname)
-            if type(reg_content) == "string" and #reg_content > 0 and #reg_content < 100000 and (#M.clips == 0 or reg_content ~= M.clips[1][1]) then
-                table.insert(M.clips, 1, { reg_content, vim.fn.getregtype(vim.v.event.regname), vim.o.filetype })
-                if #M.clips > M.limit then table.remove(M.clips) end
+            local content = table.concat(vim.v.event.regcontents, "\n")
+            if #content > 0 and #content < 100000 and (#M.clips == 0 or content ~= M.clips[1][1]) then
+                table.insert(M.clips, 1, { content, vim.v.event.regtype, vim.o.filetype })
+                while #M.clips > M.limit do table.remove(M.clips) end
                 modified = true
             end
         end,
@@ -36,8 +36,29 @@ function M.setup()
     if vim.v.vim_did_enter == 1 then
         load_disk()
     else
-        vim.api.nvim_create_autocmd("VimEnter", { group = "Clips", pattern = "*", once = true, callback = load_disk })
+        vim.api.nvim_create_autocmd("VimEnter", { group = "Clips", once = true, callback = load_disk })
     end
+end
+
+function M.pick(opts)
+    opts = opts or {}
+    local items = {}
+    for i, clip in ipairs(M.clips) do
+        items[i] = { text = clip[1]:gsub("\n", "\\n"), regtype = clip[2], preview = { text = clip[1], ft = clip[3] } }
+    end
+    require("snacks.picker")(vim.tbl_extend("force", {
+        title = "clips",
+        format = "text",
+        preview = "preview",
+        items = items,
+        confirm = function(picker, item)
+            picker:close()
+            if item then
+                vim.fn.setreg('"', item.preview.text, item.regtype)
+                vim.schedule(function() vim.api.nvim_put(vim.split(item.preview.text:gsub("\n$", ""), "\n"), item.regtype, true, false) end)
+            end
+        end,
+    }, opts))
 end
 
 return M

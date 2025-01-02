@@ -80,7 +80,7 @@
       "",
       "interface I$1Context {",
       "\t${1/(.*)/${1:/camelcase}/}: $1;",
-      "\t${1/(.*)/${1:/camelcase}/}Dispatch: React.Dispatch<$1Action>;",
+      "\tdispatch$1: React.Dispatch<$1Action>;",
       "}",
       "const $1Context = React.createContext<I$1Context | null>(null);",
       "",
@@ -99,8 +99,8 @@
       "};",
       "",
       "export const $1Provider: React.FC = (props) => {",
-      "\tconst [${1/(.*)/${1:/camelcase}/}, ${1/(.*)/${1:/camelcase}/}Dispatch] = useReducer(${1/(.*)/${1:/camelcase}/}Reducer, initialState);",
-      "\tconst contextValue: I$1Context = useMemo(() => ({ ${1/(.*)/${1:/camelcase}/}, ${1/(.*)/${1:/camelcase}/}Dispatch }), [",
+      "\tconst [${1/(.*)/${1:/camelcase}/}, dispatch$1] = useReducer(${1/(.*)/${1:/camelcase}/}Reducer, initialState);",
+      "\tconst contextValue: I$1Context = useMemo(() => ({ ${1/(.*)/${1:/camelcase}/}, dispatch$1 }), [",
       "\t\t${1/(.*)/${1:/camelcase}/},",
       "\t]);",
       "",
@@ -117,7 +117,7 @@
     ]
   },
   "Improved react functional component": {
-    "prefix": "rfc",
+    "prefix": "template-react-component",
     "body": [
       "import React from 'react';",
       "",

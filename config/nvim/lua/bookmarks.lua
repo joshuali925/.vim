@@ -178,14 +178,60 @@ function M.setup()
         vim.schedule(function() vim.cmd("$") end)
     end)
     vim.api.nvim_create_augroup("Bookmarks", {})
-    vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", pattern = "*", callback = M.dump_disk })
-    vim.api.nvim_create_autocmd("BufUnload", { group = "Bookmarks", pattern = "*", callback = function(e) M.dump_cache(e.buf, e.match) end })
-    vim.api.nvim_create_autocmd("BufReadPost", { group = "Bookmarks", pattern = "*", callback = function(e) M.load_cache(e.buf, e.match) end })
+    vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", callback = M.dump_disk })
+    vim.api.nvim_create_autocmd("BufUnload", { group = "Bookmarks", callback = function(e) M.dump_cache(e.buf, e.match) end })
+    vim.api.nvim_create_autocmd("BufReadPost", { group = "Bookmarks", callback = function(e) M.load_cache(e.buf, e.match) end })
     if vim.v.vim_did_enter == 1 then
         M.load_disk()
     else
-        vim.api.nvim_create_autocmd("VimEnter", { group = "Bookmarks", pattern = "*", once = true, callback = M.load_disk })
+        vim.api.nvim_create_autocmd("VimEnter", { group = "Bookmarks", once = true, callback = M.load_disk })
     end
+end
+
+function M.pick(opts)
+    opts = opts or {}
+    local items = {}
+    for file, bookmarks in pairs(require("bookmarks").bookmarks) do
+        local relative_path = vim.fn.fnamemodify(file, ":~:.")
+        if (opts.filter and opts.filter.cwd == false) or relative_path:match("^[/~]") == nil then
+            for _, bookmark in ipairs(bookmarks) do
+                table.insert(items, {
+                    -- TODO add proper format https://github.com/folke/snacks.nvim/blob/main/lua/snacks/picker/format.lua
+                    text = ("%s │ %-" .. (bookmark.annot and 62 or 60) .. "s │ %s:%d"):format(
+                        os.date("%m/%d/%Y %H:%M", bookmark.time),
+                        bookmark.annot and " " .. bookmark.annot or bookmark.text,
+                        relative_path,
+                        bookmark.row + 1
+                    ),
+                    file = file,
+                    pos = { bookmark.row + 1, bookmark.col + 1 },
+                    relative_path = relative_path,
+                    bookmark = bookmark,
+                })
+            end
+        end
+    end
+    table.sort(items, function(a, b) return a.bookmark.time > b.bookmark.time end)
+    require("snacks.picker")(vim.tbl_extend("force", {
+        title = "bookmarks",
+        format = "text",
+        preview = "file",
+        items = items,
+        layout = { layout = { width = 0.8 } },
+        actions = {
+            delete_bookmark = function(picker)
+                local current = picker:current()
+                local buf = vim.fn.bufnr(current.relative_path)
+                if buf == -1 then
+                    require("bookmarks").delete_in_cache(current.file, current.bookmark.id)
+                else
+                    require("bookmarks").delete({ buf = buf, row = current.bookmark.row })
+                end
+                -- TODO delete selection from picker
+            end,
+        },
+        win = { input = { keys = { ["<c-d>"] = { "delete_bookmark", mode = { "i" } }, ["dd"] = { "delete_bookmark" } } } },
+    }, opts))
 end
 
 return M

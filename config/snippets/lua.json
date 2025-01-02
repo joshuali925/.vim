@@ -1,7 +1,10 @@
 {
   "Feedkey": {
     "prefix": "feedkey",
-    "body": ["vim.api.nvim_feedkeys(vim.keycode(\"${1:<Esc>}\"), \"n\", false)"]
+    "body": [
+      "vim.cmd.execute([[\"normal! \\<Esc>\"]]) -- escape to normal mode",
+      "vim.api.nvim_feedkeys(vim.keycode(\"${1:<C-d>}\"), \"n\", false)"
+    ]
   },
   "Benchmark": {
     "prefix": "benchmark",
@@ -12,7 +15,7 @@
     ]
   },
   "Benchmark using vim function": {
-    "prefix": "benchmark-vim",
+    "prefix": "benchmark-nvim",
     "body": [
       "local start_time = vim.fn.reltime()",
       "$0",
@@ -30,7 +33,7 @@
   "Write to file": {
     "prefix": "write-file",
     "body": [
-      "local file = io.open(vim.uv.os_homedir() .. \"/.vim/tmp/lua.log\", \"a\")",
+      "local file = io.open(os.getenv(\"HOME\") .. \"/.vim/tmp/lua.log\", \"a\")",
       "if not file then return end",
       "file:write(\"${0:content}\\n\")",
       "file:close()"

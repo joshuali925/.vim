@@ -29,24 +29,27 @@ gui:
       - magenta
     unstagedChangesColor:
       - red
-notARepository: "skip"
+notARepository: skip
 disableStartupPopups: true
 keybinding:
   universal:
-    prevPage: "<c-u>" # go to next page in list
-    nextPage: "<c-d>" # go to previous page in list
-    gotoTop: "g" # go to top of list
-    gotoBottom: "G" # go to bottom of list
-    scrollLeft: "<left>" # scroll left within list view
-    scrollRight: "<right>" # scroll right within list view
-    prevBlock: "H" # goto the previous block / panel
-    nextBlock: "L" # goto the next block / panel
-    jumpToBlock: ["0", "1", "2", "3", "4"] # goto the Nth block / panel
+    prevPage: <c-u>
+    nextPage: <c-d>
+    gotoTop: g
+    gotoBottom: G
+    scrollLeft: <left>
+    scrollRight: <right>
+    prevBlock: H
+    nextBlock: L
+    jumpToBlock: [0, 1, 2, 3, 4]
     openRecentRepos: <disabled>
-    scrollUpMain-alt2: "." # main panel scroll up
-    scrollDownMain-alt2: "," # main panel scroll down
-    nextScreenMode: "_"
-    prevScreenMode: "="
-    undo: "u"
-    redo: "<c-r>"
-    renameCommitWithEditor: "e"
+    scrollUpMain-alt2: .
+    scrollDownMain-alt2: ","
+    nextScreenMode: _
+    prevScreenMode: =
+    undo: u
+    redo: <c-r>
+    renameCommitWithEditor: e
+  commits:
+    viewResetOptions: <c-r>
+    resetCherryPick: <disabled>
