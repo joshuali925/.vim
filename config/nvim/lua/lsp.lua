@@ -157,6 +157,9 @@ function M.setup()
                             defaultConfig = { -- https://raw.githubusercontent.com/CppCXY/EmmyLuaCodeStyle/HEAD/docs/format_config.md
                                 quote_style = "double",
                                 max_line_length = "unset",
+                                align_continuous_assign_statement = "false",
+                                align_continuous_rect_table_field = "false",
+                                align_if_branch = "false",
                                 align_array_table = "false",
                                 trailing_table_separator = "smart",
                             },
@@ -209,7 +212,7 @@ function M.organize_imports_and_format()
     local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
     if vim.tbl_contains(active_clients, "typescript-tools") then
         local ok, res = pcall(require("typescript-tools.api").organize_imports, true)
-        if not ok then vim.notify(res, vim.log.levels.WARN, { annote = "Failed to organize imports" }) end
+        if not ok then vim.notify(res, vim.log.levels.WARN, { title = "Failed to organize imports" }) end
     elseif vim.tbl_contains(active_clients, "pyright") then
         vim.cmd("silent PythonOrganizeImports")
     end

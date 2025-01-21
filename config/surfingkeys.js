@@ -9,8 +9,7 @@ GlobalSpeed.json (maybe try https://github.com/xxxily/h5player)
 yop toggle pdf viewer
 */
 
-// https://github.com/brookhong/Surfingkeys/issues/2159
-// chrome.storage.local.set({ noPdfViewer: 1 }); // disable pdf viewer, yop or ;s to toggle
+settings.noPdfViewer = true; // disable pdf viewer, yop or ;s to toggle
 settings.tabsThreshold = 0;
 settings.richHintsForKeystroke = 1500;
 settings.stealFocusOnLoad = false;

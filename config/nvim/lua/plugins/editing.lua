@@ -63,9 +63,9 @@ return {
                         require("multicursor-nvim").deleteCursor()
                     elseif not vim.fn.mode():match("^n.*") then
                         vim.cmd.execute([["normal! \<Esc>"]])
-                        require("snacks.picker").files({ hidden = true, layout = { preset = "vscode" }, on_show = function() vim.cmd.stopinsert() end, search = require("utils").get_visual_selection() })
+                        require("snacks.picker").files({ on_show = function() vim.cmd.stopinsert() end, search = require("utils").get_visual_selection() })
                     else
-                        require("snacks.picker").smart({ hidden = false, layout = { preset = "vscode" }, filter = { cwd = true } }) -- TODO fixme: not preserving '" mark with hidden = true
+                        require("snacks.picker").smart()
                     end
                 end,
                 mode = { "n", "x" },

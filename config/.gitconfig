@@ -78,6 +78,7 @@
 
 [core]
 	longpaths = true
+	excludesfile = ~/.gitignore
 	; pager = less -RiMXF
 	; pager = diff-so-fancy | less -RiMXF
 	pager = delta --line-numbers --navigate

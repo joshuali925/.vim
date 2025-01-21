@@ -1,26 +1,5 @@
 return {
     {
-        "akinsho/toggleterm.nvim",
-        cmd = { "ToggleTerm", "TermExec" },
-        keys = {
-            { "<C-b>", "<Cmd>ToggleTerm<CR>" },
-            { "<leader>to", "<Cmd>execute 'ToggleTerm dir=' . expand('%:p:h')<CR>" },
-            { "<leader>tv", "<Cmd>execute 'ToggleTerm direction=vertical size=' . &columns / 2<CR>" },
-            { "<leader>tt", "<Cmd>ToggleTerm direction=tab<CR>" },
-            { "<leader>tp", "<Cmd>ToggleTerm direction=float<CR>" },
-            { "<leader>te", "<Cmd>lua require('utils').send_to_toggleterm()<CR>g@" },
-            { "<leader>tee", "<Cmd>ToggleTermSendCurrentLine<CR>" },
-            { "<leader>te", "<Cmd>ToggleTermSendVisualSelection<CR>", mode = "x" },
-            { "<C-o>", "<Cmd>lua require('utils').file_manager()<CR>" },
-        },
-        opts = {
-            open_mapping = "<C-b>", -- <count><C-b> to open terminal in split
-            auto_scroll = false,
-            winbar = { enabled = true },
-            on_create = function() vim.o.signcolumn = "no" end,
-        },
-    },
-    {
         "MunifTanjim/nui.nvim",
         init = function()
             vim.ui.input = (function(overridden)
@@ -78,7 +57,7 @@ return {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
         dependencies = "MunifTanjim/nui.nvim",
-        keys = { { "<leader>b", "<Cmd>Neotree reveal<CR>" }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
+        keys = { { "<leader>B", "<Cmd>Neotree reveal<CR>" }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
         config = function()
             local function get_dir(state)
                 local node = state.tree:get_node()
@@ -117,17 +96,17 @@ return {
                         ["r"] = "refresh",
                         ["x"] = "delete",
                         ["d"] = "cut_to_clipboard",
-                        ["<C-b>"] = { function(state) vim.cmd.ToggleTerm("dir=" .. get_dir(state)) end, desc = "open_term_at_node" },
+                        ["<C-b>"] = { function(state) require("snacks.terminal").open(nil, { cwd = get_dir(state) }) end, desc = "open_term_at_node" },
                         ["<C-p>"] = {
-                            function(state) require("snacks.picker").files({ hidden = true, layout = { preset = "vscode" }, cwd = get_dir(state) }) end,
+                            function(state) require("snacks.picker").files({ cwd = get_dir(state) }) end,
                             desc = "find_files_at_node",
                         },
                         ["t"] = {
-                            function(state) require("snacks.picker").files({ hidden = true, layout = { preset = "vscode" }, cwd = get_dir(state) }) end,
+                            function(state) require("snacks.picker").files({ cwd = get_dir(state) }) end,
                             desc = "find_files_at_node",
                         },
                         ["T"] = {
-                            function(state) require("snacks.picker").files({ hidden = true, layout = { preset = "vscode" }, cwd = get_dir(state), ignored = true }) end,
+                            function(state) require("snacks.picker").files({ cwd = get_dir(state), ignored = true }) end,
                             desc = "find_files_no_ignore_at_node",
                         },
                         ["<leader>f/"] = { function(state) require("snacks.picker").grep({ cwd = get_dir(state) }) end, desc = "live_grep_at_node" },

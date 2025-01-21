@@ -1,4 +1,4 @@
-" Compatible since CentOS7 vim7.4: docker run -it --rm -e TERM -v $HOME/.vim:/root/.vim thinca/vim:v7.4.629
+" Compatible since CentOS7 vim7.4: docker run -it --rm -e TERM -v $HOME/.vim:/root/.vim --entrypoint /bin/sh thinca/vim:v7.4.629
 
 let g:dot_vim_dir=expand('<sfile>:p:h')
 
@@ -252,8 +252,6 @@ nmap <C-w>+ <C-w>+<C-w>
 nmap <C-w>- <C-w>-<C-w>
 nmap <C-w><BS> :-tabmove<CR><C-w>
 nmap <C-w>\ :+tabmove<CR><C-w>
-nmap <C-n> <leader>ncgn
-xmap <C-n> <leader>ncgn
 nnoremap <C-o> :call <SID>EditCallback('file_manager')<CR>
 noremap <leader>p "0p
 noremap <leader>P "0P
@@ -290,6 +288,8 @@ xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 
 xnoremap <leader>S :s/\%V//g<Left><Left><Left>
 nmap cn <leader>ncgn
 xmap C <leader>ncgn
+nmap <C-n> <leader>ncgn
+xmap <C-n> <leader>ncgn
 nnoremap <leader>tu <C-^>
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
@@ -342,15 +342,26 @@ command! -complete=file -nargs=+ VFind call funcs#grep('glob', <q-args>)
 command! -nargs=* VGrep execute 'vimgrep /' . escape(<q-args>, '/') . '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
 command! -nargs=* VGrepNoRegex execute 'vimgrep /' . substitute(escape(<q-args>, '/\.*$^~['), '\n', '\\n', 'g') . '/gj **/.* **/*' | if len(getqflist()) > 1 | copen | else | cfirst | endif
 command! -complete=file -nargs=+ Find call funcs#grep('find -L . -type f -not -path "*/.git/*" -iname', shellescape(<q-args>))
-command! -nargs=+ Grep call funcs#grep('grep --ignore-case --line-number -I -R', '-- ' . shellescape(<q-args>) . ' .')
-command! -nargs=+ GrepNoRegex call funcs#grep('grep --ignore-case --line-number -I -R --fixed-strings', '-- ' . shellescape(<q-args>) . ' .')
+" busybox grep does not recognize long option names
+command! -nargs=+ Grep call funcs#grep('grep -i -n -I -r', '-- ' . shellescape(<q-args>) . ' .')
+command! -nargs=+ GrepNoRegex call funcs#grep('grep -i -n -I -r --fixed-strings', '-- ' . shellescape(<q-args>) . ' .')
 command! -complete=file -nargs=+ GFind call funcs#grep('git ls-files', '-- ' . shellescape(<q-args>))
-command! -nargs=+ GGrep call funcs#grep('git grep -n --ignore-case', '-- ' . shellescape(<q-args>))
-command! -nargs=+ GGrepNoRegex call funcs#grep('git grep -n --ignore-case --fixed-strings', '-- ' . shellescape(<q-args>))
-command! -nargs=+ Rg call funcs#grep('rg --vimgrep', <q-args>)
-command! -complete=file -nargs=+ RgFind call funcs#grep('rg --vimgrep --files -g', shellescape(<q-args>))
-command! -nargs=+ RgRegex call funcs#grep('rg --vimgrep', '-- ' . shellescape(<q-args>))
-command! -nargs=+ RgNoRegex call funcs#grep('rg --vimgrep --fixed-strings', '-- ' . shellescape(<q-args>))
+command! -nargs=+ GGrep call funcs#grep('git grep -n -i', '-- ' . shellescape(<q-args>))
+command! -nargs=+ GGrepNoRegex call funcs#grep('git grep -n -i --fixed-strings', '-- ' . shellescape(<q-args>))
+let s:rg_cmd = 'RIPGREP_CONFIG_PATH="' . g:dot_vim_dir . '/config/.ripgreprc" rg --vimgrep'
+command! -nargs=+ Rg call funcs#grep(s:rg_cmd, <q-args>)
+command! -complete=file -nargs=+ RgFind call funcs#grep(s:rg_cmd . ' --files -g', shellescape(<q-args>))
+command! -nargs=+ RgRegex call s:rg_or_grep('', '-- ' . shellescape(<q-args>))
+command! -nargs=+ RgNoRegex call s:rg_or_grep(' --fixed-strings', '-- ' . shellescape(<q-args>))
+
+function! s:rg_or_grep(arg, pattern)
+  if executable('rg') == 1
+    call funcs#grep(s:rg_cmd . a:arg, a:pattern)
+  else
+    echomsg 'Warning: rg not available, using grep'
+    call funcs#grep('grep -i -n -I -r' . a:arg, a:pattern . ' .')
+  endif
+endfunction
 
 function! s:Oldfiles()
   let saved_errorformat = &errorformat

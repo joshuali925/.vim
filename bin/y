@@ -18,21 +18,28 @@ ppid=$PPID
 
 # if called from nvim terminal (:h v:servername), look upwards to find tty of the nvim process
 if [[ -n $NVIM ]]; then
-  while [[ -n $ppid ]]; do
-    psout=$(ps -p "$ppid" -o ppid= -o tty= -o comm=)
-    if [[ $(awk '{print $3}' <<<"$psout") = *nvim ]]; then
-      otty="/dev/$(awk '{print $2}' <<<"$psout")" && [[ $otty != /dev/\?* ]] && break
-    fi
-    ppid=$(awk '{print $1}' <<<"$psout")
-  done
+  if [[ -d /proc ]]; then
+    while [[ -n $ppid ]]; do
+      if [[ $(< "/proc/$ppid/comm") = *nvim ]]; then
+        otty="$(readlink "/proc/$ppid/fd/0")" && [[ $otty != /dev/null ]] && break
+      fi
+      ppid=$(awk '/PPid/ {print $2}' "/proc/$ppid/status")
+    done
+  else
+    while [[ -n $ppid ]]; do
+      read -r ppid tty comm < <(ps -p "$ppid" -o ppid=,tty=,comm=)
+      if [[ $comm = *nvim ]]; then
+        otty="/dev/$tty" && [[ $otty != /dev/\?* ]] && break
+      fi
+    done
+  fi
 fi
 
 otty="${otty:-$TTY}"
 # look upwards the process tree to find the first valid tty
 while [[ -z $otty ]] || [[ $otty = /dev/\?* ]] && [[ -n $ppid ]]; do
-  psout=$(ps -p "$ppid" -o ppid= -o tty= -o comm=)
-  otty="/dev/$(awk '{print $2}' <<<"$psout")"
-  ppid=$(awk '{print $1}' <<<"$psout")
+  read -r ppid tty < <(ps -p "$ppid" -o ppid=,tty=)
+  otty="/dev/$tty"
 done
 
 if [[ -z $otty ]] || [[ $otty =~ ^/dev/\?*$ ]]; then

@@ -1,4 +1,4 @@
---max-columns=500
+--max-columns=5000
 --max-columns-preview
 --glob=!.git
 --glob=!tags
