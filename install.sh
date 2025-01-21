@@ -251,8 +251,7 @@ install_python() {  # environment for asdf install from source: https://github.c
     return 1
   fi
   if ! builtin command -v pip3 > /dev/null 2>&1; then curl https://bootstrap.pypa.io/get-pip.py | python3; fi
-  PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip packages'
-  log "To use pynvim regardless of venv, set ${YELLOW}vim.g.python3_host_prog = \"$(which python3)\""
+  log 'Installed python3, pip3, pynvim'
 }
 
 install_node() {

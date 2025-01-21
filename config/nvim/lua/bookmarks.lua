@@ -130,7 +130,7 @@ function M.delete(opts)
         local success = vim.api.nvim_buf_del_extmark(buf, ns_id, id)
         M.delete_in_cache(file_name, id)
         if not success then
-            vim.notify("Failed to delete bookmark", vim.log.levels.ERROR, { annote = "Bookmarks" })
+            vim.notify("Failed to delete bookmark", vim.log.levels.ERROR, { title = "Bookmarks" })
         end
     end
     return true
@@ -190,44 +190,54 @@ end
 
 function M.pick(opts)
     opts = opts or {}
-    local items = {}
-    for file, bookmarks in pairs(require("bookmarks").bookmarks) do
-        local relative_path = vim.fn.fnamemodify(file, ":~:.")
-        if (opts.filter and opts.filter.cwd == false) or relative_path:match("^[/~]") == nil then
-            for _, bookmark in ipairs(bookmarks) do
-                table.insert(items, {
-                    -- TODO add proper format https://github.com/folke/snacks.nvim/blob/main/lua/snacks/picker/format.lua
-                    text = ("%s │ %-" .. (bookmark.annot and 62 or 60) .. "s │ %s:%d"):format(
-                        os.date("%m/%d/%Y %H:%M", bookmark.time),
-                        bookmark.annot and " " .. bookmark.annot or bookmark.text,
-                        relative_path,
-                        bookmark.row + 1
-                    ),
-                    file = file,
-                    pos = { bookmark.row + 1, bookmark.col + 1 },
-                    relative_path = relative_path,
-                    bookmark = bookmark,
-                })
-            end
-        end
-    end
-    table.sort(items, function(a, b) return a.bookmark.time > b.bookmark.time end)
+    local a = require("snacks.picker").util.align
     require("snacks.picker")(vim.tbl_extend("force", {
         title = "bookmarks",
-        format = "text",
+        layout = { preset = "dropdown", layout = { row = 2, width = 0.8, height = 0.9 } },
         preview = "file",
-        items = items,
-        layout = { layout = { width = 0.8 } },
+        finder = function()
+            local items = {}
+            for file, bookmarks in pairs(require("bookmarks").bookmarks) do
+                local relative_path = vim.fn.fnamemodify(file, ":~:.")
+                if (opts.filter and opts.filter.cwd == false) or relative_path:match("^[/~]") == nil then
+                    for _, bookmark in ipairs(bookmarks) do
+                        table.insert(items, {
+                            file = file,
+                            pos = { bookmark.row + 1, bookmark.col + 1 },
+                            relative_path = relative_path,
+                            bookmark = bookmark,
+                        })
+                    end
+                end
+            end
+            table.sort(items, function(x, y) return x.bookmark.time > y.bookmark.time end)
+            return items
+        end,
+        format = function(item, _)
+            local dir, file = item.relative_path:match("^(.*)/(.+)$")
+            local ret = {}
+            ret[#ret + 1] = { a(os.date("%m/%d/%Y %H:%M", item.bookmark.time), 16), "Comment" }
+            ret[#ret + 1] = { " │ " }
+            ret[#ret + 1] = { a(item.bookmark.annot and " " .. item.bookmark.annot or item.bookmark.text, 60), item.bookmark.annot and "DiagnosticOk" }
+            ret[#ret + 1] = { " │ " }
+            ret[#ret + 1] = { file, "SnacksPickerFile" }
+            ret[#ret + 1] = { ":", "SnacksPickerDelim" }
+            ret[#ret + 1] = { tostring(item.pos[1]), "SnacksPickerRow" }
+            ret[#ret + 1] = { " " }
+            ret[#ret + 1] = { dir, "Comment" }
+            return ret
+        end,
+        on_show = function() vim.cmd.stopinsert() end,
         actions = {
             delete_bookmark = function(picker)
                 local current = picker:current()
                 local buf = vim.fn.bufnr(current.relative_path)
                 if buf == -1 then
-                    require("bookmarks").delete_in_cache(current.file, current.bookmark.id)
+                    M.delete_in_cache(current.file, current.bookmark.id)
                 else
-                    require("bookmarks").delete({ buf = buf, row = current.bookmark.row })
+                    M.delete({ buf = buf, row = current.bookmark.row })
                 end
-                -- TODO delete selection from picker
+                picker:find({ on_done = function() picker.list:view(picker.list.cursor) end })
             end,
         },
         win = { input = { keys = { ["<c-d>"] = { "delete_bookmark", mode = { "i" } }, ["dd"] = { "delete_bookmark" } } } },

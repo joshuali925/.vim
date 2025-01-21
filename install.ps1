@@ -11,7 +11,7 @@ scoop bucket add java
 scoop install openjdk14
 scoop install python
 reg import "$env:USERPROFILE\scoop\apps\python\current\install-pep-514.reg"
-scoop install nodejs-lts@18.19.0
+scoop install nodejs18@18.19.0
 npm install yarn -g
 echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"
 
@@ -24,8 +24,6 @@ scoop install delta
 scoop install lazygit
 scoop install vim
 reg import "$env:USERPROFILE\scoop\apps\vim\current\install-context.reg"
-scoop install windows-terminal
-reg import "$env:USERPROFILE\scoop\apps\windows-terminal\current\install-context.reg"
 
 scoop install clink
 clink autorun install
@@ -53,12 +51,12 @@ Remove-Item "$env:USERPROFILE\zsh.zip"
 git clone --filter=blob:none https://github.com/joshuali925/.vim "$env:USERPROFILE\.vim"
 [Environment]::SetEnvironmentVariable("RIPGREP_CONFIG_PATH", "$env:USERPROFILE\.vim\config\.ripgreprc", "User")
 cmd /c mklink /J %USERPROFILE%\vimfiles %USERPROFILE%\.vim
-New-Item -ItemType Directory -Path "$env:APPDATA\lazygit", "$env:LOCALAPPDATA\Microsoft\Windows Terminal"
+New-Item -ItemType Directory -Path "$env:APPDATA\lazygit"
 cmd /c mklink /H %USERPROFILE%\.gitconfig %USERPROFILE%\.vim\config\.gitconfig
 cmd /c mklink /H %USERPROFILE%\.tmux.conf %USERPROFILE%\.vim\config\.tmux.conf
 cmd /c mklink /H %APPDATA%\lazygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
 Copy-Item "$env:USERPROFILE\.vim\config\yazi" "$env:APPDATA\yazi\config" -Recurse
-Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:USERPROFILE\scoop\apps\windows-terminal\current\settings\settings.json"
+Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 cmd /c "echo source ~/.vim/config/zsh/.zshrc >> %USERPROFILE%\.zshrc"
 cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.zshrc"
 cmd /c "echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc"

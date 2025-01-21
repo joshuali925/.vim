@@ -4,13 +4,17 @@
     "description": "rest.nvim request variables",
     "body": ["@BASE = ${1:localhost:8000}", "", "$0", ""]
   },
-  "Content type JSON header": {
+  "Content type header": {
     "prefix": "content-type",
-    "body": ["Content-Type: application/json", "", "{", "\t$0", "}"]
+    "body": "Content-Type: ${1|application/json,application/x-www-form-urlencoded|}"
   },
   "Authorization header": {
-    "prefix": "authorization",
+    "prefix": "auth-basic",
     "body": "Authorization: Basic ${1:username}:${2:password}"
+  },
+  "Sigv4 auth": {
+    "prefix": "auth-sigv4",
+    "body": "Authorization: AWS {{AWS_ACCESS_KEY_ID}} {{AWS_SECRET_ACCESS_KEY}} token:{{AWS_SESSION_TOKEN}} region:${1:us-west-2} service:${2:service}"
   },
   "GET request": {
     "prefix": "get-request",

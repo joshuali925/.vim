@@ -5034,6 +5034,9 @@ if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/mise ]]; then
   BIN_INIT=1 mise complete zsh > ~/.vim/config/zsh/completions/_mise || true
 fi
 install-from-github mise jdx/mise linux-x64-musl.tar.xz linux-arm64-musl.tar.xz macos-x64.tar.xz macos-arm64.tar.xz '--strip-components=2 mise/bin/mise' "$@"
+" pynvim
+  PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip packages'
+  log "To use pynvim regardless of venv, set ${YELLOW}vim.g.python3_host_prog = \"$(which python3)\""
 
 " =======================================================
 " nvim fzf
@@ -5048,3 +5051,106 @@ function M.fzf(visual)
 end
             { "<leader>fS", "<Cmd>lua require('utils').fzf()<CR>" },
             { "<leader>fS", ":<C-u>lua require('utils').fzf(true)<CR>", mode = "x" },
+" custom osc52 override
+    local function paste() return { vim.fn.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") } end
+    vim.g.clipboard = {
+        name = "osc52",
+        copy = { ["+"] = require("vim.ui.clipboard.osc52").copy("+"), ["*"] = require("vim.ui.clipboard.osc52").copy("*") },
+        paste = { ["+"] = paste, ["*"] = paste }, -- osc52 paste doesn't work in some terminal and can be blocking with yanky.nvim
+    }
+" avante
+    {
+        "yetone/avante.nvim",
+        event = "VeryLazy",
+        enabled = vim.env.OPENAI_API_KEY ~= nil,
+        build = "make",
+        dependencies = {
+            "stevearc/dressing.nvim",
+            "nvim-lua/plenary.nvim",
+            "MunifTanjim/nui.nvim",
+            { "nvim-lualine/lualine.nvim", opts = { options = { globalstatus = true } } },
+        },
+        opts = {
+            vendors = {
+                my_openai = {
+                    __inherited_from = "openai",
+                    api_key_name = "OPENAI_API_KEY",
+                    endpoint = vim.env.OPENAI_API_BASE,
+                    model = "anthropic.claude-3-5-sonnet-20241022-v2:0",
+                },
+            },
+            provider = "my_openai",
+            auto_suggestions_provider = "my_openai",
+            behaviour = { auto_suggestions = false },
+            mappings = {
+                -- suggestion = { accept = "<Right>", next = "<Down>", prev = "<Up>" },
+                submit = { insert = "<CR>" },
+                ask = "<leader>hq",
+                edit = "<leader>he",
+                refresh = "<leader>hr",
+                focus = "<leader>hf",
+                toggle = { default = "<leader>hh", debug = "<leader>hd", hint = "<leader>ht", suggestion = "<leader>hs", repomap = "<leader>hR" },
+                files = { add_current = "<leader>ha" },
+            },
+        },
+    },
+" fzf option breaks live grep preview to show lines at the top rather than matched lines
+--preview-window="<40(up,40%)"
+
+" =======================================================
+" untildone in nvim
+local states = require("states")
+local timers = {}
+local id = 1
+local function is_empty(value)
+    return value == nil or value == ""
+end
+-- terminate and rerun previous command in tmux first window top left pane
+function M.restart_tmux_task()
+    io.popen("tmux send-keys -t 1.0 -X cancel 2>/dev/null; tmux send-keys -t 1.0 c-c 2>/dev/null"):close()
+    vim.schedule(function()
+        vim.defer_fn(function()
+            local handle = assert(io.popen("tmux send-keys -t 1.0 s-up enter 2>&1"))
+            local result = handle:read("*a")
+            handle:close()
+            if result ~= "" then
+                vim.notify(result, vim.log.levels.ERROR, { title = "Restarting tmux task" })
+            end
+        end, 500)
+    end)
+end
+function M.untildone(command, should_restart_tmux_task, message)
+    if not is_empty(should_restart_tmux_task) then
+        M.restart_tmux_task()
+    end
+    if is_empty(command) then
+        local jobs = #timers
+        for i, timer in pairs(timers) do
+            if pcall(timer.close, timer) then
+                states.untildone_count = states.untildone_count - 1
+                table.remove(timers, i)
+            end
+        end
+        vim.notify("Number of jobs stoped: " .. jobs - #timers .. "\nNumber of jobs running: " .. #timers,
+            vim.log.levels.INFO, { title = "All loop stopped" })
+        return
+    end
+    local timer = vim.uv.new_timer()
+    local timer_id = id
+    id = id + 1
+    timers[timer_id] = timer
+    states.untildone_count = states.untildone_count + 1
+    vim.notify(command, vim.log.levels.INFO, { title = "Loop started" })
+    timer:start(1000, 1000, function()
+        local handle = assert(io.popen(command .. " 2>&1; echo $?"))
+        local result = handle:read("*a")
+        handle:close()
+        if result:match(".*%D(%d+)") == "0" then
+            states.untildone_count = states.untildone_count - 1
+            vim.notify(message or "Command succeeded", vim.log.levels.INFO, { title = "Loop stopped", icon = "" })
+            timer:close()
+            table.remove(timers, timer_id)
+        end
+    end)
+end
+                                require("states").untildone_count == 0 and "󰉡" or " " .. require("states").untildone_count,

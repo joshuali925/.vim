@@ -53,7 +53,7 @@ prepend_keymap = [
   { on = ["s", "S"], run = ["sort size --reverse", "linemode size"], desc = "Sort by size (reverse)" },
 
   { on = ["g", "s"], run = '''shell 'tput smcup; git status; bash -c "read -n 1 -s _"; tput rmcup' --block''', desc = "Git status" },
-  { on = ["g", "o"], run = '''shell 'tput smcup; git log --color --graph --pretty=simple -- "$0" | less -RiM; tput rmcup' --block''', desc = "Git log of current file" },
+  { on = ["g", "o"], run = '''shell 'tput smcup; { git rev-parse && git log --color --graph --pretty=simple -- "$0" || git -C "$0" log --color --graph --pretty=simple; } | less -RiM; tput rmcup' --block''', desc = "Git log of current file" },
   { on = ["g", "d"], run = "cd ~/Downloads", desc = "Go to the downloads directory" },
   { on = ["g", "c"], run = "cd ~/.config", desc = "Go to the config directory" },
   { on = ["g", "l"], run = "cd ~/.local", desc = "Go to the ~/.local directory" },
@@ -67,7 +67,7 @@ prepend_keymap = [
   { on = ["m", "s"], run = '''shell 'du -sbc "$@" | awk '\''function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%11.6f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'\'' | grep "total\$"; echo Press any key to continue; bash -c "read -n 1 -s _"' --block''', desc = "Show selected size" },
   { on = ["m", "t"], run = '''shell 'less -RiM +F "$0"' --block''', desc = "Tail" },
   { on = ["m", "c"], run = '''shell "$EDITOR ~/.vim/config/yazi/keymap.toml" --block''', desc = "Edit config" },
-  { on = ["m", "y"], run = "copy path", desc = "Copy the absolute path" },
+  { on = ["m", "y"], run = "shell 'printf $0 | y'", desc = "Copy the absolute path" },
   { on = ["m", "Y"], run = '''shell 'for file in "$@"; do basename "$file" | sed "s/^/'\''/;s/$/'\''/"; done | paste -s -d " " - | y'''', desc = "Copy file names" },
   { on = ["m", "p"], run = "link --relative", desc = "Symlink the relative path of files" },
   { on = ["m", "P"], run = "link", desc = "Symlink the absolute path of files" },

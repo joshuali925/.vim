@@ -2,20 +2,22 @@
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 if [[ -s ~/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh; fi
+source ~/.vim/config/aider.sh
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
 export EDITOR=nvim
 export BAT_PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
+export DELTA_PAGER='less -RiMXF'
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
-export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --border=thinblock --preview-window="border-thinblock,<40(up,40%)" --highlight-line --color=fg:#f8f8f2,bg:#282a3d,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,preview-bg:#242532'
+export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
-export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label(▏log▕)\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label(▏cat▕)\"'"
+export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
-export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40%"
+export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
 if [[ $LIGHT_THEME = 1 ]]; then
-  export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg:253,bg+:252,gutter:251,border:248,preview-bg:254"
+  export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
 else
   export BAT_THEME=OneHalfDark
 fi
@@ -109,7 +111,7 @@ alias glga='git log --graph --pretty=fuller --all'
 alias glo='git log --graph --pretty=simple'
 alias gloo='git log --graph --pretty=simple --max-count 15'
 alias gloa='git log --color --graph --pretty=simple-iso --all | \less -RiMXF -p $(git show -s --format=%h)'
-glx() { git log --graph --decorate=short --date-order --color --pretty=format:'%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)' "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$(git show -s --format=%h)"; }
+glx() { git log --graph --decorate=short --date-order --color --pretty=format:'%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)' "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$([[ -n $1 ]] && git rev-parse --short "$(git merge-base HEAD "$1")" || git show -s --format=%h)"; }
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
@@ -405,7 +407,7 @@ rf() {  # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integrat
     case $arg in -*) rest+=("$arg") ;; *) local init_query="$arg"; skip_args=1 ;; esac
   done
   local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "${rest[@]}")"
-  fzf --ansi --multi --layout=default --height=100% --border=none --disabled --query="${init_query:-}" \
+  fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --query="${init_query:-}" \
     --header="Press C-s to toggle fzf. Flags: $rg_prefix" --prompt='ripgrep> ' --delimiter=: \
     --bind='ctrl-s:transform:[[ {fzf:prompt} = "ripgrep> " ]] && echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query" || echo "change-prompt(ripgrep> )+disable-search+clear-query+reload('"$rg_prefix"' -- {q} || true)+rebind(change)"' \
     --bind="start:reload:$rg_prefix $(printf %q "${init_query:-}")" \
@@ -418,7 +420,7 @@ rf() {  # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integrat
 
 rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripgrep-multi-line-chunks, do not do livegrep as sed/perl processing is slow
   for arg in "$@"; do [[ $arg != -* ]] && local search="-c 'let @/=\"$(printf '%q' "$arg")\"' -c 'set hlsearch'" && break; done
-  rg --pretty "$@" 2>&1 | sed ':a;N;$!ba;s/\n\n/\n\x00/g' | fzf --ansi --read0 --height=100% --border=none --bind="enter:execute(head -n 2 <<< {} | awk -F: 'NR==1 {file=\$1} NR==2 {print \"+\" \$1 \" -- \" file}' | xargs $EDITOR $search)" --bind='tab:down,btab:up'
+  rg --pretty "$@" 2>&1 | sed ':a;N;$!ba;s/\n\n/\x00/g' | fzf --ansi --read0 --height=100% --list-border=none --gap --bind="enter:execute(head -n 2 <<< {} | awk -F: 'NR==1 {file=\$1} NR==2 {print \"+\" \$1 \" -- \" file}' | xargs $EDITOR $search)" --bind='tab:down,btab:up'
 }
 
 z() {
@@ -556,14 +558,14 @@ dc() {
 
 docker-shell() {
   if [[ $1 != vim* ]]; then
-    local selected_id=$(docker ps | grep -v IMAGE | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}" --height=100% --border=none --preview-window=up,70%,follow --preview='docker logs --follow --tail=10000 {1}')
+    local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}" --height=100% --list-border=none --preview-window=up,70%,follow --preview='docker logs --follow --tail=10000 {1}')
     if [[ -n $selected_id ]]; then
       printf "\n → %s\n" "$selected_id"
       selected_id=$(awk '{print $1}' <<< "$selected_id")
-      docker exec -it "$selected_id" /bin/sh -c 'eval $(set -o pipefail; grep ^$(id -un): /etc/passwd | cut -d : -f 7- || echo sh)' || docker exec -it "$selected_id" sh || {
+      docker exec -it "$selected_id" /bin/bash || docker exec -it "$selected_id" sh || {
         printf '[docker-shell] sh failed, install busybox (y/N)? '; read -r REPLY
         if [[ $REPLY = [Yy] ]]; then
-          docker cp ~/.vim/bin/busybox "$selected_id":/busybox && docker exec -it "$selected_id" /busybox --install /bin && docker exec -it "$selected_id" sh
+          docker cp ~/.vim/bin/busybox "$selected_id":/busybox && docker exec -it "$selected_id" /busybox mkdir -p /bin && docker exec -it "$selected_id" /busybox --install /bin && docker exec -it "$selected_id" sh
         fi
       }
     fi
@@ -677,7 +679,7 @@ if [[ $OSTYPE = darwin* ]]; then
       return 1
     fi
     sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), datetime((last_visit_time/1000000) - 11644473600, 'unixepoch', 'localtime'), url from urls order by last_visit_time desc" | awk -F $sep '{printf "%-'$cols's \x1b[32m%s\n\x1b[36m%s\x1b[m\0", $1, $2, $3}' |
-      fzf --ansi --read0 --multi --height=100% --border=none --tiebreak=index --scheme=history --prompt="$fzfprompt" \
+      fzf --ansi --read0 --multi --height=100% --list-border=none --tiebreak=index --scheme=history --prompt="$fzfprompt" \
       --header='Press ` to toggle sort, C-o to open, C-t C-u to show surrounding items' \
       --bind=\`:toggle-sort \
       --bind='ctrl-t:unbind(change)+track-current' \

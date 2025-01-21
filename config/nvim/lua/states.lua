@@ -23,18 +23,18 @@ vim.g.qs_filetype_blacklist = {
     "noice",
     "snacks_dashboard",
     "snacks_picker_input",
+    "snacks_picker_list",
 }
 vim.g.qs_buftype_blacklist = { "terminal" }
 
-local qs_disabled_filetypes = { ["."] = false }
+local qs_disabled_filetypes = { ["."] = false } -- neocodeium has "." = false
 for _, ft in ipairs(vim.g.qs_filetype_blacklist) do
     qs_disabled_filetypes[ft] = false
 end
 
-local fsize = vim.fn.getfsize(vim.fn.expand("%:p:f")) -- buffer not initialized, read size from disk
+local fsize = vim.fn.getfsize(vim.api.nvim_buf_get_name(0)) -- buffer not initialized, read size from disk
 
 return {
-    untildone_count = 0,
     size_threshold = 1048576, -- 1MB
     small_file = fsize == nil or fsize < 1048576,
     qs_disabled_filetypes = qs_disabled_filetypes,

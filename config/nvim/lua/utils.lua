@@ -1,11 +1,10 @@
 local M = {}
 
-local states = require("states")
-local timers = {}
-local id = 1
-
-local function is_empty(value)
-    return value == nil or value == ""
+local function send_lines_to_terminal(lines)
+    local channel = vim.bo[require("snacks.terminal").get().buf].channel
+    for _, cmd in ipairs(lines) do
+        vim.fn.chansend(channel, cmd .. "\n")
+    end
 end
 
 local function do_action_over_motion(callback)
@@ -21,56 +20,13 @@ local function do_action_over_motion(callback)
     vim.o.operatorfunc = "v:lua.operatorfunc_custom"
 end
 
--- terminate and rerun previous command in tmux first window top left pane
-function M.restart_tmux_task()
-    io.popen("tmux send-keys -t 1.0 -X cancel 2>/dev/null; tmux send-keys -t 1.0 c-c 2>/dev/null"):close()
-    vim.schedule(function()
-        vim.defer_fn(function()
-            local handle = assert(io.popen("tmux send-keys -t 1.0 s-up enter 2>&1"))
-            local result = handle:read("*a")
-            handle:close()
-            if result ~= "" then
-                vim.notify(result, vim.log.levels.ERROR, { annote = "Restarting tmux task" })
-            end
-        end, 500)
-    end)
-end
+function M.send_to_terminal() do_action_over_motion(send_lines_to_terminal) end
 
-function M.untildone(command, should_restart_tmux_task, message)
-    if not is_empty(should_restart_tmux_task) then
-        M.restart_tmux_task()
-    end
+function M.send_selection_to_terminal() send_lines_to_terminal({ M.get_visual_selection() }) end
 
-    if is_empty(command) then
-        local jobs = #timers
-        for i, timer in pairs(timers) do
-            if pcall(timer.close, timer) then
-                states.untildone_count = states.untildone_count - 1
-                table.remove(timers, i)
-            end
-        end
-        vim.notify("Number of jobs stoped: " .. jobs - #timers .. "\nNumber of jobs running: " .. #timers,
-            vim.log.levels.INFO, { annote = "All loop stopped" })
-        return
-    end
-
-    local timer = vim.uv.new_timer()
-    local timer_id = id
-    id = id + 1
-    timers[timer_id] = timer
-    states.untildone_count = states.untildone_count + 1
-    vim.notify(command, vim.log.levels.INFO, { annote = "Loop started" })
-    timer:start(1000, 1000, function()
-        local handle = assert(io.popen(command .. " 2>&1; echo $?"))
-        local result = handle:read("*a")
-        handle:close()
-        if result:match(".*%D(%d+)") == "0" then
-            states.untildone_count = states.untildone_count - 1
-            vim.notify(message or "Command succeeded", vim.log.levels.INFO, { annote = "Loop stopped", icon = "" })
-            timer:close()
-            table.remove(timers, timer_id)
-        end
-    end)
+function M.term_exec(cmd, opts)
+    local terminal = require("snacks.terminal").get(nil, opts)
+    vim.fn.chansend(vim.bo[terminal.buf].channel, cmd .. "\n")
 end
 
 function M.get_visual_selection()
@@ -135,58 +91,33 @@ function M.pick_filetypes(opts)
     }, opts))
 end
 
-function M.send_to_toggleterm()
-    do_action_over_motion(function(lines)
-        local current_window = vim.api.nvim_get_current_win()
-        local b_line, b_col = unpack(vim.api.nvim_win_get_cursor(0))
-        for _, cmd in ipairs(lines) do
-            require("toggleterm").exec(cmd)
-        end
-        vim.api.nvim_set_current_win(current_window)
-        vim.api.nvim_win_set_cursor(current_window, { b_line, b_col })
-    end)
-end
-
-local function term_with_edit_callback(cmd, height, width, border)
+function M.file_manager()
+    local curr_file = vim.fn.expand("%")
+    local cmd = ([[yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="%s" "%s"]]):format("%s", curr_file ~= "" and curr_file or ".")
     local selection_path = os.tmpname()
-    return require("toggleterm.terminal").Terminal:new({
-        cmd = cmd:format(vim.fn.fnameescape(selection_path)),
-        on_open = function(t)
-            vim.keymap.set("t", "<C-o>", function()
-                t:shutdown()
-                require("snacks.lazygit").open()
-                vim.schedule(function() vim.defer_fn(function() vim.cmd.startinsert() end, 100) end)
-            end, { buffer = true })
-        end,
-        direction = "float",
-        float_opts = { height = height, width = width, border = border or "curved" },
-        on_close = function()
-            local handle = io.open(selection_path, "r")
-            if handle ~= nil then
+    local terminal = require("snacks.terminal").open(cmd:format(vim.fn.fnameescape(selection_path)), { win = { height = 0.9, width = 0.9 } })
+    local buf = terminal.buf                         -- terminal.buf is not available in TermClose callback
+    vim.keymap.set("t", "<C-o>", function()
+        local error = require("snacks.notify").error -- to suppress error
+        require("snacks.notify").error = function() end
+        terminal:close()
+        require("snacks.notify").error = error
+        require("snacks.lazygit").open({ win = { height = 0.9, width = 0.9 } })
+    end, { buffer = buf })
+    vim.api.nvim_create_autocmd("TermClose", {
+        once = true,
+        callback = function(ev)
+            if ev.buf ~= buf then return end -- seems <buffer=n> doesn't work here
+            local file = io.open(selection_path, "r")
+            if file ~= nil then
                 local files = {}
-                for line in handle:lines() do
-                    table.insert(files, vim.fn.fnameescape(line));
-                end
-                handle:close()
+                for line in file:lines() do table.insert(files, vim.fn.fnameescape(line)) end
+                file:close()
                 os.remove(selection_path)
-                vim.schedule(function()
-                    vim.cmd.args(files)
-                end)
+                vim.schedule(function() vim.cmd.args(files) end)
             end
         end,
     })
-end
-
-local fm_term, prev_height, prev_width
-function M.file_manager()
-    local height = vim.o.lines - 7
-    local width = math.ceil(vim.o.columns * 9 / 10)
-    if fm_term == nil or prev_height ~= height or prev_width ~= width then
-        local curr_file = vim.fn.expand("%")
-        local cmd = ([[yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="%s" "%s"]]):format("%s", curr_file ~= "" and curr_file or ".")
-        fm_term = term_with_edit_callback(cmd, height, width)
-    end
-    fm_term:toggle()
 end
 
 return M

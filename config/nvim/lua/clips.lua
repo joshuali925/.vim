@@ -4,6 +4,7 @@ M.clips = {}
 M.limit = 100
 local data_file = vim.fn.stdpath("data") .. "/clips.msgpack"
 local modified = false
+local loaded = false
 
 local function dump_disk()
     if not modified then return end
@@ -14,6 +15,8 @@ local function dump_disk()
 end
 
 local function load_disk()
+    if loaded then return end
+    loaded = true
     local fd = vim.uv.fs_open(data_file, "r", 438)
     if not fd then return end
     M.clips = vim.mpack.decode(assert(vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)))
@@ -24,6 +27,7 @@ function M.setup()
     vim.api.nvim_create_autocmd("TextYankPost", {
         group = "Clips",
         callback = function()
+            load_disk()
             local content = table.concat(vim.v.event.regcontents, "\n")
             if #content > 0 and #content < 100000 and (#M.clips == 0 or content ~= M.clips[1][1]) then
                 table.insert(M.clips, 1, { content, vim.v.event.regtype, vim.o.filetype })
@@ -33,24 +37,24 @@ function M.setup()
         end,
     })
     vim.api.nvim_create_autocmd("VimLeavePre", { group = "Clips", callback = dump_disk })
-    if vim.v.vim_did_enter == 1 then
-        load_disk()
-    else
-        vim.api.nvim_create_autocmd("VimEnter", { group = "Clips", once = true, callback = load_disk })
-    end
 end
 
 function M.pick(opts)
     opts = opts or {}
-    local items = {}
-    for i, clip in ipairs(M.clips) do
-        items[i] = { text = clip[1]:gsub("\n", "\\n"), regtype = clip[2], preview = { text = clip[1], ft = clip[3] } }
-    end
+    load_disk()
     require("snacks.picker")(vim.tbl_extend("force", {
         title = "clips",
+        layout = { preset = "dropdown", layout = { row = 2, width = 0.8, height = 0.9 } },
         format = "text",
         preview = "preview",
-        items = items,
+        finder = function()
+            local items = {}
+            for i, clip in ipairs(M.clips) do
+                items[i] = { text = clip[1]:gsub("\n", "\\n"), regtype = clip[2], preview = { text = clip[1], ft = clip[3] } }
+            end
+            return items
+        end,
+        on_show = function() vim.cmd.stopinsert() end,
         confirm = function(picker, item)
             picker:close()
             if item then

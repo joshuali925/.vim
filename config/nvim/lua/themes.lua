@@ -123,7 +123,7 @@ function M.switch(index)
     M.theme = M.theme_list[index]
     pcall(M.setup) -- ignore errors because the select theme plugin might not be enabled
     pcall(M.setup) -- some plugins like bufferline need a second config call
-    vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { annote = "Theme" })
+    vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { title = "Theme" })
 end
 
 return M

@@ -83,7 +83,7 @@ function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
-  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'toggleterm', 'fugitiveblame']
+  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'fugitiveblame', 'snacks_layout_box', 'snacks_terminal']
   if has_nvim && nvim_win_get_config(0).relative != ''  " floating window focused
     quit
   elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q
@@ -132,7 +132,7 @@ function! funcs#print_variable(visual, printAbove) abort
   let print['kotlin'] = 'println("[${javaClass.simpleName}] ❗' . word . ': " + ' . word . ')'
   let print['groovy'] = 'println "❗' . word . ': " + ' . word
   let print['vim'] = "echomsg '❗" . word . ":' " . word
-  let print['lua'] = 'print("❗' . word . ': " .. vim.inspect(' . word . '))'
+  let print['lua'] = 'vim.notify("❗' . word . ': " .. vim.inspect(' . word . '))'
   let print['sh'] = 'echo "❗' . word . ': ${' . word . '}"'
   let print['bash'] = print['sh']
   let print['zsh'] = print['sh']
@@ -168,16 +168,16 @@ function! funcs#get_run_command() abort
     return user_command
   endif
   if expand('%') =~ '\.test\.[tj]sx\?'
-    return 'TermExec size=' . max([10, &columns * 1/2]) . " direction=vertical cmd=' yarn test:jest " . expand('%') . ' -t ' . funcs#jest_context() . ' --coverage --coverageReporters=text -u' . "'"
+    return 'lua require("utils").term_exec([[ yarn test:jest ' . expand('%') . ' -t ' . funcs#jest_context() . ' --coverage --coverageReporters=text -u]], { win = { position = "right" } })'
   endif
   let run_command = {}
   let run_command['vim'] = 'source %'
   let run_command['lua'] = 'luafile %'
-  if exists(':TermExec')
-    let run_command['python'] = "TermExec cmd=' python3 \"%\"'"
-    let run_command['javascript'] = "TermExec cmd=' node \"%\"'"
-    let run_command['typescript'] = "TermExec cmd=' npx ts-node --esm \"%\"'"
-    let run_command['java'] = "TermExec cmd=' javac \"%\" && java -classpath \"%:p:h\" \"%:t:r\"'"
+  if has('nvim')
+    let run_command['python'] = 'lua require("utils").term_exec([[ python3 "' . expand('%') . '"]])'
+    let run_command['javascript'] = 'lua require("utils").term_exec([[ node "' . expand('%') . '"]])'
+    let run_command['typescript'] = 'lua require("utils").term_exec([[ npx ts-node --esm "' . expand('%') . '"]])'
+    let run_command['java'] = 'lua require("utils").term_exec([[ javac "' . expand('%') . '" && java -classpath "' . expand('%:p:h') . '" "' . expand('%:t:r') . '"]])'
   else
     let run_command['python'] = '!clear; python3 %'
     let run_command['javascript'] = '!clear; node %'
@@ -190,6 +190,9 @@ function! funcs#get_run_command() abort
 endfunction
 
 function! funcs#get_visual_selection()
+  if has('nvim')
+    return join(getregion(getpos("'<"), getpos("'>"), { 'type': visualmode() }), "\n")
+  endif
   let [line_start, column_start] = getpos("'<")[1:2]
   let [line_end, column_end] = getpos("'>")[1:2]
   if column_end > getcharpos("'>")[2]

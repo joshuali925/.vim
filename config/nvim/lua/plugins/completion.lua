@@ -41,26 +41,6 @@ return {
         end,
     },
     {
-        "monkoose/neocodeium",
-        event = "InsertEnter",
-        enabled = vim.env.ENABLE_CODEIUM ~= nil,
-        config = function()
-            vim.keymap.set("i", "<Right>", function()
-                if require("neocodeium").visible() then return require("neocodeium").accept() end
-                vim.api.nvim_feedkeys(vim.keycode("<Right>"), "n", false)
-            end)
-            vim.keymap.set("i", "<Down>", function()
-                if require("neocodeium").visible() then return require("neocodeium").cycle(1) end
-                vim.api.nvim_feedkeys(vim.keycode("<Down>"), "n", false)
-            end)
-            vim.keymap.set("i", "<Up>", function()
-                if require("neocodeium").visible() then return require("neocodeium").cycle(-1) end
-                vim.api.nvim_feedkeys(vim.keycode("<Up>"), "n", false)
-            end)
-            require("neocodeium").setup({ filetypes = require("states").qs_disabled_filetypes, silent = true, debounce = true })
-        end,
-    },
-    {
         "saghen/blink.cmp",
         version = "*",
         event = { "InsertEnter", "CmdlineEnter" },
@@ -73,7 +53,7 @@ return {
                 build = "make install_jsregexp",
                 config = function() -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
                     require("luasnip.loaders.from_vscode").lazy_load()
-                    require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.expand("~/.vim/config/snippets") } })
+                    require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.uv.os_homedir() .. "/.vim/config/snippets" } })
                 end,
             },
         },
@@ -98,6 +78,8 @@ return {
                 },
                 cmdline = {
                     preset = "default",
+                    ["<Down>"] = {},
+                    ["<Up>"] = {},
                     ["<C-space>"] = {},
                     ["<Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_next() end end, "fallback" },
                     ["<S-Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_prev() end end, "fallback" },
