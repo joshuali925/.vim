@@ -5154,3 +5154,22 @@ function M.untildone(command, should_restart_tmux_task, message)
     end)
 end
                                 require("states").untildone_count == 0 and "󰉡" or " " .. require("states").untildone_count,
+
+" =======================================================
+    {
+        "ramilito/kubectl.nvim",
+        opts = {
+            kubectl_cmd = {
+                cmd = "kubectl",
+                env = function()
+                    local result = {}
+                    local varNames = { "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "AWS_DEFAULT_REGION", "AWS_DEFAULT_OUTPUT" }
+                    for _, var in ipairs(varNames) do
+                        result[var] = os.getenv(var)
+                    end
+                    return result
+                end,
+            },
+        },
+    },
+

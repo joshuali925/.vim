@@ -10,7 +10,7 @@
 
 [alias]
 	configs = config --list --show-scope --show-origin
-	count = shortlog --summary --numbered --email
+	authors = shortlog --summary --numbered --email
 	untracked = ls-files --others --exclude-standard
 	ignored = ls-files --others --exclude-standard --ignored
 	exclude = !$EDITOR .git/info/exclude
@@ -39,7 +39,7 @@
 	clear = "!git add --all && git stash push --include-untracked --message 'auto backup'"
 	nuke = "!git clear && git reset --hard && git clean -fdx"
 	reset-to-remote = "!git clear && git reset --hard @{upstream}"
-	reset-to-merge-base = "!f() { local ref=${1:-HEAD} remote=${2:-origin}; echo \"Resetting to $remote/$ref\" >&2; git fetch \"$remote\" \"$ref\" && git reset \"$(git merge-base HEAD \"$remote/$ref\")\"; }; f"
+	reset-to-merge-base = "!f() { local ref=${1:-HEAD} remote=${2:-origin}; echo \"Resetting base against $remote/$ref\" >&2; git fetch \"$remote\" && git reset \"$(git merge-base HEAD \"$remote/$ref\")\"; }; f"
 	unshallow = "!if [[ \"$(git config --local --get remote.origin.partialclonefilter)\" = blob:none ]]; then git fetch --no-filter --refetch; else git remote set-branches origin '*' && git fetch -v && printf '\\nRun \"git fetch --unshallow\" to fetch all history\\n'; fi"
 	where = "!f() { printf \"\\e[0;36mClosest tag before ${*:-HEAD}:\\e[0m \"; git describe --tags --abbrev=0 \"${@:-HEAD}\"; printf \"\\e[0;36mBranches containing ${*:-HEAD}:\\e[0m\\n\"; git branch --color -a --contains \"${@:-HEAD}\"; }; f"
 	size = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | sed -n 's/^blob //p' | sort --numeric-sort --key=2 | cut -c 1-12,41- | $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest"  # use https://rtyley.github.io/bfg-repo-cleaner to remove

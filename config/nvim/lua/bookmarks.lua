@@ -144,6 +144,7 @@ function M.load_disk()
     local fd = vim.uv.fs_open(data_file, "r", 438)
     if not fd then return end
     M.bookmarks = vim.mpack.decode(assert(vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)))
+    vim.uv.fs_close(fd)
 
     for _, buf in ipairs(vim.tbl_filter(function(buf)
         return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf })

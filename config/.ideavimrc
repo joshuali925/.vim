@@ -50,11 +50,12 @@ nnoremap \ gt
 noremap gw [w
 noremap gb [b
 noremap ge ]w
+" cannot :omap custom text objects, :normal is not recursive in visual mode
+xnoremap iu ]b[wo]w
 nnoremap ciu ]b[wc]w
 nmap cau ciu
 nnoremap diu ]b[wd]w
 nmap dau diu
-" cannot :omap (:normal and v:count not implemented)
 nnoremap c2iu ]b[wc2]w
 nnoremap c3iu ]b[wc3]w
 nnoremap d2iu ]b[wd2]w
@@ -63,9 +64,9 @@ xnoremap il ^og_
 nnoremap cil v^og_c
 nnoremap dil v^og_d
 nnoremap yil v^og_y
+" with ;yil mapped, we need to wait for ;y to become "+y to use other combinations
 nnoremap <leader>yil v^og_"+y
 xnoremap al 0o$
-nnoremap <leader>yae vGoggV"+y
 xnoremap if v%va)ob
 nnoremap cif %va)obc
 nnoremap dif %va)obd
@@ -111,15 +112,16 @@ nnoremap <leader>Y "+y$
 nmap yc "xyygcc"xp
 noremap <leader>p "0p
 noremap <leader>P "0P
-map <leader>fs <Action>(GotoFile)
+map <leader>fd <Action>(GotoFile)
 map <leader>fu <Action>(FileStructurePopup)
 map <leader>fU <Action>(GotoSymbol)
 map <leader>fm <Action>(RecentLocations)
 map <leader>fM <Action>(RecentFiles)
-map <leader>fg <Action>(SearchEverywhere)
+map <leader>fg <Action>(FindInPath)
 nmap <leader>fj viw<Action>(FindInPath)
 xmap <leader>fj <Action>(FindInPath)
-map <leader>ff <Action>(GotoAction)
+map <leader>ff <Action>(SearchEverywhere)
+map <leader>fa <Action>(GotoAction)
 nnoremap <leader>fy :registers<CR>
 nnoremap <leader>n *N
 xnoremap <leader>n y/\V<C-r>"<CR>N

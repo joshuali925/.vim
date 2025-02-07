@@ -636,7 +636,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep Electron && open -a 'Visual Studio Code') || (ps p $(pgrep idea) | grep 'IDEA CE' && open -a 'IntelliJ IDEA CE') || (pgrep idea && open -a 'IntelliJ IDEA Ultimate') || (ps -p $(pgrep jetbrains_client) -o comm= | grep -o '.*\\.app' | xargs -n -I{} open -a '{}') || (pgrep '^Cursor$' && open -a 'Cursor')"
+              "shell_command": "(pgrep Electron && open -a 'Visual Studio Code') || (ps p $(pgrep idea) | grep 'IDEA CE' && open -a 'IntelliJ IDEA CE') || (pgrep idea && open -a 'IntelliJ IDEA Ultimate') || (ps -p $(pgrep jetbrains_client) -o comm= | grep -o '.*\\.app' | xargs -I{} open -a '{}') || (pgrep '^Cursor$' && open -a 'Cursor')"
             }
           ]
         },

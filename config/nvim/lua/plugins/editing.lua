@@ -73,6 +73,7 @@ return {
             { "<C-Down>", "<Cmd>lua require('multicursor-nvim').lineAddCursor(1)<CR>", mode = { "n", "x" } },
             { "<C-Up>", "<Cmd>lua require('multicursor-nvim').lineAddCursor(-1)<CR>", mode = { "n", "x" } },
             { "<C-Leftmouse>", "<Cmd>lua require('multicursor-nvim').handleMouse()<CR>" },
+            { "<C-LeftDrag>", "<Cmd>lua require('multicursor-nvim').handleMouseDrag()<CR>" },
             { "<leader>gv", "<Cmd>lua require('multicursor-nvim').restoreCursors()<CR>" },
             {
                 "<C-x>",

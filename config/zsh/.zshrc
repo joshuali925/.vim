@@ -72,7 +72,6 @@ setopt hist_find_no_dups
 setopt hist_expire_dups_first
 setopt hist_ignore_dups
 setopt hist_ignore_space
-setopt hist_reduce_blanks
 setopt hist_verify
 
 zstyle ':completion:*' completer _expand_alias _complete _ignored _approximate

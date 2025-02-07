@@ -92,10 +92,10 @@ function M.pick_filetypes(opts)
 end
 
 function M.file_manager()
-    local curr_file = vim.fn.expand("%")
-    local cmd = ([[yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="%s" "%s"]]):format("%s", curr_file ~= "" and curr_file or ".")
+    local curr = vim.fn.expand("%")
     local selection_path = os.tmpname()
-    local terminal = require("snacks.terminal").open(cmd:format(vim.fn.fnameescape(selection_path)), { win = { height = 0.9, width = 0.9 } })
+    local cmd = ([[yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="%s" "%s"]]):format(selection_path, curr ~= "" and curr or ".")
+    local terminal = require("snacks.terminal").open(cmd, { win = { height = 0.9, width = 0.9 } })
     local buf = terminal.buf                         -- terminal.buf is not available in TermClose callback
     vim.keymap.set("t", "<C-o>", function()
         local error = require("snacks.notify").error -- to suppress error
