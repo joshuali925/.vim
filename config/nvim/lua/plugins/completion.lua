@@ -76,7 +76,9 @@ return {
                     end,
                     "fallback",
                 },
-                cmdline = {
+            },
+            cmdline = {
+                keymap = {
                     preset = "default",
                     ["<Down>"] = {},
                     ["<Up>"] = {},

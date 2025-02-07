@@ -1,5 +1,6 @@
 return {
     { "eandrju/cellular-automaton.nvim", cmd = "CellularAutomaton", enabled = false },
+    -- TODO https://github.com/rachartier/tiny-glimmer.nvim
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "nvim-lua/plenary.nvim" },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
@@ -45,14 +46,14 @@ return {
             { "[m", "<Cmd>lua require('snacks.words').jump(-vim.v.count1, true)<CR>" },
             { "]m", "<Cmd>lua require('snacks.words').jump(vim.v.count1, true)<CR>" },
             { "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>", mode = { "n", "x" } },
-            { "<leader>b", "<Cmd>lua require('snacks.picker').explorer()<CR>" },
+            { "<leader>b", "<Cmd>lua require('snacks.explorer').reveal()<CR>" },
             { "q", "<Cmd>lua require('snacks.picker').buffers()<CR>" },
             { "<leader><C-p>", "<Cmd>lua require('snacks.picker').resume()<CR>" },
             { "<leader>fm", "<Cmd>lua require('snacks.picker').recent()<CR>" },
             { "<leader>f'", "<Cmd>lua require('snacks.picker').jumps()<CR>" },
             { "<leader>fb", "<Cmd>lua require('snacks.picker').grep_buffers()<CR>" },
             { "<leader>fb", ":<C-u>lua require('snacks.picker').grep_buffers({regex = false, live = false, on_show = function() vim.cmd.stopinsert() end, search = require('utils').get_visual_selection()})<CR>", mode = "x" },
-            { "<leader>fu", "<Cmd>lua require('snacks.picker').lsp_symbols()<CR>" },
+            { "<leader>fu", "<Cmd>lua require('snacks.picker')[require('lsp').is_active() and 'lsp_symbols' or 'treesitter']()<CR>" },
             { "<leader>fg", ":RgRegex " },
             { "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>", mode = "x" },
             { "<leader>fj", "<Cmd>lua require('snacks.picker').grep_word({search = function(picker) return '\\\\b' .. picker:word() .. '\\\\b' end})<CR>" },
@@ -169,6 +170,7 @@ return {
                     explorer = {
                         hidden = true,
                         ignored = true,
+                        follow_file = false,
                         win = {
                             input = { keys = { ["<Esc>"] = { "toggle_focus", mode = { "i", "n" } }, ["jk"] = { "toggle_focus", mode = { "i", "n" } } } },
                             list = {

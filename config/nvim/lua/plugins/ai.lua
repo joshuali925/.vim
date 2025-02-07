@@ -56,7 +56,7 @@ return {
                 chat = {
                     adapter = "my_openai",
                     keymaps = {
-                        send = { modes = { n = "<CR>", i = "<CR>" } },
+                        send = { modes = { n = "!", i = "!" } },
                         completion = { modes = { i = "<C-n>" } },
                     },
                 },

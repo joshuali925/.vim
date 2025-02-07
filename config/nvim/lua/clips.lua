@@ -20,6 +20,7 @@ local function load_disk()
     local fd = vim.uv.fs_open(data_file, "r", 438)
     if not fd then return end
     M.clips = vim.mpack.decode(assert(vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)))
+    vim.uv.fs_close(fd)
 end
 
 function M.setup()

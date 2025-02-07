@@ -27,6 +27,7 @@ return {
                     size = { width = math.max(20, vim.api.nvim_strwidth(default_value) + 15) },
                     border = { style = "rounded", text = { top = get_prompt_text(opts.prompt), top_align = "left" } },
                     win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
+                    buf_options = { filetype = "nui_input" },
                 }, {
                     default_value = default_value,
                     on_close = function() on_done(nil) end,

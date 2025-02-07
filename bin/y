@@ -27,7 +27,7 @@ if [[ -n $NVIM ]]; then
     done
   else
     while [[ -n $ppid ]]; do
-      read -r ppid tty comm < <(ps -p "$ppid" -o ppid=,tty=,comm=)
+      read -r ppid tty comm < <(ps -p "$ppid" -o ppid= -o tty= -o comm=)
       if [[ $comm = *nvim ]]; then
         otty="/dev/$tty" && [[ $otty != /dev/\?* ]] && break
       fi
@@ -38,7 +38,7 @@ fi
 otty="${otty:-$TTY}"
 # look upwards the process tree to find the first valid tty
 while [[ -z $otty ]] || [[ $otty = /dev/\?* ]] && [[ -n $ppid ]]; do
-  read -r ppid tty < <(ps -p "$ppid" -o ppid=,tty=)
+  read -r ppid tty < <(ps -p "$ppid" -o ppid= -o tty=)
   otty="/dev/$tty"
 done
 

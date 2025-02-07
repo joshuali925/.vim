@@ -60,6 +60,7 @@ alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
 alias venv='deactivate 2> /dev/null; findup venv >&2 || python3 -m venv venv; source "$(findup venv)/bin/activate"'
 alias gnpm='npm --prefix ~/.local/lib/node-packages'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
+alias nlua='nvim -n -i NONE -u NONE -l'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
@@ -121,17 +122,17 @@ alias gra-fork="git remote add fork \"\$(git remote get-url origin | sed 's,^\(h
 alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
-alias grt='cd "$(git rev-parse --show-toplevel || echo ".")"'
 alias grv='git remote -v'
 alias gs='git status -sb'
 alias gst='git stash'
 alias gst-save='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller'
+alias gcd='cd "$(git rev-parse --show-toplevel || echo ".")"'
 alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
 
 gc() {
   [[ $# -eq 0 ]] && { git commit --signoff; return $?; }
-  local args=() message
+  local args=() arg message
   for arg in "$@"; do
     [[ $arg != -* ]] && message+="$arg " || args+=("$arg")
   done
@@ -303,6 +304,7 @@ print-ascii() {
 }
 
 print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 https://github.com/jbranchaud/til/blob/b1994cfe2144193f46f8c61f20f9a583085ca0aa/unix/display-all-the-terminal-colors.md
+  local x i a
   for x in {0..8}; do for i in {30..37}; do for a in {40..47}; do printf "\e[$x;$i;$a""m\\\e[$x;$i;$a""m\e[0;37;40m "; done; echo; done; done
   printf '\e[0m\n\nForeground 8 colors\n'
   printf "$(tput setaf 0) black $(tput setaf 1) red $(tput setaf 2) green $(tput setaf 3) yellow $(tput setaf 4) blue $(tput setaf 5) magenta $(tput setaf 6) cyan $(tput setaf 7) white $(tput sgr 0)"
@@ -334,6 +336,7 @@ print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f729679
 }
 
 x() {
+  local arg
   for arg in "$@"; do
     if [[ -f $arg ]]; then
       xtract "$arg"
@@ -344,6 +347,7 @@ x() {
 }
 
 X() {  # extract to a directory / compress without top directory
+  local arg
   for arg in "$@"; do
     if [[ -f $arg ]]; then
       local dir="${arg%.*}"
@@ -400,25 +404,26 @@ vrg() {
   $EDITOR -q <(rg --vimgrep "$@") -c "$pattern"  # won't work on mac: https://github.com/neovim/neovim/issues/21756
 }
 
-rf() {  # https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration, livegrep: rf [pattern] [flags]
-  local rest=() skip_args=0
+rf() {  # livegrep https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration, usage: rf [pattern] [flags], fzf-query: [pattern] -- [flags]
+  local rest=() arg
   for arg in "$@"; do
-    if [[ $skip_args -eq 1 ]]; then rest+=("$arg"); continue; fi
-    case $arg in -*) rest+=("$arg") ;; *) local init_query="$arg"; skip_args=1 ;; esac
+    if [[ -n $skip_args ]]; then rest+=("$arg"); continue; fi
+    case $arg in -*) rest+=("$arg") ;; *) local init_query="$arg"; local skip_args=1 ;; esac
   done
   local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "${rest[@]}")"
-  fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --query="${init_query:-}" \
-    --header="Press C-s to toggle fzf. Flags: $rg_prefix" --prompt='ripgrep> ' --delimiter=: \
-    --bind='ctrl-s:transform:[[ {fzf:prompt} = "ripgrep> " ]] && echo "unbind(change)+change-prompt(fzf> )+enable-search+clear-query" || echo "change-prompt(ripgrep> )+disable-search+clear-query+reload('"$rg_prefix"' -- {q} || true)+rebind(change)"' \
-    --bind="start:reload:$rg_prefix $(printf %q "${init_query:-}")" \
-    --bind="change:reload:sleep 0.2; $rg_prefix -- {q}" \
+  # disable default command and escape `*` in flags (use: pattern -- -g *.sh). quotes around `*` is required in shell but won't work in rf or snacks.picker
+  : | fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --delimiter=: --prompt='ripgrep> ' --query="${init_query:-}" \
+    --bind="start,change:transform:{ read -r pat; read -r flags; } < <(awk -F' -- ' '{gsub(/\\*/, \"\\\\*\", \$2); print \$1; print \$2}' <<<{q}) && printf 'change-header(Press C-s to toggle fzf, C-o to close fzf and open in editor. Command: $rg_prefix %s -- %q)+reload:$rg_prefix %s -- %q\n' \"\$flags\" \"\$pat\" \"\$flags\" \"\$pat\"" \
+    --bind="ctrl-s:transform:[[ {fzf:prompt} = 'ripgrep> ' ]] && echo 'unbind(change)+change-prompt(fzf:{q}> )+enable-search+clear-query' || echo 'change-prompt(ripgrep> )+disable-search+clear-query+reload($rg_prefix -- {q} || true)+rebind(change)'" \
     --bind="enter:execute(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
+    --bind="ctrl-o:become(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
     --bind='tab:toggle+up,btab:toggle+down' \
     --preview='bat --color=always --highlight-line {2} -- {1}' \
     --preview-window='up,+{2}+3/3,~3'
-  }
+}
 
 rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripgrep-multi-line-chunks, do not do livegrep as sed/perl processing is slow
+  local arg
   for arg in "$@"; do [[ $arg != -* ]] && local search="-c 'let @/=\"$(printf '%q' "$arg")\"' -c 'set hlsearch'" && break; done
   rg --pretty "$@" 2>&1 | sed ':a;N;$!ba;s/\n\n/\x00/g' | fzf --ansi --read0 --height=100% --list-border=none --gap --bind="enter:execute(head -n 2 <<< {} | awk -F: 'NR==1 {file=\$1} NR==2 {print \"+\" \$1 \" -- \" file}' | xargs $EDITOR $search)" --bind='tab:down,btab:up'
 }
@@ -451,6 +456,7 @@ t() {  # create, restore, or switch tmux session
 
 tmux-rerun() {
   if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <command>" >&2; return 1; fi
+  local pane
   for pane in $(tmux list-panes -a -f "#{==:#{pane_current_command},$1}" -F '#D'); do  # for index-based ref use #S:#I.#P
     tmux send-keys -t "${pane}" -X cancel 2>/dev/null
     tmux send-keys -t "${pane}" c-c
@@ -476,7 +482,7 @@ env() {
 }
 
 jo() {  # basic implementation of https://github.com/jpmens/jo
-  local args=()
+  local args=() arg
   for arg in "$@"; do
     args+=(--arg "$(cut -d= -f1 <<< "$arg")" "$(cut -d= -f2- <<< "$arg")")
   done

@@ -45,6 +45,7 @@
       "local fd = vim.uv.fs_open(${1:path}, \"r\", 438)",
       "if not fd then return end",
       "local content = vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)",
+      "vim.uv.fs_close(fd)",
       "if not content then return end"
     ]
   },

@@ -20,6 +20,7 @@ vim.g.qs_filetype_blacklist = {
     "fugitiveblame",
     "dropbar_menu",
     "minifiles",
+    "nui_input",
     "noice",
     "snacks_dashboard",
     "snacks_picker_input",

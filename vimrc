@@ -43,7 +43,7 @@ let g:netrw_alto = 0
 let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
 let g:markdown_fenced_languages = [ 'javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c', 'bash=sh' ]
-let g:RooterCmd = 'Grt'
+let g:RooterCmd = 'Gcd'
 let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100%'
 
 set backspace=eol,start,indent
@@ -333,7 +333,7 @@ command! CountSearch %s///gn
 command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute 'normal! ``'
 command! ShowHighlightGroups echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 command! DiffOrig execute 'diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=' . &filetype . ' | read ++edit # | 0d_ | diffthis'
-command! Grt silent execute 'cd ' . fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' ') . ';'), ':h'))
+command! Gcd silent execute 'cd ' . fnameescape(fnamemodify(finddir('.git', escape(expand('%:p:h'), ' ') . ';'), ':h'))
 command! -nargs=* Gdiff execute 'diffthis | vnew | setlocal buftype=nofile bufhidden=wipe filetype=' . &filetype . ' | file !git\ show\ <args>:' . expand('%:~:.') . ' | silent read !git show <args>:' . expand('%:~:.') | 0d_ | diffthis
 command! -nargs=* Gblame call setbufvar(winbufnr(popup_atcursor(systemlist('cd ' . shellescape(fnamemodify(resolve(expand('%:p')), ':h')) . ' && git log --no-merges -n 1 -L ' . shellescape(line('v') . ',' . line('.') . ':' . resolve(expand('%:p')))), { 'padding': [1,1,1,1], 'pos': 'botleft', 'wrap': 0 })), '&filetype', 'git')
 command! -complete=command -nargs=* -range -bang S execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | if <line1> < <line2> | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr('%') . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | elseif <q-args> != '' | redir @x | <args> | redir END | put x | endif | 1d
@@ -476,7 +476,7 @@ nnoremap <expr> yov ':setlocal virtualedit=' . (&virtualedit == 'block' ? 'all' 
 nnoremap <expr> yod &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 nnoremap <expr> yop &paste ? ':setlocal nopaste<CR>' : ':setlocal paste<CR>o'
 nnoremap yoF :call <SID>ToggleTail()<CR>
-nnoremap <expr> yog g:RooterCmd == '' ? ':execute "Grt" <bar> let g:RooterCmd = "Grt" <bar> echo "Git rooter enabled"<CR>' : ':silent execute "cd " . (expand("%") == "" ? $PWD : expand("%:p:h")) <bar> let g:RooterCmd = "" <bar> echo "Git rooter disabled"<CR>'
+nnoremap <expr> yog g:RooterCmd == '' ? ':execute "Gcd" <bar> let g:RooterCmd = "Gcd" <bar> echo "Git rooter enabled"<CR>' : ':silent execute "cd " . (expand("%") == "" ? $PWD : expand("%:p:h")) <bar> let g:RooterCmd = "" <bar> echo "Git rooter disabled"<CR>'
 nnoremap <expr> [<Space> 'mx' . v:count1 . 'O<Esc>`x'
 nnoremap <expr> ]<Space> 'mx' . v:count1 . 'o<Esc>`x'
 nnoremap [p O<C-r>"<Esc>
