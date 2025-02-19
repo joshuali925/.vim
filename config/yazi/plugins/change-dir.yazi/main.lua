@@ -18,7 +18,7 @@ end
 local function git_root()
     local output, err = Command("git"):args({ "rev-parse", "--show-toplevel" }):output()
     local stdout = read_stdout(output, err)
-    if stdout ~= nil then ya.manager_emit("cd", { stdout }) end
+    if stdout ~= nil then ya.mgr_emit("cd", { stdout }) end
 end
 
 local function fzf(type, arg) -- https://github.com/sxyazi/yazi/blob/main/yazi-plugin/preset/plugins/fzf.lua
@@ -29,7 +29,7 @@ local function fzf(type, arg) -- https://github.com/sxyazi/yazi/blob/main/yazi-p
         :stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):output()
 
     local stdout = read_stdout(output, err)
-    if stdout ~= nil then ya.manager_emit(stdout:match("[/\\]$") and "cd" or "reveal", { stdout }) end
+    if stdout ~= nil then ya.mgr_emit(stdout:match("[/\\]$") and "cd" or "reveal", { stdout }) end
 end
 
 local function z()
@@ -40,7 +40,7 @@ local function z()
         :stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):output()
 
     local stdout = read_stdout(output, err)
-    if stdout ~= nil then ya.manager_emit("cd", { stdout }) end
+    if stdout ~= nil then ya.mgr_emit("cd", { stdout }) end
 end
 
 return {

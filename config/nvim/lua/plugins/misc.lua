@@ -1,6 +1,5 @@
 return {
     { "eandrju/cellular-automaton.nvim", cmd = "CellularAutomaton", enabled = false },
-    -- TODO https://github.com/rachartier/tiny-glimmer.nvim
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "nvim-lua/plenary.nvim" },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
@@ -20,7 +19,7 @@ return {
         end,
     },
     {
-        "mistweaverco/kulala.nvim", -- TODO mistweaverco/kulala-ls
+        "mistweaverco/kulala.nvim",
         init = function()
             vim.api.nvim_create_augroup("KulalaAutoCommands", {})
             vim.api.nvim_create_autocmd("FileType", {
@@ -48,7 +47,10 @@ return {
             { "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>", mode = { "n", "x" } },
             { "<leader>b", "<Cmd>lua require('snacks.explorer').reveal()<CR>" },
             { "q", "<Cmd>lua require('snacks.picker').buffers()<CR>" },
-            { "<leader><C-p>", "<Cmd>lua require('snacks.picker').resume()<CR>" },
+            { "<leader><C-p>", function()
+                require("snacks.picker").resume()
+                vim.schedule(vim.cmd.stopinsert)
+            end },
             { "<leader>fm", "<Cmd>lua require('snacks.picker').recent()<CR>" },
             { "<leader>f'", "<Cmd>lua require('snacks.picker').jumps()<CR>" },
             { "<leader>fb", "<Cmd>lua require('snacks.picker').grep_buffers()<CR>" },
@@ -56,7 +58,7 @@ return {
             { "<leader>fu", "<Cmd>lua require('snacks.picker')[require('lsp').is_active() and 'lsp_symbols' or 'treesitter']()<CR>" },
             { "<leader>fg", ":RgRegex " },
             { "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>", mode = "x" },
-            { "<leader>fj", "<Cmd>lua require('snacks.picker').grep_word({search = function(picker) return '\\\\b' .. picker:word() .. '\\\\b' end})<CR>" },
+            { "<leader>fj", "<Cmd>lua require('snacks.picker').grep_word({args = {'--word-regexp'}})<CR>" },
             { "<leader>fj", "<Cmd>lua require('snacks.picker').grep_word()<CR>", mode = "x" },
             { "<leader>f!", "<Cmd>lua require('snacks.picker').git_status()<CR>" },
             { "<leader>fq", "<Cmd>lua require('snacks.picker').qflist()<CR>" },
@@ -155,7 +157,7 @@ return {
                 layout = { preset = "dropdown" },
                 sources = {
                     files = { hidden = true, layout = { preset = "vscode" } },
-                    smart = { hidden = false, layout = { preset = "vscode" }, filter = { cwd = true } }, -- TODO fixme: not preserving " mark with hidden = true
+                    smart = { hidden = true, layout = { preset = "vscode" }, filter = { cwd = true } },
                     buffers = { current = false, layout = { preset = "vscode" } },
                     recent = { matcher = { frecency = false }, layout = { preset = "vscode" } },
                     commands = { layout = { preset = "vscode" } },
@@ -212,8 +214,8 @@ return {
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.word_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
-            { "g<", "cxiacxiNag", remap = true },
-            { "g>", "cxiaviao<C-c>cxinag", remap = true },
+            { "g<", "cxiacxiNa", remap = true },
+            { "g>", "cxiacxiPa", remap = true },
             { "<leader>gd", "<Cmd>lua require('mini.diff').toggle_overlay()<CR>" },
             { "<leader>ga", "<leader>gAig", remap = true },
             { "<leader>gu", "<leader>gUig", remap = true },

@@ -2,7 +2,7 @@
 # shellcheck disable=1090,2015,2155
 
 NODE_VERSION=18.19.0
-JDK_VERSION=adoptopenjdk-17.0.7+7
+JDK_VERSION=21
 BACKUP_DIR=$HOME/config-backup
 
 CYAN='\033[0;36m'
@@ -98,15 +98,6 @@ link_file() {
   log "Linked $sourceFile to $destFile"
 }
 
-install_asdf() {
-  if [[ ! -s ~/.asdf/asdf.sh ]]; then
-    log '\nInstalling asdf..'
-    echo 'legacy_version_file = yes' > ~/.asdfrc
-    git clone https://github.com/asdf-vm/asdf.git --depth=1 ~/.asdf
-    source ~/.asdf/asdf.sh
-  fi
-}
-
 install_devtools() {
   log '\nInstalling development tools..'
   if [[ $OSTYPE = linux-android ]]; then
@@ -159,7 +150,6 @@ install_devtools() {
     # DarkModeBuddy: https://github.com/insidegui/DarkModeBuddy
     # update wezterm: brew upgrade --cask wezterm --no-quarantine --greedy-latest
   fi
-  install_asdf
 }
 
 install_dotfiles() {
@@ -228,17 +218,14 @@ install_docker() {
 }
 
 install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
-  install_asdf
   log "Installing java $JDK_VERSION.."
-  asdf plugin add java || true
-  asdf install java "$JDK_VERSION"
-  asdf global java "$JDK_VERSION"
-  export JAVA_HOME="$(asdf where java)"
+  mise use -g "java@$JDK_VERSION"
+  export JAVA_HOME="$(mise where java)"
   echo "export JAVA_HOME=\"$JAVA_HOME\"" | tee -a ~/.bashrc ~/.zshrc
   log "Installed $JDK_VERSION, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
 }
 
-install_python() {  # environment for asdf install from source: https://github.com/pyenv/pyenv/wiki#suggested-build-environment
+install_python() {  # environment for install from source: https://github.com/pyenv/pyenv/wiki#suggested-build-environment
   log "Installing python.."
   if [[ $PLATFORM:$PACKAGE_MANAGER = linux:yum ]]; then
     sudo yum install -y python3-devel
@@ -255,11 +242,8 @@ install_python() {  # environment for asdf install from source: https://github.c
 }
 
 install_node() {
-  install_asdf
   log "Installing node $NODE_VERSION.."
-  asdf plugin add nodejs || true
-  asdf install nodejs "$NODE_VERSION"
-  asdf global nodejs "$NODE_VERSION"
+  mise use -g "nodejs@$NODE_VERSION"
   log 'Installing node packages..'
   mkdir -p ~/.local/lib/node-packages
   [[ ! -f ~/.local/lib/node-packages/package.json ]] && echo '{}' >> ~/.local/lib/node-packages/package.json
@@ -323,7 +307,7 @@ install_pm2() {
   fi
   npm --prefix ~/.local/lib/node-packages install pm2
   pm2 set pm2:autodump true
-  sudo -E "$(asdf which node)" "$(which pm2)" startup systemd -u "$USER" --hp "$HOME"
+  sudo -E "$(mise which node)" "$(which pm2)" startup systemd -u "$USER" --hp "$HOME"
 }
 
 install_ssh-key() {

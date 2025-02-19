@@ -12,6 +12,13 @@ tab_size = 4
 max_width = 1600
 max_height = 1900
 
+[plugin]
+prepend_previewers = [
+  { mime = "application/gzip", run = "tar" },
+  { mime = "application/bzip2", run = "tar" },
+  { mime = "application/xz", run = "tar" },
+]
+
 [open]
 prepend_rules = [
   { name = "*/", use = ["open", "reveal"] },

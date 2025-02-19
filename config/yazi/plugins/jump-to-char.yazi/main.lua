@@ -23,9 +23,9 @@ return {
 
         local kw = escape(cands[idx].on)
         if changed(kw) then
-            ya.manager_emit("find_do", { ("^[%s%s]"):format(kw:lower(), kw:upper()) })
+            ya.mgr_emit("find_do", { ("^[%s%s]"):format(kw:lower(), kw:upper()) })
         else
-            ya.manager_emit("find_arrow", {})
+            ya.mgr_emit("find_arrow", {})
         end
     end,
 }

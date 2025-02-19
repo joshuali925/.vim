@@ -38,7 +38,8 @@ return {
                 pscrolldown = "<C-f>", -- press zN to create new list excluding marked items
                 pscrollup = "<C-b>",   -- press < and > to switch between lists
                 ptoggleitem = "",      -- press z<Tab> to clear marks
-                ptoggleauto = "<C-p>",
+                ptoggleauto = "yop",
+                split = "",
                 vsplit = "",
                 tab = "",
                 tabb = "",
@@ -57,6 +58,7 @@ return {
                 { "}", function() require("quicker").expand({ before = 2, after = 2, add_to_existing = true }) end, desc = "Expand quickfix context" },
                 { "{", function() require("quicker").collapse() end, desc = "Collapse quickfix context" },
             },
+            max_filename_width = function() return math.floor(math.min(95, vim.o.columns / 4)) end,
         },
     },
     {

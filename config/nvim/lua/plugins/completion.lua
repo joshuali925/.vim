@@ -62,7 +62,6 @@ return {
             completion = {
                 documentation = { auto_show = true, auto_show_delay_ms = 150 },
                 menu = { draw = { treesitter = { "lsp" } } },
-                list = { selection = { preselect = function(ctx) return ctx.mode ~= "cmdline" end, auto_insert = function(ctx) return ctx.mode == "cmdline" end } },
             },
             keymap = {
                 preset = "enter",
@@ -78,11 +77,15 @@ return {
                 },
             },
             cmdline = {
+                completion = {
+                    list = { selection = { preselect = function(ctx) return vim.fn.getcmdtype() ~= ":" end } },
+                    menu = { auto_show = function(ctx) return vim.fn.getcmdtype() == ":" end },
+                },
                 keymap = {
-                    preset = "default",
                     ["<Down>"] = {},
                     ["<Up>"] = {},
                     ["<C-space>"] = {},
+                    ["<C-n>"] = { "show_and_insert", "select_next" },
                     ["<Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_next() end end, "fallback" },
                     ["<S-Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_prev() end end, "fallback" },
                 },

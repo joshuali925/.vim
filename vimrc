@@ -235,6 +235,7 @@ xnoremap < <gv
 xnoremap > >gv
 nnoremap gf gF
 nnoremap gF gf
+xnoremap g/ <Esc>/\%><C-r>=line("'<") - 1<CR>l\%<<C-r>=line("'>") + 1<CR>l
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
 xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>
 nnoremap <expr> zn v:count > 0 ? ':set foldlevel=' . v:count . '<CR>' : ':%foldclose<CR>'

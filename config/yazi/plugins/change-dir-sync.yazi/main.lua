@@ -10,14 +10,14 @@ local function parent(offset)
     for i = start, finish, step do
         local target = parent.files[i]
         if target and target.cha.is_dir then
-            return ya.manager_emit("cd", { target.url })
+            return ya.mgr_emit("cd", { target.url })
         end
     end
 end
 
 local function follow()
     local h = cx.active.current.hovered
-    if h.link_to ~= nil then return ya.manager_emit("reveal", { tostring(h.link_to) }) end
+    if h.link_to ~= nil then return ya.mgr_emit("reveal", { tostring(h.link_to) }) end
 end
 
 

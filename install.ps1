@@ -8,7 +8,7 @@ scoop bucket add extras
 
 scoop bucket add versions
 scoop bucket add java
-scoop install openjdk14
+scoop install openjdk21
 scoop install python
 reg import "$env:USERPROFILE\scoop\apps\python\current\install-pep-514.reg"
 scoop install nodejs18@18.19.0

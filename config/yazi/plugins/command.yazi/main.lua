@@ -19,7 +19,7 @@ local get_hovered_file = ya.sync(function() return tostring(cx.active.current.ho
 
 local function shell(command, pause)
     -- NOTE keep commands POSIX compliant, on ubuntu the shell is 'sh'. need to use bash to support `read` flags
-    return ya.manager_emit("shell", { command .. (pause and "; echo Press any key to continue; bash -ic 'read -n 1 -s _'" or ""), confirm = true, block = true })
+    return ya.mgr_emit("shell", { command .. (pause and "; echo Press any key to continue; bash -ic 'read -n 1 -s _'" or ""), confirm = true, block = true })
 end
 
 local function chmod_stat()
@@ -54,8 +54,8 @@ return {
         if command:match("^chown%?$") then return chown_stat() end
         if command:match("^sudorm$") then return shell('sudo rm -r "$@"') end
         if command:match("^size$") then return shell([[du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }']], true) end
-        if command:match("^wav$") then return shell('ffmpeg -i "$0" -codec copy "${0%.*}.wav"') end
-        if command:match("^sftp$") then return shell([[echo " echo \"get '$0'\" | sftp -r " | y]]) end
+        if command:match("^wav$") then return shell('ffmpeg -i "$0" -codec copy "${0%.*}.wav" || ffmpeg -i "$0" -codec copy "${0%.*}.ogg"') end
+        if command:match("^sftp$") then return shell([[printf " echo \"get '$0'\" | sftp -r " | y]]) end
         if command:match("^tarcopy$") then return shell([[printf " printf $(XZ_OPT=-9e tar cJf - "${@##*/}" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end -- only works if the selected files are in the same directory
 
         local function compress_cmd(cmd, ext)

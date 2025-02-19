@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/mise ]]; then
+  BIN_INIT=1 mise completion zsh > ~/.vim/config/zsh/completions/_mise || true
+  BIN_INIT=1 mise use -g usage || true
+fi
+
+install-from-github mise jdx/mise linux-x64-musl.tar.xz linux-arm64-musl.tar.xz macos-x64.tar.xz macos-arm64.tar.xz '--strip-components=2 mise/bin/mise' "$@"
