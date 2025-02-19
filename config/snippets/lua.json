@@ -19,7 +19,7 @@
     "body": [
       "local start_time = vim.fn.reltime()",
       "$0",
-      "print(string.format(\"Loop took %s seconds to run\", vim.fn.reltimestr(vim.fn.reltime(start_time))))"
+      "vim.notify(string.format(\"Loop took %s seconds to run\", vim.fn.reltimestr(vim.fn.reltime(start_time))))"
     ]
   },
   "Tail to file": {

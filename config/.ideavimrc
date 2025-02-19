@@ -187,17 +187,21 @@ omap ai <Plug>textobj-indent-aI
 xmap aI <Plug>textobj-indent-ai
 omap aI <Plug>textobj-indent-ai
 
-" javascript
-nnoremap <leader>l mx"xyiwoconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
-xnoremap <leader>l mx"xyoconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
-nnoremap <leader>L mx"xyiwOconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
-xnoremap <leader>L mx"xyOconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+" some issues with vim undo
+nmap u <Action>($Undo)
+nmap <C-r> <Action>($Redo)
 
-" " java
-" nnoremap <leader>l mx"xyiwoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
-" xnoremap <leader>l mx"xyoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
-" nnoremap <leader>L mx"xyiwOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
-" xnoremap <leader>L mx"xyOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+" " javascript
+" nnoremap <leader>l mx"xyiwoconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+" xnoremap <leader>l mx"xyoconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+" nnoremap <leader>L mx"xyiwOconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+" xnoremap <leader>L mx"xyOconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x
+
+" java
+nnoremap <leader>l mx"xyiwoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+xnoremap <leader>l mx"xyoSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+nnoremap <leader>L mx"xyiwOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
+xnoremap <leader>L mx"xyOSystem.out.println("[" + getClass().getSimpleName() + " " + (<C-r>x).getClass().getSimpleName() + "] ❗<C-r>x: " + <C-r>x);<Esc>`x
 
 " " kotlin
 " nnoremap <leader>l mx"xyiwoprintln("❗<C-r>x ${<C-r>x}")<Esc>`x

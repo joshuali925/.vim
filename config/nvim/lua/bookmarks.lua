@@ -180,7 +180,7 @@ function M.setup()
     end)
     vim.api.nvim_create_augroup("Bookmarks", {})
     vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", callback = M.dump_disk })
-    vim.api.nvim_create_autocmd("BufUnload", { group = "Bookmarks", callback = function(e) M.dump_cache(e.buf, e.match) end })
+    vim.api.nvim_create_autocmd("BufDelete", { group = "Bookmarks", callback = function(e) M.dump_cache(e.buf, e.match) end })
     vim.api.nvim_create_autocmd("BufReadPost", { group = "Bookmarks", callback = function(e) M.load_cache(e.buf, e.match) end })
     if vim.v.vim_did_enter == 1 then
         M.load_disk()

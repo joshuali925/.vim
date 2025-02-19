@@ -67,7 +67,7 @@ prepend_keymap = [
   { on = ["m", "t"], run = 'shell --block -- less -RiM +F "$0"', desc = "Tail" },
   { on = ["m", "c"], run = 'shell --block -- "$EDITOR" ~/.vim/config/yazi/keymap.toml', desc = "Edit config" },
   { on = ["m", "y"], run = "shell -- printf $0 | y", desc = "Copy the absolute path" },
-  { on = ["m", "Y"], run = '''shell -- for file in "$@"; do basename "$file" | sed "s/^/'/;s/$/'/"; done | paste -s -d " " - | y''', desc = "Copy file names" },
+  { on = ["m", "Y"], run = '''shell -- for file in "$@"; do name="${file##*/}"; [[ "$name" =~ [[:space:]*?\\[\{\`\$\\\%\#\'\"\|\!\<] ]] && name="'$name'"; printf "%s " "$name"; done | sed 's/ $//' | y''', desc = "Copy file names" },
   { on = ["m", "p"], run = "link --relative", desc = "Symlink the relative path of files" },
   { on = ["m", "P"], run = "link", desc = "Symlink the absolute path of files" },
   { on = ["m", "d", "5"], run = 'shell --block -- md5sum "$@"; echo Press any key to continue; bash -c "read -n 1 -s _"', desc = "Show selected files md5sum" },

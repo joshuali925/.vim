@@ -164,6 +164,7 @@ vim.keymap.set({ "n", "x", "o" }, "gq", "gw")
 vim.keymap.set("n", "zn", "v:count > 0 ? '<Cmd>set foldlevel=' . v:count . '<CR>' : '<Cmd>%foldclose<CR>'", { expr = true, replace_keycodes = false })
 vim.keymap.set("n", "gf", "gF")
 vim.keymap.set("n", "gF", "gf")
+vim.keymap.set("x", "g/", [[<Esc>/\%><C-r>=line("'<") - 1<CR>l\%<<C-r>=line("'>") + 1<CR>l]]) -- search in fixed selection range, /\%V will search in the most recent selection dynamically
 vim.keymap.set("n", "zh", "zhz", { remap = true })
 vim.keymap.set("n", "zl", "zlz", { remap = true })
 vim.keymap.set("n", "ZX", function()
@@ -298,6 +299,7 @@ vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
 vim.api.nvim_create_user_command("JSON", [[keeppatterns %s/\n\+\%$//e | set shiftwidth=2 filetype=json | Prettier]], {})
+vim.api.nvim_create_user_command("CfilterNoTest", [[packadd cfilter | Cfilter! /test/]], {})
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript", [""] = "json" }
     local parser = args.args ~= "" and args.args or vim.bo.filetype

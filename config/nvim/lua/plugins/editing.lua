@@ -11,6 +11,15 @@ return {
                 ["J"] = { add = function() return { { "JSON.stringify(" }, { ", null, 2)" } } end },
                 ["l"] = { add = function() return { { "console.log('❗', " }, { ")" } } end },
                 ["v"] = { add = function() return { { "${" }, { "}" } } end },
+                ["i"] = { -- modified to make right delimiter optional. ref https://github.com/kylechui/nvim-surround/blob/ae298105122c87bbe0a36b1ad20b06d417c0433e/lua/nvim-surround/config.lua#L96
+                    add = function()
+                        local left_delimiter = require("nvim-surround.input").get_input("Enter the left delimiter: ")
+                        local right_delimiter = left_delimiter and left_delimiter ~= "" and require("nvim-surround.input").get_input("Enter the right delimiter: ")
+                        if left_delimiter then return { { left_delimiter }, { right_delimiter ~= "" and right_delimiter or left_delimiter } } end
+                    end,
+                    find = function() end,
+                    delete = function() end,
+                },
             },
         },
     },
@@ -119,11 +128,5 @@ return {
             end },
         },
         config = true,
-    },
-    {
-        "HakonHarnes/img-clip.nvim",
-        enabled = vim.env.SSH_CLIENT == nil,
-        keys = { { "<leader>p", "<Esc><Cmd>PasteImage<CR>", mode = "i" } },
-        opts = { default = { use_cursor_in_template = false, insert_mode_after_paste = false, relative_to_current_file = true } },
     },
 }

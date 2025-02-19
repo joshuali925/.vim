@@ -24,6 +24,7 @@ function M.lsp_install_all()
     local installed = require("mason-lspconfig").get_installed_servers()
     local not_installed = vim.tbl_filter(function(server) return not vim.tbl_contains(installed, server) end, required)
     if #not_installed > 0 then
+        vim.system({ "npm", "--prefix", "~/.local/lib/node-packages", "install", "@mistweaverco/kulala-ls" }, { text = true }):wait() -- kulala_ls not in registry
         vim.cmd.LspInstall({ args = not_installed })
     else
         vim.cmd.Mason()
@@ -31,32 +32,32 @@ function M.lsp_install_all()
     vim.cmd.MasonInstall({ args = { "prettier", "shellcheck", "black" } })
 end
 
-function M.setup()
-    local function make_config()
-        local capabilities = vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), {
-            textDocument = { -- require('blink.cmp').get_lsp_capabilities()
-                completion = {
-                    completionItem = {
-                        commitCharactersSupport = false,
-                        deprecatedSupport = true,
-                        documentationFormat = { "markdown", "plaintext" },
-                        insertReplaceSupport = true,
-                        insertTextModeSupport = { valueSet = { 1 } },
-                        labelDetailsSupport = true,
-                        preselectSupport = false,
-                        resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } },
-                        snippetSupport = true,
-                        tagSupport = { valueSet = { 1 } },
-                    },
-                    completionList = { itemDefaults = { "commitCharacters", "editRange", "insertTextFormat", "insertTextMode", "data" } },
-                    contextSupport = true,
-                    insertTextMode = 1,
+local function make_config()
+    local capabilities = vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), {
+        textDocument = { -- require('blink.cmp').get_lsp_capabilities()
+            completion = {
+                completionItem = {
+                    commitCharactersSupport = false,
+                    deprecatedSupport = true,
+                    documentationFormat = { "markdown", "plaintext" },
+                    insertReplaceSupport = true,
+                    insertTextModeSupport = { valueSet = { 1 } },
+                    labelDetailsSupport = true,
+                    preselectSupport = false,
+                    resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } },
+                    snippetSupport = true,
+                    tagSupport = { valueSet = { 1 } },
                 },
+                completionList = { itemDefaults = { "commitCharacters", "editRange", "insertTextFormat", "insertTextMode", "data" } },
+                contextSupport = true,
+                insertTextMode = 1,
             },
-        })
-        return { capabilities = capabilities, flags = { debounce_text_changes = 250 } }
-    end
+        },
+    })
+    return { capabilities = capabilities, flags = { debounce_text_changes = 250 } }
+end
 
+function M.setup()
     local function register_server(server, server_config)
         if not vim.tbl_contains(disabled_servers, server) then
             local config = vim.tbl_deep_extend("force", make_config(), server_config or {})
@@ -69,16 +70,12 @@ function M.setup()
     require("mason-lspconfig").setup_handlers({
         register_server,
         jdtls = function()
-            local project_name = vim.fn.fnamemodify(vim.uv.cwd(), ":p:h:t")
-            local workspace_dir = vim.fn.stdpath("cache") .. "/java/workspace/" .. project_name
-            os.execute("mkdir -p " .. workspace_dir)
+            local workspace_dir = vim.fn.stdpath("cache") .. "/java/workspace/" .. vim.uv.cwd():match("^.+/(.+)$")
             local install_path = require("mason-registry").get_package("jdtls"):get_install_path()
-            local os = vim.fn.has("macunix") and "mac" or "linux"
+            local platform = vim.fn.has("macunix") and "mac" or "linux"
             register_server("jdtls", {
-                -- https://astronvim.com/nightly/Recipes/advanced_lsp#java-nvim-jdtls
-                cmd = {     -- needs python3.9+ if not using custom cmd, or remove `action=argparse.BooleanOptionalAction` in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py
-                    "java", -- needs java 17, or use :LspInstall jdtls@1.12.0
-                    -- vim.uv.os_homedir() .. "/.asdf/installs/java/corretto-17.0.4.8.1/bin/java",
+                cmd = {
+                    "java",
                     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
                     "-Dosgi.bundles.defaultStartLevel=4",
                     "-Declipse.product=org.eclipse.jdt.ls.core.product",
@@ -94,7 +91,7 @@ function M.setup()
                     "-jar",
                     vim.fn.glob(install_path .. "/plugins/org.eclipse.equinox.launcher_*.jar"),
                     "-configuration",
-                    install_path .. "/config_" .. os,
+                    install_path .. "/config_" .. platform,
                     "-data",
                     workspace_dir,
                 },
@@ -110,7 +107,7 @@ function M.setup()
                         jsx_close_tag = { enable = true },
                         expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
                         tsserver_file_preferences = {
-                            importModuleSpecifierPreference = "relative",
+                            importModuleSpecifierPreference = "shortest",
                             includeInlayParameterNameHints = "all",
                             includeInlayEnumMemberValueHints = true,
                             includeInlayFunctionLikeReturnTypeHints = true,
@@ -185,6 +182,7 @@ function M.setup()
             })
         end,
     })
+    require("lspconfig").kulala_ls.setup(make_config()) -- kulala_ls not in registry
 
     vim.diagnostic.config({
         virtual_text = { prefix = "●" },

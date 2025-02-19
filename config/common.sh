@@ -1,13 +1,11 @@
 # shellcheck disable=1090,2015,2059,2148,2155,2164,2207
 source ~/.vim/config/z.sh
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
-if [[ -s ~/.asdf/asdf.sh ]]; then ASDF_DIR=$HOME/.asdf source ~/.asdf/asdf.sh; fi
 source ~/.vim/config/aider.sh
 
-export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$PATH:$HOME/.vim/bin"
+export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
 export EDITOR=nvim
-export BAT_PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
-export DELTA_PAGER='less -RiMXF'
+export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
@@ -51,7 +49,6 @@ alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
 alias sudo='sudo '
 alias watch='watch '
 alias xargs='xargs '
-alias less='less -RiM'
 alias v='$EDITOR'
 alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
@@ -60,7 +57,6 @@ alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
 alias venv='deactivate 2> /dev/null; findup venv >&2 || python3 -m venv venv; source "$(findup venv)/bin/activate"'
 alias gnpm='npm --prefix ~/.local/lib/node-packages'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
-alias nlua='nvim -n -i NONE -u NONE -l'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
@@ -78,7 +74,7 @@ alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --f
 alias fpp='if [[ -t 0 ]] && [[ $# -eq 0 ]] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 # shellcheck disable=2142
-alias gradle-deps="./gradlew -q projects | rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
+alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
 # shellcheck disable=2142
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 # shellcheck disable=2142
@@ -111,8 +107,8 @@ alias glg='git log --stat --graph --pretty=fuller'
 alias glga='git log --graph --pretty=fuller --all'
 alias glo='git log --graph --pretty=simple'
 alias gloo='git log --graph --pretty=simple --max-count 15'
-alias gloa='git log --color --graph --pretty=simple-iso --all | \less -RiMXF -p $(git show -s --format=%h)'
-glx() { git log --graph --decorate=short --date-order --color --pretty=format:'%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)' "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | \less -RiMXF -p "$([[ -n $1 ]] && git rev-parse --short "$(git merge-base HEAD "$1")" || git show -s --format=%h)"; }
+alias gloa='git log --color --graph --pretty=simple-iso --all | less -RiMXF -p $(git show -s --format=%h)'
+glx() { git log --graph --decorate=short --date-order --color --pretty=format:'%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)' "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | less -RiMXF -p "$([[ -n $1 ]] && git rev-parse --short "$(git merge-base HEAD "$1")" || git show -s --format=%h)"; }
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
@@ -164,7 +160,7 @@ gcb() {
 
 glof() {
   git log --graph --color --pretty=simple --all "$@" |
-    fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
+    fzf --ansi --layout=default --height=100% --list-border=none --scheme=history --reverse --toggle-sort=\` --multi \
     --header='Press ` to toggle sort, C-y to copy commit, C-t C-u to show surrounding items, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-t:unbind(change)+track-current' \
@@ -175,7 +171,7 @@ glof() {
 
 grlf() {
   git reflog --color --date=human-local --pretty=simple-ref "$@" | awk '!x[$1]++' |
-    fzf --ansi --scheme=history --reverse --toggle-sort=\` --multi \
+    fzf --ansi --layout=default --height=100% --list-border=none --scheme=history --reverse --toggle-sort=\` --multi \
     --header='Press ` to toggle sort, C-e to diff to HEAD, C-y to copy commit, C-t C-u to show surrounding items, C-p , . to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-t:unbind(change)+track-current' \
@@ -187,6 +183,10 @@ grlf() {
 
 tre() {
   find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"
+}
+
+function = () {
+  python -c "from math import *; print($*)"
 }
 
 st() {
@@ -411,12 +411,12 @@ rf() {  # livegrep https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep
     case $arg in -*) rest+=("$arg") ;; *) local init_query="$arg"; local skip_args=1 ;; esac
   done
   local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "${rest[@]}")"
-  # disable default command and escape `*` in flags (use: pattern -- -g *.sh). quotes around `*` is required in shell but won't work in rf or snacks.picker
+  # disable default command and escape `*` in flags (use: pattern -- -g *.sh). quotes around `*` is required in shell but won't work in rf or snacks.picker. use `\s-- ` to search for ` -- `
   : | fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --delimiter=: --prompt='ripgrep> ' --query="${init_query:-}" \
     --bind="start,change:transform:{ read -r pat; read -r flags; } < <(awk -F' -- ' '{gsub(/\\*/, \"\\\\*\", \$2); print \$1; print \$2}' <<<{q}) && printf 'change-header(Press C-s to toggle fzf, C-o to close fzf and open in editor. Command: $rg_prefix %s -- %q)+reload:$rg_prefix %s -- %q\n' \"\$flags\" \"\$pat\" \"\$flags\" \"\$pat\"" \
     --bind="ctrl-s:transform:[[ {fzf:prompt} = 'ripgrep> ' ]] && echo 'unbind(change)+change-prompt(fzf:{q}> )+enable-search+clear-query' || echo 'change-prompt(ripgrep> )+disable-search+clear-query+reload($rg_prefix -- {q} || true)+rebind(change)'" \
-    --bind="enter:execute(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
-    --bind="ctrl-o:become(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/={q}\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
+    --bind="enter:execute(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
+    --bind="ctrl-o:become(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
     --bind='tab:toggle+up,btab:toggle+down' \
     --preview='bat --color=always --highlight-line {2} -- {1}' \
     --preview-window='up,+{2}+3/3,~3'
@@ -509,13 +509,13 @@ untildone() {
 }
 
 set-env() {
-  if [[ $# -lt 1 ]]; then echo "Usage: $0 {java_home|path}" >&2; return 1; fi
+  if [[ $# -eq 0 ]]; then eval "$(mise hook-env)"; return $?; fi
   local cmd reply
   while [[ $# != 0 ]]; do
     case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
-      java_home|javahome) cmd="export JAVA_HOME=\"$(asdf where java)\""; shift ;;
+      java_home|javahome) cmd="export JAVA_HOME=\"$(mise where java)\""; shift ;;
       path) cmd="export PATH=\"$PWD:\$PATH\""; shift ;;
-      *) echo "Unsupported argument $1, exiting.." >&2; return 1 ;;
+      *) echo "Usage: $0 {java_home|path}. Unsupported argument $1, exiting.." >&2; return 1 ;;
     esac
   done
   eval "$cmd"

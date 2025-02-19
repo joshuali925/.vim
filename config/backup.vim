@@ -5172,4 +5172,16 @@ end
             },
         },
     },
+    {
+        "HakonHarnes/img-clip.nvim",
+        enabled = vim.env.SSH_CLIENT == nil,
+        keys = { { "<leader>p", "<Esc><Cmd>PasteImage<CR>", mode = "i" } },
+        opts = { default = { use_cursor_in_template = false, insert_mode_after_paste = false, relative_to_current_file = true } },
+    },
 
+" =======================================================
+mise() {
+  unset -f mise
+  eval "$(mise activate zsh)"
+  mise "$@"
+}
