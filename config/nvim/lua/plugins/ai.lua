@@ -1,4 +1,21 @@
+local aiderCmd = nil
 return {
+    {
+        "supermaven-inc/supermaven-nvim",
+        enabled = vim.env.ENABLE_SUPERMAVEN ~= nil,
+        event = "InsertEnter",
+        config = function()
+            require("supermaven-nvim").setup({
+                disable_keymaps = true,
+                condition = function() return require("states").qs_disabled_filetypes[vim.o.filetype] == false end,
+            })
+            vim.keymap.set("i", "<Right>", function()
+                local suggestion = require("supermaven-nvim.completion_preview")
+                if suggestion.has_suggestion() then return suggestion.on_accept_suggestion() end
+                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false) -- for multicursor.nvim
+            end)
+        end,
+    },
     {
         "monkoose/neocodeium",
         enabled = vim.env.ENABLE_CODEIUM ~= nil,
@@ -51,20 +68,21 @@ return {
             {
                 "<leader>i",
                 function()
+                    if aiderCmd then return require("snacks.terminal").toggle(aiderCmd, { win = { position = "right" } }) end
                     vim.env.AWS_PROFILE = "bedrock"
-                    local args = { "aider" }
                     local function get_name(buf)
                         if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf }) then
-                            local name = vim.api.nvim_buf_get_name(buf)
+                            local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":~:.")
                             if name ~= "" then return name end
                         end
                     end
+                    local files = {}
                     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
                         local name = get_name(buf)
-                        if name then table.insert(args, name) end
+                        if name then files[name] = true end
                     end
-                    local terminal = require("snacks.terminal").open(args, { win = { position = "right" } })
-                    table.remove(args, 1)
+                    aiderCmd = vim.list_extend({ "aider" }, vim.tbl_keys(files))
+                    local terminal = require("snacks.terminal").toggle(aiderCmd, { win = { position = "right" } })
                     local buf = terminal.buf
                     local channel = vim.bo[buf].channel
                     vim.api.nvim_create_augroup("Aider", {})
@@ -72,9 +90,9 @@ return {
                         group = "Aider",
                         callback = function(e)
                             local name = get_name(e.buf)
-                            if name and args[name] ~= nil then
+                            if name and files[name] ~= nil then
                                 vim.fn.chansend(channel, ("/drop %s\n"):format(name))
-                                args[name] = nil
+                                files[name] = nil
                             end
                         end,
                     })
@@ -82,9 +100,9 @@ return {
                         group = "Aider",
                         callback = function(e)
                             local name = get_name(e.buf)
-                            if name and args[name] == nil then
+                            if name and files[name] == nil then
                                 vim.fn.chansend(channel, ("/add %s\n"):format(name))
-                                args[name] = true
+                                files[name] = true
                             end
                         end,
                     })
@@ -93,7 +111,8 @@ return {
                         callback = function(ev)
                             if ev.buf ~= buf then return end
                             vim.api.nvim_del_augroup_by_name("Aider")
-                            args = nil
+                            files = nil
+                            aiderCmd = nil
                         end,
                     })
                 end,
@@ -109,10 +128,8 @@ return {
             strategies = {
                 chat = {
                     adapter = "my_openai",
-                    keymaps = {
-                        send = { modes = { n = "!", i = "!" } },
-                        completion = { modes = { i = "<C-n>" } },
-                    },
+                    keymaps = { send = { modes = { n = "<leader>r", i = "<leader>r" } }, completion = { modes = { i = "<C-n>" } } },
+                    slash_commands = { ["file"] = { opts = { provider = "snacks" } }, ["buffer"] = { opts = { provider = "snacks" } } },
                 },
                 inline = { adapter = "my_openai" },
             },
@@ -120,7 +137,7 @@ return {
                 my_openai = function()
                     return require("codecompanion.adapters").extend("openai_compatible", {
                         schema = { model = { default = vim.env.AIDER_MODEL } },
-                        env = { url = vim.env.OPENAI_API_BASE, api_key = vim.env.OPENAI_API_KEY, chat_url = "/chat/completions" },
+                        env = { url = vim.env.OPENAI_API_BASE, chat_url = "/chat/completions" },
                     })
                 end,
             },

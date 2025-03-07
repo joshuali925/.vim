@@ -141,7 +141,7 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask wezterm rectangle linearmouse maccy snipaste trex jordanbaird-ice karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
+    # brew install --cask wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
@@ -238,7 +238,7 @@ install_python() {  # environment for install from source: https://github.com/py
     return 1
   fi
   if ! builtin command -v pip3 > /dev/null 2>&1; then curl https://bootstrap.pypa.io/get-pip.py | python3; fi
-  log 'Installed python3, pip3, pynvim'
+  log 'Installed python3, pip3'
 }
 
 install_node() {
@@ -247,7 +247,7 @@ install_node() {
   log 'Installing node packages..'
   mkdir -p ~/.local/lib/node-packages
   [[ ! -f ~/.local/lib/node-packages/package.json ]] && echo '{}' >> ~/.local/lib/node-packages/package.json
-  npm install --cache ~/.local/lib/node-packages/npm-temp-cache --prefix ~/.local/lib/node-packages yarn || true
+  "$(mise which npm)" install --cache ~/.local/lib/node-packages/npm-temp-cache --prefix ~/.local/lib/node-packages yarn || true
   rm -rf ~/.local/lib/node-packages/npm-temp-cache
   log
 }

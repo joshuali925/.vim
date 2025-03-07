@@ -401,7 +401,7 @@ vf() {  # find files: vf; open files from pipe: fd | vf
 vrg() {
   if [[ $# -eq 0 ]]; then [[ ! $(fc -ln -1) =~ ^rg* ]] && echo 'Need a string to search for.' >&2 || eval "v$(fc -ln -1)"; return $?; fi
   if [[ " $* " = *' --fixed-strings '* ]] || [[ " $* " = *' -F '* ]]; then local pattern="/\V$1"; else local pattern="/$1"; fi
-  $EDITOR -q <(rg --vimgrep "$@") -c "$pattern"  # won't work on mac: https://github.com/neovim/neovim/issues/21756
+  $EDITOR -q <(rg --vimgrep "$@") -c "$pattern"
 }
 
 rf() {  # livegrep https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration, usage: rf [pattern] [flags], fzf-query: [pattern] -- [flags]
@@ -518,10 +518,10 @@ set-env() {
       *) echo "Usage: $0 {java_home|path}. Unsupported argument $1, exiting.." >&2; return 1 ;;
     esac
   done
-  eval "$cmd"
+  echo "$cmd"; eval "$cmd"
   printf 'Write to .bashrc and .zshrc (y/N)? '
   read -r reply
-  echo "$cmd" | if [[ $reply = [Yy] ]]; then tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; else cat; fi
+  if [[ $reply = [Yy] ]]; then echo "$cmd" | tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; fi
 }
 
 tldr() { curl "https://cheat.sh/${*// /+}"; }

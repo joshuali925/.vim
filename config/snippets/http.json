@@ -18,11 +18,11 @@
   },
   "GET request": {
     "prefix": "get-request",
-    "body": ["GET {{BASE}}/$0", "", "###"]
+    "body": ["GET {{BASE}}/$0", "###"]
   },
   "DELETE request": {
     "prefix": "delete-request",
-    "body": ["DELETE {{BASE}}/$0", "", "###"]
+    "body": ["DELETE {{BASE}}/$0", "###"]
   },
   "PUT request": {
     "prefix": "put-request",
@@ -33,7 +33,6 @@
       "{",
       "\t\"${2:key}\": \"${0:value}\"",
       "}",
-      "",
       "###"
     ]
   },
@@ -46,7 +45,6 @@
       "{",
       "\t\"${2:key}\": \"${0:value}\"",
       "}",
-      "",
       "###"
     ]
   }
