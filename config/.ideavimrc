@@ -187,9 +187,9 @@ omap ai <Plug>textobj-indent-aI
 xmap aI <Plug>textobj-indent-ai
 omap aI <Plug>textobj-indent-ai
 
-" some issues with vim undo
-nmap u <Action>($Undo)
-nmap <C-r> <Action>($Redo)
+" " some issues with vim undo
+" nmap u <Action>($Undo)
+" nmap <C-r> <Action>($Redo)
 
 " " javascript
 " nnoremap <leader>l mx"xyiwoconsole.log('❗<C-r>x:', <C-r>x);<Esc>`x

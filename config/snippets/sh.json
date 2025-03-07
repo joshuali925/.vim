@@ -247,7 +247,13 @@
   },
   "Trap": {
     "prefix": "trap",
-    "body": "trap ${0:cleanup} TERM INT EXIT"
+    "body": [
+      "trap cleanup TERM INT EXIT",
+      "cleanup() {",
+      "\t${1:kill \"\\$pid\"}",
+      "\texit \\$?",
+      "}"
+    ]
   },
   "iSO date": {
     "prefix": "date-iso",

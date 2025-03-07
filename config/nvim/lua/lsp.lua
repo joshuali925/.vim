@@ -24,8 +24,13 @@ function M.lsp_install_all()
     local installed = require("mason-lspconfig").get_installed_servers()
     local not_installed = vim.tbl_filter(function(server) return not vim.tbl_contains(installed, server) end, required)
     if #not_installed > 0 then
-        vim.system({ "npm", "--prefix", "~/.local/lib/node-packages", "install", "@mistweaverco/kulala-ls" }, { text = true }):wait() -- kulala_ls not in registry
         vim.cmd.LspInstall({ args = not_installed })
+        vim.notify("Installing kulala-ls...") -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
+        vim.system(
+            { "npm", "--prefix", "~/.local/lib/node-packages", "install", "@mistweaverco/kulala-ls" },
+            { text = true },
+            function() vim.notify("installed kulala-ls") end
+        )
     else
         vim.cmd.Mason()
     end
@@ -95,9 +100,8 @@ function M.setup()
                     "-data",
                     workspace_dir,
                 },
-                settings = {
-                    java = { sources = { organizeImports = { starThreshold = 9999, staticStarThreshold = 9999 } } },
-                },
+                settings = { sources = { organizeImports = { starThreshold = 9999, staticStarThreshold = 9999 } } },
+                init_options = { extendedClientCapabilities = { classFileContentsSupport = true } },
             })
         end,
         ts_ls = function()

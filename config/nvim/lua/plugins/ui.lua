@@ -58,7 +58,7 @@ return {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
         dependencies = "MunifTanjim/nui.nvim",
-        keys = { { "<leader>B", "<Cmd>Neotree reveal<CR>" }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
+        keys = { { "<leader>b", "<Cmd>Neotree reveal<CR>" }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
         config = function()
             local function get_dir(state)
                 local node = state.tree:get_node()
@@ -118,6 +118,8 @@ return {
                 },
                 filesystem = {
                     filtered_items = { hide_dotfiles = false, hide_gitignored = false, hide_hidden = false },
+                    group_empty_dirs = true,
+                    scan_mode = "deep",
                     hijack_netrw_behavior = "disabled",
                     window = { mappings = { ["-"] = "navigate_up", ["C"] = "set_root" } },
                 },

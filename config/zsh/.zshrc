@@ -41,9 +41,17 @@ elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
 fi
 
 source ~/.vim/config/common.sh
+[[ -x ~/.local/bin/mise ]] && eval "$(mise activate zsh)"
 
 # show timestamp of command in history, not fully accurate due to grep -F containing partial matches. another slower solution: https://github.com/junegunn/fzf/issues/1049#issuecomment-2241522977
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='{ tac ~/.zsh_history | grep -m 1 -F {2..} | awk -F: \"{print \\\$2}\" | xargs -I= date -u +%Y-%m-%dT%H:%M:%SZ -d @=; echo ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈; echo {2..}; } | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
+
+# process substitution <(rg) won't work on mac: https://github.com/neovim/neovim/issues/21756
+vrg() {
+  if [[ $# -eq 0 ]]; then [[ ! $(fc -ln -1) =~ ^rg* ]] && echo 'Need a string to search for.' >&2 || eval "v$(fc -ln -1)"; return $?; fi
+  if [[ " $* " = *' --fixed-strings '* ]] || [[ " $* " = *' -F '* ]]; then local pattern="/\V$1"; else local pattern="/$1"; fi
+  $EDITOR -q =(rg --vimgrep "$@") -c "$pattern"
+}
 
 typeset -U path PATH
 WORDCHARS=${WORDCHARS/=\/}

@@ -3,7 +3,7 @@ return {
     { "Wansmer/treesj", keys = { { "gS", "<Cmd>TSJSplit<CR>" }, { "gJ", "<Cmd>TSJJoin<CR>" } }, opts = { use_default_keymaps = false, max_join_length = 999 } },
     {
         "kylechui/nvim-surround",
-        keys = { "ys", "cs", "ds", { "s", mode = "x" }, { "yss", "ysiw", remap = true }, { "yS", "ysg_", remap = true } },
+        keys = { "ys", "cs", "ds", { "s", mode = "x" }, { "s<CR>", "gS<Space>", mode = "x", remap = true }, { "yss", "ysiw", remap = true }, { "yS", "ysg_", remap = true } },
         opts = {
             keymaps = { normal_cur = "<NOP>", normal_line = "<NOP>", normal_cur_line = "ysl", visual = "s" },
             surrounds = {
