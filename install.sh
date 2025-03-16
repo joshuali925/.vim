@@ -245,10 +245,9 @@ install_node() {
   log "Installing node $NODE_VERSION.."
   mise use -g "nodejs@$NODE_VERSION"
   log 'Installing node packages..'
-  mkdir -p ~/.local/lib/node-packages
-  [[ ! -f ~/.local/lib/node-packages/package.json ]] && echo '{}' >> ~/.local/lib/node-packages/package.json
-  "$(mise which npm)" install --cache ~/.local/lib/node-packages/npm-temp-cache --prefix ~/.local/lib/node-packages yarn || true
-  rm -rf ~/.local/lib/node-packages/npm-temp-cache
+  "$(mise which npm)" config set prefix ~/.local/lib/node-packages
+  "$(mise which npm)" install -g --cache ~/.local/lib/npm-temp-cache yarn || true
+  rm -rf ~/.local/lib/npm-temp-cache
   log
 }
 
@@ -305,7 +304,7 @@ install_pm2() {
     log 'Unsupported platform..'
     return 1
   fi
-  npm --prefix ~/.local/lib/node-packages install pm2
+  npm install -g pm2
   pm2 set pm2:autodump true
   sudo -E "$(mise which node)" "$(which pm2)" startup systemd -u "$USER" --hp "$HOME"
 }

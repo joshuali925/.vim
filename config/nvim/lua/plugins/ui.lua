@@ -137,19 +137,6 @@ return {
         keys = {
             { "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>" },
             { "<CR>", "<Esc><Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('visual')<CR>", mode = "x" },
-            {
-                "K",
-                function()
-                    vim.fn["quickui#context#open"]({
-                        { "Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation" },
-                        { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
-                        { "Line diagnostic", "lua vim.diagnostic.open_float({ scope = 'line', border = 'single' })", "Show diagnostic of current line" },
-                        { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
-                        { "--", "" },
-                        { "Built-in d&ocs", [[execute &filetype == "lua" ? "help " . expand('<cword>') : "normal! K"]], "Open vim built in help" },
-                    }, { index = vim.g["quickui#context#cursor"] or -1 })
-                end,
-            },
         },
         init = function()
             vim.g.quickui_show_tip = 1
@@ -224,7 +211,7 @@ return {
                 { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix (run :bufdo edit<CR> to load all buffers)" },
                 { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
                 { "&Toggle diagnostics", [[lua vim.diagnostic.enable(not vim.diagnostic.is_enabled())]], "Toggle LSP diagnostics" },
-                { "Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })]], "Toggle LSP diagnostic virtual texts" },
+                { "Toggle virtual lines", [[lua vim.diagnostic.config({ virtual_lines = not vim.diagnostic.config().virtual_lines })]], "Toggle LSP diagnostic virtual lines" },
                 { "Toggle &inlay hints", [[lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())]], "Toggle LSP inlay hints" },
                 { "--", "" },
                 { "Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
@@ -234,11 +221,11 @@ return {
                 { "Clear LSP logs", [[lua vim.fn.writefile({}, vim.lsp.get_log_path())]], "Empty lsp.log" },
             })
             vim.fn["quickui#menu#install"]("&Packages", {
-                { "Lazy &status", [[Lazy]], "Lazy status" },
+                { "Lazy &packages", [[Lazy]], "Lazy packages" },
                 { "Lazy clean", [[Lazy clean]], "Lazy clean plugins" },
                 { "Lazy &update", [[Lazy update]], "Lazy update plugins" },
                 { "--", "" },
-                { "&Mason status", [[Mason]], "Mason status" },
+                { "Ma&son packages", [[Mason]], "Mason packages" },
                 { "Mason &install all", [[lua require('lsp').lsp_install_all()]], "Install commonly used servers, linters, and formatters" },
             })
             local quickui_theme_list = {}

@@ -1,3 +1,4 @@
+# https://raw.githubusercontent.com/jesseduffield/lazygit/HEAD/docs/Config.md
 git:
   autofetch: false
   paging:
@@ -52,4 +53,11 @@ keybinding:
     renameCommitWithEditor: e
   commits:
     viewResetOptions: <c-r>
+    moveDownCommit: J
+    moveUpCommit: K
     resetCherryPick: <disabled>
+customCommands:
+  - key: 'C'
+    context: 'files'
+    command: "AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock aider --commit"
+    subprocess: true

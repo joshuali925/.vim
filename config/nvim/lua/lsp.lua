@@ -1,195 +1,63 @@
 local M = {}
 
-local disabled_servers = {
-    -- "ts_ls",
-    -- "eslint",
-    -- "jdtls",
-    -- "kotlin_language_server",
+local configured_servers = {
+    "lua-language-server",
+    "bash-language-server",
+    "vim-language-server",
+    "json-lsp",
+    "yaml-language-server",
+    "html-lsp",
+    "css-lsp",
+    "typescript-language-server",
+    "eslint-lsp",
+    "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
+    "jdtls",
+    "kotlin-language-server",
 }
+
 function M.lsp_install_all()
-    local required = {
-        "lua_ls",
-        "bashls",
-        "vimls",
-        "jsonls",
-        "yamlls",
-        "html",
-        "cssls",
-        "ts_ls",
-        "eslint",
-        "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
-        "jdtls",
-        "kotlin_language_server",
-    }
-    local installed = require("mason-lspconfig").get_installed_servers()
-    local not_installed = vim.tbl_filter(function(server) return not vim.tbl_contains(installed, server) end, required)
+    local not_installed = vim.tbl_filter(function(server)
+        return not vim.tbl_contains(require("mason-registry").get_installed_package_names(), server)
+            and not vim.tbl_contains({ "html-lsp", "css-lsp", "json-lsp" }, server) -- eslint-lsp contains them
+    end, vim.list_extend({ "prettier", "shellcheck", "black" }, configured_servers))
     if #not_installed > 0 then
-        vim.cmd.LspInstall({ args = not_installed })
+        vim.cmd.MasonInstall({ args = not_installed })
         vim.notify("Installing kulala-ls...") -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
-        vim.system(
-            { "npm", "--prefix", "~/.local/lib/node-packages", "install", "@mistweaverco/kulala-ls" },
-            { text = true },
-            function() vim.notify("installed kulala-ls") end
-        )
+        vim.system({ "npm", "install", "-g", "@mistweaverco/kulala-ls" }, { text = true }, function() vim.notify("installed kulala-ls") end)
+        local install_path = vim.fn.stdpath("data") .. "/mason"
+        vim.fn.mkdir(install_path .. "/bin", "p")
+        vim.uv.fs_symlink(install_path .. "/packages/eslint-lsp/node_modules/.bin/vscode-css-language-server", install_path .. "/bin/vscode-css-language-server")
+        vim.uv.fs_symlink(install_path .. "/packages/eslint-lsp/node_modules/.bin/vscode-html-language-server", install_path .. "/bin/vscode-html-language-server")
+        vim.uv.fs_symlink(install_path .. "/packages/eslint-lsp/node_modules/.bin/vscode-json-language-server", install_path .. "/bin/vscode-json-language-server")
     else
         vim.cmd.Mason()
     end
-    vim.cmd.MasonInstall({ args = { "prettier", "shellcheck", "black" } })
-end
-
-local function make_config()
-    local capabilities = vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), {
-        textDocument = { -- require('blink.cmp').get_lsp_capabilities()
-            completion = {
-                completionItem = {
-                    commitCharactersSupport = false,
-                    deprecatedSupport = true,
-                    documentationFormat = { "markdown", "plaintext" },
-                    insertReplaceSupport = true,
-                    insertTextModeSupport = { valueSet = { 1 } },
-                    labelDetailsSupport = true,
-                    preselectSupport = false,
-                    resolveSupport = { properties = { "documentation", "detail", "additionalTextEdits" } },
-                    snippetSupport = true,
-                    tagSupport = { valueSet = { 1 } },
-                },
-                completionList = { itemDefaults = { "commitCharacters", "editRange", "insertTextFormat", "insertTextMode", "data" } },
-                contextSupport = true,
-                insertTextMode = 1,
-            },
-        },
-    })
-    return { capabilities = capabilities, flags = { debounce_text_changes = 250 } }
 end
 
 function M.setup()
-    local function register_server(server, server_config)
-        if not vim.tbl_contains(disabled_servers, server) then
-            local config = vim.tbl_deep_extend("force", make_config(), server_config or {})
-            require("lspconfig")[server].setup(config)
-        end
-    end
-
-    require("mason").setup({ ui = { border = "rounded" } })
-    require("mason-lspconfig").setup()
-    require("mason-lspconfig").setup_handlers({
-        register_server,
-        jdtls = function()
-            local workspace_dir = vim.fn.stdpath("cache") .. "/java/workspace/" .. vim.uv.cwd():match("^.+/(.+)$")
-            local install_path = require("mason-registry").get_package("jdtls"):get_install_path()
-            local platform = vim.fn.has("macunix") and "mac" or "linux"
-            register_server("jdtls", {
-                cmd = {
-                    "java",
-                    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-                    "-Dosgi.bundles.defaultStartLevel=4",
-                    "-Declipse.product=org.eclipse.jdt.ls.core.product",
-                    "-Dlog.protocol=true",
-                    "-Dlog.level=ALL",
-                    "-javaagent:" .. install_path .. "/lombok.jar",
-                    "-Xms1g",
-                    "--add-modules=ALL-SYSTEM",
-                    "--add-opens",
-                    "java.base/java.util=ALL-UNNAMED",
-                    "--add-opens",
-                    "java.base/java.lang=ALL-UNNAMED",
-                    "-jar",
-                    vim.fn.glob(install_path .. "/plugins/org.eclipse.equinox.launcher_*.jar"),
-                    "-configuration",
-                    install_path .. "/config_" .. platform,
-                    "-data",
-                    workspace_dir,
-                },
-                settings = { sources = { organizeImports = { starThreshold = 9999, staticStarThreshold = 9999 } } },
-                init_options = { extendedClientCapabilities = { classFileContentsSupport = true } },
-            })
-        end,
-        ts_ls = function()
-            if not vim.tbl_contains(disabled_servers, "ts_ls") then
-                require("typescript-tools").setup({
-                    settings = {
-                        jsx_close_tag = { enable = true },
-                        expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
-                        tsserver_file_preferences = {
-                            importModuleSpecifierPreference = "shortest",
-                            includeInlayParameterNameHints = "all",
-                            includeInlayEnumMemberValueHints = true,
-                            includeInlayFunctionLikeReturnTypeHints = true,
-                            includeInlayFunctionParameterTypeHints = true,
-                            includeInlayPropertyDeclarationTypeHints = true,
-                            includeInlayVariableTypeHints = true,
-                        },
-                    },
-                })
-            end
-        end,
-        eslint = function()
-            register_server("eslint", {
-                on_attach = function(client, bufnr)
-                    local group = vim.api.nvim_create_augroup("LspFormatting", { clear = false })
-                    vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
-                    vim.api.nvim_create_autocmd("BufWritePre", { group = group, buffer = bufnr, command = "EslintFixAll" })
-                end,
-            })
-        end,
-        yamlls = function()
-            register_server("yamlls", { settings = { yaml = { keyOrdering = false } } })
-        end,
-        lua_ls = function()
-            register_server("lua_ls", {
-                on_attach = function(client, bufnr)
-                    local group = vim.api.nvim_create_augroup("LspFormatting", { clear = false })
-                    vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
-                    vim.api.nvim_create_autocmd("BufWritePre", {
-                        group = group,
-                        buffer = bufnr,
-                        callback = function() require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000 }) end,
-                    })
-                end,
-                settings = {
-                    Lua = {
-                        runtime = { version = "LuaJIT" },
-                        diagnostics = { neededFileStatus = { ["codestyle-check"] = "Any" } },
-                        telemetry = { enable = false },
-                        IntelliSense = { traceLocalSet = true },
-                        workspace = { library = { vim.env.VIMRUNTIME, "${3rd}/luv/library" } },
-                        format = {
-                            enable = true,
-                            defaultConfig = { -- https://raw.githubusercontent.com/CppCXY/EmmyLuaCodeStyle/HEAD/docs/format_config.md
-                                quote_style = "double",
-                                max_line_length = "unset",
-                                align_continuous_assign_statement = "false",
-                                align_continuous_rect_table_field = "false",
-                                align_if_branch = "false",
-                                align_array_table = "false",
-                                trailing_table_separator = "smart",
-                            },
-                        },
-                        hint = { enable = true },
-                    },
-                },
-            })
-        end,
-        pyright = function()
-            register_server("pyright", {
-                commands = {
-                    PythonOrganizeImports = {
-                        function()
-                            vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
-                                command = "pyright.organizeimports",
-                                arguments = { vim.uri_from_bufnr(0) },
-                            }, 3000)
-                        end,
-                        description = "Organize Imports",
-                    },
-                },
-            })
-        end,
+    vim.lsp.enable(vim.tbl_filter(function(server)              -- typescript-language-server is setup using typescript-tools, jdtls is setup using ../ftplugin/java.lua
+        return not vim.tbl_contains({ "typescript-language-server", "jdtls" }, server)
+    end, vim.list_extend({ "kulala-ls" }, configured_servers))) -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
+    require("typescript-tools").setup({
+        settings = {
+            tsserver_path = vim.fn.stdpath("data") .. "/mason/packages/typescript-language-server/node_modules/.bin/tsserver", -- mason always needs to be loaded for it to work automatically
+            jsx_close_tag = { enable = true },
+            expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
+            tsserver_file_preferences = {
+                importModuleSpecifierPreference = "shortest",
+                includeInlayParameterNameHints = "all",
+                includeInlayEnumMemberValueHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayVariableTypeHints = true,
+            },
+        },
     })
-    require("lspconfig").kulala_ls.setup(make_config()) -- kulala_ls not in registry
 
     vim.diagnostic.config({
-        virtual_text = { prefix = "●" },
+        float = { scope = "cursor" },
+        virtual_text = { prefix = "●", current_line = true },
         severity_sort = true,
         signs = {
             text = {
@@ -208,6 +76,38 @@ function M.setup()
     })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { link = "LspCodeLens" })
     vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "DiagnosticVirtualTextHint" })
+
+    vim.api.nvim_create_autocmd("LspAttach", {
+        group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+        callback = function(e)
+            local client = assert(vim.lsp.get_client_by_id(e.data.client_id))
+            if client:supports_method("textDocument/foldingRange") then vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()" end
+            local opts = { buffer = e.buf }
+            local diagnostic_win_id
+            vim.keymap.set("n", "K", function()
+                if vim.tbl_contains({ "vim", "help" }, vim.o.filetype) then return vim.cmd.normal({ args = { "K" }, bang = true }) end
+                if diagnostic_win_id and vim.api.nvim_win_is_valid(diagnostic_win_id) then
+                    vim.api.nvim_win_close(diagnostic_win_id, true)
+                    vim.lsp.buf.hover()
+                else
+                    _, diagnostic_win_id = vim.diagnostic.open_float({ border = "single" })
+                    if diagnostic_win_id == nil then vim.lsp.buf.hover() end
+                end
+            end, opts)
+            vim.keymap.set("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
+            vim.keymap.set("n", "gD", "<Cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
+            vim.keymap.set("n", "<leader>d", "<Cmd>lua vim.lsp.buf.implementation()<CR>", opts)
+            vim.keymap.set("n", "gr", "<Cmd>lua vim.lsp.buf.references()<CR>", { buffer = e.buf, nowait = true })
+            vim.keymap.set({ "n", "x" }, "<leader>a", "<Cmd>lua vim.lsp.buf.code_action()<CR>", opts)
+            vim.keymap.set("n", "<leader>R", "<Cmd>lua vim.lsp.buf.rename()<CR>", opts)
+            vim.keymap.set("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>", opts)
+            vim.keymap.set("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>", opts)
+            vim.keymap.set("n", "[A", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' } })<CR>", opts)
+            vim.keymap.set("n", "]A", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' } })<CR>", opts)
+            vim.keymap.set("n", "g<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
+            vim.keymap.set("i", "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
+        end,
+    })
 end
 
 function M.organize_imports_and_format()
@@ -216,7 +116,10 @@ function M.organize_imports_and_format()
         local ok, res = pcall(require("typescript-tools.api").organize_imports, true)
         if not ok then vim.notify(res, vim.log.levels.WARN, { title = "Failed to organize imports" }) end
     elseif vim.tbl_contains(active_clients, "pyright") then
-        vim.cmd("silent PythonOrganizeImports")
+        vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
+            command = "pyright.organizeimports",
+            arguments = { vim.uri_from_bufnr(0) },
+        }, 3000)
     end
     require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000 })
 end

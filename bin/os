@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+cleanup() {
+  [[ -n $pid ]] && kill "$pid"
+  exit $?
+}
+
 run() {
+  trap cleanup TERM INT EXIT
   local rest=() skip_args=0
   for arg in "$@"; do
     if [[ $skip_args -eq 1 ]]; then rest+=("$arg"); continue; fi

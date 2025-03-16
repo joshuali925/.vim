@@ -1,8 +1,8 @@
-local aiderCmd = nil
+local aider_cmd = nil
 return {
     {
         "supermaven-inc/supermaven-nvim",
-        enabled = vim.env.ENABLE_SUPERMAVEN ~= nil,
+        enabled = vim.env.VIM_AI == "supermaven",
         event = "InsertEnter",
         config = function()
             require("supermaven-nvim").setup({
@@ -12,18 +12,18 @@ return {
             vim.keymap.set("i", "<Right>", function()
                 local suggestion = require("supermaven-nvim.completion_preview")
                 if suggestion.has_suggestion() then return suggestion.on_accept_suggestion() end
-                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false) -- for multicursor.nvim
+                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false) -- <C-g>U is for multicursor.nvim
             end)
         end,
     },
     {
         "monkoose/neocodeium",
-        enabled = vim.env.ENABLE_CODEIUM ~= nil,
+        enabled = vim.env.VIM_AI == "codeium",
         event = "InsertEnter",
         config = function()
             vim.keymap.set("i", "<Right>", function()
                 if require("neocodeium").visible() then return require("neocodeium").accept() end
-                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false) -- for multicursor.nvim
+                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false)
             end)
             vim.keymap.set("i", "<Down>", function()
                 if require("neocodeium").visible() then return require("neocodeium").cycle(1) end
@@ -38,7 +38,7 @@ return {
     },
     {
         "milanglacier/minuet-ai.nvim",
-        enabled = vim.env.ENABLE_MINUET ~= nil and vim.env.OPENAI_API_BASE ~= nil,
+        enabled = vim.env.VIM_AI == "minuet" and vim.env.OPENAI_API_BASE ~= nil,
         event = "VeryLazy", -- InsertEnter isn't working
         opts = {
             n_completions = 1,
@@ -63,17 +63,32 @@ return {
         },
     },
     {
+        "augmentcode/augment.vim",
+        enabled = vim.env.VIM_AI == "augment",
+        event = "InsertEnter",
+        cmd = "Augment",
+        keys = { { "<leader>h", "<Cmd>Augment chat<CR>", mode = { "n", "x" } }, { "<leader>H", "<Cmd>Augment chat-toggle<CR>", mode = { "n", "x" } } },
+        init = function()
+            vim.g.augment_disable_tab_mapping = true
+            -- vim.g.augment_workspace_folders = { vim.uv.cwd() }
+        end,
+        config = function() vim.keymap.set("i", "<Right>", function() vim.fn["augment#Accept"](vim.keycode("<C-g>U<Right>")) end) end,
+    },
+    {
         "folke/snacks.nvim",
         keys = {
             {
                 "<leader>i",
                 function()
-                    if aiderCmd then return require("snacks.terminal").toggle(aiderCmd, { win = { position = "right" } }) end
+                    if aider_cmd then return require("snacks.terminal").toggle(aider_cmd, { win = { position = "right" } }) end
+                    vim.env.AWS_ACCESS_KEY_ID = nil
+                    vim.env.AWS_SECRET_ACCESS_KEY = nil
+                    vim.env.AWS_SESSION_TOKEN = nil
                     vim.env.AWS_PROFILE = "bedrock"
                     local function get_name(buf)
                         if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf }) then
-                            local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":~:.")
-                            if name ~= "" then return name end
+                            local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
+                            if name ~= "" and name:find("^/") == nil and name:find("^%w+://") == nil then return name end
                         end
                     end
                     local files = {}
@@ -81,10 +96,33 @@ return {
                         local name = get_name(buf)
                         if name then files[name] = true end
                     end
-                    aiderCmd = vim.list_extend({ "aider" }, vim.tbl_keys(files))
-                    local terminal = require("snacks.terminal").toggle(aiderCmd, { win = { position = "right" } })
+                    aider_cmd = vim.list_extend({ "aider" }, vim.tbl_keys(files))
+                    local terminal = require("snacks.terminal").toggle(aider_cmd, { win = { position = "right" } })
                     local buf = terminal.buf
                     local channel = vim.bo[buf].channel
+                    vim.keymap.set("t", "<C-b>", function()
+                        local aider_win = vim.api.nvim_get_current_win()
+                        require("snacks.picker").buffers({
+                            confirm = function(picker, item)
+                                picker:close()
+                                vim.fn.chansend(channel, (" `%s` "):format(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(item.buf), ":t:r")))
+                                vim.api.nvim_set_current_win(aider_win)
+                                vim.schedule(vim.cmd.startinsert)
+                            end,
+                        })
+                    end, { buffer = buf })
+                    vim.keymap.set("t", "<C-p>", function()
+                        local aider_win = vim.api.nvim_get_current_win()
+                        vim.cmd.wincmd("p")
+                        require("snacks.picker")[require("lsp").is_active() and "lsp_symbols" or "treesitter"]({
+                            confirm = function(picker, item)
+                                picker:close()
+                                vim.fn.chansend(channel, (" `%s` "):format(item.name))
+                                vim.api.nvim_set_current_win(aider_win)
+                                vim.schedule(vim.cmd.startinsert)
+                            end,
+                        })
+                    end, { buffer = buf })
                     vim.api.nvim_create_augroup("Aider", {})
                     vim.api.nvim_create_autocmd("BufDelete", {
                         group = "Aider",
@@ -112,32 +150,8 @@ return {
                             if ev.buf ~= buf then return end
                             vim.api.nvim_del_augroup_by_name("Aider")
                             files = nil
-                            aiderCmd = nil
+                            aider_cmd = nil
                         end,
-                    })
-                end,
-            },
-        },
-    },
-    {
-        "olimorris/codecompanion.nvim",
-        enabled = vim.env.OPENAI_API_KEY ~= nil,
-        dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
-        keys = { { "<leader>h", "<Cmd>CodeCompanionActions<CR>", mode = { "n", "x" } } },
-        opts = {
-            strategies = {
-                chat = {
-                    adapter = "my_openai",
-                    keymaps = { send = { modes = { n = "<leader>r", i = "<leader>r" } }, completion = { modes = { i = "<C-n>" } } },
-                    slash_commands = { ["file"] = { opts = { provider = "snacks" } }, ["buffer"] = { opts = { provider = "snacks" } } },
-                },
-                inline = { adapter = "my_openai" },
-            },
-            adapters = {
-                my_openai = function()
-                    return require("codecompanion.adapters").extend("openai_compatible", {
-                        schema = { model = { default = vim.env.AIDER_MODEL } },
-                        env = { url = vim.env.OPENAI_API_BASE, chat_url = "/chat/completions" },
                     })
                 end,
             },

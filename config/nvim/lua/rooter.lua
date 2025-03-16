@@ -3,7 +3,7 @@ local patterns = { ".git" }
 local whitelisted_buf_type = { "", "acwrite" }
 local enabled = true
 
-function M.root()
+local function root()
     if enabled and vim.tbl_contains(whitelisted_buf_type, vim.api.nvim_get_option_value("buftype", { buf = 0 })) then
         local ok, dir = pcall(vim.api.nvim_buf_get_var, 0, "rooter")
         if not ok then
@@ -28,7 +28,7 @@ end
 
 function M.setup()
     vim.api.nvim_create_augroup("Rooter", {})
-    vim.api.nvim_create_autocmd("BufEnter", { group = "Rooter", callback = require("rooter").root, nested = true })
+    vim.api.nvim_create_autocmd("BufEnter", { group = "Rooter", callback = root, nested = true })
 end
 
 return M

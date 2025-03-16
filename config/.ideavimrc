@@ -161,16 +161,15 @@ nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 nmap yoP <Action>(TogglePowerSave)
 
+nmap K <Action>(ShowHoverInfo)
 nmap gr <Action>(FindUsages)
-nnoremap Km K
 nmap <leader>gu <Action>(Vcs.RollbackChangedLines)
 nmap <leader>gd <Action>(Vcs.Show.Local.Changes)
 nmap <leader>gb <Action>(Annotate)
 nmap <leader>gf <Action>(Vcs.ShowTabbedFileHistory)
-nmap Ke <Action>(Generate)
+nmap <leader>ge <Action>(Generate)
 nmap <leader>gr <Action>(Github.Open.In.Browser)
-nmap KR <Action>(Refactorings.QuickListPopupAction)
-nmap gh <Action>(ShowErrorDescription)
+nmap <leader>gR <Action>(Refactorings.QuickListPopupAction)
 nmap gd <Action>(GotoDeclaration)
 nmap gD <Action>(GotoTypeDeclaration)
 nmap <C-f> <Action>(OptimizeImports)<Action>(ReformatCode)
