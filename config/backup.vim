@@ -5185,3 +5185,116 @@ mise() {
   eval "$(mise activate zsh)"
   mise "$@"
 }
+
+" =======================================================
+ai(){
+  OPENAI_MODEL=${OPENAI_MODEL:-$(curl -s -X GET "$OPENAI_API_BASE/models" -H "Authorization: Bearer $OPENAI_API_KEY" -H "Content-Type: application/json" | jq -r '.data[0].id')}
+  curl -s -N "$OPENAI_API_BASE/chat/completions" -H "Accept: text/event-stream" -H "Content-Type: application/json" -H "Authorization: Bearer $OPENAI_API_KEY" -d '{
+    "model": "'"$OPENAI_MODEL"'",
+    "messages": [{"role": "user", "content": "Answer the question, be concise. '"${*// /+}"'"}],
+    "stream": true
+  }' | sed -e '/id/!d' -e 's/^data: //' | jq --unbuffered --stream -r -j 'fromstream(inputs).choices[].delta.content | select(. != null)'
+  echo
+}
+" nvim 0.11 terminal supports osc52
+# if called from nvim terminal (:h v:servername), look upwards to find tty of the nvim process
+if [[ -n $NVIM ]]; then
+  if [[ -d /proc ]]; then
+    while [[ -n $ppid ]]; do
+      if [[ $(< "/proc/$ppid/comm") = *nvim ]]; then
+        otty="$(readlink "/proc/$ppid/fd/0")" && [[ $otty != /dev/null ]] && break
+      fi
+      ppid=$(awk '/PPid/ {print $2}' "/proc/$ppid/status")
+    done
+  else
+    while [[ -n $ppid ]]; do
+      read -r ppid tty comm < <(ps -p "$ppid" -o ppid= -o tty= -o comm=)
+      if [[ $comm = *nvim ]]; then
+        otty="/dev/$tty" && [[ $otty != /dev/\?* ]] && break
+      fi
+    done
+  fi
+fi
+
+" =======================================================
+    {
+        "folke/flash.nvim",
+        keys = {
+            { "'", "<Cmd>lua require('utils').command_without_quickscope(require('flash').jump)<CR>", mode = { "n", "x", "o" } },
+            { "<leader>e", "<Cmd>lua require('utils').command_without_quickscope(require('flash').treesitter)<CR>", mode = { "n", "x", "o" } },
+            { "r", "<Cmd>lua require('utils').command_without_quickscope(require('flash').treesitter_search)<CR>", mode = { "o" } },
+        },
+        opts = { label = { uppercase = false, before = true, after = false }, jump = { autojump = true }, modes = { char = { enabled = false } } },
+    },
+                keys = { { "<leader>e", "<Cmd>lua require('dropbar.api').pick()<CR>" } },
+    {
+        "olimorris/codecompanion.nvim",
+        enabled = vim.env.OPENAI_API_KEY ~= nil,
+        dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
+        keys = { { "<leader>h", "<Cmd>CodeCompanionActions<CR>", mode = { "n", "x" } } },
+        opts = {
+            strategies = {
+                chat = {
+                    adapter = "my_openai",
+                    keymaps = { send = { modes = { n = "<leader>r", i = "<leader>r" } }, completion = { modes = { i = "<C-n>" } } },
+                    slash_commands = { ["file"] = { opts = { provider = "snacks" } }, ["buffer"] = { opts = { provider = "snacks" } } },
+                },
+                inline = { adapter = "my_openai" },
+            },
+            adapters = {
+                my_openai = function()
+                    return require("codecompanion.adapters").extend("openai_compatible", {
+                        schema = { model = { default = vim.env.AIDER_MODEL } },
+                        env = { url = vim.env.OPENAI_API_BASE, chat_url = "/chat/completions" },
+                    })
+                end,
+            },
+        },
+    },
+            {
+                "K",
+                function()
+                    vim.fn["quickui#context#open"]({
+                        { "Docu&mentation", "lua vim.lsp.buf.hover()", "Show documentation" },
+                        { "Declaration", "lua vim.lsp.buf.declaration()", "Go to declaration" },
+                        { "Line diagnostic", "lua vim.diagnostic.open_float({ scope = 'line', border = 'single' })", "Show diagnostic of current line" },
+                        { "G&enerate doc", "lua require('neogen').generate()", "Generate annotations with neogen" },
+                        { "--", "" },
+                        { "Built-in d&ocs", [[execute &filetype == "lua" ? "help " . expand('<cword>') : "normal! K"]], "Open vim built in help" },
+                    }, { index = vim.g["quickui#context#cursor"] or -1 })
+                end,
+            },
+    vim.keymap.set("n", "K", "<Cmd>execute index(['lua', 'vim', 'help'], &filetype) >= 0 ? 'help ' . expand('<cword>') : 'lua vim.lsp.buf.hover()'<CR>")
+    vim.keymap.set("n", "gh", "<Cmd>lua if vim.diagnostic.open_float({ scope = 'cursor', border = 'single' }) == nil then vim.lsp.buf.hover() end<CR>")
+---@type vim.lsp.Config
+return {
+    cmd = { "typescript-language-server", "--stdio" },
+    filetypes = {
+        "javascript",
+        "javascriptreact",
+        "javascript.jsx",
+        "typescript",
+        "typescriptreact",
+        "typescript.tsx",
+    },
+    root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
+    single_file_support = true,
+    init_options = {
+        hostInfo = "neovim",
+        preferences = {
+            importModuleSpecifierPreference = "shortest",
+            includeInlayParameterNameHints = "all",
+            includeInlayEnumMemberValueHints = true,
+            includeInlayFunctionLikeReturnTypeHints = true,
+            includeInlayFunctionParameterTypeHints = true,
+            includeInlayPropertyDeclarationTypeHints = true,
+            includeInlayVariableTypeHints = true,
+        },
+    },
+}
+    if vim.tbl_contains(active_clients, "typescript-language-server") then
+        vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
+            command = "_typescript.organizeImports",
+            arguments = { vim.api.nvim_buf_get_name(0) },
+            title = "",
+        }, 3000)

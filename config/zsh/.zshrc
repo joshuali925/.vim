@@ -127,7 +127,7 @@ down-line-or-local-history() {
 }
 zle -N down-line-or-local-history
 
-run-file-manager () {
+run-file-manager() {
   local precmd tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp" < /dev/tty
   if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi

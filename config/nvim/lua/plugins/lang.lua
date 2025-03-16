@@ -22,6 +22,8 @@ return {
     },
     {
         "danymat/neogen",
+        keys = { { "<leader>ge", "<Cmd>lua require('neogen').generate()<CR>" } },
+        cmd = "Neogen",
         config = function()
             vim.keymap.set("i", "<Tab>", function()
                 if require("neogen").jumpable() then return require("neogen").jump_next() end
@@ -173,68 +175,44 @@ return {
         },
         config = function(_, opts) require("nvim-treesitter.configs").setup(opts) end,
     },
-    { "pmizio/typescript-tools.nvim" },
+    { "williamboman/mason.nvim", build = ":MasonUpdate", cmd = { "Mason", "MasonInstall" }, opts = { ui = { border = "rounded" } } },
+    { "pmizio/typescript-tools.nvim", dependencies = "neovim/nvim-lspconfig" },
+    { "mfussenegger/nvim-jdtls" },
     {
-        "williamboman/mason.nvim",
-        build = ":MasonUpdate",
-        dependencies = {
-            "williamboman/mason-lspconfig.nvim",
-            "neovim/nvim-lspconfig",
-            {
-                "Bekaboo/dropbar.nvim",
-                keys = { { "<leader>e", "<Cmd>lua require('dropbar.api').pick()<CR>" } },
-                init = function()
-                    vim.ui.select = (function(overridden)
-                        return function(...)
-                            local present, menu = pcall(require, "dropbar.utils.menu")
-                            vim.ui.select = present and menu.select or overridden
-                            vim.ui.select(...)
-                        end
-                    end)(vim.ui.select)
-                end,
-                opts = {
-                    bar = { enable = function(buf, win, _) return vim.fn.win_gettype(win) == "" and vim.bo[buf].bt == "" end },
-                    menu = {
-                        win_configs = { border = "single" },
-                        keymaps = {
-                            ["h"] = "<C-w>q",
-                            ["l"] = function()
-                                local utils = require("dropbar.utils")
-                                local menu = utils.menu.get_current()
-                                if not menu then return end
-                                local cursor = vim.api.nvim_win_get_cursor(menu.win)
-                                local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
-                                if component then menu:click_on(component, nil, 1, "l") end
-                            end,
-                            ["o"] = function()
-                                local utils = require("dropbar.utils")
-                                local menu = utils.menu.get_current()
-                                if not menu then return end
-                                local cursor = vim.api.nvim_win_get_cursor(menu.win)
-                                local component = menu.entries[cursor[1]]:next_clickable(cursor[2])
-                                if component then menu:click_on(component, nil, 1, "l") end
-                            end,
-                        },
-                    },
+        "Bekaboo/dropbar.nvim",
+        init = function()
+            vim.ui.select = (function(overridden)
+                return function(...)
+                    local present, menu = pcall(require, "dropbar.utils.menu")
+                    vim.ui.select = present and menu.select or overridden
+                    vim.ui.select(...)
+                end
+            end)(vim.ui.select)
+        end,
+        opts = {
+            bar = { enable = function(buf, win, _) return vim.fn.win_gettype(win) == "" and vim.bo[buf].bt == "" end },
+            menu = {
+                win_configs = { border = "single" },
+                keymaps = {
+                    ["h"] = "<C-w>q",
+                    ["l"] = function()
+                        local utils = require("dropbar.utils")
+                        local menu = utils.menu.get_current()
+                        if not menu then return end
+                        local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                        local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+                        if component then menu:click_on(component, nil, 1, "l") end
+                    end,
+                    ["o"] = function()
+                        local utils = require("dropbar.utils")
+                        local menu = utils.menu.get_current()
+                        if not menu then return end
+                        local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                        local component = menu.entries[cursor[1]]:next_clickable(cursor[2])
+                        if component then menu:click_on(component, nil, 1, "l") end
+                    end,
                 },
             },
         },
-        cond = require("states").small_file, -- prevent LSP loading on keys for large file
-        keys = {
-            { "gd", "<Cmd>lua if require('lsp').is_active() then vim.lsp.buf.definition() else vim.cmd('normal! gd') end<CR>" },
-            { "gD", vim.lsp.buf.type_definition },
-            { "<leader>d", vim.lsp.buf.implementation },
-            { "gr", vim.lsp.buf.references },
-            { "<leader>a", "<Cmd>lua vim.lsp.buf.code_action()<CR>", mode = { "n", "x" } },
-            { "gh", "<Cmd>lua if vim.diagnostic.open_float({ scope = 'cursor', border = 'single' }) == nil then vim.lsp.buf.hover() end<CR>" },
-            { "<leader>R", "<Cmd>lua vim.lsp.buf.rename()<CR>" },
-            { "[a", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>" },
-            { "]a", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>" },
-            { "[A", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' } })<CR>" },
-            { "]A", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' } })<CR>" },
-            { "g<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>" },
-            { "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>", mode = { "i" } },
-        },
-        config = function() require("lsp").setup() end,
     },
 }

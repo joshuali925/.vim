@@ -42,7 +42,7 @@ let g:netrw_preview = 1
 let g:netrw_alto = 0
 let g:netrw_winsize = 20
 let g:netrw_liststyle = 3
-let g:markdown_fenced_languages = [ 'javascript', 'js=javascript', 'css', 'html', 'python', 'java', 'c', 'bash=sh' ]
+let g:markdown_fenced_languages = [ 'javascript', 'js=javascript', 'ts=typescript', 'tsx=typescriptreact', 'json=jsonc', 'html', 'python', 'bash=sh' ]
 let g:RooterCmd = 'Gcd'
 let $FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS . ' --layout=default --bind=tab:toggle-out,shift-tab:toggle-in --height=100%'
 
@@ -500,10 +500,8 @@ nnoremap [T :tfirst<CR>
 nnoremap ]T :tlast<CR>
 nnoremap [<C-t> :ptprevious<CR>
 nnoremap ]<C-t> :ptnext<CR>
-nnoremap Ko K
-nnoremap Km K
-nnoremap Kd mx:Gdiff<CR><C-w><C-p>`x<C-w><C-p>
-nnoremap Kb :Gblame<CR>
+nnoremap <leader>gd mx:Gdiff<CR><C-w><C-p>`x<C-w><C-p>
+nnoremap <leader>gb :Gblame<CR>
 
 " execute "set <M-h>=\<Esc>h"
 " execute "set <M-j>=\<Esc>j"
@@ -543,7 +541,7 @@ else
   nnoremap <expr> <leader>y plugins#oscyank#OSCYankOperator()
   nmap <leader>yy <leader>y_
   nmap <leader>Y <leader>y$
-  xnoremap <leader>y :call plugins#oscyank#OSCYankVisual()<CR>
+  xnoremap <leader>y :<C-u>call plugins#oscyank#OSCYankVisual()<CR>
 endif
 nmap yc "xyygcc"xp
 if $SSH_CLIENT != ''

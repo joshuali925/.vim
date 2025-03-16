@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-install-from-github bat sharkdp/bat x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin '' '--strip-components=1 --wildcards bat*/bat' "$@"
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/bat ]]; then
+  BIN_INIT=1 bat --completion zsh > ~/.vim/config/zsh/completions/_bat || true
+fi
+
+install-from-github bat sharkdp/bat x86_64-unknown-linux-musl aarch64-unknown-linux x86_64-apple-darwin aarch64-apple-darwin '--strip-components=1 --wildcards bat*/bat' "$@"

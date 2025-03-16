@@ -84,12 +84,15 @@ return {
                 keymap = {
                     ["<Down>"] = {},
                     ["<Up>"] = {},
+                    ["<Left>"] = {},
+                    ["<Right>"] = {},
                     ["<C-space>"] = {},
                     ["<C-n>"] = { "show_and_insert", "select_next" },
                     ["<Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_next() end end, "fallback" },
                     ["<S-Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_prev() end end, "fallback" },
                 },
             },
+            sources = { providers = { path = { opts = { show_hidden_files_by_default = true } } } },
             appearance = {
                 kind_icons = {
                     Text = " ", -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu

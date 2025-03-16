@@ -60,7 +60,8 @@ install-from-github() {
   [[ -z $package ]] && echo "package not found for '$executable' on $PLATFORM $ARCHITECTURE, exiting.." >&2 && return 1
 
   mkdir -p ~/.local/bin
-  url=$(curl -s "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4) || true
+  [[ -n $GITHUB_API_KEY ]] && auth_header=(--header "Authorization: Bearer $GITHUB_API_KEY")
+  url=$(curl -s "${auth_header[@]}" "https://api.github.com/repos/$repo/releases/latest" | grep "browser_download_url.*$package" | head -n 1 | cut -d '"' -f 4) || true
   [[ -z $url ]] && echo "Unable to find '$package' in results of curl 'https://api.github.com/repos/$repo/releases/latest'" >&2 && return 1
   install-archive-from-url "$url" "$executable" "$extract_flags" "$@"
 }

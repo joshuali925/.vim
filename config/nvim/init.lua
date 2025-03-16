@@ -12,7 +12,7 @@ vim.g.netrw_browse_split = 4
 vim.g.netrw_preview = 1
 vim.g.netrw_alto = 0
 vim.g.netrw_liststyle = 3
-vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "css", "html", "python", "java", "c", "bash=sh" }
+vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "ts=typescript", "tsx=typescriptreact", "json=jsonc", "html", "python", "bash=sh" }
 vim.o.whichwrap = "<,>,[,]"
 vim.o.mouse = "a"
 vim.o.cursorline = true
@@ -24,7 +24,7 @@ vim.o.showmatch = true
 vim.o.showmode = false
 vim.o.showcmdloc = "statusline"
 vim.o.cmdheight = 0
-vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:histogram,linematch:60"
+vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:histogram"
 vim.o.splitright = true
 vim.o.splitbelow = true
 vim.o.splitkeep = "topline"
@@ -233,7 +233,7 @@ vim.api.nvim_create_autocmd("BufLeave", {
 })
 vim.api.nvim_create_autocmd("BufEnter", {
     group = "AutoCommands",
-    command = "let b:SavedBufnr = bufnr() | if exists('w:SavedBufView') && has_key(w:SavedBufView, b:SavedBufnr) | let b:SavedBufView = winsaveview() | if b:SavedBufView.lnum == 1 && b:SavedBufView.col == 0 && !&diff | call winrestview(w:SavedBufView[b:SavedBufnr]) | endif | unlet w:SavedBufView[b:SavedBufnr] | endif",
+    command = "if exists('w:SavedBufView') && has_key(w:SavedBufView, bufnr()) | let temp_view = winsaveview() | if temp_view.lnum == 1 && temp_view.col == 0 && !&diff | call winrestview(w:SavedBufView[bufnr()]) | endif | unlet w:SavedBufView[bufnr()] | endif",
 })
 vim.api.nvim_create_autocmd("BufReadPost", {
     group = "AutoCommands",
@@ -245,13 +245,13 @@ vim.api.nvim_create_autocmd("BufReadPost", {
         vim.api.nvim_create_autocmd({ "InsertEnter", "BufModifiedSet" }, { once = true, buffer = args.buf, command = "let b:bufpersist = 1" })
     end,
 })
-local cursorPreYank
+local pre_yank_view
 vim.keymap.set({ "n", "x" }, "y", function()
-    cursorPreYank = vim.api.nvim_win_get_cursor(0)
+    pre_yank_view = vim.fn.winsaveview()
     return "y"
 end, { expr = true })
 vim.keymap.set("n", "Y", function()
-    cursorPreYank = vim.api.nvim_win_get_cursor(0)
+    pre_yank_view = vim.fn.winsaveview()
     return "y$"
 end, { expr = true })
 vim.keymap.set({ "n", "x" }, "<leader>y", '"+y', { remap = true })
@@ -259,7 +259,7 @@ vim.keymap.set("n", "<leader>Y", '"+y$', { remap = true })
 vim.api.nvim_create_autocmd("TextYankPost", {
     group = "AutoCommands",
     callback = function()
-        if vim.v.event.operator == "y" and cursorPreYank then pcall(vim.api.nvim_win_set_cursor, 0, cursorPreYank) end
+        if vim.v.event.operator == "y" and pre_yank_view then pcall(vim.fn.winrestview, pre_yank_view) end
         vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
     end,
 })
@@ -297,16 +297,19 @@ vim.api.nvim_create_user_command("RgNoRegex", "lua require('snacks.picker').grep
 vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
-vim.api.nvim_create_user_command("JSON", [[if <range> != 0 | execute "'<,'>Prettier json" | else | keeppatterns %s/\n\+\%$//e | set shiftwidth=2 filetype=json | execute 'Prettier json' | endif]], { range = true })
 vim.api.nvim_create_user_command("CfilterNoTest", [[packadd cfilter | Cfilter! /test/]], {})
+vim.api.nvim_create_user_command("JSON", [[if <range> != 0 | execute "'<,'>Prettier json" | else | keeppatterns %s/\n\+\%$//e | set shiftwidth=2 filetype=json | execute 'Prettier json' | endif]], { range = true })
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript", [""] = "json" }
     local parser = args.args ~= "" and args.args or vim.bo.filetype
-    local line1 = args.range == 0 and 0 or args.line1 - 1
-    local line2 = args.range == 0 and -1 or args.line2
-    local result = vim.system({ "prettier", "--parser", filetype_map[parser] or parser }, { text = true, stdin = vim.api.nvim_buf_get_lines(0, line1, line2, false) }):wait()
+    local lines = args.range == 0 and vim.api.nvim_buf_get_lines(0, 0, -1, false) or vim.fn.getregion(vim.fn.getpos("'<"), vim.fn.getpos("'>"), { type = vim.fn.visualmode() })
+    local result = vim.system({ "prettier", "--parser", filetype_map[parser] or parser }, { text = true, stdin = lines }):wait()
     if result.code ~= 0 then return vim.notify(result.stderr, vim.log.levels.ERROR, { title = "Prettier failed" }) end
-    vim.api.nvim_buf_set_lines(0, line1, line2, false, vim.split(result.stdout, "\n", { trimempty = true }))
+    if args.range == 0 then return vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(result.stdout, "\n", { trimempty = true })) end
+    local start_pos = vim.fn.getpos("'<")
+    local end_pos = vim.fn.getpos("'>")
+    if end_pos[3] == vim.v.maxcol then end_pos[3] = vim.fn.col("'>") - 1 end
+    vim.api.nvim_buf_set_text(0, start_pos[2] - 1, start_pos[3] - 1, end_pos[2] - 1, end_pos[3], vim.split(result.stdout, "\n", { trimempty = true }))
 end, { complete = "filetype", nargs = "*", range = true })
 
 -- overrides {{{1
@@ -357,21 +360,20 @@ require("lazy").setup("plugins", { defaults = { lazy = true }, ui = { border = "
 require("themes").setup()
 require("rooter").setup()
 if require("states").small_file then
-    vim.schedule(function()
-        vim.defer_fn(function()
-            require("lazy").load({ plugins = { "nvim-treesitter", "mason.nvim" } })
-        end, 30)
-        vim.defer_fn(function()
-            vim.o.foldmethod = "expr"
-            -- vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
-            vim.o.foldexpr = "nvim_treesitter#foldexpr()"
-            vim.o.foldtext = ""
-            vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
-            require("lazy").load({ plugins = { "nvim-scrollview", "git-conflict.nvim", "quick-scope" } })
-            vim.cmd.doautocmd("BufReadPost") -- mason and git-conflict need this when delay loaded
-            require("bookmarks").setup()
-            require("clips").setup()
-        end, 100)
-    end)
+    vim.defer_fn(function()
+        require("lsp").setup()
+        require("lazy").load({ plugins = { "nvim-treesitter", "dropbar.nvim" } })
+    end, 30)
+    vim.defer_fn(function()
+        vim.o.foldmethod = "expr"
+        -- vim.o.foldexpr = "nvim_treesitter#foldexpr()" -- makes :g commands slow
+        vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
+        vim.o.foldtext = ""
+        vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
+        require("lazy").load({ plugins = { "nvim-scrollview", "git-conflict.nvim", "quick-scope" } })
+        vim.cmd.doautocmd("BufReadPost") -- lsp and git-conflict need this when delay loaded
+        require("bookmarks").setup()
+        require("clips").setup()
+    end, 100)
 end
 -- vim:foldmethod=marker

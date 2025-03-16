@@ -3,7 +3,7 @@ source ~/.vim/config/z.sh
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 source ~/.vim/config/aider.sh
 
-export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/node_modules/.bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
+export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
 export EDITOR=nvim
 export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
@@ -55,7 +55,6 @@ alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
 alias venv='deactivate 2> /dev/null; findup venv >&2 || python3 -m venv venv; source "$(findup venv)/bin/activate"'
-alias gnpm='npm --prefix ~/.local/lib/node-packages'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
 alias lzd='lazydocker'
@@ -166,7 +165,7 @@ glof() {
     --bind='ctrl-t:unbind(change)+track-current' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
-    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
+    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=always --line-numbers --navigate)'
 }
 
 grlf() {
@@ -176,7 +175,7 @@ grlf() {
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-t:unbind(change)+track-current' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
-    --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --line-numbers --navigate)' \
+    --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --paging=always --line-numbers --navigate)' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
 }
@@ -186,7 +185,7 @@ tre() {
 }
 
 function = () {
-  python -c "from math import *; print($*)"
+  python -c "from math import *; __import__('pprint').pprint($*)"
 }
 
 st() {
@@ -554,12 +553,8 @@ bin-update() {
   done
 }
 
-dc() {
-  unset -f dc
-  local cmd=$(builtin command -v docker-compose > /dev/null && echo docker-compose || echo docker compose)
-  # shellcheck disable=2139
-  alias dc="$cmd"
-  $cmd "$@"
+dc() {  # lazily overriding function breaks `dc; dc`
+  if builtin command -v docker-compose > /dev/null 2>&1; then docker-compose "$@"; else docker compose "$@"; fi
 }
 
 docker-shell() {
@@ -675,8 +670,8 @@ if [[ $OSTYPE = darwin* ]]; then
       [[ ! -f $histfile ]] && command cp "$HOME/Library/Application Support/Google/Chrome/Default/History" "$histfile"
       command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf.db
       sqlite3 "$histfile" 'attach "/tmp/browser-history-fzf.db" as toMerge; BEGIN;
-      delete from urls where id in (select a.id from urls as a join toMerge.urls as b on a.id = b.id where a.last_visit_time <> b.last_visit_time);
-      insert into urls select * from toMerge.urls where toMerge.urls.id not in (select id from urls); COMMIT; detach toMerge;'
+      INSERT OR REPLACE INTO urls SELECT t.* FROM toMerge.urls t LEFT JOIN urls m ON t.id = m.id
+      WHERE m.id IS NULL OR (m.id IS NOT NULL AND m.last_visit_time <> t.last_visit_time); COMMIT; detach toMerge;'
     elif [[ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]]; then
       fzfprompt='Edge> '
       command cp -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" /tmp/browser-history-fzf.db
