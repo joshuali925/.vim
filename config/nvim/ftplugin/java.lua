@@ -1,4 +1,4 @@
-local workspace_dir = vim.fn.stdpath("cache") .. "/java/workspace/" .. vim.uv.cwd():match("^.+/(.+)$")
+local workspace_dir = vim.fn.stdpath("cache") .. "/java/workspace/" .. vim.fn.fnamemodify(assert(vim.uv.cwd()), ":t")
 local install_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls" -- this is require("mason-registry").get_package("jdtls"):get_install_path()
 local platform = vim.fn.has("macunix") and "mac" or "linux"
 local config = {

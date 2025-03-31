@@ -2,7 +2,7 @@
   "Template": {
     "prefix": "template",
     "description": "rest.nvim request variables",
-    "body": ["@BASE = ${1:localhost:8000}", "", "$0", ""]
+    "body": ["@base = ${1:localhost:8000}", "", "$0", ""]
   },
   "Content type header": {
     "prefix": "content-type",
@@ -18,16 +18,16 @@
   },
   "GET request": {
     "prefix": "get-request",
-    "body": ["GET {{BASE}}/$0", "###"]
+    "body": ["GET {{base}}/$0", "###"]
   },
   "DELETE request": {
     "prefix": "delete-request",
-    "body": ["DELETE {{BASE}}/$0", "###"]
+    "body": ["DELETE {{base}}/$0", "###"]
   },
   "PUT request": {
     "prefix": "put-request",
     "body": [
-      "PUT {{BASE}}/$1",
+      "PUT {{base}}/$1",
       "Content-Type: application/json",
       "",
       "{",
@@ -39,7 +39,7 @@
   "POST request": {
     "prefix": "post-request",
     "body": [
-      "POST {{BASE}}/$1",
+      "POST {{base}}/$1",
       "Content-Type: application/json",
       "",
       "{",

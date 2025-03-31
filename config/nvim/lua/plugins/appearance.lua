@@ -82,15 +82,16 @@ return {
             options = {
                 component_separators = { left = "", right = "" },
                 section_separators = { left = "", right = "" },
+                disabled_filetypes = { statusline = { "snacks_dashboard" } },
             },
             sections = {
-                lualine_a = { function() return "󰀘" end },
+                lualine_a = { function() return "" end },
                 lualine_b = {
                     { "filetype", colored = true, icon_only = true, padding = { left = 1, right = 0 } },
                     { "filename", file_status = false, path = 1 },
                 },
                 lualine_c = {
-                    function() return " " .. vim.uv.cwd():match("^.+/(.+)$") end,
+                    function() return " " .. vim.fn.fnamemodify(assert(vim.uv.cwd()), ":t") end,
                     function()
                         local flags = ""
                         if vim.o.readonly then
@@ -107,7 +108,14 @@ return {
                         end
                         return ""
                     end,
-                    { "diff", symbols = { added = " ", modified = " ", removed = " " } },
+                    {
+                        "diff",
+                        symbols = { added = " ", modified = " ", removed = " " },
+                        source = function()
+                            local summary = vim.b.minidiff_summary
+                            if summary then return { added = summary.add, modified = summary.change, removed = summary.delete } end
+                        end,
+                    },
                     "diagnostics",
                 },
                 lualine_x = {
@@ -122,39 +130,19 @@ return {
                     { "searchcount", color = "String" },
                     function()
                         local clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
-                        local icon = #clients > 0 and " " or ""
-                        if package.loaded["neocodeium"] ~= nil then
-                            local serverstatus = require("neocodeium").get_status() -- https://www.reddit.com/r/neovim/comments/1fc34na/comment/lm5wr1j
-                            if serverstatus == 0 then
-                                icon = " " -- Connected
-                            elseif serverstatus == 1 then
-                                icon = "󰣻 " -- Connection Error
-                            elseif serverstatus == 2 then
-                                icon = "󰣽 " -- Disconnected
-                            else
-                                icon = "󰣼 " -- Unknown
-                            end
-                        end
-                        return icon .. table.concat(clients, " ")
+                        return #clients > 0 and " " .. table.concat(clients, " ") or ""
                     end,
                 },
                 lualine_y = { { "branch", padding = { left = 0, right = 1 } } },
                 lualine_z = {
                     {
                         function()
-                            local cursor = vim.api.nvim_win_get_cursor(0)
-                            local col = cursor[2] + 1
-                            return string.format(
-                                "%s %s %s %s/%s",
-                                (vim.o.expandtab and " " or " ") .. vim.o.shiftwidth,
-                                "󰉡",
-                                col < 10 and " " .. col or col,
-                                cursor[1],
-                                vim.api.nvim_buf_line_count(0)
-                            )
+                            local col = vim.api.nvim_win_get_cursor(0)[2] + 1
+                            return (vim.o.expandtab and " " or " ") .. vim.o.shiftwidth .. "  " .. (col < 10 and " " .. col or col)
                         end,
-                        padding = { left = 0, right = 1 },
+                        padding = 0,
                     },
+                    { "%l/%L" },
                 },
             },
             inactive_sections = {
@@ -164,14 +152,7 @@ return {
                     { "filetype", colored = true, icon_only = true, padding = { left = 1, right = 0 } },
                     { "filename", file_status = false, path = 1, color = "Normal" },
                 },
-                lualine_x = {
-                    {
-                        function()
-                            return string.format("%s/%s", vim.api.nvim_win_get_cursor(0)[1], vim.api.nvim_buf_line_count(0))
-                        end,
-                        color = "Normal",
-                    },
-                },
+                lualine_x = { { "%l/%L", color = "Normal" } },
                 lualine_y = {},
                 lualine_z = {},
             },

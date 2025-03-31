@@ -7,11 +7,7 @@ return {
     on_attach = function(client, bufnr)
         local group = vim.api.nvim_create_augroup("LspFormatting", { clear = false })
         vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
-        vim.api.nvim_create_autocmd("BufWritePre", {
-            group = group,
-            buffer = bufnr,
-            callback = function() require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000 }) end,
-        })
+        vim.api.nvim_create_autocmd("BufWritePre", { group = group, buffer = bufnr, command = "Conform" })
     end,
     settings = {
         Lua = {

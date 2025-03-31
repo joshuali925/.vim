@@ -106,7 +106,7 @@ let &undodir=g:dot_vim_dir . '/tmp/undo'
 let &viminfo="'5000,<50,s10,h,n" . g:dot_vim_dir . '/tmp/viminfo'
 set isfname-==
 set path=.,,**5
-set wildignore=*/tags,*/\.git/*,*/dist/*,*/build/*,*/node_modules/*,*/venv/*,*/__pycache__/*
+set wildignore=*/tags,*/\.git/*,*/dist/*,*/build/*,*/node_modules/*,*/.venv/*,*/__pycache__/*
 set encoding=utf-8
 set timeout
 set timeoutlen=1500

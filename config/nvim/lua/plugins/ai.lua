@@ -17,52 +17,6 @@ return {
         end,
     },
     {
-        "monkoose/neocodeium",
-        enabled = vim.env.VIM_AI == "codeium",
-        event = "InsertEnter",
-        config = function()
-            vim.keymap.set("i", "<Right>", function()
-                if require("neocodeium").visible() then return require("neocodeium").accept() end
-                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false)
-            end)
-            vim.keymap.set("i", "<Down>", function()
-                if require("neocodeium").visible() then return require("neocodeium").cycle(1) end
-                vim.api.nvim_feedkeys(vim.keycode("<Down>"), "n", false)
-            end)
-            vim.keymap.set("i", "<Up>", function()
-                if require("neocodeium").visible() then return require("neocodeium").cycle(-1) end
-                vim.api.nvim_feedkeys(vim.keycode("<Up>"), "n", false)
-            end)
-            require("neocodeium").setup({ filetypes = require("states").qs_disabled_filetypes, silent = true, debounce = true })
-        end,
-    },
-    {
-        "milanglacier/minuet-ai.nvim",
-        enabled = vim.env.VIM_AI == "minuet" and vim.env.OPENAI_API_BASE ~= nil,
-        event = "VeryLazy", -- InsertEnter isn't working
-        opts = {
-            n_completions = 1,
-            add_single_line_entry = false,
-            cmp = { enable_auto_complete = false },
-            blink = { enable_auto_complete = false },
-            provider = "openai_compatible",
-            provider_options = {
-                openai_compatible = {
-                    api_key = "OPENAI_API_KEY",
-                    name = "my_openai",
-                    end_point = ("%s/chat/completions"):format(vim.env.OPENAI_API_BASE),
-                    stream = true,
-                    model = vim.env.AIDER_WEAK_MODEL,
-                },
-            },
-            virtualtext = {
-                auto_trigger_ft = { "*" },
-                auto_trigger_ignore_ft = vim.g.qs_filetype_blacklist,
-                keymap = { accept = "<Right>", accept_line = "<A-a>", prev = "<Up>", next = "<Down>", dismiss = "<A-e>" },
-            },
-        },
-    },
-    {
         "augmentcode/augment.vim",
         enabled = vim.env.VIM_AI == "augment",
         event = "InsertEnter",
@@ -124,6 +78,7 @@ return {
                         })
                     end, { buffer = buf })
                     vim.api.nvim_create_augroup("Aider", {})
+                    vim.api.nvim_create_autocmd("BufEnter", { group = "Aider", buffer = buf, command = "startinsert" })
                     vim.api.nvim_create_autocmd("BufDelete", {
                         group = "Aider",
                         callback = function(e)
@@ -146,8 +101,8 @@ return {
                     })
                     vim.api.nvim_create_autocmd("TermClose", {
                         group = "Aider",
-                        callback = function(ev)
-                            if ev.buf ~= buf then return end
+                        callback = function(e)
+                            if e.buf ~= buf then return end
                             vim.api.nvim_del_augroup_by_name("Aider")
                             files = nil
                             aider_cmd = nil

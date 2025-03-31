@@ -20,10 +20,10 @@ return {
             local input_ui = nil
             function UIInput:init(opts, on_done)
                 local default_value = tostring(opts.default or "")
-                local params = vim.lsp.util.make_position_params()
+                local cursor = vim.api.nvim_win_get_cursor(0)
                 UIInput.super.init(self, {
-                    relative = { type = "buf", position = { row = params.position.line, col = params.position.character } }, -- use buf to avoid cursor shifting before on_submit
-                    position = { row = 2, col = 0 },
+                    relative = { type = "buf", position = { row = cursor[1], col = cursor[2] } }, -- use buf to avoid cursor shifting before on_submit
+                    position = { row = 1, col = 0 },
                     size = { width = math.max(20, vim.api.nvim_strwidth(default_value) + 15) },
                     border = { style = "rounded", text = { top = get_prompt_text(opts.prompt), top_align = "left" } },
                     win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
@@ -41,10 +41,7 @@ return {
 
             vim.ui.input = function(opts, on_confirm)
                 assert(type(on_confirm) == "function", "missing on_confirm function")
-                if input_ui then
-                    vim.api.nvim_err_writeln("busy: another input is pending!")
-                    return
-                end
+                if input_ui then return end
                 input_ui = UIInput(opts, function(value)
                     if input_ui then input_ui:unmount() end
                     on_confirm(value)

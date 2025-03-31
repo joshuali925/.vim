@@ -28,7 +28,7 @@ vim.g.qs_filetype_blacklist = {
 }
 vim.g.qs_buftype_blacklist = { "terminal" }
 
-local qs_disabled_filetypes = { ["."] = false } -- neocodeium has "." = false
+local qs_disabled_filetypes = {}
 for _, ft in ipairs(vim.g.qs_filetype_blacklist) do
     qs_disabled_filetypes[ft] = false
 end

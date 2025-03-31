@@ -23,7 +23,7 @@ local function buf_set_extmark(opts)
 end
 
 -- limitation: bookmarks removed by deleting lines will be restored when reading from cache again
-function M.dump_cache(buf, match)
+local function dump_cache(buf, match)
     local file_name = match or vim.api.nvim_buf_get_name(buf)
     local bookmarks = M.bookmarks[file_name]
     if file_name == "" or bookmarks == nil then return end
@@ -56,7 +56,7 @@ function M.dump_cache(buf, match)
     end
 end
 
-function M.load_cache(buf, match)
+local function load_cache(buf, match)
     local file_name = match or vim.api.nvim_buf_get_name(buf)
     local bookmarks = M.bookmarks[file_name]
     if not bookmarks then return end
@@ -93,7 +93,7 @@ function M.annote()
     local row = vim.api.nvim_win_get_cursor(0)[1] - 1
     local extmarks = vim.api.nvim_buf_get_extmarks(0, ns_id, { row, 0 }, { row, -1 }, { details = true })
     for _, extmark in ipairs(extmarks) do
-        local details = extmark[4]
+        local details = assert(extmark[4])
         if details.virt_text ~= nil then
             prev_annot = details.virt_text[1][1]:sub(5, -4)
             break
@@ -140,7 +140,7 @@ function M.toggle()
     if not M.delete() then M.create() end
 end
 
-function M.load_disk()
+local function load_disk()
     local fd = vim.uv.fs_open(data_file, "r", 438)
     if not fd then return end
     M.bookmarks = vim.mpack.decode(assert(vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)))
@@ -149,11 +149,11 @@ function M.load_disk()
     for _, buf in ipairs(vim.tbl_filter(function(buf)
         return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf })
     end, vim.api.nvim_list_bufs())) do
-        M.load_cache(buf)
+        load_cache(buf)
     end
 end
 
-function M.dump_disk()
+local function dump_disk()
     if not modified then return end
     local filtered = {}
     for file, bookmarks in pairs(M.bookmarks) do
@@ -179,13 +179,13 @@ function M.setup()
         vim.schedule(function() vim.cmd("$") end)
     end)
     vim.api.nvim_create_augroup("Bookmarks", {})
-    vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", callback = M.dump_disk })
-    vim.api.nvim_create_autocmd("BufDelete", { group = "Bookmarks", callback = function(e) M.dump_cache(e.buf, e.match) end })
-    vim.api.nvim_create_autocmd("BufReadPost", { group = "Bookmarks", callback = function(e) M.load_cache(e.buf, e.match) end })
+    vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", callback = dump_disk })
+    vim.api.nvim_create_autocmd("BufDelete", { group = "Bookmarks", callback = function(e) dump_cache(e.buf, e.match) end })
+    vim.api.nvim_create_autocmd("BufReadPost", { group = "Bookmarks", callback = function(e) load_cache(e.buf, e.match) end })
     if vim.v.vim_did_enter == 1 then
-        M.load_disk()
+        load_disk()
     else
-        vim.api.nvim_create_autocmd("VimEnter", { group = "Bookmarks", once = true, callback = M.load_disk })
+        vim.api.nvim_create_autocmd("VimEnter", { group = "Bookmarks", once = true, callback = load_disk })
     end
 end
 

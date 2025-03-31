@@ -56,13 +56,13 @@ end
 function M.toggle_venn()
     vim.b.venn_enabled = vim.b.venn_enabled == nil and true or nil
     if vim.b.venn_enabled then
-        vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBox<CR>", { noremap = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "K", "<C-v>k:VBox<CR>", { noremap = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "L", "<C-v>l:VBox<CR>", { noremap = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "H", "<C-v>h:VBox<CR>", { noremap = true })
-        vim.api.nvim_buf_set_keymap(0, "x", "v", ":VBox<CR>", { noremap = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "v", "<C-v>", { noremap = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "<C-v>", "v", { noremap = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "K", "<C-v>k:VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "L", "<C-v>l:VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "H", "<C-v>h:VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "x", "v", ":VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "v", "<C-v>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "<C-v>", "v", { noremap = true, silent = true })
     else
         vim.api.nvim_buf_del_keymap(0, "n", "J")
         vim.api.nvim_buf_del_keymap(0, "n", "K")
@@ -72,7 +72,7 @@ function M.toggle_venn()
         vim.api.nvim_buf_del_keymap(0, "n", "v")
         vim.api.nvim_buf_del_keymap(0, "n", "<C-v>")
     end
-    vim.o.virtualedit = vim.b.venn_enabled and "all" or "block"
+    vim.wo.virtualedit = vim.b.venn_enabled and "all" or "block"
     require("snacks").indent[vim.b.venn_enabled and "disable" or "enable"]()
     vim.notify("Venn.nvim " .. (vim.b.venn_enabled and "enabled" or "disabled"))
 end
@@ -107,7 +107,7 @@ function M.file_manager()
     vim.api.nvim_create_autocmd("TermClose", {
         once = true,
         callback = function(ev)
-            if ev.buf ~= buf then return end -- seems <buffer=n> doesn't work here
+            if ev.buf ~= buf then return end -- <buffer=buf> doesn't work due to snacks.win's autocmd
             local file = io.open(selection_path, "r")
             if file ~= nil then
                 local files = {}

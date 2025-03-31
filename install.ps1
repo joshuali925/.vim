@@ -15,13 +15,8 @@ scoop install nodejs18@18.19.0
 npm install yarn -g
 echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"
 
-scoop install ripgrep
-scoop install fzf
-scoop install fd
-scoop install yazi
-scoop install bat
-scoop install delta
-scoop install lazygit
+scoop install ripgrep fzf fd yazi bat delta lazygit
+scoop install nushell starship extras/carapace-bin zoxide
 scoop install vim
 reg import "$env:USERPROFILE\scoop\apps\vim\current\install-context.reg"
 
@@ -61,7 +56,10 @@ cmd /c "echo source ~/.vim/config/zsh/.zshrc >> %USERPROFILE%\.zshrc"
 cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.zshrc"
 cmd /c "echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc"
 cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.bashrc"
+Copy-Item "$env:USERPROFILE\.vim\config\nushell" "$env:APPDATA\nushell" -Recurse
+nu "$env:USERPROFILE\.vim\config\nushell\bootstrap.nu"
 
+# sudo is needed for font installation script, built-in sudo won't work
 scoop install sudo
 scoop bucket add nerd-fonts
 sudo scoop install --global JetBrainsMono-NF

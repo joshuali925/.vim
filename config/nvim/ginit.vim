@@ -1,4 +1,4 @@
-if has('win32')  " nvim-qt.exe
+if exists(':GuiFont')  " nvim-qt.exe
   GuiFont! JetBrainsMono\ NF:h10
 else
   " check available fonts with :set guifont=*<CR> and :set guifont?<CR>
@@ -25,8 +25,12 @@ if exists('g:neovide')
   noremap! <M-BS> <C-w>
 
 else  " nvim-qt
-  GuiTabline 0
-  GuiPopupmenu 0
+  if exists(':GuiTabline')
+    GuiTabline 0
+  endif
+  if exists(':GuiPopupmenu')
+    GuiPopupmenu 0
+  endif
   inoremap <S-Insert> <C-g>u<C-o>"+p
   nnoremap <S-Insert> "+p
   xnoremap <S-Insert> "+p

@@ -26,7 +26,6 @@ return {
                 pattern = "http",
                 group = "KulalaAutoCommands",
                 callback = function(ev)
-                    vim.o.commentstring = "# %s"
                     vim.keymap.set("n", "{", "<Cmd>lua require('kulala').jump_prev()<CR>", { buffer = ev.buf })
                     vim.keymap.set("n", "}", "<Cmd>lua require('kulala').jump_next()<CR>", { buffer = ev.buf })
                 end,
@@ -280,9 +279,7 @@ return {
             })
             vim.api.nvim_create_autocmd("User", {
                 pattern = "MiniFilesActionRename",
-                callback = function(event)
-                    require("snacks.rename").on_rename_file(event.data.from, event.data.to)
-                end,
+                callback = function(e) require("snacks.rename").on_rename_file(e.data.from, e.data.to) end,
             })
         end,
     },

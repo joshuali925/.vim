@@ -2,6 +2,7 @@ export AIDER_DARK_MODE=true
 export AIDER_GITIGNORE=false
 export AIDER_CACHE_PROMPTS=true
 export AIDER_SHOW_MODEL_WARNINGS=false
+export AIDER_MAP_TOKENS=3000
 # export AIDER_MODEL=bedrock/converse/us.deepseek.r1-v1:0
 export AIDER_MODEL=us.anthropic.claude-3-7-sonnet-20250219-v1:0
 export AIDER_WEAK_MODEL=anthropic.claude-3-5-haiku-20241022-v1:0
