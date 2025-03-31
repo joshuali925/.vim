@@ -2,7 +2,6 @@
 
 zmodule romkatv/powerlevel10k --on-pull "$ZIM_HOME/modules/powerlevel10k/gitstatus/install"
 
-zmodule zsh-users/zsh-completions --fpath src
 zmodule gradle/gradle-completion --fpath .
 zmodule completion
 

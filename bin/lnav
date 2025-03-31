@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github lnav tstack/lnav linux-musl-x86_64 linux-musl-arm64 x86_64-macos aarch64-macos 'lnav-*/lnav' "$@"

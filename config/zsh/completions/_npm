@@ -1,0 +1,8 @@
+#compdef npm
+
+_npm_completion() {  # taken from `npm completion` output
+  local si=$IFS
+  compadd -- $(COMP_CWORD=$((CURRENT-1)) COMP_LINE=$BUFFER COMP_POINT=0 npm completion -- "${words[@]}" 2>/dev/null)
+  IFS=$si
+}
+_npm_completion "$@"

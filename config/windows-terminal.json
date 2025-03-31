@@ -5,7 +5,6 @@
     [
         {
             "command": "find",
-            "id": "User.find",
             "keys": "ctrl+shift+f"
         },
         {
@@ -15,13 +14,12 @@
                 "split": "auto",
                 "splitMode": "duplicate"
             },
-            "id": "User.splitPane.A6751878",
             "keys": "alt+shift+d"
         }
     ],
     "copyFormatting": "none",
     "copyOnSelect": true,
-    "defaultProfile": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+    "defaultProfile": "{3a949d14-75d8-4637-86cf-ad5c78cd2cb3}",
     "disableAnimations": true,
     "firstWindowPreference": "defaultProfile",
     "largePasteWarning": false,
@@ -37,11 +35,11 @@
         "defaults": 
         {
             "closeOnExit": "always",
-            "colorScheme": "Dark+",
+            "colorScheme": "One Half Dark",
             "font": 
             {
                 "face": "JetBrainsMono Nerd Font",
-                "size": 10
+                "size": 10.0
             },
             "padding": "0"
         },
@@ -58,6 +56,14 @@
                 "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
                 "hidden": false,
                 "name": "Windows PowerShell"
+            },
+            {
+                "commandline": "%USERPROFILE%/scoop/shims/nu.exe",
+                "cursorShape": "filledBox",
+                "guid": "{3a949d14-75d8-4637-86cf-ad5c78cd2cb3}",
+                "hidden": false,
+                "name": "Nushell",
+                "startingDirectory": "%USERPROFILE%"
             },
             {
                 "commandline": "%USERPROFILE%/scoop/apps/git/current/usr/bin/bash.exe -i -l",
@@ -95,9 +101,11 @@
         ]
     },
     "schemes": [],
-    "themes": [],
     "tabSwitcherMode": "disabled",
     "tabWidthMode": "equal",
+    "theme": "dark",
+    "themes": [],
     "trimBlockSelection": true,
+    "windowingBehavior": "useExisting",
     "wordDelimiters": " \"'=()[]{}<>,"
 }

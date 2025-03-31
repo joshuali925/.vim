@@ -2,14 +2,14 @@ local M = {}
 
 local configured_servers = {
     "lua-language-server",
-    "bash-language-server",
     "vim-language-server",
-    "json-lsp",
     "yaml-language-server",
+    "bash-language-server",
+    "eslint-lsp",
+    "json-lsp",
     "html-lsp",
     "css-lsp",
     "typescript-language-server",
-    "eslint-lsp",
     "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
     "jdtls",
     "kotlin-language-server",
@@ -94,6 +94,7 @@ function M.setup()
                     if diagnostic_win_id == nil then vim.lsp.buf.hover() end
                 end
             end, opts)
+            vim.keymap.set("x", "K", ":<C-u>help <C-r>=funcs#get_visual_selection()<CR><CR>", opts)
             vim.keymap.set("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
             vim.keymap.set("n", "gD", "<Cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
             vim.keymap.set("n", "<leader>d", "<Cmd>lua vim.lsp.buf.implementation()<CR>", opts)
@@ -121,7 +122,7 @@ function M.organize_imports_and_format()
             arguments = { vim.uri_from_bufnr(0) },
         }, 3000)
     end
-    require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000 })
+    vim.cmd.Conform()
 end
 
 function M.is_active()

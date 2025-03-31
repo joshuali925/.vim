@@ -20,7 +20,7 @@ init() {
   [[ -n $INSTALL_ENV_INIT ]] && return 0 || INSTALL_ENV_INIT=1
   set -eo pipefail
   cd
-  export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"
+  export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"  # mise npm uses node, which needs to be in PATH
   detect-env
 }
 
@@ -31,7 +31,7 @@ install() {
     if declare -F "install_$package" > /dev/null; then
       "install_$package"
     elif declare -F "install_${package%%-*}" > /dev/null; then
-      "install_${package%%-*}" "${package##*-}"
+      "install_${package%%-*}" "${package##*-}"  # `$0 install swap-8` would install swap of 8G
     else
       log "Unknown package \"$package\", skipping.."
     fi
@@ -112,23 +112,19 @@ install_devtools() {
     sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh git vim
     sudo yum install -y epel-release || true
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apt-get ]]; then
-    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential zsh git curl unzip
+    sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential zsh git curl unzip
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apk ]]; then
     sudo apk add bash zsh git curl alpine-sdk
   elif [[ $PLATFORM = darwin ]]; then
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    brew install coreutils
+    brew install coreutils wget
     echo -e "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
     brew install grep && link_file "$(which ggrep)" ~/.local/bin/grep
     brew install gnu-sed && link_file "$(which gsed)" ~/.local/bin/sed
     brew install findutils && link_file "$(which gxargs)" ~/.local/bin/xargs
     brew install gawk && link_file "$(which gawk)" ~/.local/bin/awk
     brew install gnu-tar && link_file "$(which gtar)" ~/.local/bin/tar
-    brew install wget
-    brew install bat shellcheck
-    brew tap homebrew/cask-fonts
-    brew install font-jetbrains-mono-nerd-font
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
     sed -i -e "1iFPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" ~/.zshrc
     log 'Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc'
@@ -141,7 +137,7 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice karabiner-elements alt-tab visual-studio-code squirrel microsoft-remote-desktop
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice karabiner-elements alt-tab squirrel visual-studio-code
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # manually install:
     # Doll: https://github.com/xiaogdgenuine/Doll
@@ -159,7 +155,7 @@ install_dotfiles() {
     git clone --filter=blob:none https://github.com/joshuali925/.vim.git ~/.vim
   fi
   log '\nCreating directories..'
-  mkdir -pv ~/.local/{bin,lib,share} ~/.config/lazygit ~/.ssh
+  mkdir -pv ~/.local/{bin,lib,share} ~/.config/lazygit ~/.ssh ~/projects
   log '\nLinking configurations..'
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
   echo 'source ~/.vim/config/zsh/.zshrc' >> ~/.zshrc
@@ -230,7 +226,7 @@ install_python() {  # environment for install from source: https://github.com/py
   if [[ $PLATFORM:$PACKAGE_MANAGER = linux:yum ]]; then
     sudo yum install -y python3-devel
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apt-get ]]; then
-    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-dev python3-venv python3-pip
+    sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y python3-dev python3-venv python3-pip
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apk ]]; then
     sudo apk add python3
   elif [[ $PLATFORM != darwin ]]; then
@@ -244,11 +240,12 @@ install_python() {  # environment for install from source: https://github.com/py
 install_node() {
   log "Installing node $NODE_VERSION.."
   mise use -g "nodejs@$NODE_VERSION"
+  mise x -- npm config set prefix ~/.local/lib/node-packages
   log 'Installing node packages..'
-  "$(mise which npm)" config set prefix ~/.local/lib/node-packages
-  "$(mise which npm)" install -g --cache ~/.local/lib/npm-temp-cache yarn || true
+  mise x -- npm install -g --cache ~/.local/lib/npm-temp-cache yarn || true
   rm -rf ~/.local/lib/npm-temp-cache
-  log
+  curl -L https://raw.githubusercontent.com/zsh-users/zsh-completions/HEAD/src/_yarn -o ~/.vim/config/zsh/completions/_yarn
+  log 'Installed node'
 }
 
 install_tmux() {
@@ -278,7 +275,6 @@ install_neovim() {
   ~/.vim/bin/nvim --version
   log 'Installed neovim, installing plugins..'
   timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
-  timeout 30 ~/.local/bin/nvim --headless +'lua vim.defer_fn(function() vim.cmd.quitall() end, 27000)' || true
   if [[ $PLATFORM = darwin ]]; then
     nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall
   fi
@@ -320,15 +316,19 @@ default-install() {
   log "Installing for $OSTYPE"
   install devtools dotfiles
 
+  log '\nInstalling zsh plugins..'
+  zsh -ic 'exit' &
+
   if [[ $OSTYPE = linux-android ]]; then
+    wait
     log 'Finished package installs for termux. Setting up file access and styles (use dark monokai or dracula)'
     termux-setup-storage && termux-style && cp --preserve=links -r ~/storage/downloads ~/downloads
   else
-    install java python node tmux neovim || true
+    install node &
+    install tmux &
+    install neovim || true
+    wait
   fi
-
-  log '\nInstalling zsh plugins..'
-  zsh -ic 'exit'
 
   install ssh-key
 

@@ -82,7 +82,7 @@ return {
                     kotlin = { "ktlint" },
                     toml = { "taplo" },
                     awk = { "gawk" },
-                    ["_"] = { "trim_whitespace" },
+                    _ = { "trim_whitespace", lsp_format = "last" },
                     config = function(bufnr)
                         if vim.fn.bufname(bufnr):match("^Caddyfile") ~= nil then return { "caddy" } end
                         return {}
@@ -100,7 +100,7 @@ return {
                     local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
                     range = { start = { args.line1, 0 }, ["end"] = { args.line2, end_line:len() } }
                 end
-                require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 3000, range = range })
+                require("conform").format({ async = false, timeout_ms = 3000, range = range })
             end, { range = true })
         end,
     },
@@ -117,27 +117,9 @@ return {
         build = ":TSUpdate",
         dependencies = "nvim-treesitter/nvim-treesitter-textobjects",
         opts = {
-            ensure_installed = {
-                "lua",
-                "vim",
-                "vimdoc",
-                "comment",
-                "json",
-                "yaml",
-                "markdown",
-                "markdown_inline",
-                "bash",
-                "http",
-                "html",
-                "css",
-                "javascript",
-                "jsdoc",
-                "typescript",
-                "tsx",
-                "python",
-                "java",
-                "kotlin",
-            },
+            auto_install = true,
+            ensure_installed = { "markdown_inline", "jsdoc" },
+            ignore_install = { "tmux" },
             highlight = {
                 enable = true,
                 disable = function(_, buf)

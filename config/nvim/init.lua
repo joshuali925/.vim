@@ -265,6 +265,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "snacks_terminal" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
+vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "http", "nu" }, command = [[setlocal commentstring=#\ %s]] })
 vim.api.nvim_create_autocmd("FileType", {
     group = "AutoCommands",
     pattern = "netrw", -- netrw is needed for gf on URL

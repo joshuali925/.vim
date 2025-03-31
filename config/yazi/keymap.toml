@@ -30,7 +30,7 @@ prepend_keymap = [
   { on = "i", run = "plugin max-preview", desc = "Toggle max preview" },
   { on = "I", run = 'shell --block -- ~/.vim/config/yazi/preview.sh "$0"', desc = "Preview" },
   { on = "t", run = "plugin change-dir -- fzf CTRL_T", desc = "Find file with fzf" },
-  { on = "T", run = "plugin change-dir -- fzf CTRL_T --no-ignore", desc = "Find fine with fzf --no-ignore" },
+  { on = "T", run = "plugin change-dir -- fzf CTRL_T --follow --no-ignore", desc = "Find fine with fzf --follow --no-ignore" },
   { on = "<Tab>", run = "plugin change-dir -- fzf ALT_C", desc = "Focus file in current directory with fzf" },
   { on = "z", run = "plugin change-dir -- z", desc = "Change directory with z.sh" },
   { on = "J", run = "plugin change-dir-sync -- parent 1", desc = "Go down in parent dir" },
@@ -72,7 +72,7 @@ prepend_keymap = [
   { on = ["m", "P"], run = "link", desc = "Symlink the absolute path of files" },
   { on = ["m", "d", "5"], run = 'shell --block -- md5sum "$@"; echo Press any key to continue; bash -c "read -n 1 -s _"', desc = "Show selected files md5sum" },
   { on = ["m", "1"], run = "shell --block btop", desc = "Open btop" },
-  { on = ["m", "!"], run = 'shell --block -- sudo -E "$(which yazi)"', desc = "Open yazi with sudo" },
+  { on = ["m", "!"], run = 'shell --block -- XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(which yazi)"', desc = "Open yazi with sudo" },
   { on = ["m", "e"], run = 'shell --block -- sudo vim -u ~/.vim/config/mini.vim "$0"', desc = "Sudo edit" },
 ]
 

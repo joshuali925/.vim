@@ -561,7 +561,7 @@ let s:types = extend({
 
 fun! plugins#zeef#tags(path, ft)
   return systemlist(printf(s:ctags . ' -f - --sort=no --excmd=number --fields= --extras=+F --language-force=%s' .
-        \ ' --exclude=.git --exclude=node_modules --exclude=venv --langmap=TypeScript:.ts.tsx %s',
+        \ ' --exclude=.git --exclude=node_modules --exclude=.venv --langmap=TypeScript:.ts.tsx %s',
         \ get(s:types, a:ft, a:ft),
         \ shellescape(expand(a:path))
         \ ))

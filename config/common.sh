@@ -10,7 +10,7 @@ export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
-export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"
+export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --follow --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
@@ -54,7 +54,7 @@ alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
-alias venv='deactivate 2> /dev/null; findup venv >&2 || python3 -m venv venv; source "$(findup venv)/bin/activate"'
+alias venv='deactivate 2> /dev/null; findup .venv >&2 || uv venv; source "$(findup .venv)/bin/activate"'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias lg='lazygit'
 alias lzd='lazydocker'
@@ -188,12 +188,16 @@ function = () {
   python -c "from math import *; __import__('pprint').pprint($*)"
 }
 
+termwrap() {
+  nvim --clean -c 'set cmdheight=0 laststatus=0 shadafile=NONE' -c 'highlight Normal guifg=NONE guibg=NONE' -c 'autocmd TermClose * quitall!' -c "terminal $*" -c startinsert
+}
+
 st() {
   ssh -t "$@" '.vim/bin/tmux new -A -s 0'
 }
 
 tarcopy() {
-  printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | tee >(y) | wc -c | xargs echo Characters copied:
+  printf " printf $(XZ_OPT=-9e tar czf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvz" | tee >(y) | wc -c | xargs echo Characters copied:
 }
 
 convert() {

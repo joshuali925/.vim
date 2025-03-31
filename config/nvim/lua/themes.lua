@@ -105,7 +105,6 @@ local function highlight_plugins()
     end
     vim.api.nvim_set_hl(0, "QuickBG", { link = "CursorLine" }) -- quickui
     vim.api.nvim_set_hl(0, "NeoTreeGitIgnored", { link = "Comment" })
-    vim.api.nvim_set_hl(0, "NeoCodeiumSuggestion", { link = "LspCodeLens" })
     vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { link = "LspCodeLens" })
     vim.g.quickui_color_scheme = "papercol-" .. vim.o.background
 end

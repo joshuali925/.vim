@@ -306,7 +306,7 @@ function! funcs#ctags_create_and_jump() abort
   let answer = input('Generate ctags for language ("all" for all supported, empty to cancel): ', get(types, &filetype, &filetype), 'filetype')  " language list: ctags --list-languages
   if answer != ''
     let args = answer == 'all' ? '' : '--languages=' . answer
-    execute '!ctags --exclude=.git --exclude=node_modules --exclude=venv --langmap=TypeScript:.ts.tsx -R ' . args
+    execute '!ctags --exclude=.git --exclude=node_modules --exclude=.venv --langmap=TypeScript:.ts.tsx -R ' . args
     silent execute 'ltag ' . expand('<cword>')
     echo 'tag 1 of ' . len(getloclist(0))
   endif

@@ -1585,6 +1585,12 @@ install-from-github stylua JohnnyMorganz/StyLua linux '' macos '' '' "$@"
 install-from-github shellcheck koalaman/shellcheck linux.x86_64 linux.aarch64 darwin.x86_64 '' '--strip-components=1 --wildcards shellcheck*/shellcheck' "$@"
 install-from-github croc schollz/croc Linux-64bit.tar.gz Linux-ARM64.tar.gz macOS-64bit macOS-ARM64 croc "$@"
 install-from-github dep-tree gabotechs/dep-tree linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 dep-tree "$@"
+install-from-github grex pemistahl/grex x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-apple-darwin aarch64-apple-darwin '' "$@"
+install-from-github dust bootandy/dust x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-apple-darwin '' '--strip-components=1 --wildcards dust*/dust' "$@"
+install-from-github restic restic/restic linux_amd64.bz2 linux_arm64.bz2 darwin_amd64.bz2 darwin_arm64.bz2 restic "$@"
+install-from-github up akavel/up up '' up-darwin '' '' "$@"
+install-from-github imgcat danielgatis/imgcat Linux_x86_64 Linux_arm64 Darwin_x86_64 Darwin_arm64 imgcat "$@"
+install-from-url iterm-imgls https://iterm2.com/utilities/imgls "$@"
 alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'  # doesn't support arm64
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
@@ -4061,36 +4067,36 @@ export MANROFFOPT='-c'
                 " { "&Save session", [[call feedkeys(":lua MiniSessions.write('temp')\<Left>\<Left>", "n")]], "Save session using mini.nvim" },
                 " { "Load s&ession", [[lua MiniSessions.select()]], "Load session using mini.nvim" },
             require("mini.git").setup() -- show_at_cursor needs current file committed
-            require("mini.statusline").setup({ -- refreshing too often
+            local sl = require("mini.statusline")
+            local filename = sl.section_filename({ trunc_width = 9999 })
+            sl.setup({
                 content = {
                     active = function()
-                        local _, mode_hl  = MiniStatusline.section_mode({ trunc_width = 120 })
-                        local git         = MiniStatusline.section_git({ trunc_width = 40 })
-                        local diff        = MiniStatusline.section_diff({ trunc_width = 75 })
-                        local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
-                        local lsp         = MiniStatusline.section_lsp({ trunc_width = 75 })
-                        local filename    = MiniStatusline.section_filename({ trunc_width = 140 })
-                        local fileinfo    = MiniStatusline.section_fileinfo({ trunc_width = 120 })
-                        local location    = MiniStatusline.section_location({ trunc_width = 75 })
-                        local search      = MiniStatusline.section_searchcount({ trunc_width = 75 })
-                        local clients     = {}
-                        for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
-                            clients[#clients + 1] = client.name
-                        end
-                        local lsp_clients = #clients == 0 and "" or " " .. table.concat(clients, " ")
-                        return MiniStatusline.combine_groups({
-                            { hl = mode_hl, strings = { "󰀘" } },
+                        local _, mode_hl = sl.section_mode({})
+                        local fileinfo = sl.section_fileinfo({ trunc_width = 120 })
+                        local cwd = " " .. vim.uv.cwd():match("^.+/(.+)$")
+                        local diff = vim.b.minidiff_summary_string
+                        local diff_text = diff and diff ~= "" and diff:sub((diff:find(" ", 3, true))) or nil
+                        local diagnostics = sl.section_diagnostics({ icon = "", signs = { ERROR = " ", WARN = " ", HINT = " ", INFO = " " }, trunc_width = 75 })
+                        local search = sl.section_searchcount({ trunc_width = 75 })
+                        local clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
+                        local clients_text = #clients > 0 and " " .. table.concat(clients, " ") or nil
+                        local reg = vim.fn.reg_recording()
+                        local reg_text = reg ~= "" and "recording @" .. reg or nil
+                        return sl.combine_groups({
+                            { hl = mode_hl, strings = { "" } },
                             { hl = "MiniStatuslineFileinfo", strings = { filename } },
-                            "%<", -- Mark general truncate point
-                            { hl = "MiniStatuslineFilename", strings = { git, diff, diagnostics, lsp } },
-                            "%=", -- End left alignment
-                            { hl = "MiniStatuslineFilename", strings = { lsp_clients } },
+                            "%<",
+                            { hl = "MiniStatuslineFilename", strings = { cwd, diff_text, diagnostics } },
+                            "%=",
+                            { hl = "Constant", strings = { reg_text } },
+                            { hl = "MiniStatuslineFilename", strings = { "%S", clients_text } },
                             { hl = "MiniStatuslineDevinfo", strings = { fileinfo } },
-                            { hl = mode_hl, strings = { search, location } },
+                            { hl = mode_hl, strings = { search, (vim.o.expandtab and " " or " ") .. vim.o.shiftwidth, " %c %l/%L" } },
                         })
-                    end
+                    end,
+                    inactive = function() return sl.combine_groups({ { hl = "MiniStatuslineInactive", strings = { filename } } }) end,
                 },
-                set_vim_settings = false,
             })
         end,
     },
@@ -5029,11 +5035,6 @@ gunexclude() { sed -i "/^${*//\//\\/}\$/d" "$(git rev-parse --show-toplevel)/.gi
 alias gexclude2='git update-index --assume-unchanged'
 alias gexcluded2='git ls-files -v | grep "^[[:lower:]]"'
 alias gunexclude2='git update-index --no-assume-unchanged'
-" mise
-if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/mise ]]; then
-  BIN_INIT=1 mise complete zsh > ~/.vim/config/zsh/completions/_mise || true
-fi
-install-from-github mise jdx/mise linux-x64-musl.tar.xz linux-arm64-musl.tar.xz macos-x64.tar.xz macos-arm64.tar.xz '--strip-components=2 mise/bin/mise' "$@"
 " pynvim
   PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user pynvim && log 'Installed python3, pip3, pynvim' || log 'Installed python3, failed to install pip packages'
   log "To use pynvim regardless of venv, set ${YELLOW}vim.g.python3_host_prog = \"$(which python3)\""
@@ -5298,3 +5299,68 @@ return {
             arguments = { vim.api.nvim_buf_get_name(0) },
             title = "",
         }, 3000)
+
+" =======================================================
+    {
+        "milanglacier/minuet-ai.nvim",
+        enabled = vim.env.VIM_AI == "minuet" and vim.env.OPENAI_API_BASE ~= nil,
+        event = "VeryLazy", -- InsertEnter isn't working
+        opts = {
+            n_completions = 1,
+            add_single_line_entry = false,
+            cmp = { enable_auto_complete = false },
+            blink = { enable_auto_complete = false },
+            provider = "openai_compatible",
+            provider_options = {
+                openai_compatible = {
+                    api_key = "OPENAI_API_KEY",
+                    name = "my_openai",
+                    end_point = ("%s/chat/completions"):format(vim.env.OPENAI_API_BASE),
+                    stream = true,
+                    model = vim.env.AIDER_WEAK_MODEL,
+                },
+            },
+            virtualtext = {
+                auto_trigger_ft = { "*" },
+                auto_trigger_ignore_ft = vim.g.qs_filetype_blacklist,
+                keymap = { accept = "<Right>", accept_line = "<A-a>", prev = "<Up>", next = "<Down>", dismiss = "<A-e>" },
+            },
+        },
+    },
+    {
+        "monkoose/neocodeium",
+        enabled = vim.env.VIM_AI == "codeium",
+        event = "InsertEnter",
+        config = function()
+            vim.keymap.set("i", "<Right>", function()
+                if require("neocodeium").visible() then return require("neocodeium").accept() end
+                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false)
+            end)
+            vim.keymap.set("i", "<Down>", function()
+                if require("neocodeium").visible() then return require("neocodeium").cycle(1) end
+                vim.api.nvim_feedkeys(vim.keycode("<Down>"), "n", false)
+            end)
+            vim.keymap.set("i", "<Up>", function()
+                if require("neocodeium").visible() then return require("neocodeium").cycle(-1) end
+                vim.api.nvim_feedkeys(vim.keycode("<Up>"), "n", false)
+            end)
+            require("neocodeium").setup({ filetypes = require("states").qs_disabled_filetypes, silent = true, debounce = true })
+        end,
+    },
+local qs_disabled_filetypes = { ["."] = false } -- neocodeium has "." = false
+    vim.api.nvim_set_hl(0, "NeoCodeiumSuggestion", { link = "LspCodeLens" })
+                        if package.loaded["neocodeium"] ~= nil then
+                            local serverstatus = require("neocodeium").get_status() -- https://www.reddit.com/r/neovim/comments/1fc34na/comment/lm5wr1j
+                            if serverstatus == 0 then
+                                icon = " " -- Connected
+                            elseif serverstatus == 1 then
+                                icon = "󰣻 " -- Connection Error
+                            elseif serverstatus == 2 then
+                                icon = "󰣽 " -- Disconnected
+                            else
+                                icon = "󰣼 " -- Unknown
+                            end
+                        end
+
+" =======================================================
+zmodule zsh-users/zsh-completions --fpath src
