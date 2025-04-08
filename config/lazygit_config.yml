@@ -1,17 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
 # https://raw.githubusercontent.com/jesseduffield/lazygit/HEAD/docs/Config.md
 git:
-  autofetch: false
+  autoFetch: true
   paging:
     colorArg: always
     pager: delta --paging=never --24-bit-color=always
-  branchLogCmd: 'git log --color --graph --pretty=simple {{branchName}} --'
-  allBranchesLogCmd: 'git log --color --graph --format=simple-iso --all'
+  branchLogCmd: git log --color --graph --pretty=simple {{branchName}} --
+  allBranchesLogCmd: git log --color --graph --format=simple-iso --all
 gui:
   showCommandLog: false # @ to toggle
   showFileTree: false # ` to toggle
   showBranchCommitHash: true
   showBottomLine: false
-  nerdFontsVersion: 3
   theme:
     activeBorderColor:
       - cyan
@@ -22,8 +22,6 @@ gui:
       - cyan
     selectedLineBgColor:
       - black
-    selectedRangeBgColor:
-      - cyan
     cherryPickedCommitBgColor:
       - yellow
     cherryPickedCommitFgColor:
@@ -42,7 +40,7 @@ keybinding:
     scrollRight: <right>
     prevBlock: H
     nextBlock: L
-    jumpToBlock: [0, 1, 2, 3, 4]
+    jumpToBlock: ["0", "1", "2", "3", "4"]
     openRecentRepos: <disabled>
     scrollUpMain-alt2: .
     scrollDownMain-alt2: ","
@@ -50,14 +48,13 @@ keybinding:
     prevScreenMode: =
     undo: u
     redo: <c-r>
-    renameCommitWithEditor: e
   commits:
     viewResetOptions: <c-r>
     moveDownCommit: J
     moveUpCommit: K
     resetCherryPick: <disabled>
 customCommands:
-  - key: 'C'
-    context: 'files'
-    command: "AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock aider --commit"
+  - key: C
+    context: files
+    command: AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock aider --commit
     subprocess: true

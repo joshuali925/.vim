@@ -19,7 +19,7 @@ end
 function M.toggle()
     enabled = not enabled
     if enabled then
-        M.root()
+        root()
     else -- set working directory to directory of current file or directory where nvim was started. do not use uv.chdir, otherwise file path will be incorrect if vim is opened in a subdirectory
         vim.api.nvim_set_current_dir(vim.fn.expand("%") == "" and vim.env.PWD or vim.fn.expand("%:p:h"))
     end

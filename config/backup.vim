@@ -5364,3 +5364,11 @@ local qs_disabled_filetypes = { ["."] = false } -- neocodeium has "." = false
 
 " =======================================================
 zmodule zsh-users/zsh-completions --fpath src
+scoop bucket add versions
+scoop bucket add java
+scoop install openjdk21
+scoop install python
+reg import "$env:USERPROFILE\scoop\apps\python\current\install-pep-514.reg"
+scoop install nodejs18@18.19.0
+npm install yarn -g
+echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"

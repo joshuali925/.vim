@@ -1,5 +1,4 @@
 # shellcheck disable=1090,2015,2059,2148,2155,2164,2207
-source ~/.vim/config/z.sh
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 source ~/.vim/config/aider.sh
 
@@ -570,7 +569,7 @@ docker-shell() {
       docker exec -it "$selected_id" /bin/bash || docker exec -it "$selected_id" sh || {
         printf '[docker-shell] sh failed, install busybox (y/N)? '; read -r REPLY
         if [[ $REPLY = [Yy] ]]; then
-          docker cp ~/.vim/bin/busybox "$selected_id":/busybox && docker exec -it "$selected_id" /busybox mkdir -p /bin && docker exec -it "$selected_id" /busybox --install /bin && docker exec -it "$selected_id" sh
+          docker cp ~/.vim/bin/busybox "$selected_id":/busybox && { docker exec -it "$selected_id" /busybox mkdir -p /bin && docker exec -it "$selected_id" /busybox --install /bin && docker exec -it "$selected_id" sh; } || docker exec -it "$selected_id" /busybox sh
         fi
       }
     fi

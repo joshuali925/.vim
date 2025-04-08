@@ -5,11 +5,7 @@ zmodule romkatv/powerlevel10k --on-pull "$ZIM_HOME/modules/powerlevel10k/gitstat
 zmodule gradle/gradle-completion --fpath .
 zmodule completion
 
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-ZSH_AUTOSUGGEST_HISTORY_IGNORE="?(#c150,)"
-ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=50
-ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+zmodule agkozak/zsh-z
 zmodule zsh-users/zsh-autosuggestions
 zmodule zsh-users/zsh-syntax-highlighting
 zmodule ~/.vim/config/zsh --source key-bindings.zsh  # ohmyzsh/ohmyzsh is too large

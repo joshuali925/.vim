@@ -90,6 +90,7 @@ if [[ -n $PS1 ]]; then
     PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([[ \$? != 0 ]] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")❯ \[\e[0m\]"
     PROMPT_COMMAND=
   }
+  source ~/.vim/config/z.sh
 fi
 
 source ~/.vim/config/common.sh

@@ -14,9 +14,7 @@ max_height = 1900
 
 [plugin]
 prepend_previewers = [
-  { mime = "application/gzip", run = "tar" },
-  { mime = "application/bzip2", run = "tar" },
-  { mime = "application/xz", run = "tar" },
+  { name = "*.tar*", run = 'piper --format=url -- tar tf "$1"' },
 ]
 
 [open]

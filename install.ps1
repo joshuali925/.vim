@@ -3,22 +3,19 @@ REG ADD HKCU\Software\Classes\ms-officeapp\Shell\Open\Command /t REG_SZ /d rundl
 
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
-scoop install git
 scoop bucket add extras
+scoop install git
+scoop install mise ripgrep fzf fd yazi bat delta lazygit
+Add-Content -Path "$env:USERPROFILE\.npmrc" -Value "prefix=$env:USERPROFILE\.local\lib\node-packages"
 
-scoop bucket add versions
-scoop bucket add java
-scoop install openjdk21
-scoop install python
-reg import "$env:USERPROFILE\scoop\apps\python\current\install-pep-514.reg"
-scoop install nodejs18@18.19.0
-npm install yarn -g
-echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"
-
-scoop install ripgrep fzf fd yazi bat delta lazygit
-scoop install nushell starship extras/carapace-bin zoxide
+scoop install nu starship extras/carapace-bin zoxide
 scoop install vim
 reg import "$env:USERPROFILE\scoop\apps\vim\current\install-context.reg"
+
+# sudo is needed for font installation script, built-in sudo won't work
+scoop install sudo
+scoop bucket add nerd-fonts
+sudo scoop install --global JetBrainsMono-NF
 
 scoop install clink
 clink autorun install
@@ -30,11 +27,11 @@ cmd /c clink installscripts "$env:USERPROFILE\scoop\others\clink-completions"
 git clone --depth=1 https://github.com/chrisant996/clink-gizmos "$env:USERPROFILE\scoop\others\clink-gizmos"
 cmd /c clink installscripts "$env:USERPROFILE\scoop\others\clink-gizmos"
 
-# clone gow and add gow\bin to deduped path
-git clone https://github.com/joshuali925/gow --single-branch -b main --depth=1 "$env:USERPROFILE\scoop\others\gow"
+# install gow and setup deduped path
+git clone --depth=1 https://github.com/joshuali925/gow -b main "$env:USERPROFILE\scoop\others\gow"
 $env:Path >> "$env:USERPROFILE\scoop\others\PATH.bak"
-[Environment]::SetEnvironmentVariable("Path", (([Environment]::GetEnvironmentVariable("Path", "User") + ";$env:USERPROFILE\scoop\others\gow\bin" -split ";" | Select-Object -Unique) -join ";"), "User")
-Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\config\flexprompt_autoconfig.lua" "$env:USERPROFILE\scoop\apps\clink-flex-prompt\current\flexprompt_autoconfig.lua"
+[Environment]::SetEnvironmentVariable("Path", (([Environment]::GetEnvironmentVariable("Path", "User") + ";$env:USERPROFILE\.local\bin;$env:USERPROFILE\.local\lib\node-packages;$env:USERPROFILE\scoop\others\gow\bin" -split ";" | Select-Object -Unique) -join ";"), "User")
+Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\flexprompt_autoconfig.lua" "$env:USERPROFILE\scoop\apps\clink-flex-prompt\current\flexprompt_autoconfig.lua"
 Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\z.cmd" "$env:USERPROFILE\scoop\apps\clink\current\z.cmd"
 Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\z.lua" "$env:USERPROFILE\scoop\apps\clink\current\z.lua"
 
@@ -43,26 +40,23 @@ Invoke-WebRequest -Uri https://github.com/joshuali925/gow/releases/download/bina
 Expand-Archive -Path "$env:USERPROFILE\zsh.zip" -DestinationPath "$env:USERPROFILE\scoop\apps\git\current\usr" -Force
 Remove-Item "$env:USERPROFILE\zsh.zip"
 
+# add dot files
 git clone --filter=blob:none https://github.com/joshuali925/.vim "$env:USERPROFILE\.vim"
 [Environment]::SetEnvironmentVariable("RIPGREP_CONFIG_PATH", "$env:USERPROFILE\.vim\config\.ripgreprc", "User")
-cmd /c mklink /J %USERPROFILE%\vimfiles %USERPROFILE%\.vim
+[Environment]::SetEnvironmentVariable("YAZI_FILE_ONE", "$env:USERPROFILE\scoop\apps\git\current\usr\bin\file.exe", "User")
+New-Item -ItemType Junction -Path "$env:USERPROFILE\vimfiles" -Target "$env:USERPROFILE\.vim"
+New-Item -ItemType HardLink -Path "$env:USERPROFILE\.gitconfig" -Target "$env:USERPROFILE\.vim\config\.gitconfig"
+New-Item -ItemType HardLink -Path "$env:USERPROFILE\.tmux.conf" -Target "$env:USERPROFILE\.vim\config\.tmux.conf"
+New-Item -ItemType Junction -Path "$env:APPDATA\yazi\config" -Target "$env:USERPROFILE\.vim\config\yazi"
 New-Item -ItemType Directory -Path "$env:APPDATA\lazygit"
-cmd /c mklink /H %USERPROFILE%\.gitconfig %USERPROFILE%\.vim\config\.gitconfig
-cmd /c mklink /H %USERPROFILE%\.tmux.conf %USERPROFILE%\.vim\config\.tmux.conf
-cmd /c mklink /H %APPDATA%\lazygit\config.yml %USERPROFILE%\.vim\config\lazygit_config.yml
-Copy-Item "$env:USERPROFILE\.vim\config\yazi" "$env:APPDATA\yazi\config" -Recurse
+New-Item -ItemType HardLink -Path "$env:APPDATA\lazygit\config.yml" -Target "$env:USERPROFILE\.vim\config\lazygit_config.yml"
 Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-cmd /c "echo source ~/.vim/config/zsh/.zshrc >> %USERPROFILE%\.zshrc"
-cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.zshrc"
-cmd /c "echo source ~/.vim/config/.bashrc >> %USERPROFILE%\.bashrc"
-cmd /c "echo export EDITOR=vim TMUX_NO_TPM=1 >> %USERPROFILE%\.bashrc"
-Copy-Item "$env:USERPROFILE\.vim\config\nushell" "$env:APPDATA\nushell" -Recurse
+New-Item -ItemType Junction -Path "$env:APPDATA\nushell" -Target "$env:USERPROFILE\.vim\config\nushell"
 nu "$env:USERPROFILE\.vim\config\nushell\bootstrap.nu"
-
-# sudo is needed for font installation script, built-in sudo won't work
-scoop install sudo
-scoop bucket add nerd-fonts
-sudo scoop install --global JetBrainsMono-NF
+Add-Content -Path "$env:USERPROFILE\.zshrc" -Value "source ~/.vim/config/zsh/.zshrc"
+Add-Content -Path "$env:USERPROFILE\.zshrc" -Value "export EDITOR=vim TMUX_NO_TPM=1"
+Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "source ~/.vim/config/.bashrc"
+Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "export EDITOR=vim TMUX_NO_TPM=1"
 
 Remove-Item "$env:LOCALAPPDATA\nvim" -Force -Recurse -ErrorAction SilentlyContinue
 Copy-Item "$env:USERPROFILE\.vim\config\nvim" "$env:LOCALAPPDATA\nvim" -Recurse

@@ -29,10 +29,12 @@ local function chmod_stat()
 end
 
 local function chown_stat()
-    local stat = Command("stat"):arg(get_hovered_file()):stdout(Command.PIPED):spawn()
-    local output, err = Command("grep"):arg("^Access: ("):stdin(stat:take_stdout()):stdout(Command.PIPED):output()
+    local output, err = Command("stat"):arg(get_hovered_file()):stdout(Command.PIPED):output()
     local stdout = read_stdout(output, err)
-    if stdout ~= nil then ya.notify({ title = "File owner", content = stdout, timeout = 5 }) end
+    if stdout ~= nil then
+        local access = stdout:match("Access: [^\n]*")
+        ya.notify({ title = "File owner", content = access, timeout = 5 })
+    end
 end
 
 return {
