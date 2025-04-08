@@ -20,7 +20,7 @@ init() {
   [[ -n $INSTALL_ENV_INIT ]] && return 0 || INSTALL_ENV_INIT=1
   set -eo pipefail
   cd
-  export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"  # mise npm uses node, which needs to be in PATH
+  export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"
   detect-env
 }
 
@@ -137,14 +137,9 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice karabiner-elements alt-tab squirrel visual-studio-code
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel darkmodebuddy coconutbattery visual-studio-code orion
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
-    # manually install:
-    # Doll: https://github.com/xiaogdgenuine/Doll
-    # Orion: https://browser.kagi.com
-    # coconutBattery: https://www.coconut-flavour.com/coconutbattery
-    # DarkModeBuddy: https://github.com/insidegui/DarkModeBuddy
-    # update wezterm: brew upgrade --cask wezterm --no-quarantine --greedy-latest
+    # to update wezterm: brew upgrade --cask wezterm --no-quarantine --greedy-latest
   fi
 }
 
@@ -264,7 +259,7 @@ install_tmux() {
     tic -xe tmux-256color terminfo.src && rm terminfo.src
     log 'Installed tmux-256colors terminfo to ~/.terminfo'
   fi
-  log
+  log 'Installed tmux and plugins'
 }
 
 install_neovim() {
@@ -306,10 +301,12 @@ install_pm2() {
 }
 
 install_ssh-key() {
-  if [[ ! -f ~/.ssh/id_ed25519 ]]; then
-    ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
-    log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
+  if [[ -f ~/.ssh/id_ed25519 ]]; then  # shellcheck disable=2088
+    log '~/.ssh/id_ed25519 already exists, skipping..'
+    return 0
   fi
+  ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
+  log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
 }
 
 default-install() {

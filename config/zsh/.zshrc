@@ -17,6 +17,13 @@ if [[ ! -e $ZIM_HOME/zimfw.zsh ]]; then
   curl -fsSL --create-dirs -o $ZIM_HOME/zimfw.zsh https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
 fi
 
+# plugin env vars set in .zimrc won't persist
+ZSHZ_CMD=_z
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_HISTORY_IGNORE="?(#c150,)"
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=50
+ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+
 if [[ ! $ZIM_HOME/init.zsh -nt $ZDOTDIR/.zimrc ]]; then
   source $ZIM_HOME/zimfw.zsh init
   if [[ $OSTYPE = linux-android ]]; then  # https://github.com/zimfw/zimfw/issues/482#issuecomment-1288943906

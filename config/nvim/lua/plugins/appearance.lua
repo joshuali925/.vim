@@ -25,7 +25,16 @@ return {
     {
         "dstein64/nvim-scrollview",
         config = function()
-            require("scrollview").setup({ signs_on_startup = { "diagnostics", "search" }, signs_max_per_row = 2, winblend_gui = 50 })
+            require("scrollview").setup({
+                visibility = "info",
+                signs_on_startup = { "diagnostics", "search" },
+                signs_max_per_row = 2,
+                winblend_gui = 50,
+                diagnostics_error_symbol = "═",
+                diagnostics_warn_symbol = "═",
+                diagnostics_hint_symbol = "═",
+                diagnostics_info_symbol = "═",
+            })
         end,
     },
     {
@@ -65,6 +74,10 @@ return {
     {
         "akinsho/bufferline.nvim",
         event = "BufEnter", -- VimEnter/UIEnter breaks '+<line>' argument in command line nvim when 'line' is large
+        init = function()   -- prevent text shift on bufferline load
+            vim.o.showtabline = 2
+            vim.o.tabline = " "
+        end,
         keys = {
             { "<BS>", "<Cmd>keepjumps BufferLineCyclePrev<CR>" },
             { "\\", "<Cmd>keepjumps BufferLineCycleNext<CR>" },

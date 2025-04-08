@@ -55,6 +55,9 @@ function M.setup()
         },
     })
 
+    -- additional lsp servers
+    -- require("lspconfig").gopls.setup({})
+
     vim.diagnostic.config({
         float = { scope = "cursor" },
         virtual_text = { prefix = "●", current_line = true },
