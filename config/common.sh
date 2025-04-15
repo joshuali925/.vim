@@ -6,6 +6,7 @@ export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/sh
 export EDITOR=nvim
 export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
+export NEOVIDE_FRAME=none
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
@@ -53,8 +54,9 @@ alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
-alias venv='deactivate 2> /dev/null; findup .venv >&2 || uv venv; source "$(findup .venv)/bin/activate"'
+alias venv='deactivate 2> /dev/null; findup .venv >&2 || uv venv; source "$(findup .venv)/bin/activate"'  # to auto venv: echo -e '[env]\n_.python.venv = { path = ".venv" }' >> mise.toml
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
+alias k='kubectl'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
@@ -164,7 +166,7 @@ glof() {
     --bind='ctrl-t:unbind(change)+track-current' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
-    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=always --line-numbers --navigate)'
+    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=always)'
 }
 
 grlf() {
@@ -174,9 +176,9 @@ grlf() {
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-t:unbind(change)+track-current' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
-    --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --paging=always --line-numbers --navigate)' \
+    --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --paging=always)' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
-    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --line-numbers --navigate)'
+    --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=always)'
 }
 
 tre() {
@@ -191,8 +193,8 @@ termwrap() {
   nvim --clean -c 'set cmdheight=0 laststatus=0 shadafile=NONE' -c 'highlight Normal guifg=NONE guibg=NONE' -c 'autocmd TermClose * quitall!' -c "terminal $*" -c startinsert
 }
 
-st() {
-  ssh -t "$@" '.vim/bin/tmux new -A -s 0'
+st() {  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display
+  ssh -t "$@" 'LANG=C.UTF-8 .vim/bin/tmux new -A -s 0'
 }
 
 tarcopy() {
@@ -562,14 +564,19 @@ dc() {  # lazily overriding function breaks `dc; dc`
 
 docker-shell() {
   if [[ $1 != vim* ]]; then
-    local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --no-sort --tiebreak=begin,index --query="${1:-}" --height=100% --list-border=none --preview-window=up,70%,follow --preview='docker logs --follow --tail=10000 {1}')
+    local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --query="${1:-}" --height=100% --list-border=none --preview-window=up,70%,border-bottom,follow --preview='docker logs --follow --tail=10000 {1}')
     if [[ -n $selected_id ]]; then
       printf "\n → %s\n" "$selected_id"
       selected_id=$(awk '{print $1}' <<< "$selected_id")
       docker exec -it "$selected_id" /bin/bash || docker exec -it "$selected_id" sh || {
         printf '[docker-shell] sh failed, install busybox (y/N)? '; read -r REPLY
-        if [[ $REPLY = [Yy] ]]; then
-          docker cp ~/.vim/bin/busybox "$selected_id":/busybox && { docker exec -it "$selected_id" /busybox mkdir -p /bin && docker exec -it "$selected_id" /busybox --install /bin && docker exec -it "$selected_id" sh; } || docker exec -it "$selected_id" /busybox sh
+        if [[ $REPLY = [Yy] ]] && docker cp ~/.vim/bin/busybox "$selected_id":/busybox; then
+          docker exec -it "$selected_id" /busybox mkdir -p /bin && docker exec -it "$selected_id" /busybox --install /bin || {
+            local tmp=$(mktemp -d); mkdir -p "$tmp" && chmod 755 "$tmp" && docker cp "$tmp" "$selected_id":/bin; rm -rf "$tmp"  # create /bin if not exists
+            docker cp ~/.vim/bin/busybox "$selected_id":/bin/ls
+            docker cp ~/.vim/bin/busybox "$selected_id":/bin/cat
+          }
+          docker exec -it "$selected_id" /busybox sh
         fi
       }
     fi
@@ -599,13 +606,20 @@ docker-shell() {
   fi
 }
 
+kube-shell() {
+  FZF_DEFAULT_COMMAND='kubectl get pods --all-namespaces 2>&1' fzf --height=100% --list-border=none --info=inline --header-lines=1 \
+    --prompt "$(kubectl config current-context | sed 's/-context$//')> " --header='Press C-o to open log in editor' \
+    --bind='enter:execute:kubectl exec -it --namespace {1} {2} -- bash' --bind="ctrl-o:execute:$EDITOR <(kubectl logs --all-containers --namespace {1} {2})" \
+    --preview-window=up,70%,border-bottom,follow --preview='kubectl logs --follow --all-containers --tail=10000 --namespace {1} {2}'
+}
+
 ec2() {
   local ids curr_state user
   case $1 in
     start) curr_state=stopped ;;
     stop) curr_state=running ;;
-    refresh)
-      aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text
+    ls)
+      aws ec2 describe-instances --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],to_string(NetworkInterfaces[0].Association.PublicDnsName || ''), State.Name] | sort_by([], &[2])" --output table
       return $? ;;
     ssh)
       local tag=${2:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')}
@@ -625,7 +639,7 @@ ec2() {
         [[ $((SECONDS - start)) -gt 10 ]] && break
       done
       return $? ;;
-    *) echo "Usage: $0 {start|stop|refresh|ssh} [instance-tag] [options]" >&2; return 1 ;;
+    *) echo "Usage: $0 {start|stop|ls|ssh} [instance-tag] [options]" >&2; return 1 ;;
   esac
   ids=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | if [[ -n $2 ]]; then grep "^$2\s"; else fzf --multi; fi | awk '{print $2}')
   [[ -z $ids ]] && return 1
@@ -665,6 +679,7 @@ if [[ $OSTYPE = darwin* ]]; then
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
   alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
   alias toggle-dark-theme="osascript -e 'tell application \"System Events\" to tell appearance preferences to set dark mode to not dark mode'"
+  alias last-sleeps='pmset -g log | grep "Clamshell Sleep" | tail'
   browser-history() {
     local cols=$((COLUMNS - 26)) sep='{::}' fzftemp fzfprompt histfile=/tmp/browser-history-fzf.db
     if [[ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]]; then

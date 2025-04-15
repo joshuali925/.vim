@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-source ~/.vim/bin/_install_from_github.sh
-install-from-url ack https://beyondgrep.com/ack-v3.8.1 "$@"

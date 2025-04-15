@@ -158,10 +158,12 @@ return {
         config = function(_, opts) require("nvim-treesitter.configs").setup(opts) end,
     },
     { "williamboman/mason.nvim", build = ":MasonUpdate", cmd = { "Mason", "MasonInstall" }, opts = { ui = { border = "rounded" } } },
+    { "neovim/nvim-lspconfig" },
     { "pmizio/typescript-tools.nvim", dependencies = "neovim/nvim-lspconfig" },
     { "mfussenegger/nvim-jdtls" },
     {
         "Bekaboo/dropbar.nvim",
+        keys = { { "<leader>e", "<Cmd>lua require('dropbar.api').pick()<CR>" } },
         init = function()
             vim.ui.select = (function(overridden)
                 return function(...)

@@ -21,7 +21,7 @@
 	autoremove = gc --prune=now --aggressive
 	difft = -c diff.external=difft diff
 	diffw = -c core.pager='diff-so-fancy | less --tabs=4 -RiMXF' diff --word-diff=color --ignore-all-space
-	diff-side-by-side = -c core.pager='delta --line-numbers --navigate --side-by-side' diff
+	diff-side-by-side = -c core.pager='delta --side-by-side' diff
 	diff-so-fancy = -c core.pager='diff-so-fancy | less --tabs=4 -RiMXF' diff
 	preview-merge-diff = "!f() { git diff HEAD...\"$@\"; }; f"  # diff between target and the common ancestor of HEAD and target
 	preview-merge-log = "!git log --graph --pretty=simple HEAD.."  # commits in target but not in HEAD (will be merged with git merge target)
@@ -54,7 +54,7 @@
 	toggle-url = "!f() { local pattern='s,^\\(https://\\|git@\\)\\([^:/]\\+\\)[:/],' remote=\"${1:-origin}\" url=\"$(git remote get-url \"${1:-origin}\")\"; echo \"$url\" | grep -q '^https://' && pattern=\"${pattern}git@\\\\2:,\" || pattern=\"${pattern}https://\\\\2/,\"; git remote set-url \"$remote\" \"$(echo \"$url\" | sed \"$pattern\")\"; git remote -v; }; f"
 	ls = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; { find . -maxdepth 1 ! -path . -type d | cut -d/ -f2- | xargs -I{} -P$(nproc) sh -c 'git log --color --format=\"$(ls -d -F --color \"$1\")§%C(bold black)▕ %Creset%C(yellow)%h %Cgreen%cr%Creset§%C(bold black)▕ %C(bold blue)%an %Creset%s%Creset\" --max-count 1 HEAD -- \"$1\"' _ {} | sort; find . -maxdepth 1 ! -type d | cut -d/ -f2- | xargs -I{} -P$(nproc) sh -c 'git log --color --format=\"$(ls -d -F --color -- \"$1\")§%C(bold black)▕ %Creset%C(yellow)%h %Cgreen%cr%Creset§%C(bold black)▕ %C(bold blue)%an %Creset%s%Creset\" --max-count 1 HEAD -- \"$1\"' _ {} | sed 'h;s/\\x1b[[0-9;]*m//g;G;s/\\n/\\t/' | sort | cut -f2-; } | awk -F'§' -vCOLUMNS=$(tput cols || echo 80) '{ nf[NR]=NF; for (i = 1; i <= NF; i++) { cell[NR,i] = $i; gsub(/\\033\\[([[:digit:]]+(;[[:digit:]]+)*)?[mK]/, \"\", $i); len[NR,i] = l = length($i); if (l > max[i]) max[i] = l; } } END { for (row = 1; row <= NR; row++) { width = 0; for (col = 1; col < nf[row]; col++) { printf \"%s%*s%s\", cell[row,col], max[col]-len[row,col], \"\", OFS; width+=max[col]+1; } print substr(cell[row,nf[row]],1,COLUMNS-width+17); } }'"
 	histogram = "!git log --date=format:'%Y-%m' --pretty=format:'%cd' | sort | uniq -c | awk 'BEGIN{\"git log --reverse --date=format:%Y-%m --pretty=%cd | head -1\" | getline start; cmd=\"date -d \\\"\" start \"-01\\\" +%s\"; cmd | getline ts; close(cmd)} {counts[$2]=$1; if($2>max_date)max_date=$2} END{while(1){date=strftime(\"%Y-%m\",ts); count=counts[date]+0; printf \"%s %4d %s\\n\",date,count,repeat(\"█\",int(count^0.7)); if(date==max_date)break; ts+=2678400}} function repeat(s,n){return n?s repeat(s,n-1):\"\"}' | less -RiMXF"
-	rg = "!f() { unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; if [ \"$#\" -eq 0 ]; then echo \"Usage: git rg [--reflog] [--regex] <text> [<git-log-args>]\" >&2; return 1; fi; while [ \"$#\" -ne 0 ]; do case $1 in --reflog) local cmd=reflog; shift ;; --regex) local search=-G; shift ;; --) shift; break ;; *) break ;; esac done; local pattern=$'\\022'$1; git \"${cmd:-log}\" --color --pretty=simple --all --regexp-ignore-case \"${search:--S}\" \"$@\" | fzf --ansi --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind=\"enter:execute(echo {} | grep -o \\\"[a-f0-9]\\\\{7,\\\\}\\\" | head -n 1 | xargs -I{} git show --patch-with-stat --color {} | delta --line-numbers --pager=\\\"$PAGER --pattern=\\\\\\\"$pattern\\\\\\\"\\\")\" --preview=\"echo {} | grep -o \\\"[a-f0-9]\\\\{7,\\\\}\\\" | head -n 1 | xargs git show --patch-with-stat --color | delta --paging=never\"; }; f"
+	rg = "!f() { unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; if [ \"$#\" -eq 0 ]; then echo \"Usage: git rg [--reflog] [--regex] <text> [<git-log-args>]\" >&2; return 1; fi; while [ \"$#\" -ne 0 ]; do case $1 in --reflog) local cmd=reflog; shift ;; --regex) local search=-G; shift ;; --) shift; break ;; *) break ;; esac done; local pattern=$'\\022'$1; git \"${cmd:-log}\" --color --pretty=simple --all --regexp-ignore-case \"${search:--S}\" \"$@\" | fzf --ansi --bind=',:preview-down,.:preview-up' --bind='tab:down,btab:up' --bind=\"enter:execute(echo {} | grep -o \\\"[a-f0-9]\\\\{7,\\\\}\\\" | head -n 1 | xargs -I{} git show --patch-with-stat --color {} | delta --pager=\\\"$PAGER --pattern=\\\\\\\"$pattern\\\\\\\"\\\")\" --preview=\"echo {} | grep -o \\\"[a-f0-9]\\\\{7,\\\\}\\\" | head -n 1 | xargs git show --patch-with-stat --color | delta --paging=never\"; }; f"
 	fd = "!f() { local root=$PWD; unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; local filepath=$(git log --pretty=format: --name-only --all \"$@\" | awk NF | sort -u | fzf --ansi --multi --header=\"Find file in all commits, git log takes glob: git fd '*filename*'\" --preview=\"git log --color --pretty=simple --all --full-history -- '$root'/{}\"); if [ -n \"$filepath\" ]; then echo $filepath; local sha=$(git log --color --pretty=simple --all --full-history -- \"${root}/${filepath}\" | fzf --ansi --preview=\"echo {} | grep -o \\\"[a-f0-9]\\\\{7,\\\\}\\\" | head -n 1 | xargs -I{} git show {} -- ${root}/${filepath} | delta --paging=never\" --bind=',:preview-down,.:preview-up' | grep -o \"[a-f0-9]\\{7,\\}\" | head -n 1); if [ -n \"$sha\" ]; then printf \"\\033[0;35mgit show $sha:$filepath\\033[0m\\n\" >&2; git show \"$sha:$filepath\" | $EDITOR - -c \"file $sha:$filepath\" -c 'filetype detect'; fi; fi; }; f"
 	pr = "!f() { if [ \"$#\" -lt 1 ]; then echo \"Usage: git pr {<PR-number>|<PR-URL>} [<remote>]\" >&2; return 1; fi; local pr=${1##*/} remote=${2:-origin}; git clear; git fetch -fu \"$remote\" \"refs/pull/$pr/head:pr/$pr\" && git checkout \"pr/$pr\" && git reset --hard FETCH_HEAD && git config --local --replace \"branch.pr/$pr.remote\" \"$remote\" && git config --local --replace \"branch.pr/$pr.merge\" \"refs/pull/$pr/head\"; }; f"
 
@@ -83,11 +83,11 @@
 	excludesfile = ~/.gitignore
 	; pager = less -RiMXF
 	; pager = diff-so-fancy | less -RiMXF
-	pager = delta --line-numbers --navigate
+	pager = delta
 
 [interactive]
 	; diffFilter = diff-so-fancy --patch
-	diffFilter = delta --line-numbers
+	diffFilter = delta
 
 [diff]
 	renames = copies
@@ -147,6 +147,8 @@
 	stripLeadingSymbols = false
 
 [delta]
+	features = line-numbers
+	navigate = true
 	hunk-header-style = line-number syntax bold
 	hunk-header-line-number-style = white
 	hunk-header-decoration-style = "#4b5263" box
@@ -155,3 +157,6 @@
 	line-numbers-zero-style = "#4b5263"
 	line-numbers-left-format = "{nm:^4} "
 	line-numbers-right-format = "{np:^4} "
+
+[delta "no-line-numbers"]  ; https://github.com/dandavison/delta/issues/307#issuecomment-755823411
+    line-numbers = false

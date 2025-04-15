@@ -1,4 +1,5 @@
 " Compatible since CentOS7 vim7.4: docker run -it --rm -e TERM -v $HOME/.vim:/root/.vim --entrypoint /bin/sh thinca/vim:v7.4.629
+" check feature version support https://github.com/tweekmonster/helpful.vim
 
 let g:dot_vim_dir=expand('<sfile>:p:h')
 
@@ -98,7 +99,7 @@ if has('folding')  " vim small does not have folding
   set foldexpr=max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth
   let &foldtext='getline(v:foldstart)." ⋯"'
   " invalid argument in windows git-bash
-  silent! set fillchars=eob:\ ,fold:\ ,foldopen:,foldsep:\ ,foldclose:
+  silent! set fillchars=eob:\ ,diff:╱,fold:\ ,foldopen:,foldsep:\ ,foldclose:
 endif
 set history=1000
 set undofile

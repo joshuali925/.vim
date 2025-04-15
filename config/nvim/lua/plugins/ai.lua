@@ -1,5 +1,6 @@
 local aider_cmd = nil
 return {
+    -- TODO https://github.com/ravitemer/mcphub.nvim
     {
         "supermaven-inc/supermaven-nvim",
         enabled = vim.env.VIM_AI == "supermaven",

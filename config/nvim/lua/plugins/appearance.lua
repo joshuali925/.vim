@@ -26,7 +26,6 @@ return {
         "dstein64/nvim-scrollview",
         config = function()
             require("scrollview").setup({
-                visibility = "info",
                 signs_on_startup = { "diagnostics", "search" },
                 signs_max_per_row = 2,
                 winblend_gui = 50,
@@ -151,7 +150,7 @@ return {
                     {
                         function()
                             local col = vim.api.nvim_win_get_cursor(0)[2] + 1
-                            return (vim.o.expandtab and " " or " ") .. vim.o.shiftwidth .. "  " .. (col < 10 and " " .. col or col)
+                            return (vim.o.expandtab and " " or " ") .. (vim.o.shiftwidth > 0 and vim.o.shiftwidth or vim.o.tabstop) .. "  " .. (col < 10 and " " .. col or col)
                         end,
                         padding = 0,
                     },

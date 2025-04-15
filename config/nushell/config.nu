@@ -6,11 +6,15 @@ $env.config = {
     ]
 }
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
-$env.EDITOR = 'vim'
+$env.EDITOR = 'nvim'
 
 alias ll = ls -l
-alias v = vim
+alias v = nvim
 alias lg = lazygit
+
+def st [...args] {
+  ssh -t ...$args 'LANG=C.UTF-8 .vim/bin/tmux new -A -s 0'
+}
 
 def --env yy [...args] {
     let tmp = (mktemp -t "yazi-cwd.XXXXXX")
