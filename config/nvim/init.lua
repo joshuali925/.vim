@@ -24,7 +24,7 @@ vim.o.showmatch = true
 vim.o.showmode = false
 vim.o.showcmdloc = "statusline"
 vim.o.cmdheight = 0
-vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:histogram"
+vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:histogram" -- TODO(0.12) add inline:word
 vim.o.splitright = true
 vim.o.splitbelow = true
 vim.o.splitkeep = "topline"
@@ -62,6 +62,7 @@ vim.o.synmaxcol = 1000
 vim.o.writebackup = false
 vim.o.wildcharm = 26 -- <C-z>
 vim.o.cedit = "<C-x>"
+vim.filetype.add({ extension = { conf = "config" }, filename = { Caddyfile = "config" } })
 
 -- mappings {{{1
 -- text objects {{{2
@@ -313,44 +314,6 @@ vim.api.nvim_create_user_command("Prettier", function(args)
     vim.api.nvim_buf_set_text(0, start_pos[2] - 1, start_pos[3] - 1, end_pos[2] - 1, end_pos[3], vim.split(result.stdout, "\n", { trimempty = true }))
 end, { complete = "filetype", nargs = "*", range = true })
 
--- overrides {{{1
-vim.filetype.add({
-    extension = {
-        log = "log",
-        http = "http",
-        conf = "config",
-    },
-    filename = {
-        Caddyfile = "config",
-    },
-})
-vim.paste = (function(overridden) -- break undo before pasting in insert mode, :h vim.paste()
-    return function(lines, phase)
-        if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
-            vim.o.undolevels = vim.o.undolevels -- resetting undolevels breaks undo
-        end
-        overridden(lines, phase)
-    end
-end)(vim.paste)
-if vim.env.SSH_CLIENT ~= nil then -- ssh session
-    vim.g.clipboard = {           -- in Windows Terminal -> ssh -> nvim, osc52 doesn't automatically enable
-        name = "osc52",
-        copy = { ["+"] = require("vim.ui.clipboard.osc52").copy("+"), ["*"] = require("vim.ui.clipboard.osc52").copy("*") },
-        paste = { ["+"] = require("vim.ui.clipboard.osc52").paste("+"), ["*"] = require("vim.ui.clipboard.osc52").paste("*") },
-    }
-    vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { title = 'Link copied' })<CR>")
-elseif vim.fn.has("wsl") == 1 then
-    vim.g.clipboard = {
-        name = "WslClipboard",
-        copy = { ["+"] = "clip.exe", ["*"] = "clip.exe" },
-        paste = {
-            ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-            ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-        },
-        cache_enabled = 0,
-    }
-end
-
 -- plugins {{{1
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
@@ -360,6 +323,7 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins", { defaults = { lazy = true }, ui = { border = "rounded" } })
 require("themes").setup()
 require("rooter").setup()
+vim.defer_fn(function() require("states").load_overrides() end, 50)
 if require("states").small_file then
     vim.defer_fn(function()
         require("lsp").setup()
@@ -370,7 +334,7 @@ if require("states").small_file then
         -- vim.o.foldexpr = "nvim_treesitter#foldexpr()" -- makes :g commands slow
         vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
         vim.o.foldtext = ""
-        vim.o.fillchars = "fold: ,foldopen:,foldsep: ,foldclose:"
+        vim.o.fillchars = "diff:╱,fold: ,foldopen:,foldsep: ,foldclose:"
         require("lazy").load({ plugins = { "nvim-scrollview", "git-conflict.nvim", "quick-scope" } })
         vim.cmd.doautocmd("BufReadPost") -- lsp and git-conflict need this when delay loaded
         require("bookmarks").setup()

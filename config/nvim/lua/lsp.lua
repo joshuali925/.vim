@@ -12,8 +12,8 @@ local configured_servers = {
     "typescript-language-server",
     "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
     "jdtls",
-    "kotlin-language-server",
 }
+local extras = { "kotlin-language-server", "gopls", "clangd" } -- manual install, auto configured using lspconfig
 
 function M.lsp_install_all()
     local not_installed = vim.tbl_filter(function(server)
@@ -40,7 +40,7 @@ function M.setup()
     end, vim.list_extend({ "kulala-ls" }, configured_servers))) -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
     require("typescript-tools").setup({
         settings = {
-            tsserver_path = vim.fn.stdpath("data") .. "/mason/packages/typescript-language-server/node_modules/.bin/tsserver", -- mason always needs to be loaded for it to work automatically
+            tsserver_path = vim.fn.stdpath("data") .. "/mason/packages/typescript-language-server/node_modules/.bin/tsserver", -- manually specify path, otherwise mason needs to be loaded
             jsx_close_tag = { enable = true },
             expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
             tsserver_file_preferences = {
@@ -54,9 +54,9 @@ function M.setup()
             },
         },
     })
-
-    -- additional lsp servers
-    -- require("lspconfig").gopls.setup({})
+    for _, extra in ipairs(vim.tbl_filter(function(bin) return vim.fn.executable(vim.fn.stdpath("data") .. "/mason/bin/" .. bin) == 1 end, extras)) do
+        require("lspconfig")[extra].setup({})
+    end
 
     vim.diagnostic.config({
         float = { scope = "cursor" },

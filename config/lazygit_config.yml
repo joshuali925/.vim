@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
 # https://raw.githubusercontent.com/jesseduffield/lazygit/HEAD/docs/Config.md
 git:
-  autoFetch: true
+  autoFetch: false
   paging:
     colorArg: always
-    pager: delta --paging=never --24-bit-color=always
+    pager: delta --paging=never --24-bit-color=always --features=no-line-numbers
   branchLogCmd: git log --color --graph --pretty=simple {{branchName}} --
   allBranchesLogCmd: git log --color --graph --format=simple-iso --all
 gui:

@@ -203,7 +203,7 @@ nnoremap gr :call VSCodeNotify('references-view.find')<CR>
 nnoremap <leader>gu :call VSCodeNotify('git.revertSelectedRanges')<CR>
 nnoremap <leader>ga :call VSCodeNotify('git.stageSelectedRanges')<CR>
 nmap <leader>gd gh
-nnoremap <leader>gr :call VSCodeNotify('openInGithub.openInGitHubFile')<CR>
+nnoremap <leader>gr :call VSCodeNotify('gitlens.openFileOnRemote')<CR>
 nnoremap <leader>a :call VSCodeNotify('editor.action.quickFix')<CR>
 nnoremap <leader>R :call VSCodeNotify('editor.action.rename')<CR>
 nnoremap <leader>d :call VSCodeNotify('references-view.findImplementations')<CR>

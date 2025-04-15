@@ -1591,6 +1591,8 @@ install-from-github restic restic/restic linux_amd64.bz2 linux_arm64.bz2 darwin_
 install-from-github up akavel/up up '' up-darwin '' '' "$@"
 install-from-github imgcat danielgatis/imgcat Linux_x86_64 Linux_arm64 Darwin_x86_64 Darwin_arm64 imgcat "$@"
 install-from-url iterm-imgls https://iterm2.com/utilities/imgls "$@"
+install-from-url git-quick-stats https://raw.githubusercontent.com/git-quick-stats/git-quick-stats/HEAD/git-quick-stats "$@"
+install-from-url ack https://beyondgrep.com/ack-v3.8.1 "$@"
 alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'  # doesn't support arm64
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
@@ -5227,7 +5229,6 @@ fi
         },
         opts = { label = { uppercase = false, before = true, after = false }, jump = { autojump = true }, modes = { char = { enabled = false } } },
     },
-                keys = { { "<leader>e", "<Cmd>lua require('dropbar.api').pick()<CR>" } },
     {
         "olimorris/codecompanion.nvim",
         enabled = vim.env.OPENAI_API_KEY ~= nil,
@@ -5372,3 +5373,18 @@ reg import "$env:USERPROFILE\scoop\apps\python\current\install-pep-514.reg"
 scoop install nodejs18@18.19.0
 npm install yarn -g
 echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"
+
+" =======================================================
+" cmd starship is slow
+Add-Content -Path "$env:LocalAppData\clink\starship.lua" -Value "load(io.popen('starship init cmd'):read('*a'))()"
+git clone --depth=1 https://github.com/vladimir-kotikov/clink-completions "$env:USERPROFILE\scoop\others\clink-completions"
+clink installscripts "$env:USERPROFILE\scoop\others\clink-completions"
+git clone --depth=1 https://github.com/chrisant996/clink-gizmos "$env:USERPROFILE\scoop\others\clink-gizmos"
+clink installscripts "$env:USERPROFILE\scoop\others\clink-gizmos"
+## enable sshd on ec2
+if ((Get-WmiObject -Class Win32_ComputerSystem).Manufacturer -match 'Amazon EC2') {
+    Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+    Set-Service -Name sshd -StartupType 'Automatic'
+    Start-Service sshd
+    New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "$env:USERPROFILE\scoop\shims\bash.exe" -PropertyType String -Force
+}
