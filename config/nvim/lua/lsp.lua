@@ -1,5 +1,6 @@
 local M = {}
 
+-- TODO https://github.com/tekumara/typos-lsp, https://github.com/Automattic/harper
 local configured_servers = {
     "lua-language-server",
     "vim-language-server",
@@ -13,13 +14,13 @@ local configured_servers = {
     "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
     "jdtls",
 }
-local extras = { "kotlin-language-server", "gopls", "clangd" } -- manual install, auto configured using lspconfig
+local extras = { ["kotlin-language-server"] = "kotlin_language_server", gopls = "gopls", clangd = "clangd" } -- manual install, auto configured using lspconfig
 
 function M.lsp_install_all()
     local not_installed = vim.tbl_filter(function(server)
         return not vim.tbl_contains(require("mason-registry").get_installed_package_names(), server)
             and not vim.tbl_contains({ "html-lsp", "css-lsp", "json-lsp" }, server) -- eslint-lsp contains them
-    end, vim.list_extend({ "prettier", "shellcheck", "black" }, configured_servers))
+    end, vim.list_extend({ "prettier", "shellcheck" }, configured_servers))
     if #not_installed > 0 then
         vim.cmd.MasonInstall({ args = not_installed })
         vim.notify("Installing kulala-ls...") -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
@@ -54,8 +55,10 @@ function M.setup()
             },
         },
     })
-    for _, extra in ipairs(vim.tbl_filter(function(bin) return vim.fn.executable(vim.fn.stdpath("data") .. "/mason/bin/" .. bin) == 1 end, extras)) do
-        require("lspconfig")[extra].setup({})
+    for executable, server in pairs(extras) do
+        if vim.fn.executable(vim.fn.stdpath("data") .. "/mason/bin/" .. executable) == 1 then
+            require("lspconfig")[server].setup({})
+        end
     end
 
     vim.diagnostic.config({

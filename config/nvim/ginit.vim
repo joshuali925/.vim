@@ -1,3 +1,5 @@
+set belloff=all
+
 if exists('g:neovide')
   " check available fonts with :set guifont=*<CR> and :set guifont?<CR>
   if has('mac')

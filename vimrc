@@ -284,10 +284,13 @@ xnoremap <leader>fy :<C-u>registers<CR>:normal! gv"p<Left>
 " 7.4 doesn't have Lexplore and netrw has many issues
 nnoremap <silent> <leader>b :let @x = ' \zs' . expand('%:t') . '\(\*\\|@\)\?\ze\(\s\\|$\)' <bar> let @y = len(split(expand('%:~:.'), '/')) - 1 <bar> silent execute (exists(':Lexplore') ? 'L' : 'V') . 'explore' . (expand('%') != '' ? ' %:h' : '') <bar> if &filetype == 'netrw' <bar> execute @y > 0 ? 'normal ' . repeat('-', @y) : '' <bar> call search(@x) <bar> execute 'normal! zb' <bar> endif<CR>
 nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
-xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
+xnoremap <leader>n :<C-u>let @/ = substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>
-xnoremap <leader>s "xy:%s/<C-r>=substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(@x, '/\.*$^~[&'), '\n', '\\n', 'g')<CR>/gc<Left><Left><Left>
+xnoremap <leader>s :<C-u>%s/<C-r>=substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g')<CR>/<C-r>=substitute(escape(funcs#get_visual_selection(), '/\.*$^~[&'), '\n', '\\r', 'g')<CR>/gc<Left><Left><Left>]
 xnoremap <leader>S :s/\%V//g<Left><Left><Left>
+nnoremap m<C-c> :call funcs#highlight_clear()<CR>
+nnoremap m<leader>n :call funcs#highlight('\<<C-r><C-w>\>')<CR>
+xnoremap m<leader>n :<C-u>call funcs#highlight(substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g'))<CR>]
 nmap cn <leader>ncgn
 xmap C <leader>ncgn
 nmap <C-n> <leader>ncgn

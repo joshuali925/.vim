@@ -84,10 +84,12 @@ log() {
 }
 
 backup() {
-  if [[ -e $1 ]] || [[ -L $1 ]]; then
-    mkdir -p "$BACKUP_DIR"
-    mv -v "$1" "$BACKUP_DIR/$(basename "$1").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"  # .backup_$(date +%s) suffix won't be unique in this script
-  fi
+  for arg in "$@"; do
+    if [[ -e $arg ]] || [[ -L $arg ]]; then  # -L is needed for broken symlinks
+      mkdir -p "$BACKUP_DIR"
+      mv -v "$arg" "$BACKUP_DIR/$(basename "$arg").backup_$(tr -cd 'a-f0-9' < /dev/urandom | head -c 8)"  # .backup_$(date +%s) suffix won't be unique in this script
+    fi
+  done
 }
 
 link_file() {
@@ -144,14 +146,14 @@ install_devtools() {
 }
 
 install_dotfiles() {
-  log '\nCloning dotfiles..'
+  log 'Cloning dotfiles..'
   if [[ ! -f ~/.vim/config/.bashrc ]]; then
     backup ~/.vim
     git clone --filter=blob:none https://github.com/joshuali925/.vim.git ~/.vim
   fi
-  log '\nCreating directories..'
+  log 'Creating directories..'
   mkdir -pv ~/.local/{bin,lib,share} ~/.config/lazygit ~/.ssh ~/projects
-  log '\nLinking configurations..'
+  log 'Linking configurations..'
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
   echo 'source ~/.vim/config/zsh/.zshrc' >> ~/.zshrc
   echo 'skip_global_compinit=1' >> ~/.zshenv
@@ -166,11 +168,10 @@ install_dotfiles() {
   link_file ~/.vim/config/yazi ~/.config/yazi
   link_file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml
   if [[ $PLATFORM = darwin ]]; then
-    mkdir -p ~/Library/Application\ Support/lazygit ~/.config/wezterm
+    mkdir -p ~/Library/Application\ Support/lazygit ~/.config/wezterm ~/.config/karabiner/assets/complex_modifications
     ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport
     link_file ~/.vim/config/lazygit_config.yml ~/Library/ApplicationSupport/lazygit/config.yml
     link_file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
-    mkdir -p ~/.config/karabiner/assets/complex_modifications
     link_file ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
   elif [[ $OSTYPE = linux-android ]]; then
     cat >> ~/.zshrc <<EOF
@@ -185,7 +186,7 @@ bindkey "\e'" end-of-line
 bindkey '\eu' undo
 EOF
   fi
-  log
+  log 'Installed dotfiles'
 }
 
 install_docker() {
@@ -200,12 +201,11 @@ install_docker() {
   fi
   log 'Adding user to docker group..'
   sudo groupadd docker || true
-  sudo usermod -aG docker "$USER" || true
-  sudo systemctl restart docker || sudo service docker restart
-  sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login, enable read write access for other groups now to work immediately
-  # TODO https://github.com/docker/docs/issues/16397, docker completion zsh > ~/.vim/config/zsh/completions/_docker does not have argument descriptions
-  curl -fsSL -o ~/.vim/config/zsh/completions/_docker https://raw.githubusercontent.com/docker/cli/HEAD/contrib/completion/zsh/_docker || true
-  log "Installed docker, run ${YELLOW}docker info${CYAN} for status"
+  sudo usermod -aG docker "$USER"
+  sudo systemctl restart docker
+  newgrp docker  # make group take effect immediately without re-login
+  docker completion zsh > ~/.vim/config/zsh/completions/_docker
+  log 'Installed docker'
 }
 
 install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
@@ -265,15 +265,13 @@ install_tmux() {
 install_neovim() {
   log "Installing neovim.."
   link_file ~/.vim/config/nvim ~/.config/nvim
-  backup ~/.local/lib/nvim
-  backup ~/.local/bin/nvim
+  backup ~/.local/lib/nvim ~/.local/bin/nvim
   ~/.vim/bin/nvim --version
-  log 'Installed neovim, installing plugins..'
   timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
   if [[ $PLATFORM = darwin ]]; then
     nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall
   fi
-  log "\nInstalled neovim plugins"
+  log "\nInstalled neovim and plugins"
 }
 
 install_swap() {
@@ -313,7 +311,7 @@ default-install() {
   log "Installing for $OSTYPE"
   install devtools dotfiles
 
-  log '\nInstalling zsh plugins..'
+  log 'Installing zsh plugins..'
   zsh -ic 'exit' &
 
   if [[ $OSTYPE = linux-android ]]; then

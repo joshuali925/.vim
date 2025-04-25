@@ -28,7 +28,6 @@
 	pulled = "!git log --pretty=simple --stat ORIG_HEAD...HEAD"  # what was pulled
 	topush = "!git log --pretty=simple --stat --stat @{upstream}..HEAD"  # what will be pushed
 	missing = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git log --graph --pretty=simple --cherry-pick --right-only HEAD...\"$@\"; }; f"  # commits in target but not in HEAD and not cherry-picked to HEAD, similar to git cherry -v HEAD <target>
-	# TODO try https://github.com/mlange-42/git-graph
 	forest = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git foresta --style=10 \"$@\" | less -RiMXF -p $(git show -s --format=%h); }; f"
 	ignore = "!f() { echo \"$@\" >> .gitignore; }; f"
 	ignoreio = "!f() { curl -fsSL https://www.gitignore.io/api/\"$@\"; }; f"

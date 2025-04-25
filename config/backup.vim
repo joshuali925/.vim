@@ -5373,6 +5373,8 @@ reg import "$env:USERPROFILE\scoop\apps\python\current\install-pep-514.reg"
 scoop install nodejs18@18.19.0
 npm install yarn -g
 echo "To install and switch other versions: scoop install openjdk17; scoop reset openjdk17"
+" this has argument descriptions in completions, but doesn't support 'docker compose'
+curl -fsSL -o ~/.vim/config/zsh/completions/_docker https://raw.githubusercontent.com/docker/cli/HEAD/contrib/completion/zsh/_docker
 
 " =======================================================
 " cmd starship is slow

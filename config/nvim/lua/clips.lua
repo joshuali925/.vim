@@ -2,7 +2,7 @@ local M = {}
 
 M.clips = {}
 M.limit = 100
-local data_file = vim.fn.stdpath("data") .. "/clips.msgpack"
+local data_file = vim.fn.stdpath("data") .. "/clips.json" -- msgpack throws error on windows for some strings
 local modified = false
 local loaded = false
 
@@ -10,7 +10,7 @@ local function dump_disk()
     if not modified then return end
     local file = io.open(data_file, "w")
     if not file then return end
-    file:write(vim.mpack.encode(M.clips))
+    file:write(vim.json.encode(M.clips))
     file:close()
 end
 
@@ -19,7 +19,7 @@ local function load_disk()
     loaded = true
     local fd = vim.uv.fs_open(data_file, "r", 438)
     if not fd then return end
-    M.clips = vim.mpack.decode(assert(vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)))
+    M.clips = vim.json.decode(assert(vim.uv.fs_read(fd, vim.uv.fs_fstat(fd).size)))
     vim.uv.fs_close(fd)
 end
 
