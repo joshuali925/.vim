@@ -40,6 +40,26 @@ function! funcs#simple_complete()
   endif
 endfunction
 
+let s:highlight_index = 0
+let s:pattern_to_match_id = {}
+function! funcs#highlight(pattern)
+  let highlights = ['Visual', 'DiffAdd', 'DiffDelete', 'DiffText']
+  if has_key(s:pattern_to_match_id, a:pattern)
+    call matchdelete(s:pattern_to_match_id[a:pattern])
+    unlet s:pattern_to_match_id[a:pattern]
+    let s:highlight_index = 0
+  else
+    let s:pattern_to_match_id[a:pattern] = matchadd(highlights[s:highlight_index], a:pattern)
+    let s:highlight_index = (s:highlight_index + 1) % len(highlights)
+  endif
+endfunction
+
+function! funcs#highlight_clear()
+  call clearmatches()
+  let s:highlight_index = 0
+  let s:pattern_to_match_id = {}
+endfunction
+
 function! funcs#get_session_names(arg_lead, cmd_line, cursor_pos)
   return map(glob(stdpath('data') . '/session_*.vim', 0, 1), 'substitute(v:val, stdpath("data") . "/session_", "", "")[0:-5]')
 endfunction

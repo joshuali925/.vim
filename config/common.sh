@@ -1,6 +1,5 @@
 # shellcheck disable=1090,2015,2059,2148,2155,2164,2207
 source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
-source ~/.vim/config/aider.sh
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
 export EDITOR=nvim
@@ -14,6 +13,18 @@ export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignor
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
+export AIDER_DARK_MODE=true
+export AIDER_GITIGNORE=false
+export AIDER_CACHE_PROMPTS=true
+export AIDER_SHOW_MODEL_WARNINGS=false
+export AIDER_MAP_TOKENS=3000
+export AIDER_MODEL=us.anthropic.claude-3-7-sonnet-20250219-v1:0  # bedrock/converse/us.deepseek.r1-v1:0
+export AIDER_WEAK_MODEL=anthropic.claude-3-5-haiku-20241022-v1:0
+export AIDER_EDIT_FORMAT=diff
+export AIDER_ATTRIBUTE_AUTHOR=false
+export AIDER_ATTRIBUTE_COMMITTER=false
+export AIDER_SUBTREE_ONLY=true
+export AIDER_WATCH_FILES=true
 if [[ $LIGHT_THEME = 1 ]]; then
   export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
 else
@@ -44,7 +55,6 @@ alias l='eza -lF --git --color=always --color-scale=size --icons --header --grou
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias chmod\?='stat --printf "%a %n\n"'
 alias bell='echo -n -e "\a"'
-alias escape="sed 's/\\([\"\\]\\)/\\\\\\1/g'"  # escape "\ with backslash
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
 alias sudo='sudo '
 alias watch='watch '
@@ -54,9 +64,10 @@ alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
-alias venv='deactivate 2> /dev/null; findup .venv >&2 || uv venv; source "$(findup .venv)/bin/activate"'  # to auto venv: echo -e '[env]\n_.python.venv = { path = ".venv" }' >> mise.toml
+alias venv='deactivate 2> /dev/null; findup .venv >&2 || uv venv; source "$(findup .venv)/bin/activate"'  # to enable auto venv: echo -e '[env]\n_.python.venv = { path = ".venv" }' >> mise.toml
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias k='kubectl'
+alias dc='docker compose'
 alias lg='lazygit'
 alias lzd='lazydocker'
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
@@ -79,6 +90,7 @@ alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 # shellcheck disable=2142
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
+alias aider='AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock \aider'
 
 alias ga='git add'
 alias gau='git add --all --intent-to-add'
@@ -202,7 +214,7 @@ tarcopy() {
 }
 
 convert() {
-  if [[ $# -ne 2 ]]; then echo "Usage: $0 <file> <format>" >&2; return 1; fi
+  if [[ $# -ne 2 ]]; then echo "Usage: $0 <file> <extension>" >&2; return 1; fi
   ffmpeg -i "$1" -codec copy "${1%.*}.$2" || ffmpeg -y -i "$1" "${1%.*}.$2"
 }
 
@@ -274,7 +286,7 @@ psmem() {
 }
 
 sudorun() {
-  if [[ $# -eq 0 ]]; then echo 'Need a command to run.'; return 1; fi
+  if [[ $# -eq 0 ]]; then echo 'Need a command to run.' >&2; return 1; fi
   local cmd=$1; shift
   if [[ ! -x $(command -v "$cmd") ]] && type "$cmd" | grep -q "$cmd is a \(shell \)\?function"; then
     echo -e "Running as bash function..\n" >&2
@@ -435,7 +447,7 @@ rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripg
 z() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
-    fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9,.]* *//' -e "\|^$PWD\$|d" | fzf --ansi --scheme=history --tac \
+    fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9 ]*//' -e "\|^$PWD\$|d" | fzf --ansi --scheme=history --tac \
       --header='Press ` for recent directories under cwd, or C-a for all directories' --bind='tab:down,btab:up' \
       --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD/\" '\$0~cwd {print \$1}')" \
       --bind='ctrl-a:reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)') && z "$fzftemp"
@@ -459,13 +471,19 @@ t() {  # create, restore, or switch tmux session
 }
 
 tmux-rerun() {
-  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <command>" >&2; return 1; fi
+  if [[ $# -eq 0 ]]; then echo "Usage: $0 <command>" >&2; return 1; fi
   local pane
-  for pane in $(tmux list-panes -a -f "#{==:#{pane_current_command},$1}" -F '#D'); do  # for index-based ref use #S:#I.#P
+  for pane in $(tmux list-panes -a -f "#{==:#{pane_current_command},$1}" -F '#D'); do  # for index-based ref use #S:#I.#P (session:window.pane, <prefix>q to display pane numbers)
     tmux send-keys -t "${pane}" -X cancel 2>/dev/null
     tmux send-keys -t "${pane}" c-c
     tmux send-keys -t "${pane}" s-up enter
   done
+}
+
+tmux-wait() {
+  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <pane>\nBlocks until the first pid of the given pane does not have child processes." >&2; return 1; fi
+  local ppid=$(tmux display-message -t "$1" -p '#{pane_pid}')
+  untildone "printf 'Waiting for command: ' && ! ps -o command= -p $(pgrep -P "$ppid") 2>/dev/null" && echo Command finished
 }
 
 man() {
@@ -556,10 +574,6 @@ bin-update() {
     command mv -v "$bin" "$HOME/config-backup/$executable.backup_$(date +%s)"
     "$vim_bin" --version || "$vim_bin" -version || "$vim_bin" -V || "$vim_bin" version
   done
-}
-
-dc() {  # lazily overriding function breaks `dc; dc`
-  if builtin command -v docker-compose > /dev/null 2>&1; then docker-compose "$@"; else docker compose "$@"; fi
 }
 
 docker-shell() {
@@ -697,7 +711,7 @@ if [[ $OSTYPE = darwin* ]]; then
       echo "Chrome and Edge histories not found, exiting.."
       return 1
     fi
-    sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), datetime((last_visit_time/1000000) - 11644473600, 'unixepoch', 'localtime'), url from urls order by last_visit_time desc" | awk -F $sep '{printf "%-'$cols's \x1b[32m%s\n\x1b[36m%s\x1b[m\0", $1, $2, $3}' |
+    sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), datetime((last_visit_time/1000000) - 11644473600, 'unixepoch', 'localtime'), substr(url, 1, 200) from urls order by last_visit_time desc" | awk -F $sep '{printf "%-'$cols's \x1b[32m%s\n\x1b[36m%s\x1b[m\0", $1, $2, $3}' |
       fzf --ansi --read0 --multi --height=100% --list-border=none --tiebreak=index --scheme=history --prompt="$fzfprompt" \
       --header='Press ` to toggle sort, C-o to open, C-t C-u to show surrounding items' \
       --bind=\`:toggle-sort \

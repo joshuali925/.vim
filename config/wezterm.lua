@@ -4,6 +4,11 @@ local light_theme = false -- sync with system theme: https://wezfurlong.org/wezt
 local mux = wezterm.mux
 local config = wezterm.config_builder()
 
+-- config.animation_fps = 240
+-- config.max_fps = 240
+-- config.front_end = "WebGpu"
+-- config.webgpu_power_preference = "HighPerformance"
+
 wezterm.on("gui-startup", function(cmd)
     local tab, pane, window = mux.spawn_window(cmd or {})
     window:gui_window():maximize()
@@ -75,6 +80,7 @@ config.keys = {
             end),
         }),
     },
+    { key = "t", mods = "CMD|SHIFT", action = wezterm.action.SpawnCommandInNewTab({ args = { os.getenv("HOME") .. "/.local/bin/nu" }, domain = "CurrentPaneDomain" }) },
 }
 config.key_tables = { search_mode = search_mode }
 config.set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" }

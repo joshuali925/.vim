@@ -157,7 +157,7 @@ return {
         },
         config = function(_, opts) require("nvim-treesitter.configs").setup(opts) end,
     },
-    { "williamboman/mason.nvim", build = ":MasonUpdate", cmd = { "Mason", "MasonInstall" }, opts = { ui = { border = "rounded" } } },
+    { "mason-org/mason.nvim", build = ":MasonUpdate", cmd = { "Mason", "MasonInstall" }, opts = { ui = { border = "rounded" } } },
     { "neovim/nvim-lspconfig" },
     { "pmizio/typescript-tools.nvim", dependencies = "neovim/nvim-lspconfig" },
     { "mfussenegger/nvim-jdtls" },

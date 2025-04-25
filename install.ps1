@@ -15,7 +15,7 @@ Add-Content -Path "$env:USERPROFILE\.npmrc" -Value "prefix=$env:USERPROFILE\.loc
 # install gow and setup deduped path
 git clone --depth=1 https://github.com/joshuali925/gow -b main "$env:USERPROFILE\scoop\others\gow"
 $env:Path >> "$env:USERPROFILE\scoop\others\PATH.bak"
-[Environment]::SetEnvironmentVariable("Path", (([Environment]::GetEnvironmentVariable("Path", "User") + ";$env:USERPROFILE\.local\bin;$env:USERPROFILE\.local\lib\node-packages;$env:LOCALAPPDATA\nvim-data\mason\bin;$env:USERPROFILE\scoop\others\gow\bin" -split ";" | Select-Object -Unique) -join ";"), "User")
+[Environment]::SetEnvironmentVariable("Path", (([Environment]::GetEnvironmentVariable("Path", "User") + ";$env:USERPROFILE\.local\bin;$env:USERPROFILE\.local\lib\node-packages;$env:LOCALAPPDATA\mise\shims;$env:LOCALAPPDATA\nvim-data\mason\bin;$env:USERPROFILE\scoop\others\gow\bin" -split ";" | Select-Object -Unique) -join ";"), "User")
 
 # add zsh from msys2
 Invoke-WebRequest -Uri https://github.com/joshuali925/gow/releases/download/binaries/zsh-5.9-win64.zip -OutFile "$env:USERPROFILE\zsh.zip"
@@ -42,8 +42,8 @@ New-Item -ItemType HardLink -Path "$env:LOCALAPPDATA\lazygit\config.yml" -Target
 Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 New-Item -ItemType Junction -Path "$env:APPDATA\nushell" -Target "$env:USERPROFILE\.vim\config\nushell"
 nu "$env:USERPROFILE\.vim\config\nushell\bootstrap.nu"
-Add-Content -Path "$env:USERPROFILE\.zshrc" -Value "source ~/.vim/config/zsh/.zshrc"
-Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "source ~/.vim/config/.bashrc"
+Add-Content -Path "$env:USERPROFILE\.zshrc" -Value "export LANG=C.UTF-8", "source ~/.vim/config/zsh/.zshrc"
+Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "export LANG=C.UTF-8", "source ~/.vim/config/.bashrc"
 
 scoop install neovim extras/neovide zig
 reg import "$env:USERPROFILE\scoop\apps\neovide\current\install-context.reg"

@@ -44,7 +44,7 @@ local function z()
     ya.hide()
     local child, err = Command("fzf")
         :env("FZF_DEFAULT_COMMAND", "sort -nrk 3 -t '|' ~/.z | awk -F '|' '{print $1}'")
-        :env("FZF_DEFAULT_OPTS", os.getenv("FZF_DEFAULT_OPTS") .. [[ --scheme=history --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -nr -k 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD\" '\$0~cwd {print \$1}')" --height=100%]])
+        :env("FZF_DEFAULT_OPTS", os.getenv("FZF_DEFAULT_OPTS") .. [[ --scheme=history --bind='tab:down,btab:up' --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD\" '\$0~cwd {print \$1}')" --height=100%]])
         :stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
 
     local stdout = read_child_output(child, err)

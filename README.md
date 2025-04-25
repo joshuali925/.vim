@@ -65,7 +65,7 @@ Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: command
                       -> Input Sources: only keep "Select next source" as option-space
                       -> Mission Control: deselect "Move left a space" and "Move right a space"
                       -> Keyboard: Move focus to next window: command-option-tab
-         -> Text -> uncheck "Use smart quotes and dashes" and all automatical settings
+         -> Text -> uncheck "Use smart quotes and dashes" and all automatic settings
 
 Desktop & Dock -> Hot Corners -> remove Quick Note
 

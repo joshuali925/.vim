@@ -209,6 +209,7 @@ return {
                 { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
                 { "&Toggle diagnostics", [[lua vim.diagnostic.enable(not vim.diagnostic.is_enabled())]], "Toggle LSP diagnostics" },
                 { "Toggle virtual lines", [[lua vim.diagnostic.config({ virtual_lines = not vim.diagnostic.config().virtual_lines })]], "Toggle LSP diagnostic virtual lines" },
+                { "Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = { prefix = "●", current_line = not vim.diagnostic.config().virtual_text.current_line } })]], "Toggle LSP diagnostic virtual lines" },
                 { "Toggle &inlay hints", [[lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())]], "Toggle LSP inlay hints" },
                 { "--", "" },
                 { "Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },

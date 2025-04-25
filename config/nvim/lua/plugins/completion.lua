@@ -49,7 +49,6 @@ return {
             "rafamadriz/friendly-snippets",
             {
                 "L3MON4D3/LuaSnip",
-                version = "v2.*",
                 build = "make install_jsregexp",
                 config = function() -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
                     require("luasnip.loaders.from_vscode").lazy_load()
@@ -65,7 +64,7 @@ return {
             },
             keymap = {
                 preset = "enter",
-                ["<C-space>"] = { function(cmp) cmp.show({ providers = { "lsp" } }) end },
+                ["<C-Space>"] = { function(cmp) cmp.show({ providers = { "lsp" } }) end },
                 ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
                 ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
                 ["<C-k>"] = {
@@ -86,7 +85,7 @@ return {
                     ["<Up>"] = {},
                     ["<Left>"] = {},
                     ["<Right>"] = {},
-                    ["<C-space>"] = {},
+                    ["<C-Space>"] = { "fallback_to_mappings" },
                     ["<C-n>"] = { "show_and_insert", "select_next" },
                     ["<Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_next() end end, "fallback" },
                     ["<S-Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_prev() end end, "fallback" },

@@ -152,7 +152,7 @@ return {
             explorer = {},
             picker = {
                 ui_select = false,
-                formatters = { file = { filename_first = true } },
+                formatters = { file = { filename_first = true, truncate = 80 } },
                 layout = { preset = "dropdown" },
                 sources = {
                     files = { hidden = true, layout = { preset = "vscode" } },
@@ -244,6 +244,7 @@ return {
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
             require("mini.files").setup({ mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
             require("mini.move").setup({ mappings = { left = "", right = "", down = "<C-,>", up = "<C-.>", line_left = "", line_right = "", line_down = "<C-,>", line_up = "<C-.>" } })
+            require("mini.keymap").map_combo("i", "jk", "<BS><BS><Esc>")
             require("mini.hipatterns").setup({
                 highlighters = {
                     fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },

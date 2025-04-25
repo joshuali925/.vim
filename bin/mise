@@ -3,6 +3,7 @@ source ~/.vim/bin/_install_from_github.sh
 if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/mise ]]; then
   BIN_INIT=1 mise completion zsh > ~/.vim/config/zsh/completions/_mise || true
   BIN_INIT=1 mise use -g usage || true
+  BIN_INIT=1 mise settings add idiomatic_version_file_enable_tools node || true  # enable .nvmrc support, https://github.com/jdx/mise/discussions/4345
 fi
 
 install-from-github mise jdx/mise linux-x64-musl.tar.xz linux-arm64-musl.tar.xz macos-x64.tar.xz macos-arm64.tar.xz '--strip-components=2 mise/bin/mise' "$@"
