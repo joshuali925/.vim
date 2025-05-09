@@ -559,20 +559,6 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "c",
-            "modifiers": {
-              "mandatory": ["left_option"]
-            }
-          },
-          "to": [
-            {
-              "shell_command": "(pgrep 'WeChat' && open -a 'WeChat')"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
             "key_code": "grave_accent_and_tilde",
             "modifiers": {
               "mandatory": ["left_command"]

@@ -1587,7 +1587,6 @@ install-from-github croc schollz/croc Linux-64bit.tar.gz Linux-ARM64.tar.gz macO
 install-from-github dep-tree gabotechs/dep-tree linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 dep-tree "$@"
 install-from-github grex pemistahl/grex x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-apple-darwin aarch64-apple-darwin '' "$@"
 install-from-github dust bootandy/dust x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-apple-darwin '' '--strip-components=1 --wildcards dust*/dust' "$@"
-install-from-github restic restic/restic linux_amd64.bz2 linux_arm64.bz2 darwin_amd64.bz2 darwin_arm64.bz2 restic "$@"
 install-from-github up akavel/up up '' up-darwin '' '' "$@"
 install-from-github imgcat danielgatis/imgcat Linux_x86_64 Linux_arm64 Darwin_x86_64 Darwin_arm64 imgcat "$@"
 install-from-url iterm-imgls https://iterm2.com/utilities/imgls "$@"
@@ -5229,30 +5228,6 @@ fi
         },
         opts = { label = { uppercase = false, before = true, after = false }, jump = { autojump = true }, modes = { char = { enabled = false } } },
     },
-    {
-        "olimorris/codecompanion.nvim",
-        enabled = vim.env.OPENAI_API_KEY ~= nil,
-        dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
-        keys = { { "<leader>h", "<Cmd>CodeCompanionActions<CR>", mode = { "n", "x" } } },
-        opts = {
-            strategies = {
-                chat = {
-                    adapter = "my_openai",
-                    keymaps = { send = { modes = { n = "<leader>r", i = "<leader>r" } }, completion = { modes = { i = "<C-n>" } } },
-                    slash_commands = { ["file"] = { opts = { provider = "snacks" } }, ["buffer"] = { opts = { provider = "snacks" } } },
-                },
-                inline = { adapter = "my_openai" },
-            },
-            adapters = {
-                my_openai = function()
-                    return require("codecompanion.adapters").extend("openai_compatible", {
-                        schema = { model = { default = vim.env.AIDER_MODEL } },
-                        env = { url = vim.env.OPENAI_API_BASE, chat_url = "/chat/completions" },
-                    })
-                end,
-            },
-        },
-    },
             {
                 "K",
                 function()
@@ -5362,6 +5337,8 @@ local qs_disabled_filetypes = { ["."] = false } -- neocodeium has "." = false
                                 icon = "󰣼 " -- Unknown
                             end
                         end
+    " xml encodes characters in code block
+    { "brianhuster/live-preview.nvim", cmd = "LivePreview" },
 
 " =======================================================
 zmodule zsh-users/zsh-completions --fpath src

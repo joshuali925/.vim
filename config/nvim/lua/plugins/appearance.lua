@@ -9,7 +9,7 @@ return {
     { "Mofiqul/vscode.nvim", priority = 1000, enabled = theme == "vscode" },
     {
         "folke/noice.nvim",
-        event = "VeryLazy", -- delay loading causes screen to flicker on startup
+        event = "VeryLazy", -- VeryLazy causes flicker on startup, synchronized loading causes flicker on opening a file, delay loading causes small flicker to both
         opts = {
             lsp = {
                 override = {
@@ -139,7 +139,6 @@ return {
                         end,
                         color = "Constant",
                     },
-                    { "searchcount", color = "String" },
                     function()
                         local clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
                         return #clients > 0 and " " .. table.concat(clients, " ") or ""
@@ -147,6 +146,7 @@ return {
                 },
                 lualine_y = { { "branch", padding = { left = 0, right = 1 } } },
                 lualine_z = {
+                    { "searchcount", padding = { left = 0, right = 1 } },
                     {
                         function()
                             local col = vim.api.nvim_win_get_cursor(0)[2] + 1

@@ -4,6 +4,7 @@ source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
 export EDITOR=nvim
 export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
+export DELTA_PAGER=$PAGER  # somehow delta doesn't respect PAGER
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export NEOVIDE_FRAME=none
 export FZF_COMPLETION_TRIGGER=\\
@@ -56,15 +57,16 @@ alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias chmod\?='stat --printf "%a %n\n"'
 alias bell='echo -n -e "\a"'
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
-alias sudo='sudo '
-alias watch='watch '
+alias sudo='sudo '  # alias commands with space allows alias after command
 alias xargs='xargs '
+alias watch='watch '
+alias viddy='viddy '
 alias v='$EDITOR'
 alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
-alias venv='deactivate 2> /dev/null; findup .venv >&2 || uv venv; source "$(findup .venv)/bin/activate"'  # to enable auto venv: echo -e '[env]\n_.python.venv = { path = ".venv" }' >> mise.toml
+alias venv='deactivate 2> /dev/null; findup .venv >&2 || { uv venv && echo "to enable auto venv with mise: echo -e '"'"'[env]\\\n_.python.venv = { path = \".venv\" }'"'"' >> mise.toml"; }; source "$(findup .venv)/bin/activate"'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias k='kubectl'
 alias dc='docker compose'
@@ -481,8 +483,9 @@ tmux-rerun() {
 }
 
 tmux-wait() {
-  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <pane>\nBlocks until the first pid of the given pane does not have child processes." >&2; return 1; fi
-  local ppid=$(tmux display-message -t "$1" -p '#{pane_pid}')
+  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 [<window-number>.]<pane-number>\n\tBlocks until the first pid of the provided pane in the current or provided window does not have any child processes\n\tUse <prefix>q to display pane numbers" >&2; return 1; fi
+  if [[ $1 = *'.'* ]]; then local pane_id=$1; else local pane_id="$(tmux display-message -p '#S:#I').$1"; fi
+  local ppid=$(tmux display-message -t "$pane_id" -p '#{pane_pid}')
   untildone "printf 'Waiting for command: ' && ! ps -o command= -p $(pgrep -P "$ppid") 2>/dev/null" && echo Command finished
 }
 

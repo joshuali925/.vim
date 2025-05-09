@@ -9,7 +9,7 @@ iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
 scoop install git
 scoop bucket add extras  # buckets rely on git
 scoop bucket add nerd-fonts
-scoop install yazi ripgrep fd fzf bat extras/lazygit delta mise nerd-fonts/JetBrainsMono-NF nu starship extras/carapace-bin zoxide
+scoop install yazi ripgrep fd fzf bat extras/lazygit delta mise nerd-fonts/Maple-Mono-NF-CN nu starship extras/carapace-bin zoxide
 Add-Content -Path "$env:USERPROFILE\.npmrc" -Value "prefix=$env:USERPROFILE\.local\lib\node-packages"
 
 # install gow and setup deduped path
@@ -45,10 +45,14 @@ nu "$env:USERPROFILE\.vim\config\nushell\bootstrap.nu"
 Add-Content -Path "$env:USERPROFILE\.zshrc" -Value "export LANG=C.UTF-8", "source ~/.vim/config/zsh/.zshrc"
 Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "export LANG=C.UTF-8", "source ~/.vim/config/.bashrc"
 
+# install neovim
 scoop install neovim extras/neovide zig
 reg import "$env:USERPROFILE\scoop\apps\neovide\current\install-context.reg"
+[Environment]::SetEnvironmentVariable("NEOVIDE_FRAME", "none", "User")
+Remove-Item "$env:USERPROFILE\.vim\config\nvim\autoload" -Force -Recurse
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.vim\config\nvim\autoload" -Target "$env:USERPROFILE\.vim\autoload"
+git -C "$env:USERPROFILE\.vim" update-index --skip-worktree config/nvim/autoload
+Add-Content -Path "$env:USERPROFILE\.vim\.git\info\exclude" -Value "/config/nvim/autoload"
 Remove-Item "$env:LOCALAPPDATA\nvim" -Force -Recurse -ErrorAction SilentlyContinue
 New-Item -ItemType Junction -Path "$env:LOCALAPPDATA\nvim" -Target "$env:USERPROFILE\.vim\config\nvim"
-Remove-Item "$env:LOCALAPPDATA\nvim\autoload" -Force -Recurse
-New-Item -ItemType Junction -Path "$env:LOCALAPPDATA\nvim\autoload" -Target "$env:USERPROFILE\.vim\autoload"
 nvim --headless +'Lazy! restore' +quitall

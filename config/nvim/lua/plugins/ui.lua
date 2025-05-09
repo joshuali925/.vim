@@ -55,7 +55,16 @@ return {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
         dependencies = "MunifTanjim/nui.nvim",
-        keys = { { "<leader>b", "<Cmd>Neotree reveal<CR>" }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
+        keys = { { "<leader>b", function()
+            for _, winid in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+                local success, source_name = pcall(vim.api.nvim_buf_get_var, vim.api.nvim_win_get_buf(winid), "neo_tree_source")
+                if success then
+                    if source_name ~= "filesystem" then return vim.api.nvim_set_current_win(winid) end
+                    break
+                end
+            end
+            vim.cmd.Neotree("reveal")
+        end }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
         config = function()
             local function get_dir(state)
                 local node = state.tree:get_node()
@@ -224,7 +233,7 @@ return {
                 { "Lazy &update", [[Lazy update]], "Lazy update plugins" },
                 { "--", "" },
                 { "Ma&son packages", [[Mason]], "Mason packages" },
-                { "Mason &install all", [[lua require('lsp').lsp_install_all()]], "Install commonly used servers, linters, and formatters" },
+                { "Mason &install", [[lua require('lsp').install_packages()]], "Install commonly used servers, linters, and formatters" },
             })
             local quickui_theme_list = {}
             local used_chars = "hjklqg"

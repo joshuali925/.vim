@@ -1,6 +1,5 @@
 local aider_cmd = nil
 return {
-    -- TODO https://github.com/ravitemer/mcphub.nvim
     {
         "supermaven-inc/supermaven-nvim",
         enabled = vim.env.VIM_AI == "supermaven",
@@ -28,6 +27,41 @@ return {
             -- vim.g.augment_workspace_folders = { vim.uv.cwd() }
         end,
         config = function() vim.keymap.set("i", "<Right>", function() vim.fn["augment#Accept"](vim.keycode("<C-g>U<Right>")) end) end,
+    },
+    {
+        "olimorris/codecompanion.nvim", -- TODO https://github.com/ravitemer/mcphub.nvim, https://github.com/alvinunreal/tmuxai
+        enabled = vim.env.VIM_AI ~= "augment" and vim.env.OPENAI_API_KEY ~= nil,
+        dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
+        keys = { { "<leader>h", "<Cmd>CodeCompanionChat Toggle<CR>" }, { "<leader>h", "<Cmd>CodeCompanionActions<CR>", mode = { "x" } } },
+        config = function()
+            require("codecompanion").setup({
+                display = { action_palette = { provider = "snacks" } },
+                adapters = {
+                    my_openai = function()
+                        return require("codecompanion.adapters").extend("openai_compatible", {
+                            schema = { model = { default = vim.env.AIDER_MODEL } },
+                            env = { url = vim.env.OPENAI_API_BASE, chat_url = "/chat/completions" },
+                        })
+                    end,
+                },
+                strategies = {
+                    chat = {
+                        adapter = "my_openai",
+                        keymaps = {
+                            send = { modes = { n = "<leader>r", i = "<leader>r" } },
+                            stop = { modes = { n = "<C-c>", i = "<C-c>" } },
+                            close = { modes = { n = "<leader>q", i = "<Nop>" } },
+                            completion = { modes = { i = "<C-n>" } },
+                        },
+                        slash_commands = { ["file"] = { opts = { provider = "snacks" } }, ["buffer"] = { opts = { provider = "snacks" } } },
+                    },
+                    inline = { adapter = "my_openai" },
+                },
+            })
+            local group = vim.api.nvim_create_augroup("CodeCompanionHooks", {})
+            vim.api.nvim_create_autocmd("User", { pattern = "CodeCompanionChatCreated", group = group, command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#buffer'])" })
+            vim.api.nvim_create_autocmd("User", { pattern = "CodeCompanionChatSubmitted", group = group, command = "stopinsert" })
+        end,
     },
     {
         "folke/snacks.nvim",

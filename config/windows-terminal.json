@@ -1,14 +1,14 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions": 
+    "actions":
     [
         {
             "command": "find",
             "keys": "ctrl+shift+f"
         },
         {
-            "command": 
+            "command":
             {
                 "action": "splitPane",
                 "split": "auto",
@@ -23,27 +23,32 @@
     "disableAnimations": true,
     "firstWindowPreference": "defaultProfile",
     "largePasteWarning": false,
+    "launchMode": "maximized",
     "multiLinePasteWarning": false,
-    "newTabMenu": 
+    "newTabMenu":
     [
         {
             "type": "remainingProfiles"
         }
     ],
-    "profiles": 
+    "profiles":
     {
-        "defaults": 
+        "defaults":
         {
             "closeOnExit": "always",
             "colorScheme": "One Half Dark",
-            "font": 
+            "font":
             {
-                "face": "JetBrainsMono Nerd Font",
-                "size": 10.0
+                "face": "Maple Mono NF CN",
+                "size": 10.0,
+                "features":
+                {
+                    "calt": 0
+                }
             },
             "padding": "0"
         },
-        "list": 
+        "list":
         [
             {
                 "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",

@@ -3,7 +3,7 @@
 ### Install tools and configs
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh)"
+time bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh)" && SHELL=$(which zsh) exec zsh
 ```
 
 ### Run bash with configs

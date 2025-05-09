@@ -31,6 +31,7 @@ $env.EDITOR = 'nvim'
 alias ll = ls -al
 alias v = ^$env.EDITOR
 alias lg = lazygit
+alias size = du | sort-by apparent | reverse
 
 alias gd = git diff
 alias gpf = git push --force-with-lease fork (git symbolic-ref --short HEAD)
@@ -46,6 +47,23 @@ def st [...args] {
 
 def vf [] {
   rg --files | lines | input list --fuzzy ' ' | if $in != null { ^$env.EDITOR $in }
+}
+
+def untildone [command: string, --interval: duration = 1sec, --max-tries: int = 0] {
+  mut try = 1
+  loop {
+    print $"Try ($try) at (date now)"
+    try {
+      nu -c $command
+      break
+    }
+    if $max_tries > 0 and $try >= $max_tries {
+      print $"Max tries ($max_tries) reached. Exiting."
+      break
+    }
+    $try = $try + 1
+    sleep $interval
+  }
 }
 
 def --env yy [...args] {

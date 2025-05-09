@@ -66,7 +66,7 @@ prepend_keymap = [
   { on = ["g", "c"], run = "plugin change-dir -- git_root", desc = "Go to git root" },
 
   { on = ["m", "r"], run = 'shell --block -- printf "%s\n" "$@" | vidir -', desc = "vidir" },
-  { on = ["m", "s"], run = '''shell --block -- du -sbc "$@" | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%11.6f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | grep "total\$"; echo Press any key to continue; bash -c "read -n 1 -s _"''', desc = "Show selected size" },
+  { on = ["m", "s"], run = '''shell --block -- du -sbc "$@" | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%11.6f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | grep "total\$"; echo Press any key to continue; bash -c "read -n 1 -s _"''', desc = "Show selected size", for = "unix" },
   { on = ["m", "t"], run = 'shell --block -- less -RiM +F "$0"', desc = "Tail" },
   { on = ["m", "c"], run = 'shell --block -- "$EDITOR" ~/.vim/config/yazi/keymap.toml', desc = "Edit config" },
   { on = ["m", "y"], run = "copy path", desc = "Copy the absolute path" },
