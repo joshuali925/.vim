@@ -119,7 +119,7 @@ return {
         opts = {
             auto_install = true,
             ensure_installed = { "markdown_inline", "jsdoc" },
-            ignore_install = { "tmux" },
+            ignore_install = { "tmux", "gitcommit" },
             highlight = {
                 enable = true,
                 disable = function(_, buf)
@@ -158,7 +158,10 @@ return {
         config = function(_, opts) require("nvim-treesitter.configs").setup(opts) end,
     },
     { "mason-org/mason.nvim", build = ":MasonUpdate", cmd = { "Mason", "MasonInstall" }, opts = { ui = { border = "rounded" } } },
-    { "neovim/nvim-lspconfig" },
+    {
+        "neovim/nvim-lspconfig", -- https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
+        init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
+    },
     { "pmizio/typescript-tools.nvim", dependencies = "neovim/nvim-lspconfig" },
     { "mfussenegger/nvim-jdtls" },
     {

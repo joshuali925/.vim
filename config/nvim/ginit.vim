@@ -5,7 +5,7 @@ if exists('g:neovide')
   if has('mac')
     set guifont=JetBrainsMono\ Nerd\ Font:h14
   else
-    set guifont=JetBrainsMono\ Nerd\ Font:h10
+    set guifont=Maple\ Mono\ NF\ CN:h10
   endif
 
   " let g:neovide_cursor_vfx_mode = 'torpedo'

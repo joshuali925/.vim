@@ -203,7 +203,7 @@ install_docker() {
   sudo groupadd docker || true
   sudo usermod -aG docker "$USER"
   sudo systemctl restart docker
-  newgrp docker  # make group take effect immediately without re-login
+  sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login and newgrp only changes group for the current terminal. enable read write access for other groups now to work immediately
   docker completion zsh > ~/.vim/config/zsh/completions/_docker
   log 'Installed docker'
 }

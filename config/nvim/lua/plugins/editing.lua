@@ -72,7 +72,7 @@ return {
                         require("multicursor-nvim").deleteCursor()
                     elseif not vim.fn.mode():match("^n.*") then
                         vim.cmd.execute([["normal! \<Esc>"]])
-                        require("snacks.picker").files({ on_show = function() vim.cmd.stopinsert() end, search = require("utils").get_visual_selection() })
+                        require("snacks.picker").files({ on_show = function() vim.cmd.stopinsert() end, pattern = require("utils").get_visual_selection() })
                     else
                         require("snacks.picker").smart()
                     end

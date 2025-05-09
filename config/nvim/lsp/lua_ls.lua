@@ -1,9 +1,5 @@
 ---@type vim.lsp.Config
 return {
-    cmd = { "lua-language-server" },
-    filetypes = { "lua" },
-    root_markers = { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" },
-
     on_attach = function(client, bufnr)
         local group = vim.api.nvim_create_augroup("LspFormatting", { clear = false })
         vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })

@@ -1,26 +1,43 @@
 local M = {}
 
--- TODO https://github.com/tekumara/typos-lsp, https://github.com/Automattic/harper
-local configured_servers = {
+local required_servers = {
+    "typos_lsp",
+    "lua_ls",
+    "vimls",
+    "yamlls",
+    "bashls",
+    "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
+    "eslint",
+    -- lsp servers not installed by mason
+    "jsonls", -- use eslint-lsp package for json, html, css lsps
+    "html",
+    "cssls",
+    "kulala_ls", -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
+}
+local required_packages = {
+    "typos-lsp",
     "lua-language-server",
     "vim-language-server",
     "yaml-language-server",
     "bash-language-server",
+    "pyright",
     "eslint-lsp",
-    "json-lsp",
-    "html-lsp",
-    "css-lsp",
-    "typescript-language-server",
-    "pyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
-    "jdtls",
+    -- lsp servers configured not using lspconfig
+    "typescript-language-server", -- typescript-language-server is setup using typescript-tools
+    "jdtls",                      -- jdtls is setup using ../ftplugin/java.lua
+    -- tools
+    "prettier",
+    "shellcheck",
 }
-local extras = { ["kotlin-language-server"] = "kotlin_language_server", gopls = "gopls", clangd = "clangd" } -- manual install, auto configured using lspconfig
+local extra_servers = { -- packages need to be manual installed on demand
+    ["kotlin-language-server"] = "kotlin_language_server",
+    gopls = "gopls",
+    clangd = "clangd",
+}
 
-function M.lsp_install_all()
-    local not_installed = vim.tbl_filter(function(server)
-        return not vim.tbl_contains(require("mason-registry").get_installed_package_names(), server)
-            and not vim.tbl_contains({ "html-lsp", "css-lsp", "json-lsp" }, server) -- eslint-lsp contains them
-    end, vim.list_extend({ "prettier", "shellcheck" }, configured_servers))
+function M.install_packages()
+    local installed = require("mason-registry").get_installed_package_names()
+    local not_installed = vim.tbl_filter(function(package) return not vim.tbl_contains(installed, package) end, required_packages)
     if #not_installed > 0 then
         vim.cmd.MasonInstall({ args = not_installed })
         vim.notify("Installing kulala-ls...") -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
@@ -36,16 +53,15 @@ function M.lsp_install_all()
 end
 
 function M.setup()
-    vim.lsp.enable(vim.tbl_filter(function(server)              -- typescript-language-server is setup using typescript-tools, jdtls is setup using ../ftplugin/java.lua
-        return not vim.tbl_contains({ "typescript-language-server", "jdtls" }, server)
-    end, vim.list_extend({ "kulala-ls" }, configured_servers))) -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
+    vim.lsp.enable(required_servers)
     require("typescript-tools").setup({
         settings = {
             tsserver_path = vim.fn.stdpath("data") .. "/mason/packages/typescript-language-server/node_modules/.bin/tsserver", -- manually specify path, otherwise mason needs to be loaded
             jsx_close_tag = { enable = true },
             expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
             tsserver_file_preferences = {
-                importModuleSpecifierPreference = "shortest",
+                -- importModuleSpecifierPreference = "shortest",
+                importModuleSpecifierPreference = "relative",
                 includeInlayParameterNameHints = "all",
                 includeInlayEnumMemberValueHints = true,
                 includeInlayFunctionLikeReturnTypeHints = true,
@@ -55,9 +71,9 @@ function M.setup()
             },
         },
     })
-    for executable, server in pairs(extras) do
+    for executable, server in pairs(extra_servers) do
         if vim.fn.executable(vim.fn.stdpath("data") .. "/mason/bin/" .. executable) == 1 then
-            require("lspconfig")[server].setup({})
+            vim.lsp.enable(server)
         end
     end
 

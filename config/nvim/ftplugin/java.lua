@@ -1,5 +1,5 @@
 local workspace_dir = vim.fn.stdpath("cache") .. "/java/workspace/" .. vim.fn.fnamemodify(assert(vim.uv.cwd()), ":t")
-local install_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls" -- this is require("mason-registry").get_package("jdtls"):get_install_path()
+local install_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
 local platform = vim.fn.has("macunix") and "mac" or "linux"
 local config = {
     cmd = { -- exec_args in ~/.local/share/nvim/mason/packages/jdtls/bin/jdtls.py + lombok.jar

@@ -277,6 +277,7 @@ return {
                 view = { style = "sign", signs = { add = "▎", change = "░", delete = "▏" } },
                 mappings = { apply = "<leader>gA", reset = "<leader>gU", textobject = "ig", goto_first = "[G", goto_prev = "[g", goto_next = "]g", goto_last = "]G" },
                 options = { wrap_goto = true },
+                source = { require("mini.diff").gen_source.git(), require("mini.diff").gen_source.save() },
             })
             vim.api.nvim_create_autocmd("User", {
                 pattern = "MiniFilesActionRename",

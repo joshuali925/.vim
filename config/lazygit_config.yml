@@ -1,12 +1,13 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
 # https://raw.githubusercontent.com/jesseduffield/lazygit/HEAD/docs/Config.md
 git:
-  autoFetch: false
+  autoFetch: true
   paging:
     colorArg: always
     pager: delta --paging=never --24-bit-color=always --features=no-line-numbers
   branchLogCmd: git log --color --graph --pretty=simple {{branchName}} --
-  allBranchesLogCmd: git log --color --graph --format=simple-iso --all
+  allBranchesLogCmds:
+    - git log --color --graph --format=simple-iso --all
 gui:
   showCommandLog: false # @ to toggle
   showFileTree: false # ` to toggle
@@ -57,4 +58,4 @@ customCommands:
   - key: C
     context: files
     command: AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock aider --commit
-    subprocess: true
+    output: terminal
