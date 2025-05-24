@@ -87,6 +87,11 @@ vim.keymap.set("x", "a5", "iw%")
 vim.keymap.set("o", "a5", "<Cmd>normal va5<CR>")
 vim.keymap.set("n", "gp", "`[v`]")
 vim.keymap.set("o", "gp", "<Cmd>normal gp<CR>")
+vim.keymap.set("x", "P", function()
+    local is_visual_line = vim.fn.mode() == "V"
+    vim.cmd.normal({ args = { '"' .. vim.v.register .. "P" }, bang = true })
+    if is_visual_line then vim.cmd.normal({ args = { "`[v`]=" }, bang = true }) end
+end)
 vim.keymap.set("x", "ii", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
 vim.keymap.set("o", "ii", [[<Cmd>call plugins#indent_object#HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>]], { silent = true })
 vim.keymap.set("x", "ai", [[:<C-u>call plugins#indent_object#HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv]], { silent = true })
@@ -174,6 +179,7 @@ vim.keymap.set("n", "ZX", function()
         if vim.bo[bufnr].buflisted and bufnr ~= cur and vim.b[bufnr].bufpersist ~= 1 then require("mini.bufremove").delete(bufnr, false) end
     end
 end, { desc = "Close untouched buffers" })
+vim.keymap.set("i", "jk", "<Esc>")
 vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch<CR>")
 vim.keymap.set("n", "<C-w><C-c>", "<Esc>")
 vim.keymap.set("n", "<C-w><", "<C-w><<C-w>", { remap = true })
@@ -203,6 +209,7 @@ vim.keymap.set("x", "<leader>S", [[:s/\%V//g<Left><Left><Left>]])
 vim.keymap.set("n", "m<C-c>", "<Cmd>call funcs#highlight_clear()<CR>")
 vim.keymap.set("n", "m<leader>n", [[:call funcs#highlight('\<<C-r><C-w>\>')<CR>]], { silent = true })
 vim.keymap.set("x", "m<leader>n", [[:<C-u>call funcs#highlight(substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g'))<CR>]], { silent = true })
+vim.keymap.set("n", "c.", '/\\V\\C<C-r>=escape(@", "/")<CR><CR>cgn<C-a><Esc>')
 vim.keymap.set("n", "cn", "<leader>ncgn", { remap = true })
 vim.keymap.set("x", "C", "<leader>ncgn", { remap = true })
 vim.keymap.set("n", "<leader>tu", "<C-^>")
@@ -218,6 +225,7 @@ vim.keymap.set("n", "<leader>Q", "<Cmd>call funcs#quit(0, 1)<CR>") -- close tab
 vim.keymap.set("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>") -- close buffer and preserve layout
 vim.keymap.set("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
 vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight <bar> TSBufToggle indent<CR>")
+vim.keymap.set("n", "yov", "':setlocal virtualedit=' . (&virtualedit == 'block' ? 'all' : 'block') . '<CR>'", { expr = true })
 vim.keymap.set("n", "yog", "<Cmd>lua require('rooter').toggle()<CR>")
 vim.keymap.set("n", "yoR", "<Cmd>if get(g:, 'ReaderMode', 0) == 0 | nnoremap <nowait> d <C-d>| nnoremap u <C-u> | else | execute 'nunmap d' | execute 'nunmap u' | endif | let g:ReaderMode = 1 - get(g:, 'ReaderMode', 0) | lua vim.notify('Reader mode ' .. (vim.g.ReaderMode == 1 and 'on' or 'off'))<CR>")
 vim.keymap.set("t", "<C-u>", "<C-\\><C-n>")

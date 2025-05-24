@@ -140,7 +140,7 @@ return {
                         color = "Constant",
                     },
                     function()
-                        local clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
+                        local clients = vim.tbl_map(function(client) if client.name ~= "typos_lsp" then return client.name end end, vim.lsp.get_clients({ bufnr = 0 }))
                         return #clients > 0 and " " .. table.concat(clients, " ") or ""
                     end,
                 },

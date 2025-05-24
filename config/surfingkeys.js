@@ -22,6 +22,7 @@ settings.prevLinkRegex = /(上一封|上页|上一页|上一章|前一页|prev|p
 settings.nextLinkRegex = /(下一封|下页|下一页|下一章|后一页|next|newer|>|›|→|»|≫|>>|▶)/i;
 settings.useNeovim = false;
 
+api.iunmap('<Ctrl-a>'); // https://github.com/brookhong/Surfingkeys/issues/2285
 api.imap('<Ctrl-[>', '<Esc>');
 api.vmap('-', '$');
 api.vmap('<Ctrl-q>', ';'); // temp key holder

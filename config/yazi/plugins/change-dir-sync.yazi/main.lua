@@ -10,7 +10,7 @@ local function parent(offset)
     for i = start, finish, step do
         local target = parent.files[i]
         if target and target.cha.is_dir then
-            return ya.mgr_emit("cd", { target.url })
+            return ya.emit("cd", { target.url })
         end
     end
 end

@@ -160,6 +160,7 @@ nnoremap ]<Space> mxo<Esc>`x
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 nmap yoP <Action>(TogglePowerSave)
+nnoremap yow :set wrap!<CR>
 
 nmap K <Action>(ShowHoverInfo)
 nmap gr <Action>(FindUsages)

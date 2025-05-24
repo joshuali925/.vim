@@ -45,6 +45,14 @@ def st [...args] {
   ssh -t ...$args 'LANG=C.UTF-8 .vim/bin/tmux new -A -s 0'
 }
 
+def --env z [...args] {
+  if ($args | is-empty) {
+    cd $'(zoxide query --exclude $env.PWD --list | lines | input list --fuzzy " ")'
+  } else {
+    cd $'(zoxide query --exclude $env.PWD -- ...$args | str trim -r -c "\n")'
+  }
+}
+
 def vf [] {
   rg --files | lines | input list --fuzzy ' ' | if $in != null { ^$env.EDITOR $in }
 }

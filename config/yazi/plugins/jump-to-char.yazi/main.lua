@@ -1,4 +1,6 @@
+--- @since 25.5.28
 -- https://github.com/yazi-rs/plugins/tree/main/jump-to-char.yazi
+
 local AVAILABLE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789."
 
 local changed = ya.sync(function(st, new)
@@ -23,9 +25,9 @@ return {
 
         local kw = escape(cands[idx].on)
         if changed(kw) then
-            ya.mgr_emit("find_do", { ("^[%s%s]"):format(kw:lower(), kw:upper()) })
+            ya.emit("find_do", { ("^[%s%s]"):format(kw:lower(), kw:upper()) })
         else
-            ya.mgr_emit("find_arrow", {})
+            ya.emit("find_arrow", {})
         end
     end,
 }

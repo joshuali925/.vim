@@ -79,7 +79,7 @@ download() {
     [[ $arch = x64 ]] && arch=x86_64 || arch=aarch64
     url="https://artifacts.elastic.co/downloads/$selected/$selected-oss-$version-linux-$arch.tar.gz"
   elif [[ ${core[*]} = *${selected}* ]]; then
-    if [[ $(ver "$version") -gt $(ver "$(curl -fsSL https://opensearch.org/ | rg -o 'Current Version: ([\d\.]+)' -r '$1')") ]]; then
+    if [[ $(ver "$version") -gt $(ver "$(curl -fsSL https://opensearch.org/downloads/ | rg -o 'Version:</strong> ([\d.]+)' -r '$1')") ]]; then
       url="https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/$selected-$version-linux-$arch.tar.gz"
       printf "\033[0;36m%s\033[0m\n" "Manifest: https://ci.opensearch.org/ci/dbc/distribution-build-$selected/$version/latest/linux/$arch/tar/dist/$selected/manifest.yml" >&2
     else

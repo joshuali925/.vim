@@ -1592,6 +1592,8 @@ install-from-github imgcat danielgatis/imgcat Linux_x86_64 Linux_arm64 Darwin_x8
 install-from-url iterm-imgls https://iterm2.com/utilities/imgls "$@"
 install-from-url git-quick-stats https://raw.githubusercontent.com/git-quick-stats/git-quick-stats/HEAD/git-quick-stats "$@"
 install-from-url ack https://beyondgrep.com/ack-v3.8.1 "$@"
+alias l='eza -lF --git --color=always --color-scale=size --icons --header --group-directories-first --time-style=long-iso --all --smart-group'
+install-from-github eza eza-community/eza x86_64-unknown-linux-musl.tar.gz aarch64-unknown-linux-gnu.tar.gz '' '' '' "$@"
 alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'  # doesn't support arm64
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
@@ -4068,6 +4070,7 @@ export MANROFFOPT='-c'
                 " { "&Save session", [[call feedkeys(":lua MiniSessions.write('temp')\<Left>\<Left>", "n")]], "Save session using mini.nvim" },
                 " { "Load s&ession", [[lua MiniSessions.select()]], "Load session using mini.nvim" },
             require("mini.git").setup() -- show_at_cursor needs current file committed
+            require("mini.keymap").map_combo("i", "jk", "<BS><BS><Esc>") -- sometimes doesn't trigger, and does not clear space on empty line
             local sl = require("mini.statusline")
             local filename = sl.section_filename({ trunc_width = 9999 })
             sl.setup({
@@ -5275,6 +5278,19 @@ return {
             arguments = { vim.api.nvim_buf_get_name(0) },
             title = "",
         }, 3000)
+function M.restart_lsp()
+    local clients = vim.lsp.get_clients()
+    vim.lsp.stop_client(clients, true)
+    assert(vim.uv.new_timer()):start(500, 0, function()
+        for _, _client in ipairs(clients) do
+            vim.schedule_wrap(function(client)
+                vim.lsp.enable(client.name)
+                vim.cmd.edit()
+            end)(_client)
+        end
+    end)
+end
+
 
 " =======================================================
     {
@@ -5302,6 +5318,18 @@ return {
                 keymap = { accept = "<Right>", accept_line = "<A-a>", prev = "<Up>", next = "<Down>", dismiss = "<A-e>" },
             },
         },
+    },
+    {
+        "augmentcode/augment.vim",
+        enabled = vim.env.VIM_AI == "augment",
+        event = "InsertEnter",
+        cmd = "Augment",
+        keys = { { "<leader>h", "<Cmd>Augment chat<CR>", mode = { "n", "x" } }, { "<leader>H", "<Cmd>Augment chat-toggle<CR>", mode = { "n", "x" } } },
+        init = function()
+            vim.g.augment_disable_tab_mapping = true
+            -- vim.g.augment_workspace_folders = { vim.uv.cwd() }
+        end,
+        config = function() vim.keymap.set("i", "<Right>", function() vim.fn["augment#Accept"](vim.keycode("<C-g>U<Right>")) end) end,
     },
     {
         "monkoose/neocodeium",
@@ -5367,3 +5395,4 @@ if ((Get-WmiObject -Class Win32_ComputerSystem).Manufacturer -match 'Amazon EC2'
     Start-Service sshd
     New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "$env:USERPROFILE\scoop\shims\bash.exe" -PropertyType String -Force
 }
+# try https://github.com/sigoden/argc-completions to replace carapace?

@@ -244,7 +244,6 @@ return {
             require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
             require("mini.files").setup({ mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
             require("mini.move").setup({ mappings = { left = "", right = "", down = "<C-,>", up = "<C-.>", line_left = "", line_right = "", line_down = "<C-,>", line_up = "<C-.>" } })
-            require("mini.keymap").map_combo("i", "jk", "<BS><BS><Esc>")
             require("mini.hipatterns").setup({
                 highlighters = {
                     fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },

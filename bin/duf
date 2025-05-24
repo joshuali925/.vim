@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
+# https://github.com/Canop/dysk if duf is unmaintained
 install-from-github duf muesli/duf linux_x86_64.tar.gz linux_arm64.tar.gz Darwin_x86_64 Darwin_arm64 duf "$@"

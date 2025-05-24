@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/k9s ]]; then
+  BIN_INIT=1 k9s completion zsh > ~/.vim/config/zsh/completions/_k9s || true
+fi
+
 install-from-github k9s derailed/k9s k9s_Linux_amd64.tar.gz k9s_Linux_arm64.tar.gz k9s_Darwin_amd64.tar.gz k9s_Darwin_arm64.tar.gz k9s "$@"

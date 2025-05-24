@@ -17,21 +17,13 @@ return {
         end,
     },
     {
-        "augmentcode/augment.vim",
-        enabled = vim.env.VIM_AI == "augment",
-        event = "InsertEnter",
-        cmd = "Augment",
-        keys = { { "<leader>h", "<Cmd>Augment chat<CR>", mode = { "n", "x" } }, { "<leader>H", "<Cmd>Augment chat-toggle<CR>", mode = { "n", "x" } } },
-        init = function()
-            vim.g.augment_disable_tab_mapping = true
-            -- vim.g.augment_workspace_folders = { vim.uv.cwd() }
-        end,
-        config = function() vim.keymap.set("i", "<Right>", function() vim.fn["augment#Accept"](vim.keycode("<C-g>U<Right>")) end) end,
-    },
-    {
-        "olimorris/codecompanion.nvim", -- TODO https://github.com/ravitemer/mcphub.nvim, https://github.com/alvinunreal/tmuxai
-        enabled = vim.env.VIM_AI ~= "augment" and vim.env.OPENAI_API_KEY ~= nil,
-        dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
+        "olimorris/codecompanion.nvim",
+        enabled = vim.env.OPENAI_API_KEY ~= nil,
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-treesitter/nvim-treesitter",
+            { "ravitemer/mcphub.nvim", build = "npm install -g mcp-hub@latest", cmd = "MCPHub", opts = { auto_approve = true } },
+        },
         keys = { { "<leader>h", "<Cmd>CodeCompanionChat Toggle<CR>" }, { "<leader>h", "<Cmd>CodeCompanionActions<CR>", mode = { "x" } } },
         config = function()
             require("codecompanion").setup({
@@ -50,17 +42,31 @@ return {
                         keymaps = {
                             send = { modes = { n = "<leader>r", i = "<leader>r" } },
                             stop = { modes = { n = "<C-c>", i = "<C-c>" } },
-                            close = { modes = { n = "<leader>q", i = "<Nop>" } },
+                            close = { modes = { n = "<leader>x", i = "<Nop>" } },
                             completion = { modes = { i = "<C-n>" } },
                         },
                         slash_commands = { ["file"] = { opts = { provider = "snacks" } }, ["buffer"] = { opts = { provider = "snacks" } } },
                     },
                     inline = { adapter = "my_openai" },
                 },
+                extensions = {
+                    mcphub = { callback = "mcphub.extensions.codecompanion", opts = { show_result_in_chat = true, make_vars = true, make_slash_commands = true } },
+                },
             })
             local group = vim.api.nvim_create_augroup("CodeCompanionHooks", {})
-            vim.api.nvim_create_autocmd("User", { pattern = "CodeCompanionChatCreated", group = group, command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#buffer'])" })
-            vim.api.nvim_create_autocmd("User", { pattern = "CodeCompanionChatSubmitted", group = group, command = "stopinsert" })
+            vim.api.nvim_create_autocmd("User", {
+                pattern = "CodeCompanionChatCreated",
+                group = group,
+                command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#buffer']) | nnoremap <buffer> ]\\ <Cmd>CodeCompanionChat<CR>",
+            })
+            vim.api.nvim_create_autocmd("User", {
+                pattern = "CodeCompanionChatSubmitted",
+                group = group,
+                callback = function()
+                    require("blink.cmp").hide()
+                    vim.cmd.stopinsert()
+                end,
+            })
         end,
     },
     {
@@ -127,11 +133,13 @@ return {
                     vim.api.nvim_create_autocmd("BufReadPost", {
                         group = "Aider",
                         callback = function(e)
-                            local name = get_name(e.buf)
-                            if name and files[name] == nil then
-                                vim.fn.chansend(channel, ("/add %s\n"):format(name))
-                                files[name] = true
-                            end
+                            vim.schedule(function() -- wrap in schedule to run after buflisted when opening with mini.nvim
+                                local name = get_name(e.buf)
+                                if name and files[name] == nil then
+                                    vim.fn.chansend(channel, ("/add %s\n"):format(name))
+                                    files[name] = true
+                                end
+                            end)
                         end,
                     })
                     vim.api.nvim_create_autocmd("TermClose", {

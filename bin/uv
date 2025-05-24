@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/uv ]]; then
+  BIN_INIT=1 uv generate-shell-completion zsh > ~/.vim/config/zsh/completions/_uv || true
+  BIN_INIT=1 uvx --generate-shell-completion zsh > ~/.vim/config/zsh/completions/_uvx || true
+fi
+
+install-from-github uv astral-sh/uv x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-apple-darwin aarch64-apple-darwin '--strip-components=1 --wildcards uv-*/uv uv-*/uvx' "$@"

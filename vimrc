@@ -291,6 +291,7 @@ xnoremap <leader>S :s/\%V//g<Left><Left><Left>
 nnoremap m<C-c> :call funcs#highlight_clear()<CR>
 nnoremap m<leader>n :call funcs#highlight('\<<C-r><C-w>\>')<CR>
 xnoremap m<leader>n :<C-u>call funcs#highlight(substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g'))<CR>]
+nnoremap c. /\V\C<C-r>=escape(@", '/')<CR><CR>cgn<C-a><Esc>
 nmap cn <leader>ncgn
 xmap C <leader>ncgn
 nmap <C-n> <leader>ncgn
