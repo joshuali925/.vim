@@ -63,7 +63,7 @@ return {
                     break
                 end
             end
-            vim.cmd.Neotree("reveal")
+            vim.cmd.Neotree("reveal_force_cwd")
         end }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
         config = function()
             local function get_dir(state)
@@ -234,6 +234,8 @@ return {
                 { "--", "" },
                 { "Ma&son packages", [[Mason]], "Mason packages" },
                 { "Mason &install", [[lua require('lsp').install_packages()]], "Install commonly used servers, linters, and formatters" },
+                { "--", "" },
+                { "&MCP servers", [[MCPHub]], "Open MCPHub" },
             })
             local quickui_theme_list = {}
             local used_chars = "hjklqg"

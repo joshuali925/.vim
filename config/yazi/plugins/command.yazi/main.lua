@@ -19,11 +19,11 @@ local get_hovered_file = ya.sync(function() return tostring(cx.active.current.ho
 
 local function shell(command, pause)
     -- NOTE keep commands POSIX compliant, on ubuntu the shell is 'sh'. need to use bash to support `read` flags
-    return ya.mgr_emit("shell", { command .. (pause and "; echo Press any key to continue; bash -ic 'read -n 1 -s _'" or ""), confirm = true, block = true })
+    return ya.emit("shell", { command .. (pause and "; echo Press any key to continue; bash -ic 'read -n 1 -s _'" or ""), confirm = true, block = true })
 end
 
 local function chmod_stat()
-    local output, err = Command("stat"):args({ "--printf", "%a %n\n", get_hovered_file() }):output()
+    local output, err = Command("stat"):arg({ "--printf", "%a %n\n", get_hovered_file() }):output()
     local stdout = read_stdout(output, err)
     if stdout ~= nil then ya.notify({ title = "File permission", content = stdout, timeout = 5 }) end
 end

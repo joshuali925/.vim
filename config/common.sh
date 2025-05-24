@@ -19,7 +19,7 @@ export AIDER_GITIGNORE=false
 export AIDER_CACHE_PROMPTS=true
 export AIDER_SHOW_MODEL_WARNINGS=false
 export AIDER_MAP_TOKENS=3000
-export AIDER_MODEL=us.anthropic.claude-3-7-sonnet-20250219-v1:0  # bedrock/converse/us.deepseek.r1-v1:0
+export AIDER_MODEL=us.anthropic.claude-3-7-sonnet-20250219-v1:0  # us.anthropic.claude-sonnet-4-20250514-v1:0
 export AIDER_WEAK_MODEL=anthropic.claude-3-5-haiku-20241022-v1:0
 export AIDER_EDIT_FORMAT=diff
 export AIDER_ATTRIBUTE_AUTHOR=false
@@ -52,7 +52,6 @@ alias cp='cp -riv'
 alias mkdir='mkdir -pv'
 alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
-alias l='eza -lF --git --color=always --color-scale=size --icons --header --group-directories-first --time-style=long-iso --all --smart-group'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias chmod\?='stat --printf "%a %n\n"'
 alias bell='echo -n -e "\a"'
@@ -65,8 +64,9 @@ alias v='$EDITOR'
 alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
+alias .install='~/.vim/install.sh install'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
-alias venv='deactivate 2> /dev/null; findup .venv >&2 || { uv venv && echo "to enable auto venv with mise: echo -e '"'"'[env]\\\n_.python.venv = { path = \".venv\" }'"'"' >> mise.toml"; }; source "$(findup .venv)/bin/activate"'
+alias venv='deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv="$PWD/.venv"; }'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias k='kubectl'
 alias dc='docker compose'
@@ -648,7 +648,7 @@ ec2() {
         return $?
       fi
       echo "ssh to ec2: $host" >&2
-      for user in ubuntu ec2-user admin; do
+      for user in ubuntu ec2-user admin; do  # default username for ubuntu, AL2, debian
         sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
         printf "Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n" "$user" >> ~/.ssh/ec2hosts
         local start=$SECONDS

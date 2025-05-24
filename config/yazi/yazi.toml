@@ -1,6 +1,6 @@
 # https://raw.githubusercontent.com/sxyazi/yazi/HEAD/yazi-config/preset/yazi.toml
 
-[manager]
+[mgr]
 ratio = [1, 2, 3]
 sort_by = "natural"
 linemode = "size"

@@ -160,6 +160,7 @@ nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
 xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1) <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
+nnoremap c. /\V\C<C-r>=escape(@", '/')<CR><CR>cgn<C-a><Esc>
 nmap cn <leader>ncgn
 xmap C <leader>ncgn
 nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
@@ -177,8 +178,10 @@ nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', 
 " https://github.com/vscode-neovim/vscode-neovim/issues/1139, map plugs to avoid repeat.vim override mappings
 nmap <leader><C-u> <Plug>(RepeatUndo)
 nmap <leader><C-r> <Plug>(RepeatRedo)
-nnoremap u :call VSCodeNotify('undo')<CR>
-nnoremap <C-r> :call VSCodeNotify('redo')<CR>
+
+" some issues with vim undo
+" nnoremap u :call VSCodeNotify('undo')<CR>
+" nnoremap <C-r> :call VSCodeNotify('redo')<CR>
 
 nnoremap Z[ :call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
 nnoremap Z] :call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>

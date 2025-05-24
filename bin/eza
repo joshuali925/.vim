@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-source ~/.vim/bin/_install_from_github.sh
-install-from-github eza eza-community/eza x86_64-unknown-linux-musl.tar.gz aarch64-unknown-linux-gnu.tar.gz '' '' '' "$@"

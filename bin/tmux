@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [[ $(readlink -f "$HOME/.tmux.conf") != $HOME/.vim/config/.tmux.conf ]]; then
+if [[ $(readlink -f "$HOME/.tmux.conf") != $(readlink -f "$HOME/.vim/config/.tmux.conf") ]]; then
   [[ -f $HOME/.tmux.conf ]] && echo '~/.tmux.conf exists, renaming to ~/.tmux.conf.bak' >&2 && mv -iv ~/.tmux.conf ~/.tmux.conf.bak
   ln -sv ~/.vim/config/.tmux.conf ~/.tmux.conf
 fi
