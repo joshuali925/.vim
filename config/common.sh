@@ -19,7 +19,7 @@ export AIDER_GITIGNORE=false
 export AIDER_CACHE_PROMPTS=true
 export AIDER_SHOW_MODEL_WARNINGS=false
 export AIDER_MAP_TOKENS=3000
-export AIDER_MODEL=us.anthropic.claude-3-7-sonnet-20250219-v1:0  # us.anthropic.claude-sonnet-4-20250514-v1:0
+export AIDER_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0  # us.anthropic.claude-3-7-sonnet-20250219-v1:0
 export AIDER_WEAK_MODEL=anthropic.claude-3-5-haiku-20241022-v1:0
 export AIDER_EDIT_FORMAT=diff
 export AIDER_ATTRIBUTE_AUTHOR=false
@@ -92,7 +92,7 @@ alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 # shellcheck disable=2142
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
-alias aider='AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock \aider'
+alias aider='AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock-prod \aider'
 
 alias ga='git add'
 alias gau='git add --all --intent-to-add'
@@ -460,7 +460,12 @@ z() {
 
 t() {  # create, restore, or switch tmux session
   local change current fzftemp
-  [[ -n $TMUX ]] && change='switch-client' && current=$(tmux display-message -p '#{session_name}') || change='attach-session'
+  if [[ -n $TMUX ]]; then
+    if [[ $# -eq 0 ]]; then tmux-wait -; return $?; fi
+    change='switch-client' && current=$(tmux display-message -p '#{session_name}')
+  else
+    change='attach-session'
+  fi
   if [[ $# -gt 0 ]]; then
     [[ $1 = a ]] && tmux attach 2> /dev/null || tmux $change -t "$1" 2> /dev/null || (tmux new-session -d -s "$@" && tmux $change -t "$1")
     return $?

@@ -78,7 +78,7 @@ return {
             cmdline = {
                 completion = {
                     list = { selection = { preselect = function(ctx) return vim.fn.getcmdtype() ~= ":" end } },
-                    menu = { auto_show = function(ctx) return vim.fn.getcmdtype() == ":" end },
+                    menu = { auto_show = function(ctx) return vim.fn.getcmdtype() == ":" or vim.fn.getcmdwintype() == ":" end },
                 },
                 keymap = {
                     ["<Down>"] = {},

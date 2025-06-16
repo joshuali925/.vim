@@ -15,6 +15,7 @@ return {
             { "<leader>gf", ":Flogsplit<CR>", mode = { "x" } },
             { "<leader>gb", "<Cmd>0,.Git blame<CR>" },
             { "<leader>gc", "<Cmd>Git commit --signoff<CR>" },
+            { "<leader>f~", "<Cmd>Git mergetool<CR>" },
         },
         config = function()
             vim.g.fugitive_summary_format = "%d %s (%cr) <%an>"

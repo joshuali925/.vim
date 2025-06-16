@@ -57,5 +57,5 @@ keybinding:
 customCommands:
   - key: C
     context: files
-    command: AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock aider --commit
+    command: AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock-prod aider --commit
     output: terminal

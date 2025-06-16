@@ -1,57 +1,5 @@
 return {
     {
-        "MunifTanjim/nui.nvim",
-        init = function()
-            vim.ui.input = (function(overridden)
-                return function(...)
-                    local present = pcall(require, "nui.input")
-                    if not present then vim.ui.input = overridden end
-                    vim.ui.input(...)
-                end
-            end)(vim.ui.input)
-        end,
-        config = function() -- https://github.com/MunifTanjim/nui.nvim/wiki/vim.ui, https://github.com/MunifTanjim/dotfiles/tree/8c13a4e05359bb12f9ade5abc1baca6fcec372db/private_dot_config/nvim/lua/plugins/lsp/custom
-            local function get_prompt_text(prompt)
-                local prompt_text = prompt or "[Input]"
-                if prompt_text:sub(-1) == ":" then prompt_text = "[" .. prompt_text:sub(1, -2) .. "]" end
-                return prompt_text
-            end
-            local UIInput = require("nui.input"):extend("UIInput")
-            local input_ui = nil
-            function UIInput:init(opts, on_done)
-                local default_value = tostring(opts.default or "")
-                local cursor = vim.api.nvim_win_get_cursor(0)
-                UIInput.super.init(self, {
-                    relative = { type = "buf", position = { row = cursor[1], col = cursor[2] } }, -- use buf to avoid cursor shifting before on_submit
-                    position = { row = 1, col = 0 },
-                    size = { width = math.max(20, vim.api.nvim_strwidth(default_value) + 15) },
-                    border = { style = "rounded", text = { top = get_prompt_text(opts.prompt), top_align = "left" } },
-                    win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
-                    buf_options = { filetype = "nui_input" },
-                }, {
-                    default_value = default_value,
-                    on_close = function() on_done(nil) end,
-                    on_submit = function(value) on_done(value) end,
-                })
-                self:map("n", "<CR>", function(value) on_done(value) end, { noremap = true, nowait = true })
-                self:map("n", "<Esc>", function() on_done(nil) end, { noremap = true, nowait = true })
-                self:map("n", "q", function() on_done(nil) end, { noremap = true, nowait = true })
-                self:on(require("nui.utils.autocmd").event.BufLeave, function() on_done(nil) end, { once = true })
-            end
-
-            vim.ui.input = function(opts, on_confirm)
-                assert(type(on_confirm) == "function", "missing on_confirm function")
-                if input_ui then return end
-                input_ui = UIInput(opts, function(value)
-                    if input_ui then input_ui:unmount() end
-                    on_confirm(value)
-                    input_ui = nil
-                end)
-                input_ui:mount()
-            end
-        end,
-    },
-    {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
         dependencies = "MunifTanjim/nui.nvim",

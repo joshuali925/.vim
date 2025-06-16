@@ -144,7 +144,7 @@ vim.keymap.set("n", "<C-]>", "<Cmd>call funcs#ctags()<CR>")
 vim.keymap.set("n", "<leader><C-]>", "<Cmd>call funcs#ctags_create_and_jump()<CR>")
 vim.keymap.set({ "n", "x", "o" }, "0", "funcs#home()", { expr = true })
 vim.keymap.set({ "n", "x", "o" }, "^", "0")
-vim.keymap.set({ "n", "o" }, "-", "$") -- $ in normal mode will always put cursor at last column when scrolling, g_ will not
+vim.keymap.set({ "n", "o" }, "-", "$") -- $ in normal mode will always put cursor at last column when scrolling (curswant), g_ will not
 vim.keymap.set("x", "-", "g_")
 vim.keymap.set({ "n", "x", "o" }, "g-", "g$")
 vim.keymap.set({ "n", "x", "o" }, "<Home>", "g^")
@@ -306,10 +306,9 @@ vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { narg
 vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("RgRegex", "lua require('snacks.picker').grep({regex = '<bang>' == '' and true or false, live = false, on_show = function() vim.cmd.stopinsert() end, search = <q-args>})", { nargs = "*", bang = true })
 vim.api.nvim_create_user_command("RgNoRegex", "lua require('snacks.picker').grep({regex = false, live = false, on_show = function() vim.cmd.stopinsert() end, search = <q-args>})", { nargs = "*" })
-vim.api.nvim_create_user_command("Untildone", "lua require('utils').untildone(<q-args>, '<bang>')", { complete = "shellcmd", nargs = "*", bang = true })
+vim.api.nvim_create_user_command("DeleteComments", function(opts) if opts.range > 0 then require("utils").delete_comments(opts.line1, opts.line2) else require("utils").delete_comments() end end, { range = true })
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
-vim.api.nvim_create_user_command("CfilterNoTest", [[packadd cfilter | Cfilter! /test/]], {})
 vim.api.nvim_create_user_command("JSON", [[if <range> != 0 | execute "'<,'>Prettier json" | else | keeppatterns %s/\n\+\%$//e | set shiftwidth=2 filetype=json | execute 'Prettier json' | endif]], { range = true })
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript", [""] = "json" }

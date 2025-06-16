@@ -42,8 +42,10 @@ return {
                         keymaps = {
                             send = { modes = { n = "<leader>r", i = "<leader>r" } },
                             stop = { modes = { n = "<C-c>", i = "<C-c>" } },
-                            close = { modes = { n = "<leader>x", i = "<Nop>" } },
+                            close = { modes = { n = "<leader>x" } },
                             completion = { modes = { i = "<C-n>" } },
+                            previous_chat = { modes = { n = "<" }, nowait = true },
+                            next_chat = { modes = { n = ">" }, nowait = true },
                         },
                         slash_commands = { ["file"] = { opts = { provider = "snacks" } }, ["buffer"] = { opts = { provider = "snacks" } } },
                     },
@@ -57,7 +59,7 @@ return {
             vim.api.nvim_create_autocmd("User", {
                 pattern = "CodeCompanionChatCreated",
                 group = group,
-                command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#buffer']) | nnoremap <buffer> ]\\ <Cmd>CodeCompanionChat<CR>",
+                command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#{buffer}{watch}']) | nnoremap <buffer> ]\\ <C-w>p<Cmd>CodeCompanionChat<CR>",
             })
             vim.api.nvim_create_autocmd("User", {
                 pattern = "CodeCompanionChatSubmitted",
@@ -67,6 +69,8 @@ return {
                     vim.cmd.stopinsert()
                 end,
             })
+            vim.api.nvim_create_autocmd("User", { pattern = "CodeCompanionRequestStarted", group = group, callback = function() require("states").loading = true end })
+            vim.api.nvim_create_autocmd("User", { pattern = "CodeCompanionRequestFinished", group = group, callback = function() require("states").loading = false end })
         end,
     },
     {
@@ -79,7 +83,7 @@ return {
                     vim.env.AWS_ACCESS_KEY_ID = nil
                     vim.env.AWS_SECRET_ACCESS_KEY = nil
                     vim.env.AWS_SESSION_TOKEN = nil
-                    vim.env.AWS_PROFILE = "bedrock"
+                    vim.env.AWS_PROFILE = "bedrock-prod"
                     local function get_name(buf)
                         if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf }) then
                             local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
