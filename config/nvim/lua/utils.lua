@@ -27,6 +27,7 @@ function M.send_selection_to_terminal() send_lines_to_terminal({ M.get_visual_se
 function M.term_exec(cmd, opts)
     local terminal = require("snacks.terminal").get(nil, opts)
     vim.fn.chansend(vim.bo[terminal.buf].channel, cmd .. "\n")
+    return terminal.buf
 end
 
 function M.get_visual_selection()
@@ -40,17 +41,29 @@ function M.base64_decode(str)
 end
 
 function M.command_without_quickscope(command)
-    if vim.g.qs_enable == 1 then
-        vim.cmd.QuickScopeToggle()
+    if vim.g.qs_enable == 1 then vim.cmd.QuickScopeToggle() end
+    if type(command) == "string" then vim.cmd(command) else command() end
+    if vim.g.qs_enable == 0 then vim.cmd.QuickScopeToggle() end
+end
+
+function M.delete_comments(start_line, end_line) -- https://gist.github.com/kelvinauta/bf812108f3b68fa73de58e873c309805
+    local bufnr = vim.api.nvim_get_current_buf()
+    local ft = vim.bo[bufnr].filetype
+    local lang = vim.treesitter.language.get_lang(ft) or ft
+    local ok, parser = pcall(vim.treesitter.get_parser, bufnr, lang)
+    if not ok then return vim.notify("No parser for " .. ft, vim.log.levels.WARN) end
+    local tree = assert(parser):parse()[1]
+    local root = tree:root()
+    local query = vim.treesitter.query.parse(lang, "(comment) @comment")
+    local ranges = {}
+    for _, node in query:iter_captures(root, bufnr, start_line and (start_line - 1) or 0, end_line or -1) do
+        table.insert(ranges, { node:range() })
     end
-    if type(command) == "string" then
-        vim.cmd(command)
-    else
-        command()
-    end
-    if vim.g.qs_enable == 0 then
-        vim.cmd.QuickScopeToggle()
-    end
+    table.sort(ranges, function(a, b)
+        if a[1] == b[1] then return a[2] < b[2] end
+        return a[1] > b[1]
+    end)
+    for _, r in ipairs(ranges) do vim.api.nvim_buf_set_text(bufnr, r[1], r[2], r[3], r[4], {}) end
 end
 
 function M.toggle_venn()

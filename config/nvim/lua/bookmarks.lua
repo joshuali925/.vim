@@ -86,7 +86,7 @@ function M.create(annot)
     modified = true
 end
 
-function M.annote()
+function M.annotate()
     local file_name = vim.api.nvim_buf_get_name(0)
     if file_name == "" then return end
     local prev_annot
@@ -171,7 +171,7 @@ local function dump_disk()
 end
 
 function M.setup()
-    vim.keymap.set("n", "ma", M.annote)
+    vim.keymap.set("n", "ma", M.annotate)
     vim.keymap.set("n", "mm", M.toggle)
     vim.keymap.set("n", "ms", function()
         vim.notify(vim.inspect(M.bookmarks))
@@ -233,7 +233,7 @@ function M.pick(opts)
             delete_bookmark = function(picker)
                 local current = picker:current()
                 local buf = vim.fn.bufnr(current.relative_path)
-                if buf == -1 then
+                if buf == -1 or not vim.api.nvim_buf_is_loaded(buf) then
                     M.delete_in_cache(current.file, current.bookmark.id)
                 else
                     M.delete({ buf = buf, row = current.bookmark.row })

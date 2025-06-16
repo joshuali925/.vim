@@ -35,7 +35,13 @@ end
 
 local fsize = vim.fn.getfsize(vim.api.nvim_buf_get_name(0)) -- buffer not initialized, read size from disk
 
-local function load_overrides()
+M = {}
+M.loading = false
+M.size_threshold = 1048576 -- 1MB
+M.small_file = fsize == nil or fsize < 1048576
+M.qs_disabled_filetypes = qs_disabled_filetypes
+
+function M.load_overrides()
     if vim.fn.has("win32") == 1 then vim.g.termshell = "nu" end
     vim.paste = (function(overridden) -- break undo before pasting in insert mode, :h vim.paste()
         return function(lines, phase)
@@ -65,9 +71,14 @@ local function load_overrides()
     end
 end
 
-return {
-    size_threshold = 1048576, -- 1MB
-    small_file = fsize == nil or fsize < 1048576,
-    qs_disabled_filetypes = qs_disabled_filetypes,
-    load_overrides = load_overrides,
-}
+M.spin = (function()
+    local frames = { "⠋ ", "⠙ ", "⠹ ", "⠸ ", "⠼ ", "⠴ ", "⠦ ", "⠧ ", "⠇ ", "⠏ " }
+    local i = 0
+    return function()
+        if not M.loading then return "" end
+        i = i % #frames + 1
+        return frames[i]
+    end
+end)()
+
+return M

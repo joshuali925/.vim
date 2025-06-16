@@ -171,14 +171,16 @@ function! funcs#jest_context() abort
   let pos = getcurpos()
   normal! $
   let regex = '([''"`]\zs[^''"`]\+\ze'
-  let desc_match = matchstr(getline(search('^\s*describe' . regex, 'cbnW')), 'describe' . regex)
-  let it_match = matchstr(getline(search('^\s*\(it\|test\)' . regex, 'cbnW')), '\(it\|test\)' . regex)
+  let desc_line = search('^\s*describe' . regex, 'cbnW')
+  let desc_match = matchstr(getline(desc_line), 'describe' . regex)
+  let it_match = matchstr(getline(search('^\s*\(it\|test\)' . regex, 'cbnW', desc_line)), '\(it\|test\)' . regex)
   call setpos('.', pos)
   return '"' . desc_match . ' ' . it_match . '"'
 endfunction
 
 function! funcs#get_run_command() abort
-  if expand('%') =~ '\.class'
+  let file = expand('%')
+  if file =~ '\.class'
     call funcs#decompile_java_class()
     return
   endif
@@ -187,17 +189,21 @@ function! funcs#get_run_command() abort
   if user_command != ''
     return user_command
   endif
-  if expand('%') =~ '\.test\.[tj]sx\?'
-    return 'lua require("utils").term_exec([[ yarn test:jest ' . expand('%') . ' -t ' . funcs#jest_context() . ' --coverage --coverageReporters=text -u]], { win = { position = "right" } })'
+  if file =~ '\.test\.[tj]sx\?'
+    let included_dir = expand('%:~:.::h')
+    if fnamemodify(included_dir, ':t') =~ 'test'
+      let included_dir = fnamemodify(included_dir, ':h')
+    endif
+    return 'lua local cur = vim.api.nvim_get_current_win(); vim.api.nvim_set_current_win(vim.fn.win_findbuf(require("utils").term_exec([[ yarn test:jest ' . file . ' -t ' . funcs#jest_context() . " --coverage --collectCoverageFrom='" . included_dir . "/**' --coverageReporters=text -u]], { win = { position = 'right' } }))[1]); vim.cmd.startinsert(); vim.schedule(function() vim.api.nvim_set_current_win(cur) end)"
   endif
   let run_command = {}
   let run_command['vim'] = 'source %'
   let run_command['lua'] = 'luafile %'
   if has('nvim')
-    let run_command['python'] = 'lua require("utils").term_exec([[ python3 "' . expand('%') . '"]])'
-    let run_command['javascript'] = 'lua require("utils").term_exec([[ node "' . expand('%') . '"]])'
-    let run_command['typescript'] = 'lua require("utils").term_exec([[ npx ts-node --esm "' . expand('%') . '"]])'
-    let run_command['java'] = 'lua require("utils").term_exec([[ javac "' . expand('%') . '" && java -classpath "' . expand('%:p:h') . '" "' . expand('%:t:r') . '"]])'
+    let run_command['python'] = 'lua require("utils").term_exec([[ python3 "' . file . '"]])'
+    let run_command['javascript'] = 'lua require("utils").term_exec([[ node "' . file . '"]])'
+    let run_command['typescript'] = 'lua require("utils").term_exec([[ npx ts-node --esm "' . file . '"]])'
+    let run_command['java'] = 'lua require("utils").term_exec([[ javac "' . file . '" && java -classpath "' . expand('%:p:h') . '" "' . expand('%:t:r') . '"]])'
   else
     let run_command['python'] = '!clear; python3 %'
     let run_command['javascript'] = '!clear; node %'

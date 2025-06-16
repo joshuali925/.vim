@@ -18,7 +18,7 @@
 	update-skip = update-index --skip-worktree
 	unupdate-skip = update-index --no-skip-worktree
 	update-skipped = "!git ls-files -v | grep '^S'"
-	autoremove = gc --prune=now --aggressive
+	autoremove = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all; git repack -a -d -f --depth=300 --window=300 --window-memory=1g; git prune-packed"  # from https://github.com/GitAlias/gitalias/tree/7b27ef766a3557a5708086734559f6a14bb97744/doc/git-optimizer, claims better than git gc --prune=now --aggressive
 	difft = -c diff.external=difft diff
 	diffw = -c core.pager='diff-so-fancy | less --tabs=4 -RiMXF' diff --word-diff=color --ignore-all-space
 	diff-side-by-side = -c core.pager='delta --side-by-side' diff
@@ -36,8 +36,9 @@
 	rerere-forget = "!rm -rf .git/rr-cache"
 	wip = "!git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m '--wip--'"
 	unwip = "!git log -n 1 | grep -q -c -- '--wip--' && git reset HEAD~1"
-	clear = "!git add --all && git stash push --include-untracked --message 'auto backup'"
-	nuke = "!git clear && git reset --hard && git clean -fdx"
+	save = "!git add --all && git stash push --include-untracked --message 'auto backup'"  # stash everything except ignored files
+	clear = "!git reset --hard && git clean -fd"  # clean everything except ignored files
+	nuke = "!git reset --hard && git clean -fdx"  # clean everything including ignored files
 	reset-to-remote = "!git abort; git clear && git reset --hard @{upstream}"
 	reset-to-merge-base = "!f() { local ref=${1:-HEAD} remote=${2:-origin}; echo \"Resetting base against $remote/$ref\" >&2; git fetch \"$remote\" && git reset \"$(git merge-base HEAD \"$remote/$ref\")\"; }; f"
 	unshallow = "!if [ \"$(git config --local --get remote.origin.partialclonefilter)\" = blob:none ]; then git fetch --no-filter --refetch; else git remote set-branches origin '*' && git fetch -v && printf '\\nRun \"git fetch --unshallow\" to fetch all history\\n'; fi"

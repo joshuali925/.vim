@@ -1591,6 +1591,7 @@ install-from-github up akavel/up up '' up-darwin '' '' "$@"
 install-from-github imgcat danielgatis/imgcat Linux_x86_64 Linux_arm64 Darwin_x86_64 Darwin_arm64 imgcat "$@"
 install-from-url iterm-imgls https://iterm2.com/utilities/imgls "$@"
 install-from-url git-quick-stats https://raw.githubusercontent.com/git-quick-stats/git-quick-stats/HEAD/git-quick-stats "$@"
+install-from-url asn https://raw.githubusercontent.com/nitefood/asn/HEAD/asn "$@"
 install-from-url ack https://beyondgrep.com/ack-v3.8.1 "$@"
 alias l='eza -lF --git --color=always --color-scale=size --icons --header --group-directories-first --time-style=long-iso --all --smart-group'
 install-from-github eza eza-community/eza x86_64-unknown-linux-musl.tar.gz aarch64-unknown-linux-gnu.tar.gz '' '' '' "$@"
@@ -5291,7 +5292,6 @@ function M.restart_lsp()
     end)
 end
 
-
 " =======================================================
     {
         "milanglacier/minuet-ai.nvim",
@@ -5365,7 +5365,7 @@ local qs_disabled_filetypes = { ["."] = false } -- neocodeium has "." = false
                                 icon = "󰣼 " -- Unknown
                             end
                         end
-    " xml encodes characters in code block
+    " markdown preview in lua, xml encodes characters in code block
     { "brianhuster/live-preview.nvim", cmd = "LivePreview" },
 
 " =======================================================
@@ -5396,3 +5396,56 @@ if ((Get-WmiObject -Class Win32_ComputerSystem).Manufacturer -match 'Amazon EC2'
     New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "$env:USERPROFILE\scoop\shims\bash.exe" -PropertyType String -Force
 }
 # try https://github.com/sigoden/argc-completions to replace carapace?
+
+" =======================================================
+    {
+        "MunifTanjim/nui.nvim",
+        init = function()
+            vim.ui.input = (function(overridden)
+                return function(...)
+                    local present = pcall(require, "nui.input")
+                    if not present then vim.ui.input = overridden end
+                    vim.ui.input(...)
+                end
+            end)(vim.ui.input)
+        end,
+        config = function() -- https://github.com/MunifTanjim/nui.nvim/wiki/vim.ui, https://github.com/MunifTanjim/dotfiles/tree/8c13a4e05359bb12f9ade5abc1baca6fcec372db/private_dot_config/nvim/lua/plugins/lsp/custom
+            local function get_prompt_text(prompt)
+                local prompt_text = prompt or "[Input]"
+                if prompt_text:sub(-1) == ":" then prompt_text = "[" .. prompt_text:sub(1, -2) .. "]" end
+                return prompt_text
+            end
+            local UIInput = require("nui.input"):extend("UIInput")
+            local input_ui = nil
+            function UIInput:init(opts, on_done)
+                local default_value = tostring(opts.default or "")
+                local cursor = vim.api.nvim_win_get_cursor(0)
+                UIInput.super.init(self, {
+                    relative = { type = "buf", position = { row = cursor[1], col = cursor[2] } }, -- use buf to avoid cursor shifting before on_submit
+                    position = { row = 1, col = 0 },
+                    size = { width = math.max(40, vim.api.nvim_strwidth(default_value) + 20) },
+                    border = { style = "rounded", text = { top = get_prompt_text(opts.prompt), top_align = "left" } },
+                    win_options = { winhighlight = "NormalFloat:Normal,FloatBorder:Normal" },
+                    buf_options = { filetype = "nui_input" },
+                }, {
+                    default_value = default_value,
+                    on_close = function() on_done(nil) end,
+                    on_submit = function(value) on_done(value) end,
+                })
+                self:map("n", "<CR>", function(value) on_done(value) end, { noremap = true, nowait = true })
+                self:map("n", "<Esc>", function() on_done(nil) end, { noremap = true, nowait = true })
+                self:map("n", "q", function() on_done(nil) end, { noremap = true, nowait = true })
+                self:on(require("nui.utils.autocmd").event.BufLeave, function() on_done(nil) end, { once = true })
+            end
+            vim.ui.input = function(opts, on_confirm)
+                assert(type(on_confirm) == "function", "missing on_confirm function")
+                if input_ui then return end
+                input_ui = UIInput(opts, function(value)
+                    if input_ui then input_ui:unmount() end
+                    on_confirm(value)
+                    input_ui = nil
+                end)
+                input_ui:mount()
+            end
+        end,
+    },

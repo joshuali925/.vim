@@ -51,6 +51,7 @@ return {
                 vsplit = "",
                 tab = "",
                 tabb = "",
+                fzffilter = "",
             },
         },
     },
@@ -66,6 +67,7 @@ return {
                 { "<C-k>", "<C-w>p" },
                 { "}", function() require("quicker").expand({ before = 2, after = 2, add_to_existing = true }) end, desc = "Expand quickfix context" },
                 { "{", function() require("quicker").collapse() end, desc = "Collapse quickfix context" },
+                { "zf", "<Cmd>packadd cfilter<CR>:Cfilter! /test/<Left>", desc = "Remove items matching pattern" },
             },
             max_filename_width = function() return math.floor(math.min(95, vim.o.columns / 4)) end,
         },
@@ -140,7 +142,7 @@ return {
                         color = "Constant",
                     },
                     function()
-                        local clients = vim.tbl_map(function(client) if client.name ~= "typos_lsp" then return client.name end end, vim.lsp.get_clients({ bufnr = 0 }))
+                        local clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
                         return #clients > 0 and " " .. table.concat(clients, " ") or ""
                     end,
                 },
@@ -150,7 +152,7 @@ return {
                     {
                         function()
                             local col = vim.api.nvim_win_get_cursor(0)[2] + 1
-                            return (vim.o.expandtab and " " or " ") .. (vim.o.shiftwidth > 0 and vim.o.shiftwidth or vim.o.tabstop) .. "  " .. (col < 10 and " " .. col or col)
+                            return require("states").spin() .. (vim.o.expandtab and " " or " ") .. (vim.o.shiftwidth > 0 and vim.o.shiftwidth or vim.o.tabstop) .. "  " .. (col < 10 and " " .. col or col)
                         end,
                         padding = 0,
                     },

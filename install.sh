@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=1090,2015,2155
 
-NODE_VERSION=18.19.0
+NODE_VERSION=20.18.3
 JDK_VERSION=21
 BACKUP_DIR=$HOME/config-backup
 
@@ -240,7 +240,7 @@ install_node() {
   mise x -- npm install -g --cache ~/.local/lib/npm-temp-cache yarn || true
   rm -rf ~/.local/lib/npm-temp-cache
   curl -L https://raw.githubusercontent.com/zsh-users/zsh-completions/HEAD/src/_yarn -o ~/.vim/config/zsh/completions/_yarn
-  log 'Installed node'
+  log 'Installed node, yarn'
 }
 
 install_tmux() {

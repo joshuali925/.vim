@@ -106,10 +106,8 @@ return {
     },
     {
         "nvim-treesitter/nvim-treesitter-context",
-        cmd = "TSContextToggle", -- treesitter-context throws errors when loaded on keys
-        init = function()
-            vim.keymap.set("n", "yoC", "<Cmd>TSContextToggle<CR>")
-        end,
+        keys = { { "yoc", "<Cmd>TSContext toggle<CR>" } },
+        init = function() vim.keymap.set("n", "yoC", "<Cmd>setlocal cursorline!<CR>") end,
         opts = { enable = false, mode = "topline" },
     },
     {

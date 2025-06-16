@@ -82,6 +82,7 @@ return {
             { "<leader>te", "<Cmd>lua require('utils').send_to_terminal()<CR>g@" },
             { "<leader>tee", "<leader>te_", remap = true },
             { "<leader>te", ":<C-u>lua require('utils').send_selection_to_terminal()<CR>", mode = { "x" } },
+            { "<leader>gB", "<Cmd>lua require('snacks.git').blame_line()<CR>" },
         },
         opts = {
             bigfile = { enabled = true },
@@ -89,6 +90,7 @@ return {
             statuscolumn = { enabled = false, left = { "sign" }, git = { patterns = { "MiniDiffSign" } } },
             words = { enabled = true },
             terminal = { auto_insert = false, win = { height = 0.3, width = 0.5 } },
+            input = { enabled = true, win = { width = 25, relative = "cursor", row = 1 } },
             indent = {
                 enabled = true,
                 animate = { enabled = false },
