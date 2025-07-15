@@ -44,10 +44,11 @@ return {
                             stop = { modes = { n = "<C-c>", i = "<C-c>" } },
                             close = { modes = { n = "<leader>x" } },
                             completion = { modes = { i = "<C-n>" } },
-                            previous_chat = { modes = { n = "<" }, nowait = true },
-                            next_chat = { modes = { n = ">" }, nowait = true },
+                            previous_chat = { modes = { n = "<BS>" } },
+                            next_chat = { modes = { n = "\\" } },
                         },
                         slash_commands = { ["file"] = { opts = { provider = "snacks" } }, ["buffer"] = { opts = { provider = "snacks" } } },
+                        opts = { completion_provider = "default" },
                     },
                     inline = { adapter = "my_openai" },
                 },
@@ -59,7 +60,7 @@ return {
             vim.api.nvim_create_autocmd("User", {
                 pattern = "CodeCompanionChatCreated",
                 group = group,
-                command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#{buffer}{watch}']) | nnoremap <buffer> ]\\ <C-w>p<Cmd>CodeCompanionChat<CR>",
+                command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#{buffer}{watch}', '@{insert_edit_into_file}']) | nnoremap <buffer> ]\\ <C-w>p<Cmd>CodeCompanionChat<CR>",
             })
             vim.api.nvim_create_autocmd("User", {
                 pattern = "CodeCompanionChatSubmitted",
@@ -105,6 +106,8 @@ return {
                             confirm = function(picker, item)
                                 picker:close()
                                 vim.fn.chansend(channel, (" `%s` "):format(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(item.buf), ":t:r")))
+                            end,
+                            on_close = function()
                                 vim.api.nvim_set_current_win(aider_win)
                                 vim.schedule(vim.cmd.startinsert)
                             end,
@@ -117,6 +120,8 @@ return {
                             confirm = function(picker, item)
                                 picker:close()
                                 vim.fn.chansend(channel, (" `%s` "):format(item.name))
+                            end,
+                            on_close = function()
                                 vim.api.nvim_set_current_win(aider_win)
                                 vim.schedule(vim.cmd.startinsert)
                             end,

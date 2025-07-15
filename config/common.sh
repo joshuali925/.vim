@@ -24,6 +24,7 @@ export AIDER_WEAK_MODEL=anthropic.claude-3-5-haiku-20241022-v1:0
 export AIDER_EDIT_FORMAT=diff
 export AIDER_ATTRIBUTE_AUTHOR=false
 export AIDER_ATTRIBUTE_COMMITTER=false
+export AIDER_ATTRIBUTE_CO_AUTHORED_BY=false
 export AIDER_SUBTREE_ONLY=true
 export AIDER_WATCH_FILES=true
 if [[ $LIGHT_THEME = 1 ]]; then
@@ -94,6 +95,7 @@ alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
 alias aider='AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock-prod \aider'
 
+alias g='git -c color.status=always status -sb | head -1; git log --graph --pretty=simple --max-count 15 @'
 alias ga='git add'
 alias gau='git add --all --intent-to-add'
 alias gaa='git add --all'
@@ -120,7 +122,6 @@ alias gl='git pull'
 alias glg='git log --stat --graph --pretty=fuller'
 alias glga='git log --graph --pretty=fuller --all'
 alias glo='git log --graph --pretty=simple'
-alias gloo='git log --graph --pretty=simple --max-count 15'
 alias gloa='git log --color --graph --pretty=simple-iso --all | less -RiMXF -p $(git show -s --format=%h)'
 glx() { git log --graph --decorate=short --date-order --color --pretty=format:'%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)' "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | less -RiMXF -p "$([[ -n $1 ]] && git rev-parse --short "$(git merge-base HEAD "$1")" || git show -s --format=%h)"; }
 alias gr='git remote'
@@ -152,7 +153,7 @@ gc() {
 
 gcb() {
   if [[ $# -gt 0 ]]; then
-    git checkout -b "$@" || git checkout --ignore-other-worktrees "$@"  # with worktree add -f and checkout --ignore-other-worktrees, commits will be applied to all worktrees with the same branch (as they have the same .git file), but the working directory won't automatically change
+    git checkout -b "$@" || git checkout --merge --ignore-other-worktrees "$@"  # with worktree add -f and checkout --ignore-other-worktrees, commits will be applied to all worktrees with the same branch (as they have the same .git file), but the working directory won't automatically change
     return $?
   fi
   # shellcheck disable=2016
@@ -165,7 +166,7 @@ gcb() {
   [[ $fzftemp = remotes/* ]] && local remote="${fzftemp#remotes/}" && branch="${remote#[^\/]*/}" || branch="$fzftemp"  # remote: <remote>/<branch>; branch: <branch>
   if git show-ref --verify --quiet "refs/heads/$branch"; then  # <branch> exists, switch if tracking <remote> or create as <remote>-<branch>
     local tracking="$(git rev-parse --abbrev-ref "$branch@{upstream}" 2> /dev/null)"  # current tracking <remote'>/<branch'> for <branch>
-    if [[ -z $remote ]] || [[ -z $tracking ]] || [[ $tracking = "$remote" ]]; then git checkout --ignore-other-worktrees "$branch" && return $?; fi  # create <remote>-<branch> if <remote'> and <remote> are different, otherwise switch directly
+    if [[ -z $remote ]] || [[ -z $tracking ]] || [[ $tracking = "$remote" ]]; then git checkout --merge --ignore-other-worktrees "$branch" && return $?; fi  # create <remote>-<branch> if <remote'> and <remote> are different, otherwise switch directly
     git show-ref --verify --quiet "refs/heads/${remote/\//-}" && git checkout "${remote/\//-}" || git checkout -b "${remote/\//-}" --track "$remote"
   else  # <branch> doesn't exist, create it
     [[ -n $remote ]] && git checkout --track "$remote" || git checkout "$branch"

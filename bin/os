@@ -55,6 +55,12 @@ run() {
   fi
 }
 
+optimize() {
+  if [[ -f opensearch_dashboards.d.ts ]]; then
+    exec scripts/use_node -e "require('./src/setup_node_env'); require('./src/cli/cluster/run_osd_optimizer').runOsdOptimizer({ cache: true }, require('./src/legacy/server/config').Config.withDefaultSchema()).subscribe();"
+  fi
+}
+
 download() {
   if [[ $# -eq 0 ]]; then echo "Usage: ${0##*/} download <3-digit-version> [filter] [-x|--extract]" >&2; return 1; fi
   ver() { awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"; }
@@ -119,11 +125,11 @@ sed() {
 
 main() {
   case $1 in
-    run|download|sed) "$@" ;;
+    run|optimize|download|sed) "$@" ;;
     d) download "${@:2}" ;;
     sql*|ppl*) query "$@" ;;
     get|put|post|delete|GET|PUT|POST|DELETE) request "$@" ;;
-    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] [-b|--bootstrap] | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|put|post|delete} [path] [<body> [args...]]" >&2; exit 1 ;;
+    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] [-b|--bootstrap] | optimize | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|put|post|delete} [path] [<body> [args...]]" >&2; exit 1 ;;
   esac
 }
 

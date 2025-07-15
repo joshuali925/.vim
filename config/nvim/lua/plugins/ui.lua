@@ -77,6 +77,7 @@ return {
                     hijack_netrw_behavior = "disabled",
                     window = { mappings = { ["-"] = "navigate_up", ["C"] = "set_root" } },
                 },
+                buffers = { window = { mappings = { ["-"] = "navigate_up", ["C"] = "set_root" } } },
                 document_symbols = { window = { mappings = { ["x"] = "none", ["d"] = "none" } } },
                 sources = { "filesystem", "buffers", "git_status", "document_symbols" },
                 event_handlers = {
@@ -164,6 +165,8 @@ return {
             vim.fn["quickui#menu#install"]("L&SP", {
                 { "Workspace &diagnostics", [[lua require("lsp").quickfix_all_diagnostics()]], "Show workspace diagnostics in quickfix (run :bufdo edit<CR> to load all buffers)" },
                 { "Workspace warnings and errors", [[lua require("lsp").quickfix_all_diagnostics(vim.diagnostic.severity.WARN)]], "Show workspace warnings and errors in quickfix" },
+                { "&Yank diagnostics", [[lua vim.fn.setreg("+", require("lsp").get_diagnostics_in_buffers()); vim.notify("Copied warnings and errors")]], "Copy warnings and errors in open buffers" },
+                { "--", "" },
                 { "&Toggle diagnostics", [[lua vim.diagnostic.enable(not vim.diagnostic.is_enabled())]], "Toggle LSP diagnostics" },
                 { "Toggle virtual lines", [[lua vim.diagnostic.config({ virtual_lines = not vim.diagnostic.config().virtual_lines })]], "Toggle LSP diagnostic virtual lines" },
                 { "Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = { prefix = "●", current_line = not vim.diagnostic.config().virtual_text.current_line } })]], "Toggle LSP diagnostic virtual lines" },

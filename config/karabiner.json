@@ -260,8 +260,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.microsoft\\.edgemac$",
-                "^com\\.google\\.Chrome$",
-                "^company\\.thebrowser\\.Browser$"
+                "^com\\.google\\.Chrome$"
               ]
             }
           ]
@@ -285,8 +284,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.microsoft\\.edgemac$",
-                "^com\\.google\\.Chrome$",
-                "^company\\.thebrowser\\.Browser$"
+                "^com\\.google\\.Chrome$"
               ]
             }
           ]
@@ -313,10 +311,7 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$"
-              ]
+              "bundle_identifiers": ["^com\\.github\\.wez\\.wezterm$"]
             }
           ]
         },
@@ -342,10 +337,7 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$"
-              ]
+              "bundle_identifiers": ["^com\\.github\\.wez\\.wezterm$"]
             }
           ]
         },
@@ -371,10 +363,7 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$"
-              ]
+              "bundle_identifiers": ["^com\\.github\\.wez\\.wezterm$"]
             }
           ]
         },
@@ -400,7 +389,6 @@
             {
               "type": "frontmost_application_if",
               "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
                 "com\\.microsoft\\.rdc\\.macos"
               ]
@@ -429,7 +417,6 @@
             {
               "type": "frontmost_application_if",
               "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
                 "com\\.microsoft\\.rdc\\.macos"
               ]
@@ -461,10 +448,7 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$"
-              ]
+              "bundle_identifiers": ["^com\\.github\\.wez\\.wezterm$"]
             }
           ]
         },
@@ -490,64 +474,7 @@
           "conditions": [
             {
               "type": "frontmost_application_if",
-              "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
-                "^com\\.github\\.wez\\.wezterm$"
-              ]
-            }
-          ]
-        },
-        {
-          "from": {
-            "key_code": "a",
-            "modifiers": {
-              "mandatory": [
-                "left_command",
-                "right_command",
-                "right_control",
-                "right_shift",
-                "right_option"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "grave_accent_and_tilde",
-              "modifiers": ["right_command", "right_option"]
-            }
-          ],
-          "type": "basic",
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "bundle_identifiers": ["^com\\.jetbrains\\.intellij"]
-            }
-          ]
-        },
-        {
-          "from": {
-            "key_code": "s",
-            "modifiers": {
-              "mandatory": [
-                "left_command",
-                "right_command",
-                "right_control",
-                "right_shift",
-                "right_option"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "grave_accent_and_tilde",
-              "modifiers": ["right_command", "right_option", "right_shift"]
-            }
-          ],
-          "type": "basic",
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "bundle_identifiers": ["^com\\.jetbrains\\.intellij"]
+              "bundle_identifiers": ["^com\\.github\\.wez\\.wezterm$"]
             }
           ]
         }
@@ -580,7 +507,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep 'Slack' && open -a 'Slack')"
+              "shell_command": "pgrep 'Slack' && open -a 'Slack'"
             }
           ]
         },
@@ -594,7 +521,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep Chrome && open -a 'Google Chrome') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep Orion && open -a 'Orion') || (pgrep '^Arc$' && open -a 'Arc')"
+              "shell_command": "(pgrep Chrome && open -a 'Google Chrome') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep Orion && open -a 'Orion')"
             }
           ]
         },
@@ -608,7 +535,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep Orion && open -a 'Orion') || (pgrep '^Arc$' && open -a 'Arc') || (pgrep 'Microsoft Outlook' && open -a 'Microsoft Outlook')"
+              "shell_command": "(pgrep Orion && open -a 'Orion') || (pgrep 'Microsoft Outlook' && open -a 'Microsoft Outlook')"
             }
           ]
         },
@@ -622,7 +549,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep Electron && open -a 'Visual Studio Code') || (ps p $(pgrep idea) | grep 'IDEA Community' && open -a 'IntelliJ IDEA Community Edition') || (pgrep idea && open -a 'IntelliJ IDEA Ultimate') || (ps -p $(pgrep jetbrains_client) -o comm= | grep -o '.*\\.app' | xargs -I{} open -a '{}') || (pgrep '^Cursor$' && open -a 'Cursor')"
+              "shell_command": "ps -p $(pgrep 'Electron|idea|jetbrains_client' | head -1) -o comm= | grep -m1 -o '.*\\.app' | xargs -r -I@ open -a '@'"
             }
           ]
         },
@@ -733,7 +660,6 @@
             {
               "type": "frontmost_application_unless",
               "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
                 "com\\.microsoft\\.rdc\\.macos"
               ]
@@ -758,7 +684,6 @@
             {
               "type": "frontmost_application_unless",
               "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
                 "com\\.microsoft\\.rdc\\.macos"
               ]
@@ -783,7 +708,6 @@
             {
               "type": "frontmost_application_unless",
               "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
                 "com\\.microsoft\\.rdc\\.macos"
               ]
@@ -808,7 +732,6 @@
             {
               "type": "frontmost_application_unless",
               "bundle_identifiers": [
-                "^com\\.googlecode\\.iterm2$",
                 "^com\\.github\\.wez\\.wezterm$",
                 "com\\.microsoft\\.rdc\\.macos"
               ]
@@ -1994,7 +1917,7 @@
       ]
     },
     {
-      "description": "Applications: record screen, vim, dict, term, rectangle",
+      "description": "Applications: record screen, dict, rectangle",
       "manipulators": [
         {
           "from": {
@@ -2013,26 +1936,6 @@
             {
               "key_code": "5",
               "modifiers": ["right_command", "right_shift"]
-            }
-          ],
-          "type": "basic"
-        },
-        {
-          "from": {
-            "key_code": "v",
-            "modifiers": {
-              "mandatory": [
-                "left_command",
-                "right_command",
-                "right_control",
-                "right_shift",
-                "right_option"
-              ]
-            }
-          },
-          "to": [
-            {
-              "shell_command": "/opt/homebrew/bin/wezterm -e -- zsh -ic '/Applications/neovide.app/Contents/MacOS/neovide --no-vsync'"
             }
           ],
           "type": "basic"
@@ -2065,26 +1968,6 @@
             {
               "key_code": "t",
               "modifiers": ["right_command", "right_option"]
-            }
-          ],
-          "type": "basic"
-        },
-        {
-          "from": {
-            "key_code": "t",
-            "modifiers": {
-              "mandatory": [
-                "left_command",
-                "right_command",
-                "right_control",
-                "right_shift",
-                "right_option"
-              ]
-            }
-          },
-          "to": [
-            {
-              "shell_command": "open -a 'WezTerm'"
             }
           ],
           "type": "basic"

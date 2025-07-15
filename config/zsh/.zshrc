@@ -100,6 +100,7 @@ zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 zstyle ':fzf-tab:*' popup-min-size 50 8
 zstyle ':fzf-tab:*' fzf-min-height 8
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' fzf-flags --list-border=none  # avoid having two borders with tmux popup
 
 compdef _dirs d
 compdef _command_names path

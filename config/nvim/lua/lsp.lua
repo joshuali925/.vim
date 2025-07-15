@@ -116,7 +116,7 @@ function M.setup()
                     if diagnostic_win_id == nil then vim.lsp.buf.hover() end
                 end
             end, opts)
-            vim.keymap.set("x", "K", ":<C-u>help <C-r>=funcs#get_visual_selection()<CR><CR>", opts)
+            vim.keymap.set("x", "K", ":<C-u>help <C-r>=funcs#get_visual_selection()<CR><CR>", { buffer = e.buf, silent = true })
             vim.keymap.set("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
             vim.keymap.set("n", "gD", "<Cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
             vim.keymap.set("n", "<leader>d", "<Cmd>lua vim.lsp.buf.implementation()<CR>", opts)
@@ -136,7 +136,8 @@ end
 function M.organize_imports_and_format()
     local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
     if vim.tbl_contains(active_clients, "typescript-tools") then
-        local ok, res = pcall(require("typescript-tools.api").organize_imports, true)
+        local ok, res = pcall(require("typescript-tools.api").organize_imports) -- sync organize imports always fails
+        vim.cmd.sleep()
         if not ok then vim.notify(res, vim.log.levels.WARN, { title = "Failed to organize imports" }) end
     elseif vim.tbl_contains(active_clients, "basedpyright") then
         vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
@@ -165,6 +166,30 @@ function M.quickfix_all_diagnostics(filter)
     end)
     vim.fn.setqflist(diagnostics, "r")
     vim.cmd.copen()
+end
+
+function M.get_diagnostics_in_buffers(filter)
+    local severity_names = { "ERROR", "WARN", "INFO", "HINT" }
+    local outputs = {}
+    for _, bufnr in ipairs(vim.tbl_filter(function(buf)
+        return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf })
+    end, vim.api.nvim_list_bufs())) do
+        local diagnostics = vim.diagnostic.get(bufnr, { severity = { min = filter or vim.diagnostic.severity.WARN } })
+        if #diagnostics > 0 then
+            local diagnostics_by_line = {}
+            for _, diagnostic in ipairs(diagnostics) do
+                diagnostics_by_line[diagnostic.lnum] = diagnostics_by_line[diagnostic.lnum] or {}
+                table.insert(diagnostics_by_line[diagnostic.lnum], string.format("[%s] %s", severity_names[diagnostic.severity], diagnostic.message))
+            end
+            local lines = {}
+            for lnum, messages in pairs(diagnostics_by_line) do
+                table.insert(lines, { lnum, string.format("%s:\n%d %s", table.concat(messages, "; "), lnum + 1, vim.api.nvim_buf_get_lines(bufnr, lnum, lnum + 1, false)[1] or "") })
+            end
+            table.sort(lines, function(a, b) return a[1] < b[1] end)
+            table.insert(outputs, vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":~:.") .. ":\n" .. table.concat(vim.tbl_map(function(l) return l[2] end, lines), "\n"))
+        end
+    end
+    return table.concat(outputs, "\n\n")
 end
 
 return M

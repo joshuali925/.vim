@@ -41,6 +41,7 @@ do_action() {
         preview_win='down:80%'
     fi
     selected=$(FZF_DEFAULT_COMMAND=$cmd SHELL=$(command -v bash) fzf \
+        --list-border=none \
         --header 'C-p:preview   C-n:new window   C-r:reload   C-x:kill   C-v:join vert   C-s:join   C-t:swap' \
         --multi --preview="$preview_cmd" \
         --preview-window=$preview_win --height=100% --reverse --info=inline --header-lines=1 \

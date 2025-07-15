@@ -123,6 +123,7 @@ return {
                     keys = {
                         { icon = " ", key = "e", desc = "New File", action = ":enew", hidden = true },
                         { icon = " ", key = "i", desc = "Insert", action = ":enew | startinsert", hidden = true },
+                        { icon = "󰙅 ", key = "b", desc = "Open file tree", action = ":lua require('neo-tree.command').execute({reveal_force_cwd = true})" },
                         { icon = " ", key = "f", desc = "Find files", action = ":lua require('snacks.picker').files()" },
                         { icon = " ", key = "m", desc = "Find MRU (CWD only: 'M')", action = ":lua require('snacks.picker').recent()" },
                         { icon = " ", key = "M", desc = "Find MRU in CWD", action = ":lua require('snacks.picker').recent({filter = {cwd = true}})", hidden = true },
@@ -145,7 +146,7 @@ return {
                 sections = {
                     { section = "header" },
                     { icon = " ", title = "Recent files (current directory)", section = "recent_files", cwd = true, indent = 2, limit = 5, padding = 1 },
-                    { icon = " ", title = "Recent files", section = "recent_files", indent = 2, limit = 3 },
+                    { icon = " ", title = "Recent files", section = "recent_files", indent = 2, limit = 5 },
                     { pane = 2, section = "keys", gap = 1, padding = 1 },
                     { pane = 2, section = "startup", padding = 1 },
                     { pane = 2, icon = " ", title = "Projects", section = "projects", limit = 3, indent = 2 },

@@ -1,6 +1,6 @@
 return {
     {
-        "windwp/nvim-autopairs",
+        "windwp/nvim-autopairs", -- alt: m4xshen/autoclose.nvim, Saghen/blink.pairs
         event = "InsertEnter",
         config = function()
             local npairs = require("nvim-autopairs")
