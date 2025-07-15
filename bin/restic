@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/restic ]]; then
+  BIN_INIT=1 restic generate --zsh-completion ~/.vim/config/zsh/completions/_restic || true
+fi
+
 install-from-github restic restic/restic linux_amd64.bz2 linux_arm64.bz2 darwin_amd64.bz2 darwin_arm64.bz2 '' "$@"

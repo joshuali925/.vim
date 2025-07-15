@@ -291,6 +291,16 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.keymap.set("n", "a", "%", { remap = true, buffer = true })
     end,
 })
+vim.api.nvim_create_autocmd("FileType", {
+    group = "AutoCommands",
+    pattern = "zsh",
+    callback = function()
+        if vim.api.nvim_buf_get_name(0):match(".*/tmp/zsh.*") then -- https://www.reddit.com/r/neovim/comments/1m9iyem/comment/n58cnee
+            vim.keymap.set("n", "<C-f>", [[<Cmd>%s/&&/\\\r\&\&/ge|%s/--/\\\r  --/ge|%s/ -\(\w\)/ \\\r  -\1/ge<CR><Cmd>nohlsearch<CR>]], { buffer = true })
+            vim.keymap.set("x", "<C-f>", [[:s/&&/\\\r\&\&/ge|'<,'>s/--/\\\r  --/ge|'<,'>s/ -\(\w\)/ \\\r  -\1/ge<CR><Cmd>nohlsearch<CR>]], { buffer = true, silent = true })
+        end
+    end,
+})
 vim.api.nvim_create_autocmd("CmdwinEnter", { group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
 vim.api.nvim_create_autocmd("BufEnter", { group = "AutoCommands", pattern = "term://*", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'trim(v:val) != ""')) == 0 | startinsert | endif]] })
 

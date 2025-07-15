@@ -85,6 +85,12 @@
 	; pager = diff-so-fancy | less -RiMXF
 	pager = delta
 
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = -version:refname
+
 [interactive]
 	; diffFilter = diff-so-fancy --patch
 	diffFilter = delta
@@ -97,6 +103,9 @@
 	prune = true
 	writeCommitGraph = true
 
+[push]
+	autoSetupRemote = true
+
 [pull]
 	rebase = true
 
@@ -108,10 +117,11 @@
 	autoStash = true
 
 [merge]
-	conflictstyle = diff3
+	conflictstyle = zdiff3
 	tool = vimdiff
 
 [diff]
+	mnemonicPrefix = true
 	algorithm = histogram
 	; colorMoved = default
 	; colorMovedWS = allow-indentation-change
