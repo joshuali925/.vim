@@ -14,19 +14,7 @@ export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignor
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
-export AIDER_DARK_MODE=true
-export AIDER_GITIGNORE=false
-export AIDER_CACHE_PROMPTS=true
-export AIDER_SHOW_MODEL_WARNINGS=false
-export AIDER_MAP_TOKENS=3000
-export AIDER_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0  # us.anthropic.claude-3-7-sonnet-20250219-v1:0
-export AIDER_WEAK_MODEL=anthropic.claude-3-5-haiku-20241022-v1:0
-export AIDER_EDIT_FORMAT=diff
-export AIDER_ATTRIBUTE_AUTHOR=false
-export AIDER_ATTRIBUTE_COMMITTER=false
-export AIDER_ATTRIBUTE_CO_AUTHORED_BY=false
-export AIDER_SUBTREE_ONLY=true
-export AIDER_WATCH_FILES=true
+export OPENAI_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0  # us.anthropic.claude-3-7-sonnet-20250219-v1:0
 if [[ $LIGHT_THEME = 1 ]]; then
   export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
 else
@@ -56,7 +44,7 @@ alias ls='ls -F --color=auto'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias chmod\?='stat --printf "%a %n\n"'
 alias bell='echo -n -e "\a"'
-alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>
+alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>. to get epoch milliseconds: date +%s%3N
 alias sudo='sudo '  # alias commands with space allows alias after command
 alias xargs='xargs '
 alias watch='watch '
@@ -65,7 +53,6 @@ alias v='$EDITOR'
 alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
-alias .install='~/.vim/install.sh install'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
 alias venv='deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv="$PWD/.venv"; }'
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
@@ -93,7 +80,6 @@ alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 # shellcheck disable=2142
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
-alias aider='AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock-prod \aider'
 
 alias g='git -c color.status=always status -sb | head -1; git log --graph --pretty=simple --max-count 15 @'
 alias ga='git add'
@@ -107,7 +93,7 @@ alias gcs='gc --signoff'
 alias gcs!='gc --signoff --amend --no-verify --allow-empty'
 alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcl='git clone --filter=blob:none'
-alias gcm='git checkout "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
+alias gcm='git checkout --merge "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
 alias gcp='git cherry-pick'
 alias gd='git diff'
@@ -208,8 +194,8 @@ termwrap() {
   nvim --clean -c 'set cmdheight=0 laststatus=0 shadafile=NONE' -c 'highlight Normal guifg=NONE guibg=NONE' -c 'autocmd TermClose * quitall!' -c "terminal $*" -c startinsert
 }
 
-st() {  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display
-  ssh -t "$@" 'LANG=C.UTF-8 .vim/bin/tmux new -A -s 0'
+st() {  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display. Set basic PATH for commands invoked by tmux not through shell (e.g. new-window)
+  ssh -t "$@" 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
 tarcopy() {
@@ -561,7 +547,11 @@ getip() {
   if [[ $# -gt 1 ]]; then
     echo "Usage: $0 [--private|ip|domain]" >&2
   elif [[ $# -eq 0 ]]; then
-    curl -s "https://checkip.amazonaws.com"  # or ifconfig.me
+    if builtin command -v ec2metadata > /dev/null 2>&1; then
+      curl -s -XPUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 1800' | xargs -I {} curl -s -H 'X-aws-ec2-metadata-token: {}' http://169.254.169.254/latest/meta-data/public-ipv4
+    else
+      curl -s https://checkip.amazonaws.com  # or ifconfig.me
+    fi
   elif [[ $1 = --private ]]; then  # en0: wireless, en1: ethernet, en3: thunderbolt to ethernet
     builtin command -v ifconfig > /dev/null 2>&1 && ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' || ipconfig getifaddr en0 2> /dev/null || ipconfig getifaddr en1 2> /dev/null || hostname -I 2> /dev/null || ip route get 1.1.1.1 | awk '{print $7}'
   elif [[ $1 =~ ^[0-9.]+$ ]]; then
@@ -599,7 +589,7 @@ docker-shell() {
             docker cp ~/.vim/bin/busybox "$selected_id":/bin/ls
             docker cp ~/.vim/bin/busybox "$selected_id":/bin/cat
           }
-          docker exec -it "$selected_id" /busybox sh
+          docker exec -it "$selected_id" /busybox sh || echo 'Failed to start shell in container. Attaching volumes to alpine..' >&2 && docker run --rm -it --volumes-from "$selected_id" alpine:edge sh
         fi
       }
     fi
@@ -634,6 +624,12 @@ kube-shell() {
     --prompt "$(kubectl config current-context | sed 's/-context$//')> " --header='Press C-o to open log in editor' \
     --bind='enter:execute:kubectl exec -it --namespace {1} {2} -- bash' --bind="ctrl-o:execute:$EDITOR <(kubectl logs --all-containers --namespace {1} {2})" \
     --preview-window=up,70%,border-bottom,follow --preview='kubectl logs --follow --all-containers --tail=10000 --namespace {1} {2}'
+}
+
+awsctx() {
+  local profile=$1
+  if [[ -z $profile ]]; then profile=$(aws configure list-profiles | fzf); fi
+  if [[ -n $profile ]]; then export AWS_PROFILE=$profile; fi
 }
 
 ec2() {
@@ -685,6 +681,10 @@ theme() {  # locally toggles wezterm theme, remotely updates configs to match te
   fi
   source ~/.vim/config/common.sh
   if [[ -n $TMUX ]]; then tmux set-environment -ug LIGHT_THEME; fi
+}
+
+.install() {  # declare as function for zsh completion
+  ~/.vim/install.sh install "$@"
 }
 
 .vim-disable-binary-downloads() {

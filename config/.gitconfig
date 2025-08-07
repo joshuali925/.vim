@@ -118,7 +118,10 @@
 
 [merge]
 	conflictstyle = zdiff3
-	tool = vimdiff
+	tool = nvimdiff
+
+[mergetool "nvimdiff"]
+	layout = "LOCAL,BASE,REMOTE / MERGED"
 
 [diff]
 	mnemonicPrefix = true

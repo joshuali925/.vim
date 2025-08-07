@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github git-absorb tummychow/git-absorb x86_64-unknown-linux-musl '' x86_64-apple-darwin '' '--strip-components=1 --wildcards git-absorb*/git-absorb' "$@"

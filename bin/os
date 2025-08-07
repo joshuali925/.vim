@@ -53,6 +53,7 @@ run() {
     if [[ -n $bootstrap ]]; then yarn osd bootstrap --single-version=loose || true; fi
     exec yarn start --no-base-path --run-examples "${opts[@]}" "$@"
   fi
+  echo 'Error: Could not find any runnable OpenSearch or OpenSearch Dashboards environment.' >&2
 }
 
 optimize() {

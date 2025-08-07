@@ -5449,3 +5449,116 @@ if ((Get-WmiObject -Class Win32_ComputerSystem).Manufacturer -match 'Amazon EC2'
             end
         end,
     },
+
+" =======================================================
+export AIDER_DARK_MODE=true
+export AIDER_GITIGNORE=false
+export AIDER_CACHE_PROMPTS=true
+export AIDER_SHOW_MODEL_WARNINGS=false
+export AIDER_MAP_TOKENS=3000
+export AIDER_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0  # us.anthropic.claude-3-7-sonnet-20250219-v1:0
+export AIDER_WEAK_MODEL=anthropic.claude-3-5-haiku-20241022-v1:0
+export AIDER_EDIT_FORMAT=diff
+export AIDER_ATTRIBUTE_AUTHOR=false
+export AIDER_ATTRIBUTE_COMMITTER=false
+export AIDER_ATTRIBUTE_CO_AUTHORED_BY=false
+export AIDER_SUBTREE_ONLY=true
+export AIDER_WATCH_FILES=true
+alias aider='AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock-prod \aider'
+local aider_cmd = nil
+    {
+        "folke/snacks.nvim",
+        keys = {
+            {
+                "<leader>i",
+                function()
+                    if aider_cmd then return require("snacks.terminal").toggle(aider_cmd, { win = { position = "right" } }) end
+                    vim.env.AWS_ACCESS_KEY_ID = nil
+                    vim.env.AWS_SECRET_ACCESS_KEY = nil
+                    vim.env.AWS_SESSION_TOKEN = nil
+                    vim.env.AWS_PROFILE = "bedrock-prod"
+                    local function get_name(buf)
+                        if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value("buflisted", { buf = buf }) then
+                            local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
+                            if name ~= "" and name:find("^/") == nil and name:find("^%w+://") == nil then return name end
+                        end
+                    end
+                    local files = {}
+                    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+                        local name = get_name(buf)
+                        if name then files[name] = true end
+                    end
+                    aider_cmd = vim.list_extend({ "aider" }, vim.tbl_keys(files))
+                    local terminal = require("snacks.terminal").toggle(aider_cmd, { win = { position = "right" } })
+                    local buf = terminal.buf
+                    local channel = vim.bo[buf].channel
+                    vim.keymap.set("t", "<C-b>", function()
+                        local aider_win = vim.api.nvim_get_current_win()
+                        require("snacks.picker").buffers({
+                            confirm = function(picker, item)
+                                picker:close()
+                                vim.fn.chansend(channel, (" `%s` "):format(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(item.buf), ":t:r")))
+                            end,
+                            on_close = function()
+                                vim.api.nvim_set_current_win(aider_win)
+                                vim.schedule(vim.cmd.startinsert)
+                            end,
+                        })
+                    end, { buffer = buf })
+                    vim.keymap.set("t", "<C-p>", function()
+                        local aider_win = vim.api.nvim_get_current_win()
+                        vim.cmd.wincmd("p")
+                        require("snacks.picker")[require("lsp").is_active() and "lsp_symbols" or "treesitter"]({
+                            confirm = function(picker, item)
+                                picker:close()
+                                vim.fn.chansend(channel, (" `%s` "):format(item.name))
+                            end,
+                            on_close = function()
+                                vim.api.nvim_set_current_win(aider_win)
+                                vim.schedule(vim.cmd.startinsert)
+                            end,
+                        })
+                    end, { buffer = buf })
+                    vim.api.nvim_create_augroup("Aider", {})
+                    vim.api.nvim_create_autocmd("BufEnter", { group = "Aider", buffer = buf, command = "startinsert" })
+                    vim.api.nvim_create_autocmd("BufDelete", {
+                        group = "Aider",
+                        callback = function(e)
+                            local name = get_name(e.buf)
+                            if name and files[name] ~= nil then
+                                vim.fn.chansend(channel, ("/drop %s\n"):format(name))
+                                files[name] = nil
+                            end
+                        end,
+                    })
+                    vim.api.nvim_create_autocmd("BufReadPost", {
+                        group = "Aider",
+                        callback = function(e)
+                            vim.schedule(function() -- wrap in schedule to run after buflisted when opening with mini.nvim
+                                local name = get_name(e.buf)
+                                if name and files[name] == nil then
+                                    vim.fn.chansend(channel, ("/add %s\n"):format(name))
+                                    files[name] = true
+                                end
+                            end)
+                        end,
+                    })
+                    vim.api.nvim_create_autocmd("TermClose", {
+                        group = "Aider",
+                        callback = function(e)
+                            if e.buf ~= buf then return end
+                            vim.api.nvim_del_augroup_by_name("Aider")
+                            files = nil
+                            aider_cmd = nil
+                        end,
+                    })
+                end,
+            },
+        },
+    },
+# lazygit
+customCommands:
+  - key: C
+    context: files
+    command: AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock-prod aider --commit
+    output: terminal

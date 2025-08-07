@@ -8,8 +8,8 @@ detect-env
 case $PLATFORM:$ARCHITECTURE in
   linux:x86_64) url=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz ;;
   linux:arm64) url=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz ;;
-  darwin:x86_64) url=https://evermeet.cx/ffmpeg/ffmpeg-7.1.1z ;;
-  darwin:arm64) url=https://www.osxexperts.net/ffmpeg711arm.zip ;;
+  darwin:x86_64) url=https://evermeet.cx/ffmpeg/ffmpeg-8.0.7z ;;
+  darwin:arm64) url=https://www.osxexperts.net/ffmpeg80arm.zip ;;
   *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2; exit 1 ;;
 esac
 
