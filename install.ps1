@@ -46,7 +46,7 @@ Add-Content -Path "$env:USERPROFILE\.zshrc" -Value "export LANG=C.UTF-8", "sourc
 Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "export LANG=C.UTF-8", "source ~/.vim/config/.bashrc"
 
 # install neovim
-scoop install neovim extras/neovide zig
+scoop install neovim extras/neovide gcc
 reg import "$env:USERPROFILE\scoop\apps\neovide\current\install-context.reg"
 [Environment]::SetEnvironmentVariable("NEOVIDE_FRAME", "none", "User")
 Remove-Item "$env:USERPROFILE\.vim\config\nvim\autoload" -Force -Recurse

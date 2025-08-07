@@ -19,22 +19,26 @@ if exists('g:neovide')
   let g:neovide_scroll_animation_far_lines = 0
   let g:neovide_scroll_animation_length = 0.00
 
+  " windows
   inoremap <S-Insert> <C-g>u<C-r>+
   nnoremap <S-Insert> "+p
   xnoremap <S-Insert> "+p
   cnoremap <S-Insert> <C-r>+
-  inoremap <D-v> <C-g>u<C-r>+
-  cnoremap <D-v> <C-r>+
-  tnoremap <D-v> <C-\><C-o>"+p
-  nnoremap <D-v> "+p
-  xnoremap <D-v> "+p
-  noremap <D-Left> <Home>
-  noremap! <D-Left> <Home>
-  noremap <D-Right> <End>
-  noremap! <D-Right> <End>
+  tnoremap <S-Insert> <C-\><C-o>"+p
   noremap <M-Left> <C-Left>
   noremap! <M-Left> <C-Left>
   noremap <M-Right> <C-right>
   noremap! <M-Right> <C-right>
   noremap! <M-BS> <C-w>
+
+  " mac
+  inoremap <D-v> <C-g>u<C-r>+
+  nnoremap <D-v> "+p
+  xnoremap <D-v> "+p
+  cnoremap <D-v> <C-r>+
+  tnoremap <D-v> <C-\><C-o>"+p
+  noremap <D-Left> <Home>
+  noremap! <D-Left> <Home>
+  noremap <D-Right> <End>
+  noremap! <D-Right> <End>
 endif

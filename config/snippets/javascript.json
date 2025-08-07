@@ -37,7 +37,7 @@
   },
   "Range": {
     "prefix": "range",
-    "body": "Array(${1:10}).fill().map(Number.call, Number)"
+    "body": "Array(${1:10}).fill(0).map(Number.call, Number)"
   },
   "Random string": {
     "prefix": "random-string",

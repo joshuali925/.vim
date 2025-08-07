@@ -149,7 +149,8 @@ return {
                 { "Git gre&p all", [[call feedkeys(":Git log --all --name-status -i -G ''\<Left>", "n")]], "Search a regex in all committed versions of files, command: git log -p --all -i -G '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
                 { "Git fi&nd files all", [[call feedkeys(":Git log --all --name-status -- '**'\<Left>\<Left>", "n")]], "Grep file names in all commits" },
             })
-            vim.fn["quickui#menu#install"]("&Tables", {
+            vim.fn["quickui#menu#install"]("&Format", {
+                { "Fold with &treesitter", [[setlocal foldexpr=nvim_treesitter#foldexpr()]], "Use treesitter to fold, this can be slow" },
                 { "&Venn ascii draw", [[lua require("utils").toggle_venn()]], "Toggle venn.nvim, use HJKL to draw arrow, select area and use v to draw box" },
                 { "--", "" },
                 { "Table &mode", [[TableModeToggle]], "Toggle TableMode" },
@@ -158,7 +159,6 @@ return {
                 { "Delete row", [[execute "normal \<Plug>(table-mode-delete-row)"]], "Delete row" },
                 { "Delete column", [[execute "normal \<Plug>(table-mode-delete-column)"]], "Delete column" },
                 { "Show cell &position", [[execute "normal \<Plug>(table-mode-echo-cell)"]], "Show cell index number" },
-                { "--", "" },
                 { "&Add formula", [[TableAddFormula]], "Add formula to current cell, i.e. Sum(r1,c1:r2,c2)" },
                 { "&Evaluate formula", [[TableEvalFormulaLine]], "Evaluate formula" },
             })

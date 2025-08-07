@@ -14,10 +14,10 @@ settings.tabsThreshold = 0;
 settings.richHintsForKeystroke = 1500;
 settings.stealFocusOnLoad = false;
 settings.focusFirstCandidate = true;
-settings.hintAlign = "left";
+settings.hintAlign = 'left';
 settings.smoothScroll = false;
 settings.omnibarMaxResults = 20;
-settings.modeAfterYank = "Normal";
+settings.modeAfterYank = 'Normal';
 settings.prevLinkRegex = /(上一封|上页|上一页|上一章|前一页|prev|previous|older|<|‹|←|«|≪|<<|◀)/i;
 settings.nextLinkRegex = /(下一封|下页|下一页|下一章|后一页|next|newer|>|›|→|»|≫|>>|▶)/i;
 settings.useNeovim = false;
@@ -126,7 +126,7 @@ api.mapkey(';Vp', 'Pop window', function() { window.open(document.location.href,
 api.mapkey('<Ctrl-r>', 'Hard reload', function() { sessionStorage.clear(); window.location.reload(true); });
 api.unmap("'");
 api.mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
-    api.Front.openOmnibar({type: "VIMarks", tabbed: false});
+    api.Front.openOmnibar({type: 'VIMarks', tabbed: false});
 });
 api.unmap('p');
 api.mapkey('p', '#0enter ephemeral PassThrough mode to temporarily suppress SurfingKeys', function() {
@@ -172,10 +172,10 @@ api.mapkey('P', 'Open url or google', function() {
 });
 api.mapkey('gp', 'DuckDuckGo first result', function() {
     if (window.getSelection().toString()) {
-        api.tabOpenLink("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(window.getSelection().toString()));
+        api.tabOpenLink('https://duckduckgo.com/?q=!ducky+' + encodeURIComponent(window.getSelection().toString()));
     } else {
         api.Clipboard.read(function(response) {
-            api.tabOpenLink("https://duckduckgo.com/?q=!ducky+" + encodeURIComponent(response.data));
+            api.tabOpenLink('https://duckduckgo.com/?q=!ducky+' + encodeURIComponent(response.data));
         });
     }
 });
@@ -188,6 +188,69 @@ api.mapkey('gP', 'Google first result', function() {
             api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(response.data)}&btnI=&sourceid=navclient&gfns=1`);
         });
     }
+});
+api.unmap('v');
+api.mapkey('v', 'Copy element text', function() {
+    let removeDuplicates = true;
+    let selectedElement = null;
+    let overlay = null;
+    function createOverlay() {
+        overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:999999;pointer-events:none;';
+        document.body.appendChild(overlay);
+    }
+    function highlightElement(element) {
+        if (!element) return;
+        const rect = element.getBoundingClientRect();
+        overlay.style.cssText += `border:2px solid red; background:rgba(255,0,0,0.1); top:${rect.top + window.scrollY}px; left:${rect.left + window.scrollX}px; width:${rect.width}px; height:${rect.height}px; position:absolute; pointer-events:none; z-index:999999;`;
+    }
+    function getTextNodes(element) {
+        let textNodes = removeDuplicates ? new Set() : [];
+        let walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while ((node = walker.nextNode())) {
+            if (node.textContent.trim()) {
+                if (removeDuplicates) textNodes.add(node.textContent.trim());
+                else textNodes.push(node.textContent.trim());
+            }
+        }
+        return removeDuplicates ? Array.from(textNodes) : textNodes;
+    }
+    function copyToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    }
+    function cleanup() {
+        if (overlay) overlay.remove();
+        document.removeEventListener('click', handleClick, true);
+        document.removeEventListener('mouseover', handleMouseOver, true);
+        document.removeEventListener('contextmenu', handleRightClick, true);
+    }
+    function handleClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        selectedElement = e.target;
+        const textNodes = getTextNodes(selectedElement);
+        const content = textNodes.join('\n');
+        copyToClipboard(content);
+        cleanup();
+    }
+    function handleMouseOver(e) {
+        highlightElement(e.target);
+    }
+    function handleRightClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        cleanup();
+    }
+    createOverlay();
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('mouseover', handleMouseOver, true);
+    document.addEventListener('contextmenu', handleRightClick, true);
 });
 api.unmap('r');
 api.mapkey('r', 'Toggle full screen', function() {
@@ -218,12 +281,12 @@ api.mapkey('yot', 'Toggle dark theme', function() {
 iframe, img, image, video, [style*="background-image"] {
     filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
 }`;
-    const ee = document.getElementById("surfingkeys-dark-theme");
+    const ee = document.getElementById('surfingkeys-dark-theme');
     if (null != ee) ee.parentNode.removeChild(ee);
     else {
         const style = document.createElement('style');
-        style.type = "text/css";
-        style.id = "surfingkeys-dark-theme";
+        style.type = 'text/css';
+        style.id = 'surfingkeys-dark-theme';
         if (style.styleSheet) style.styleSheet.cssText = odmcss;
         else style.appendChild(document.createTextNode(odmcss));
         document.head.appendChild(style);
@@ -243,12 +306,7 @@ api.mapkey('yoT', 'Use water.css', function() {
     const toggleBtn = createElement('button', {
         innerHTML: sunSVG,
         ariaLabel: 'Switch theme',
-        style: `position: fixed;
-            top: 50px;
-            right: 50px;
-            margin: 0;
-            padding: 10px;
-            line-height: 1;`
+        style: `position: fixed; top: 50px; right: 50px; margin: 0; padding: 10px; line-height: 1;`
     })
     let theme = 'light'
     const toggleTheme = () => {
@@ -354,21 +412,21 @@ api.Front.registerInlineQuery({
     },
     parseResult: function(res) {
         var parser = new DOMParser();
-        var doc = parser.parseFromString(res.text, "text/html");
-        var collinsResult = doc.querySelector("#collinsResult");
-        var authTransToggle = doc.querySelector("#authTransToggle");
-        var examplesToggle = doc.querySelector("#examplesToggle");
+        var doc = parser.parseFromString(res.text, 'text/html');
+        var collinsResult = doc.querySelector('#collinsResult');
+        var authTransToggle = doc.querySelector('#authTransToggle');
+        var examplesToggle = doc.querySelector('#examplesToggle');
         if (collinsResult) {
-            collinsResult.querySelectorAll("div>span.collinsOrder").forEach(function(span) {
+            collinsResult.querySelectorAll('div>span.collinsOrder').forEach(function(span) {
                 span.nextElementSibling.prepend(span);
             });
-            collinsResult.querySelectorAll("div.examples").forEach(function(div) {
-                div.innerHTML = div.innerHTML.replace(/<p/gi, "<span").replace(/<\/p>/gi, "</span>");
+            collinsResult.querySelectorAll('div.examples').forEach(function(div) {
+                div.innerHTML = div.innerHTML.replace(/<p/gi, '<span').replace(/<\/p>/gi, '</span>');
             });
             var exp = collinsResult.innerHTML;
             return exp;
         } else if (authTransToggle) {
-            authTransToggle.querySelector("div.via.ar").remove();
+            authTransToggle.querySelector('div.via.ar').remove();
             return authTransToggle.innerHTML;
         } else if (examplesToggle) {
             return examplesToggle.innerHTML;

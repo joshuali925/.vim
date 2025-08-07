@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=1090,2015,2155
+# shellcheck disable=2155
 
 NODE_VERSION=20.18.3
 JDK_VERSION=21
@@ -47,7 +47,7 @@ detect-env() {
     #   ARCHITECTURE=arm6 ;;
     # *armv7*)
     #   ARCHITECTURE=arm7 ;;
-    *aarch64* | *armv8* | arm64)
+    *aarch64* | *armv8* | arm64)  # shellcheck disable=SC2034
       ARCHITECTURE=arm64 ;;
     *)
       echo 'architecture not supported, exiting..' >&2

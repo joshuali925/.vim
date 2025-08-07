@@ -1,0 +1,6 @@
+#compdef .install
+
+_package_completion() {
+  compadd -- $(~/.vim/install.sh -h 2>&1 | awk -F': ' 'NR==2 {gsub(/,/, ""); print $2}')
+}
+_package_completion "$@"

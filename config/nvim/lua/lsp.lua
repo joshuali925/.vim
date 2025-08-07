@@ -33,6 +33,7 @@ local extra_servers = {                                    -- packages need to b
     ["kotlin-language-server"] = "kotlin_language_server", -- TODO https://github.com/Kotlin/kotlin-lsp
     gopls = "gopls",
     clangd = "clangd",
+    marksman = "marksman",
 }
 
 function M.install_packages()

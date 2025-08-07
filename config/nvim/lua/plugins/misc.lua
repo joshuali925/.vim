@@ -37,7 +37,7 @@ return {
         end,
     },
     {
-        "folke/snacks.nvim",
+        "folke/snacks.nvim", -- or https://github.com/dmtrKovalenko/fff.nvim
         priority = 1000,
         lazy = false,
         keys = {
@@ -210,7 +210,7 @@ return {
         },
     },
     {
-        "echasnovski/mini.nvim", -- loaded when icons are used
+        "nvim-mini/mini.nvim", -- loaded when icons are used
         keys = {
             { "'", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.single_character) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
@@ -224,7 +224,7 @@ return {
             { "<leader>fd", "<Cmd>lua require('mini.pick').builtin.files()<CR>" },
             {
                 "<leader>fd",
-                function()                                -- https://github.com/echasnovski/mini.nvim/issues/513#issuecomment-1762785125
+                function()                                -- https://github.com/nvim-mini/mini.nvim/issues/513#issuecomment-1762785125
                     vim.cmd.execute([["normal! \<Esc>"]]) -- escape visual mode to update '< and '> marks
                     local prompt = require("utils").get_visual_selection()
                     vim.schedule(function() require("mini.pick").set_picker_query(vim.split(prompt, "")) end)
