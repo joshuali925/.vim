@@ -142,8 +142,10 @@ return {
                         color = "Constant",
                     },
                     function()
-                        local clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
-                        return #clients > 0 and " " .. table.concat(clients, " ") or ""
+                        local clients = vim.tbl_filter(function(name) return not vim.tbl_contains({ "amazonq-completion" }, name) end, vim.tbl_map(function(client)
+                            return client.name == "amazonq" and " " or client.name == "typos_lsp" and "󰼭 " or client.name
+                        end, vim.lsp.get_clients({ bufnr = 0 })))
+                        return #clients > 0 and table.concat(clients, " ") or ""
                     end,
                 },
                 lualine_y = { { "branch", padding = { left = 0, right = 1 } } },

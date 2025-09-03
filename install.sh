@@ -120,7 +120,7 @@ install_devtools() {
   elif [[ $PLATFORM = darwin ]]; then
     mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    brew install coreutils wget
+    brew install coreutils wget xz
     echo -e "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
     brew install grep && link_file "$(which ggrep)" ~/.local/bin/grep
     brew install gnu-sed && link_file "$(which gsed)" ~/.local/bin/sed
@@ -139,7 +139,7 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel darkmodebuddy coconutbattery visual-studio-code orion
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery visual-studio-code orion
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update wezterm: brew upgrade --cask wezterm --no-quarantine --greedy-latest
   fi
@@ -165,8 +165,8 @@ install_dotfiles() {
   link_file ~/.vim/config/.tmux.conf ~/.tmux.conf --relative
   link_file ~/.vim/config/.gitconfig ~/.gitconfig --relative
   link_file ~/.vim/config/.ideavimrc ~/.ideavimrc --relative
-  link_file ~/.vim/config/yazi ~/.config/yazi
-  link_file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml
+  link_file ~/.vim/config/yazi ~/.config/yazi --relative
+  link_file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml --relative
   if [[ $PLATFORM = darwin ]]; then
     mkdir -p ~/Library/Application\ Support/lazygit ~/.config/wezterm ~/.config/karabiner/assets/complex_modifications
     ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport
@@ -264,7 +264,7 @@ install_tmux() {
 
 install_neovim() {
   log "Installing neovim.."
-  link_file ~/.vim/config/nvim ~/.config/nvim
+  link_file ~/.vim/config/nvim ~/.config/nvim --relative
   backup ~/.local/lib/nvim ~/.local/bin/nvim
   ~/.vim/bin/nvim --version
   timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
@@ -296,6 +296,35 @@ install_pm2() {
   npm install -g pm2
   pm2 set pm2:autodump true
   sudo -E "$(mise which node)" "$(which pm2)" startup systemd -u "$USER" --hp "$HOME"
+}
+
+install_claude_code() {
+  if [[ -e ~/.claude.json ]]; then
+    log 'Claude Code configuration already exists, skipping..'
+    return 0
+  fi
+  npm install -g @anthropic-ai/claude-code
+  mkdir -p ~/.aws ~/.claude
+  link_file ~/.vim/config/claude/commands ~/.claude/commands --relative
+  link_file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
+  cat >> ~/.aws/credentials <<'EOF'
+
+[bedrock-prod]
+role_arn = arn:aws:iam::000000000000:role/Admin
+credential_source = Ec2InstanceMetadata
+; source_profile = default
+region = us-west-2
+EOF
+  cat >> ~/.zshrc <<'EOF'
+
+export CLAUDE_CODE_USE_BEDROCK=1
+export ANTHROPIC_MODEL=$OPENAI_MODEL
+alias claude='AWS_PROFILE=bedrock-prod claude'
+EOF
+  echo '{"statusLine": {"type": "command", "command": "npx -y ccstatusline@latest", "padding": 0}}' > ~/.claude/settings.json
+  claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
+  log "\nInstalled Claude Code. To configure statusline, run ${YELLOW}npx -y ccstatusline@latest"
+  log "TODO: update bedrock role in ${YELLOW}~/.aws/credentials"
 }
 
 install_ssh-key() {

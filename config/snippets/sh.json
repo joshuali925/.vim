@@ -235,7 +235,7 @@
   },
   "Heredoc": {
     "prefix": "heredoc",
-    "body": ["${1:cat >> multiline.txt} <<<EOF", "$0", "EOF"]
+    "body": ["${1:cat >> multiline.txt} <<EOF", "$0", "EOF"]
   },
   "Script directory": {
     "prefix": "script-directory",

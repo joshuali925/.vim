@@ -30,7 +30,7 @@ local required_packages = {
     "shellcheck",
 }
 local extra_servers = {                                    -- packages need to be manual installed on demand
-    ["kotlin-language-server"] = "kotlin_language_server", -- TODO https://github.com/Kotlin/kotlin-lsp
+    ["kotlin-language-server"] = "kotlin_language_server", -- gd not working in official lsp https://github.com/Kotlin/kotlin-lsp/issues/44
     gopls = "gopls",
     clangd = "clangd",
     marksman = "marksman",

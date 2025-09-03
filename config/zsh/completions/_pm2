@@ -1,0 +1,21 @@
+#compdef pm2
+
+# revised from `pm2 completion` output
+
+COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
+COMP_WORDBREAKS=${COMP_WORDBREAKS/@/}
+
+_pm2() {
+  local si="$IFS"
+  IFS=$'\n'
+  local -a completions
+  completions=($(COMP_CWORD="$((CURRENT-1))" \
+                 COMP_LINE="$BUFFER" \
+                 COMP_POINT="$CURSOR" \
+                 pm2 completion -- "${words[@]}" \
+                 2>/dev/null)) || return $?
+  IFS="$si"
+  compadd -a completions
+}
+
+_pm2 "$@"

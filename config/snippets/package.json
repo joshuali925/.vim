@@ -4,6 +4,7 @@
     "snippets": [
       { "language": "gitcommit", "path": "./gitcommit.json" },
       { "language": "gitignore", "path": "./gitignore.json" },
+      { "language": "confini", "path": "./confini.json" },
       { "language": "http", "path": "./http.json" },
       { "language": "java", "path": "./java.json" },
       {

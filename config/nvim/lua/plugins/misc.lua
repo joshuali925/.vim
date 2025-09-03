@@ -85,7 +85,7 @@ return {
             { "<leader>gB", "<Cmd>lua require('snacks.git').blame_line()<CR>" },
         },
         opts = {
-            bigfile = { enabled = true },
+            bigfile = { enabled = true, line_length = 5000 },
             quickfile = { enabled = true },
             statuscolumn = { enabled = false, left = { "sign" }, git = { patterns = { "MiniDiffSign" } } },
             words = { enabled = true },

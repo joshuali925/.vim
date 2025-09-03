@@ -45,9 +45,6 @@ paste and run in target machine. To transfer through ssh, change `pbcopy` to `ss
 docker run -e TERM --network host -w /root -it --rm alpine:edge sh -uelic '
   apk add curl bash vim
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/bin/bashrc)"'
-
-# use local config
-docker run -e TERM --network host -w /root -v ~/.vim:/root/.vim -it --rm alpine:edge sh -uelic 'apk add curl bash vim; .vim/bin/bashrc'
 ```
 
 ### Windows (PowerShell)

@@ -5,8 +5,15 @@ return {
         cmd = "CsvViewToggle",
         config = function()
             vim.opt_local.wrap = false
-            vim.fn.setreg("/", ",")
-            require("csvview").setup({ view = { display_mode = "border" } })
+            require("csvview").setup({
+                view = { display_mode = "border" },
+                keymaps = {
+                    textobject_field_inner = { "ia", mode = { "o", "x" } },
+                    textobject_field_outer = { "aa", mode = { "o", "x" } },
+                    jump_next_field_end = { "<Tab>", mode = { "n", "x" } },
+                    jump_prev_field_end = { "<S-Tab>", mode = { "n", "x" } },
+                },
+            })
         end,
     },
     {

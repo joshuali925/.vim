@@ -1,3 +1,8 @@
+# build: docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim
+# run: docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v ~/.local/docker-share:/docker-share -it --name vim_container ubuntu_vim
+# resume: docker start -ai vim_container
+# delete: docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim
+
 FROM ubuntu:24.04
 
 # add additional dependencies

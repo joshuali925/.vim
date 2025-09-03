@@ -2,5 +2,9 @@
   "Sign off": {
     "prefix": "signed-off-by",
     "body": "Signed-off-by: Joshua Li <joshuali925@gmail.com>"
+  },
+  "Co-author": {
+    "prefix": "co-authored-by",
+    "body": "Co-authored-by: Joshua Li <joshuali925@gmail.com>"
   }
 }

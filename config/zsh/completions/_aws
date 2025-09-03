@@ -1,0 +1,9 @@
+#compdef aws
+
+_aws() {
+  if ! declare -f _bash_complete >/dev/null; then
+    autoload -U +X bashcompinit && bashcompinit
+  fi
+  complete -C aws_completer aws
+  _bash_complete
+}

@@ -1,0 +1,13 @@
+{
+  "AWS profile from assume role in ~/.aws/credentials": {
+    "prefix": "aws-profile-assume-role",
+    "body": [
+      "[${1:my_profile}]",
+      "role_arn = ${2:arn:aws:iam::000000000000:role/Admin}",
+      "source_profile = ${3:default}",
+      "# or if credentials are not coming from a profile, comment out source_profile and use credential_source",
+      "# credential_source = ${4|Ec2InstanceMetadata,EcsContainer,Environment|}",
+      "region = us-west-2"
+    ]
+  }
+}

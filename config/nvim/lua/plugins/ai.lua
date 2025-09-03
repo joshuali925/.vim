@@ -1,18 +1,26 @@
 return {
     {
-        "supermaven-inc/supermaven-nvim",
-        enabled = vim.env.VIM_AI == "supermaven",
+        "awslabs/amazonq.nvim",
+        enabled = vim.env.Q_SSO_URL ~= nil,
+        cmd = "AmazonQ",
         event = "InsertEnter",
+        keys = { { "<leader>i", function() vim.api.nvim_feedkeys(vim.keycode(":AmazonQ"), "", false) end, mode = { "n", "x" } } },
         config = function()
-            require("supermaven-nvim").setup({
-                disable_keymaps = true,
-                condition = function() return require("states").qs_disabled_filetypes[vim.o.filetype] == false end,
+            require("amazonq").setup({
+                ssoStartUrl = vim.env.Q_SSO_URL,
+                filetypes = {
+                    "amazonq", "bash", "java", "python", "typescript", "javascript", "csharp",
+                    "ruby", "kotlin", "sh", "sql", "c", "cpp", "go", "rust", "lua", "typescriptreact",
+                },
+                on_chat_open = function()
+                    vim.cmd("vertical botright split")
+                    vim.schedule(function()
+                        vim.bo.buflisted = false
+                        vim.opt_local.number = false
+                    end)
+                end,
             })
-            vim.keymap.set("i", "<Right>", function()
-                local suggestion = require("supermaven-nvim.completion_preview")
-                if suggestion.has_suggestion() then return suggestion.on_accept_suggestion() end
-                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false) -- <C-g>U is for multicursor.nvim
-            end)
+            vim.cmd.doautocmd("BufReadPost")
         end,
     },
     {

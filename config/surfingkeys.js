@@ -79,7 +79,7 @@ api.map('E', 'cs'); // switch scroll target
 api.map(';fj', ';fs'); // choose scroll target
 api.map('gv', 'V'); // restore visual mode
 api.map('C', 'v'); // enter caret mode
-api.map('v', 'zv'); // visual select element
+api.map('V', 'zv'); // visual select element
 api.map('ys', 'ya'); // select url to copy
 api.map('yP', 'yp'); // copy POST form data
 api.map('yp', 'yt'); // duplicate page
