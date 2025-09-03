@@ -58,6 +58,7 @@ run() {
 
 optimize() {
   if [[ -f opensearch_dashboards.d.ts ]]; then
+    echo "❯ scripts/use_node -e \"require('./src/setup_node_env'); require('./src/cli/cluster/run_osd_optimizer').runOsdOptimizer({ cache: true }, require('./src/legacy/server/config').Config.withDefaultSchema()).subscribe();\"" >&2
     exec scripts/use_node -e "require('./src/setup_node_env'); require('./src/cli/cluster/run_osd_optimizer').runOsdOptimizer({ cache: true }, require('./src/legacy/server/config').Config.withDefaultSchema()).subscribe();"
   fi
 }

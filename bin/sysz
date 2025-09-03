@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
+# https://silverrainz.me/blog/2025-09-systemd-fzf-aliases.html if sysz is unmaintained
 install-from-url sysz https://raw.githubusercontent.com/joehillen/sysz/HEAD/sysz "$@"

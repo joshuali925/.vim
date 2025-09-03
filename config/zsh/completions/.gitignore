@@ -1,5 +1,7 @@
 *
 !.gitignore
 !_.install
+!_aws
 !_awsctx
 !_npm
+!_pm2

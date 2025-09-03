@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-url copyparty https://github.com/9001/copyparty/releases/latest/download/copyparty-en.py "$@"

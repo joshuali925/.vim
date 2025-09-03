@@ -4593,21 +4593,6 @@ fif() {  # find in file
   if [[ $# -eq 0 ]]; then echo 'Need a string to search for.'; return 1; fi
   rg --files-with-matches --no-messages "$@" | fzf --multi --preview-window=up,60% --preview="rg --pretty --context 5 --max-columns 0 -- $(printf "%q " "$@"){+}" --bind="enter:execute($EDITOR -c \"/$1\" -- {+} < /dev/tty)"
 }
-lazypm2() {
-  local IFS=$'\n' app_list map=() names ids status
-  app_list=$(pm2 list -m)
-  names=($(echo "$app_list" | awk '/^\+---/{sub("+--- ", ""); print}'))
-  ids=($(echo "$app_list" | awk '/^pm2 id : /{sub("pm2 id : ", ""); print}'))
-  status=($(echo "$app_list" | awk '/^status : /{sub("status : ", ""); print}'))
-  for i in "${!ids[@]}"; do
-    if [[ ${status[i]} = online ]]; then
-      map+=("${ids[i]} : \e[0;32m${names[i]}\e[0m")
-    else
-      map+=("${ids[i]} : \e[0;31m${names[i]} [${status[i]}]\e[0m")
-    fi
-  done
-  printf "%b\n" "${map[@]}" | fzf --ansi --height=100 --preview="awk '{print \$1}' <<< {} | xargs pm2 logs --raw --" --preview-window=80%,follow
-}
                 theme.button("!", "Git changed files", [[<Cmd>execute "lua require('lazy').load({plugins = 'vim-flog'})" | Git difftool --name-status | args `git ls-files --others --exclude-standard`<CR>]]),
 alias gvenv='[[ ! -d $HOME/.local/lib/venv ]] && python3 -m venv "$HOME/.local/lib/venv"; source "$HOME/.local/lib/venv/bin/activate"'
 install-from-github q harelba/q linux-q '' macos-q '' '' "$@"
@@ -5351,6 +5336,22 @@ end
             require("neocodeium").setup({ filetypes = require("states").qs_disabled_filetypes, silent = true, debounce = true })
         end,
     },
+    {
+        "supermaven-inc/supermaven-nvim",
+        enabled = vim.env.VIM_AI == "supermaven",
+        event = "InsertEnter",
+        config = function()
+            require("supermaven-nvim").setup({
+                disable_keymaps = true,
+                condition = function() return require("states").qs_disabled_filetypes[vim.o.filetype] == false end,
+            })
+            vim.keymap.set("i", "<Right>", function()
+                local suggestion = require("supermaven-nvim.completion_preview")
+                if suggestion.has_suggestion() then return suggestion.on_accept_suggestion() end
+                vim.api.nvim_feedkeys(vim.keycode("<C-g>U<Right>"), "n", false) -- <C-g>U is for multicursor.nvim
+            end)
+        end,
+    },
 local qs_disabled_filetypes = { ["."] = false } -- neocodeium has "." = false
     vim.api.nvim_set_hl(0, "NeoCodeiumSuggestion", { link = "LspCodeLens" })
                         if package.loaded["neocodeium"] ~= nil then
@@ -5562,3 +5563,27 @@ customCommands:
     context: files
     command: AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= AWS_SESSION_TOKEN= AWS_PROFILE=bedrock-prod aider --commit
     output: terminal
+
+" =======================================================
+  if ! docker image ls | grep -q ubuntu_vim; then
+    docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim || return 1
+    echo -e "\n\nFinished building image. To commit new change: docker commit vim_container ubuntu_vim"
+  fi
+  # shellcheck disable=2046
+  case $1 in
+    vim-once) docker run --network host -it --name vim_container_temp --rm ubuntu_vim; return $? ;;
+    vim-remove) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
+    vim-build) docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
+    vim) local container_name=${2:-vim_container} ;;
+    *) echo -e "Usage: $0 {vim-once|vim-remove|vim-build|vim [container-name]}\nReceived argument $1, exiting.." >&2; return 1 ;;
+  esac
+  local running=$(docker inspect -f '{{.State.Running}}' "$container_name" 2> /dev/null)
+  if [[ $running = true ]]; then
+    echo 'Starting shell in running container..'; docker exec -it "$container_name" zsh
+  elif [[ $running = false ]]; then
+    echo 'Starting stopped container..'; docker start -ai "$container_name"
+  else
+    echo "Starting new container ($container_name) with host network and docker socket mapped.."
+    mkdir -p ~/.local/docker-share
+    docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v ~/.local/docker-share:/docker-share -it --name "$container_name" ubuntu_vim
+  fi

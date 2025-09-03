@@ -75,10 +75,14 @@ return {
                     %s
                 else
                     selected="$(basename "$0")"
-                    if [ -f "$0" ]; then
-                        xtract "$selected"
-                    else
+                    if [ -d "$0" ]; then
                         tar czvf "$selected.tar.gz" "$selected"
+                    elif file -Lb --mime-type -- "$selected" | grep -q "^video/"; then
+                        ffmpeg -i "$selected" -vcodec libx264 -crf 28 "${selected%%.*}.small.mp4"
+                    elif file -Lb --mime-type -- "$selected" | grep -q "^image/"; then
+                        ffmpeg -i "$selected" -q:v 10 "${selected%%.*}.small.${selected##*.}"
+                    else
+                        xtract "$selected"
                     fi
                 fi
             ]]):format(compress_cmd("tar czvf", "tar.gz")))

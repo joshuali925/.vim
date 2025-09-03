@@ -13,7 +13,7 @@ export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidde
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --follow --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
-export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
+export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-t C-u: show surrounding items | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
 export OPENAI_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0  # us.anthropic.claude-3-7-sonnet-20250219-v1:0
 if [[ $LIGHT_THEME = 1 ]]; then
   export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
@@ -54,7 +54,7 @@ alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
-alias venv='deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv="$PWD/.venv"; }'
+alias venv='deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv=".venv"; }'  # py -m venv .venv
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias k='kubectl'
 alias dc='docker compose'
@@ -81,7 +81,7 @@ alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD
 # shellcheck disable=2142
 alias command-frequency-with-args="fc -l 1 | awk '{\$1=\"\"; CMD[\$0]++;count++;}END { for (a in CMD)print CMD[a] \"\\t\" CMD[a]/count*100 \"%\\t\" a;}' | sort -nr | head -n 30 | nl | column -c3 -s \$'\\t' -t"
 
-alias g='git -c color.status=always status -sb | head -1; git log --graph --pretty=simple --max-count 15 @'
+alias g='git -c color.status=always status -sb | head -1; git log --graph --pretty=simple --boundary --max-count 15 @ $(grref 2>/dev/null)'
 alias ga='git add'
 alias gau='git add --all --intent-to-add'
 alias gaa='git add --all'
@@ -95,7 +95,7 @@ alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcl='git clone --filter=blob:none'
 alias gcm='git checkout --merge "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
-alias gcp='git cherry-pick'
+alias gcp='git cherry-pick -x'
 alias gd='git diff'
 alias gdst='git diff --staged'
 gds() { if [[ $# -eq 0 ]]; then echo -e "\e[1;32mStaged\e[0m"; git diff --stat --staged; echo -e "\n\e[1;31mUnstaged\e[0m"; fi; git diff --stat "$@"; }
@@ -162,7 +162,7 @@ gcb() {
 glof() {
   git log --graph --color --pretty=simple --all "$@" |
     fzf --ansi --layout=default --height=100% --list-border=none --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='Press ` to toggle sort, C-y to copy commit, C-t C-u to show surrounding items, C-p , . to control preview' \
+    --header='`: toggle sort | C-y: copy commit | C-t C-u: show surrounding items | C-p , .: to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-t:unbind(change)+track-current' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
@@ -173,7 +173,7 @@ glof() {
 grlf() {
   git reflog --color --date=human-local --pretty=simple-ref "$@" | awk '!x[$1]++' |
     fzf --ansi --layout=default --height=100% --list-border=none --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='Press ` to toggle sort, C-e to diff to HEAD, C-y to copy commit, C-t C-u to show surrounding items, C-p , . to control preview' \
+    --header='`: toggle sort | C-e: diff to HEAD | C-y: copy commit | C-t C-u: show surrounding items | C-p , .: control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-t:unbind(change)+track-current' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
@@ -418,7 +418,7 @@ rf() {  # livegrep https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep
   local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "${rest[@]}")"
   # disable default command and escape `*` in flags (use: pattern -- -g *.sh). quotes around `*` is required in shell but won't work in rf or snacks.picker. use `\s-- ` to search for ` -- `
   : | fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --delimiter=: --prompt='ripgrep> ' --query="${init_query:-}" \
-    --bind="start,change:transform:{ read -r pat; read -r flags; } < <(awk -F' -- ' '{gsub(/\\*/, \"\\\\*\", \$2); print \$1; print \$2}' <<<{q}) && printf 'change-header(Press C-s to toggle fzf, C-o to close fzf and open in editor. Command: $rg_prefix %s -- %q)+reload:$rg_prefix %s -- %q\n' \"\$flags\" \"\$pat\" \"\$flags\" \"\$pat\"" \
+    --bind="start,change:transform:{ read -r pat; read -r flags; } < <(awk -F' -- ' '{gsub(/\\*/, \"\\\\*\", \$2); print \$1; print \$2}' <<<{q}) && printf 'change-header(C-s: toggle fzf | C-o: close fzf and open in editor | $rg_prefix %s -- %q)+reload:$rg_prefix %s -- %q\n' \"\$flags\" \"\$pat\" \"\$flags\" \"\$pat\"" \
     --bind="ctrl-s:transform:[[ {fzf:prompt} = 'ripgrep> ' ]] && echo 'unbind(change)+change-prompt(fzf:{q}> )+enable-search+clear-query' || echo 'change-prompt(ripgrep> )+disable-search+clear-query+reload($rg_prefix -- {q} || true)+rebind(change)'" \
     --bind="enter:execute(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
     --bind="ctrl-o:become(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
@@ -437,7 +437,7 @@ z() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
     fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9 ]*//' -e "\|^$PWD\$|d" | fzf --ansi --scheme=history --tac \
-      --header='Press ` for recent directories under cwd, or C-a for all directories' --bind='tab:down,btab:up' \
+      --header='`: show recent directories under cwd | C-a: show all directories' --bind='tab:down,btab:up' \
       --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD/\" '\$0~cwd {print \$1}')" \
       --bind='ctrl-a:reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)') && z "$fzftemp"
   elif [[ -d $1 ]]; then cd -- "$1"
@@ -576,47 +576,21 @@ bin-update() {
 }
 
 docker-shell() {
-  if [[ $1 != vim* ]]; then
-    local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --query="${1:-}" --height=100% --list-border=none --preview-window=up,70%,border-bottom,follow --preview='docker logs --follow --tail=10000 {1}')
-    if [[ -n $selected_id ]]; then
-      printf "\n → %s\n" "$selected_id"
-      selected_id=$(awk '{print $1}' <<< "$selected_id")
-      docker exec -it "$selected_id" /bin/bash || docker exec -it "$selected_id" sh || {
-        printf '[docker-shell] sh failed, install busybox (y/N)? '; read -r REPLY
-        if [[ $REPLY = [Yy] ]] && docker cp ~/.vim/bin/busybox "$selected_id":/busybox; then
-          docker exec -it "$selected_id" /busybox mkdir -p /bin && docker exec -it "$selected_id" /busybox --install /bin || {
-            local tmp=$(mktemp -d); mkdir -p "$tmp" && chmod 755 "$tmp" && docker cp "$tmp" "$selected_id":/bin; rm -rf "$tmp"  # create /bin if not exists
-            docker cp ~/.vim/bin/busybox "$selected_id":/bin/ls
-            docker cp ~/.vim/bin/busybox "$selected_id":/bin/cat
-          }
-          docker exec -it "$selected_id" /busybox sh || echo 'Failed to start shell in container. Attaching volumes to alpine..' >&2 && docker run --rm -it --volumes-from "$selected_id" alpine:edge sh
-        fi
+  if [[ $1 = new ]]; then docker run -e TERM --network host -w /root -v ~/.vim:/root/.vim -it --rm alpine:edge sh -uelic 'apk add curl bash vim; .vim/bin/bashrc'; return $?; fi
+  local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --query="${1:-}" --height=100% --list-border=none --preview-window=up,70%,border-bottom,follow --preview='docker logs --follow --tail=10000 {1}')
+  if [[ -z $selected_id ]]; then return 1; fi
+  printf "\n → %s\n" "$selected_id"
+  selected_id=$(awk '{print $1}' <<< "$selected_id")
+  docker exec -it "$selected_id" /bin/bash || docker exec -it "$selected_id" sh || {
+    printf '[docker-shell] sh failed, install busybox (y/N)? '; read -r REPLY
+    if [[ $REPLY = [Yy] ]] && docker cp ~/.vim/bin/busybox "$selected_id":/busybox; then
+      docker exec -it "$selected_id" /busybox mkdir -p /bin && docker exec -it "$selected_id" /busybox --install /bin || {
+        local tmp=$(mktemp -d); mkdir -p "$tmp" && chmod 755 "$tmp" && docker cp "$tmp" "$selected_id":/bin; rm -rf "$tmp"  # create /bin if not exists
+        docker cp ~/.vim/bin/busybox "$selected_id":/bin/ls; docker cp ~/.vim/bin/busybox "$selected_id":/bin/cat
       }
+      docker exec -it "$selected_id" /busybox sh || echo 'Failed to start shell in container. Attaching volumes to alpine..' >&2 && docker run --rm -it --volumes-from "$selected_id" alpine:edge sh
     fi
-    return $?
-  fi
-  if ! docker image ls | grep -q ubuntu_vim; then
-    docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim || return 1
-    echo -e "\n\nFinished building image. To commit new change: docker commit vim_container ubuntu_vim"
-  fi
-  # shellcheck disable=2046
-  case $1 in
-    vim-once) docker run --network host -it --name vim_container_temp --rm ubuntu_vim; return $? ;;
-    vim-remove) docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim; return $? ;;
-    vim-build) docker build --network host -t ubuntu_vim -f ~/.vim/Dockerfile ~/.vim; return $? ;;
-    vim) local container_name=${2:-vim_container} ;;
-    *) echo -e "Usage: $0 {vim-once|vim-remove|vim-build|vim [container-name]}\nReceived argument $1, exiting.." >&2; return 1 ;;
-  esac
-  local running=$(docker inspect -f '{{.State.Running}}' "$container_name" 2> /dev/null)
-  if [[ $running = true ]]; then
-    echo 'Starting shell in running container..'; docker exec -it "$container_name" zsh
-  elif [[ $running = false ]]; then
-    echo 'Starting stopped container..'; docker start -ai "$container_name"
-  else
-    echo "Starting new container ($container_name) with host network and docker socket mapped.."
-    mkdir -p ~/.local/docker-share
-    docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v ~/.local/docker-share:/docker-share -it --name "$container_name" ubuntu_vim
-  fi
+  }
 }
 
 kube-shell() {
@@ -626,10 +600,18 @@ kube-shell() {
     --preview-window=up,70%,border-bottom,follow --preview='kubectl logs --follow --all-containers --tail=10000 --namespace {1} {2}'
 }
 
+lazypm2() {
+    local get_state='local IFS=$'\''\n'\'' app_list=$(pm2 list -m) map=() names ids app_status && names=($(echo "$app_list" | awk '\''/^\+---/{sub("+--- ", ""); print}'\'')) && ids=($(echo "$app_list" | awk '\''/^pm2 id : /{sub("pm2 id : ", ""); print}'\'')) && app_status=($(echo "$app_list" | awk '\''/^status : /{sub("status : ", ""); print}'\'')) && for ((i=1; i<=${#ids[@]}; i++)); do if [[ ${app_status[i]} = online ]]; then map+=("${ids[i]} : \e[0;32m${names[i]}\e[0m"); else map+=("${ids[i]} : \e[0;31m${names[i]} [${app_status[i]}]\e[0m"); fi; done && printf "%b\n" "${map[@]}"'
+  FZF_DEFAULT_COMMAND=$get_state fzf --ansi --height=100% --list-border=none --header='CR: logs | C-e: start | C-t: stop | C-r: restart' \
+    --bind="ctrl-e:execute(pm2 start {1} && sleep 1)+reload($get_state)" --bind="ctrl-t:execute(pm2 stop {1} && sleep 1)+reload($get_state)" \
+    --bind="ctrl-r:execute(pm2 restart {1} && sleep 1)+reload($get_state)" --bind="enter:become(pm2 logs --raw --lines 60000 -- {1})" \
+    --preview-window=up,70%,border-bottom,follow --preview='pm2 logs --raw --lines 10000 -- {1}'
+}
+
 awsctx() {
   local profile=$1
-  if [[ -z $profile ]]; then profile=$(aws configure list-profiles | fzf); fi
-  if [[ -n $profile ]]; then export AWS_PROFILE=$profile; fi
+  if [[ -z $profile ]]; then profile=$(aws configure list-profiles | sort | fzf); fi
+  if [[ -n $profile ]]; then export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$profile"; fi
 }
 
 ec2() {
@@ -639,6 +621,15 @@ ec2() {
     stop) curr_state=running ;;
     ls)
       aws ec2 describe-instances --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],to_string(NetworkInterfaces[0].Association.PublicDnsName || ''), State.Name] | sort_by([], &[2])" --output table
+      return $? ;;
+    create)
+      local tag=$2 instance_type="${3:-m8i.large}" security_group
+      security_group=$(aws ec2 describe-security-groups --group-names 'ec2-cli-security-group' --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null)
+      if [[ -z $security_group ]]; then
+        security_group=$(aws ec2 create-security-group --group-name 'ec2-cli-security-group' --description 'created using aws cli for ec2' --vpc-id "$(aws ec2 describe-vpcs --filters 'Name=isDefault,Values=true' --query 'Vpcs[0].VpcId' --output text)" --query 'GroupId' --output text)
+        aws ec2 authorize-security-group-ingress --group-id "$security_group" --ip-permissions '{"IpProtocol":"tcp","FromPort":22,"ToPort":22,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":443,"ToPort":443,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":80,"ToPort":80,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' > /dev/null
+      fi
+      aws ec2 run-instances --image-id 'ami-03aa99ddf5498ceb9' --instance-type "$instance_type" --key-name 'ec2' --block-device-mappings '{"DeviceName":"/dev/sda1","Ebs":{"Encrypted":false,"DeleteOnTermination":true,"Iops":3000,"VolumeSize":8,"VolumeType":"gp3","Throughput":125}}' --network-interfaces '{"AssociatePublicIpAddress":true,"DeviceIndex":0,"Groups":["'"$security_group"'"]}' --tag-specifications '{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"'"$tag"'"}]}' --metadata-options '{"HttpEndpoint":"enabled","HttpPutResponseHopLimit":2,"HttpTokens":"required"}' --private-dns-name-options '{"HostnameType":"ip-name","EnableResourceNameDnsARecord":true,"EnableResourceNameDnsAAAARecord":false}' --count '1'
       return $? ;;
     ssh)
       local tag=${2:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')}
@@ -658,7 +649,7 @@ ec2() {
         [[ $((SECONDS - start)) -gt 10 ]] && break
       done
       return $? ;;
-    *) echo "Usage: $0 {start|stop|ls|ssh} [instance-tag] [options]" >&2; return 1 ;;
+    *) echo "Usage: $0 {start|stop|ls|create|ssh} [instance-tag] [options]" >&2; return 1 ;;
   esac
   ids=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | if [[ -n $2 ]]; then grep "^$2\s"; else fzf --multi; fi | awk '{print $2}')
   [[ -z $ids ]] && return 1
@@ -722,7 +713,7 @@ if [[ $OSTYPE = darwin* ]]; then
     fi
     sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), datetime((last_visit_time/1000000) - 11644473600, 'unixepoch', 'localtime'), substr(url, 1, 200) from urls order by last_visit_time desc" | awk -F $sep '{printf "%-'$cols's \x1b[32m%s\n\x1b[36m%s\x1b[m\0", $1, $2, $3}' |
       fzf --ansi --read0 --multi --height=100% --list-border=none --tiebreak=index --scheme=history --prompt="$fzfprompt" \
-      --header='Press ` to toggle sort, C-o to open, C-t C-u to show surrounding items' \
+      --header='`: to toggle sort | C-o: open | C-t C-u: show surrounding items' \
       --bind=\`:toggle-sort \
       --bind='ctrl-t:unbind(change)+track-current' \
       --bind='ctrl-o:execute(awk "NR==2" <<< {} | xargs -r open)' |

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github tw shshemi/tabiew x86_64-unknown-linux aarch64-unknown-linux x86_64-apple aarch64-apple '' "$@"
