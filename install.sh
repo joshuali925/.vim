@@ -5,6 +5,7 @@ NODE_VERSION=20.18.3
 JDK_VERSION=21
 BACKUP_DIR=$HOME/config-backup
 
+BG_RED='\033[41m'
 CYAN='\033[0;36m'
 YELLOW='\033[0;33m'
 BLACK='\033[1;30m'
@@ -216,7 +217,7 @@ install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEA
   log "Installed $JDK_VERSION, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
 }
 
-install_system_python() {  # environment for install from source: https://github.com/pyenv/pyenv/wiki#suggested-build-environment
+install_system-python() {  # environment for install from source: https://github.com/pyenv/pyenv/wiki#suggested-build-environment
   log "Installing python system-wide.."
   if [[ $PLATFORM:$PACKAGE_MANAGER = linux:yum ]]; then
     sudo yum install -y python3-devel
@@ -298,7 +299,26 @@ install_pm2() {
   sudo -E "$(mise which node)" "$(which pm2)" startup systemd -u "$USER" --hp "$HOME"
 }
 
-install_claude_code() {
+install_google-chrome() {
+  if builtin command -v google-chrome > /dev/null 2>&1; then
+    log 'Google Chrome already installed, skipping..'
+    return 0
+  fi
+  if [[ $PLATFORM:$PACKAGE_MANAGER:$ARCHITECTURE = linux:yum:x86_64 ]]; then
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+    sudo yum localinstall google-chrome-stable_current_x86_64.rpm
+    rm -f google-chrome-stable_current_x86_64.rpm
+  elif [[ $PLATFORM:$PACKAGE_MANAGER:$ARCHITECTURE = linux:apt-get:x86_64 ]]; then
+    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+    sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y google-chrome-stable
+  else
+    log 'Unsupported platform..'
+    return 1
+  fi
+}
+
+install_claude-code() {
   if [[ -e ~/.claude.json ]]; then
     log 'Claude Code configuration already exists, skipping..'
     return 0
@@ -323,8 +343,9 @@ alias claude='AWS_PROFILE=bedrock-prod claude'
 EOF
   echo '{"statusLine": {"type": "command", "command": "npx -y ccstatusline@latest", "padding": 0}}' > ~/.claude/settings.json
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
+  install_google-chrome 2> /dev/null && claude mcp add -s user chrome-devtools -- npx chrome-devtools-mcp@latest --headless --isolated --no-sandbox || true
   log "\nInstalled Claude Code. To configure statusline, run ${YELLOW}npx -y ccstatusline@latest"
-  log "TODO: update bedrock role in ${YELLOW}~/.aws/credentials"
+  log "${NC}${BG_RED}TODO${CYAN}: update bedrock role in ${YELLOW}~/.aws/credentials"
 }
 
 install_ssh-key() {
@@ -332,8 +353,14 @@ install_ssh-key() {
     log '~/.ssh/id_ed25519 already exists, skipping..'
     return 0
   fi
-  ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && cat ~/.ssh/id_ed25519.pub
+  ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && ssh-keygen -y -f ~/.ssh/id_ed25519
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
+}
+
+install_tls-key() {
+  mkdir -p ~/.vim/tmp/tls
+  openssl req -x509 -newkey rsa:4096 -keyout ~/.vim/tmp/tls/server.key -out ~/.vim/tmp/tls/server.crt -days 730 -nodes -subj '/C=US/ST=California/L=San Francisco/O=ORG/OU=UNIT/CN=localhost'
+  log 'Saved to ~/.vim/tmp/tls/server.key and ~/.vim/tmp/tls/server.crt'
 }
 
 default-install() {

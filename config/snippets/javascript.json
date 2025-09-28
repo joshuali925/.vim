@@ -41,7 +41,7 @@
   },
   "Random string": {
     "prefix": "random-string",
-    "body": "const randString = () => Math.random().toString(36).substring(2);"
+    "body": "Math.random().toString(36).substring(2);"
   },
   "Random integer": {
     "prefix": "random-int",

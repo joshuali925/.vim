@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -e
+
+ls() {
+  aws ec2 describe-instances --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],to_string(NetworkInterfaces[0].Association.PublicDnsName || ''), State.Name, InstanceType] | sort_by([], &[2])" --output table
+}
+
+change_state() {
+  local desired_state=$1 ids
+  ids=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' \
+    "Name=instance-state-name,Values=$([[ $desired_state = start ]] && echo stopped || echo running)" \
+    --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text |
+    if [[ -n $2 ]]; then grep "^$2\s"; else fzf --multi; fi | awk '{print $2}') && aws ec2 "$desired_state-instances" --instance-ids $(echo $ids)
+}
+
+create() {
+  usage() { echo "Usage: ${0##*/} create <tag> [--instance-type <type>] [--volume-size <gigabytes>]" >&2; return 1; }
+  local tag instance_type="m8i.large" volume_size=30 security_group
+  while [[ $# -ne 0 ]]; do
+    case $1 in
+      --instance-type) instance_type="$2"; shift 2 ;;
+      --volume-size) volume_size="$2"; shift 2 ;;
+      -*) usage ;;
+      *) tag="$1"; shift ;;
+    esac
+  done
+  if [[ -z $tag ]]; then usage; fi
+  security_group=$(aws ec2 describe-security-groups --group-names 'ec2-cli-security-group' --query 'SecurityGroups[0].GroupId' --output text 2> /dev/null)
+  if [[ -z $security_group ]]; then
+    security_group=$(aws ec2 create-security-group --group-name 'ec2-cli-security-group' --description 'created using aws cli for ec2' --vpc-id "$(aws ec2 describe-vpcs --filters 'Name=isDefault,Values=true' --query 'Vpcs[0].VpcId' --output text)" --query 'GroupId' --output text)
+    aws ec2 authorize-security-group-ingress --group-id "$security_group" --ip-permissions '{"IpProtocol":"tcp","FromPort":22,"ToPort":22,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":443,"ToPort":443,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":80,"ToPort":80,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":29128,"ToPort":29128,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' > /dev/null
+  fi
+  # requires ec2-cli ssh key: https://repost.aws/knowledge-center/ec2-ssh-key-pair-regions
+  aws ec2 run-instances --tag-specifications '{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"'"$tag"'"}]}' \
+    --instance-type "$instance_type" --count '1' --key-name 'ec2-cli' \
+    --image-id "resolve:ssm:/aws/service/canonical/ubuntu/server/24.04/stable/current/$([[ "${instance_type%.*}" =~ g ]] && echo "arm64" || echo "amd64")/hvm/ebs-gp3/ami-id" \
+    --block-device-mappings '{"DeviceName":"/dev/sda1","Ebs":{"Encrypted":false,"DeleteOnTermination":true,"Iops":3000,"VolumeSize":'"$volume_size"',"VolumeType":"gp3","Throughput":125}}' \
+    --network-interfaces '{"AssociatePublicIpAddress":true,"DeviceIndex":0,"Groups":["'"$security_group"'"]}' \
+    --metadata-options '{"HttpEndpoint":"enabled","HttpPutResponseHopLimit":2,"HttpTokens":"required"}' \
+    --private-dns-name-options '{"HostnameType":"ip-name","EnableResourceNameDnsARecord":true,"EnableResourceNameDnsAAAARecord":false}'
+}
+
+ssh() {
+  local tag=${1:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')} host
+  [[ -z $tag ]] && return 1
+  [[ -n $1 ]] && shift
+  host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
+  if [[ -z $host ]]; then
+    change_state start "$tag" && sleep 17 && ssh "$tag" "$@"
+    return $?
+  fi
+  echo "ssh to ec2: $host" >&2
+  for user in ubuntu ec2-user admin; do  # default username for ubuntu, AL2, debian
+    sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
+    printf "Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n" "$user" >> ~/.ssh/ec2hosts
+    local start=$SECONDS
+    command ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$user@$host" "$@" && break
+    [[ $((SECONDS - start)) -gt 10 ]] && break
+  done
+  return $?
+}
+
+main() {
+  case $1 in
+    start|stop) change_state "$@" ;;
+    create|ssh|ls) "$@" ;;
+    *) echo "Usage: ${0##*/} {start|stop|ls|create|ssh} [instance-tag] [options]" >&2; return 1 ;;
+  esac
+}
+
+main "$@"

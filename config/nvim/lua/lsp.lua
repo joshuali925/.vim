@@ -2,6 +2,7 @@ local M = {}
 
 local required_servers = {
     "typos_lsp",
+    "marksman",
     "lua_ls",
     "vimls",
     "yamlls",
@@ -16,6 +17,7 @@ local required_servers = {
 }
 local required_packages = {
     "typos-lsp",
+    "marksman",
     "lua-language-server",
     "vim-language-server",
     "yaml-language-server",
@@ -33,7 +35,6 @@ local extra_servers = {                                    -- packages need to b
     ["kotlin-language-server"] = "kotlin_language_server", -- gd not working in official lsp https://github.com/Kotlin/kotlin-lsp/issues/44
     gopls = "gopls",
     clangd = "clangd",
-    marksman = "marksman",
 }
 
 function M.install_packages()
@@ -55,9 +56,10 @@ end
 
 function M.setup()
     vim.lsp.enable(required_servers)
+    local mason_path = vim.fn.stdpath("data") .. "/mason"
     require("typescript-tools").setup({
         settings = {
-            tsserver_path = vim.fn.stdpath("data") .. "/mason/packages/typescript-language-server/node_modules/.bin/tsserver", -- manually specify path, otherwise mason needs to be loaded
+            tsserver_path = mason_path .. "/packages/typescript-language-server/node_modules/.bin/tsserver", -- manually specify path, otherwise mason needs to be loaded
             jsx_close_tag = { enable = true },
             expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
             tsserver_file_preferences = {
@@ -73,9 +75,9 @@ function M.setup()
         },
     })
     for executable, server in pairs(extra_servers) do
-        if vim.fn.executable(vim.fn.stdpath("data") .. "/mason/bin/" .. executable) == 1 then
-            vim.lsp.enable(server)
-        end
+        vim.uv.fs_stat(mason_path .. "/bin/" .. executable, function(err, stat)
+            if not err and stat then vim.lsp.enable(server) end
+        end)
     end
 
     vim.diagnostic.config({

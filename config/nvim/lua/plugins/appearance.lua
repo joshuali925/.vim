@@ -26,6 +26,7 @@ return {
         "dstein64/nvim-scrollview",
         config = function()
             require("scrollview").setup({
+                excluded_filetypes = { "gitsigns-blame" },
                 signs_on_startup = { "diagnostics", "search" },
                 signs_max_per_row = 2,
                 winblend_gui = 50,
@@ -34,6 +35,7 @@ return {
                 diagnostics_hint_symbol = "═",
                 diagnostics_info_symbol = "═",
             })
+            require("scrollview.contrib.gitsigns").setup()
         end,
     },
     {
@@ -126,8 +128,11 @@ return {
                         "diff",
                         symbols = { added = " ", modified = " ", removed = " " },
                         source = function()
-                            local summary = vim.b.minidiff_summary
-                            if summary then return { added = summary.add, modified = summary.change, removed = summary.delete } end
+                            local status = vim.b.gitsigns_status
+                            if status then
+                                status.modified = status.changed
+                                return status
+                            end
                         end,
                     },
                     "diagnostics",
@@ -148,7 +153,7 @@ return {
                         return #clients > 0 and table.concat(clients, " ") or ""
                     end,
                 },
-                lualine_y = { { "branch", padding = { left = 0, right = 1 } } },
+                lualine_y = { { function() return " " .. vim.b.gitsigns_status.head end, padding = { left = 0, right = 1 } } },
                 lualine_z = {
                     { "searchcount", padding = { left = 0, right = 1 } },
                     {
@@ -172,7 +177,6 @@ return {
                 lualine_y = {},
                 lualine_z = {},
             },
-            extensions = { "fugitive" },
         },
     },
 }

@@ -354,7 +354,7 @@ if require("states").small_file then
         vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
         vim.o.foldtext = ""
         vim.o.fillchars = "diff:╱,fold: ,foldopen:,foldsep: ,foldclose:"
-        require("lazy").load({ plugins = { "nvim-scrollview", "git-conflict.nvim", "quick-scope" } })
+        require("lazy").load({ plugins = { "nvim-scrollview", "git-conflict.nvim", "gitsigns.nvim", "quick-scope" } })
         vim.cmd.doautocmd("BufReadPost") -- lsp and git-conflict need this when delay loaded
         require("bookmarks").setup()
         require("clips").setup()

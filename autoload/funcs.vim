@@ -103,7 +103,7 @@ function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
-  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'fugitiveblame', 'snacks_layout_box', 'snacks_terminal', 'kulala_ui.text', 'codecompanion']
+  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'gitsigns-blame', 'snacks_layout_box', 'snacks_terminal', 'kulala_ui.text', 'codecompanion']
   if has_nvim && nvim_win_get_config(0).relative != ''  " floating window focused
     quit
   elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q
@@ -211,7 +211,7 @@ function! funcs#get_run_command() abort
   let run_command['html'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['http'] = 'lua require("kulala").run()'
-  let run_command['markdown'] = $SSH_CLIENT != '' ? 'Glow' : 'MarkdownPreview'
+  let run_command['markdown'] = $SSH_CLIENT == '' ? 'LivePreview start' : 'lua require("utils").term_exec([[markdown-preview --host 0.0.0.0 "' . file . '"]]); vim.system({"curl", "-s", "https://checkip.amazonaws.com"}, {text = true}, function(obj) vim.schedule(function() vim.fn.setreg("+", vim.trim(obj.stdout) .. ":3333"); vim.cmd.wincmd("p") end) end)'
   return get(run_command, &filetype, '') . get(b:, 'args', '')
 endfunction
 

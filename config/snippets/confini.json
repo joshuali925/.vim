@@ -1,6 +1,15 @@
 {
+  "AWS profile from creds in ~/.aws/credentials": {
+    "prefix": "template-aws-access-key",
+    "body": [
+      "[${1:my_profile}]",
+      "aws_access_key_id=${2:AWS_ACCESS_KEY_ID}",
+      "aws_secret_access_key=${3:AWS_SECRET_ACCESS_KEY}",
+      "aws_region=us-west-2"
+    ]
+  },
   "AWS profile from assume role in ~/.aws/credentials": {
-    "prefix": "aws-profile-assume-role",
+    "prefix": "template-aws-assume-role",
     "body": [
       "[${1:my_profile}]",
       "role_arn = ${2:arn:aws:iam::000000000000:role/Admin}",

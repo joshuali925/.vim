@@ -15,14 +15,13 @@ vim.g.qs_filetype_blacklist = {
     "neo-tree",
     "DiffviewFileHistory",
     "DiffviewFiles",
-    "floggraph",
-    "git",
-    "fugitiveblame",
+    "git", -- mini.git
+    "gitsigns-blame",
     "dropbar_menu",
     "minifiles",
-    "nui_input",
     "noice",
     "snacks_dashboard",
+    "snacks_input",
     "snacks_picker_input",
     "snacks_picker_list",
 }

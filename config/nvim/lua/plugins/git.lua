@@ -1,39 +1,27 @@
 return {
     {
-        "rbong/vim-flog",
-        dependencies = {
-            "tpope/vim-fugitive",
-            {
-                "ja-he/heat.nvim",
-                opts = { colors = { [1] = { value = 0, color = { 0, 0, 0 } }, [2] = { value = 0.95, color = { 0.75, 0.75, 0.75 } }, [3] = { value = 1, color = { 1, 1, 1 } } } },
-            },
-        },
-        ft = "gitcommit", -- issue number omni-completion, does not work if cloned with url.replacement.insteadOf
-        cmd = { "Git", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Greset", "Flog" },
+        "lewis6991/gitsigns.nvim",
         keys = {
-            { "<leader>gf", "<Cmd>.Flogsplit<CR>" },
-            { "<leader>gf", ":Flogsplit<CR>", mode = { "x" } },
-            { "<leader>gb", "<Cmd>0,.Git blame<CR>" },
-            { "<leader>gc", "<Cmd>Git commit --signoff<CR>" },
-            { "<leader>f~", "<Cmd>Git mergetool<CR>" },
+            { "[g", "<Cmd>lua require('gitsigns').nav_hunk('prev', {target='all'})<CR>" },
+            { "]g", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
+            { "ig", ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
+            { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
+            { "<leader>ga", "<Cmd>lua require('gitsigns').stage_hunk()<CR>" },
+            { "<leader>gu", "<Cmd>lua require('gitsigns').reset_hunk()<CR>" },
+            { "<leader>gb", "<Cmd>lua require('gitsigns').blame_line({full = true, ignore_whitespace = true})<CR>", mode = { "n", "x" } },
         },
         config = function()
-            vim.g.fugitive_summary_format = "%d %s (%cr) <%an>"
-            vim.keymap.set("ca", "git", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>")
-            vim.api.nvim_create_user_command("Greset", "Git reset %", {})
-            vim.api.nvim_create_autocmd("User", {
-                pattern = "FugitiveIndex",
-                group = "AutoCommands",
-                callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
+            require("gitsigns").setup({
+                signs = { add = { text = "▎" }, change = { text = "░" }, delete = { text = "▏" }, topdelete = { text = "▔" }, changedelete = { text = "▒" } },
+                update_debounce = 250,
+                preview_config = { border = "rounded" },
+                sign_priority = 13, -- higher priority than diagnostic signs
+                diffthis = { split = "botright" },
+                status_formatter = function(status) return status end,
             })
-            vim.api.nvim_create_autocmd("FileType", {
-                pattern = "fugitiveblame", -- https://github.com/tpope/vim-fugitive/issues/543#issuecomment-1875806353
-                group = "AutoCommands",
-                callback = function()      -- '-' to reblame at commit, '~' to blame prior to commit, '_' to go back, '+' to go forward
-                    vim.keymap.set("n", "_", "<Cmd>quit<CR><C-o><Cmd>Git blame<CR>", { buffer = true })
-                    vim.keymap.set("n", "+", "<Cmd>quit<CR><C-i><Cmd>Git blame<CR>", { buffer = true })
-                end,
-            })
+            vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})
+            vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})
+            vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {})
         end,
     },
     { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },
