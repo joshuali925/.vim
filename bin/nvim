@@ -15,6 +15,6 @@ mkdir -p ~/.local/{bin,lib}
 [[ -d ~/.local/lib/nvim ]] && command mv -v ~/.local/lib/nvim "$HOME/config-backup/nvim-install.backup_$(date +%s)"
 curl -L -o- "$url" | tar xz -C ~/.local/lib
 command mv -v ~/.local/lib/nvim-* ~/.local/lib/nvim 2> /dev/null || true
-[[ ! -x ~/.local/bin/nvim ]] && ln -svf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim
+[[ ! -x ~/.local/bin/nvim ]] && { ln -srvf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim || ln -svf ~/.local/lib/nvim/bin/nvim ~/.local/bin/nvim; }
 
 run-if-exists "$0" "$@"

@@ -104,7 +104,7 @@ return {
             vim.api.nvim_create_autocmd("User", {
                 pattern = "CodeCompanionChatCreated",
                 group = group,
-                command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#{buffer}{watch}', '@{insert_edit_into_file}']) | nnoremap <buffer> ]\\ <C-w>p<Cmd>CodeCompanionChat<CR>",
+                command = "call nvim_buf_set_lines(0, 2, 2, v:false, ['#{buffer}{watch}']) | nnoremap <buffer> ]\\ <C-w>p<Cmd>CodeCompanionChat<CR>",
             })
             vim.api.nvim_create_autocmd("User", {
                 pattern = "CodeCompanionChatSubmitted",

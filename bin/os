@@ -8,13 +8,14 @@ cleanup() {
 
 run() {
   trap cleanup TERM INT EXIT
-  local rest=() skip_args=0
+  local rest=() skip_args=0 start_cmd=start
   for arg in "$@"; do
     if [[ $skip_args -eq 1 ]]; then rest+=("$arg"); continue; fi
     case $arg in
       --no-sec|--nosec) local nosec=1 ;;
       --debug) export OPENSEARCH_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 ;;
       -b|--bootstrap) local bootstrap=1 ;;
+      -e|--explore) start_cmd=start:explore rest+=(--workspace.enabled=true) ;;
       --) skip_args=1; rest+=("$arg") ;;
       *) rest+=("$arg") ;;
     esac
@@ -51,15 +52,15 @@ run() {
   if [[ -f opensearch_dashboards.d.ts ]]; then
     opts+=(--opensearch.ignoreVersionMismatch=true)
     if [[ -n $bootstrap ]]; then yarn osd bootstrap --single-version=loose || true; fi
-    exec yarn start --no-base-path --run-examples "${opts[@]}" "$@"
+    exec yarn "$start_cmd" --no-base-path "${opts[@]}" "$@"  # --run-examples
   fi
   echo 'Error: Could not find any runnable OpenSearch or OpenSearch Dashboards environment.' >&2
 }
 
 optimize() {
   if [[ -f opensearch_dashboards.d.ts ]]; then
-    echo "❯ scripts/use_node -e \"require('./src/setup_node_env'); require('./src/cli/cluster/run_osd_optimizer').runOsdOptimizer({ cache: true }, require('./src/legacy/server/config').Config.withDefaultSchema()).subscribe();\"" >&2
-    exec scripts/use_node -e "require('./src/setup_node_env'); require('./src/cli/cluster/run_osd_optimizer').runOsdOptimizer({ cache: true }, require('./src/legacy/server/config').Config.withDefaultSchema()).subscribe();"
+    echo "❯ scripts/use_node scripts/build_opensearch_dashboards_platform_plugins --no-examples" >&2
+    scripts/use_node scripts/build_opensearch_dashboards_platform_plugins --no-examples
   fi
 }
 
@@ -125,13 +126,20 @@ sed() {
   sd '("opensearchDashboardsVersion": ").*(",)' '${1}opensearchDashboards${2}' opensearch_dashboards.json
 }
 
+flog() {
+  request put flog || true; echo
+  request put flog/_mapping '{"properties":{"bytes":{"type":"long"},"datetime":{"type":"date","format":"dd/MMM/yyyy:HH:mm:ss Z||strict_date_optional_time||epoch_millis"},"host":{"type":"keyword"},"method":{"type":"keyword"},"protocol":{"type":"keyword"},"referer":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"request":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"status":{"type":"keyword"},"user-identifier":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}}}}' || true; echo
+  while request post flog/_doc "$(command flog -f json -n 1)"; do echo; sleep 1; done
+}
+
 main() {
   case $1 in
     run|optimize|download|sed) "$@" ;;
     d) download "${@:2}" ;;
     sql*|ppl*) query "$@" ;;
     get|put|post|delete|GET|PUT|POST|DELETE) request "$@" ;;
-    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] [-b|--bootstrap] | optimize | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|put|post|delete} [path] [<body> [args...]]" >&2; exit 1 ;;
+    flog) "$@" ;;
+    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] [-b|--bootstrap] [-e|--explore] | optimize | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|put|post|delete} [path] [<body> [args...]] | flog" >&2; exit 1 ;;
   esac
 }
 

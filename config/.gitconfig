@@ -62,6 +62,7 @@
 	simple = format:%C(yellow)%h %Cgreen⦗%cr⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset
 	simple-iso = format:%C(yellow)%h %Cgreen⦗%ci⦘%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset
 	simple-ref = format:%C(yellow)%h%Creset %Cgreen%gD:%Creset %gs%Creset%C(auto)%d%Creset
+	plain = format:%h (%ci) %an: %s%d
 
 [url "https://github.com/"]
 	insteadOf = gh:

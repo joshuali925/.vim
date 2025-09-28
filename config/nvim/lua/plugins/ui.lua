@@ -124,7 +124,7 @@ return {
                 { "Move tab right &+", [[+tabmove]] },
                 { "&Refresh screen", [[execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
                 { "--", "" },
-                { "Open d&ashboard", [[lua require('snacks.dashboard')()]], "Open dashboard" },
+                { "Open d&ashboard", [[lua require("snacks.dashboard")()]], "Open dashboard" },
                 { "&Save session", [[call feedkeys(":SessionSave", "n")]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
                 { "Load s&ession", [[call feedkeys(":SessionLoad", "n")]], "Load session from .cache/nvim/session_<name>.vim" },
                 { "--", "" },
@@ -132,22 +132,17 @@ return {
                 { "GB18030 to utf-8", [[edit ++enc=GB18030 | set fileencoding=utf8]], "Edit as GB18030 (edit ++enc=GB18030) for Chinese characters and reset file format back to utf-8" },
                 { "Open in &VSCode", [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]] },
             })
-            vim.fn["quickui#menu#install"]("&Git", { -- GBrowse loaded on command won't include line number in URL, need to explicitly load it. Similar issues for other fugitive commands.
-                { "Git checko&ut ref", [[call feedkeys(":Gread @:%\<Left>\<Left>", "n")]], "Checkout current file from ref and load as unsaved buffer (Gread HEAD:%)" },
-                { "Git &blame", [[Git blame]], "Git blame of current file" },
-                { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
-                { "Git diff H&EAD", [[Gdiffsplit HEAD:%]], "Diff current file with last committed version (Gdiffsplit HEAD:%)" },
-                { "Git file history", [[vsplit | execute "lua require('lazy').load({plugins = 'vim-flog'})" | 0Gclog]], "Browse previously committed versions of current file" },
+            vim.fn["quickui#menu#install"]("&Git", {
+                { "Git checko&ut ref", [[call feedkeys(":Git restore --source=@ -- %\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Show current file from ref" },
+                { "Git &blame", [[lua require("gitsigns").blame()]], "Git blame of current file" },
+                { "Git &change base", [[call feedkeys(":Gitsigns change_base @ true\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Gitsigns show hunk based on ref" },
+                { "Git reset base", [[lua require("gitsigns").reset_base(true)]], "Gitsigns reset changed base" },
+                { "--", "" },
+                { "Git &diff", [[lua require("gitsigns").diffthis(nil, nil, function() vim.cmd.wincmd('p'); vim.opt_local.winbar = "%f" end)]], "Diff current file with last staged version" },
+                { "Git deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines gitsigns" },
+                { "Git &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
                 { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
-                { "--", "" },
-                { "Git &status", [[Git]], "Git status" },
-                { "Diff&view", [[DiffviewOpen]], "Diff files with HEAD, use :DiffviewOpen ref..ref<CR> to speficy commits" },
-                { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
-                { "--", "" },
-                { "Git search current", [[call feedkeys(":Git log --all --name-status -S '' -- %\<Left>\<S-Left>\<Left>\<Left>", "n")]], "Search a string in all committed versions of current file, command: git log -p --all -S '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- %" },
-                { "Git search &all", [[call feedkeys(":Git log --all --name-status -S ''\<Left>", "n")]], "Search a string in all committed versions of files, command: git log -p --all -S '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
-                { "Git gre&p all", [[call feedkeys(":Git log --all --name-status -i -G ''\<Left>", "n")]], "Search a regex in all committed versions of files, command: git log -p --all -i -G '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
-                { "Git fi&nd files all", [[call feedkeys(":Git log --all --name-status -- '**'\<Left>\<Left>", "n")]], "Grep file names in all commits" },
+                { "Git l&og", [[Git log --graph --pretty=plain]], "Show git log using mini.git" },
             })
             vim.fn["quickui#menu#install"]("&Format", {
                 { "Fold with &treesitter", [[setlocal foldexpr=nvim_treesitter#foldexpr()]], "Use treesitter to fold, this can be slow" },
@@ -227,10 +222,7 @@ return {
                 { "Search in &buffers", [[execute 'cexpr []' | execute 'bufdo vimgrepadd /' . substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g') . '/g %' | copen]], "Grep current search pattern in all buffers, add to quickfix" },
             })
             vim.fn["quickui#menu#install"]("&Git", {
-                { "Git file history", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
                 { "Diffview &file history", [['<,'>DiffviewFileHistory --follow]], "Browse previously committed versions of selected range with Diffview" },
-                { "Git l&og", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
-                { "Git &search", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | execute "Git log --all --name-status -S '" . substitute(funcs#get_visual_selection(), "'", "''", 'g') . "'"]], "Search selected in all committed versions of files" },
             })
             vim.fn["quickui#menu#install"]("Ta&bles", {
                 { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },

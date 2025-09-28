@@ -5587,3 +5587,84 @@ customCommands:
     mkdir -p ~/.local/docker-share
     docker run --network host -v /var/run/docker.sock:/var/run/docker.sock -v ~/.local/docker-share:/docker-share -it --name "$container_name" ubuntu_vim
   fi
+
+" =======================================================
+" minidiff and fugitive
+            { "<leader>gd", "<Cmd>lua require('mini.diff').toggle_overlay()<CR>" },
+            { "<leader>ga", "<leader>gAig", remap = true },
+            { "<leader>gu", "<leader>gUig", remap = true },
+                require("mini.diff").setup({
+                    view = { style = "sign", signs = { add = "▎", change = "░", delete = "▏" } },
+                    mappings = { apply = "<leader>gA", reset = "<leader>gU", textobject = "ig", goto_first = "[G", goto_prev = "[g", goto_next = "]g", goto_last = "]G" },
+                    options = { wrap_goto = true },
+                    source = { require("mini.diff").gen_source.git(), require("mini.diff").gen_source.save() },
+                })
+                            local summary = vim.b.minidiff_summary
+                            if summary then return { added = summary.add, modified = summary.change, removed = summary.delete } end
+    {
+        "rbong/vim-flog",
+        dependencies = {
+            "tpope/vim-fugitive",
+            {
+                "ja-he/heat.nvim",
+                opts = { colors = { [1] = { value = 0, color = { 0, 0, 0 } }, [2] = { value = 0.95, color = { 0.75, 0.75, 0.75 } }, [3] = { value = 1, color = { 1, 1, 1 } } } },
+            },
+        },
+        ft = "gitcommit", -- issue number omni-completion, does not work if cloned with url.replacement.insteadOf
+        cmd = { "Git", "Gdiffsplit", "Gread", "Gwrite", "Gedit", "Gclog", "Greset", "Flog" },
+        keys = {
+            { "<leader>gf", "<Cmd>.Flogsplit<CR>" },
+            { "<leader>gf", ":Flogsplit<CR>", mode = { "x" } },
+            -- { "<leader>gb", "<Cmd>0,.Git blame<CR>" },
+            { "<leader>gc", "<Cmd>Git commit --signoff<CR>" },
+            { "<leader>f~", "<Cmd>Git mergetool<CR>" },
+        },
+        config = function()
+            vim.g.fugitive_summary_format = "%d %s (%cr) <%an>"
+            vim.keymap.set("ca", "git", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Git' : 'git')<CR>")
+            vim.api.nvim_create_user_command("Greset", "Git reset %", {})
+            vim.api.nvim_create_autocmd("User", {
+                pattern = "FugitiveIndex",
+                group = "AutoCommands",
+                callback = function() vim.keymap.set("n", "dt", ":Gtabedit <Plug><cfile><bar>Gdiffsplit! @<CR>", { silent = true, buffer = true }) end,
+            })
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "fugitiveblame", -- https://github.com/tpope/vim-fugitive/issues/543#issuecomment-1875806353
+                group = "AutoCommands",
+                callback = function()      -- '-' to reblame at commit, '~' to blame prior to commit, '_' to go back, '+' to go forward
+                    vim.keymap.set("n", "_", "<Cmd>quit<CR><C-o><Cmd>Git blame<CR>", { buffer = true })
+                    vim.keymap.set("n", "+", "<Cmd>quit<CR><C-i><Cmd>Git blame<CR>", { buffer = true })
+                end,
+            })
+        end,
+    },
+                { "Git checko&ut ref", [[call feedkeys(":Gread @:%\<Left>\<Left>", "n")]], "Checkout current file from ref and load as unsaved buffer (Gread HEAD:%)" },
+                { "Git &blame", [[Git blame]], "Git blame of current file" },
+                { "Git &diff", [[Gdiffsplit]], "Diff current file with last staged version (Gdiffsplit)" },
+                { "Git diff H&EAD", [[Gdiffsplit HEAD:%]], "Diff current file with last committed version (Gdiffsplit HEAD:%)" },
+                { "Git file history", [[vsplit | execute "lua require('lazy').load({plugins = 'vim-flog'})" | 0Gclog]], "Browse previously committed versions of current file" },
+                { "--", "" },
+                { "Git &status", [[Git]], "Git status" },
+                { "Git l&og", [[Flog]], "Show git logs with vim-flog" },
+                { "--", "" },
+                { "Git search current", [[call feedkeys(":Git log --all --name-status -S '' -- %\<Left>\<S-Left>\<Left>\<Left>", "n")]], "Search a string in all committed versions of current file, command: git log -p --all -S '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- %" },
+                { "Git search &all", [[call feedkeys(":Git log --all --name-status -S ''\<Left>", "n")]], "Search a string in all committed versions of files, command: git log -p --all -S '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
+                { "Git gre&p all", [[call feedkeys(":Git log --all --name-status -i -G ''\<Left>", "n")]], "Search a regex in all committed versions of files, command: git log -p --all -i -G '<pattern>' --since=<yyyy.mm.dd> --until=<yyyy.mm.dd> -- <path>" },
+                { "Git fi&nd files all", [[call feedkeys(":Git log --all --name-status -- '**'\<Left>\<Left>", "n")]], "Grep file names in all commits" },
+                " visual
+                { "Git file history", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | vsplit | '<,'>Gclog]], "Browse previously committed versions of selected range" },
+                { "Git l&og", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | '<,'>Flogsplit]], "Show git log of selected range with vim-flog" },
+                { "Git &search", [[execute "lua require('lazy').load({plugins = 'vim-flog'})" | execute "Git log --all --name-status -S '" . substitute(funcs#get_visual_selection(), "'", "''", 'g') . "'"]], "Search selected in all committed versions of files" },
+
+" =======================================================
+    {
+        "iamcco/markdown-preview.nvim",
+        enabled = vim.env.SSH_CLIENT == nil,
+        build = "cd app && yarn install",
+        cmd = "MarkdownPreview",
+        init = function()
+            vim.g.mkdp_auto_close = 0
+            vim.g.mkdp_preview_options = { disable_sync_scroll = 1 }
+        end,
+        config = function() vim.cmd.doautocmd("FileType") end, -- trigger autocmd to define MarkdownPreview command for buffer
+    },

@@ -14,7 +14,7 @@ export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignor
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-t C-u: show surrounding items | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
-export OPENAI_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0  # us.anthropic.claude-3-7-sonnet-20250219-v1:0
+export OPENAI_MODEL=us.anthropic.claude-sonnet-4-5-20250929-v1:0
 if [[ $LIGHT_THEME = 1 ]]; then
   export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
 else
@@ -576,7 +576,15 @@ bin-update() {
 }
 
 docker-shell() {
-  if [[ $1 = new ]]; then docker run -e TERM --network host -w /root -v ~/.vim:/root/.vim -it --rm alpine:edge sh -uelic 'apk add curl bash vim; .vim/bin/bashrc'; return $?; fi
+  if [[ $1 = new || $1 = env ]]; then
+    mkdir -p ~/.local/docker-share
+    if [[ $1 = new ]]; then
+      docker run -e TERM --network host -w /root -v ~/.local/docker-share:/docker-share -v ~/.vim:/root/.vim -it --rm alpine:edge sh -uelic 'apk add curl bash vim; .vim/bin/bashrc'
+    else
+      docker run -e TERM --network host -w /root -v ~/.local/docker-share:/docker-share -v ~/.vim:/root/.vim:ro -v ~/.local:/root/.local:ro -v ~/.config:/root/.config:ro -it --rm alpine:edge sh -uelic 'apk add curl bash vim; .vim/bin/bashrc'
+    fi
+    return $?
+  fi
   local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --query="${1:-}" --height=100% --list-border=none --preview-window=up,70%,border-bottom,follow --preview='docker logs --follow --tail=10000 {1}')
   if [[ -z $selected_id ]]; then return 1; fi
   printf "\n → %s\n" "$selected_id"
@@ -609,57 +617,13 @@ lazypm2() {
 }
 
 awsctx() {
-  local profile=$1
-  if [[ -z $profile ]]; then profile=$(aws configure list-profiles | sort | fzf); fi
-  if [[ -n $profile ]]; then export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$profile"; fi
-}
-
-ec2() {
-  local ids curr_state user
-  case $1 in
-    start) curr_state=stopped ;;
-    stop) curr_state=running ;;
-    ls)
-      aws ec2 describe-instances --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],to_string(NetworkInterfaces[0].Association.PublicDnsName || ''), State.Name] | sort_by([], &[2])" --output table
-      return $? ;;
-    create)
-      local tag=$2 instance_type="${3:-m8i.large}" security_group
-      security_group=$(aws ec2 describe-security-groups --group-names 'ec2-cli-security-group' --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null)
-      if [[ -z $security_group ]]; then
-        security_group=$(aws ec2 create-security-group --group-name 'ec2-cli-security-group' --description 'created using aws cli for ec2' --vpc-id "$(aws ec2 describe-vpcs --filters 'Name=isDefault,Values=true' --query 'Vpcs[0].VpcId' --output text)" --query 'GroupId' --output text)
-        aws ec2 authorize-security-group-ingress --group-id "$security_group" --ip-permissions '{"IpProtocol":"tcp","FromPort":22,"ToPort":22,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":443,"ToPort":443,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":80,"ToPort":80,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' > /dev/null
-      fi
-      aws ec2 run-instances --image-id 'ami-03aa99ddf5498ceb9' --instance-type "$instance_type" --key-name 'ec2' --block-device-mappings '{"DeviceName":"/dev/sda1","Ebs":{"Encrypted":false,"DeleteOnTermination":true,"Iops":3000,"VolumeSize":8,"VolumeType":"gp3","Throughput":125}}' --network-interfaces '{"AssociatePublicIpAddress":true,"DeviceIndex":0,"Groups":["'"$security_group"'"]}' --tag-specifications '{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"'"$tag"'"}]}' --metadata-options '{"HttpEndpoint":"enabled","HttpPutResponseHopLimit":2,"HttpTokens":"required"}' --private-dns-name-options '{"HostnameType":"ip-name","EnableResourceNameDnsARecord":true,"EnableResourceNameDnsAAAARecord":false}' --count '1'
-      return $? ;;
-    ssh)
-      local tag=${2:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')}
-      [[ -z $tag ]] && return 1
-      [[ -n $2 ]] && shift; shift
-      local host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
-      if [[ -z $host ]]; then
-        ec2 start "$tag" && sleep 17 && ec2 ssh "$tag" "$@"
-        return $?
-      fi
-      echo "ssh to ec2: $host" >&2
-      for user in ubuntu ec2-user admin; do  # default username for ubuntu, AL2, debian
-        sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-        printf "Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n" "$user" >> ~/.ssh/ec2hosts
-        local start=$SECONDS
-        ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$user@$host" "$@" && break
-        [[ $((SECONDS - start)) -gt 10 ]] && break
-      done
-      return $? ;;
-    *) echo "Usage: $0 {start|stop|ls|create|ssh} [instance-tag] [options]" >&2; return 1 ;;
-  esac
-  ids=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=$curr_state" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | if [[ -n $2 ]]; then grep "^$2\s"; else fzf --multi; fi | awk '{print $2}')
-  [[ -z $ids ]] && return 1
-  if [[ $curr_state = stopped ]]; then
-    # shellcheck disable=2046,2086,2116
-    aws ec2 start-instances --instance-ids $(echo $ids)
-  else
-    # shellcheck disable=2046,2086,2116
-    aws ec2 stop-instances --instance-ids $(echo $ids)
+  if [[ $1 = --region || $1 == -r ]]; then
+    [[ ! -e ~/.vim/tmp/aws-ec2-regions ]] && aws ec2 describe-regions --query 'Regions[].{Region:RegionName}' --output text > ~/.vim/tmp/aws-ec2-regions
+    local region=$(< ~/.vim/tmp/aws-ec2-regions fzf)
+    [[ -n $region ]] && export AWS_REGION=$region && echo "export AWS_REGION=$AWS_REGION"; return $?
   fi
+  if [[ -n $1 ]]; then local profile=$1; else local profile=$({ awk -F'[][]' '/^\[/ {gsub(/^profile /, "", $2); print $2}' ~/.aws/credentials ~/.aws/config 2> /dev/null || aws configure list-profiles; } | sort -u | fzf); fi
+  [[ -n $profile ]] && export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$AWS_PROFILE"
 }
 
 theme() {  # locally toggles wezterm theme, remotely updates configs to match terminal theme

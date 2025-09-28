@@ -130,9 +130,8 @@ return {
                         { icon = " ", key = "z", desc = "Find projects", action = ":lua require('snacks.picker').projects()" },
                         { icon = " ", key = "'", desc = "Find bookmarks", action = ":lua require('bookmarks').pick()" },
                         { icon = "󰘬 ", key = "!", desc = "Git changed files", action = ":lua require('snacks.picker').git_status()" },
-                        { icon = " ", key = "d", desc = "Git diff (conflicts: '~')", action = ":DiffviewOpen" },
+                        { icon = " ", key = "d", desc = "Git diff", action = ":DiffviewOpen" },
                         { icon = " ", key = "+", desc = "Git diff remote", action = ":DiffviewOpen @{upstream}..HEAD" },
-                        { icon = " ", key = "~", desc = "Git conflicts", action = ":Git mergetool", hidden = true },
                         { icon = "󰍜 ", key = "\\", desc = "Open quickui", action = ":Lazy load vim-quickui | call quickui#menu#open('normal')" },
                         { icon = "󰒲 ", key = "p", desc = "Open Lazy (update: 'u', profile: 'P')", action = ":Lazy" },
                         { icon = "󰄉 ", key = "P", desc = "Open Lazy profile", action = ":Lazy profile", hidden = true },
@@ -218,9 +217,7 @@ return {
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
             { "g<", "cxiacxiNa", remap = true },
             { "g>", "cxiacxiPa", remap = true },
-            { "<leader>gd", "<Cmd>lua require('mini.diff').toggle_overlay()<CR>" },
-            { "<leader>ga", "<leader>gAig", remap = true },
-            { "<leader>gu", "<leader>gUig", remap = true },
+            { "<leader>gc", "<Cmd>Git commit --signoff<CR>" },
             { "<leader>fd", "<Cmd>lua require('mini.pick').builtin.files()<CR>" },
             {
                 "<leader>fd",
@@ -241,50 +238,60 @@ return {
             end
         end,
         config = function()
-            require("mini.extra").setup()
-            require("mini.pick").setup()
-            require("mini.bufremove").setup()
-            require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
-            require("mini.files").setup({ mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
-            require("mini.move").setup({ mappings = { left = "", right = "", down = "<C-,>", up = "<C-.>", line_left = "", line_right = "", line_down = "<C-,>", line_up = "<C-.>" } })
-            require("mini.hipatterns").setup({
-                highlighters = {
-                    fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
-                    hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
-                    todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
-                    note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
-                    hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
-                },
-            })
-            require("mini.align").setup({ mappings = { start = "", start_with_preview = "gl" } })
-            require("mini.splitjoin").setup({ mappings = { toggle = "gs" } })
-            require("mini.ai").setup({
-                mappings = { around_next = "aN", inside_next = "iN", around_last = "aP", inside_last = "iP" },
-                custom_textobjects = {
-                    b = { { "%b()", "%b[]", "%b{}", "%b''", '%b""', "%b``", "%b<>" }, "^.().*().$" },
-                    n = require("mini.extra").gen_ai_spec.number(),
-                    ["'"] = false,
-                    ['"'] = false,
-                    ["`"] = false,
-                    ["("] = false,
-                    [")"] = false,
-                    ["{"] = false,
-                    ["}"] = false,
-                },
-            })
-            require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
-            require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
-            require("mini.operators").make_mappings("replace", { textobject = "cp", line = "", selection = "" })
-            require("mini.diff").setup({
-                view = { style = "sign", signs = { add = "▎", change = "░", delete = "▏" } },
-                mappings = { apply = "<leader>gA", reset = "<leader>gU", textobject = "ig", goto_first = "[G", goto_prev = "[g", goto_next = "]g", goto_last = "]G" },
-                options = { wrap_goto = true },
-                source = { require("mini.diff").gen_source.git(), require("mini.diff").gen_source.save() },
-            })
-            vim.api.nvim_create_autocmd("User", {
-                pattern = "MiniFilesActionRename",
-                callback = function(e) require("snacks.rename").on_rename_file(e.data.from, e.data.to) end,
-            })
+            vim.defer_fn(function()
+                require("mini.extra").setup()
+                local ui_select_orig = vim.ui.select -- https://github.com/nvim-mini/mini.nvim/commit/a447cccd085a28b30ec55c24211cd49813295aa8
+                require("mini.pick").setup()
+                vim.ui.select = ui_select_orig
+                require("mini.bufremove").setup()
+                require("mini.jump2d").setup({ mappings = { start_jumping = "" } })
+                require("mini.files").setup({ mappings = { go_in = "L", go_in_plus = "l", show_help = "?", reveal_cwd = "<leader>b", synchronize = "<leader>w" } })
+                require("mini.move").setup({ mappings = { left = "", right = "", down = "<C-,>", up = "<C-.>", line_left = "", line_right = "", line_down = "<C-,>", line_up = "<C-.>" } })
+                require("mini.hipatterns").setup({
+                    highlighters = {
+                        fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
+                        hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
+                        todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
+                        note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
+                        hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
+                    },
+                })
+                require("mini.align").setup({ mappings = { start = "", start_with_preview = "gl" } })
+                require("mini.splitjoin").setup({ mappings = { toggle = "gs" } })
+                require("mini.ai").setup({
+                    mappings = { around_next = "aN", inside_next = "iN", around_last = "aP", inside_last = "iP" },
+                    custom_textobjects = {
+                        b = { { "%b()", "%b[]", "%b{}", "%b''", '%b""', "%b``", "%b<>" }, "^.().*().$" },
+                        n = require("mini.extra").gen_ai_spec.number(),
+                        ["'"] = false,
+                        ['"'] = false,
+                        ["`"] = false,
+                        ["("] = false,
+                        [")"] = false,
+                        ["{"] = false,
+                        ["}"] = false,
+                    },
+                })
+                require("mini.operators").setup({ exchange = { prefix = "" }, multiply = { prefix = "" }, replace = { prefix = "" }, sort = { prefix = "" } })
+                require("mini.operators").make_mappings("exchange", { textobject = "cx", line = "cxx", selection = "X" })
+                require("mini.operators").make_mappings("replace", { textobject = "cp", line = "", selection = "" })
+                vim.api.nvim_create_user_command("Git", function(opts)
+                    vim.api.nvim_create_autocmd("FileType", {
+                        pattern = "git",
+                        callback = function(args)
+                            if vim.api.nvim_buf_get_name(args.buf):match("^minigit://") then
+                                vim.keymap.set("n", "<CR>", function() require("mini.git").show_at_cursor() end, { buffer = args.buf })
+                            end
+                        end,
+                    })
+                    require("mini.git").setup()
+                    vim.cmd.Git({ args = opts.fargs })
+                end, { bang = true, nargs = "+" })
+                vim.api.nvim_create_autocmd("User", {
+                    pattern = "MiniFilesActionRename",
+                    callback = function(e) require("snacks.rename").on_rename_file(e.data.from, e.data.to) end,
+                })
+            end, 200)
         end,
     },
 }
