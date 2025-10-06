@@ -139,13 +139,13 @@ return {
                 { "Git reset base", [[lua require("gitsigns").reset_base(true)]], "Gitsigns reset changed base" },
                 { "--", "" },
                 { "Git &diff", [[lua require("gitsigns").diffthis(nil, nil, function() vim.cmd.wincmd('p'); vim.opt_local.winbar = "%f" end)]], "Diff current file with last staged version" },
-                { "Git deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines gitsigns" },
+                { "Git deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
                 { "Git &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
                 { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
                 { "Git l&og", [[Git log --graph --pretty=plain]], "Show git log using mini.git" },
             })
             vim.fn["quickui#menu#install"]("&Format", {
-                { "Fold with &treesitter", [[setlocal foldexpr=nvim_treesitter#foldexpr()]], "Use treesitter to fold, this can be slow" },
+                { "Fold with &treesitter", [[setlocal foldexpr=v:lua.vim.treesitter.foldexpr()]], "Use treesitter to fold, this can be slow" },
                 { "&Venn ascii draw", [[lua require("utils").toggle_venn()]], "Toggle venn.nvim, use HJKL to draw arrow, select area and use v to draw box" },
                 { "--", "" },
                 { "Table &mode", [[TableModeToggle]], "Toggle TableMode" },
@@ -180,8 +180,6 @@ return {
                 { "--", "" },
                 { "Ma&son packages", [[Mason]], "Mason packages" },
                 { "Mason &install", [[lua require('lsp').install_packages()]], "Install commonly used servers, linters, and formatters" },
-                { "--", "" },
-                { "&MCP servers", [[MCPHub]], "Open MCPHub" },
             })
             local quickui_theme_list = {}
             local used_chars = "hjklqg"

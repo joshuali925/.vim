@@ -81,7 +81,7 @@ function M.setup()
     end
 
     vim.diagnostic.config({
-        float = { scope = "cursor" },
+        float = { scope = "cursor", source = true },
         virtual_text = { prefix = "●", current_line = true },
         severity_sort = true,
         signs = {

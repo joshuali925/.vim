@@ -54,3 +54,7 @@ keybinding:
     moveDownCommit: J
     moveUpCommit: K
     resetCherryPick: <disabled>
+customCommands:
+  - key: <c-y>
+    context: commits
+    command: printf " git -C '$(pwd)' format-patch --stdout {{.SelectedCommitRange.From}}^..{{.SelectedCommitRange.To}} | git am -3" | y

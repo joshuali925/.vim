@@ -27,7 +27,7 @@ function M.send_selection_to_terminal() send_lines_to_terminal({ M.get_visual_se
 function M.term_exec(cmd, opts)
     local terminal = require("snacks.terminal").get(nil, opts)
     vim.fn.chansend(vim.bo[terminal.buf].channel, cmd .. "\n")
-    return terminal.buf
+    return terminal
 end
 
 function M.get_visual_selection()

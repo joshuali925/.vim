@@ -350,7 +350,7 @@ if require("states").small_file then
     end, 30)
     vim.defer_fn(function()
         vim.o.foldmethod = "expr"
-        -- vim.o.foldexpr = "nvim_treesitter#foldexpr()" -- makes :g commands slow
+        -- vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- makes :g commands slow
         vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
         vim.o.foldtext = ""
         vim.o.fillchars = "diff:╱,fold: ,foldopen:,foldsep: ,foldclose:"

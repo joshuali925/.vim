@@ -5,7 +5,11 @@ New-Item -ItemType Directory -Path ([System.IO.Path]::GetDirectoryName($Profile)
 Add-Content -Path $Profile -Value "Set-PSReadLineKeyHandler -Key 'Ctrl+d' -Function DeleteCharOrExit"
 
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
+if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
+} else {
+    irm get.scoop.sh | iex
+}
 scoop install git
 scoop bucket add extras  # buckets rely on git
 scoop bucket add nerd-fonts
@@ -48,7 +52,6 @@ Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "export LANG=C.UTF-8", "sour
 # install neovim
 scoop install neovim extras/neovide gcc
 reg import "$env:USERPROFILE\scoop\apps\neovide\current\install-context.reg"
-[Environment]::SetEnvironmentVariable("NEOVIDE_FRAME", "none", "User")
 Remove-Item "$env:USERPROFILE\.vim\config\nvim\autoload" -Force -Recurse
 New-Item -ItemType Junction -Path "$env:USERPROFILE\.vim\config\nvim\autoload" -Target "$env:USERPROFILE\.vim\autoload"
 git -C "$env:USERPROFILE\.vim" update-index --skip-worktree config/nvim/autoload

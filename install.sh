@@ -81,7 +81,7 @@ sudo() {
 }
 
 log() {
-  echo -e "${CYAN}${*}${NC}" >&2
+  if [[ -t 2 ]]; then echo -e "${CYAN}${*}${NC}" >&2; else echo "$*" >&2; fi
 }
 
 backup() {
