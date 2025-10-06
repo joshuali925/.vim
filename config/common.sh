@@ -93,7 +93,7 @@ alias gcs='gc --signoff'
 alias gcs!='gc --signoff --amend --no-verify --allow-empty'
 alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcl='git clone --filter=blob:none'
-alias gcm='git checkout --merge "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
+alias gcm='git checkout --merge --ignore-other-worktrees "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
 alias gcp='git cherry-pick -x'
 alias gd='git diff'
@@ -123,7 +123,7 @@ alias grv='git remote -v'
 alias gs='git status -sb'
 alias gst='git stash'
 alias gst-save='git stash; git stash apply'
-alias gshow='git show --patch-with-stat --pretty=fuller'
+alias gshow='git show --patch-with-stat --pretty=fuller --remerge-diff'
 alias gcd='cd "$(git rev-parse --show-toplevel || echo ".")"'
 alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
 
@@ -618,11 +618,11 @@ lazypm2() {
 
 awsctx() {
   if [[ $1 = --region || $1 == -r ]]; then
-    [[ ! -e ~/.vim/tmp/aws-ec2-regions ]] && aws ec2 describe-regions --query 'Regions[].{Region:RegionName}' --output text > ~/.vim/tmp/aws-ec2-regions
+    [[ ! -e ~/.vim/tmp/aws-ec2-regions ]] && aws ec2 describe-regions --query 'Regions[].{Region:RegionName}' --output text | sort > ~/.vim/tmp/aws-ec2-regions
     local region=$(< ~/.vim/tmp/aws-ec2-regions fzf)
     [[ -n $region ]] && export AWS_REGION=$region && echo "export AWS_REGION=$AWS_REGION"; return $?
   fi
-  if [[ -n $1 ]]; then local profile=$1; else local profile=$({ awk -F'[][]' '/^\[/ {gsub(/^profile /, "", $2); print $2}' ~/.aws/credentials ~/.aws/config 2> /dev/null || aws configure list-profiles; } | sort -u | fzf); fi
+  if [[ -n $1 ]]; then local profile=$1; else local profile=$({ awk -F'[][]' '/^\[/ {print $2}' ~/.aws/credentials 2> /dev/null; awk -F'[][]' '/^\[profile / {gsub(/^profile /, "", $2); print $2}' ~/.aws/config 2> /dev/null; } | sort -u | fzf); fi  # faster than `aws configure list-profiles`
   [[ -n $profile ]] && export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$AWS_PROFILE"
 }
 

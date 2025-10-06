@@ -58,15 +58,15 @@ return {
         if command:match("^size$") then return shell([[du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }']], true) end
         if command:match("^audio$") then return shell([[ffmpeg -i "$0" 2>&1 | rg -o 'Stream \S+ Audio: (\w+)' -r '$1' | xargs -I@ ffmpeg -i "$0" -codec copy "${0%.*}.@"]]) end
         if command:match("^sftp$") then return shell([[printf " echo \"get '$0'\" | sftp -r " | y]]) end
-        if command:match("^tarcopy$") then return shell([[printf " printf $(XZ_OPT=-9e tar cJf - "${@##*/}" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end -- only works if the selected files are in the same directory
+        if command:match("^tarcopy$") then return shell([[for file in "$@"; do set -- "$@" "$(realpath --relative-to=. "$file")"; shift; done; printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end
 
         local function compress_cmd(cmd, ext)
             return ('for file in "$@"; do set -- "$@" "$(realpath --relative-to="." "$file")"; shift; done; %s "${1}.%s" "$@"'):format(cmd, ext)
         end
         if command:match("^zip$") then return shell(compress_cmd("zip -r", "zip")) end
         if command:match("^7z$") then return shell(compress_cmd("7z a", "7z")) end
-        if command:match("^7zfast$") then return shell(compress_cmd("7z -mx=1 a", "7z")) end
-        if command:match("^7zultra$") then return shell(compress_cmd("7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on", "7z")) end
+        if command:match("^7zfast$") then return shell(compress_cmd("7z a -t7z -mx=1", "7z")) end
+        if command:match("^7zultra$") then return shell(compress_cmd("7z a -t7z -mx=9 -m0=lzma -mfb=64 -md=32m -ms=on", "7z")) end
         if command:match("^7zmax$") then return shell(compress_cmd("7z a -t7z -mx=9 -mfb=273 -ms -md=31 -myx=9 -mtm=- -mmt -mmtf -md=1536m -mmf=bt3 -mmc=10000 -mpb=0 -mlc=0 -m0=LZMA2:27", "7z")) end
         if command:match("^x$") then
             return shell(([[

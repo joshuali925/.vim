@@ -2,7 +2,7 @@
 set -e
 
 ls() {
-  aws ec2 describe-instances --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],to_string(NetworkInterfaces[0].Association.PublicDnsName || ''), State.Name, InstanceType] | sort_by([], &[2])" --output table
+  aws ec2 describe-instances --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0], to_string(NetworkInterfaces[0].Association.PublicDnsName || ''), State.Name, InstanceType, InstanceId] | sort_by([], &[2])" --output table
 }
 
 change_state() {
@@ -21,7 +21,7 @@ create() {
       --instance-type) instance_type="$2"; shift 2 ;;
       --volume-size) volume_size="$2"; shift 2 ;;
       -*) usage ;;
-      *) tag="$1"; shift ;;
+      *) [[ -n $tag ]] && usage; tag="$1"; shift ;;
     esac
   done
   if [[ -z $tag ]]; then usage; fi

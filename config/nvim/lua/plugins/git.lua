@@ -4,7 +4,7 @@ return {
         keys = {
             { "[g", "<Cmd>lua require('gitsigns').nav_hunk('prev', {target='all'})<CR>" },
             { "]g", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
-            { "ig", ":<C-u>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
+            { "ig", "<Cmd>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
             { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
             { "<leader>ga", "<Cmd>lua require('gitsigns').stage_hunk()<CR>" },
             { "<leader>gu", "<Cmd>lua require('gitsigns').reset_hunk()<CR>" },
@@ -19,9 +19,9 @@ return {
                 diffthis = { split = "botright" },
                 status_formatter = function(status) return status end,
             })
-            vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})
-            vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})
-            vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {})
+            vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})        -- git checkout -- %
+            vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})       -- git add -- %
+            vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {}) -- git reset -- %
         end,
     },
     { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },
