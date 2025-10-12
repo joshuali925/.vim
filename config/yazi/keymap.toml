@@ -71,6 +71,7 @@ prepend_keymap = [
   { on = ["m", "c"], run = 'shell --block -- "$EDITOR" ~/.vim/config/yazi/keymap.toml', desc = "Edit config" },
   { on = ["m", "y"], run = "copy path", desc = "Copy the absolute path" },
   { on = ["m", "Y"], run = '''shell -- for file in "$@"; do name="${file##*/}"; [[ "$name" =~ [[:space:]*?\\[\{\`\$\\\%\#\'\"\|\!\<] ]] && name="'$name'"; printf "%s " "$name"; done | sed 's/ $//' | y''', desc = "Copy file names" },
+  { on = ["m", "g"], run = '''shell -- realpath --no-symlinks --relative-to="$(git rev-parse --show-toplevel || echo ~)" "$0" | head -c -1 | y''', desc = "Copy the relative path to git root or home" },
   { on = ["m", "p"], run = "link --relative", desc = "Symlink the relative path of files" },
   { on = ["m", "P"], run = "link", desc = "Symlink the absolute path of files" },
   { on = ["m", "d", "5"], run = 'shell --block -- md5sum "$@"; echo Press any key to continue; bash -c "read -n 1 -s _"', desc = "Show selected files md5sum" },

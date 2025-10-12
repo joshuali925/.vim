@@ -138,11 +138,14 @@ return {
                 { "Git &change base", [[call feedkeys(":Gitsigns change_base @ true\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Gitsigns show hunk based on ref" },
                 { "Git reset base", [[lua require("gitsigns").reset_base(true)]], "Gitsigns reset changed base" },
                 { "--", "" },
-                { "Git &diff", [[lua require("gitsigns").diffthis(nil, nil, function() vim.cmd.wincmd('p'); vim.opt_local.winbar = "%f" end)]], "Diff current file with last staged version" },
+                { "Git &diff", [[call feedkeys(":Gdiffsplit @", "n")]], "Diff current file with ref" },
                 { "Git deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
                 { "Git &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
                 { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
-                { "Git l&og", [[Git log --graph --pretty=plain]], "Show git log using mini.git" },
+                { "Git file l&og", [[Git log --graph --pretty=plain -- %]], "Show git log for current file using mini.git" },
+                { "--", "" },
+                { "Git &issues", [[lua require("snacks.picker").gh_issue({state = "all"})]], "Pick GitHub issues" },
+                { "Git &PRs", [[lua require("snacks.picker").gh_pr({state = "all"})]], "Pick GitHub pull requests" },
             })
             vim.fn["quickui#menu#install"]("&Format", {
                 { "Fold with &treesitter", [[setlocal foldexpr=v:lua.vim.treesitter.foldexpr()]], "Use treesitter to fold, this can be slow" },

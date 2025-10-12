@@ -3,7 +3,7 @@ return {
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "nvim-lua/plenary.nvim" },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
-    { "will133/vim-dirdiff", cmd = "DirDiff" },
+    { "will133/vim-dirdiff", cmd = "DirDiff" }, -- TODO(0.12) https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
     { "jbyuki/venn.nvim", cmd = "VBox" },
     {
         "dhruvasagar/vim-table-mode",
@@ -164,6 +164,9 @@ return {
                     commands = { layout = { preset = "vscode" } },
                     projects = { layout = { preset = "vscode" } },
                     pickers = { layout = { preset = "vscode" } },
+                    gh_issue = { layout = { preset = "ivy_split" } },
+                    gh_pr = { layout = { preset = "ivy_split" } },
+                    gh_diff = { layout = { preset = "default" } },
                     grep = { hidden = true, layout = { layout = { row = 2, width = 0.8, height = 0.9 } } },
                     grep_word = { hidden = true, layout = { layout = { row = 2, width = 0.8, height = 0.9 } }, on_show = function() vim.cmd.stopinsert() end },
                     grep_buffers = { layout = { layout = { row = 2, width = 0.8, height = 0.9 } } },

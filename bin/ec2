@@ -41,7 +41,7 @@ create() {
 }
 
 ssh() {
-  local tag=${1:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')} host
+  local tag=${1:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')} host user valid_user
   [[ -z $tag ]] && return 1
   [[ -n $1 ]] && shift
   host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
@@ -51,13 +51,12 @@ ssh() {
   fi
   echo "ssh to ec2: $host" >&2
   for user in ubuntu ec2-user admin; do  # default username for ubuntu, AL2, debian
-    sed -i "/Host $tag/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-    printf "Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n" "$user" >> ~/.ssh/ec2hosts
-    local start=$SECONDS
-    command ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$user@$host" "$@" && break
-    [[ $((SECONDS - start)) -gt 10 ]] && break
+    command ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$user@$host" exit && valid_user=$user && break
   done
-  return $?
+  if [[ -z $valid_user ]]; then echo "Failed to ssh to $host" >&2 && return 1; fi
+  sed -i "/Host $tag$/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
+  printf "Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n" "$valid_user" >> ~/.ssh/ec2hosts
+  exec ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$valid_user@$host" "$@"
 }
 
 main() {

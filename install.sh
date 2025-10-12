@@ -339,7 +339,7 @@ EOF
 
 export CLAUDE_CODE_USE_BEDROCK=1
 export ANTHROPIC_MODEL=$OPENAI_MODEL
-alias claude='AWS_PROFILE=bedrock-prod claude'
+alias claude='AWS_PROFILE=bedrock-prod claude --allow-dangerously-skip-permissions'
 EOF
   echo '{"statusLine": {"type": "command", "command": "npx -y ccstatusline@latest", "padding": 0}}' > ~/.claude/settings.json
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
