@@ -72,6 +72,8 @@ return {
                     less = { "prettier" },
                     html = { "prettier" },
                     json = { "prettier" },
+                    jsonc = { "prettier" },
+                    json5 = { "prettier" },
                     yaml = { "prettier" },
                     markdown = { "prettier" },
                     python = { "black" },
@@ -108,13 +110,13 @@ return {
         opts = { enable = false, mode = "topline" },
     },
     {
-        "nvim-treesitter/nvim-treesitter",
+        "nvim-treesitter/nvim-treesitter", -- TODO(0.12) https://www.reddit.com/r/neovim/comments/1ow2m75/when_would_nvimtreesitter_main_branch_become/
         build = ":TSUpdate",
         dependencies = "nvim-treesitter/nvim-treesitter-textobjects",
         opts = {
             auto_install = true,
             ensure_installed = { "markdown_inline", "jsdoc" },
-            ignore_install = { "tmux", "gitcommit" },
+            ignore_install = { "tmux" },
             highlight = {
                 enable = true,
                 disable = function(_, buf)
@@ -154,10 +156,10 @@ return {
     },
     { "mason-org/mason.nvim", build = ":MasonUpdate", cmd = { "Mason", "MasonInstall" }, opts = { ui = { border = "rounded" } } },
     {
-        "neovim/nvim-lspconfig", -- https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
+        "neovim/nvim-lspconfig", -- only needs configs in rtp https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
         init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
     },
-    { "pmizio/typescript-tools.nvim", dependencies = "neovim/nvim-lspconfig" },
+    { "pmizio/typescript-tools.nvim" },
     { "mfussenegger/nvim-jdtls" },
     {
         "Bekaboo/dropbar.nvim",

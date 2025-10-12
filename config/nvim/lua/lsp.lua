@@ -13,7 +13,6 @@ local required_servers = {
     "jsonls", -- use eslint-lsp package for json, html, css lsps
     "html",
     "cssls",
-    "kulala_ls", -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
 }
 local required_packages = {
     "typos-lsp",
@@ -42,8 +41,6 @@ function M.install_packages()
     local not_installed = vim.tbl_filter(function(package) return not vim.tbl_contains(installed, package) end, required_packages)
     if #not_installed > 0 then
         vim.cmd.MasonInstall({ args = not_installed })
-        vim.notify("Installing kulala-ls...") -- kulala-ls not in mason registry https://github.com/mason-org/mason-registry/pull/7477
-        vim.system({ "npm", "install", "-g", "@mistweaverco/kulala-ls" }, { text = true }, function() vim.notify("installed kulala-ls") end)
         local install_path = vim.fn.stdpath("data") .. "/mason"
         vim.fn.mkdir(install_path .. "/bin", "p")
         vim.uv.fs_symlink(install_path .. "/packages/eslint-lsp/node_modules/.bin/vscode-css-language-server", install_path .. "/bin/vscode-css-language-server")

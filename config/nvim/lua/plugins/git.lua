@@ -19,9 +19,10 @@ return {
                 diffthis = { split = "botright" },
                 status_formatter = function(status) return status end,
             })
-            vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})        -- git checkout -- %
-            vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})       -- git add -- %
-            vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {}) -- git reset -- %
+            vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})                                                                                                                                               -- git checkout -- %
+            vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})                                                                                                                                              -- git add -- %
+            vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {})                                                                                                                                        -- git reset -- %
+            vim.api.nvim_create_user_command("Gdiffsplit", "lua require('gitsigns').diffthis(<q-args>, {split = 'aboveleft'}, function() vim.api.nvim_win_set_option(vim.fn.win_getid(vim.fn.winnr('#')), 'winbar', '%f') end)", { nargs = "*" }) -- git diff <ref> -- %
         end,
     },
     { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-source ~/.vim/bin/_install_from_github.sh
-run-if-exists "$0" "$@"
-
-mkdir -p ~/.local/{bin,lib/PathPicker}
-echo "Installing fpp from https://github.com/facebook/PathPicker/archive/main.tar.gz" >&2
-curl -L -o- https://github.com/facebook/PathPicker/archive/main.tar.gz | tar xz -C ~/.local/lib/PathPicker --strip-components=1
-ln -srvf ~/.local/lib/PathPicker/fpp ~/.local/bin/fpp || ln -svf ~/.local/lib/PathPicker/fpp ~/.local/bin/fpp
-run-if-exists "$0" "$@"

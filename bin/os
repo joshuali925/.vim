@@ -59,8 +59,8 @@ run() {
 
 optimize() {
   if [[ -f opensearch_dashboards.d.ts ]]; then
-    echo "❯ scripts/use_node scripts/build_opensearch_dashboards_platform_plugins --no-examples" >&2
-    scripts/use_node scripts/build_opensearch_dashboards_platform_plugins --no-examples
+    echo "❯ scripts/use_node scripts/build_opensearch_dashboards_platform_plugins ${*:---no-examples}" >&2
+    scripts/use_node scripts/build_opensearch_dashboards_platform_plugins "${@:---no-examples}"
   fi
 }
 

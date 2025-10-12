@@ -3,8 +3,8 @@ source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
 export EDITOR=nvim
-export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file
-export DELTA_PAGER=$PAGER  # somehow delta doesn't respect PAGER
+export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file, -+F: always paginate
+export DELTA_PAGER=$PAGER  # delta doesn't respect PAGER but respects DELTA_PAGER and LESS
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export NEOVIDE_FRAME=none
 export FZF_COMPLETION_TRIGGER=\\
@@ -13,7 +13,7 @@ export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidde
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --follow --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
-export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-t C-u: show surrounding items | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
+export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
 export OPENAI_MODEL=us.anthropic.claude-sonnet-4-5-20250929-v1:0
 if [[ $LIGHT_THEME = 1 ]]; then
   export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
@@ -72,7 +72,6 @@ alias jsonl2csv='json2csv -s'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
-alias fpp='if [[ -t 0 ]] && [[ $# -eq 0 ]] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 alias http.server='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
@@ -162,9 +161,9 @@ gcb() {
 glof() {
   git log --graph --color --pretty=simple --all "$@" |
     fzf --ansi --layout=default --height=100% --list-border=none --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='`: toggle sort | C-y: copy commit | C-t C-u: show surrounding items | C-p , .: to control preview' \
+    --header='`: toggle sort | C-y: copy commit | C-r: toggle raw | C-p , .: to control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
-    --bind='ctrl-t:unbind(change)+track-current' \
+    --bind='ctrl-r:toggle-raw' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=always)'
@@ -173,9 +172,9 @@ glof() {
 grlf() {
   git reflog --color --date=human-local --pretty=simple-ref "$@" | awk '!x[$1]++' |
     fzf --ansi --layout=default --height=100% --list-border=none --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='`: toggle sort | C-e: diff to HEAD | C-y: copy commit | C-t C-u: show surrounding items | C-p , .: control preview' \
+    --header='`: toggle sort | C-e: diff to HEAD | C-y: copy commit | C-r: toggle raw | C-p , .: control preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
-    --bind='ctrl-t:unbind(change)+track-current' \
+    --bind='ctrl-r:toggle-raw' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
     --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --paging=always)' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
@@ -183,7 +182,7 @@ grlf() {
 }
 
 tre() {
-  find "${@:-.}" | sort | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"
+  find "${@:-.}" | sed 's;/;\t;g' | sort | sed 's;\t;/;g' | sed "s;[^-][^\/]*/;   │;g;s;│\([^ ]\);├── \1;;s;^ \+;;"
 }
 
 function = () {
@@ -416,8 +415,8 @@ rf() {  # livegrep https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep
     case $arg in -*) rest+=("$arg") ;; *) local init_query="$arg"; local skip_args=1 ;; esac
   done
   local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "${rest[@]}")"
-  # disable default command and escape `*` in flags (use: pattern -- -g *.sh). quotes around `*` is required in shell but won't work in rf or snacks.picker. use `\s-- ` to search for ` -- `
-  : | fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --delimiter=: --prompt='ripgrep> ' --query="${init_query:-}" \
+  # `: |` disables default fzf command. quotes around `*` is required in shell but won't work in rf or snacks.picker. use pattern -- -g *.sh; `\s-- ` to search for ` -- `
+  : | fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --delimiter=: --prompt='ripgrep> ' --query="${init_query:-}" --freeze-left 1 \
     --bind="start,change:transform:{ read -r pat; read -r flags; } < <(awk -F' -- ' '{gsub(/\\*/, \"\\\\*\", \$2); print \$1; print \$2}' <<<{q}) && printf 'change-header(C-s: toggle fzf | C-o: close fzf and open in editor | $rg_prefix %s -- %q)+reload:$rg_prefix %s -- %q\n' \"\$flags\" \"\$pat\" \"\$flags\" \"\$pat\"" \
     --bind="ctrl-s:transform:[[ {fzf:prompt} = 'ripgrep> ' ]] && echo 'unbind(change)+change-prompt(fzf:{q}> )+enable-search+clear-query' || echo 'change-prompt(ripgrep> )+disable-search+clear-query+reload($rg_prefix -- {q} || true)+rebind(change)'" \
     --bind="enter:execute(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
@@ -677,9 +676,9 @@ if [[ $OSTYPE = darwin* ]]; then
     fi
     sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), datetime((last_visit_time/1000000) - 11644473600, 'unixepoch', 'localtime'), substr(url, 1, 200) from urls order by last_visit_time desc" | awk -F $sep '{printf "%-'$cols's \x1b[32m%s\n\x1b[36m%s\x1b[m\0", $1, $2, $3}' |
       fzf --ansi --read0 --multi --height=100% --list-border=none --tiebreak=index --scheme=history --prompt="$fzfprompt" \
-      --header='`: to toggle sort | C-o: open | C-t C-u: show surrounding items' \
+      --header='`: to toggle sort | C-o: open | C-r: toggle raw' \
       --bind=\`:toggle-sort \
-      --bind='ctrl-t:unbind(change)+track-current' \
+      --bind='ctrl-r:toggle-raw' \
       --bind='ctrl-o:execute(awk "NR==2" <<< {} | xargs -r open)' |
       awk 'NR==2' | xargs -r open
   }

@@ -2762,10 +2762,10 @@ end
   source ~/.local/python-packages/bin/activate && pip install bpytop && deactivate
   echo -e "color_theme=\"dracula\"\nshow_init=False" >> ~/.config/bpytop/bpytop.conf
   ln -s ~/.local/python-packages/bin/bpytop ~/.local/bin/bpytop
-  git clone https://github.com/facebook/PathPicker.git ~/.local/python-packages/PathPicker --depth=1
-  ln -s ~/.local/python-packages/PathPicker/fpp ~/.local/bin/fpp
+  curl -L -o- https://github.com/facebook/PathPicker/archive/main.tar.gz | tar xz -C ~/.local/lib/PathPicker --strip-components=1
+  ln -srvf ~/.local/lib/PathPicker/fpp ~/.local/bin/fpp || ln -svf ~/.local/lib/PathPicker/fpp ~/.local/bin/fpp
   log "Installed bpytop, fpp"
-alias fpp='if [ -t 0 ] && [ $# -eq 0 ] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval $(fc -ln -1) | command fpp; else command fpp; fi'
+alias fpp='if [[ -t 0 ]] && [[ $# -eq 0 ]] && [[ ! $(fc -ln -1) =~ "\| *fpp$" ]]; then eval "$(fc -ln -1 | sed "s/^rg /rg --vimgrep /")" | command fpp; else command fpp; fi'
 
 
 " =======================================================
@@ -5728,3 +5728,13 @@ customCommands:
         end,
         config = function() vim.cmd.doautocmd("FileType") end, -- trigger autocmd to define MarkdownPreview command for buffer
     },
+
+" =======================================================
+" diff-so-fancy
+install-from-url diff-so-fancy https://github.com/so-fancy/diff-so-fancy/releases/latest/download/diff-so-fancy "$@"
+	diffw = -c core.pager='diff-so-fancy | less --tabs=4 -RiMXF' diff --word-diff=color --ignore-all-space
+	diff-so-fancy = -c core.pager='diff-so-fancy | less --tabs=4 -RiMXF' diff
+	pager = diff-so-fancy | less -RiMXF
+	diffFilter = diff-so-fancy --patch
+[diff-so-fancy]
+	stripLeadingSymbols = false

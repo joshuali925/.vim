@@ -51,7 +51,7 @@ source ~/.vim/config/common.sh
 [[ -x ~/.local/bin/mise ]] && eval "$(mise activate zsh)"
 
 # show timestamp of command in history, not fully accurate due to grep -F containing partial matches. another slower solution: https://github.com/junegunn/fzf/issues/1049#issuecomment-2241522977
-export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-t:unbind(change)+track-current,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='Press \` to toggle sort, C-t C-u to show surrounding items, C-y to copy' --preview='{ tac ~/.zsh_history | grep -m 1 -F {2..} | awk -F: \"{print \\\$2}\" | xargs -I= date -u +%Y-%m-%dT%H:%M:%SZ -d @=; echo ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈; echo {2..}; } | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
+export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='{ tac ~/.zsh_history | grep -m 1 -F {2..} | awk -F: \"{print \\\$2}\" | xargs -I= date -u +%Y-%m-%dT%H:%M:%SZ -d @=; echo ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈; echo {2..}; } | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
 
 # process substitution <(rg) won't work on mac: https://github.com/neovim/neovim/issues/21756
 vrg() {
@@ -165,7 +165,7 @@ bindkey '^[[1;5C' emacs-forward-word          # <C-Right> to next word end. alte
 
 alias history='history -f 0'
 alias get-completion='compdef _gnu_generic'
-chpwd() { emulate -L zsh; [[ $(command ls | wc -l) -lt 200 ]] && ls -AF --color=auto; }
+chpwd() { emulate -L zsh; [[ -t 1 ]] && [[ $(command ls | wc -l) -lt 200 ]] && ls -AF --color=auto; }
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/zsh/.p10k.zsh.
 source ~/.vim/config/zsh/.p10k.zsh

@@ -33,7 +33,7 @@ return {
             { "<leader>c", "<Cmd>ClaudeCodeTreeAdd<CR>", ft = { "neo-tree", "minifiles" } },
         },
         opts = {
-            terminal_cmd = 'AWS_PROFILE="bedrock-prod" node --no-warnings --enable-source-maps ~/.local/lib/node-packages/bin/claude',
+            terminal_cmd = "AWS_PROFILE=bedrock-prod claude --allow-dangerously-skip-permissions",
             terminal = {
                 split_width_percentage = 0.4,
                 snacks_win_opts = {

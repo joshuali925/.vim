@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
+# TODO https://github.com/lusingander/serie/issues/49
 source ~/.vim/bin/_install_from_github.sh
 install-from-url git-foresta https://raw.githubusercontent.com/takaaki-kasai/git-foresta/HEAD/git-foresta "$@"

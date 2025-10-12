@@ -274,6 +274,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
         vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
     end,
 })
+vim.api.nvim_create_autocmd("VimResized", { group = "AutoCommands", command = "wincmd =" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "snacks_terminal" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "http", "nu" }, command = [[setlocal commentstring=#\ %s]] })
