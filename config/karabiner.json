@@ -502,7 +502,7 @@
           },
           "to": [
             {
-              "shell_command": "(pgrep 'Amazon Chime' && open -a 'Amazon Chime') || open -a 'WeChat'"
+              "shell_command": "(pgrep zoom.us && open -a zoom.us) || open -a WeChat"
             }
           ]
         },

@@ -42,7 +42,7 @@ alias gs = git status
 alias gco = git checkout
 
 def st [...args] {
-  ssh -t ...$args 'LANG=C.UTF-8 .vim/bin/tmux new -A -s 0'
+  ssh -t ...$args 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
 def --env z [...args] {

@@ -14,18 +14,18 @@ change_state() {
 }
 
 create() {
-  usage() { echo "Usage: ${0##*/} create <tag> [--instance-type <type>] [--volume-size <gigabytes>]" >&2; return 1; }
+  usage() { echo "Usage: ${0##*/} create <tag> [-i|--instance-type <type>] [-v|--volume-size <gigabytes>]" >&2; return 1; }
   local tag instance_type="m8i.large" volume_size=30 security_group
   while [[ $# -ne 0 ]]; do
     case $1 in
-      --instance-type) instance_type="$2"; shift 2 ;;
-      --volume-size) volume_size="$2"; shift 2 ;;
+      -i|--instance-type) instance_type="$2"; shift 2 ;;
+      -v|--volume-size) volume_size="$2"; shift 2 ;;
       -*) usage ;;
       *) [[ -n $tag ]] && usage; tag="$1"; shift ;;
     esac
   done
   if [[ -z $tag ]]; then usage; fi
-  security_group=$(aws ec2 describe-security-groups --group-names 'ec2-cli-security-group' --query 'SecurityGroups[0].GroupId' --output text 2> /dev/null)
+  security_group=$(aws ec2 describe-security-groups --group-names 'ec2-cli-security-group' --query 'SecurityGroups[0].GroupId' --output text 2> /dev/null) || true
   if [[ -z $security_group ]]; then
     security_group=$(aws ec2 create-security-group --group-name 'ec2-cli-security-group' --description 'created using aws cli for ec2' --vpc-id "$(aws ec2 describe-vpcs --filters 'Name=isDefault,Values=true' --query 'Vpcs[0].VpcId' --output text)" --query 'GroupId' --output text)
     aws ec2 authorize-security-group-ingress --group-id "$security_group" --ip-permissions '{"IpProtocol":"tcp","FromPort":22,"ToPort":22,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":443,"ToPort":443,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":80,"ToPort":80,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":29128,"ToPort":29128,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' > /dev/null
@@ -38,6 +38,12 @@ create() {
     --network-interfaces '{"AssociatePublicIpAddress":true,"DeviceIndex":0,"Groups":["'"$security_group"'"]}' \
     --metadata-options '{"HttpEndpoint":"enabled","HttpPutResponseHopLimit":2,"HttpTokens":"required"}' \
     --private-dns-name-options '{"HostnameType":"ip-name","EnableResourceNameDnsARecord":true,"EnableResourceNameDnsAAAARecord":false}'
+}
+
+allow-me() {  # shellcheck disable=2155
+  local security_group=$(aws ec2 describe-security-groups --group-names 'ec2-cli-security-group' --query 'SecurityGroups[0].GroupId' --output text 2> /dev/null)
+  if [[ -z $security_group ]]; then echo "Security group 'ec2-cli-security-group' not found. Create an instance first." >&2 && return 1; fi
+  aws ec2 authorize-security-group-ingress --group-id "$security_group" --ip-permissions "{\"IpProtocol\":\"-1\",\"IpRanges\":[{\"CidrIp\":\"$(curl -s https://checkip.amazonaws.com)/32\",\"Description\":\"me\"}]}"
 }
 
 ssh() {
@@ -62,8 +68,8 @@ ssh() {
 main() {
   case $1 in
     start|stop) change_state "$@" ;;
-    create|ssh|ls) "$@" ;;
-    *) echo "Usage: ${0##*/} {start|stop|ls|create|ssh} [instance-tag] [options]" >&2; return 1 ;;
+    create|ssh|ls|allow-me) "$@" ;;
+    *) echo "Usage: ${0##*/} {start|stop|ls|create|ssh|add-ip} [instance-tag] [options]" >&2; return 1 ;;
   esac
 }
 

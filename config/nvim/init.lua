@@ -249,7 +249,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.api.nvim_create_autocmd("BufReadPost", {
     group = "AutoCommands",
     callback = function(args)
-        if vim.b.cursor_restored or require("states").qs_disabled_filetypes[vim.o.filetype] == false then return end
+        if vim.b.cursor_restored or require("states").qs_disabled_filetypes[vim.o.filetype] == false or vim.api.nvim_buf_get_name(args.buf):match("/COMMIT_EDITMSG$") then return end
         vim.b.cursor_restored = true
         pcall(vim.api.nvim_win_set_cursor, 0, vim.api.nvim_buf_get_mark(args.buf, '"'))
         vim.opt_local.winbar = "%f"
@@ -334,6 +334,37 @@ vim.api.nvim_create_user_command("Prettier", function(args)
     vim.api.nvim_buf_set_text(0, start_pos[2] - 1, start_pos[3] - 1, end_pos[2] - 1, end_pos[3], vim.split(result.stdout, "\n", { trimempty = true }))
 end, { complete = "filetype", nargs = "*", range = true })
 
+-- overrides {{{1
+vim.defer_fn(function()
+    if vim.fn.has("win32") == 1 then vim.g.termshell = "nu" end
+    vim.paste = (function(overridden) -- break undo before pasting in insert mode, :h vim.paste()
+        return function(lines, phase)
+            if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
+                vim.o.undolevels = vim.o.undolevels -- resetting undolevels breaks undo
+            end
+            overridden(lines, phase)
+        end
+    end)(vim.paste)
+    if vim.env.SSH_CLIENT ~= nil then -- ssh session
+        vim.g.clipboard = {           -- in Windows Terminal -> ssh -> nvim, osc52 doesn't automatically enable
+            name = "osc52",
+            copy = { ["+"] = require("vim.ui.clipboard.osc52").copy("+"), ["*"] = require("vim.ui.clipboard.osc52").copy("*") },
+            paste = { ["+"] = require("vim.ui.clipboard.osc52").paste("+"), ["*"] = require("vim.ui.clipboard.osc52").paste("*") },
+        }
+        vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { title = 'Link copied' })<CR>")
+    elseif vim.fn.has("wsl") == 1 then
+        vim.g.clipboard = {
+            name = "WslClipboard",
+            copy = { ["+"] = "clip.exe", ["*"] = "clip.exe" },
+            paste = {
+                ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+                ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+            },
+            cache_enabled = 0,
+        }
+    end
+end, 50)
+
 -- plugins {{{1
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
@@ -343,7 +374,6 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins", { defaults = { lazy = true }, ui = { border = "rounded" } })
 require("themes").setup()
 require("rooter").setup()
-vim.defer_fn(function() require("states").load_overrides() end, 50)
 if require("states").small_file then
     vim.defer_fn(function()
         require("lsp").setup()

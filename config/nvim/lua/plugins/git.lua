@@ -6,9 +6,12 @@ return {
             { "]g", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
             { "ig", "<Cmd>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
             { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
+            { "<leader>gd", ":Gitsigns preview_hunk<CR>", mode = { "x" } }, -- range only works with `:` for gitsigns
             { "<leader>ga", "<Cmd>lua require('gitsigns').stage_hunk()<CR>" },
+            { "<leader>ga", ":Gitsigns stage_hunk<CR>", mode = { "x" } },
             { "<leader>gu", "<Cmd>lua require('gitsigns').reset_hunk()<CR>" },
-            { "<leader>gb", "<Cmd>lua require('gitsigns').blame_line({full = true, ignore_whitespace = true})<CR>", mode = { "n", "x" } },
+            { "<leader>gu", ":Gitsigns reset_hunk<CR>", mode = { "x" } },
+            { "<leader>gb", "<Cmd>lua require('gitsigns').blame_line({full = true, ignore_whitespace = true})<CR>" },
         },
         config = function()
             require("gitsigns").setup({
@@ -25,6 +28,7 @@ return {
             vim.api.nvim_create_user_command("Gdiffsplit", "lua require('gitsigns').diffthis(<q-args>, {split = 'aboveleft'}, function() vim.api.nvim_win_set_option(vim.fn.win_getid(vim.fn.winnr('#')), 'winbar', '%f') end)", { nargs = "*" }) -- git diff <ref> -- %
         end,
     },
+    -- https://github.com/esmuellert/vscode-diff.nvim if diffview is unmaintained
     { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },
     {
         "akinsho/git-conflict.nvim",

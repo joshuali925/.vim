@@ -1,5 +1,9 @@
 # disable win+ctrl+shift+alt office key
 REG ADD HKCU\Software\Classes\ms-officeapp\Shell\Open\Command /t REG_SZ /d rundll32
+# disable folder type detection
+Set-ItemProperty 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' -Name FolderType -Value NotSpecified -Type String -Force
+# disable bing search
+Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Value 0 -Type DWord
 # ctr-d exit powershell
 New-Item -ItemType Directory -Path ([System.IO.Path]::GetDirectoryName($Profile)) -Force
 Add-Content -Path $Profile -Value "Set-PSReadLineKeyHandler -Key 'Ctrl+d' -Function DeleteCharOrExit"

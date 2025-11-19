@@ -1589,6 +1589,7 @@ install-from-github grex pemistahl/grex x86_64-unknown-linux-musl aarch64-unknow
 install-from-github dust bootandy/dust x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-apple-darwin '' '--strip-components=1 --wildcards dust*/dust' "$@"
 install-from-github up akavel/up up '' up-darwin '' '' "$@"
 install-from-github imgcat danielgatis/imgcat Linux_x86_64 Linux_arm64 Darwin_x86_64 Darwin_arm64 imgcat "$@"
+install-from-github markdown-preview yusukebe/gh-markdown-preview linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 '' "$@"
 install-from-url iterm-imgls https://iterm2.com/utilities/imgls "$@"
 install-from-url git-quick-stats https://raw.githubusercontent.com/git-quick-stats/git-quick-stats/HEAD/git-quick-stats "$@"
 install-from-url asn https://raw.githubusercontent.com/nitefood/asn/HEAD/asn "$@"
@@ -5456,7 +5457,6 @@ if ((Get-WmiObject -Class Win32_ComputerSystem).Manufacturer -match 'Amazon EC2'
     Start-Service sshd
     New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "$env:USERPROFILE\scoop\shims\bash.exe" -PropertyType String -Force
 }
-# try https://github.com/sigoden/argc-completions to replace carapace?
 
 " =======================================================
     {

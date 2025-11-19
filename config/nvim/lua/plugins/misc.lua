@@ -25,14 +25,18 @@ return {
             vim.api.nvim_create_autocmd("FileType", {
                 pattern = "http",
                 group = "KulalaAutoCommands",
-                callback = function(ev)
-                    vim.keymap.set("n", "{", "<Cmd>lua require('kulala').jump_prev()<CR>", { buffer = ev.buf })
-                    vim.keymap.set("n", "}", "<Cmd>lua require('kulala').jump_next()<CR>", { buffer = ev.buf })
+                callback = function(e)
+                    vim.keymap.set("n", "{", "<Cmd>lua require('kulala').jump_prev()<CR>", { buffer = e.buf })
+                    vim.keymap.set("n", "}", "<Cmd>lua require('kulala').jump_next()<CR>", { buffer = e.buf })
                 end,
             })
         end,
         config = function()
-            require("kulala").setup({ default_view = "headers_body", additional_curl_options = { "--insecure" } })
+            require("kulala").setup({
+                default_view = "headers_body",
+                additional_curl_options = { "--insecure" },
+                ui = { max_response_size = require("states").size_threshold * 2 },
+            })
             vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
         end,
     },
@@ -57,9 +61,10 @@ return {
             { "<leader>fu", "<Cmd>lua require('snacks.picker')[require('lsp').is_active() and 'lsp_symbols' or 'treesitter']()<CR>" },
             { "<leader>fg", ":RgRegex " },
             { "<leader>fg", ":<C-u>RgNoRegex <C-r>=funcs#get_visual_selection()<CR>", mode = "x" },
-            { "<leader>fj", "<Cmd>lua require('snacks.picker').grep_word({args = {'--word-regexp'}})<CR>" },
-            { "<leader>fj", "<Cmd>lua require('snacks.picker').grep_word()<CR>", mode = "x" },
-            { "<leader>f!", "<Cmd>lua require('snacks.picker').git_status()<CR>" },
+            { "<leader>fj", "<Cmd>lua require('snacks.picker').grep_word()<CR>" },
+            { "<leader>fj", "<Cmd>lua require('snacks.picker').grep_word({args = {}})<CR>", mode = "x" },
+            { "<leader>fs", "<Cmd>lua require('snacks.picker').git_status({on_show = function() vim.cmd.stopinsert() end})<CR>" },
+            { "<leader>f!", "<Cmd>lua require('snacks.picker').git_diff()<CR>" },
             { "<leader>fq", "<Cmd>lua require('snacks.picker').qflist()<CR>" },
             { "<leader>fl", "<Cmd>lua require('snacks.picker').lines()<CR>" },
             { "<leader>fL", "<Cmd>lua require('snacks.picker').loclist()<CR>" },
@@ -129,14 +134,15 @@ return {
                         { icon = " ", key = "M", desc = "Find MRU in CWD", action = ":lua require('snacks.picker').recent({filter = {cwd = true}})", hidden = true },
                         { icon = " ", key = "z", desc = "Find projects", action = ":lua require('snacks.picker').projects()" },
                         { icon = " ", key = "'", desc = "Find bookmarks", action = ":lua require('bookmarks').pick()" },
-                        { icon = "󰘬 ", key = "!", desc = "Git changed files", action = ":lua require('snacks.picker').git_status()" },
+                        { icon = "󰘬 ", key = "s", desc = "Git changed files (open: !)", action = ":lua require('snacks.picker').git_status()" },
+                        { icon = "󰘬 ", key = "!", desc = "Open git changed files", action = ":argadd `git diff --name-only @` | bnext", hidden = true },
                         { icon = " ", key = "d", desc = "Git diff", action = ":DiffviewOpen" },
                         { icon = " ", key = "+", desc = "Git diff remote", action = ":DiffviewOpen @{upstream}..HEAD" },
                         { icon = "󰍜 ", key = "\\", desc = "Open quickui", action = ":Lazy load vim-quickui | call quickui#menu#open('normal')" },
                         { icon = "󰒲 ", key = "p", desc = "Open Lazy (update: 'u', profile: 'P')", action = ":Lazy" },
                         { icon = "󰄉 ", key = "P", desc = "Open Lazy profile", action = ":Lazy profile", hidden = true },
                         { icon = "󰚰 ", key = "u", desc = "Update plugins", action = ":Lazy update", hidden = true },
-                        { icon = " ", key = "s", desc = "Open Mason", action = ":Mason" },
+                        { icon = " ", key = "S", desc = "Open Mason", action = ":Mason" },
                         { icon = "󰑓 ", key = "r", desc = "Load session", action = ":call feedkeys(':SessionLoad', 'n')" },
                         { icon = " ", key = "c", desc = "Edit vimrc", action = ":edit $MYVIMRC" },
                         { icon = " ", key = "q", desc = "Quit", action = ":quit", hidden = true },
@@ -167,10 +173,11 @@ return {
                     gh_issue = { layout = { preset = "ivy_split" } },
                     gh_pr = { layout = { preset = "ivy_split" } },
                     gh_diff = { layout = { preset = "default" } },
+                    git_diff = { layout = { preset = "default" }, on_show = function() vim.cmd.stopinsert() end },
                     grep = { hidden = true, layout = { layout = { row = 2, width = 0.8, height = 0.9 } } },
                     grep_word = { hidden = true, layout = { layout = { row = 2, width = 0.8, height = 0.9 } }, on_show = function() vim.cmd.stopinsert() end },
                     grep_buffers = { layout = { layout = { row = 2, width = 0.8, height = 0.9 } } },
-                    git_status = { on_show = function() vim.cmd.stopinsert() end },
+                    git_status = { layout = { preset = "default" } },
                     jumps = { on_show = function() vim.cmd.stopinsert() end },
                     undo = { layout = { preset = "default" }, on_show = function() vim.cmd.stopinsert() end },
                     explorer = {
@@ -209,6 +216,7 @@ return {
                     },
                 },
             },
+            lazygit = { config = { os = { edit = '[ -z "\"$NVIM\"" ] && (nvim -- {{filename}}) || (nvim --server "\"$NVIM\"" --remote-send "\"q\"" && nvim --server "\"$NVIM\"" --remote {{filename}})' } } }, -- https://github.com/folke/snacks.nvim/discussions/87#discussioncomment-12302614
         },
     },
     {

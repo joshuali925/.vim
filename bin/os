@@ -38,7 +38,7 @@ run() {
     exec ./bin/opensearch "$@"
   fi
 
-  local opts=(--host 0.0.0.0 --server.maxPayloadBytes=99999999)
+  local opts=(--host 0.0.0.0 --server.maxPayloadBytes=99999999 --opensearch.ignoreVersionMismatch=true --data_source.ssl.verificationMode=none)
   if [[ -f opensearch_dashboards.json ]]; then cd ../..; fi  # cd up from plugins directory
   if [[ -d plugins/securityDashboards ]] || [[ -d plugins/security-dashboards-plugin ]]; then
     if ! grep -q '^opensearch.hosts' config/opensearch_dashboards.yml; then
@@ -50,7 +50,6 @@ run() {
     exec ./bin/opensearch-dashboards "${opts[@]}" "$@"
   fi
   if [[ -f opensearch_dashboards.d.ts ]]; then
-    opts+=(--opensearch.ignoreVersionMismatch=true)
     if [[ -n $bootstrap ]]; then yarn osd bootstrap --single-version=loose || true; fi
     exec yarn "$start_cmd" --no-base-path "${opts[@]}" "$@"  # --run-examples
   fi

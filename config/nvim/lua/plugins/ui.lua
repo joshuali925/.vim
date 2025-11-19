@@ -144,6 +144,8 @@ return {
                 { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
                 { "Git file l&og", [[Git log --graph --pretty=plain -- %]], "Show git log for current file using mini.git" },
                 { "--", "" },
+                { "Diff&view", [[DiffviewOpen]], "Diff repo using Diffview" },
+                { "Open changed files (&!)", [[call feedkeys(":argadd `git diff --name-only @`\<Left>", "n")]], "Open modified files against ref" },
                 { "Git &issues", [[lua require("snacks.picker").gh_issue({state = "all"})]], "Pick GitHub issues" },
                 { "Git &PRs", [[lua require("snacks.picker").gh_pr({state = "all"})]], "Pick GitHub pull requests" },
             })

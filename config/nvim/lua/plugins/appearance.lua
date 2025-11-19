@@ -159,7 +159,7 @@ return {
                     {
                         function()
                             local col = vim.api.nvim_win_get_cursor(0)[2] + 1
-                            return require("states").spin() .. (vim.o.expandtab and " " or " ") .. (vim.o.shiftwidth > 0 and vim.o.shiftwidth or vim.o.tabstop) .. "  " .. (col < 10 and " " .. col or col)
+                            return (vim.o.expandtab and " " or " ") .. (vim.o.shiftwidth > 0 and vim.o.shiftwidth or vim.o.tabstop) .. "  " .. (col < 10 and " " .. col or col)
                         end,
                         padding = 0,
                     },

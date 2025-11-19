@@ -14,8 +14,7 @@ export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignor
 export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
-export OPENAI_MODEL=us.anthropic.claude-sonnet-4-5-20250929-v1:0
-if [[ $LIGHT_THEME = 1 ]]; then
+if [[ $LIGHT_THEME = 1 ]]; then  # https://github.com/jesseduffield/lazygit/issues/4550, delta auto detect also doesn't work in diffnav
   export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
 else
   export BAT_THEME=OneHalfDark
@@ -60,10 +59,10 @@ alias k='kubectl'
 alias dc='docker compose'
 alias lg='lazygit'
 alias lzd='lazydocker'
+alias claude='claude --allow-dangerously-skip-permissions'
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
 alias 00='[[ -f ~/.vim/tmp/last_result ]] && cd "$(cat ~/.vim/tmp/last_result)"'
-alias view='nvim -c "lua Snacks.terminal.colorize()"'
 # shellcheck disable=2154
 alias jsonflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
 # shellcheck disable=2154
@@ -86,10 +85,10 @@ alias gau='git add --all --intent-to-add'
 alias gaa='git add --all'
 alias gb='git branch'
 alias gba='git branch -vv --sort=-committerdate -a'
-alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(align:50,left)%(HEAD)%(color:red)%(refname:short)%(end)%(color:yellow)%(objectname:short) %(color:green)⦗%(committerdate:relative)⦘%(color:reset) - %(subject) %(color:bold blue)❪%(authorname)❫%(color:reset)"'
+alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(align:50,left)%(HEAD)%(color:red)%(refname:short)%(end)%(color:yellow)%(objectname:short) %(color:green)(%(committerdate:relative))%(color:reset) - %(subject) %(color:bold blue)❪%(authorname)❫%(color:reset)"'
 alias gc!='gc --amend'
 alias gcs='gc --signoff'
-alias gcs!='gc --signoff --amend --no-verify --allow-empty'
+alias gcs!='gc --signoff --amend --no-verify --allow-empty --no-edit'
 alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcl='git clone --filter=blob:none'
 alias gcm='git checkout --merge --ignore-other-worktrees "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
@@ -546,7 +545,7 @@ getip() {
   if [[ $# -gt 1 ]]; then
     echo "Usage: $0 [--private|ip|domain]" >&2
   elif [[ $# -eq 0 ]]; then
-    if builtin command -v ec2metadata > /dev/null 2>&1; then
+    if grep -q 'Amazon EC2' /sys/class/dmi/id/board_vendor 2> /dev/null; then
       curl -s -XPUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 1800' | xargs -I {} curl -s -H 'X-aws-ec2-metadata-token: {}' http://169.254.169.254/latest/meta-data/public-ipv4
     else
       curl -s https://checkip.amazonaws.com  # or ifconfig.me
@@ -619,7 +618,12 @@ awsctx() {
   if [[ $1 = --region || $1 == -r ]]; then
     [[ ! -e ~/.vim/tmp/aws-ec2-regions ]] && aws ec2 describe-regions --query 'Regions[].{Region:RegionName}' --output text | sort > ~/.vim/tmp/aws-ec2-regions
     local region=$(< ~/.vim/tmp/aws-ec2-regions fzf)
-    [[ -n $region ]] && export AWS_REGION=$region && echo "export AWS_REGION=$AWS_REGION"; return $?
+    if [[ -n $region ]]; then
+      sed -i "/^${region}$/d; 1i ${region}" ~/.vim/tmp/aws-ec2-regions
+      export AWS_REGION=$region && echo "export AWS_REGION=$AWS_REGION"
+      return $?
+    fi
+    return 1
   fi
   if [[ -n $1 ]]; then local profile=$1; else local profile=$({ awk -F'[][]' '/^\[/ {print $2}' ~/.aws/credentials 2> /dev/null; awk -F'[][]' '/^\[profile / {gsub(/^profile /, "", $2); print $2}' ~/.aws/config 2> /dev/null; } | sort -u | fzf); fi  # faster than `aws configure list-profiles`
   [[ -n $profile ]] && export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$AWS_PROFILE"

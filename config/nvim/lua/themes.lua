@@ -110,7 +110,6 @@ local function highlight_plugins()
 end
 
 function M.setup()
-    vim.o.background = theme_index < 0 and "dark" or "light"
     themes[M.theme].setup()
     highlight_plugins() -- autocmd might not trigger for some colorschemes
 end
