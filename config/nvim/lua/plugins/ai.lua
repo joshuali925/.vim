@@ -25,7 +25,7 @@ return {
     },
     {
         "coder/claudecode.nvim",
-        enabled = vim.env.ANTHROPIC_MODEL ~= nil,
+        enabled = vim.uv.fs_stat(vim.env.HOME .. "/.claude.json") ~= nil,
         dependencies = { "folke/snacks.nvim" },
         keys = {
             { "<leader>c", "<Cmd>ClaudeCode<CR>" },
@@ -33,7 +33,7 @@ return {
             { "<leader>c", "<Cmd>ClaudeCodeTreeAdd<CR>", ft = { "neo-tree", "minifiles" } },
         },
         opts = {
-            terminal_cmd = "AWS_PROFILE=bedrock-prod claude --allow-dangerously-skip-permissions",
+            terminal_cmd = "claude --allow-dangerously-skip-permissions",
             terminal = {
                 split_width_percentage = 0.4,
                 snacks_win_opts = {

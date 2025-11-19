@@ -2,9 +2,9 @@
 # https://raw.githubusercontent.com/jesseduffield/lazygit/HEAD/docs/Config.md
 git:
   autoFetch: true
-  paging:
-    colorArg: always
-    pager: delta --paging=never --24-bit-color=always --features=no-line-numbers
+  pagers:
+    - colorArg: always
+      pager: delta --paging=never --24-bit-color=always --features=no-line-numbers
   branchLogCmd: git log --color --graph --pretty=simple {{branchName}} --
   allBranchesLogCmds:
     - git log --color --graph --format=simple-iso --all
@@ -13,6 +13,7 @@ gui:
   showFileTree: false # ` to toggle
   showBranchCommitHash: true
   showBottomLine: false
+  useHunkModeInStagingView: true
   theme:
     activeBorderColor:
       - cyan
@@ -57,4 +58,9 @@ keybinding:
 customCommands:
   - key: <c-y>
     context: commits
+    description: Copy command to apply selected commits
     command: printf " git -C '$(pwd)' format-patch --stdout {{.SelectedCommitRange.From}}^..{{.SelectedCommitRange.To}} | git am -3" | y
+  - key: <c-a>
+    context: files
+    description: Add all files to be tracked
+    command: git add --all --intent-to-add

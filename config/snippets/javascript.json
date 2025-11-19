@@ -174,7 +174,7 @@
       "const shell = (command, options = {}) => {",
       "\tconst { timeoutMs = 90000, parseJSON = false } = options;",
       "\treturn new Promise((resolve, reject) =>",
-      "\t\texec(command, { timeout: timeoutMs }, (error, stdout, stderr) => {",
+      "\t\texec(command, { timeout: timeoutMs, maxBuffer: 67108864 }, (error, stdout, stderr) => {",
       "\t\t\tif (stderr) console.error(`stderr: \\${stderr.trim()}`);",
       "\t\t\tif (error) {",
       "\t\t\t\treject(error.message);",

@@ -3,9 +3,10 @@
   "lines": [
     [
       {
-        "id": "1394b21c-4de8-403b-834b-bdd0308bb47d",
-        "type": "context-length",
-        "backgroundColor": "bgBrightRed",
+        "id": "3",
+        "type": "context-percentage",
+        "color": "brightBlack",
+        "rawValue": false,
         "merge": "no-padding"
       },
       {
@@ -16,14 +17,9 @@
         "merge": "no-padding"
       },
       {
-        "id": "3",
-        "type": "context-percentage",
-        "color": "brightBlack",
-        "rawValue": true
-      },
-      {
         "id": "e020c1a8-6161-47e7-b907-f8e8104fff03",
-        "type": "session-cost"
+        "type": "session-cost",
+        "rawValue": true
       },
       {
         "id": "f43da1ae-c56f-475f-9407-c25890fa9fa7",

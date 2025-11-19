@@ -2,6 +2,7 @@
 # shellcheck disable=2155
 
 NODE_VERSION=20.18.3
+YARN_VERSION=1.22.10
 JDK_VERSION=21
 BACKUP_DIR=$HOME/config-backup
 
@@ -238,7 +239,7 @@ install_node() {
   mise use -g "nodejs@$NODE_VERSION"
   mise x -- npm config set prefix ~/.local/lib/node-packages
   log 'Installing node packages..'
-  mise x -- npm install -g --cache ~/.local/lib/npm-temp-cache yarn || true
+  mise x -- npm install -g --cache ~/.local/lib/npm-temp-cache "yarn@$YARN_VERSION" || true
   rm -rf ~/.local/lib/npm-temp-cache
   curl -L https://raw.githubusercontent.com/zsh-users/zsh-completions/HEAD/src/_yarn -o ~/.vim/config/zsh/completions/_yarn
   log 'Installed node, yarn'
@@ -282,8 +283,13 @@ install_swap() {
   fi
   local g="${1:-4}"
   log "Installing ${g}G swapfile.."
-  sudo dd if=/dev/zero of=/swapfile count=$((g * 1024)) bs=1MiB && sudo chmod 600 /swapfile
-  sudo mkswap /swapfile && sudo swapon /swapfile
+  sudo dd if=/dev/zero of=/swapfile count=$((g * 1024)) bs=1MiB &
+  if [[ $PACKAGE_MANAGER = apt-get ]]; then
+    log "Installing earlyoom.."
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y earlyoom
+  fi
+  wait
+  sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
   sudo sed -i '/^\/swapfile swap swap defaults 0 0$/d' /etc/fstab
   echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
   free -h
@@ -326,6 +332,7 @@ install_claude-code() {
   npm install -g @anthropic-ai/claude-code
   mkdir -p ~/.aws ~/.claude
   link_file ~/.vim/config/claude/commands ~/.claude/commands --relative
+  link_file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link_file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
   cat >> ~/.aws/credentials <<'EOF'
 
@@ -335,13 +342,6 @@ credential_source = Ec2InstanceMetadata
 ; source_profile = default
 region = us-west-2
 EOF
-  cat >> ~/.zshrc <<'EOF'
-
-export CLAUDE_CODE_USE_BEDROCK=1
-export ANTHROPIC_MODEL=$OPENAI_MODEL
-alias claude='AWS_PROFILE=bedrock-prod claude --allow-dangerously-skip-permissions'
-EOF
-  echo '{"statusLine": {"type": "command", "command": "npx -y ccstatusline@latest", "padding": 0}}' > ~/.claude/settings.json
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   install_google-chrome 2> /dev/null && claude mcp add -s user chrome-devtools -- npx chrome-devtools-mcp@latest --headless --isolated --no-sandbox || true
   log "\nInstalled Claude Code. To configure statusline, run ${YELLOW}npx -y ccstatusline@latest"

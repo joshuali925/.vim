@@ -343,12 +343,14 @@ api.mapkey('yov', 'Toggle sites', function() {
         api.tabOpenLink(window.location.href.replace(/github.(com|dev)/, function(match, p1) { return p1 === 'com' ? 'github.dev' : 'github.com' }));
     } else if (window.location.hostname === 'www.baidu.com') {
         window.location.href = `https://www.google.com/search?q=${window.location.href.match(/[?&]wd=([^&]+)/)[1]}`;
+    } else if (window.location.hostname === 'www.bing.com') {
+        window.location.href = `https://www.google.com/search?q=${window.location.href.match(/[?&]q=([^&]+)/)[1]}`;
     } else if (window.location.hostname === 'www.google.com') {
         window.location.href = `https://www.baidu.com/s?ie=UTF-8&wd=${window.location.href.match(/[?&]q=([^&]+)/)[1]}`;
     } else if (window.location.hostname === 'www.reddit.com') {
         window.location.href = window.location.href.replace('www.reddit.com', 'libredd.it');
     }
-}, {domain: /(baidu|google|github|reddit)\.(com|dev|io)/i});
+}, {domain: /(baidu|bing|google|github|reddit)\.(com|dev|io)/i});
 api.mapkey('yos', 'Toggle sourcegraph search', function() {
     api.tabOpenLink('https://sourcegraph.com/search?q=context:global+repo:' + window.location.href.match(/(github.com\/[^/]+\/?[^/]+)/)[1] + '+');
 }, {domain: /github\.com/i});

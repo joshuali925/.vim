@@ -119,15 +119,15 @@ function M.file_manager()
     end, { buffer = buf })
     vim.api.nvim_create_autocmd("TermClose", {
         once = true,
-        callback = function(ev)
-            if ev.buf ~= buf then return end -- <buffer=buf> doesn't work due to snacks.win's autocmd
+        callback = function(e)
+            if e.buf ~= buf then return end -- <buffer=buf> doesn't work due to snacks.win's autocmd
             local file = io.open(selection_path, "r")
             if file ~= nil then
                 local files = {}
                 for line in file:lines() do table.insert(files, vim.fn.fnameescape(line)) end
                 file:close()
                 os.remove(selection_path)
-                vim.schedule(function() vim.cmd.args(files) end)
+                if #files > 0 then vim.schedule(function() vim.cmd.args(files) end) end
             end
         end,
     })

@@ -16,7 +16,7 @@ return {
             })
         end,
     },
-    { "brianhuster/live-preview.nvim", enabled = vim.env.SSH_CLIENT == nil, cmd = "LivePreview" },
+    { "brianhuster/live-preview.nvim", cmd = "LivePreview", config = function() require("livepreview.config").set({ address = "0.0.0.0" }) end },
     {
         "danymat/neogen",
         keys = { { "<leader>ge", "<Cmd>lua require('neogen').generate()<CR>" } },
@@ -158,6 +158,7 @@ return {
     {
         "neovim/nvim-lspconfig", -- only needs configs in rtp https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
         init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
+        cmd = "LspInfo",
     },
     { "pmizio/typescript-tools.nvim" },
     { "mfussenegger/nvim-jdtls" },
