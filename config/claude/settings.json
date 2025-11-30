@@ -1,8 +1,12 @@
 {
   "env": {
+    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0",
+    "AWS_PROFILE": "bedrock-prod",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "true",
     "CLAUDE_CODE_USE_BEDROCK": "true",
-    "ANTHROPIC_MODEL": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-    "AWS_PROFILE": "bedrock-prod"
+    "DISABLE_BUG_COMMAND": "true",
+    "DISABLE_ERROR_REPORTING": "true",
+    "DISABLE_TELEMETRY": "true"
   },
   "statusLine": {
     "type": "command",

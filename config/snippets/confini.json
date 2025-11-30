@@ -3,9 +3,9 @@
     "prefix": "template-aws-access-key",
     "body": [
       "[${1:my_profile}]",
-      "aws_access_key_id=${2:AWS_ACCESS_KEY_ID}",
-      "aws_secret_access_key=${3:AWS_SECRET_ACCESS_KEY}",
-      "aws_region=us-west-2"
+      "aws_access_key_id = ${2:AWS_ACCESS_KEY_ID}",
+      "aws_secret_access_key = ${3:AWS_SECRET_ACCESS_KEY}",
+      "aws_region = us-west-2"
     ]
   },
   "AWS profile from assume role in ~/.aws/credentials": {
@@ -14,8 +14,8 @@
       "[${1:my_profile}]",
       "role_arn = ${2:arn:aws:iam::000000000000:role/Admin}",
       "source_profile = ${3:default}",
-      "# or if credentials are not coming from a profile, comment out source_profile and use credential_source",
-      "# credential_source = ${4|Ec2InstanceMetadata,EcsContainer,Environment|}",
+      "; or if credentials are not coming from a profile, comment out source_profile and use credential_source",
+      "; credential_source = ${4|Ec2InstanceMetadata,EcsContainer,Environment|}",
       "region = us-west-2"
     ]
   }

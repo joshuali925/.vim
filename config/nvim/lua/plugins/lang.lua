@@ -175,7 +175,11 @@ return {
             end)(vim.ui.select)
         end,
         opts = {
-            bar = { enable = function(buf, win, _) return vim.fn.win_gettype(win) == "" and vim.bo[buf].bt == "" end },
+            bar = {
+                enable = function(buf, win, _)
+                    return vim.fn.win_gettype(win) == "" and vim.bo[buf].buftype == "" and vim.bo[buf].filetype ~= "http" -- breaks visual selection in kulala http
+                end,
+            },
             menu = {
                 win_configs = { border = "single" },
                 keymaps = {

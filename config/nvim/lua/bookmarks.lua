@@ -1,6 +1,8 @@
 local M = {}
 
 M.bookmarks = {}
+local icon = ""
+local icon_annot = ""
 local data_file = vim.fn.stdpath("data") .. "/bookmarks.msgpack"
 local ns_id = vim.api.nvim_create_namespace("bookmarks")
 local modified = false
@@ -10,26 +12,28 @@ local function min(a, b)
 end
 
 local function buf_set_extmark(opts)
-    local extmark_opts = { sign_text = "", sign_hl_group = "DiagnosticOk" }
+    local extmark_opts = { sign_text = icon, sign_hl_group = "DiagnosticOk", invalidate = true }
     if opts.annot ~= nil then
-        extmark_opts.sign_text = ""
-        extmark_opts.virt_text = { { " " .. opts.annot .. string.rep(" ", 3), "DiagnosticOk" } }
+        extmark_opts.sign_text = icon_annot
+        extmark_opts.virt_text = { { icon_annot .. opts.annot .. string.rep(" ", 3), "DiagnosticOk" } }
         extmark_opts.virt_text_pos = "right_align"
     end
     local buf = opts.buf or 0
     local row = min(opts.row, vim.api.nvim_buf_line_count(buf) - 1)
-    local col = min(opts.col, #vim.api.nvim_buf_get_lines(buf, row, row + 1, false)[1])
+    local line = vim.api.nvim_buf_get_lines(buf, row, row + 1, false)[1]
+    local col = min(opts.col, #line)
+    extmark_opts.end_row = row
+    extmark_opts.end_col = #line
     return vim.api.nvim_buf_set_extmark(buf, ns_id, row, col, extmark_opts)
 end
 
--- limitation: bookmarks removed by deleting lines will be restored when reading from cache again
 local function dump_cache(buf, match)
     local file_name = match or vim.api.nvim_buf_get_name(buf)
     local bookmarks = M.bookmarks[file_name]
     if file_name == "" or bookmarks == nil then return end
-    local extmarks = vim.api.nvim_buf_get_extmarks(buf, ns_id, 0, -1, {})
+    local extmarks = vim.api.nvim_buf_get_extmarks(buf, ns_id, 0, -1, { details = true })
     local rows_index = {}
-    for _, extmark in ipairs(extmarks) do
+    for _, extmark in ipairs(vim.tbl_filter(function(e) return not e[4].invalid end, extmarks)) do
         local id, row, col = unpack(extmark)
         for i, bookmark in ipairs(bookmarks) do
             if bookmark.id == id then
@@ -42,7 +46,7 @@ local function dump_cache(buf, match)
                     end
                 elseif bookmark.annot ~= nil then -- there is already a bookmark in this row, only append to annotation
                     local bookmark_at_row = bookmarks[rows_index[row]]
-                    bookmark_at_row.annot = bookmark_at_row.annot == nil and bookmark.annot or (bookmark_at_row.annot .. "  " .. bookmark.annot)
+                    bookmark_at_row.annot = bookmark_at_row.annot == nil and bookmark.annot or (bookmark_at_row.annot .. icon_annot .. bookmark.annot)
                     bookmark.row = row
                 end
                 break
@@ -180,7 +184,7 @@ function M.setup()
     end)
     vim.api.nvim_create_augroup("Bookmarks", {})
     vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", callback = dump_disk })
-    vim.api.nvim_create_autocmd("BufDelete", { group = "Bookmarks", callback = function(e) dump_cache(e.buf, e.match) end })
+    vim.api.nvim_create_autocmd("BufUnload", { group = "Bookmarks", callback = function(e) dump_cache(e.buf, e.match) end }) -- BufLeave to immediately retire invalidated extmarks
     vim.api.nvim_create_autocmd("BufReadPost", { group = "Bookmarks", callback = function(e) load_cache(e.buf, e.match) end })
     if vim.v.vim_did_enter == 1 then
         load_disk()
@@ -214,12 +218,21 @@ function M.pick(opts)
             table.sort(items, function(x, y) return x.bookmark.time > y.bookmark.time end)
             return items
         end,
+        confirm = function(picker, item, action)
+            if item then
+                local buf = vim.fn.bufnr(item.file)
+                if buf ~= -1 and vim.api.nvim_buf_is_loaded(buf) then
+                    item.pos[1] = min(item.pos[1], vim.api.nvim_buf_line_count(buf))
+                end
+            end
+            require("snacks.picker.actions").jump(picker, item, action)
+        end,
         format = function(item, _)
             local dir, file = item.relative_path:match("^(.*)/(.+)$")
             local ret = {}
             ret[#ret + 1] = { a(os.date("%m/%d/%Y %H:%M", item.bookmark.time), 16), "Comment" }
             ret[#ret + 1] = { " │ " }
-            ret[#ret + 1] = { a(item.bookmark.annot and " " .. item.bookmark.annot or item.bookmark.text, 60), item.bookmark.annot and "DiagnosticOk" }
+            ret[#ret + 1] = { a(item.bookmark.annot and icon_annot .. item.bookmark.annot or item.bookmark.text, 60), item.bookmark.annot and "DiagnosticOk" }
             ret[#ret + 1] = { " │ " }
             ret[#ret + 1] = { file, "SnacksPickerFile" }
             ret[#ret + 1] = { ":", "SnacksPickerDelim" }

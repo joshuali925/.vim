@@ -229,6 +229,7 @@ vim.keymap.set("n", "yov", "':setlocal virtualedit=' . (&virtualedit == 'block' 
 vim.keymap.set("n", "yog", "<Cmd>lua require('rooter').toggle()<CR>")
 vim.keymap.set("n", "yoR", "<Cmd>if get(g:, 'ReaderMode', 0) == 0 | nnoremap <nowait> d <C-d>| nnoremap u <C-u> | else | execute 'nunmap d' | execute 'nunmap u' | endif | let g:ReaderMode = 1 - get(g:, 'ReaderMode', 0) | lua vim.notify('Reader mode ' .. (vim.g.ReaderMode == 1 and 'on' or 'off'))<CR>")
 vim.keymap.set("t", "<C-u>", "<C-\\><C-n>")
+vim.keymap.set("t", "<C-\\><C-u>", "<C-u>")
 vim.keymap.set("c", "<C-Space>", [[':/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<BS>", [[':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'

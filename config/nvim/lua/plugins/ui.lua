@@ -128,14 +128,14 @@ return {
                 { "&Save session", [[call feedkeys(":SessionSave", "n")]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
                 { "Load s&ession", [[call feedkeys(":SessionLoad", "n")]], "Load session from .cache/nvim/session_<name>.vim" },
                 { "--", "" },
-                { "Edit Vimr&c", [[edit $MYVIMRC]] },
+                { "Edit Vimr&c", [[edit ~/.vim/config/nvim/init.lua]] },
                 { "GB18030 to utf-8", [[edit ++enc=GB18030 | set fileencoding=utf8]], "Edit as GB18030 (edit ++enc=GB18030) for Chinese characters and reset file format back to utf-8" },
                 { "Open in &VSCode", [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]] },
             })
             vim.fn["quickui#menu#install"]("&Git", {
                 { "Git checko&ut ref", [[call feedkeys(":Git restore --source=@ -- %\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Show current file from ref" },
                 { "Git &blame", [[lua require("gitsigns").blame()]], "Git blame of current file" },
-                { "Git &change base", [[call feedkeys(":Gitsigns change_base @ true\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Gitsigns show hunk based on ref" },
+                { "Git &change base", [[call feedkeys(":Gitsigns change_base @^ true\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Gitsigns show hunk based on ref" },
                 { "Git reset base", [[lua require("gitsigns").reset_base(true)]], "Gitsigns reset changed base" },
                 { "--", "" },
                 { "Git &diff", [[call feedkeys(":Gdiffsplit @", "n")]], "Diff current file with ref" },

@@ -180,6 +180,9 @@ endfunction
 
 function! funcs#get_run_command() abort
   let file = expand('%')
+  if file =~ 'Caddyfile$'
+    return 'lua require("utils").term_exec([[ docker exec caddy caddy reload --config /etc/caddy/Caddyfile]])'
+  endif
   if file =~ '\.class'
     call funcs#decompile_java_class()
     return

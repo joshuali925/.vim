@@ -14,7 +14,7 @@
   },
   "Sigv4 auth": {
     "prefix": "auth-sigv4",
-    "body": "Authorization: AWS {{AWS_ACCESS_KEY_ID}} {{AWS_SECRET_ACCESS_KEY}} token:{{AWS_SESSION_TOKEN}} region:${1:us-west-2} service:${2:service}"
+    "body": "Authorization: AWS {{AWS_ACCESS_KEY_ID}} {{AWS_SECRET_ACCESS_KEY}} token:{{AWS_SESSION_TOKEN}} region:{{AWS_REGION}} service:${1:service}"
   },
   "GET request": {
     "prefix": "get-request",

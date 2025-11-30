@@ -32,6 +32,7 @@ gui:
       - red
 notARepository: skip
 disableStartupPopups: true
+promptToReturnFromSubprocess: false
 keybinding:
   universal:
     prevPage: <c-u>
