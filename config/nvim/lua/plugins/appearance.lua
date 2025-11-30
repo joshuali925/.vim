@@ -84,8 +84,8 @@ return {
         keys = {
             { "<BS>", "<Cmd>keepjumps BufferLineCyclePrev<CR>" },
             { "\\", "<Cmd>keepjumps BufferLineCycleNext<CR>" },
-            { "<C-w><BS>", ":BufferLineMovePrev<CR><Cmd>redraw!<CR><C-w>", remap = true },
-            { "<C-w>\\", ":BufferLineMoveNext<CR><Cmd>redraw!<CR><C-w>", remap = true },
+            { "<C-w><BS>", "<Cmd>execute 'BufferLineMovePrev' | redraw!<CR><C-w>", remap = true },
+            { "<C-w>\\", "<Cmd>execute 'BufferLineMoveNext' | redraw!<CR><C-w>", remap = true },
             { "Z[", "<Cmd>BufferLineCloseLeft<CR>" },
             { "Z]", "<Cmd>BufferLineCloseRight<CR>" },
         },

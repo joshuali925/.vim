@@ -145,17 +145,18 @@ api.mapkey(';v', 'Edit with web vim', function() {
     });
 });
 api.unmap('P');
-api.mapkey('P', 'Open url or google', function() {
+api.mapkey('P', 'Open url or search', function() {
     function validURL(str) {
-        var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|localhost|'+ // domain name
-        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-        return !!pattern.test(str.trim());
+        var text = str.trim();
+        try {
+            var urlToTest = /^https?:\/\//i.test(text) ? text : 'http://' + text;
+            var parsed = new URL(urlToTest);
+            return parsed.hostname.includes('.') || parsed.hostname === 'localhost';
+        } catch (e) {
+            return false;
+        }
     }
-    function openUrlOrGoogle(text) {
+    function openUrlOrSearch(text) {
         if (validURL(text)) {
             api.tabOpenLink(text);
         } else {
@@ -163,10 +164,10 @@ api.mapkey('P', 'Open url or google', function() {
         }
     }
     if (window.getSelection().toString()) {
-        openUrlOrGoogle(window.getSelection().toString());
+        openUrlOrSearch(window.getSelection().toString());
     } else {
         api.Clipboard.read(function(response) {
-            openUrlOrGoogle(response.data);
+            openUrlOrSearch(response.data);
         });
     }
 });

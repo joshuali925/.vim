@@ -7,6 +7,8 @@ export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-
 export DELTA_PAGER=$PAGER  # delta doesn't respect PAGER but respects DELTA_PAGER and LESS
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export NEOVIDE_FRAME=none
+export RCLONE_PROGRESS=true
+export RCLONE_DELETE_EMPTY_SRC_DIRS=true
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
@@ -52,8 +54,8 @@ alias v='$EDITOR'
 alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
-alias .env='findup .env >&2 && env $(grep -v "^#" "$(findup .env)" | xargs)'
-alias venv='deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv=".venv"; }'  # py -m venv .venv
+alias .env='findup .env >&2 && env $(sed "/^#/d;s/^export //" "$(findup .env)" | xargs) '
+alias venv='deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv=".venv"; }'  # without uv: py -m venv .venv
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias k='kubectl'
 alias dc='docker compose'
@@ -200,11 +202,6 @@ tarcopy() {
   printf " printf $(XZ_OPT=-9e tar czf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvz" | tee >(y) | wc -c | xargs echo Characters copied:
 }
 
-convert() {
-  if [[ $# -ne 2 ]]; then echo "Usage: $0 <file> <extension>" >&2; return 1; fi
-  ffmpeg -i "$1" -codec copy "${1%.*}.$2" || ffmpeg -y -i "$1" "${1%.*}.$2"
-}
-
 yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yazi
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp"
@@ -282,7 +279,7 @@ sudorun() {
   fi
   case $cmd in
     v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u ~/.vim/config/mini.vim "$@" ;;
-    *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(/usr/bin/which "$cmd")" "$@" ;;
+    *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E env PATH="$PATH" "$cmd" "$@" ;;
   esac
 }
 
@@ -490,6 +487,7 @@ man() {
   fi
 }
 
+# shellcheck disable=2032
 env() {
   if [[ $# -ne 0 ]]; then command env "$@"; return $?; fi
   # shellcheck disable=2016
@@ -509,9 +507,13 @@ untildone() {
     echo -e "Usage: UNTILDONE_MAX_TRIES=<n> UNTILDONE_INTERVAL=<sec> $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour\n\t$0 ! ps <pid>; ./run  # run after pid exits" >&2
     return 1
   fi
-  local i=1 max_tries=${UNTILDONE_MAX_TRIES:-0} interval=${UNTILDONE_INTERVAL:-1}
+  local i=1 max_tries=${UNTILDONE_MAX_TRIES:-0} interval=${UNTILDONE_INTERVAL:-2}
+  local start_time=$SECONDS
+  tput sc
   while true; do
-    echo "Try $i, $(date +'%Y-%m-%dT%H:%M:%S%z')." >&2
+    local elapsed=$((SECONDS - start_time))
+    local hours=$((elapsed / 3600)) mins=$(((elapsed % 3600) / 60)) secs=$((elapsed % 60))
+    printf "\033[0;36mTry %d, elapsed %02d:%02d:%02d at %s.\033[0m\n" "$i" "$hours" "$mins" "$secs" "$(date +'%Y-%m-%dT%H:%M:%S%z')" >&2
     eval "$*" && break
     ((i+=1))
     if [[ $max_tries -gt 0 && $i -gt $max_tries ]]; then
@@ -519,7 +521,8 @@ untildone() {
       return 1
     fi
     sleep "$interval"
-    echo >&2
+    tput rc
+    tput ed
   done
 }
 

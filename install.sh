@@ -105,7 +105,7 @@ link_file() {
 install_devtools() {
   log '\nInstalling development tools..'
   if [[ $OSTYPE = linux-android ]]; then
-    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd ripgrep lazygit tmux bat git-delta neovim
+    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd ripgrep lazygit tmux bat git-delta neovim file  # yazi requires file
     chsh -s zsh "$(whoami)"
     mkdir -p ~/temp && cd ~/temp
     wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip && unzip JetBrainsMono.zip
@@ -372,9 +372,10 @@ default-install() {
 
   if [[ $OSTYPE = linux-android ]]; then
     wait
-    sed -i 's/#\?setopt NO_CASE_GLOB/#setopt NO_CASE_GLOB/' "$HOME/.local/zim/modules/completion/init.zsh"  # https://github.com/zimfw/zimfw/issues/482#issuecomment-1288943906
     log 'Finished package installs for termux. Setting up file access and styles (use dark monokai or dracula)'
-    termux-setup-storage && sleep 5 && termux-style && cp --preserve=links -r ~/storage/downloads ~/downloads
+    termux-style
+    termux-setup-storage && sleep 5 && cp --preserve=links -r ~/storage/downloads ~/downloads
+    sed -i 's/#\?setopt NO_CASE_GLOB/#setopt NO_CASE_GLOB/' "$HOME/.local/zim/modules/completion/init.zsh"  # https://github.com/zimfw/zimfw/issues/482#issuecomment-1288943906
   else
     install node &
     install tmux &

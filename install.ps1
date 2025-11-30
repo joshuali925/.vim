@@ -1,9 +1,11 @@
 # disable win+ctrl+shift+alt office key
-REG ADD HKCU\Software\Classes\ms-officeapp\Shell\Open\Command /t REG_SZ /d rundll32
+REG ADD HKCU\Software\Classes\ms-officeapp\Shell\Open\Command /f /t REG_SZ /d rundll32
+# use old context menu
+REG ADD "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
 # disable folder type detection
-Set-ItemProperty 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' -Name FolderType -Value NotSpecified -Type String -Force
+Set-ItemProperty HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell -Name FolderType -Value NotSpecified -Type String -Force
 # disable bing search
-Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Value 0 -Type DWord
+Set-ItemProperty HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search -Name BingSearchEnabled -Value 0 -Type DWord -Force
 # ctr-d exit powershell
 New-Item -ItemType Directory -Path ([System.IO.Path]::GetDirectoryName($Profile)) -Force
 Add-Content -Path $Profile -Value "Set-PSReadLineKeyHandler -Key 'Ctrl+d' -Function DeleteCharOrExit"
@@ -62,4 +64,4 @@ git -C "$env:USERPROFILE\.vim" update-index --skip-worktree config/nvim/autoload
 Add-Content -Path "$env:USERPROFILE\.vim\.git\info\exclude" -Value "/config/nvim/autoload"
 Remove-Item "$env:LOCALAPPDATA\nvim" -Force -Recurse -ErrorAction SilentlyContinue
 New-Item -ItemType Junction -Path "$env:LOCALAPPDATA\nvim" -Target "$env:USERPROFILE\.vim\config\nvim"
-nvim --headless +'Lazy! restore' +quitall
+nvim --headless +"Lazy! restore" +quitall

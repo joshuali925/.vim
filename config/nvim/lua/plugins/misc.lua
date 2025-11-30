@@ -35,7 +35,7 @@ return {
             require("kulala").setup({
                 default_view = "headers_body",
                 additional_curl_options = { "--insecure" },
-                ui = { max_response_size = require("states").size_threshold * 2 },
+                ui = { max_response_size = require("states").size_threshold * 5 },
             })
             vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
         end,
@@ -52,7 +52,7 @@ return {
             { "q", "<Cmd>lua require('snacks.picker').buffers()<CR>" },
             { "<leader><C-p>", function()
                 require("snacks.picker").resume()
-                vim.schedule(vim.cmd.stopinsert)
+                vim.defer_fn(vim.cmd.stopinsert, 100)
             end },
             { "<leader>fm", "<Cmd>lua require('snacks.picker').recent()<CR>" },
             { "<leader>f'", "<Cmd>lua require('snacks.picker').jumps()<CR>" },
@@ -144,7 +144,7 @@ return {
                         { icon = "󰚰 ", key = "u", desc = "Update plugins", action = ":Lazy update", hidden = true },
                         { icon = " ", key = "S", desc = "Open Mason", action = ":Mason" },
                         { icon = "󰑓 ", key = "r", desc = "Load session", action = ":call feedkeys(':SessionLoad', 'n')" },
-                        { icon = " ", key = "c", desc = "Edit vimrc", action = ":edit $MYVIMRC" },
+                        { icon = " ", key = "c", desc = "Edit vimrc", action = ":edit ~/.vim/config/nvim/init.lua" },
                         { icon = " ", key = "q", desc = "Quit", action = ":quit", hidden = true },
                     },
                 },
