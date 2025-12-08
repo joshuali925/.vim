@@ -12,10 +12,10 @@
     "prefix": "template-aws-assume-role",
     "body": [
       "[${1:my_profile}]",
-      "role_arn = ${2:arn:aws:iam::000000000000:role/Admin}",
-      "source_profile = ${3:default}",
-      "; or if credentials are not coming from a profile, comment out source_profile and use credential_source",
-      "; credential_source = ${4|Ec2InstanceMetadata,EcsContainer,Environment|}",
+      "role_arn = arn:aws:iam::${2:000000000000}:role/${3:Admin}",
+      "source_profile = ${4:default}",
+      "# or if credentials are not to be assumed by a profile, comment out source_profile and use credential_source",
+      "# credential_source = ${5|Ec2InstanceMetadata,EcsContainer,Environment|}",
       "region = us-west-2"
     ]
   }

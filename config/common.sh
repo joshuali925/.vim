@@ -72,7 +72,7 @@ alias json2csv='jq -r "def flatten_object: . as \$in | reduce paths(scalars) as 
 alias jsonl2csv='json2csv -s'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
-alias xcp="rsync -aviHKhSPz --no-owner --no-group --one-file-system --delete --filter=':- .gitignore'"
+alias xcp="rsync -avihP --no-owner --no-group --delete --filter=':- .gitignore'"
 alias http.server='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
@@ -513,7 +513,7 @@ untildone() {
   while true; do
     local elapsed=$((SECONDS - start_time))
     local hours=$((elapsed / 3600)) mins=$(((elapsed % 3600) / 60)) secs=$((elapsed % 60))
-    printf "\033[0;36mTry %d, elapsed %02d:%02d:%02d at %s.\033[0m\n" "$i" "$hours" "$mins" "$secs" "$(date +'%Y-%m-%dT%H:%M:%S%z')" >&2
+    printf "\033[0;33mTry %d, elapsed %02d:%02d:%02d at %s.\033[0m\n" "$i" "$hours" "$mins" "$secs" "$(date +'%Y-%m-%dT%H:%M:%S%z')" >&2
     eval "$*" && break
     ((i+=1))
     if [[ $max_tries -gt 0 && $i -gt $max_tries ]]; then
@@ -533,7 +533,14 @@ set-env() {
     case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
       java_home|javahome) cmd="export JAVA_HOME=\"$(mise where java)\""; shift ;;
       path) cmd="export PATH=\"$PWD:\$PATH\""; shift ;;
-      *) echo "Usage: $0 {java_home|path}. Unsupported argument $1, exiting.." >&2; return 1 ;;
+      proxy)
+        local port=${2:-1080}
+        cmd="export all_proxy=socks5://127.0.0.1:$port ALL_PROXY=socks5://127.0.0.1:$port no_proxy=localhost,127.0.0.1 NO_PROXY=localhost,127.0.0.1"
+        if curl -s --connect-timeout 1 -x "http://127.0.0.1:$port" http://www.google.com > /dev/null 2>&1; then
+          cmd+=" http_proxy=http://127.0.0.1:$port https_proxy=http://127.0.0.1:$port HTTP_PROXY=http://127.0.0.1:$port HTTPS_PROXY=http://127.0.0.1:$port"
+        fi
+        [[ -n $2 ]] && shift; shift ;;
+      *) echo "Usage: $0 {java_home|path|proxy}. Unsupported argument $1, exiting.." >&2; return 1 ;;
     esac
   done
   echo "$cmd"; eval "$cmd"
@@ -609,8 +616,9 @@ kube-shell() {
     --preview-window=up,70%,border-bottom,follow --preview='kubectl logs --follow --all-containers --tail=10000 --namespace {1} {2}'
 }
 
-lazypm2() {
-    local get_state='local IFS=$'\''\n'\'' app_list=$(pm2 list -m) map=() names ids app_status && names=($(echo "$app_list" | awk '\''/^\+---/{sub("+--- ", ""); print}'\'')) && ids=($(echo "$app_list" | awk '\''/^pm2 id : /{sub("pm2 id : ", ""); print}'\'')) && app_status=($(echo "$app_list" | awk '\''/^status : /{sub("status : ", ""); print}'\'')) && for ((i=1; i<=${#ids[@]}; i++)); do if [[ ${app_status[i]} = online ]]; then map+=("${ids[i]} : \e[0;32m${names[i]}\e[0m"); else map+=("${ids[i]} : \e[0;31m${names[i]} [${app_status[i]}]\e[0m"); fi; done && printf "%b\n" "${map[@]}"'
+pm2() {
+  if [[ $# -gt 0 ]]; then command pm2 "$@"; return $?; fi
+  local get_state='local IFS=$'\''\n'\'' app_list=$(pm2 list -m) map=() names ids app_status && names=($(echo "$app_list" | awk '\''/^\+---/{sub("+--- ", ""); print}'\'')) && ids=($(echo "$app_list" | awk '\''/^pm2 id : /{sub("pm2 id : ", ""); print}'\'')) && app_status=($(echo "$app_list" | awk '\''/^status : /{sub("status : ", ""); print}'\'')) && for ((i=1; i<=${#ids[@]}; i++)); do if [[ ${app_status[i]} = online ]]; then map+=("${ids[i]} : \e[0;32m${names[i]}\e[0m"); else map+=("${ids[i]} : \e[0;31m${names[i]} [${app_status[i]}]\e[0m"); fi; done && printf "%b\n" "${map[@]}"'
   FZF_DEFAULT_COMMAND=$get_state fzf --ansi --height=100% --list-border=none --header='CR: logs | C-e: start | C-t: stop | C-r: restart' \
     --bind="ctrl-e:execute(pm2 start {1} && sleep 1)+reload($get_state)" --bind="ctrl-t:execute(pm2 stop {1} && sleep 1)+reload($get_state)" \
     --bind="ctrl-r:execute(pm2 restart {1} && sleep 1)+reload($get_state)" --bind="enter:become(pm2 logs --raw --lines 60000 -- {1})" \
@@ -689,4 +697,6 @@ if [[ $OSTYPE = darwin* ]]; then
       --bind='ctrl-o:execute(awk "NR==2" <<< {} | xargs -r open)' |
       awk 'NR==2' | xargs -r open
   }
+elif [[ $OSTYPE = linux-android ]]; then
+  alias pr='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl '  # or termux-chroot. ref: https://github.com/pocketbase/pocketbase/discussions/4030#discussioncomment-12814598
 fi

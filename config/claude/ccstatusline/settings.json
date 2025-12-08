@@ -13,7 +13,7 @@
         "id": "c908ad8d-b787-484a-aef8-2f72defd85b4",
         "type": "custom-text",
         "backgroundColor": "bgGreen",
-        "customText": "│",
+        "customText": " │ ",
         "merge": "no-padding"
       },
       {
@@ -23,7 +23,7 @@
       },
       {
         "id": "f43da1ae-c56f-475f-9407-c25890fa9fa7",
-        "type": "git-worktree",
+        "type": "git-branch",
         "backgroundColor": "bgYellow"
       }
     ],

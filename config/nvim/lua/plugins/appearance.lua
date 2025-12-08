@@ -1,4 +1,4 @@
-local theme = require("themes").theme
+local theme = require("themes").theme -- this happens before shada loads, so vim.g.UPPER_CASE_VAR can't be used
 return {
     { "folke/tokyonight.nvim", priority = 1000, enabled = theme == "tokyonight" },
     { "projekt0n/github-nvim-theme", priority = 1000, enabled = theme == "github" },

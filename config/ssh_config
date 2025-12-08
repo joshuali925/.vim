@@ -4,10 +4,12 @@ Host *
     Compression yes
     ControlMaster auto
     # see TOKENS section under man ssh_config for formatting
-    ControlPath ~/.ssh/master_%r_%C
+    ControlPath ~/.ssh/_%r_%C
     # ControlPersist 10h
     # ForwardAgent yes
 
+# temporary tunnel: cloudflared tunnel --url ssh://localhost:8022
+# or log in: cloudflared tunnel login && cloudflared tunnel run --token xxx
 Host *.trycloudflare.com
     HostName %h
     Port 22

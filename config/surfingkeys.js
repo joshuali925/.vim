@@ -338,7 +338,7 @@ api.mapkey('yraw', 'Copy github raw', function() {
 api.mapkey('yov', 'Toggle sites', function() {
     if (/[^.]+\.github\.io/.test(window.location.hostname)) {
         window.location.href = `https://github.com/${window.location.hostname.match(/([^.]+)\.github\.io/)[1]}/${window.location.pathname.match(/^\/?([^\/]+|)/)[1]}`;
-    } else if (/github.com\/\w+\/\w+\/?/.test(window.location.href)) {
+    } else if (/github.com\/[^/]+\/[^/]+\/?$/.test(window.location.href)) {
         window.location.href = window.location.href.replace(/github.com/, 'deepwiki.com');
     } else if (/github.(com|dev)/.test(window.location.hostname)) {
         api.tabOpenLink(window.location.href.replace(/github.(com|dev)/, function(match, p1) { return p1 === 'com' ? 'github.dev' : 'github.com' }));

@@ -14,8 +14,9 @@ change_state() {
 }
 
 create() {
-  usage() { echo "Usage: ${0##*/} create <tag> [-i|--instance-type <type>] [-v|--volume-size <gigabytes>]" >&2; return 1; }
   local tag instance_type="m8i.large" volume_size=30 security_group
+  local usage="Usage: ${0##*/} create <tag> [-i|--instance-type <type> (default $instance_type)] [-v|--volume-size <gigabytes> (default $volume_size)]"
+  usage() { echo "$usage" >&2; return 1; }
   while [[ $# -ne 0 ]]; do
     case $1 in
       -i|--instance-type) instance_type="$2"; shift 2 ;;

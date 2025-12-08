@@ -16,6 +16,28 @@ return {
             })
         end,
     },
+    {
+        "mistweaverco/kulala.nvim",
+        init = function()
+            vim.api.nvim_create_augroup("KulalaAutoCommands", {})
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "http",
+                group = "KulalaAutoCommands",
+                callback = function(e)
+                    vim.keymap.set("n", "{", "<Cmd>lua require('kulala').jump_prev()<CR>", { buffer = e.buf })
+                    vim.keymap.set("n", "}", "<Cmd>lua require('kulala').jump_next()<CR>", { buffer = e.buf })
+                end,
+            })
+        end,
+        config = function()
+            require("kulala").setup({
+                default_view = "headers_body",
+                additional_curl_options = { "--insecure" },
+                ui = { max_response_size = require("states").size_threshold * 5 },
+            })
+            vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
+        end,
+    },
     { "brianhuster/live-preview.nvim", cmd = "LivePreview", config = function() require("livepreview.config").set({ address = "0.0.0.0" }) end },
     {
         "danymat/neogen",
@@ -55,6 +77,7 @@ return {
                 hook_function = function() require("ts_context_commentstring.internal").update_commentstring() end,
             })
             require("kommentary.config").configure_language("lua", { prefer_single_line_comments = true })
+            require("kommentary.config").configure_language("confini", { single_line_comment_string = "#" }) -- otherwise default # gets overridden by ts_context_commentstring
         end,
     },
     {
@@ -110,55 +133,44 @@ return {
         opts = { enable = false, mode = "topline" },
     },
     {
-        "nvim-treesitter/nvim-treesitter", -- TODO(0.12) https://www.reddit.com/r/neovim/comments/1ow2m75/when_would_nvimtreesitter_main_branch_become/
-        build = ":TSUpdate",
-        dependencies = "nvim-treesitter/nvim-treesitter-textobjects",
-        opts = {
-            auto_install = true,
-            ensure_installed = { "markdown_inline", "jsdoc" },
-            ignore_install = { "tmux" },
-            highlight = {
-                enable = true,
-                disable = function(_, buf)
-                    local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-                    return ok and stats and stats.size > require("states").size_threshold
+        "nvim-treesitter/nvim-treesitter",
+        build = function()
+            require("lazy").load({ plugins = { "mason.nvim", "nvim-treesitter" } })
+            require("mason-registry").refresh()
+            if not require("mason-registry").is_installed("tree-sitter-cli") then require("mason-registry").get_package("tree-sitter-cli"):install() end
+            vim.cmd.TSUpdate()
+        end,
+        config = function()
+            local installed = require("nvim-treesitter").get_installed()
+            local not_installed = vim.tbl_filter(function(lang) return not vim.tbl_contains(installed, lang) end, { "markdown_inline", "jsdoc" })
+            if #not_installed > 0 then
+                vim.list_extend(installed, not_installed)
+                require("nvim-treesitter").install(not_installed)
+            end
+            local available = require("nvim-treesitter").get_available()
+            vim.api.nvim_create_autocmd("FileType", {
+                group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true }),
+                callback = function(event)
+                    local lang = vim.treesitter.language.get_lang(event.match)
+                    if not vim.tbl_contains(available, lang) then return end
+                    local ts_toggle = function(enable)
+                        if enable == nil then enable = not vim.treesitter.highlighter.active[event.buf] end
+                        vim.treesitter[enable and "start" or "stop"](event.buf, enable and lang or nil)
+                        vim.bo[event.buf].indentexpr = enable and "v:lua.require('nvim-treesitter').indentexpr()" or ""
+                    end
+                    vim.keymap.set("n", "yot", ts_toggle, { buffer = event.buf })
+                    if vim.tbl_contains(installed, lang) then return ts_toggle(true) end
+                    table.insert(installed, lang)
+                    require("nvim-treesitter").install(lang):await(function(err) if not err and vim.api.nvim_buf_is_loaded(event.buf) then ts_toggle(true) end end)
                 end,
-            },
-            textobjects = {
-                select = {
-                    enable = true,
-                    keymaps = {
-                        ["if"] = "@call.inner",
-                        ["af"] = "@call.outer",
-                        ["iF"] = "@function.inner",
-                        ["aF"] = "@function.outer",
-                        ["ic"] = "@class.inner",
-                        ["ac"] = "@class.outer",
-                    },
-                },
-                move = {
-                    enable = true,
-                    set_jumps = true,
-                    goto_next_start = { ["]]"] = "@function.outer" },
-                    goto_next_end = { ["]["] = "@function.outer", [")"] = "@parameter.inner" },
-                    goto_previous_start = { ["[["] = "@function.outer", ["("] = "@parameter.inner" },
-                    goto_previous_end = { ["[]"] = "@function.outer" },
-                },
-                swap = {
-                    enable = true,
-                    swap_next = { ["g>"] = "@parameter.inner" },
-                    swap_previous = { ["g<"] = "@parameter.inner" },
-                },
-            },
-            indent = { enable = true },
-        },
-        config = function(_, opts) require("nvim-treesitter.configs").setup(opts) end,
+            })
+        end,
     },
     { "mason-org/mason.nvim", build = ":MasonUpdate", cmd = { "Mason", "MasonInstall" }, opts = { ui = { border = "rounded" } } },
     {
         "neovim/nvim-lspconfig", -- only needs configs in rtp https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
         init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
-        cmd = "LspInfo",
+        cmd = { "LspInfo", "LspLog" },
     },
     { "pmizio/typescript-tools.nvim" },
     { "mfussenegger/nvim-jdtls" },
