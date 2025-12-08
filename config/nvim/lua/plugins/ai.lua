@@ -24,7 +24,7 @@ return {
         end,
     },
     {
-        "coder/claudecode.nvim",
+        "coder/claudecode.nvim", -- TODO try https://github.com/carlos-algms/agentic.nvim
         enabled = vim.uv.fs_stat(vim.env.HOME .. "/.claude.json") ~= nil,
         dependencies = { "folke/snacks.nvim" },
         keys = {
@@ -48,7 +48,10 @@ return {
                                         picker:close()
                                         vim.fn.chansend(channel, (" @%s "):format(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(item.buf), ":~:.")))
                                     end,
-                                    on_close = function() vim.api.nvim_set_current_win(win) end,
+                                    on_close = function()
+                                        vim.api.nvim_set_current_win(win)
+                                        vim.schedule(vim.cmd.startinsert)
+                                    end,
                                 })
                             end,
                             mode = "t",

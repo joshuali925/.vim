@@ -224,7 +224,6 @@ vim.keymap.set("n", "<leader>q", "<Cmd>call funcs#quit(0, 0)<CR>") -- close wind
 vim.keymap.set("n", "<leader>Q", "<Cmd>call funcs#quit(0, 1)<CR>") -- close tab
 vim.keymap.set("n", "<leader>x", "<Cmd>call funcs#quit(1, 0)<CR>") -- close buffer and preserve layout
 vim.keymap.set("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
-vim.keymap.set("n", "yot", "<Cmd>TSBufToggle highlight <bar> TSBufToggle indent<CR>")
 vim.keymap.set("n", "yov", "':setlocal virtualedit=' . (&virtualedit == 'block' ? 'all' : 'block') . '<CR>'", { expr = true })
 vim.keymap.set("n", "yog", "<Cmd>lua require('rooter').toggle()<CR>")
 vim.keymap.set("n", "yoR", "<Cmd>if get(g:, 'ReaderMode', 0) == 0 | nnoremap <nowait> d <C-d>| nnoremap u <C-u> | else | execute 'nunmap d' | execute 'nunmap u' | endif | let g:ReaderMode = 1 - get(g:, 'ReaderMode', 0) | lua vim.notify('Reader mode ' .. (vim.g.ReaderMode == 1 and 'on' or 'off'))<CR>")
@@ -278,7 +277,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.api.nvim_create_autocmd("VimResized", { group = "AutoCommands", command = "wincmd =" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "snacks_terminal" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
-vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "http", "nu" }, command = [[setlocal commentstring=#\ %s]] })
 vim.api.nvim_create_autocmd("FileType", {
     group = "AutoCommands",
     pattern = "netrw", -- netrw is needed for gf on URL

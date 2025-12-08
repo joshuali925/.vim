@@ -1,5 +1,6 @@
 {
   "env": {
+    "MCP_TIMEOUT": 120000,
     "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0",
     "AWS_PROFILE": "bedrock-prod",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "true",
@@ -10,7 +11,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "npx -y ccstatusline@latest",
+    "command": "ccstatusline",
     "padding": 0
   },
   "alwaysThinkingEnabled": true

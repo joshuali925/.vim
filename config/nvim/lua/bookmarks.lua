@@ -15,7 +15,7 @@ local function buf_set_extmark(opts)
     local extmark_opts = { sign_text = icon, sign_hl_group = "DiagnosticOk", invalidate = true }
     if opts.annot ~= nil then
         extmark_opts.sign_text = icon_annot
-        extmark_opts.virt_text = { { icon_annot .. opts.annot .. string.rep(" ", 3), "DiagnosticOk" } }
+        extmark_opts.virt_text = { { icon_annot .. " " .. opts.annot .. string.rep(" ", 3), "DiagnosticOk" } }
         extmark_opts.virt_text_pos = "right_align"
     end
     local buf = opts.buf or 0
@@ -46,7 +46,7 @@ local function dump_cache(buf, match)
                     end
                 elseif bookmark.annot ~= nil then -- there is already a bookmark in this row, only append to annotation
                     local bookmark_at_row = bookmarks[rows_index[row]]
-                    bookmark_at_row.annot = bookmark_at_row.annot == nil and bookmark.annot or (bookmark_at_row.annot .. icon_annot .. bookmark.annot)
+                    bookmark_at_row.annot = bookmark_at_row.annot == nil and bookmark.annot or (bookmark_at_row.annot .. icon_annot .. " " .. bookmark.annot)
                     bookmark.row = row
                 end
                 break
@@ -232,7 +232,7 @@ function M.pick(opts)
             local ret = {}
             ret[#ret + 1] = { a(os.date("%m/%d/%Y %H:%M", item.bookmark.time), 16), "Comment" }
             ret[#ret + 1] = { " │ " }
-            ret[#ret + 1] = { a(item.bookmark.annot and icon_annot .. item.bookmark.annot or item.bookmark.text, 60), item.bookmark.annot and "DiagnosticOk" }
+            ret[#ret + 1] = { a(item.bookmark.annot and icon_annot .. " " .. item.bookmark.annot or item.bookmark.text, 60), item.bookmark.annot and "DiagnosticOk" }
             ret[#ret + 1] = { " │ " }
             ret[#ret + 1] = { file, "SnacksPickerFile" }
             ret[#ret + 1] = { ":", "SnacksPickerDelim" }

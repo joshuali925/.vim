@@ -1,16 +1,35 @@
-You will be making a change to OpenSearch Dashboards. These commands can help to validate your change.
+# OpenSearch Dashboards Validation Protocol
 
-1. `yarn osd bootstrap`: install and linking dependencies.
-2. `scripts/use_node scripts/build_opensearch_dashboards_platform_plugins`: run optimizer to create bundles.
-3. `yarn start`: start OpenSearch Dashboards on localhost:5601. If user provides a `os run <args>` command, use it instead of `yarn start`.
-4. If you are fixing errors related to building artifact: run `yarn build-platform --linux --skip-os-packages`.
-5. If you are fixing errors related to running artifact: run `./build/opensearch-dashboards/bin/opensearch-dashboards` after build.
-6. If you are fixing errors that show up in browser console: use chrome-devtools MCP to access localhost:5601[/path] after server has started.
+When making changes to OpenSearch Dashboards, follow this validation workflow:
 
-After making any fix, you must follow these rules and investigate errors.
+## Required Commands
 
-- If you've modified dependencies or the `packages/` directory, you must run 1 first. Otherwise it's not required.
-- 2 is always required.
-- 3-6 are required only for relevant situations.
+1. **`yarn osd bootstrap`** - Install and link dependencies
+   - **Required when:** You've modified `package.json`, `yarn.lock`, or anything in `packages/` directory
+   - **Skip when:** Only changing application code
 
-Repeat the steps until they finish successfully with NO errors.
+2. **`scripts/use_node scripts/build_opensearch_dashboards_platform_plugins`** - Build optimizer bundles
+   - **Required when** You've made code changes, and the server is not running
+   - Avoid `--no-cache` flag unless absolutely necessary
+
+3. **`os run -e`** - Start development server on localhost:5601
+   - Use this command (NOT `yarn start`) unless user specifies otherwise
+   - `os run` is a wrapper with feature flags
+   - Server runs optimizer with file watcher automatically
+   - **If server is already running:** No need to stop and rerun step 2
+
+## Situational Validation
+
+4. **Build artifact errors:** `yarn build-platform --linux --skip-os-packages`
+
+5. **Runtime artifact errors:** `./build/opensearch-dashboards/bin/opensearch-dashboards` (after build)
+
+6. **Browser console errors:** Use chrome-devtools MCP to access localhost:5601 with optionally provided path (after server starts)
+
+## Validation Rules
+
+After **every fix**, you must:
+- Run applicable steps based on what you changed
+- Verify each step completes with **NO errors**
+- If errors occur, investigate and fix them
+- Repeat until all validation passes successfully

@@ -105,7 +105,7 @@ link_file() {
 install_devtools() {
   log '\nInstalling development tools..'
   if [[ $OSTYPE = linux-android ]]; then
-    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y zsh openssh wget git vim termux-exec diffutils fd ripgrep lazygit tmux bat git-delta neovim file  # yazi requires file
+    pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y proot zsh openssh wget git vim termux-exec diffutils fd ripgrep lazygit tmux bat git-delta neovim file  # yazi requires file
     chsh -s zsh "$(whoami)"
     mkdir -p ~/temp && cd ~/temp
     wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip && unzip JetBrainsMono.zip
@@ -329,7 +329,7 @@ install_claude-code() {
     log 'Claude Code configuration already exists, skipping..'
     return 0
   fi
-  npm install -g @anthropic-ai/claude-code
+  npm install -g @anthropic-ai/claude-code ccstatusline@latest
   mkdir -p ~/.aws ~/.claude
   link_file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link_file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
@@ -343,8 +343,8 @@ credential_source = Ec2InstanceMetadata
 region = us-west-2
 EOF
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
-  install_google-chrome 2> /dev/null && claude mcp add -s user chrome-devtools -- npx chrome-devtools-mcp@latest --headless --isolated --no-sandbox || true
-  log "\nInstalled Claude Code. To configure statusline, run ${YELLOW}npx -y ccstatusline@latest"
+  install_google-chrome 2> /dev/null && npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox || true
+  log "\nInstalled Claude Code. To configure statusline, run ${YELLOW}ccstatusline"
   log "${NC}${BG_RED}TODO${CYAN}: update bedrock role in ${YELLOW}~/.aws/credentials"
 }
 

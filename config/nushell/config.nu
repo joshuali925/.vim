@@ -30,14 +30,16 @@ $env.EDITOR = 'nvim'
 
 alias ll = ls -al
 alias v = ^$env.EDITOR
+alias vi = vim
+alias vim = ^$env.EDITOR
 alias lg = lazygit
 alias size = du | sort-by apparent | reverse
 
 alias gd = git diff
 alias gpf = git push --force-with-lease fork (git symbolic-ref --short HEAD)
 alias gl = git pull
+alias g = git log --graph --pretty=simple --boundary --max-count 15
 alias glo = git log --graph --pretty=simple
-alias gloo = git log --graph --pretty=simple --max-count 15
 alias gs = git status
 alias gco = git checkout
 

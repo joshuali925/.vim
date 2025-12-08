@@ -2,7 +2,7 @@
   "Template": {
     "prefix": "template",
     "description": "rest.nvim request variables",
-    "body": ["@base = ${1:localhost:8000}", "", "$0", ""]
+    "body": ["@base = localhost:${1:8000}", "", "$0", ""]
   },
   "Content type header": {
     "prefix": "content-type",

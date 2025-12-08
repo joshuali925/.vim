@@ -19,29 +19,7 @@ return {
         end,
     },
     {
-        "mistweaverco/kulala.nvim",
-        init = function()
-            vim.api.nvim_create_augroup("KulalaAutoCommands", {})
-            vim.api.nvim_create_autocmd("FileType", {
-                pattern = "http",
-                group = "KulalaAutoCommands",
-                callback = function(e)
-                    vim.keymap.set("n", "{", "<Cmd>lua require('kulala').jump_prev()<CR>", { buffer = e.buf })
-                    vim.keymap.set("n", "}", "<Cmd>lua require('kulala').jump_next()<CR>", { buffer = e.buf })
-                end,
-            })
-        end,
-        config = function()
-            require("kulala").setup({
-                default_view = "headers_body",
-                additional_curl_options = { "--insecure" },
-                ui = { max_response_size = require("states").size_threshold * 5 },
-            })
-            vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
-        end,
-    },
-    {
-        "folke/snacks.nvim", -- or https://github.com/dmtrKovalenko/fff.nvim
+        "folke/snacks.nvim",
         priority = 1000,
         lazy = false,
         keys = {
@@ -135,7 +113,7 @@ return {
                         { icon = " ", key = "z", desc = "Find projects", action = ":lua require('snacks.picker').projects()" },
                         { icon = " ", key = "'", desc = "Find bookmarks", action = ":lua require('bookmarks').pick()" },
                         { icon = "󰘬 ", key = "s", desc = "Git changed files (open: !)", action = ":lua require('snacks.picker').git_status()" },
-                        { icon = "󰘬 ", key = "!", desc = "Open git changed files", action = ":argadd `git diff --name-only @` | bnext", hidden = true },
+                        { icon = "󰘬 ", key = "!", desc = "Open git changed files", action = ":argadd `git diff --name-only --diff-filter=d @` | bnext", hidden = true },
                         { icon = " ", key = "d", desc = "Git diff", action = ":DiffviewOpen" },
                         { icon = " ", key = "+", desc = "Git diff remote", action = ":DiffviewOpen @{upstream}..HEAD" },
                         { icon = "󰍜 ", key = "\\", desc = "Open quickui", action = ":Lazy load vim-quickui | call quickui#menu#open('normal')" },
@@ -226,8 +204,8 @@ return {
             { "<leader>j", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.line_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>k", "<Cmd>lua require('utils').command_without_quickscope(function() MiniJump2d.start(MiniJump2d.builtin_opts.word_start) end)<CR>", mode = { "n", "x", "o" } },
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
-            { "g<", "cxiacxiNa", remap = true },
-            { "g>", "cxiacxiPa", remap = true },
+            { "g<", "cxiacxiPag", remap = true },
+            { "g>", "cxiacxiNag", remap = true },
             { "<leader>gc", "<Cmd>Git commit --signoff<CR>" },
             { "<leader>fd", "<Cmd>lua require('mini.pick').builtin.files()<CR>" },
             {

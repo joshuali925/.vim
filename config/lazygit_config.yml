@@ -65,3 +65,7 @@ customCommands:
     context: files
     description: Add all files to be tracked
     command: git add --all --intent-to-add
+  - key: <c-g>
+    context: commits
+    description: Amend latest commit with sign-off
+    command: git commit --amend --signoff --no-edit

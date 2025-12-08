@@ -7,7 +7,7 @@ local required_servers = {
     "vimls",
     "yamlls",
     "bashls",
-    "basedpyright", -- to change max line length: printf '[pycodestyle]\nmax-line-length = 150' >> setup.cfg
+    "ty",
     "eslint",
     -- lsp servers not installed by mason
     "jsonls", -- use eslint-lsp package for json, html, css lsps
@@ -21,7 +21,7 @@ local required_packages = {
     "vim-language-server",
     "yaml-language-server",
     "bash-language-server",
-    "basedpyright",
+    "ty",
     "eslint-lsp",
     -- lsp servers configured not using lspconfig
     "typescript-language-server", -- typescript-language-server is setup using typescript-tools
@@ -139,11 +139,6 @@ function M.organize_imports_and_format()
         local ok, res = pcall(require("typescript-tools.api").organize_imports) -- sync organize imports always fails
         vim.cmd.sleep()
         if not ok then vim.notify(res, vim.log.levels.WARN, { title = "Failed to organize imports" }) end
-    elseif vim.tbl_contains(active_clients, "basedpyright") then
-        vim.lsp.buf_request_sync(0, "workspace/executeCommand", {
-            command = "basedpyright.organizeimports",
-            arguments = { vim.uri_from_bufnr(0) },
-        }, 3000)
     end
     vim.cmd.Conform()
 end
