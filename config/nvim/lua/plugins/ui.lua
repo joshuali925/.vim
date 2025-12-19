@@ -220,8 +220,9 @@ return {
             vim.fn["quickui#menu#install"]("&Actions", {
                 { "&Minimize JSON", [['<,'>!jq -c .]], "Use jq to minimize selected JSON" },
                 { "Base64 &encode", [[execute "lua vim.fn.setreg('x', vim.base64.encode(require('utils').get_visual_selection()))" | execute 'S put x' | file base64_encode]], "Use base64 to encode selected text" },
-                { "Base64 &decode", [[lua local temp = require("utils").base64_decode(require("utils").get_visual_selection()); vim.cmd.S(); vim.api.nvim_put(temp, "", false, true); vim.api.nvim_buf_set_name(0, "base64_decode"); temp = nil]], "Decode selected text with base64" },
+                { "Base&64 decode", [[lua local temp = require("utils").base64_decode(require("utils").get_visual_selection()); vim.cmd.S(); vim.api.nvim_put(temp, "", false, true); vim.api.nvim_buf_set_name(0, "base64_decode"); temp = nil]], "Decode selected text with base64" },
                 { "Generate &snippet", [[let @x = substitute(escape(funcs#get_visual_selection(), '"$'), repeat(' ', &shiftwidth), '\\t', 'g') | execute 'S put x' | execute '%normal! gI"' | execute '%normal! A",' | execute 'normal! Gdd$x' | file snippet_body]], "Generate vscode compatible snippet body from selected text" },
+                { "&Delete comments", [[lua require("utils").delete_comments(vim.fn.line("'<"), vim.fn.line("'>"))]], "Delete comments from selected lines" },
                 { "--", "" },
                 { "Search in &buffers", [[execute 'cexpr []' | execute 'bufdo vimgrepadd /' . substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g') . '/g %' | copen]], "Grep current search pattern in all buffers, add to quickfix" },
             })

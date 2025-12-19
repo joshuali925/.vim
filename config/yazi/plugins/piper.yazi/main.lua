@@ -1,4 +1,4 @@
---- @since 25.5.28
+--- @since 25.9.15
 -- https://github.com/yazi-rs/plugins/tree/main/piper.yazi
 
 local M = {}
@@ -7,7 +7,7 @@ local function fail(job, s) ya.preview_widget(job, ui.Text.parse(s):area(job.are
 
 function M:peek(job)
     local child, err = Command("sh")
-        :arg({ "-c", job.args[1], "sh", tostring(job.file.url) })
+        :arg({ "-c", job.args[1], "sh", tostring(job.file.cache or job.file.url) })
         :env("w", job.area.w)
         :env("h", job.area.h)
         :stdout(Command.PIPED)
@@ -49,7 +49,7 @@ function M:seek(job) require("code"):seek(job) end
 function M.format(job, lines)
     local format = job.args.format
     if format ~= "url" then
-        local s = table.concat(lines, ""):gsub("\t", string.rep(" ", rt.preview.tab_size))
+        local s = table.concat(lines, ""):gsub("\r", ""):gsub("\t", string.rep(" ", rt.preview.tab_size))
         return ui.Text.parse(s):area(job.area)
     end
 
@@ -58,7 +58,7 @@ function M.format(job, lines)
 
         local icon = File({
             url = Url(lines[i]),
-            cha = Cha { kind = lines[i]:sub(-1) == "/" and 1 or 0 },
+            cha = Cha { mode = tonumber(lines[i]:sub(-1) == "/" and "40700" or "100644", 8) },
         }):icon()
 
         if icon then

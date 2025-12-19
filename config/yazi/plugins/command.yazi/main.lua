@@ -43,29 +43,29 @@ return {
         if type(job.args[1]) == "string" then
             command = job.args[1]
         else
-            local cmd, event = ya.input({ title = "Command:", position = { "top-center", y = 3, w = 60 } })
+            local cmd, event = ya.input({ title = "Command:", pos = { "top-center", y = 3, w = 60 } })
             if event ~= 1 then return end
             command = cmd
         end
 
-        if command:match("^open$") then return shell(command .. ' "$0"') end
-        if command:match("^file$") then return shell(command .. ' "$0"', true) end
-        if command:match("^chmod ") then return shell(command .. ' "$@"') end
+        if command:match("^open$") then return shell(command .. " %h") end
+        if command:match("^file$") then return shell(command .. " %h", true) end
+        if command:match("^chmod ") then return shell(command .. " %s") end
         if command:match("^chmod%?$") then return chmod_stat() end
-        if command:match("^chown$") then return shell('sudo chown -R "$USER:$USER" "$0"') end
+        if command:match("^chown$") then return shell('sudo chown -R "$USER:$USER" %h') end
         if command:match("^chown%?$") then return chown_stat() end
-        if command:match("^sudorm$") then return shell('sudo rm -r "$@"') end
-        if command:match("^size$") then return shell([[du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }']], true) end
-        if command:match("^audio$") then return shell([[ffmpeg -i "$0" 2>&1 | rg -o 'Stream \S+ Audio: (\w+)' -r '$1' | xargs -I@ ffmpeg -i "$0" -codec copy "${0%.*}.@"]]) end
+        if command:match("^sudorm$") then return shell("sudo rm -r %s") end
+        if command:match("^size$") then return shell([[du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%%8.3f %%s", bytes/x, hum[x]); } } return sprintf("%%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }']], true) end
+        if command:match("^audio$") then return shell([[ffmpeg -i %h 2>&1 | rg -o 'Stream \S+ Audio: (\w+)' -r '$1' | xargs -I@ ffmpeg -i %h -codec copy "${0%%.*}.@"]]) end
         if command:match("^convert ") then
             local ext = command:match("^convert (%S+)")
-            return shell(([[ffmpeg -i "$0" -codec copy "${0%%.*}.%s" || ffmpeg -y -i "$0" "${0%%.*}.%s"]]):format(ext, ext))
+            return shell('ffmpeg -i %h -codec copy "${0%%.*}.' .. ext .. '" || ffmpeg -y -i %h "${0%%.*}.' .. ext .. '"')
         end
-        if command:match("^sftp$") then return shell([[printf " echo \"get '$0'\" | sftp -r " | y]]) end
-        if command:match("^tarcopy$") then return shell([[for file in "$@"; do set -- "$@" "$(realpath --relative-to=. "$file")"; shift; done; printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end
+        if command:match("^sftp$") then return shell([[printf " echo \"get %h\" | sftp -r " | y]]) end
+        if command:match("^tarcopy$") then return shell([[for file in %s; do set -- "$@" "$(realpath --relative-to=. "$file")"; shift; done; printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end
 
         local function compress_cmd(cmd, ext)
-            return ('for file in "$@"; do set -- "$@" "$(realpath --relative-to="." "$file")"; shift; done; %s "${1}.%s" "$@"'):format(cmd, ext)
+            return 'for file in %s; do set -- "$@" "$(realpath --relative-to="." "$file")"; shift; done; ' .. cmd .. ' "%s1.' .. ext .. '" "$@"'
         end
         if command:match("^zip$") then return shell(compress_cmd("zip -r", "zip")) end
         if command:match("^7z$") then return shell(compress_cmd("7z a", "7z")) end
@@ -73,13 +73,14 @@ return {
         if command:match("^7zultra$") then return shell(compress_cmd("7z a -t7z -mx=9 -m0=lzma -mfb=64 -md=32m -ms=on", "7z")) end
         if command:match("^7zmax$") then return shell(compress_cmd("7z a -t7z -mx=9 -mfb=273 -ms -md=31 -myx=9 -mtm=- -mmt -mmtf -md=1536m -mmf=bt3 -mmc=10000 -mpb=0 -mlc=0 -m0=LZMA2:27", "7z")) end
         if command:match("^x$") then
-            return shell(([[
+            return shell([[
+                set -x
                 set -f
                 if [ "$#" -gt 1 ]; then
-                    %s
+                    ]] .. compress_cmd("tar cvzf", "tar.gz") .. [[;
                 else
-                    selected="$(basename "$0")"
-                    if [ -d "$0" ]; then
+                    selected="$(basename %h)"
+                    if [ -d %h ]; then
                         tar czvf "$selected.tar.gz" "$selected"
                     elif file -Lb --mime-type -- "$selected" | grep -q "^video/"; then
                         ffmpeg -i "$selected" -vcodec libx264 -crf 28 "${selected%%.*}.small.mp4"
@@ -89,14 +90,14 @@ return {
                         xtract "$selected"
                     fi
                 fi
-            ]]):format(compress_cmd("tar czvf", "tar.gz")))
+            ]])
         end
         if command:match("^X$") then
             return shell([[
                 set -f
-                selected="$(basename "$0")"
+                selected="$(basename %h)"
                 if [ -f "$selected" ]; then
-                    dir="${selected%.*}"
+                    dir="${selected%%.*}"
                     filename="$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)_$selected"
                     command mkdir -pv "$dir"
                     command mv -i "$selected" "$dir/$filename"
@@ -111,7 +112,7 @@ return {
         end
 
         -- copy file reference (mac only)
-        if command:match("^copy$") then return shell('osascript -e "on run args" -e "set the clipboard to POSIX file (first item of args)" -e end "$0"') end
+        if command:match("^copy$") then return shell('osascript -e "on run args" -e "set the clipboard to POSIX file (first item of args)" -e end %h') end
 
         return shell(command, true)
     end,

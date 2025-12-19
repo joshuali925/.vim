@@ -51,7 +51,7 @@ run() {
   fi
   if [[ -f opensearch_dashboards.d.ts ]]; then
     if [[ -n $bootstrap ]]; then yarn osd bootstrap --single-version=loose || true; fi
-    exec yarn "$start_cmd" --no-base-path "${opts[@]}" "$@"  # --run-examples
+    exec env OSD_OPTIMIZER_THEMES="${OSD_OPTIMIZER_THEMES:-v9light}" yarn "$start_cmd" --no-base-path "${opts[@]}" "$@"  # --run-examples
   fi
   echo 'Error: Could not find any runnable OpenSearch or OpenSearch Dashboards environment.' >&2
 }

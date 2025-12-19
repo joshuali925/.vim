@@ -142,17 +142,20 @@ return {
         end,
         config = function()
             local installed = require("nvim-treesitter").get_installed()
-            local not_installed = vim.tbl_filter(function(lang) return not vim.tbl_contains(installed, lang) end, { "markdown_inline", "jsdoc" })
+            local not_installed = vim.tbl_filter(function(lang) return not vim.tbl_contains(installed, lang) end, { "jsdoc" })
             if #not_installed > 0 then
                 vim.list_extend(installed, not_installed)
                 require("nvim-treesitter").install(not_installed)
             end
-            local available = require("nvim-treesitter").get_available()
+            local available = { kulala_http = true }
+            for _, lang in ipairs(require("nvim-treesitter").get_available()) do
+                if not vim.tbl_contains({ "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" }, lang) then available[lang] = true end
+            end
             vim.api.nvim_create_autocmd("FileType", {
                 group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true }),
                 callback = function(event)
                     local lang = vim.treesitter.language.get_lang(event.match)
-                    if not vim.tbl_contains(available, lang) then return end
+                    if not available[lang] then return end
                     local ts_toggle = function(enable)
                         if enable == nil then enable = not vim.treesitter.highlighter.active[event.buf] end
                         vim.treesitter[enable and "start" or "stop"](event.buf, enable and lang or nil)

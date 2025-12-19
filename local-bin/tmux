@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euo pipefail
 
 tmux_path=$(builtin command -v tmux)
 [[ $tmux_path = */.vim/*/tmux ]] && echo 'Tmux not installed.' >&2 && exit 1

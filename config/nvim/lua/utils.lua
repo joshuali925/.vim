@@ -56,14 +56,29 @@ function M.delete_comments(start_line, end_line) -- https://gist.github.com/kelv
     local root = tree:root()
     local query = vim.treesitter.query.parse(lang, "(comment) @comment")
     local ranges = {}
+    local affected_lines = {}
     for _, node in query:iter_captures(root, bufnr, start_line and (start_line - 1) or 0, end_line or -1) do
-        table.insert(ranges, { node:range() })
+        local r = { node:range() }
+        table.insert(ranges, r)
+        for line = r[1], r[3] do affected_lines[line] = true end
     end
     table.sort(ranges, function(a, b)
         if a[1] == b[1] then return a[2] < b[2] end
         return a[1] > b[1]
     end)
     for _, r in ipairs(ranges) do vim.api.nvim_buf_set_text(bufnr, r[1], r[2], r[3], r[4], {}) end
+    local lines_to_delete = {}
+    for line in pairs(affected_lines) do
+        local content = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
+        if content and content:match("^%s*$") then
+            table.insert(lines_to_delete, line)
+        elseif content then
+            local trimmed = content:gsub("%s+$", "")
+            if trimmed ~= content then vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, { trimmed }) end
+        end
+    end
+    table.sort(lines_to_delete, function(a, b) return a > b end)
+    for _, line in ipairs(lines_to_delete) do vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, {}) end
 end
 
 function M.toggle_venn()
