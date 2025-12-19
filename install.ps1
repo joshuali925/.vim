@@ -57,6 +57,7 @@ Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "export LANG=C.UTF-8", "sour
 
 # install neovim
 scoop install neovim extras/neovide gcc
+[Environment]::SetEnvironmentVariable("CC", "gcc", "User")  # for treesitter
 reg import "$env:USERPROFILE\scoop\apps\neovide\current\install-context.reg"
 Remove-Item "$env:USERPROFILE\.vim\config\nvim\autoload" -Force -Recurse
 New-Item -ItemType Junction -Path "$env:USERPROFILE\.vim\config\nvim\autoload" -Target "$env:USERPROFILE\.vim\autoload"

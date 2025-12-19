@@ -7,6 +7,8 @@ Host *
     ControlPath ~/.ssh/_%r_%C
     # ControlPersist 10h
     # ForwardAgent yes
+    # ForwardX11 yes
+    # DynamicForward 1080
 
 # temporary tunnel: cloudflared tunnel --url ssh://localhost:8022
 # or log in: cloudflared tunnel login && cloudflared tunnel run --token xxx

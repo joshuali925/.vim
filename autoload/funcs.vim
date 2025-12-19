@@ -183,7 +183,10 @@ function! funcs#get_run_command() abort
   if file =~ 'Caddyfile$'
     return 'lua require("utils").term_exec([[ docker exec caddy caddy reload --config /etc/caddy/Caddyfile]])'
   endif
-  if file =~ '\.class'
+  if file =~ 'docker-compose.yml$'
+    return 'lua require("utils").term_exec([[ dc -f "' . file . '" up -d --remove-orphans]])'
+  endif
+  if file =~ '\.class$'
     call funcs#decompile_java_class()
     return
   endif
@@ -197,7 +200,7 @@ function! funcs#get_run_command() abort
     if fnamemodify(included_dir, ':t') =~ 'test'
       let included_dir = fnamemodify(included_dir, ':h')
     endif
-    return 'lua local cur = vim.api.nvim_get_current_win(); vim.api.nvim_set_current_win(vim.fn.win_findbuf(require("utils").term_exec([[ yarn test:jest ' . file . ' -t ' . funcs#jest_context() . " --coverage --collectCoverageFrom='" . included_dir . "/**' --coverageReporters=text -u]], { win = { position = 'right' } }).buf)[1]); vim.cmd.startinsert(); vim.schedule(function() vim.api.nvim_set_current_win(cur) end)"
+    return 'lua local cur = vim.api.nvim_get_current_win(); vim.api.nvim_set_current_win(vim.fn.win_findbuf(require("utils").term_exec([[ yarn test:jest "' . file . '" -t ' . funcs#jest_context() . " --coverage --collectCoverageFrom='" . included_dir . "/**' --coverageReporters=text -u]], { win = { position = 'right' } }).buf)[1]); vim.cmd.startinsert(); vim.schedule(function() vim.api.nvim_set_current_win(cur) end)"
   endif
   let run_command = {}
   let run_command['vim'] = 'source %'

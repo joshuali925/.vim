@@ -14,11 +14,11 @@ max_height = 1900
 
 [plugin]
 prepend_previewers = [
-  { name = "*.tar*", run = 'piper --format=url -- tar tf "$1"' },
+  { url = "*.tar*", run = 'piper --format=url -- tar tf "$1"' },
 ]
 
 [open]
 prepend_rules = [
-  { name = "*/", use = ["open", "reveal"] },
-  { mime = "{audio,video}/*", use = ["open", "reveal"] },
+  { url = "*/", use = ["open", "reveal"] },
+  { url = "{audio,video}/*", use = ["open", "reveal"] },
 ]

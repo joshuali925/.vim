@@ -489,7 +489,7 @@ man() {
 
 # shellcheck disable=2032
 env() {
-  if [[ $# -ne 0 ]]; then command env "$@"; return $?; fi
+  if [[ $# -gt 0 || ! -t 1 ]]; then command env "$@"; return $?; fi
   # shellcheck disable=2016
   printenv | cut -d= -f1 | fzf --multi --preview='printenv {}' | xargs -r -I{} sh -c 'echo "{}=$(printenv "{}")"'
 }
@@ -617,7 +617,7 @@ kube-shell() {
 }
 
 pm2() {
-  if [[ $# -gt 0 ]]; then command pm2 "$@"; return $?; fi
+  if [[ $# -gt 0 || ! -t 1 ]]; then command pm2 "$@"; return $?; fi
   local get_state='local IFS=$'\''\n'\'' app_list=$(pm2 list -m) map=() names ids app_status && names=($(echo "$app_list" | awk '\''/^\+---/{sub("+--- ", ""); print}'\'')) && ids=($(echo "$app_list" | awk '\''/^pm2 id : /{sub("pm2 id : ", ""); print}'\'')) && app_status=($(echo "$app_list" | awk '\''/^status : /{sub("status : ", ""); print}'\'')) && for ((i=1; i<=${#ids[@]}; i++)); do if [[ ${app_status[i]} = online ]]; then map+=("${ids[i]} : \e[0;32m${names[i]}\e[0m"); else map+=("${ids[i]} : \e[0;31m${names[i]} [${app_status[i]}]\e[0m"); fi; done && printf "%b\n" "${map[@]}"'
   FZF_DEFAULT_COMMAND=$get_state fzf --ansi --height=100% --list-border=none --header='CR: logs | C-e: start | C-t: stop | C-r: restart' \
     --bind="ctrl-e:execute(pm2 start {1} && sleep 1)+reload($get_state)" --bind="ctrl-t:execute(pm2 stop {1} && sleep 1)+reload($get_state)" \

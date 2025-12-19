@@ -20,7 +20,7 @@ usage() {
 
 init() {
   [[ -n $INSTALL_ENV_INIT ]] && return 0 || INSTALL_ENV_INIT=1
-  set -eo pipefail
+  set -euo pipefail
   cd
   export PATH="$HOME/.local/bin:$PATH:$HOME/.vim/bin"
   detect-env
@@ -45,11 +45,7 @@ detect-env() {
     # mac shows i386 for x86_64
     i[36]86 | amd64 | x86_64)
       ARCHITECTURE=x86_64 ;;
-    # *armv6*)
-    #   ARCHITECTURE=arm6 ;;
-    # *armv7*)
-    #   ARCHITECTURE=arm7 ;;
-    *aarch64* | *armv8* | arm64)  # shellcheck disable=SC2034
+    *aarch64* | *armv8* | arm64)
       ARCHITECTURE=arm64 ;;
     *)
       echo 'architecture not supported, exiting..' >&2
@@ -66,8 +62,7 @@ detect-env() {
         PACKAGE_MANAGER=apk
       else
         echo 'package manager not supported' >&2
-      fi
-      ;;
+      fi ;;
     darwin*)
       PLATFORM=darwin ;;
     *)
@@ -143,7 +138,8 @@ install_devtools() {
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
     # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery visual-studio-code orion
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
-    # to update wezterm: brew upgrade --cask wezterm --no-quarantine --greedy-latest
+    # to update casks: brew upgrade --cask --greedy
+    # to update one cask: brew upgrade --cask wezterm --no-quarantine --greedy-latest
   fi
 }
 
@@ -285,7 +281,7 @@ install_swap() {
   log "Installing ${g}G swapfile.."
   sudo dd if=/dev/zero of=/swapfile count=$((g * 1024)) bs=1MiB &
   if [[ $PACKAGE_MANAGER = apt-get ]]; then
-    log "Installing earlyoom.."
+    log 'Installing earlyoom..'
     sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y earlyoom
   fi
   wait
