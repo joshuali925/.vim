@@ -120,6 +120,7 @@ return {
                 { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
                 { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
                 { "Diff next buffer", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
+                { "Diff directories", [[call feedkeys(":CodeDiff dir ", "n")]], "Run DirDiff to compare two directories" }, -- TODO(0.12) https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },
@@ -139,13 +140,13 @@ return {
                 { "Git &change base", [[call feedkeys(":Gitsigns change_base @^ true\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Gitsigns show hunk based on ref" },
                 { "Git reset base", [[lua require("gitsigns").reset_base(true)]], "Gitsigns reset changed base" },
                 { "--", "" },
-                { "Git &diff", [[call feedkeys(":Gdiffsplit @", "n")]], "Diff current file with ref" },
-                { "Git deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
-                { "Git &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
-                { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
+                { "Git &diff", [[call feedkeys(":CodeDiff file @", "n")]], "Diff current file with ref" },
+                { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
+                { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
+                { "Git &file history", [[lua require("snacks.picker").git_log_file()]], "Browse previously committed versions of current file" },
                 { "Git file l&og", [[Git log --graph --pretty=plain -- %]], "Show git log for current file using mini.git" },
                 { "--", "" },
-                { "Diff&view", [[DiffviewOpen]], "Diff repo using Diffview" },
+                { "&View diff page", [[CodeDiff]], "Diff repo" },
                 { "Open changed files (&!)", [[call feedkeys(":argadd `git diff --name-only --diff-filter=d @`\<Left>", "n")]], "Open modified files against ref" },
                 { "Git &issues", [[lua require("snacks.picker").gh_issue({state = "all"})]], "Pick GitHub issues" },
                 { "Git &PRs", [[lua require("snacks.picker").gh_pr({state = "all"})]], "Pick GitHub pull requests" },
@@ -227,7 +228,7 @@ return {
                 { "Search in &buffers", [[execute 'cexpr []' | execute 'bufdo vimgrepadd /' . substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g') . '/g %' | copen]], "Grep current search pattern in all buffers, add to quickfix" },
             })
             vim.fn["quickui#menu#install"]("&Git", {
-                { "Diffview &file history", [['<,'>DiffviewFileHistory --follow]], "Browse previously committed versions of selected range with Diffview" },
+                { "Git &file history", [[lua require("mini.git").show_range_history({ line_start = vim.fn.line("'<"), line_end = vim.fn.line("'>"), log_args = { "--follow" } })]], "Browse previously committed versions of selected lines" },
             })
             vim.fn["quickui#menu#install"]("Ta&bles", {
                 { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },

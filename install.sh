@@ -136,7 +136,7 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery visual-studio-code orion
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
     # to update one cask: brew upgrade --cask wezterm --no-quarantine --greedy-latest
@@ -172,7 +172,7 @@ install_dotfiles() {
     link_file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
     link_file ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
   elif [[ $OSTYPE = linux-android ]]; then
-    cat >> ~/.zshrc <<EOF
+    cat >> ~/.zshrc <<'EOF'
 export SSH_CLIENT=1 TMUX_NO_TPM=1
 export EDITOR=vim
 
@@ -249,9 +249,9 @@ install_tmux() {
   if [[ ! -d ~/.tmux ]]; then
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth=1
   else
-    ~/.tmux/plugins/tpm/bin/update_plugins all || true
+    TMUX_PLUGIN_MANAGER_PATH=$HOME/.tmux/plugins/ ~/.tmux/plugins/tpm/bin/update_plugins all || true
   fi
-  ~/.tmux/plugins/tpm/bin/install_plugins || true
+  TMUX_PLUGIN_MANAGER_PATH=$HOME/.tmux/plugins/ ~/.tmux/plugins/tpm/bin/install_plugins || true
   if [[ ! -d ~/.terminfo ]]; then
     curl -LO https://invisible-island.net/datafiles/current/terminfo.src.gz && gunzip terminfo.src.gz
     tic -xe tmux-256color terminfo.src && rm terminfo.src
@@ -330,18 +330,28 @@ install_claude-code() {
   link_file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link_file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link_file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
-  cat >> ~/.aws/credentials <<'EOF'
-
-[bedrock-prod]
-role_arn = arn:aws:iam::000000000000:role/Admin
-credential_source = Ec2InstanceMetadata
-; source_profile = default
-region = us-west-2
-EOF
+  printf '\n[bedrock-prod]\nrole_arn = arn:aws:iam::000000000000:role/Admin\ncredential_source = Ec2InstanceMetadata\n; source_profile = default\nregion = us-west-2\n' >> ~/.aws/credentials
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
+  claude plugin marketplace add anthropics/claude-code
+  claude plugin install frontend-design@claude-code-plugins
+  claude plugin disable frontend-design
+  claude plugin marketplace add memvid/claude-brain
+  claude plugin install mind@memvid
   install_google-chrome 2> /dev/null && npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox || true
-  log "\nInstalled Claude Code. To configure statusline, run ${YELLOW}ccstatusline"
-  log "${NC}${BG_RED}TODO${CYAN}: update bedrock role in ${YELLOW}~/.aws/credentials"
+  log "\nInstalled Claude Code. Use ${YELLOW}claude --permission-mode=bypassPermissions${CYAN} to trust all"
+  log "${BG_RED}TODO${CYAN}: update bedrock role in ${YELLOW}~/.aws/credentials"
+}
+
+install_k3s() {
+  curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode=644
+  kubectl completion zsh > ~/.vim/config/zsh/completions/_kubectl
+  k9s completion zsh > ~/.vim/config/zsh/completions/_k9s
+  mise use -g helm stern
+  mise x -- helm completion zsh > ~/.vim/config/zsh/completions/_helm
+  mise x -- stern --completion zsh > ~/.vim/config/zsh/completions/_stern
+  export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+  echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' | tee -a ~/.bashrc ~/.zshrc
+  log 'Installed k3s, helm, k9s, stern'
 }
 
 install_ssh-key() {

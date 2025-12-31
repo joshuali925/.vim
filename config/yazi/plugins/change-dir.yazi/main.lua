@@ -44,11 +44,12 @@ local function git_root()
     if stdout ~= nil then ya.emit("cd", { stdout }) end
 end
 
-local function fzf(type, args) -- https://github.com/sxyazi/yazi/blob/main/yazi-plugin/preset/plugins/fzf.lua
+local function fzf(type, args) -- https://raw.githubusercontent.com/sxyazi/yazi/HEAD/yazi-plugin/preset/plugins/fzf.lua
     ui.hide()
+    local cmd = os.getenv(("FZF_%s_COMMAND"):format(type))
     local child, err = Command("fzf")
-        :env("FZF_DEFAULT_COMMAND", os.getenv(("FZF_%s_COMMAND"):format(type)) .. " " .. (flags_from_args(args) or ""))
-        :env("FZF_DEFAULT_OPTS", os.getenv("FZF_DEFAULT_OPTS") .. " " .. os.getenv(("FZF_%s_OPTS"):format(type)) .. " --height=100%")
+        :env("FZF_DEFAULT_COMMAND", cmd and (cmd .. " " .. flags_from_args(args)) or "")
+        :env("FZF_DEFAULT_OPTS", (os.getenv("FZF_DEFAULT_OPTS") or "") .. " " .. (os.getenv(("FZF_%s_OPTS"):format(type)) or "") .. " --height=100%")
         :stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
 
     local stdout = read_child_output(child, err)
@@ -66,14 +67,23 @@ local function z()
     if stdout ~= nil then ya.emit("cd", { stdout }) end
 end
 
-local initial_cwd = ya.sync(function(st) if st.initial_cwd then ya.emit("cd", { st.initial_cwd }) end end)
+local navigate = ya.sync(function(st, direction)
+    if not st.history or st.history_idx + direction < 1 or st.history_idx + direction > #st.history then return end
+    st.history_idx = st.history_idx + direction
+    ya.emit("cd", { st.history[st.history_idx] })
+end)
 
 return {
     setup = function()
         ps.sub("cd", ya.sync(function(st)
-            if not st.initial_cwd then
-                st.initial_cwd = tostring(cx.active.current.cwd)
-                ps.unsub("cd")
+            local cwd = tostring(cx.active.current.cwd)
+            if not st.history then
+                st.history = { cwd }
+                st.history_idx = 1
+            elseif st.history[st.history_idx] ~= cwd then
+                for i = #st.history, st.history_idx + 1, -1 do st.history[i] = nil end
+                st.history[#st.history + 1] = cwd
+                st.history_idx = #st.history
             end
         end))
     end,
@@ -81,6 +91,7 @@ return {
         if job.args[1] == "git_root" then return git_root() end
         if job.args[1] == "fzf" then return fzf(job.args[2], job.args) end
         if job.args[1] == "z" then return z() end
-        if job.args[1] == "initial_cwd" then return initial_cwd() end
+        if job.args[1] == "initial_cwd" then return ya.sync(function(st) if st.history then ya.emit("cd", { st.history[1] }) end end) end
+        if job.args[1] == "navigate" then return navigate(job.args[2]) end
     end,
 }

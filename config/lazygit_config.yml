@@ -2,6 +2,8 @@
 # https://raw.githubusercontent.com/jesseduffield/lazygit/HEAD/docs/Config.md
 git:
   autoFetch: true
+  commit:
+    signOff: true
   pagers:
     - colorArg: always
       pager: delta --paging=never --24-bit-color=always --features=no-line-numbers
@@ -65,6 +67,10 @@ customCommands:
     context: files
     description: Add all files to be tracked
     command: git add --all --intent-to-add
+  - key: <c-g>
+    context: files
+    description: Run eslint fix for OSD
+    command: node scripts/precommit_hook --fix
   - key: <c-g>
     context: commits
     description: Amend latest commit with sign-off

@@ -73,6 +73,8 @@ Maccy -> Preferences -> Hotkey -> control-shift-v
 
 Alt-tab -> Preferences -> Controls -> change to cmd + tab
                        -> Appearance -> check Hide apps with no open window
+
+Handy -> General -> Transcribe -> change to cmd + option + space
 ```
 
 - Surfingkeys settings: https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js

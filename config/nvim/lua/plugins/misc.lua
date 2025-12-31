@@ -3,7 +3,6 @@ return {
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "nvim-lua/plenary.nvim" },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
-    { "will133/vim-dirdiff", cmd = "DirDiff" }, -- TODO(0.12) https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
     { "jbyuki/venn.nvim", cmd = "VBox" },
     {
         "dhruvasagar/vim-table-mode",
@@ -114,8 +113,8 @@ return {
                         { icon = " ", key = "'", desc = "Find bookmarks", action = ":lua require('bookmarks').pick()" },
                         { icon = "󰘬 ", key = "s", desc = "Git changed files (open: !)", action = ":lua require('snacks.picker').git_status()" },
                         { icon = "󰘬 ", key = "!", desc = "Open git changed files", action = ":argadd `git diff --name-only --diff-filter=d @` | bnext", hidden = true },
-                        { icon = " ", key = "d", desc = "Git diff", action = ":DiffviewOpen" },
-                        { icon = " ", key = "+", desc = "Git diff remote", action = ":DiffviewOpen @{upstream}..HEAD" },
+                        { icon = " ", key = "d", desc = "Git diff", action = ":CodeDiff" },
+                        { icon = " ", key = "+", desc = "Git diff remote", action = ":CodeDiff @{upstream}" },
                         { icon = "󰍜 ", key = "\\", desc = "Open quickui", action = ":Lazy load vim-quickui | call quickui#menu#open('normal')" },
                         { icon = "󰒲 ", key = "p", desc = "Open Lazy (update: 'u', profile: 'P')", action = ":Lazy" },
                         { icon = "󰄉 ", key = "P", desc = "Open Lazy profile", action = ":Lazy profile", hidden = true },
@@ -139,7 +138,6 @@ return {
             picker = {
                 ui_select = false,
                 formatters = { file = { filename_first = true, truncate = 80 } },
-                layout = { preset = "dropdown" },
                 sources = {
                     files = { hidden = true, layout = { preset = "vscode" } },
                     smart = { hidden = true, layout = { preset = "vscode" }, filter = { cwd = true } },
@@ -150,14 +148,20 @@ return {
                     pickers = { layout = { preset = "vscode" } },
                     gh_issue = { layout = { preset = "ivy_split" } },
                     gh_pr = { layout = { preset = "ivy_split" } },
-                    gh_diff = { layout = { preset = "default" } },
-                    git_diff = { layout = { preset = "default" }, on_show = function() vim.cmd.stopinsert() end },
-                    grep = { hidden = true, layout = { layout = { row = 2, width = 0.8, height = 0.9 } } },
-                    grep_word = { hidden = true, layout = { layout = { row = 2, width = 0.8, height = 0.9 } }, on_show = function() vim.cmd.stopinsert() end },
-                    grep_buffers = { layout = { layout = { row = 2, width = 0.8, height = 0.9 } } },
-                    git_status = { layout = { preset = "default" } },
+                    git_diff = { on_show = function() vim.cmd.stopinsert() end },
+                    git_log_file = {
+                        layout = { preset = "sidebar" },
+                        confirm = function(picker, item)
+                            picker:close()
+                            if item and item.commit then vim.cmd.CodeDiff({ args = { "file", item.commit .. "^", item.commit } }) end
+                        end,
+                        on_show = function() vim.cmd.stopinsert() end,
+                    },
+                    grep = { hidden = true, layout = { preset = "dropdown", layout = { row = 2, width = 0.8, height = 0.9 } } },
+                    grep_word = { hidden = true, layout = { preset = "dropdown", layout = { row = 2, width = 0.8, height = 0.9 } }, on_show = function() vim.cmd.stopinsert() end },
+                    grep_buffers = { layout = { layout = { preset = "dropdown", row = 2, width = 0.8, height = 0.9 } } },
                     jumps = { on_show = function() vim.cmd.stopinsert() end },
-                    undo = { layout = { preset = "default" }, on_show = function() vim.cmd.stopinsert() end },
+                    undo = { on_show = function() vim.cmd.stopinsert() end },
                     explorer = {
                         hidden = true,
                         ignored = true,
@@ -188,6 +192,7 @@ return {
                             ["<Esc>"] = { "close", mode = { "i", "n" } },
                             [","] = "preview_scroll_down",
                             ["."] = "preview_scroll_up",
+                            ["<C-l>"] = "focus_preview",
                             ["<C-s>"] = { "toggle_live", mode = { "i", "n" } },
                             ["`"] = { "toggle_ignored", mode = { "i", "n" } },
                         },
@@ -245,7 +250,7 @@ return {
                         hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
                     },
                 })
-                require("mini.align").setup({ mappings = { start = "", start_with_preview = "gl" } })
+                require("mini.align").setup({ mappings = { start = "", start_with_preview = "gl" } }) -- p to remove gap before delimiter
                 require("mini.splitjoin").setup({ mappings = { toggle = "gs" } })
                 require("mini.ai").setup({
                     mappings = { around_next = "aN", inside_next = "iN", around_last = "aP", inside_last = "iP" },

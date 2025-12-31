@@ -14,5 +14,9 @@
     "command": "ccstatusline",
     "padding": 0
   },
+  "enabledPlugins": {
+    "frontend-design@claude-code-plugins": false,
+    "mind@memvid": true
+  },
   "alwaysThinkingEnabled": true
 }

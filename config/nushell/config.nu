@@ -35,6 +35,7 @@ alias vim = ^$env.EDITOR
 alias lg = lazygit
 alias size = du | sort-by apparent | reverse
 
+alias gcl = git clone --filter=blob:none
 alias gd = git diff
 alias gpf = git push --force-with-lease fork (git symbolic-ref --short HEAD)
 alias gl = git pull
@@ -78,10 +79,10 @@ def untildone [command: string, --interval: duration = 1sec, --max-tries: int = 
 
 def --env yy [...args] {
   let tmp = (mktemp -t "yazi-cwd.XXXXXX")
-  yazi ...$args --cwd-file $tmp
+  ^yazi ...$args --cwd-file $tmp
   let cwd = (open $tmp)
   if $cwd != "" and $cwd != $env.PWD {
-      cd $cwd
+    cd $cwd
   }
   rm -fp $tmp
 }

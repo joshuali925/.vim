@@ -37,6 +37,75 @@ local function chown_stat()
     end
 end
 
+local function format_size(size)
+    local units = { "B", "KiB", "MiB", "GiB", "TiB" }
+    local unit_index = 1
+    while size >= 1024 and unit_index < #units do
+        size = size / 1024
+        unit_index = unit_index + 1
+    end
+    return string.format(unit_index == 1 and "%d %s" or "%.6f %s", size, units[unit_index])
+end
+
+local get_items = ya.sync(function(_, hovered)
+    local items = {}
+    if #cx.active.selected > 0 then
+        for _, url in pairs(cx.active.selected) do
+            local path = tostring(url)
+            table.insert(items, { url = path, name = path:match("([^/\\]+)[/\\]?$") or path })
+        end
+    elseif hovered then
+        local file = cx.active.current.hovered
+        if file then table.insert(items, { url = tostring(file.url), name = tostring(file.name) }) end
+    else
+        for i = 1, #cx.active.current.files do
+            local file = cx.active.current.files[i]
+            table.insert(items, { url = tostring(file.url), name = tostring(file.name) })
+        end
+    end
+    return items
+end)
+
+local function get_dir_size(url)
+    local files = fs.read_dir(url, { resolve = true })
+    if not files then return 0 end
+    local total = 0
+    for _, file in ipairs(files) do
+        total = total + (file.cha.is_dir and get_dir_size(file.url) or file.cha.len or 0)
+    end
+    return total
+end
+
+local function get_item_size(url_str)
+    local url = Url(url_str)
+    local cha = fs.cha(url, true)
+    if not cha then return 0 end
+    return cha.is_dir and get_dir_size(url) or cha.len or 0
+end
+
+local function calculate_sizes(args)
+    local items = get_items(args and args.hovered)
+    local sizes, total = {}, 0
+    for _, item in ipairs(items) do
+        local size = get_item_size(item.url)
+        table.insert(sizes, { name = item.name, size = size })
+        total = total + size
+    end
+    table.sort(sizes, function(a, b) return a.size > b.size end)
+    local formatted_total = format_size(total)
+    local max_width = #formatted_total
+    for i = 1, math.min(20, #sizes) do
+        sizes[i].formatted = format_size(sizes[i].size)
+        if #sizes[i].formatted > max_width then max_width = #sizes[i].formatted end
+    end
+    local lines = {}
+    for i = 1, math.min(20, #sizes) do
+        table.insert(lines, string.format("%" .. max_width .. "s  %s", sizes[i].formatted, sizes[i].name))
+    end
+    if #sizes > 1 then table.insert(lines, string.format("%" .. max_width .. "s  total (%d items)", formatted_total, #sizes)) end
+    ya.notify({ title = "Sizes", content = table.concat(lines, "\n"), timeout = 3 })
+end
+
 return {
     entry = function(_, job)
         local command
@@ -55,7 +124,7 @@ return {
         if command:match("^chown$") then return shell('sudo chown -R "$USER:$USER" %h') end
         if command:match("^chown%?$") then return chown_stat() end
         if command:match("^sudorm$") then return shell("sudo rm -r %s") end
-        if command:match("^size$") then return shell([[du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%%8.3f %%s", bytes/x, hum[x]); } } return sprintf("%%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }']], true) end
+        if command:match("^size$") then return calculate_sizes(job.args) end
         if command:match("^audio$") then return shell([[ffmpeg -i %h 2>&1 | rg -o 'Stream \S+ Audio: (\w+)' -r '$1' | xargs -I@ ffmpeg -i %h -codec copy "${0%%.*}.@"]]) end
         if command:match("^convert ") then
             local ext = command:match("^convert (%S+)")
@@ -65,7 +134,7 @@ return {
         if command:match("^tarcopy$") then return shell([[for file in %s; do set -- "$@" "$(realpath --relative-to=. "$file")"; shift; done; printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end
 
         local function compress_cmd(cmd, ext)
-            return 'for file in %s; do set -- "$@" "$(realpath --relative-to="." "$file")"; shift; done; ' .. cmd .. ' "%s1.' .. ext .. '" "$@"'
+            return ('for file in "$@"; do set -- "$@" "$(realpath --relative-to="." "$file")"; shift; done; %s "${1}.%s" "$@"'):format(cmd, ext)
         end
         if command:match("^zip$") then return shell(compress_cmd("zip -r", "zip")) end
         if command:match("^7z$") then return shell(compress_cmd("7z a", "7z")) end

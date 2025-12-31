@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -e
 
 ls() {
   aws ec2 describe-instances --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0], to_string(NetworkInterfaces[0].Association.PublicDnsName || ''), State.Name, InstanceType, InstanceId] | sort_by([], &[2])" --output table
