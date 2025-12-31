@@ -64,9 +64,12 @@ local function load_cache(buf, match)
     local file_name = match or vim.api.nvim_buf_get_name(buf)
     local bookmarks = M.bookmarks[file_name]
     if not bookmarks then return end
+    local existing_ids = {}
+    for _, extmark in ipairs(vim.api.nvim_buf_get_extmarks(buf, ns_id, 0, -1, {})) do
+        existing_ids[extmark[1]] = true
+    end
     for _, bookmark in ipairs(bookmarks) do
-        local extmarks = vim.api.nvim_buf_get_extmarks(0, ns_id, { bookmark.row, 0 }, { bookmark.row, -1 }, {})
-        if #extmarks == 0 then
+        if not bookmark.id or not existing_ids[bookmark.id] then
             bookmark.id = buf_set_extmark({ buf = buf, row = bookmark.row, col = bookmark.col, annot = bookmark.annot })
         end
     end

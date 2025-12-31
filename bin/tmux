@@ -1,18 +1,8 @@
 #!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
 if [[ $(readlink -f "$HOME/.tmux.conf") != $(readlink -f "$HOME/.vim/config/.tmux.conf") ]]; then
   [[ -f $HOME/.tmux.conf ]] && echo '~/.tmux.conf exists, renaming to ~/.tmux.conf.bak' >&2 && mv -iv ~/.tmux.conf ~/.tmux.conf.bak
   ln -sv ~/.vim/config/.tmux.conf ~/.tmux.conf
 fi
 
-source ~/.vim/bin/_install_from_github.sh
-run-if-exists "$0" "$@"
-detect-env
-
-case $PLATFORM:$ARCHITECTURE in
-  linux:*) url=https://github.com/joshuali925/.vim/releases/download/binaries/tmux-linux-$ARCHITECTURE.tar.gz ;;
-  darwin:*) brew install tmux --HEAD ;;
-  *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2; exit 1 ;;
-esac
-
-[[ -n $url ]] && install-archive-from-url "$url" tmux '' "$@"
-run-if-exists "$0" "$@"
+install-from-github tmux tmux/tmux-builds linux-x86_64 linux-arm64 macos-x86_64 macos-arm64 tmux "$@"

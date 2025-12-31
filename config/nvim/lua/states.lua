@@ -13,8 +13,6 @@ vim.g.qs_filetype_blacklist = {
     "lazy",
     "mason",
     "neo-tree",
-    "DiffviewFileHistory",
-    "DiffviewFiles",
     "git", -- mini.git
     "gitsigns-blame",
     "dropbar_menu",

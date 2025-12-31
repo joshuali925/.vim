@@ -26,7 +26,7 @@ return {
     {
         "coder/claudecode.nvim", -- TODO try https://github.com/carlos-algms/agentic.nvim
         enabled = vim.uv.fs_stat(vim.env.HOME .. "/.claude.json") ~= nil,
-        dependencies = { "folke/snacks.nvim" },
+        dependencies = "folke/snacks.nvim",
         keys = {
             { "<leader>c", "<Cmd>ClaudeCode<CR>" },
             { "<leader>c", "<Cmd>ClaudeCodeSend<CR>", mode = "x" },
@@ -44,9 +44,12 @@ return {
                                 local channel = vim.bo.channel
                                 local win = vim.api.nvim_get_current_win()
                                 require("snacks.picker").buffers({
-                                    confirm = function(picker, item)
+                                    confirm = function(picker)
+                                        local items = picker:selected({ fallback = true })
                                         picker:close()
-                                        vim.fn.chansend(channel, (" @%s "):format(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(item.buf), ":~:.")))
+                                        vim.fn.chansend(channel, " " .. table.concat(vim.tbl_map(function(item)
+                                            return ("@%s"):format(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(item.buf), ":~:."))
+                                        end, items), " ") .. " ")
                                     end,
                                     on_close = function()
                                         vim.api.nvim_set_current_win(win)

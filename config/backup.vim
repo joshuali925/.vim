@@ -5728,6 +5728,10 @@ customCommands:
         end,
         config = function() vim.cmd.doautocmd("FileType") end, -- trigger autocmd to define MarkdownPreview command for buffer
     },
+    { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },
+                { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
+                { "Diffview &file history", [['<,'>DiffviewFileHistory --follow]], "Browse previously committed versions of selected range with Diffview" },
+            vim.api.nvim_create_user_command("Gdiffsplit", lua require('gitsigns').diffthis(<q-args>, {split = 'aboveleft'}, function() vim.api.nvim_win_set_option(vim.fn.win_getid(vim.fn.winnr('#')), 'winbar', '%f') end)", { nargs = "*" }) -- git diff <ref> -- %
 
 " =======================================================
 " diff-so-fancy
@@ -5738,3 +5742,7 @@ install-from-url diff-so-fancy https://github.com/so-fancy/diff-so-fancy/release
 	diffFilter = diff-so-fancy --patch
 [diff-so-fancy]
 	stripLeadingSymbols = false
+
+" =======================================================
+  { on = ["m", "s"], run = '''shell --block -- du -sbc %s | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%%11.6f %%s", bytes/x, hum[x]); } } return sprintf("%%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | grep "total\$"; echo Press any key to continue; bash -c "read -n 1 -s _"''', desc = "Show selected size", for = "unix" },
+        if command:match("^size$") then return shell([[du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%%8.3f %%s", bytes/x, hum[x]); } } return sprintf("%%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }']], true) end

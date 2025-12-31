@@ -5,7 +5,7 @@ detect-env
 
 # appimage: curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage && chmod u+x nvim-linux-x86_64.appimage && ./nvim-linux-x86_64.appimage --appimage-extract && rm  && \mv squashfs-root ~/.local/lib/nvim && ln -svf ~/.local/lib/nvim/usr/bin/nvim ~/.local/bin/nvim
 case $PLATFORM:$ARCHITECTURE in
-  linux:x86_64) url=https://github.com/neovim/neovim-releases/releases/latest/download/nvim-linux-$ARCHITECTURE.tar.gz ;;
+  linux:x86_64) url=https://github.com/neovim/neovim-releases/releases/latest/download/nvim-linux-$ARCHITECTURE.tar.gz ;;  # for old glibc builds
   linux:arm64) url=https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$ARCHITECTURE.tar.gz ;;
   darwin:*) url=https://github.com/neovim/neovim/releases/latest/download/nvim-macos-$ARCHITECTURE.tar.gz ;;
   *) echo "package not found for '${0##*/}' on $PLATFORM $ARCHITECTURE, exiting.." >&2; exit 1 ;;

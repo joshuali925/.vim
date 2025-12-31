@@ -58,8 +58,8 @@
 	pr = "!f() { if [ \"$#\" -lt 1 ]; then echo \"Usage: git pr {<PR-number>|<PR-URL>} [<remote>]\" >&2; return 1; fi; local pr=${1##*/} remote=${2:-origin}; git clear; git fetch -fu \"$remote\" \"refs/pull/$pr/head:pr/$pr\" && git checkout \"pr/$pr\" && git reset --hard FETCH_HEAD && git config --local --replace \"branch.pr/$pr.remote\" \"$remote\" && git config --local --replace \"branch.pr/$pr.merge\" \"refs/pull/$pr/head\"; }; f"
 
 [pretty]
-	simple = format:%C(yellow)%h %Cgreen(%cr)%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset
-	simple-iso = format:%C(yellow)%h %Cgreen(%ci)%C(auto)%d%Creset %s %C(bold blue)❪%an❫%Creset
+	simple = format:%C(yellow)%h %Cgreen(%cr)%C(auto)%d%Creset %s %C(bold blue)(%an)%Creset
+	simple-iso = format:%C(yellow)%h %Cgreen(%ci)%C(auto)%d%Creset %s %C(bold blue)(%an)%Creset
 	simple-ref = format:%C(yellow)%h%Creset %Cgreen%gD:%Creset %gs%Creset%C(auto)%d%Creset
 	plain = format:%h (%ci) %an: %s%d
 
@@ -116,10 +116,14 @@
 
 [merge]
 	conflictstyle = zdiff3
-	tool = nvimdiff  ; TODO(0.12) https://www.reddit.com/r/neovim/comments/1o4eo6s/new_difftool_command_added_to_neovim/
+	; tool = nvimdiff  ; TODO(0.12) https://www.reddit.com/r/neovim/comments/1o4eo6s/new_difftool_command_added_to_neovim/
+	tool = codediff
 
 [mergetool "nvimdiff"]
 	layout = "LOCAL,BASE,REMOTE / MERGED"
+
+[mergetool "codediff"]
+	cmd = nvim \"$MERGED\" -c \"CodeDiff merge \\\"$MERGED\\\"\"
 
 [diff]
 	mnemonicPrefix = true

@@ -49,6 +49,7 @@ vim.o.signcolumn = "yes"
 vim.o.virtualedit = "block"
 vim.o.previewheight = 7
 vim.o.foldlevel = 99
+vim.o.fillchars = "diff:╱,fold: ,foldopen:,foldsep: ,foldclose:"
 vim.o.jumpoptions = "view"
 vim.o.shada = "!,'5000,<50,s10,/20,@20,h"
 vim.o.undofile = true
@@ -382,7 +383,6 @@ if require("states").small_file then
         -- vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- makes :g commands slow
         vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
         vim.o.foldtext = ""
-        vim.o.fillchars = "diff:╱,fold: ,foldopen:,foldsep: ,foldclose:"
         require("lazy").load({ plugins = { "nvim-scrollview", "git-conflict.nvim", "gitsigns.nvim", "quick-scope" } })
         vim.cmd.doautocmd("BufReadPost") -- lsp and git-conflict need this when delay loaded
         require("bookmarks").setup()

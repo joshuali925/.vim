@@ -22,14 +22,13 @@ return {
                 diffthis = { split = "botright" },
                 status_formatter = function(status) return status end,
             })
-            vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})                                                                                                                                               -- git checkout -- %
-            vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})                                                                                                                                              -- git add -- %
-            vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {})                                                                                                                                        -- git reset -- %
-            vim.api.nvim_create_user_command("Gdiffsplit", "lua require('gitsigns').diffthis(<q-args>, {split = 'aboveleft'}, function() vim.api.nvim_win_set_option(vim.fn.win_getid(vim.fn.winnr('#')), 'winbar', '%f') end)", { nargs = "*" }) -- git diff <ref> -- %
+            vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})        -- git checkout -- %
+            vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})       -- git add -- %
+            vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {}) -- git reset -- %
         end,
     },
-    -- https://github.com/esmuellert/vscode-diff.nvim if diffview is unmaintained
-    { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },
+    -- alternative: https://github.com/clabby/difftastic.nvim
+    { "esmuellert/codediff.nvim", dependencies = "MunifTanjim/nui.nvim", cmd = "CodeDiff", opts = { keymaps = { view = { next_file = "\\", prev_file = "<BS>" } } } },
     {
         "akinsho/git-conflict.nvim",
         config = function()
@@ -37,8 +36,7 @@ return {
             vim.api.nvim_create_autocmd("User", {
                 pattern = "GitConflictDetected",
                 callback = function(e)
-                    -- TODO https://github.com/akinsho/git-conflict.nvim/issues/48#issuecomment-2131531276
-                    vim.keymap.set("n", "<leader>gc", function()
+                    vim.keymap.set("n", "<leader>gc", function() -- from https://github.com/akinsho/git-conflict.nvim/issues/48#issuecomment-2131531276
                         local actions = {
                             GitConflictCurrent = "ours",
                             GitConflictCurrentLabel = "ours",
