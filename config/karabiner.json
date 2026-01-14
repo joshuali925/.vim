@@ -2044,71 +2044,13 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "left_control",
-            "modifiers": { "optional": ["any"] }
+            "key_code": "right_command"
           },
           "to": [
             {
               "key_code": "spacebar",
-              "modifiers": ["right_command", "right_option"]
+              "modifiers": ["command", "option"]
             }
-          ],
-          "conditions": [
-            {
-              "type": "expression_if",
-              "expression": "control_x2_expiration > system.now.milliseconds"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "left_control",
-            "modifiers": { "optional": ["any"] }
-          },
-          "to": [
-            {
-              "set_variable": {
-                "name": "control_x2_expiration",
-                "expression": "system.now.milliseconds + 300"
-              }
-            },
-            { "key_code": "left_control" }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "right_control",
-            "modifiers": { "optional": ["any"] }
-          },
-          "to": [
-            {
-              "key_code": "spacebar",
-              "modifiers": ["right_command", "right_option"]
-            }
-          ],
-          "conditions": [
-            {
-              "type": "expression_if",
-              "expression": "control_x2_expiration > system.now.milliseconds"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "right_control",
-            "modifiers": { "optional": ["any"] }
-          },
-          "to": [
-            {
-              "set_variable": {
-                "name": "control_x2_expiration",
-                "expression": "system.now.milliseconds + 300"
-              }
-            },
-            { "key_code": "right_control" }
           ]
         }
       ]

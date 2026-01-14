@@ -5,4 +5,4 @@ if [[ ! -f $HOME/.config/btop/btop.conf ]]; then
 fi
 
 source ~/.vim/bin/_install_from_github.sh
-install-from-github btop aristocratos/btop x86_64-linux-musl aarch64-linux-musl x86_64-macos-monterey arm64-macos-monterey "--strip-components=3 ./btop/bin/btop" "$@"
+install-from-github btop aristocratos/btop x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-macos-monterey arm64-macos-monterey "--strip-components=3 ./btop/bin/btop" "$@"

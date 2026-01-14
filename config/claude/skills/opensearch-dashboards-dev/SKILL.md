@@ -1,3 +1,8 @@
+---
+name: opensearch-dashboards-dev
+description: "OpenSearch Dashboards development validation workflow. Use when making changes to OpenSearch Dashboards code, running the dev server, fixing build errors, or validating changes. Triggers on OSD development, bootstrap, optimize, build errors, runtime errors, browser console errors, localhost:5601."
+---
+
 # OpenSearch Dashboards Validation Protocol
 
 ## Required Commands
@@ -20,7 +25,7 @@
 
 4. **Build artifact errors:** `yarn build-platform --linux --skip-os-packages`
 5. **Runtime artifact errors:** `./build/opensearch-dashboards/bin/opensearch-dashboards` (after build)
-6. **Browser console errors:** Use chrome-devtools MCP to access localhost:5601 with optionally provided path (after server starts)
+6. **Browser console errors:** Use chrome-devtools MCP to access localhost:5601
 
 ## Validation Rules
 

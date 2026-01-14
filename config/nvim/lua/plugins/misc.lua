@@ -211,7 +211,6 @@ return {
             { "<leader>o", "<Cmd>lua require('mini.files').open(vim.api.nvim_buf_get_name(0), false)<CR>" },
             { "g<", "cxiacxiPag", remap = true },
             { "g>", "cxiacxiNag", remap = true },
-            { "<leader>gc", "<Cmd>Git commit --signoff<CR>" },
             { "<leader>fd", "<Cmd>lua require('mini.pick').builtin.files()<CR>" },
             {
                 "<leader>fd",

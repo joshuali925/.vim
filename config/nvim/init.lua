@@ -50,7 +50,7 @@ vim.o.virtualedit = "block"
 vim.o.previewheight = 7
 vim.o.foldlevel = 99
 vim.o.fillchars = "diff:╱,fold: ,foldopen:,foldsep: ,foldclose:"
-vim.o.jumpoptions = "view"
+vim.o.jumpoptions = "clean,view"
 vim.o.shada = "!,'5000,<50,s10,/20,@20,h"
 vim.o.undofile = true
 vim.o.isfname = vim.o.isfname:gsub(",=", "")
@@ -277,7 +277,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 vim.api.nvim_create_autocmd("VimResized", { group = "AutoCommands", command = "wincmd =" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", command = "setlocal formatoptions=rjql" })
-vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "snacks_terminal" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
+vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "snacks_terminal", "sidekick_terminal" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", {
     group = "AutoCommands",
     pattern = "netrw", -- netrw is needed for gf on URL
@@ -383,8 +383,8 @@ if require("states").small_file then
         -- vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- makes :g commands slow
         vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
         vim.o.foldtext = ""
-        require("lazy").load({ plugins = { "nvim-scrollview", "git-conflict.nvim", "gitsigns.nvim", "quick-scope" } })
-        vim.cmd.doautocmd("BufReadPost") -- lsp and git-conflict need this when delay loaded
+        require("lazy").load({ plugins = { "nvim-scrollview", "unclash.nvim", "gitsigns.nvim", "quick-scope" } })
+        vim.cmd.doautocmd("BufReadPost") -- lsp and unclash need this when delay loaded
         require("bookmarks").setup()
         require("clips").setup()
     end, 100)

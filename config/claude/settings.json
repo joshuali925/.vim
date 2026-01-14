@@ -16,7 +16,8 @@
   },
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": false,
-    "mind@memvid": true
+    "mind@memvid": true,
+    "typescript-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true
 }
