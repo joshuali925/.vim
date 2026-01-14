@@ -128,8 +128,12 @@
 [diff]
 	mnemonicPrefix = true
 	algorithm = histogram
+	tool = codediff
 	; colorMoved = default
 	; colorMovedWS = allow-indentation-change
+
+[difftool "codediff"]
+	cmd = nvim \"$LOCAL\" \"$REMOTE\" +\"CodeDiff file $LOCAL $REMOTE\"
 
 [blame]
 	coloring = highlightRecent

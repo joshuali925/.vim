@@ -14,7 +14,7 @@ change_state() {
 }
 
 create() {
-  local tag instance_type="m8i.large" volume_size=30 security_group
+  local tag instance_type="m8i.large" volume_size=30 security_group user_data run_output instance_id host
   local usage="Usage: ${0##*/} create <tag> [-i|--instance-type <type> (default $instance_type)] [-v|--volume-size <gigabytes> (default $volume_size)]"
   usage() { echo "$usage" >&2; return 1; }
   while [[ $# -ne 0 ]]; do
@@ -31,14 +31,24 @@ create() {
     security_group=$(aws ec2 create-security-group --group-name 'ec2-cli-security-group' --description 'created using aws cli for ec2' --vpc-id "$(aws ec2 describe-vpcs --filters 'Name=isDefault,Values=true' --query 'Vpcs[0].VpcId' --output text)" --query 'GroupId' --output text)
     aws ec2 authorize-security-group-ingress --group-id "$security_group" --ip-permissions '{"IpProtocol":"tcp","FromPort":22,"ToPort":22,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":443,"ToPort":443,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":80,"ToPort":80,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":29128,"ToPort":29128,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' > /dev/null
   fi
-  # requires ec2-cli ssh key: https://repost.aws/knowledge-center/ec2-ssh-key-pair-regions
-  aws ec2 run-instances --tag-specifications '{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"'"$tag"'"}]}' \
-    --instance-type "$instance_type" --count '1' --key-name 'ec2-cli' \
+  user_data=$(printf '#cloud-config\nssh_authorized_keys:\n  - %s' "$(ssh-keygen -y -f ~/.ssh/id_ed25519)")
+  user_data+=$'\nruncmd:\n  - su - ubuntu -c \'curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh | bash\''
+  run_output=$(aws ec2 run-instances --tag-specifications '{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"'"$tag"'"}]}' \
+    --instance-type "$instance_type" --count '1' --user-data "$user_data" \
     --image-id "resolve:ssm:/aws/service/canonical/ubuntu/server/24.04/stable/current/$([[ "${instance_type%.*}" =~ g ]] && echo "arm64" || echo "amd64")/hvm/ebs-gp3/ami-id" \
     --block-device-mappings '{"DeviceName":"/dev/sda1","Ebs":{"Encrypted":false,"DeleteOnTermination":true,"Iops":3000,"VolumeSize":'"$volume_size"',"VolumeType":"gp3","Throughput":125}}' \
     --network-interfaces '{"AssociatePublicIpAddress":true,"DeviceIndex":0,"Groups":["'"$security_group"'"]}' \
     --metadata-options '{"HttpEndpoint":"enabled","HttpPutResponseHopLimit":2,"HttpTokens":"required"}' \
-    --private-dns-name-options '{"HostnameType":"ip-name","EnableResourceNameDnsARecord":true,"EnableResourceNameDnsAAAARecord":false}'
+    --private-dns-name-options '{"HostnameType":"ip-name","EnableResourceNameDnsARecord":true,"EnableResourceNameDnsAAAARecord":false}')
+  echo "$run_output" >&2
+  instance_id=$(echo "$run_output" | jq -r '.Instances[0].InstanceId')
+  aws ec2 wait instance-running --instance-ids "$instance_id"
+  host=$(aws ec2 describe-instances --instance-ids "$instance_id" --query 'Reservations[0].Instances[0].PublicDnsName' --output text)
+  sed -i "/Host $tag$/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
+  printf "Host $tag\n  HostName $host\n  User %s\n\n" ubuntu >> ~/.ssh/ec2hosts
+  command ssh -o 'StrictHostKeyChecking no' "$tag" 'tail -f /var/log/cloud-init-output.log & pid=$!; while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done; kill $pid'
+  command ssh "$tag" -O exit || true
+  exec command ssh "$tag" -t 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
 allow-me() {  # shellcheck disable=2155
@@ -58,12 +68,12 @@ ssh() {
   fi
   echo "ssh to ec2: $host" >&2
   for user in ubuntu ec2-user admin; do  # default username for ubuntu, AL2, debian
-    command ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$user@$host" exit && valid_user=$user && break
+    command ssh -o 'StrictHostKeyChecking no' "$user@$host" exit && valid_user=$user && break
   done
   if [[ -z $valid_user ]]; then echo "Failed to ssh to $host" >&2 && return 1; fi
   sed -i "/Host $tag$/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
-  printf "Host $tag\n  HostName $host\n  User %s\n  IdentityFile ~/.ssh/ec2.pem\n\n" "$valid_user" >> ~/.ssh/ec2hosts
-  exec ssh -o 'StrictHostKeyChecking no' -i ~/.ssh/ec2.pem "$valid_user@$host" "$@"
+  printf "Host $tag\n  HostName $host\n  User %s\n\n" "$valid_user" >> ~/.ssh/ec2hosts
+  exec ssh -o 'StrictHostKeyChecking no' "$valid_user@$host" "$@"
 }
 
 main() {

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # shellcheck disable=2155
 
-NODE_VERSION=20.18.3
+NODE_VERSION=22.22.0
 YARN_VERSION=1.22.10
-JDK_VERSION=21
+JDK_VERSION=25
 BACKUP_DIR=$HOME/config-backup
 
-BG_RED='\033[41m'
-CYAN='\033[0;36m'
-YELLOW='\033[0;33m'
-BLACK='\033[1;30m'
-NC='\033[0m'
+BG_RED=$'\033[41m'
+CYAN=$'\033[0;36m'
+YELLOW=$'\033[0;33m'
+BLACK=$'\033[1;30m'
+NC=$'\033[0m'
 
 usage() {
   echo "usage: bash $0 [install <package> ...]" >&2
@@ -77,7 +77,7 @@ sudo() {
 }
 
 log() {
-  if [[ -t 2 ]]; then echo -e "${CYAN}${*}${NC}" >&2; else echo "$*" >&2; fi
+  echo -e "${CYAN}${*}${NC}" >&2
 }
 
 backup() {
@@ -325,13 +325,18 @@ install_claude-code() {
     log 'Claude Code configuration already exists, skipping..'
     return 0
   fi
-  npm install -g @anthropic-ai/claude-code ccstatusline@latest
+  curl -fsSL https://claude.ai/install.sh | bash
+  npm install -g ccstatusline@latest
   mkdir -p ~/.aws ~/.claude
+  link_file ~/.vim/config/claude/agents ~/.claude/agents --relative
+  link_file ~/.vim/config/claude/skills ~/.claude/skills --relative
   link_file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link_file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link_file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
   printf '\n[bedrock-prod]\nrole_arn = arn:aws:iam::000000000000:role/Admin\ncredential_source = Ec2InstanceMetadata\n; source_profile = default\nregion = us-west-2\n' >> ~/.aws/credentials
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
+  claude plugin marketplace add anthropics/claude-plugins-official
+  claude plugin install typescript-lsp@claude-plugins-official
   claude plugin marketplace add anthropics/claude-code
   claude plugin install frontend-design@claude-code-plugins
   claude plugin disable frontend-design

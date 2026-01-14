@@ -1,5 +1,30 @@
 return {
     {
+        "folke/sidekick.nvim", -- TODO try https://github.com/carlos-algms/agentic.nvim
+        enabled = vim.env.Q_SSO_URL ~= nil or vim.uv.fs_stat(vim.env.HOME .. "/.claude.json") ~= nil,
+        keys = {
+            { "<leader>c", "<Cmd>lua require('sidekick.cli').toggle({name = 'claude'})<CR>" },
+            { "<leader>c", "<Cmd>lua require('sidekick.cli').send({name = 'claude', msg = '{this}'})<CR>", mode = { "x" } },
+            { "<leader>h", "<Cmd>lua require('sidekick.cli').toggle({name = 'kiro'})<CR>" },
+            { "<leader>h", "<Cmd>lua require('sidekick.cli').send({name = 'kiro', msg = '{this}'})<CR>", mode = { "x" } },
+        },
+        opts = {
+            cli = {
+                tools = {
+                    claude = { cmd = { "claude", "--allow-dangerously-skip-permissions" } },
+                    kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" }, format = function(text, str) return str:gsub("@", "") end },
+                },
+                win = {
+                    split = { width = 0.4 },
+                    keys = {
+                        buffers = { "<C-p>", "buffers", mode = "nt", desc = "open buffer picker" },
+                        prompt = { "<C-b>", "prompt", mode = "t", desc = "insert prompt or context" },
+                    },
+                },
+            },
+        },
+    },
+    {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
         dependencies = "MunifTanjim/nui.nvim",
@@ -143,7 +168,7 @@ return {
                 { "Git &diff", [[call feedkeys(":CodeDiff file @", "n")]], "Diff current file with ref" },
                 { "Git &toggle deleted", [[lua require("gitsigns").toggle_deleted()]], "Show deleted lines with gitsigns" },
                 { "Git toggle &word diff", [[lua require("gitsigns").toggle_word_diff()]], "Show word diff with gitsigns" },
-                { "Git &file history", [[lua require("snacks.picker").git_log_file()]], "Browse previously committed versions of current file" },
+                { "Git &file history", [[CodeDiff history %]], "Browse previously committed versions of current file" },
                 { "Git file l&og", [[Git log --graph --pretty=plain -- %]], "Show git log for current file using mini.git" },
                 { "--", "" },
                 { "&View diff page", [[CodeDiff]], "Diff repo" },

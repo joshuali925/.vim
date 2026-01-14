@@ -27,47 +27,33 @@ return {
             vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {}) -- git reset -- %
         end,
     },
-    -- alternative: https://github.com/clabby/difftastic.nvim
     { "esmuellert/codediff.nvim", dependencies = "MunifTanjim/nui.nvim", cmd = "CodeDiff", opts = { keymaps = { view = { next_file = "\\", prev_file = "<BS>" } } } },
     {
-        "akinsho/git-conflict.nvim",
-        config = function()
-            require("git-conflict").setup({ default_mappings = false, default_commands = false })
-            vim.api.nvim_create_autocmd("User", {
-                pattern = "GitConflictDetected",
-                callback = function(e)
-                    vim.keymap.set("n", "<leader>gc", function() -- from https://github.com/akinsho/git-conflict.nvim/issues/48#issuecomment-2131531276
-                        local actions = {
-                            GitConflictCurrent = "ours",
-                            GitConflictCurrentLabel = "ours",
-                            GitConflictAncestor = "base",
-                            GitConflictAncestorLabel = "base",
-                            GitConflictIncoming = "theirs",
-                            GitConflictIncomingLabel = "theirs",
-                        }
-                        local line = vim.api.nvim_get_current_line()
-                        if line:match("=======") then
-                            require("git-conflict").choose("both")
-                            return
-                        end
-                        if line:match(">>>>>>>") then
-                            local cursor_pos = vim.api.nvim_win_get_cursor(0)
-                            vim.api.nvim_win_set_cursor(0, { cursor_pos[1] - 1, cursor_pos[2] })
-                            require("git-conflict").choose("theirs")
-                            return
-                        end
-                        local mark = vim.iter(vim.inspect_pos().extmarks):find(
-                            function(mark) return mark.ns == "git-conflict" and actions[mark.opts.hl_group] end
-                        )
-                        if not mark then
-                            vim.notify("No conflict under cursor", vim.log.levels.WARN)
-                            return
-                        end
-                        require("git-conflict").choose(actions[mark.opts.hl_group])
-                    end, { buffer = e.buf })
-                    vim.keymap.set("n", "<leader>gC", "<Cmd>lua require('git-conflict').choose('none')<CR>", { buffer = e.buf })
+        "madmaxieee/unclash.nvim",
+        keys = {
+            { "[n", "<Cmd>lua require('unclash').prev_conflict()<CR>" },
+            { "]n", "<Cmd>lua require('unclash').next_conflict()<CR>" },
+            {
+                "<leader>gc",
+                function()
+                    local actions = {
+                        UnclashCurrent = "current",
+                        UnclashCurrentMarker = "current",
+                        UnclashBase = "base",
+                        UnclashBaseMarker = "base",
+                        UnclashIncoming = "incoming",
+                        UnclashIncomingMarker = "incoming",
+                    }
+                    local mark = vim.iter(vim.inspect_pos().extmarks):find(function(mark) return mark.ns == "Unclash" and actions[mark.opts.hl_group] end)
+                    if mark then
+                        require("unclash").accept(actions[mark.opts.hl_group])
+                    elseif vim.api.nvim_get_current_line():match("^=======") then
+                        require("unclash").accept("both")
+                    else
+                        vim.cmd.Git({ args = { "commit", "--signoff" } }) -- mini.git command
+                    end
                 end,
-            })
-        end,
+            },
+        },
     },
 }

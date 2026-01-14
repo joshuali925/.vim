@@ -175,7 +175,7 @@ return {
         init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
         cmd = { "LspInfo", "LspLog" },
     },
-    { "pmizio/typescript-tools.nvim" }, -- TODO try https://github.com/chojs23/ts-bridge and https://github.com/microsoft/typescript-go
+    { "pmizio/typescript-tools.nvim" }, -- TODO https://github.com/microsoft/typescript-go, https://github.com/ruicsh/tailwind-hover.nvim
     { "mfussenegger/nvim-jdtls" },
     {
         "Bekaboo/dropbar.nvim",

@@ -32,7 +32,7 @@ gui:
       - magenta
     unstagedChangesColor:
       - red
-notARepository: skip
+notARepository: quit
 disableStartupPopups: true
 promptToReturnFromSubprocess: false
 keybinding:
