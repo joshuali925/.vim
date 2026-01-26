@@ -1,19 +1,5 @@
 local M = {}
 
-local required_servers = {
-    "typos_lsp",
-    "marksman",
-    "lua_ls",
-    "vimls",
-    "yamlls",
-    "bashls",
-    "ty",
-    "eslint",
-    -- lsp servers not installed by mason
-    "jsonls", -- use eslint-lsp package for json, html, css lsps
-    "html",
-    "cssls",
-}
 local required_packages = {
     "typos-lsp",
     "marksman",
@@ -22,13 +8,29 @@ local required_packages = {
     "yaml-language-server",
     "bash-language-server",
     "ty",
+    "tsgo",
     "eslint-lsp",
     -- lsp servers configured not using lspconfig
-    "typescript-language-server", -- typescript-language-server is setup using typescript-tools
+    "typescript-language-server", -- typescript-language-server is setup using typescript-tools. TODO remove when removing typescript-tools
     "jdtls",                      -- jdtls is setup using ../ftplugin/java.lua
     -- tools
     "prettier",
     "shellcheck",
+}
+local required_servers = {
+    "typos_lsp",
+    "marksman",
+    "lua_ls",
+    "vimls",
+    "yamlls",
+    "bashls",
+    "ty",
+    -- "tsgo", -- TODO enable when removing typescript-tools
+    "eslint",
+    -- lsp servers not installed by mason
+    "jsonls", -- use eslint-lsp package for json, html, css lsps
+    "html",
+    "cssls",
 }
 local extra_servers = {                                    -- packages need to be manual installed on demand
     ["kotlin-language-server"] = "kotlin_language_server", -- gd not working in official lsp https://github.com/Kotlin/kotlin-lsp/issues/44
@@ -54,23 +56,27 @@ end
 function M.setup()
     vim.lsp.enable(required_servers)
     local mason_path = vim.fn.stdpath("data") .. "/mason"
-    require("typescript-tools").setup({
-        settings = {
-            tsserver_path = mason_path .. "/packages/typescript-language-server/node_modules/.bin/tsserver", -- manually specify path, otherwise mason needs to be loaded
-            jsx_close_tag = { enable = true },
-            expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
-            tsserver_file_preferences = {
-                -- importModuleSpecifierPreference = "shortest",
-                importModuleSpecifierPreference = "relative",
-                includeInlayParameterNameHints = "all",
-                includeInlayEnumMemberValueHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayVariableTypeHints = true,
+    if require("lazy.core.config").plugins["typescript-tools.nvim"] == nil then
+        vim.lsp.enable("tsgo")
+    else
+        require("typescript-tools").setup({
+            settings = {
+                tsserver_path = mason_path .. "/packages/typescript-language-server/node_modules/.bin/tsserver", -- manually specify path, otherwise mason needs to be loaded
+                jsx_close_tag = { enable = true },
+                expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
+                tsserver_file_preferences = {
+                    -- importModuleSpecifierPreference = "shortest",
+                    importModuleSpecifierPreference = "relative",
+                    includeInlayParameterNameHints = "all",
+                    includeInlayEnumMemberValueHints = true,
+                    includeInlayFunctionLikeReturnTypeHints = true,
+                    includeInlayFunctionParameterTypeHints = true,
+                    includeInlayPropertyDeclarationTypeHints = true,
+                    includeInlayVariableTypeHints = true,
+                },
             },
-        },
-    })
+        })
+    end
     for executable, server in pairs(extra_servers) do
         vim.uv.fs_stat(mason_path .. "/bin/" .. executable, function(err, stat)
             if not err and stat then vim.lsp.enable(server) end
@@ -135,7 +141,14 @@ end
 
 function M.organize_imports_and_format()
     local active_clients = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
-    if vim.tbl_contains(active_clients, "typescript-tools") then
+    if vim.tbl_contains(active_clients, "tsgo") then
+        vim.lsp.buf.code_action({
+            apply = true,
+            filter = function(action) return action.kind == "source.organizeImports" end,
+            context = { only = { "source.organizeImports" }, diagnostics = {} },
+        })
+        vim.cmd.sleep("300m")
+    elseif vim.tbl_contains(active_clients, "typescript-tools") then
         local ok, res = pcall(require("typescript-tools.api").organize_imports) -- sync organize imports always fails
         vim.cmd.sleep()
         if not ok then vim.notify(res, vim.log.levels.WARN, { title = "Failed to organize imports" }) end

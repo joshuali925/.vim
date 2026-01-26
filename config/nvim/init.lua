@@ -24,7 +24,7 @@ vim.o.showmatch = true
 vim.o.showmode = false
 vim.o.showcmdloc = "statusline"
 vim.o.cmdheight = 0
-vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:histogram" -- TODO(0.12) add inline:word or inline:char
+vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:histogram" -- TODO (0.12) add inline:word or inline:char
 vim.o.splitright = true
 vim.o.splitbelow = true
 vim.o.splitkeep = "topline"
@@ -320,6 +320,7 @@ vim.api.nvim_create_user_command("RgNoRegex", "lua require('snacks.picker').grep
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
 vim.api.nvim_create_user_command("JSON", [[if <range> != 0 | execute "'<,'>Prettier json" | else | keeppatterns %s/\n\+\%$//e | set shiftwidth=2 filetype=json | execute 'Prettier json' | endif]], { range = true })
+vim.api.nvim_create_user_command("JoinWithChar", [[if <line1> < <line2> | keeppatterns <line1>,<line2>s/\s\+$//e | keeppatterns <line1>+1,<line2>s/^\s\+//e | if <q-args> != '' | silent keeppatterns <line1>,<line2>-1s/$/\=<q-args>/ | endif | <line1>,<line2>join! | endif]], { range = true, nargs = "?" })
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript", [""] = "json" }
     local parser = args.args ~= "" and args.args or vim.bo.filetype

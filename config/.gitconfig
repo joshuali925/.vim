@@ -80,7 +80,7 @@
 
 [core]
 	longpaths = true
-	excludesfile = ~/.gitignore
+	excludesFile = ~/.gitignore  ; p10k's gitstatusd won't use default global ~/.config/git/ignore
 	; pager = less -RiMXF
 	pager = delta
 
@@ -116,7 +116,7 @@
 
 [merge]
 	conflictstyle = zdiff3
-	; tool = nvimdiff  ; TODO(0.12) https://www.reddit.com/r/neovim/comments/1o4eo6s/new_difftool_command_added_to_neovim/
+	; tool = nvimdiff  ; TODO (0.12) https://www.reddit.com/r/neovim/comments/1o4eo6s/new_difftool_command_added_to_neovim/
 	tool = codediff
 
 [mergetool "nvimdiff"]

@@ -5799,6 +5799,7 @@ customCommands:
                 { "Diffview &file history", [['<,'>DiffviewFileHistory --follow]], "Browse previously committed versions of selected range with Diffview" },
             vim.api.nvim_create_user_command("Gdiffsplit", lua require('gitsigns').diffthis(<q-args>, {split = 'aboveleft'}, function() vim.api.nvim_win_set_option(vim.fn.win_getid(vim.fn.winnr('#')), 'winbar', '%f') end)", { nargs = "*" }) -- git diff <ref> -- %
 " bookmarks: https://github.com/TheNoeTrevino/haunt.nvim, delays cursor after modification
+" tailwind: https://github.com/ruicsh/tailwind-hover.nvim
 
 " =======================================================
 " diff-so-fancy

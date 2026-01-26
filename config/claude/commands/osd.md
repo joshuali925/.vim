@@ -1,4 +1,4 @@
-# OpenSearch Dashboards Validation Protocol
+# OpenSearch Dashboards Validation SOP
 
 ## Required Commands
 
@@ -9,12 +9,12 @@
 2. **`os optimize`** - Build optimizer bundles
    - Required when: Code changes made and server is not running
    - Avoid `--no-cache` unless absolutely necessary
+   - Skip when: Server is already running
 
 3. **`os run -e`** - Start development server on localhost:5601
    - Use this (NOT `yarn start`) unless user specifies otherwise
-   - `os run` is a wrapper with feature flags
    - Server runs optimizer with file watcher automatically
-   - If server already running: Skip step 2
+   - Skip when: Server is already running
 
 ## Situational Validation
 
@@ -25,7 +25,17 @@
 ## Validation Rules
 
 After every fix:
+
+- Check if server is already running on :5601 first
 - Run applicable steps based on changes
 - Verify each step completes with NO errors
-- If errors occur, investigate and fix
+- If errors occur, including pre-existing ones, investigate and fix
 - Repeat until all validation passes
+
+If server is already running, you can check server output using:
+
+```bash
+tmux capture-pane -p -t 1.$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1}')
+```
+
+If the tmux command does not work, or server is not behaving as expected, then kill the existing process and start the server yourself. Do not use tmux this time.

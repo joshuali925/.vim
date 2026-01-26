@@ -29,6 +29,7 @@ return {
                 excluded_filetypes = { "gitsigns-blame" },
                 signs_on_startup = { "diagnostics", "search" },
                 signs_max_per_row = 2,
+                hide_on_text_intersect = true,
                 winblend_gui = 50,
                 diagnostics_error_symbol = "═",
                 diagnostics_warn_symbol = "═",

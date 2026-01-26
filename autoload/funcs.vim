@@ -217,6 +217,7 @@ function! funcs#get_run_command() abort
   let run_command['html'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['http'] = 'lua require("kulala").run()'
+  let run_command['csv'] = "lua require('utils').term_exec([[ csvq '" . file . "'\nselect * from t limit 1;]])"
   let run_command['markdown'] = $SSH_CLIENT == '' ? 'lua vim.cmd.LivePreview("close"); vim.cmd.LivePreview("start")' : 'lua vim.cmd.LivePreview("close"); vim.cmd.LivePreview("start"); vim.system({"curl", "-s", "https://checkip.amazonaws.com"}, {text = true}, function(obj) vim.schedule(function() vim.fn.setreg("+", vim.trim(obj.stdout) .. ":5500/" .. vim.fn.expand("%:.")); vim.notify("Copied markdown preview URL") end) end)'
   return get(run_command, &filetype, '') . get(b:, 'args', '')
 endfunction
