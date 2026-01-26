@@ -30,10 +30,11 @@ config.font = wezterm.font_with_fallback({ { family = "JetBrainsMono Nerd Font",
 config.font_size = 14
 config.line_height = 1.1
 config.use_fancy_tab_bar = false
+config.macos_fullscreen_extend_behind_notch = true
 config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" } -- disable ligatures
 config.warn_about_missing_glyphs = false
 -- config.custom_block_glyphs = false
-config.window_decorations = "RESIZE"
+config.window_decorations = "RESIZE|MACOS_FORCE_SQUARE_CORNERS"
 config.text_blink_rate = 0
 config.cursor_blink_rate = 0
 config.force_reverse_video_cursor = light_theme
@@ -45,6 +46,7 @@ config.check_for_updates_interval_seconds = 864000
 config.audible_bell = "Disabled"
 config.exit_behavior = "Close"
 config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
+config.window_content_alignment = { horizontal = "Center", vertical = "Center" }
 config.color_schemes = { tokyonight = tokyonight }
 config.color_scheme = light_theme and "Catppuccin Latte" or "tokyonight"
 config.quick_select_patterns = {

@@ -1,6 +1,6 @@
 return {
     {
-        "folke/sidekick.nvim", -- TODO try https://github.com/carlos-algms/agentic.nvim
+        "folke/sidekick.nvim",
         enabled = vim.env.Q_SSO_URL ~= nil or vim.uv.fs_stat(vim.env.HOME .. "/.claude.json") ~= nil,
         keys = {
             { "<leader>c", "<Cmd>lua require('sidekick.cli').toggle({name = 'claude'})<CR>" },
@@ -145,7 +145,7 @@ return {
                 { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
                 { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
                 { "Diff next buffer", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
-                { "Diff directories", [[call feedkeys(":CodeDiff dir ", "n")]], "Run DirDiff to compare two directories" }, -- TODO(0.12) https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
+                { "Diff directories", [[call feedkeys(":CodeDiff dir ", "n")]], "Run DirDiff to compare two directories" }, -- TODO (0.12) https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },

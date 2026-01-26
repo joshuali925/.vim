@@ -44,31 +44,29 @@ if [[ -n $PS1 ]]; then
     bind -x '"\C-r": _load_fzf'
   fi
 
+  # git branch with prompt sign colored by exit code. ref: https://gist.github.com/bingzhangdai/dd4e283a14290c079a76c4ba17f19d69
+  # takes optional arguments as separators between branch and prompt sign
   _get_prompt_tail() {
-    # https://gist.github.com/bingzhangdai/dd4e283a14290c079a76c4ba17f19d69
-    # git branch with prompt sign colored by exit code
-    # takes optional arguments as separators between those two
-    local _head_file _head _dir="$PWD" _tail _exit="$?"
-    [[ $_exit != 0 ]] && _tail="${*:- }"$'\001\e[38;5;9m\002❯\001\e[0m\002 ' || _tail="${*:- }"$'\001\e[38;5;141m\002❯\001\e[0m\002 '
+    local _head_file _head _dir=$PWD _tail _exit=$?
+    (( _exit )) && _tail="${*:- }"$'\001\e[38;5;9m\002❯\001\e[0m\002 ' || _tail="${*:- }"$'\001\e[38;5;141m\002❯\001\e[0m\002 '
     while [[ -n $_dir ]]; do
-      _head_file="$_dir/.git/HEAD"
-      if [[ -f $_dir/.git ]]; then
-        read -r _head_file < "$_dir/.git" && _head_file="${_head_file#gitdir: }/HEAD"
-        if [[ ! -e $_head_file ]]; then _head_file="$_dir/$_head_file"; else break; fi
+      if [[ -f $_dir/.git/HEAD ]]; then
+        _head_file=$_dir/.git/HEAD
+        break
+      elif [[ -f $_dir/.git ]]; then
+        read -r _head_file < "$_dir/.git" && _head_file=${_head_file#gitdir: }/HEAD
+        if [[ ! -f $_head_file ]]; then _head_file=$_dir/$_head_file; fi
+        break
       fi
-      if [[ -e $_head_file ]]; then break; fi
-      _dir="${_dir%/*}"
+      _dir=${_dir%/*}
     done
-    if [[ -e $_head_file ]]; then
-      read -r _head < "$_head_file" || return
+    if [[ -f $_head_file ]] && read -r _head < "$_head_file"; then
       case "$_head" in
-        ref:*) printf $'\001\e[38;5;130m\002'" (${_head#ref: refs/heads/})$_tail" ;;
-        "") ;;
-        # HEAD detached
-        *) printf $'\001\e[38;5;130m\002'" (${_head:0:9})$_tail" ;;
+        ref:*) printf '\001\e[38;5;130m\002 (%s)%s' "${_head#ref: refs/heads/}" "$_tail" ;;
+        *) printf '\001\e[38;5;130m\002 (%.9s)%s' "$_head" "$_tail" ;;  # HEAD detached
       esac
     else
-      printf "$_tail"
+      printf '%s' "$_tail"
     fi
   }
 

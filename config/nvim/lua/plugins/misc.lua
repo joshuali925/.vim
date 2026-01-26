@@ -5,7 +5,7 @@ return {
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
     { "jbyuki/venn.nvim", cmd = "VBox" },
     {
-        "dhruvasagar/vim-table-mode",
+        "dhruvasagar/vim-table-mode", -- alternative: https://github.com/numEricL/table.vim
         cmd = { "TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine" },
         keys = { { "<leader>tm", "<Cmd>TableModeToggle<CR>" } },
         init = function()
@@ -114,7 +114,7 @@ return {
                         { icon = "󰘬 ", key = "s", desc = "Git changed files (open: !)", action = ":lua require('snacks.picker').git_status()" },
                         { icon = "󰘬 ", key = "!", desc = "Open git changed files", action = ":argadd `git diff --name-only --diff-filter=d @` | bnext", hidden = true },
                         { icon = " ", key = "d", desc = "Git diff", action = ":CodeDiff" },
-                        { icon = " ", key = "+", desc = "Git diff remote", action = ":CodeDiff @{upstream}" },
+                        { icon = " ", key = "+", desc = "Git diff remote", action = ":CodeDiff @{upstream}..HEAD" },
                         { icon = "󰍜 ", key = "\\", desc = "Open quickui", action = ":Lazy load vim-quickui | call quickui#menu#open('normal')" },
                         { icon = "󰒲 ", key = "p", desc = "Open Lazy (update: 'u', profile: 'P')", action = ":Lazy" },
                         { icon = "󰄉 ", key = "P", desc = "Open Lazy profile", action = ":Lazy profile", hidden = true },

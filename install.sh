@@ -136,10 +136,10 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
-    # to update one cask: brew upgrade --cask wezterm --no-quarantine --greedy-latest
+    # to update one cask: brew upgrade --cask wezterm@nightly --greedy-latest
   fi
 }
 
@@ -342,7 +342,7 @@ install_claude-code() {
   claude plugin disable frontend-design
   claude plugin marketplace add memvid/claude-brain
   claude plugin install mind@memvid
-  install_google-chrome 2> /dev/null && npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox || true
+  install_google-chrome 2> /dev/null && npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics || true
   log "\nInstalled Claude Code. Use ${YELLOW}claude --permission-mode=bypassPermissions${CYAN} to trust all"
   log "${BG_RED}TODO${CYAN}: update bedrock role in ${YELLOW}~/.aws/credentials"
 }

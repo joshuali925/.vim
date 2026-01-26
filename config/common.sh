@@ -12,8 +12,8 @@ export RCLONE_DELETE_EMPTY_SRC_DIRS=true
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
-export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:[[ {fzf:prompt} = \"no-ignore> \" ]] && echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\" || echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --follow --no-ignore || true)\"' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"
-export FZF_ALT_C_COMMAND='command ls -1Ap --color=always 2> /dev/null'
+export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:if [[ {fzf:prompt} = \"▌ \" ]]; then if [[ -e .git ]] || git rev-parse --git-dir &>/dev/null; then echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --follow --no-ignore || true)\"; else echo \"change-prompt(ls> )+reload(ls -1Ap --color=always --group-directories-first)\"; fi; elif [[ {fzf:prompt} = \"no-ignore> \" ]]; then echo \"change-prompt(git> )+reload({ git diff --name-only HEAD; git ls-files --others --exclude-standard; })\"; elif [[ {fzf:prompt} = \"git> \" ]]; then echo \"change-prompt(ls> )+reload(ls -1Ap --color=always --group-directories-first)\"; else echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\"; fi' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"
+export FZF_ALT_C_COMMAND='ls -1Ap --color=always --group-directories-first 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
 if [[ $LIGHT_THEME = 1 ]]; then  # https://github.com/jesseduffield/lazygit/issues/4550, delta auto detect also doesn't work in diffnav
@@ -162,7 +162,7 @@ gcb() {
 glof() {
   git log --graph --color --pretty=simple --all "$@" |
     fzf --ansi --layout=default --height=100% --list-border=none --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='`: toggle sort | C-y: copy commit | C-r: toggle raw | C-p , .: to control preview' \
+    --header='`: toggle sort | C-y: copy commit | C-r: toggle raw | C-p: toggle preview' \
     --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
     --bind='ctrl-r:toggle-raw' \
     --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
@@ -173,10 +173,12 @@ glof() {
 grlf() {
   git reflog --color --date=human-local --pretty=simple-ref "$@" | awk '!x[$1]++' |
     fzf --ansi --layout=default --height=100% --list-border=none --scheme=history --reverse --toggle-sort=\` --multi \
-    --header='`: toggle sort | C-e: diff to HEAD | C-y: copy commit | C-r: toggle raw | C-p , .: control preview' \
-    --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=never' \
+    --header='`: toggle sort | C-e: diff to HEAD | C-y: copy commit | C-r: toggle raw | C-p: toggle log/diff preview' \
+    --preview='grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git log --color --graph --pretty=simple' \
+    --preview-label=' log ' \
     --bind='ctrl-r:toggle-raw' \
-    --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
+    --bind='ctrl-p:transform:[[ $FZF_PREVIEW_LABEL =~ log ]] && echo "change-preview-label( show )+change-preview(grep -o \"[a-f0-9]\\{7,\\}\" <<< \{} | xargs git show --patch-with-stat --color | delta --paging=never)" || echo "change-preview-label( log )+change-preview(grep -o \"[a-f0-9]\\{7,\\}\" <<< \{} | xargs git log --color --graph --pretty=simple)"' \
+    --bind=',:preview-down,.:preview-up' \
     --bind='ctrl-e:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs -I@ git diff @..HEAD | delta --paging=always)' \
     --bind='ctrl-y:execute(echo {+} | grep -o "[a-f0-9]\{7,\}" | tac | tr "\n" " " | y)+abort' \
     --bind='enter:execute(grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --patch-with-stat --color | delta --paging=always)'
@@ -373,12 +375,15 @@ path() {
 
 findup() {
   if [[ $# -ne 1 ]]; then echo "Usage: $0 <file>" >&2; return 1; fi
-  local dir=$PWD result
-  while result=$(find "$dir" -maxdepth 1 -name "$@"); [[ -z $result ]] && [[ $dir != / ]]; do
-    dir=$(dirname "$dir")
+  local dir=$PWD depth=0 rel
+  while [[ ! -e $dir/$1 ]]; do
+    if [[ $dir == / ]]; then return 1; fi
+    dir=${dir%/*}
+    dir=${dir:-/}
+    ((depth++))
   done
-  [[ -z $result ]] && return 1
-  realpath -s --relative-to="$PWD" "$result"
+  for ((i=0; i<depth; i++)); do rel+=../; done
+  echo "$rel$1"
 }
 
 vx() {
@@ -565,7 +570,7 @@ getip() {
   elif [[ $1 =~ ^[0-9.]+$ ]]; then
     curl -s "http://ip-api.com/line/$1"
   else
-    curl -s "https://dns.google.com/resolve?name=$1" | if builtin command -v python > /dev/null 2>&1; then python -m json.tool; else cat; fi
+    curl -s "https://dns.google.com/resolve?name=$1" | if builtin command -v python > /dev/null 2>&1; then python -m json.tool --indent 2; else cat; fi
   fi
 }
 

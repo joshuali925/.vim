@@ -15,6 +15,7 @@ return {
         },
         config = function()
             require("gitsigns").setup({
+                attach_to_untracked = true,
                 signs = { add = { text = "▎" }, change = { text = "░" }, delete = { text = "▏" }, topdelete = { text = "▔" }, changedelete = { text = "▒" } },
                 update_debounce = 250,
                 preview_config = { border = "rounded" },

@@ -51,19 +51,20 @@ create() {
   exec command ssh "$tag" -t 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
-allow-me() {  # shellcheck disable=2155
-  local security_group=$(aws ec2 describe-security-groups --group-names 'ec2-cli-security-group' --query 'SecurityGroups[0].GroupId' --output text 2> /dev/null)
+allow-me() {
+  local security_group
+  security_group=$(aws ec2 describe-security-groups --group-names 'ec2-cli-security-group' --query 'SecurityGroups[0].GroupId' --output text 2> /dev/null)
   if [[ -z $security_group ]]; then echo "Security group 'ec2-cli-security-group' not found. Create an instance first." >&2 && return 1; fi
   aws ec2 authorize-security-group-ingress --group-id "$security_group" --ip-permissions "{\"IpProtocol\":\"-1\",\"IpRanges\":[{\"CidrIp\":\"$(curl -s https://checkip.amazonaws.com)/32\",\"Description\":\"me\"}]}"
 }
 
 ssh() {
-  local tag=${1:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')} host user valid_user
+  local tag=${1:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')} host instance_id user valid_user
   [[ -z $tag ]] && return 1
   [[ -n $1 ]] && shift
-  host=$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' 'Name=instance-state-name,Values=running' --query "Reservations[*].Instances[*][NetworkInterfaces[0].Association.PublicDnsName,Tags[?Key=='Name'].Value[] | [0]]" --output text | grep "\s$tag$" | awk '{print $1}')
-  if [[ -z $host ]]; then
-    change_state start "$tag" && sleep 17 && ssh "$tag" "$@"
+  read -r host instance_id < <(aws ec2 describe-instances --filter "Name=tag:Name,Values=$tag" --query "Reservations[*].Instances[*].[NetworkInterfaces[0].Association.PublicDnsName,InstanceId]" --output text | head -1)
+  if [[ -z $host || $host == "None" ]]; then
+    change_state start "$tag" && aws ec2 wait instance-running --instance-ids "$instance_id" && ssh "$tag" "$@"
     return $?
   fi
   echo "ssh to ec2: $host" >&2

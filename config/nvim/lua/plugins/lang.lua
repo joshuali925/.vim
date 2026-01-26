@@ -173,9 +173,9 @@ return {
     {
         "neovim/nvim-lspconfig", -- only needs configs in rtp https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
         init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
-        cmd = { "LspInfo", "LspLog" },
+        cmd = { "LspInfo", "LspLog", "LspRestart" },
     },
-    { "pmizio/typescript-tools.nvim" }, -- TODO https://github.com/microsoft/typescript-go, https://github.com/ruicsh/tailwind-hover.nvim
+    { "pmizio/typescript-tools.nvim", enabled = false },
     { "mfussenegger/nvim-jdtls" },
     {
         "Bekaboo/dropbar.nvim",

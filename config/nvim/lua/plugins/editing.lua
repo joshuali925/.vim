@@ -49,6 +49,7 @@ return {
                     augend.constant.new({ elements = { "_prev", "_next" }, word = false, cyclic = true }),
                     augend.constant.new({ elements = { "prev_", "next_" }, word = false, cyclic = true }),
                     augend.constant.new({ elements = { "[ ]", "[x]" }, word = false, cyclic = true }),
+                    augend.constant.new({ elements = { "us-east-1", "us-west-2" }, word = true, cyclic = true }),
                 },
             })
         end,

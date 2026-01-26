@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+install-from-github fresh sinelaw/fresh x86_64-unknown-linux-musl.tar.gz aarch64-unknown-linux-musl.tar.gz x86_64-apple-darwin aarch64-apple-darwin '--strip-components=1 --wildcards fresh*/fresh' "$@"
