@@ -12,6 +12,7 @@
 [alias]
 	configs = config --list --show-scope --show-origin
 	authors = shortlog --summary --numbered --email
+	signoff = commit --signoff --amend --no-verify --allow-empty --no-edit
 	untracked = ls-files --others --exclude-standard
 	ignored = ls-files --others --exclude-standard --ignored
 	exclude = "!f() { [ \"$#\" -gt 0 ] && printf '%s\n' \"$@\" >> .git/info/exclude; $EDITOR .git/info/exclude; }; f"
@@ -21,7 +22,6 @@
 	autoremove = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all; git repack -a -d -f --depth=300 --window=300 --window-memory=1g; git prune-packed"  ; from https://github.com/GitAlias/gitalias/tree/7b27ef766a3557a5708086734559f6a14bb97744/doc/git-optimizer, claims better than git gc --prune=now --aggressive
 	difft = -c diff.external=difft diff
 	diffw = diff --word-diff=color --ignore-all-space
-	diffn = -c core.pager=diffnav diff
 	preview-merge-diff = "!f() { git diff HEAD...\"$@\"; }; f"  ; diff between target and the common ancestor of HEAD and target
 	preview-merge-log = "!git log --graph --pretty=simple HEAD.."  ; commits in target but not in HEAD (will be merged with git merge target)
 	pulled = "!git log --pretty=simple --stat ORIG_HEAD...HEAD"  ; what was pulled

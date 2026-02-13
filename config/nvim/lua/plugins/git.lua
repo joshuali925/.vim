@@ -2,8 +2,8 @@ return {
     {
         "lewis6991/gitsigns.nvim",
         keys = {
-            { "[g", "<Cmd>lua require('gitsigns').nav_hunk('prev', {target='all'})<CR>" },
-            { "]g", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
+            { "[c", "<Cmd>lua if vim.wo.diff then vim.cmd.normal({'[c', bang=true}) else require('gitsigns').nav_hunk('prev', {target='all'}) end<CR>" },
+            { "]c", "<Cmd>lua if vim.wo.diff then vim.cmd.normal({']c', bang=true}) else require('gitsigns').nav_hunk('next', {target='all'}) end<CR>" },
             { "ig", "<Cmd>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
             { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
             { "<leader>gd", ":Gitsigns preview_hunk<CR>", mode = { "x" } }, -- range only works with `:` for gitsigns
@@ -26,9 +26,18 @@ return {
             vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})        -- git checkout -- %
             vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})       -- git add -- %
             vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {}) -- git reset -- %
+            vim.api.nvim_create_user_command(
+                "Gdiffsplit",
+                "tab sbuffer | lua require('gitsigns').diffthis(<q-args>, {split = 'aboveleft'}, function() vim.wo[vim.fn.win_getid(vim.fn.winnr('#'))].winbar = '%f' end)",
+                { nargs = "*" }
+            ) -- git diff <ref> -- %
         end,
     },
-    { "esmuellert/codediff.nvim", dependencies = "MunifTanjim/nui.nvim", cmd = "CodeDiff", opts = { keymaps = { view = { next_file = "\\", prev_file = "<BS>" } } } },
+    {
+        "esmuellert/codediff.nvim",
+        cmd = "CodeDiff",
+        opts = { explorer = { view_mode = "tree" }, keymaps = { view = { next_file = "\\", prev_file = "<BS>" }, explorer = { toggle_view_mode = "`" } } },
+    },
     {
         "madmaxieee/unclash.nvim",
         keys = {

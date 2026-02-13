@@ -3,7 +3,6 @@ return {
     { "NMAC427/guess-indent.nvim", lazy = false, opts = { filetype_exclude = vim.g.qs_filetype_blacklist } },
     { "nvim-lua/plenary.nvim" },
     { "tpope/vim-unimpaired", keys = { { "[", mode = { "n", "x", "o" } }, { "]", mode = { "n", "x", "o" } }, "=p", "yo" } },
-    { "jbyuki/venn.nvim", cmd = "VBox" },
     {
         "dhruvasagar/vim-table-mode", -- alternative: https://github.com/numEricL/table.vim
         cmd = { "TableModeToggle", "TableModeRealign", "Tableize", "TableAddFormula", "TableEvalFormulaLine" },
@@ -69,7 +68,6 @@ return {
         opts = {
             bigfile = { enabled = true, line_length = 5000 },
             quickfile = { enabled = true },
-            statuscolumn = { enabled = false, left = { "sign" }, git = { patterns = { "MiniDiffSign" } } },
             words = { enabled = true },
             terminal = { auto_insert = false, win = { height = 0.3, width = 0.5 } },
             input = { enabled = true, win = { width = 25, relative = "cursor", row = 1 } },
@@ -140,7 +138,7 @@ return {
                 formatters = { file = { filename_first = true, truncate = 80 } },
                 sources = {
                     files = { hidden = true, layout = { preset = "vscode" } },
-                    smart = { hidden = true, layout = { preset = "vscode" }, filter = { cwd = true } },
+                    smart = { hidden = true, layout = { preset = "vscode" }, filter = { cwd = true } }, -- alternative: https://github.com/dtormoen/neural-open.nvim
                     buffers = { current = false, layout = { preset = "vscode" } },
                     recent = { matcher = { frecency = false }, layout = { preset = "vscode" } },
                     commands = { layout = { preset = "vscode" } },

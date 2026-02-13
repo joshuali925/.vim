@@ -14,13 +14,14 @@ change_state() {
 }
 
 create() {
-  local tag instance_type="m8i.large" volume_size=30 security_group user_data run_output instance_id host
-  local usage="Usage: ${0##*/} create <tag> [-i|--instance-type <type> (default $instance_type)] [-v|--volume-size <gigabytes> (default $volume_size)]"
+  local tag instance_type="m8i.large" volume_size=30 no_init security_group user_data run_output instance_id host
+  local usage="Usage: ${0##*/} create <tag> [-i|--instance-type <type> (default $instance_type)] [-v|--volume-size <gigabytes> (default $volume_size)] [--no-init]"
   usage() { echo "$usage" >&2; return 1; }
   while [[ $# -ne 0 ]]; do
     case $1 in
       -i|--instance-type) instance_type="$2"; shift 2 ;;
       -v|--volume-size) volume_size="$2"; shift 2 ;;
+      --no-init) no_init=1; shift ;;
       -*) usage ;;
       *) [[ -n $tag ]] && usage; tag="$1"; shift ;;
     esac
@@ -32,7 +33,7 @@ create() {
     aws ec2 authorize-security-group-ingress --group-id "$security_group" --ip-permissions '{"IpProtocol":"tcp","FromPort":22,"ToPort":22,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":443,"ToPort":443,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":80,"ToPort":80,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' '{"IpProtocol":"tcp","FromPort":29128,"ToPort":29128,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}' > /dev/null
   fi
   user_data=$(printf '#cloud-config\nssh_authorized_keys:\n  - %s' "$(ssh-keygen -y -f ~/.ssh/id_ed25519)")
-  user_data+=$'\nruncmd:\n  - su - ubuntu -c \'curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh | bash\''
+  if [[ -z $no_init ]]; then user_data+=$'\nruncmd:\n  - su - ubuntu -c \'curl -fsSL https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.sh | bash\''; fi
   run_output=$(aws ec2 run-instances --tag-specifications '{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"'"$tag"'"}]}' \
     --instance-type "$instance_type" --count '1' --user-data "$user_data" \
     --image-id "resolve:ssm:/aws/service/canonical/ubuntu/server/24.04/stable/current/$([[ "${instance_type%.*}" =~ g ]] && echo "arm64" || echo "amd64")/hvm/ebs-gp3/ami-id" \
@@ -48,7 +49,17 @@ create() {
   printf "Host $tag\n  HostName $host\n  User %s\n\n" ubuntu >> ~/.ssh/ec2hosts
   command ssh -o 'StrictHostKeyChecking no' "$tag" 'tail -f /var/log/cloud-init-output.log & pid=$!; while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done; kill $pid'
   command ssh "$tag" -O exit || true
+  if [[ -n $no_init ]]; then exec command ssh "$tag"; fi
   exec command ssh "$tag" -t 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
+}
+
+terminate() {
+  local tag=$1 instance_id
+  if [[ -z $tag ]]; then echo "Usage: ${0##*/} terminate <tag>" >&2; return 1; fi
+  instance_id=$(aws ec2 describe-instances --filter "Name=tag:Name,Values=$tag" "Name=instance-state-name,Values=pending,running,stopping,stopped" --query "Reservations[*].Instances[*].InstanceId" --output text)
+  if [[ -z $instance_id ]]; then echo "No instance found with tag '$tag'" >&2; return 1; fi
+  ls && printf 'Terminate instance %s (%s)? [y/N] ' "$tag" "$instance_id" && read -r REPLY
+  if [[ $REPLY = [Yy] ]]; then aws ec2 terminate-instances --instance-ids $instance_id; fi
 }
 
 allow-me() {
@@ -59,7 +70,8 @@ allow-me() {
 }
 
 ssh() {
-  local tag=${1:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')} host instance_id user valid_user
+  if [[ $1 == --copy-id ]]; then local copy_id=1; shift; fi
+  local tag=${1:-$(aws ec2 describe-instances --filter 'Name=tag-key,Values=Name' 'Name=tag-value,Values=*' "Name=instance-state-name,Values=*" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0],InstanceId]" --output text | fzf | awk '{print $1}')} host instance_id user valid_user ssh_opts=(-o 'StrictHostKeyChecking no')
   [[ -z $tag ]] && return 1
   [[ -n $1 ]] && shift
   read -r host instance_id < <(aws ec2 describe-instances --filter "Name=tag:Name,Values=$tag" --query "Reservations[*].Instances[*].[NetworkInterfaces[0].Association.PublicDnsName,InstanceId]" --output text | head -1)
@@ -68,10 +80,12 @@ ssh() {
     return $?
   fi
   echo "ssh to ec2: $host" >&2
+  if [[ -n $copy_id ]]; then local ssh_opts+=(-i ~/.ssh/ec2.pem); fi
   for user in ubuntu ec2-user admin; do  # default username for ubuntu, AL2, debian
-    command ssh -o 'StrictHostKeyChecking no' "$user@$host" exit && valid_user=$user && break
+    command ssh "${ssh_opts[@]}" -o 'StrictHostKeyChecking no' "$user@$host" exit && valid_user=$user && break
   done
   if [[ -z $valid_user ]]; then echo "Failed to ssh to $host" >&2 && return 1; fi
+  if [[ -n $copy_id ]]; then command ssh-copy-id -f -i ~/.ssh/id_ed25519.pub -o "IdentityFile=$HOME/.ssh/ec2.pem" "$valid_user@$host"; fi
   sed -i "/Host $tag$/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
   printf "Host $tag\n  HostName $host\n  User %s\n\n" "$valid_user" >> ~/.ssh/ec2hosts
   exec ssh -o 'StrictHostKeyChecking no' "$valid_user@$host" "$@"
@@ -80,8 +94,9 @@ ssh() {
 main() {
   case $1 in
     start|stop) change_state "$@" ;;
-    create|ssh|ls|allow-me) "$@" ;;
-    *) echo "Usage: ${0##*/} {start|stop|ls|create|ssh|add-ip} [instance-tag] [options]" >&2; return 1 ;;
+    ssh-copy-id) shift; ssh --copy-id "$@" ;;
+    create|ssh|ls|allow-me|terminate) "$@" ;;
+    *) echo "Usage: ${0##*/} {start|stop|ls|create|terminate|ssh|ssh-copy-id|allow-me} [instance-tag] [options]" >&2; return 1 ;;
   esac
 }
 

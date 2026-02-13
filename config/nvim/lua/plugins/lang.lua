@@ -175,7 +175,6 @@ return {
         init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
         cmd = { "LspInfo", "LspLog", "LspRestart" },
     },
-    { "pmizio/typescript-tools.nvim", enabled = false },
     { "mfussenegger/nvim-jdtls" },
     {
         "Bekaboo/dropbar.nvim",

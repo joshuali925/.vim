@@ -3,11 +3,16 @@
     "MCP_TIMEOUT": "120000",
     "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-6-v1",
     "AWS_PROFILE": "bedrock-prod",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "true",
-    "CLAUDE_CODE_USE_BEDROCK": "true",
-    "DISABLE_BUG_COMMAND": "true",
-    "DISABLE_ERROR_REPORTING": "true",
-    "DISABLE_TELEMETRY": "true"
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_USE_BEDROCK": "1",
+    "DISABLE_BUG_COMMAND": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_TELEMETRY": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
   },
   "statusLine": {
     "type": "command",
@@ -17,11 +22,10 @@
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": false,
     "mind@memvid": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "superpowers@superpowers-marketplace": true
   },
   "alwaysThinkingEnabled": true,
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  }
+  "skipDangerousModePermissionPrompt": true
 }

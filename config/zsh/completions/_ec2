@@ -1,0 +1,10 @@
+#compdef ec2
+
+_ec2() {
+  if (( CURRENT == 2 )); then
+    compadd -- $(ec2 2>&1 | awk -F'[{}]' '{gsub(/\|/, " "); print $2}')
+  elif [[ ${words[2]} == create ]]; then
+    compadd -- $(ec2 create 2>&1 | grep -oE -- '-[-a-zA-Z]+' | sort -u)
+  fi
+}
+_ec2 "$@"

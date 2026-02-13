@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # https://raw.githubusercontent.com/duong-db/fzf-simple-completion/HEAD/fzf-simple-completion.sh
-# commit: 78765e5c79cde6300bf03a439d47715d2f5a16ed
+# commit: b7ac555adde51e88e74d03e694d83fc0db4112e8
 
 # FZF SIMPLE COMPLETION - Pipe bash tab-completion suggestions into fzf fuzzy finder
 # More details at https://github.com/duong-db/fzf-simple-completion
@@ -40,8 +40,9 @@ _fzf_get_argument_list() {
 
     # Add color
     for i in "${!COMPREPLY[@]}"; do
-        if [[ -e "${COMPREPLY[i]}" ]]; then
-            COMPREPLY[i]=$(ls -F -d --color=always "${COMPREPLY[i]}" 2>/dev/null)
+        # "~/Documents" is not recognized as a directory due to quotes so we need to expand tilde
+        if [[ -e "${COMPREPLY[i]/#~/$HOME}" ]]; then
+            COMPREPLY[i]=$(ls -F -d --color=always "${COMPREPLY[i]/#~/$HOME}" 2>/dev/null)
         fi
     done
     printf '%s\n' "${COMPREPLY[@]}" | LC_ALL=C sort -u | LC_ALL=C sort -t '.' -k2
@@ -50,13 +51,15 @@ _fzf_get_argument_list() {
 _fzf_argument_completion() {
     # Hack on directories completion
     # - Only display the last sub directory for fzf searching
-    #     Example. a/b/c -> a//b//c/ -> c/
+    #     Example. a/b/c/ -> a//b//c/ -> c/
     # - Handle the case where directory contains spaces
     #     Example. New Folder/ -> New\ Folder/
+    # - Revert $HOME back to tilde
     COMPREPLY=$(
-        _fzf_get_argument_list | sed 's/\//\/\//g; s/\/$//' |
-            fzf --bind=tab:down,btab:up --cycle --reverse --height=12 --select-1 --exit-0 --ansi -d '//' --with-nth='-1..' |
-            sed -e 's/\/\//\//g' -e 's/ /\\ /g; s/\\ $/ /'
+        _fzf_get_argument_list |
+        sed 's|/|//|g; s|/$||' | fzf --bind=tab:down,btab:up --cycle --reverse --height=12 --select-1 --exit-0 --ansi -d '//' --with-nth='-1..' | sed 's|//|/|g' |
+        sed 's| |\\ |g; s|\\ $| |' |
+        sed "s|^$HOME|~|"
     )
     printf '\e[5n'
 }

@@ -63,6 +63,7 @@ alias lg='lazygit'
 alias lzd='lazydocker'
 alias claude='claude --allow-dangerously-skip-permissions'
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
+alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
 alias 00='[[ -f ~/.vim/tmp/last_result ]] && cd "$(cat ~/.vim/tmp/last_result)"'
 # shellcheck disable=2154
@@ -90,8 +91,6 @@ alias gba='git branch -vv --sort=-committerdate -a'
 alias gbl='git for-each-ref --sort=-committerdate refs/heads --format="%(align:50,left)%(HEAD)%(color:red)%(refname:short)%(end)%(color:yellow)%(objectname:short) %(color:green)(%(committerdate:relative))%(color:reset) - %(subject) %(color:bold blue)❪%(authorname)❫%(color:reset)"'
 alias gc!='gc --amend'
 alias gcs='gc --signoff'
-alias gcs!='gc --signoff --amend --no-verify --allow-empty --no-edit'
-alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gcl='git clone --filter=blob:none'
 alias gcm='git checkout --merge --ignore-other-worktrees "$(git remote show origin | sed -n "/HEAD branch/s/.*: //p")"'  # checkout default branch in origin
 alias gco='git checkout'
@@ -100,8 +99,7 @@ alias gd='git diff'
 alias gdst='git diff --staged'
 gds() { if [[ $# -eq 0 ]]; then echo -e "\e[1;32mStaged\e[0m"; git diff --stat --staged; echo -e "\n\e[1;31mUnstaged\e[0m"; fi; git diff --stat "$@"; }
 alias gf='git fetch'
-alias gfa='git remote | xargs -L1 git fetch --filter=blob:none --prune'
-alias ggl='git pull origin $(gref)'
+alias gfa='git remote | xargs -L1 git fetch --filter=blob:none'
 alias gpf='git remote get-url fork > /dev/null 2>&1 || { gra-fork && echo Added remote: fork; }; git push --force-with-lease fork $(gref)'
 alias gsup='git remote | fzf --bind="tab:down,btab:up" | xargs -I {} git branch --set-upstream-to={}/$(git symbolic-ref --short HEAD)'
 alias gl='git pull'
@@ -120,7 +118,7 @@ alias grmv='git remote rename'
 alias grrm='git remote remove'
 alias grset='git remote set-url'
 alias grv='git remote -v'
-alias gs='git status -sb'
+alias gs='git status'
 alias gst='git stash'
 alias gst-save='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller --remerge-diff'
@@ -128,7 +126,7 @@ alias gcd='cd "$(git rev-parse --show-toplevel || echo ".")"'
 alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
 
 gc() {
-  [[ $# -eq 0 ]] && { git commit --signoff; return $?; }
+  [[ $# -eq 0 ]] && { git commit; return $?; }
   local args=() arg message
   for arg in "$@"; do
     [[ $arg != -* ]] && message+="$arg " || args+=("$arg")
@@ -436,7 +434,7 @@ rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripg
 z() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
-    fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9 ]*//' -e "\|^$PWD\$|d" | fzf --ansi --scheme=history --tac \
+    fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9 ]\+//' -e "\|^$PWD\$|d" | fzf --ansi --scheme=history --tac \
       --header='`: show recent directories under cwd | C-a: show all directories' --bind='tab:down,btab:up' \
       --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD/\" '\$0~cwd {print \$1}')" \
       --bind='ctrl-a:reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)') && z "$fzftemp"
