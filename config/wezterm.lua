@@ -83,6 +83,32 @@ config.keys = {
         }),
     },
     { key = "t", mods = "CMD|SHIFT", action = wezterm.action.SpawnCommandInNewTab({ args = { os.getenv("HOME") .. "/.local/bin/nu" }, domain = "CurrentPaneDomain" }) },
+    {
+        key = "v",
+        mods = "CMD|SHIFT",
+        action = wezterm.action_callback(function(window, pane)
+            local info = pane:get_foreground_process_info()
+            if not info or not info.executable:match("/ssh$") then return window:perform_action(wezterm.action.SendKey({ key = "v", mods = "CTRL" }), pane) end
+            local host = nil
+            local i = 2
+            while not host and i <= #info.argv do
+                if info.argv[i]:match("^%-[bcDEeFIiJLlmOopQRSWw]$") then
+                    i = i + 2
+                elseif info.argv[i]:sub(1, 1) == "-" then
+                    i = i + 1
+                else
+                    host = info.argv[i]
+                end
+            end
+            if not host then return end
+            local ok, _, _ = wezterm.run_child_process({
+                "sh", "-c",
+                ([[osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/tmp/clipboard.png" with write permission)' && scp /tmp/clipboard.png %s:/tmp/clipboard.png && rm -f /tmp/clipboard.png && ssh %s '.vim/bin/ffmpeg -y -i /tmp/clipboard.png -vf "scale='"'"'min(1568,iw)'"'"':'"'"'min(1568,ih)'"'"':force_original_aspect_ratio=decrease" -q:v 10 /tmp/clipboard.jpg && rm -f /tmp/clipboard.png']]):format(host, host),
+            })
+            if not ok then return end
+            pane:send_text("/tmp/clipboard.jpg")
+        end),
+    },
 }
 config.key_tables = { search_mode = search_mode }
 config.set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" }

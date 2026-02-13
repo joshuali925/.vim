@@ -35,14 +35,14 @@ alias vim = ^$env.EDITOR
 alias lg = lazygit
 alias size = du | sort-by apparent | reverse
 
-alias gcl = git clone --filter=blob:none
-alias gd = git diff
-alias gpf = git push --force-with-lease fork (git symbolic-ref --short HEAD)
-alias gl = git pull
 alias g = git log --graph --pretty=simple --boundary --max-count 15
-alias glo = git log --graph --pretty=simple
-alias gs = git status
+alias gcl = git clone --filter=blob:none
 alias gco = git checkout
+alias gd = git diff
+alias gl = git pull
+alias glo = git log --graph --pretty=simple
+alias gpf = git push --force-with-lease fork (git symbolic-ref --short HEAD)
+alias gs = git status
 
 def st [...args] {
   ssh -t ...$args 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'

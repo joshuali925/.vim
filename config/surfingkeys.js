@@ -190,6 +190,9 @@ api.mapkey('gP', 'Google first result', function() {
         });
     }
 });
+api.mapkey('y/', 'Copy URL path', function() {
+    api.Clipboard.write(window.location.pathname + window.location.search + window.location.hash);
+});
 api.unmap('v');
 api.mapkey('v', 'Copy element text', function() {
     let removeDuplicates = true;

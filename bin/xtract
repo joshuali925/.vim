@@ -1,18 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+archives=()
+paths=()
+
 for arg in "$@"; do
+  if [[ -e "$arg" ]]; then
+    archives+=("$arg")
+  else
+    paths+=("$arg")
+  fi
+done
+
+for arg in "${archives[@]}"; do
   case $arg in
-    *.tar)                       tar xvf "$arg"    ;;
-    *.tar.gz | *.tgz)            tar xvzf "$arg"   ;;
-    *.tar.xz | *.xz)             tar xvJf "$arg"   ;;
-    *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$arg"   ;;
-    *.bz2)                       bunzip2 "$arg"    ;;
-    *.gz)                        gunzip "$arg"     ;;
-    *.zip)                       unzip "$arg"      ;;
-    *.rar)                       unrar x "$arg"    ;;
-    *.Z)                         uncompress "$arg" ;;
-    *.7z)                        7z x "$arg"       ;;
+    *.tar)                       tar xvf "$arg" "${paths[@]}"        ;;
+    *.tar.gz | *.tgz)            tar xvzf "$arg" "${paths[@]}"       ;;
+    *.tar.xz | *.xz)             tar xvJf "$arg" "${paths[@]}"       ;;
+    *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$arg" "${paths[@]}"       ;;
+    *.bz2)                       bunzip2 "$arg"                      ;;
+    *.gz)                        gunzip "$arg"                       ;;
+    *.zip)                       unzip "$arg" "${paths[@]}"          ;;
+    *.rar)                       unrar x "$arg" "${paths[@]}"        ;;
+    *.Z)                         uncompress "$arg"                   ;;
+    *.7z)                        7z x "$arg" "${paths[@]}"           ;;
     *)                           echo "Unable to extract '$arg'" >&2 ;;
   esac
 done

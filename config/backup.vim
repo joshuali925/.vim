@@ -1596,7 +1596,8 @@ install-from-url asn https://raw.githubusercontent.com/nitefood/asn/HEAD/asn "$@
 install-from-url ack https://beyondgrep.com/ack-v3.8.1 "$@"
 alias l='eza -lF --git --color=always --color-scale=size --icons --header --group-directories-first --time-style=long-iso --all --smart-group'
 install-from-github eza eza-community/eza x86_64-unknown-linux-musl.tar.gz aarch64-unknown-linux-gnu.tar.gz '' '' '' "$@"
-alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'  # doesn't support arm64
+install-from-github trivy aquasecurity/trivy Linux-64bit.tar.gz Linux-ARM64.tar.gz macOS-64bit.tar.gz macOS-ARM64.tar.gz trivy "$@"
+install-from-github ctop bcicen/ctop linux-amd64 linux-arm64 darwin-amd64 '' '' "$@"
   # zinit light-mode as"program" from"gh-r" atclone"mv btm $ZPFX/bin" for ClementTsang/bottom
 alias btm='btm --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic'
     btm) sudo -E "$(/usr/bin/which btm)" --config=/dev/null --mem_as_value --process_command --color=gruvbox --basic "$@" ;;
@@ -2558,6 +2559,7 @@ alias gbss='git bisect start'
 alias gcan!='git commit -v -a --no-edit --amend'
 alias gcans!='git commit -v -a -s --no-edit --amend'
 alias gcam='git commit -a -m'
+alias gcgpg='export GPG_TTY=$(tty) && git commit --gpg-sign --signoff -m'
 alias gclean='git clean -fd'
 alias gdw='git diff --word-diff'
 alias gpoat='git push origin --all && git push origin --tags'
@@ -5797,7 +5799,6 @@ customCommands:
     { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },
                 { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
                 { "Diffview &file history", [['<,'>DiffviewFileHistory --follow]], "Browse previously committed versions of selected range with Diffview" },
-            vim.api.nvim_create_user_command("Gdiffsplit", lua require('gitsigns').diffthis(<q-args>, {split = 'aboveleft'}, function() vim.api.nvim_win_set_option(vim.fn.win_getid(vim.fn.winnr('#')), 'winbar', '%f') end)", { nargs = "*" }) -- git diff <ref> -- %
 " bookmarks: https://github.com/TheNoeTrevino/haunt.nvim, delays cursor after modification
 " tailwind: https://github.com/ruicsh/tailwind-hover.nvim
 
@@ -5810,7 +5811,69 @@ install-from-url diff-so-fancy https://github.com/so-fancy/diff-so-fancy/release
 	diffFilter = diff-so-fancy --patch
 [diff-so-fancy]
 	stripLeadingSymbols = false
+install-from-github diffnav dlvhdr/diffnav Linux_x86_64 Linux_arm64 Darwin_x86_64 Darwin_arm64 diffnav "$@"
+	diffn = -c core.pager=diffnav diff
 
 " =======================================================
   { on = ["m", "s"], run = '''shell --block -- du -sbc %s | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%%11.6f %%s", bytes/x, hum[x]); } } return sprintf("%%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }' | grep "total\$"; echo Press any key to continue; bash -c "read -n 1 -s _"''', desc = "Show selected size", for = "unix" },
         if command:match("^size$") then return shell([[du -b --max-depth=1 | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%%8.3f %%s", bytes/x, hum[x]); } } return sprintf("%%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }']], true) end
+
+" =======================================================
+    { "pmizio/typescript-tools.nvim" },
+    "typescript-language-server", -- typescript-language-server is setup using typescript-tools. TODO remove when removing typescript-tools
+        require("typescript-tools").setup({
+            settings = {
+                tsserver_path = mason_path .. "/packages/typescript-language-server/node_modules/.bin/tsserver", -- manually specify path, otherwise mason needs to be loaded
+                jsx_close_tag = { enable = true },
+                expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
+                tsserver_file_preferences = {
+                    -- importModuleSpecifierPreference = "shortest",
+                    importModuleSpecifierPreference = "relative",
+                    includeInlayParameterNameHints = "all",
+                    includeInlayEnumMemberValueHints = true,
+                    includeInlayFunctionLikeReturnTypeHints = true,
+                    includeInlayFunctionParameterTypeHints = true,
+                    includeInlayPropertyDeclarationTypeHints = true,
+                    includeInlayVariableTypeHints = true,
+                },
+            },
+        })
+    elseif vim.tbl_contains(active_clients, "typescript-tools") then
+        local ok, res = pcall(require("typescript-tools.api").organize_imports) -- sync organize imports always fails
+        vim.cmd.sleep()
+        if not ok then vim.notify(res, vim.log.levels.WARN, { title = "Failed to organize imports" }) end
+" venn
+    { "jbyuki/venn.nvim", cmd = "VBox" },
+                { "&Venn ascii draw", [[lua require("utils").toggle_venn()]], "Toggle venn.nvim, use HJKL to draw arrow, select area and use v to draw box" },
+function M.toggle_venn()
+    vim.b.venn_enabled = vim.b.venn_enabled == nil and true or nil
+    if vim.b.venn_enabled then
+        vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "K", "<C-v>k:VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "L", "<C-v>l:VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "H", "<C-v>h:VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "x", "v", ":VBox<CR>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "v", "<C-v>", { noremap = true, silent = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "<C-v>", "v", { noremap = true, silent = true })
+    else
+        vim.api.nvim_buf_del_keymap(0, "n", "J")
+        vim.api.nvim_buf_del_keymap(0, "n", "K")
+        vim.api.nvim_buf_del_keymap(0, "n", "L")
+        vim.api.nvim_buf_del_keymap(0, "n", "H")
+        vim.api.nvim_buf_del_keymap(0, "x", "v")
+        vim.api.nvim_buf_del_keymap(0, "n", "v")
+        vim.api.nvim_buf_del_keymap(0, "n", "<C-v>")
+    end
+    vim.wo.virtualedit = vim.b.venn_enabled and "all" or "block"
+    require("snacks").indent[vim.b.venn_enabled and "disable" or "enable"]()
+    vim.notify("Venn.nvim " .. (vim.b.venn_enabled and "enabled" or "disabled"))
+end
+
+" =======================================================
+  paste-image-ssh() {
+    if [[ $# -eq 0 ]]; then echo "Usage: $0 <host>" >&2; return 1; fi
+    osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/tmp/clipboard.png" with write permission)' || return 1
+    ffmpeg -y -loglevel error -i /tmp/clipboard.png -vf "scale='min(1568,iw)':'min(1568,ih)':force_original_aspect_ratio=decrease" -q:v 10 /tmp/clipboard.jpg
+    scp /tmp/clipboard.jpg "$1:/tmp/clipboard.jpg" && printf /tmp/clipboard.jpg | pbcopy
+    rm -f /tmp/clipboard.png /tmp/clipboard.jpg
+  }

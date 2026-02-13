@@ -124,8 +124,8 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
-nnoremap _ :call VSCodeNotify('workbench.action.navigateBack')<CR>
-nnoremap + :call VSCodeNotify('workbench.action.navigateForward')<CR>
+nnoremap _ <Cmd>call VSCodeNotify('workbench.action.navigateBack')<CR>
+nnoremap + <Cmd>call VSCodeNotify('workbench.action.navigateForward')<CR>
 nnoremap Q q
 " yankstack needs nmap
 nmap Y y$
@@ -133,7 +133,7 @@ xnoremap . :normal .<CR>
 xnoremap < <gv
 xnoremap > >gv
 nnoremap <C-c> :nohlsearch<CR>
-nnoremap <C-f> :call VSCodeCall('editor.action.organizeImports') <bar> sleep 500m <bar> call VSCodeCall('editor.action.formatDocument')<CR>
+nnoremap <C-f> <Cmd>call VSCodeCall('editor.action.organizeImports') <bar> sleep 500m <bar> call VSCodeCall('editor.action.formatDocument')<CR>
 xnoremap <C-f> =
 nnoremap <leader>r :call <SID>RunCode()<CR>
 noremap <leader>y "+y
@@ -141,21 +141,21 @@ nnoremap <leader>Y "+y$
 nmap yc "xyygcc"xp
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
-nnoremap <C-p> :call VSCodeNotify('workbench.action.quickOpen')<CR>
-nnoremap <leader>e :call VSCodeNotify('breadcrumbs.focus')<CR>
-nnoremap <leader>fd :call VSCodeNotify('workbench.action.quickOpen')<CR>
-nnoremap <leader>fm :call VSCodeNotify('workbench.action.openRecent')<CR>
-nnoremap <leader>fb :call VSCodeNotify('workbench.explorer.openEditorsView.toggleVisibility')<CR>
-nnoremap <leader>fu :call VSCodeNotify('workbench.action.gotoSymbol')<CR>
-nnoremap <leader>fU :call VSCodeNotify('workbench.action.showAllSymbols')<CR>
-nnoremap <leader>fg :call VSCodeNotify('workbench.view.search')<CR>
+nnoremap <C-p> <Cmd>call VSCodeNotify('workbench.action.quickOpen')<CR>
+nnoremap <leader>e <Cmd>call VSCodeNotify('breadcrumbs.focus')<CR>
+nnoremap <leader>fd <Cmd>call VSCodeNotify('workbench.action.quickOpen')<CR>
+nnoremap <leader>fm <Cmd>call VSCodeNotify('workbench.action.openRecent')<CR>
+nnoremap <leader>fb <Cmd>call VSCodeNotify('workbench.explorer.openEditorsView.toggleVisibility')<CR>
+nnoremap <leader>fu <Cmd>call VSCodeNotify('workbench.action.gotoSymbol')<CR>
+nnoremap <leader>fU <Cmd>call VSCodeNotify('workbench.action.showAllSymbols')<CR>
+nnoremap <leader>fg <Cmd>call VSCodeNotify('workbench.view.search')<CR>
 xnoremap <leader>fg <Cmd>call VSCodeNotifyRangePos('workbench.action.findInFiles', getpos('v')[1], getpos('.')[1], getpos('v')[2], getpos('.')[2] + 1, 1)<CR>
-nnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': expand('<cword>')})<CR>
+nnoremap <leader>fj <Cmd>call VSCodeNotify('workbench.action.findInFiles', { 'query': expand('<cword>')})<CR>
 xnoremap <leader>fj :call VSCodeNotify('workbench.action.findInFiles', { 'query': funcs#get_visual_selection() })<CR>
-nnoremap <leader>fa :call VSCodeNotify('workbench.action.focusActivityBar')<CR>
-nnoremap <leader>ff :call VSCodeNotify('workbench.action.showCommands')<CR>
-nnoremap <leader>fy :registers<CR>
-nnoremap <leader>b :call VSCodeNotify('workbench.view.explorer')<CR>
+nnoremap <leader>fa <Cmd>call VSCodeNotify('workbench.action.focusActivityBar')<CR>
+nnoremap <leader>ff <Cmd>call VSCodeNotify('workbench.action.showCommands')<CR>
+nnoremap <leader>fy <Cmd>registers<CR>
+nnoremap <leader>b <Cmd>call VSCodeNotify('workbench.view.explorer')<CR>
 nnoremap <leader>n :let @/ = '\<<C-r><C-w>\>' <bar> set hlsearch<CR>
 xnoremap <leader>n "xy:let @/ = substitute(escape(@x, '/\.*$^~['), '\n', '\\n', 'g') <bar> set hlsearch<CR>
 nnoremap <leader>s :call VSCodeNotify('actions.find') <bar> call VSCodeNotify('editor.action.startFindReplaceAction')<CR>
@@ -163,15 +163,15 @@ xnoremap <leader>s <Cmd>call VSCodeNotifyRangePos('actions.find', getpos('v')[1]
 nnoremap c. /\V\C<C-r>=escape(@", '/')<CR><CR>cgn<C-a><Esc>
 nmap cn <leader>ncgn
 xmap C <leader>ncgn
-nnoremap <leader>l :call funcs#print_variable(0, 0)<CR>
+nnoremap <leader>l <Cmd>call funcs#print_variable(0, 0)<CR>
 xnoremap <leader>l :<C-u>call funcs#print_variable(1, 0)<CR>
-nnoremap <leader>L :call funcs#print_variable(0, 1)<CR>
+nnoremap <leader>L <Cmd>call funcs#print_variable(0, 1)<CR>
 xnoremap <leader>L :<C-u>call funcs#print_variable(1, 1)<CR>
-nnoremap <leader>tu :call VSCodeNotify('workbench.action.reopenClosedEditor')<CR>
-nnoremap <leader>w :call VSCodeNotify('workbench.action.files.save')<CR>
-nnoremap <leader>W :call VSCodeNotify('workbench.action.files.saveAll')<CR>
-nnoremap <leader>q :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
-nnoremap <leader>x :call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
+nnoremap <leader>tu <Cmd>call VSCodeNotify('workbench.action.reopenClosedEditor')<CR>
+nnoremap <leader>w <Cmd>call VSCodeNotify('workbench.action.files.save')<CR>
+nnoremap <leader>W <Cmd>call VSCodeNotify('workbench.action.files.saveAll')<CR>
+nnoremap <leader>q <Cmd>call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
+nnoremap <leader>x <Cmd>call VSCodeNotify('workbench.action.closeActiveEditor')<CR>
 " open current file in gvim
 nnoremap <leader>V :call VSCodeNotify('workbench.action.terminal.sendSequence', {'text': "gvim '${file}'\u000D"})<CR>
 
@@ -183,48 +183,48 @@ nmap <leader><C-r> <Plug>(RepeatRedo)
 " nnoremap u :call VSCodeNotify('undo')<CR>
 " nnoremap <C-r> :call VSCodeNotify('redo')<CR>
 
-nnoremap Z[ :call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
-nnoremap Z] :call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
-nnoremap ZX :call VSCodeNotify('workbench.action.closeOtherEditors')<CR>
-nnoremap [g :call VSCodeNotify('workbench.action.editor.previousChange')<CR>
-nnoremap ]g :call VSCodeNotify('workbench.action.editor.nextChange')<CR>
-nnoremap [a :call VSCodeNotify('editor.action.marker.prev')<CR>
-nnoremap ]a :call VSCodeNotify('editor.action.marker.next')<CR>
+nnoremap Z[ <Cmd>call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
+nnoremap Z] <Cmd>call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
+nnoremap ZX <Cmd>call VSCodeNotify('workbench.action.closeOtherEditors')<CR>
+nnoremap [c <Cmd>call VSCodeNotify('workbench.action.editor.previousChange')<CR>
+nnoremap ]c <Cmd>call VSCodeNotify('workbench.action.editor.nextChange')<CR>
+nnoremap [a <Cmd>call VSCodeNotify('editor.action.marker.prev')<CR>
+nnoremap ]a <Cmd>call VSCodeNotify('editor.action.marker.next')<CR>
 nmap [b gT
 nmap ]b gt
-nnoremap [e :call VSCodeNotify('editor.action.moveLinesUpAction')<CR>
+nnoremap [e <Cmd>call VSCodeNotify('editor.action.moveLinesUpAction')<CR>
 xnoremap [e <Cmd>call VSCodeNotifyRange('editor.action.moveLinesUpAction', line('v'), line('.'), 1)<CR>
-nnoremap ]e :call VSCodeNotify('editor.action.moveLinesDownAction')<CR>
+nnoremap ]e <Cmd>call VSCodeNotify('editor.action.moveLinesDownAction')<CR>
 xnoremap ]e <Cmd>call VSCodeNotifyRange('editor.action.moveLinesDownAction', line('v'), line('.'), 1)<CR>
 nnoremap [<Space> mxO<Esc>`x
 nnoremap ]<Space> mxo<Esc>`x
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
 
-nnoremap gD :call VSCodeNotify('editor.action.peekTypeDefinition')<CR>
-nnoremap gr :call VSCodeNotify('references-view.find')<CR>
-nnoremap <leader>gu :call VSCodeNotify('git.revertSelectedRanges')<CR>
-nnoremap <leader>ga :call VSCodeNotify('git.stageSelectedRanges')<CR>
+nnoremap gD <Cmd>call VSCodeNotify('editor.action.peekTypeDefinition')<CR>
+nnoremap gr <Cmd>call VSCodeNotify('references-view.find')<CR>
+nnoremap <leader>gu <Cmd>call VSCodeNotify('git.revertSelectedRanges')<CR>
+nnoremap <leader>ga <Cmd>call VSCodeNotify('git.stageSelectedRanges')<CR>
 nmap <leader>gd gh
-nnoremap <leader>gr :call VSCodeNotify('gitlens.openFileOnRemote')<CR>
-nnoremap <leader>a :call VSCodeNotify('editor.action.quickFix')<CR>
-nnoremap <leader>R :call VSCodeNotify('editor.action.rename')<CR>
-nnoremap <leader>d :call VSCodeNotify('references-view.findImplementations')<CR>
+nnoremap <leader>gr <Cmd>call VSCodeNotify('gitlens.openFileOnRemote')<CR>
+nnoremap <leader>a <Cmd>call VSCodeNotify('editor.action.quickFix')<CR>
+nnoremap <leader>R <Cmd>call VSCodeNotify('editor.action.rename')<CR>
+nnoremap <leader>d <Cmd>call VSCodeNotify('references-view.findImplementations')<CR>
 
-nnoremap <leader>to :call VSCodeNotify('workbench.action.terminal.newWithCwd', { 'cwd': '${fileDirname}' })<CR>
-nnoremap <leader>tt :call VSCodeNotify('workbench.action.terminal.focus')<CR>
-nnoremap <leader>te :call VSCodeNotify('workbench.action.terminal.runSelectedText')<CR>
+nnoremap <leader>to <Cmd>call VSCodeNotify('workbench.action.terminal.newWithCwd', { 'cwd': '${fileDirname}' })<CR>
+nnoremap <leader>tt <Cmd>call VSCodeNotify('workbench.action.terminal.focus')<CR>
+nnoremap <leader>te <Cmd>call VSCodeNotify('workbench.action.terminal.runSelectedText')<CR>
 xnoremap <leader>te <Cmd>call VSCodeNotifyRange('workbench.action.terminal.runSelectedText', line('v'), line('.'), 1)<CR>
 
-nnoremap zc :call VSCodeNotify('editor.fold')<CR>
-nnoremap zC :call VSCodeNotify('editor.foldRecursively')<CR>
-nnoremap zo :call VSCodeNotify('editor.unfold')<CR>
-nnoremap zO :call VSCodeNotify('editor.unfoldRecursively')<CR>
-nnoremap za :call VSCodeNotify('editor.toggleFold')<CR>
-nnoremap zm :call VSCodeNotify('editor.foldAll')<CR>
-nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
-nnoremap zr :call VSCodeNotify('editor.unfoldAll')<CR>
-nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
+nnoremap zc <Cmd>call VSCodeNotify('editor.fold')<CR>
+nnoremap zC <Cmd>call VSCodeNotify('editor.foldRecursively')<CR>
+nnoremap zo <Cmd>call VSCodeNotify('editor.unfold')<CR>
+nnoremap zO <Cmd>call VSCodeNotify('editor.unfoldRecursively')<CR>
+nnoremap za <Cmd>call VSCodeNotify('editor.toggleFold')<CR>
+nnoremap zm <Cmd>call VSCodeNotify('editor.foldAll')<CR>
+nnoremap zM <Cmd>call VSCodeNotify('editor.foldAll')<CR>
+nnoremap zr <Cmd>call VSCodeNotify('editor.unfoldAll')<CR>
+nnoremap zR <Cmd>call VSCodeNotify('editor.unfoldAll')<CR>
 
 function! s:RunCode()
   if expand('%:t') =~ 'test.[tj]sx\?'

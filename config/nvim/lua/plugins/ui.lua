@@ -11,7 +11,12 @@ return {
         opts = {
             cli = {
                 tools = {
-                    claude = { cmd = { "claude", "--allow-dangerously-skip-permissions" } },
+                    claude = {
+                        cmd = { "claude", "--allow-dangerously-skip-permissions" },
+                        format = function(text, str) -- sometimes sidekick sends @path :Ln
+                            return str:gsub("@([^@]-) :L(%d+)%-L(%d+)", "@%1#L%2-%3"):gsub("@([^@]-) :L(%d+):C%d+%-?C?%d*", "@%1#L%2"):gsub("@([^@]-) :L(%d+)", "@%1#L%2")
+                        end,
+                    },
                     kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" }, format = function(text, str) return str:gsub("@", "") end },
                 },
                 win = {
@@ -136,15 +141,15 @@ return {
                 { "Du&plicated lines", [[sort | let @/ = '\C^\(.*\)$\n\1$' | set hlsearch]], "Sort and search duplicated lines" },
                 { "Calculate line &=", [[let @x = getline(".")[max([0, matchend(getline("."), ".*=")]):] | execute "normal! A = \<C-r>=\<C-r>x\<CR>"]], "Calculate expression from previous '=' or current line" },
                 { "--", "" },
-                { "&Word count", [[call feedkeys("g\<C-g>")]], "Show document details" },
-                { "Cou&nt search", [[echo searchcount({'maxcount': 0})]], "Count occurrences of current search pattern (:%s/pattern//gn also works)" },
+                { "Cou&nt search matches", [[echo searchcount({'maxcount': 0})]], "Count occurrences of current search pattern (:%s/pattern//gn also works)" },
                 { "&Yank search matches", [[let @x = '' | %s//\=setreg('X', submatch(0), 'V')/gn | let @" = @x | let @x = '']], "Copy all strings matching current search pattern" },
+                { "&Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
                 { "Search non-ascii", [[let @/ = '[^\d0-\d127]' | set hlsearch]], [[Search all non-ascii characters, in command line: rg '[^\x00-\x7F]']] },
                 { "Search for red '&!'", [[RgNoRegex ❗]], [[Search for '❗' symbol]] },
                 { "Search in &buffers", [[execute 'cexpr []' | call feedkeys(":bufdo vimgrepadd //g % | only | copen\<Home>\<S-Right>\<S-Right>\<Right>\<Right>", "n")]], "Search a pattern in all buffers, add to quickfix" },
-                { "Fold unmatched lines", [[setlocal foldexpr=(getline(v:lnum)=~@/)?0:(getline(v:lnum-1)=~@/)\\|\\|(getline(v:lnum+1)=~@/)?1:2 foldmethod=expr foldlevel=0 foldcolumn=2 foldmethod=manual]], "Fold lines that don't have a match for the current search phrase" },
-                { "&Diff unsaved", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
-                { "Diff next buffer", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
+                { "--", "" },
+                { "Diff &original", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
+                { "&Diff next buffer", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
                 { "Diff directories", [[call feedkeys(":CodeDiff dir ", "n")]], "Run DirDiff to compare two directories" }, -- TODO (0.12) https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
@@ -178,7 +183,6 @@ return {
             })
             vim.fn["quickui#menu#install"]("&Format", {
                 { "Fold with &treesitter", [[setlocal foldexpr=v:lua.vim.treesitter.foldexpr()]], "Use treesitter to fold, this can be slow" },
-                { "&Venn ascii draw", [[lua require("utils").toggle_venn()]], "Toggle venn.nvim, use HJKL to draw arrow, select area and use v to draw box" },
                 { "--", "" },
                 { "Table &mode", [[TableModeToggle]], "Toggle TableMode" },
                 { "&Reformat table", [[TableModeRealign]], "Reformat table" },
@@ -249,11 +253,12 @@ return {
                 { "Base&64 decode", [[lua local temp = require("utils").base64_decode(require("utils").get_visual_selection()); vim.cmd.S(); vim.api.nvim_put(temp, "", false, true); vim.api.nvim_buf_set_name(0, "base64_decode"); temp = nil]], "Decode selected text with base64" },
                 { "Generate &snippet", [[let @x = substitute(escape(funcs#get_visual_selection(), '"$'), repeat(' ', &shiftwidth), '\\t', 'g') | execute 'S put x' | execute '%normal! gI"' | execute '%normal! A",' | execute 'normal! Gdd$x' | file snippet_body]], "Generate vscode compatible snippet body from selected text" },
                 { "&Delete comments", [[lua require("utils").delete_comments(vim.fn.line("'<"), vim.fn.line("'>"))]], "Delete comments from selected lines" },
+                { "&Yank path reference", [[let @+=('@'.expand('%:.').'#L'.line("'<").(line("'<")!=line("'>") ? '-'.line("'>") : ''))]], "Copy file reference in Claude Code format" },
                 { "--", "" },
                 { "Search in &buffers", [[execute 'cexpr []' | execute 'bufdo vimgrepadd /' . substitute(escape(funcs#get_visual_selection(), '/\.*$^~['), '\n', '\\n', 'g') . '/g %' | copen]], "Grep current search pattern in all buffers, add to quickfix" },
             })
             vim.fn["quickui#menu#install"]("&Git", {
-                { "Git &file history", [[lua require("mini.git").show_range_history({ line_start = vim.fn.line("'<"), line_end = vim.fn.line("'>"), log_args = { "--follow" } })]], "Browse previously committed versions of selected lines" },
+                { "Git &file history", [['<,'>CodeDiff history %]], "Browse previously committed versions of selected lines" },
             })
             vim.fn["quickui#menu#install"]("Ta&bles", {
                 { "Reformat table", [['<,'>TableModeRealign]], "Reformat table" },

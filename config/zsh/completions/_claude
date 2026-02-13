@@ -1,0 +1,344 @@
+#compdef claude
+
+_claude() {
+  local curcontext="$curcontext" ret=1
+  local -a context line state state_descr
+  local -A opt_args
+
+  _arguments -C \
+    '*--add-dir=[additional directories to allow tool access to]:directory:_directories' \
+    '--agent=[agent for the current session]:agent' \
+    '--agents=[JSON object defining custom agents]:json' \
+    '--allow-dangerously-skip-permissions[enable bypassing all permission checks as an option]' \
+    '*--allowed-tools=[tool names to allow]:tools' \
+    '*--allowedTools=[tool names to allow]:tools' \
+    '--append-system-prompt=[append to default system prompt]:prompt' \
+    '*--betas=[beta headers for API requests]:betas' \
+    '--chrome[enable Claude in Chrome integration]' \
+    '(-r --resume)'{-c,--continue}'[continue most recent conversation]' \
+    '--dangerously-skip-permissions[bypass all permission checks]' \
+    '(-d --debug)'{-d,--debug}'[enable debug mode]::filter' \
+    '--debug-file=[write debug logs to file]:path:_files' \
+    '--disable-slash-commands[disable all skills]' \
+    '*--disallowed-tools=[tool names to deny]:tools' \
+    '*--disallowedTools=[tool names to deny]:tools' \
+    '--effort=[effort level]:level:(low medium high)' \
+    '--fallback-model=[fallback model when default is overloaded]:model' \
+    '*--file=[file resources to download at startup]:spec' \
+    '--fork-session[create a new session ID when resuming]' \
+    '--from-pr=[resume session linked to a PR]::pr number or url' \
+    '(- *)'{-h,--help}'[display help]' \
+    '--ide[auto-connect to IDE on startup]' \
+    '--include-partial-messages[include partial message chunks]' \
+    '--input-format=[input format]:format:(text stream-json)' \
+    '--json-schema=[JSON Schema for structured output]:schema' \
+    '--max-budget-usd=[maximum dollar amount for API calls]:amount' \
+    '*--mcp-config=[load MCP servers from JSON files]:config:_files' \
+    '--mcp-debug[enable MCP debug mode (deprecated)]' \
+    '--model=[model for current session]:model:(sonnet opus haiku)' \
+    '--no-chrome[disable Claude in Chrome integration]' \
+    '--no-session-persistence[disable session persistence]' \
+    '--output-format=[output format]:format:(text json stream-json)' \
+    '--permission-mode=[permission mode]:mode:(acceptEdits bypassPermissions default delegate dontAsk plan)' \
+    '*--plugin-dir=[load plugins from directories]:directory:_directories' \
+    '(-p --print)'{-p,--print}'[print response and exit]' \
+    '--replay-user-messages[re-emit user messages from stdin on stdout]' \
+    '(-c --continue)'{-r,--resume}'[resume a conversation]::session id or search term' \
+    '--session-id=[use a specific session ID]:uuid' \
+    '--setting-sources=[setting sources to load]:sources' \
+    '--settings=[path to settings JSON file or JSON string]:file:_files' \
+    '--strict-mcp-config[only use MCP servers from --mcp-config]' \
+    '--system-prompt=[system prompt for the session]:prompt' \
+    '*--tools=[specify available tools]:tools' \
+    '--verbose[override verbose mode setting]' \
+    '(- *)'{-v,--version}'[output version number]' \
+    '1: :_claude_commands' \
+    '*::arg:->args' \
+  && ret=0
+
+  case $state in
+    (args)
+      case $line[1] in
+        auth)
+          _claude_auth && ret=0
+          ;;
+        doctor|setup-token)
+          _arguments -C \
+            '(- *)'{-h,--help}'[display help]' \
+          && ret=0
+          ;;
+        install)
+          _arguments -C \
+            '--force[force installation even if already installed]' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:target:(stable latest)' \
+          && ret=0
+          ;;
+        mcp)
+          _claude_mcp && ret=0
+          ;;
+        plugin)
+          _claude_plugin && ret=0
+          ;;
+        update|upgrade)
+          _arguments -C \
+            '(- *)'{-h,--help}'[display help]' \
+          && ret=0
+          ;;
+      esac
+      ;;
+  esac
+
+  return ret
+}
+
+_claude_commands() {
+  local -a commands=(
+    'auth:manage authentication'
+    'doctor:check health of auto-updater'
+    'install:install Claude Code native build'
+    'mcp:configure and manage MCP servers'
+    'plugin:manage Claude Code plugins'
+    'setup-token:set up a long-lived authentication token'
+    'update:check for updates and install'
+  )
+  _describe -t commands 'command' commands
+}
+
+_claude_auth() {
+  local -a subcmds=(
+    'login:sign in to your Anthropic account'
+    'logout:log out from your Anthropic account'
+    'status:show authentication status'
+  )
+
+  _arguments -C \
+    '(- *)'{-h,--help}'[display help]' \
+    '1: :->subcmd' \
+    '*::arg:->args' \
+  && return
+
+  case $state in
+    (subcmd)
+      _describe -t commands 'auth command' subcmds
+      ;;
+    (args)
+      case $line[1] in
+        login)
+          _arguments \
+            '--email=[pre-populate email address]:email' \
+            '--sso[force SSO login flow]' \
+            '(- *)'{-h,--help}'[display help]'
+          ;;
+        logout)
+          _arguments \
+            '(- *)'{-h,--help}'[display help]'
+          ;;
+        status)
+          _arguments \
+            '--json[output as JSON]' \
+            '--text[output as human-readable text]' \
+            '(- *)'{-h,--help}'[display help]'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_claude_mcp() {
+  local -a subcmds=(
+    'add:add an MCP server'
+    'add-from-claude-desktop:import MCP servers from Claude Desktop'
+    'add-json:add an MCP server with a JSON string'
+    'get:get details about an MCP server'
+    'list:list configured MCP servers'
+    'remove:remove an MCP server'
+    'reset-project-choices:reset approved/rejected project-scoped servers'
+    'serve:start the Claude Code MCP server'
+  )
+
+  _arguments -C \
+    '(- *)'{-h,--help}'[display help]' \
+    '1: :->subcmd' \
+    '*::arg:->args' \
+  && return
+
+  case $state in
+    (subcmd)
+      _describe -t commands 'mcp command' subcmds
+      ;;
+    (args)
+      case $line[1] in
+        add)
+          _arguments \
+            '--callback-port=[fixed port for OAuth callback]:port' \
+            '--client-id=[OAuth client ID]:client id' \
+            '--client-secret[prompt for OAuth client secret]' \
+            '*'{-e,--env}'=[set environment variables]:env (KEY=value)' \
+            '*'{-H,--header}'=[set WebSocket headers]:header' \
+            {-s,--scope}'=[configuration scope]:scope:(local user project)' \
+            {-t,--transport}'=[transport type]:transport:(stdio sse http)' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:name' \
+            '2:command or url:_files' \
+            '*:args'
+          ;;
+        add-from-claude-desktop)
+          _arguments \
+            {-s,--scope}'=[configuration scope]:scope:(local user project)' \
+            '(- *)'{-h,--help}'[display help]'
+          ;;
+        add-json)
+          _arguments \
+            '--client-secret[prompt for OAuth client secret]' \
+            {-s,--scope}'=[configuration scope]:scope:(local user project)' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:name' \
+            '2:json'
+          ;;
+        get)
+          _arguments \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:name'
+          ;;
+        list|reset-project-choices)
+          _arguments \
+            '(- *)'{-h,--help}'[display help]'
+          ;;
+        remove)
+          _arguments \
+            {-s,--scope}'=[configuration scope]:scope:(local user project)' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:name'
+          ;;
+        serve)
+          _arguments \
+            {-d,--debug}'[enable debug mode]' \
+            '--verbose[override verbose mode setting]' \
+            '(- *)'{-h,--help}'[display help]'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_claude_plugin() {
+  local -a subcmds=(
+    'disable:disable an enabled plugin'
+    'enable:enable a disabled plugin'
+    'install:install a plugin from marketplaces'
+    'list:list installed plugins'
+    'marketplace:manage Claude Code marketplaces'
+    'uninstall:uninstall an installed plugin'
+    'update:update a plugin to latest version'
+    'validate:validate a plugin or marketplace manifest'
+  )
+
+  _arguments -C \
+    '(- *)'{-h,--help}'[display help]' \
+    '1: :->subcmd' \
+    '*::arg:->args' \
+  && return
+
+  case $state in
+    (subcmd)
+      _describe -t commands 'plugin command' subcmds
+      ;;
+    (args)
+      case $line[1] in
+        disable)
+          _arguments \
+            {-a,--all}'[disable all enabled plugins]' \
+            {-s,--scope}'=[installation scope]:scope:(user project local)' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1::plugin'
+          ;;
+        enable)
+          _arguments \
+            {-s,--scope}'=[installation scope]:scope:(user project local)' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:plugin'
+          ;;
+        install|i)
+          _arguments \
+            {-s,--scope}'=[installation scope]:scope:(user project local)' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:plugin'
+          ;;
+        list)
+          _arguments \
+            '--available[include available plugins from marketplaces]' \
+            '--json[output as JSON]' \
+            '(- *)'{-h,--help}'[display help]'
+          ;;
+        marketplace)
+          _claude_plugin_marketplace
+          ;;
+        uninstall|remove)
+          _arguments \
+            {-s,--scope}'=[uninstall from scope]:scope:(user project local)' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:plugin'
+          ;;
+        update)
+          _arguments \
+            {-s,--scope}'=[installation scope]:scope:(user project local managed)' \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:plugin'
+          ;;
+        validate)
+          _arguments \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:path:_files'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_claude_plugin_marketplace() {
+  local -a subcmds=(
+    'add:add a marketplace from URL, path, or GitHub repo'
+    'list:list all configured marketplaces'
+    'remove:remove a configured marketplace'
+    'update:update marketplace(s) from source'
+  )
+
+  _arguments -C \
+    '(- *)'{-h,--help}'[display help]' \
+    '1: :->subcmd' \
+    '*::arg:->args' \
+  && return
+
+  case $state in
+    (subcmd)
+      _describe -t commands 'marketplace command' subcmds
+      ;;
+    (args)
+      case $line[1] in
+        add)
+          _arguments \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:source'
+          ;;
+        list)
+          _arguments \
+            '--json[output as JSON]' \
+            '(- *)'{-h,--help}'[display help]'
+          ;;
+        remove|rm)
+          _arguments \
+            '(- *)'{-h,--help}'[display help]' \
+            '1:name'
+          ;;
+        update)
+          _arguments \
+            '(- *)'{-h,--help}'[display help]' \
+            '1::name'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_claude "$@"

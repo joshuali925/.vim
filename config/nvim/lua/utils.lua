@@ -81,30 +81,6 @@ function M.delete_comments(start_line, end_line) -- https://gist.github.com/kelv
     for _, line in ipairs(lines_to_delete) do vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, {}) end
 end
 
-function M.toggle_venn()
-    vim.b.venn_enabled = vim.b.venn_enabled == nil and true or nil
-    if vim.b.venn_enabled then
-        vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBox<CR>", { noremap = true, silent = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "K", "<C-v>k:VBox<CR>", { noremap = true, silent = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "L", "<C-v>l:VBox<CR>", { noremap = true, silent = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "H", "<C-v>h:VBox<CR>", { noremap = true, silent = true })
-        vim.api.nvim_buf_set_keymap(0, "x", "v", ":VBox<CR>", { noremap = true, silent = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "v", "<C-v>", { noremap = true, silent = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "<C-v>", "v", { noremap = true, silent = true })
-    else
-        vim.api.nvim_buf_del_keymap(0, "n", "J")
-        vim.api.nvim_buf_del_keymap(0, "n", "K")
-        vim.api.nvim_buf_del_keymap(0, "n", "L")
-        vim.api.nvim_buf_del_keymap(0, "n", "H")
-        vim.api.nvim_buf_del_keymap(0, "x", "v")
-        vim.api.nvim_buf_del_keymap(0, "n", "v")
-        vim.api.nvim_buf_del_keymap(0, "n", "<C-v>")
-    end
-    vim.wo.virtualedit = vim.b.venn_enabled and "all" or "block"
-    require("snacks").indent[vim.b.venn_enabled and "disable" or "enable"]()
-    vim.notify("Venn.nvim " .. (vim.b.venn_enabled and "enabled" or "disabled"))
-end
-
 function M.pick_filetypes(opts)
     opts = opts or {}
     require("snacks.picker")(vim.tbl_extend("force", {
@@ -117,6 +93,18 @@ function M.pick_filetypes(opts)
             if item then vim.o.filetype = item.text end
         end,
     }, opts))
+end
+
+function M.tmux_pick_files(target_pane, prefix)
+    require("snacks.picker").smart({
+        layout = { layout = { width = 0, height = 0 } },
+        on_close = function() vim.cmd.quitall() end,
+        confirm = function(picker)
+            local paths = vim.tbl_map(function(s) return (prefix or "") .. vim.fn.fnamemodify(s.file, ":.") end, picker:selected({ fallback = true }))
+            vim.system({ "tmux", "send-keys", "-l", "-t", target_pane, table.concat(paths, " ") .. " " }):wait()
+            picker:close()
+        end,
+    })
 end
 
 function M.file_manager()

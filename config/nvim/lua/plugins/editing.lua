@@ -3,9 +3,18 @@ return {
     { "Wansmer/treesj", keys = { { "gS", "<Cmd>TSJSplit<CR>" }, { "gJ", "<Cmd>TSJJoin<CR>" } }, opts = { use_default_keymaps = false, max_join_length = 999 } },
     {
         "kylechui/nvim-surround",
-        keys = { "ys", "cs", "ds", { "s", mode = "x" }, { "s<CR>", "gS<Space>", mode = "x", remap = true }, { "yss", "ysiw", remap = true }, { "yS", "ysg_", remap = true } },
+        keys = {
+            { "ys", "<Plug>(nvim-surround-normal)" },
+            { "ds", "<Plug>(nvim-surround-delete)" },
+            { "cs", "<Plug>(nvim-surround-change)" },
+            { "ysl", "<Plug>(nvim-surround-normal-cur-line)" },
+            { "s", "<Plug>(nvim-surround-visual)", mode = "x" },
+            { "s<CR>", "<Plug>(nvim-surround-visual-line)<Space>", mode = "x" },
+            { "yss", "ysiw", remap = true },
+            { "yS", "ysg_", remap = true },
+        },
+        init = function() vim.g.nvim_surround_no_mappings = true end,
         opts = {
-            keymaps = { normal_cur = "<NOP>", normal_line = "<NOP>", normal_cur_line = "ysl", visual = "s" },
             surrounds = {
                 ["j"] = { add = function() return { { "JSON.stringify(" }, { ")" } } end },
                 ["J"] = { add = function() return { { "JSON.stringify(" }, { ", null, 2)" } } end },

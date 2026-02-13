@@ -91,6 +91,7 @@ backup() {
 
 link_file() {
   local sourceFile="$1" destFile="$2"
+  mkdir -p "${destFile%/*}"
   backup "$destFile"
   shift 2
   ln -s "$@" "$sourceFile" "$destFile" || ln -s "$sourceFile" "$destFile"
@@ -115,7 +116,6 @@ install_devtools() {
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apk ]]; then
     sudo apk add bash zsh git curl alpine-sdk
   elif [[ $PLATFORM = darwin ]]; then
-    mkdir -pv ~/.local/bin
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils wget xz
     echo -e "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
@@ -136,7 +136,7 @@ install_devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly rectangle linearmouse maccy pixpin trex thaw@beta doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
     # to update one cask: brew upgrade --cask wezterm@nightly --greedy-latest
@@ -150,7 +150,7 @@ install_dotfiles() {
     git clone --filter=blob:none https://github.com/joshuali925/.vim.git ~/.vim
   fi
   log 'Creating directories..'
-  mkdir -pv ~/.local/{bin,lib,share} ~/.config/lazygit ~/.ssh ~/projects
+  mkdir -pv ~/.local/{bin,lib} ~/.ssh ~/projects
   log 'Linking configurations..'
   echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
   echo 'source ~/.vim/config/zsh/.zshrc' >> ~/.zshrc
@@ -166,7 +166,6 @@ install_dotfiles() {
   link_file ~/.vim/config/yazi ~/.config/yazi --relative
   link_file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml --relative
   if [[ $PLATFORM = darwin ]]; then
-    mkdir -p ~/Library/Application\ Support/lazygit ~/.config/wezterm ~/.config/karabiner/assets/complex_modifications
     ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport
     link_file ~/.vim/config/lazygit_config.yml ~/Library/ApplicationSupport/lazygit/config.yml
     link_file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
@@ -201,7 +200,7 @@ install_docker() {
   sudo groupadd docker || true
   sudo usermod -aG docker "$USER"
   sudo systemctl restart docker
-  sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login and newgrp only changes group for the current terminal. enable read write access for other groups now to work immediately
+  sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login and newgrp only changes group for the current shell session. enable read write access for other groups now to work immediately
   docker completion zsh > ~/.vim/config/zsh/completions/_docker
   log 'Installed docker'
 }
@@ -328,20 +327,24 @@ install_claude-code() {
   curl -fsSL https://claude.ai/install.sh | bash
   npm install -g ccstatusline@latest
   mkdir -p ~/.aws ~/.claude
+  grep -qxF '/.claude/' ~/.gitignore 2>/dev/null || echo '/.claude/' >> ~/.gitignore
   link_file ~/.vim/config/claude/agents ~/.claude/agents --relative
   link_file ~/.vim/config/claude/skills ~/.claude/skills --relative
   link_file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link_file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link_file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
   printf '\n[bedrock-prod]\nrole_arn = arn:aws:iam::000000000000:role/Admin\ncredential_source = Ec2InstanceMetadata\n; source_profile = default\nregion = us-west-2\n' >> ~/.aws/credentials
-  claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   claude plugin marketplace add anthropics/claude-plugins-official
   claude plugin install typescript-lsp@claude-plugins-official
+  claude plugin install ralph-loop@claude-plugins-official
   claude plugin marketplace add anthropics/claude-code
   claude plugin install frontend-design@claude-code-plugins
   claude plugin disable frontend-design
   claude plugin marketplace add memvid/claude-brain
   claude plugin install mind@memvid
+  claude plugin marketplace add obra/superpowers-marketplace
+  claude plugin install superpowers@superpowers-marketplace
+  claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   install_google-chrome 2> /dev/null && npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics || true
   log "\nInstalled Claude Code. Use ${YELLOW}claude --permission-mode=bypassPermissions${CYAN} to trust all"
   log "${BG_RED}TODO${CYAN}: update bedrock role in ${YELLOW}~/.aws/credentials"
@@ -395,13 +398,8 @@ default-install() {
   fi
 
   install ssh-key
-
   sudo chsh -s "$(which zsh)" "$(whoami)" || true
-  log '\nDefault shell will be zsh after re-login, try the following if it did not work'
-  log "${YELLOW}SHELL=$(which zsh) exec zsh  ${BLACK}# run zsh now"
-  log "${YELLOW}sed -i -e '1i[[ -t 1 ]] && exec zsh\' ~/.bashrc  ${BLACK}# run zsh when bash starts"
-  log "${YELLOW}sudo vipw  ${BLACK}# then edit login shell for user"
-
+  log '\nDefault shell will be zsh after re-login'
   log '\nFinished, exiting..'
 }
 
