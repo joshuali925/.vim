@@ -142,15 +142,16 @@ return {
         end,
         config = function()
             local installed = require("nvim-treesitter").get_installed()
-            local not_installed = vim.tbl_filter(function(lang) return not vim.tbl_contains(installed, lang) end, { "jsdoc" })
+            for _, lang in ipairs({ "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" }) do -- built-in parsers (~/.local/lib/nvim/lib/nvim/parser), no need to install again
+                if not vim.tbl_contains(installed, lang) then table.insert(installed, lang) end
+            end
+            local not_installed = vim.tbl_filter(function(lang) return not vim.tbl_contains(installed, lang) end, { "jsdoc" }) -- parsers that won't be installed on demand
             if #not_installed > 0 then
                 vim.list_extend(installed, not_installed)
                 require("nvim-treesitter").install(not_installed)
             end
             local available = { kulala_http = true }
-            for _, lang in ipairs(require("nvim-treesitter").get_available()) do
-                if not vim.tbl_contains({ "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" }, lang) then available[lang] = true end
-            end
+            for _, lang in ipairs(require("nvim-treesitter").get_available()) do available[lang] = true end
             vim.api.nvim_create_autocmd("FileType", {
                 group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true }),
                 callback = function(event)

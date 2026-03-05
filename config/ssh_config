@@ -1,6 +1,6 @@
 Host *
-    ServerAliveInterval 47
-    ServerAliveCountMax 5
+    ServerAliveInterval 23
+    ServerAliveCountMax 2
     Compression yes
     ControlMaster auto
     # see TOKENS section under man ssh_config for formatting

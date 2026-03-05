@@ -17,7 +17,7 @@ return {
                             return str:gsub("@([^@]-) :L(%d+)%-L(%d+)", "@%1#L%2-%3"):gsub("@([^@]-) :L(%d+):C%d+%-?C?%d*", "@%1#L%2"):gsub("@([^@]-) :L(%d+)", "@%1#L%2")
                         end,
                     },
-                    kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" }, format = function(text, str) return str:gsub("@", "") end },
+                    kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" } },
                 },
                 win = {
                     split = { width = 0.4 },

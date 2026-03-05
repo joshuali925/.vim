@@ -1,4 +1,6 @@
-# OpenSearch Dashboards Validation SOP
+---
+description: OpenSearch Dashboards validation SOP
+---
 
 ## Required Commands
 
@@ -20,30 +22,27 @@
 
 4. **Build artifact errors:** `yarn build-platform --linux --skip-os-packages`
 5. **Runtime artifact errors:** `./build/opensearch-dashboards/bin/opensearch-dashboards` (after build)
-6. **Browser console errors:** Use chrome-devtools MCP to access localhost:5601 with optionally provided path (after server starts)
-
-## Browser Testing with Chrome DevTools MCP
-
-When spawning subagent or agent teams that need to interact with the browser, include these instructions in their prompt to ensure they discover and use the MCP tools:
-
-> You have Chrome DevTools MCP tools available. Do NOT use curl, WebFetch, or Bash for browser interaction — use the MCP tools instead. Start by using the `mcp__chrome-devtools__new_page` tool to open a new browser tab with a URL.
+6. **Browser console errors:** Use `playwright-cli` skill to access `localhost:5601` with optionally provided path (after server starts)
+   - Store any generated images, logs, etc. in the `./.playwright-cli/` directory
+   - When spawning subagent or agent teams that need to interact with the browser, ensure they use the `playwright-cli` skill (NOT curl or WebFetch) for browser interactions
 
 ## Validation Rules
 
 After every fix:
 
-- Check if server is already running on :5601 first
+- Check if server is already running on :5601 port first (`curl -sL -o /dev/null -w "%{http_code}" http://localhost:5601`)
 - Run applicable steps based on changes
 - Verify each step completes with NO errors
 - If errors occur, including pre-existing ones, investigate and fix
+- Always use `playwright-cli` skill to verify fixes if user has provided a URL path
 - Repeat until all validation passes
 
 If server is already running, you can check server output using:
 
 ```bash
-tmux capture-pane -p -t 1.$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1}')
+p=$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1; e=1} END {exit !e}') && tmux capture-pane -p -t "1.$p"
 ```
 
-The server will automatically compile typescript using file watcher. If there's a recent "bundles compiled successfully" log, then the latest changes are compiled.
+The server will automatically compile typescript using file watcher. Ignore bundle errors above any "bundles compiled successfully" message, and if there's a recent "bundles compiled successfully" log, then the latest changes are compiled.
 
 If the tmux command does not work, or server is not behaving as expected, then kill the existing process and start the server yourself. Do not use tmux this time.

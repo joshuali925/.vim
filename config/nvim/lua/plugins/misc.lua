@@ -136,6 +136,10 @@ return {
             picker = {
                 ui_select = false,
                 formatters = { file = { filename_first = true, truncate = 80 } },
+                preview = function(ctx)
+                    if ctx.item.file and not ctx.item.preview_title then ctx.item.preview_title = ctx.item.file end
+                    return require("snacks.picker.preview").file(ctx)
+                end,
                 sources = {
                     files = { hidden = true, layout = { preset = "vscode" } },
                     smart = { hidden = true, layout = { preset = "vscode" }, filter = { cwd = true } }, -- alternative: https://github.com/dtormoen/neural-open.nvim

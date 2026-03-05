@@ -4,7 +4,7 @@
     [
       {
         "id": "3",
-        "type": "context-percentage",
+        "type": "context-length",
         "color": "brightBlack",
         "rawValue": false,
         "merge": "no-padding"
