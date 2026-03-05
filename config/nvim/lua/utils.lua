@@ -95,13 +95,13 @@ function M.pick_filetypes(opts)
     }, opts))
 end
 
-function M.tmux_pick_files(target_pane, prefix)
+function M.tmux_pick_files(prefix)
     require("snacks.picker").smart({
         layout = { layout = { width = 0, height = 0 } },
         on_close = function() vim.cmd.quitall() end,
         confirm = function(picker)
             local paths = vim.tbl_map(function(s) return (prefix or "") .. vim.fn.fnamemodify(s.file, ":.") end, picker:selected({ fallback = true }))
-            vim.system({ "tmux", "send-keys", "-l", "-t", target_pane, table.concat(paths, " ") .. " " }):wait()
+            vim.system({ "tmux", "send-keys", "-l", table.concat(paths, " ") .. " " }):wait()
             picker:close()
         end,
     })
@@ -109,25 +109,35 @@ end
 
 function M.file_manager()
     local curr = vim.fn.expand("%")
-    local selection_path = os.tmpname()
-    local cmd = ([[yazi --cwd-file="$HOME/.vim/tmp/last_result" --chooser-file="%s" "%s"]]):format(selection_path, curr ~= "" and curr or ".")
-    local terminal = require("snacks.terminal").open(cmd, { win = { height = 0.9, width = 0.9 } })
-    local buf = terminal.buf                         -- terminal.buf is not available in TermClose callback
+    local selection_path = vim.fn.tempname() -- os.tmpname() creates the empty file when called
+    local exit_path = vim.env.HOME .. "/.vim/tmp/last_result"
+    os.remove(exit_path)
+    local cmd = ([[yazi --cwd-file="%s" --chooser-file="%s" "%s"]]):format(exit_path, selection_path, curr ~= "" and curr or ".")
+    local terminal = require("snacks.terminal").open(cmd, { auto_close = false, win = { height = 0.9, width = 0.9 } })
+    local buf = terminal.buf -- terminal.buf is not available in TermClose callback
+    local want_lazygit = false
     vim.keymap.set("t", "<C-o>", function()
-        local error = require("snacks.notify").error -- to suppress error
-        require("snacks.notify").error = function() end
+        want_lazygit = true
+        vim.fn.jobstop(vim.bo[buf].channel)
         terminal:close()
-        require("snacks.notify").error = error
-        require("snacks.lazygit").open({ win = { height = 0.9, width = 0.9 } })
     end, { buffer = buf })
     vim.api.nvim_create_autocmd("TermClose", {
         once = true,
         callback = function(e)
             if e.buf ~= buf then return end -- <buffer=buf> doesn't work due to snacks.win's autocmd
+            if want_lazygit then
+                return vim.schedule(function()
+                    local file = io.open(exit_path, "r")
+                    local cwd = file and file:read("*l") or "."
+                    if file then file:close() end
+                    require("snacks.lazygit").open({ cwd = cwd, win = { height = 0.9, width = 0.9 } })
+                end)
+            end
+            terminal:close() -- close here instead of snacks.terminal auto_close to avoid error message
             local file = io.open(selection_path, "r")
             if file ~= nil then
                 local files = {}
-                for line in file:lines() do table.insert(files, vim.fn.fnameescape(line)) end
+                for line in file:lines() do table.insert(files, vim.fn.fnameescape((line:gsub("^.-://.-/", "")))) end -- https://github.com/sxyazi/yazi/issues/3510
                 file:close()
                 os.remove(selection_path)
                 if #files > 0 then vim.schedule(function() vim.cmd.args(files) end) end

@@ -44,7 +44,7 @@ alias ll='ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias chmod\?='stat --printf "%a %n\n"'
-alias bell='echo -n -e "\a"'
+alias bell='printf "\a"'
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>. to get epoch milliseconds: date +%s%3N
 alias sudo='sudo '  # alias commands with space allows alias after command
 alias xargs='xargs '
@@ -414,15 +414,16 @@ rf() {  # livegrep https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep
     case $arg in -*) rest+=("$arg") ;; *) local init_query="$arg"; local skip_args=1 ;; esac
   done
   local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "${rest[@]}")"
-  # `: |` disables default fzf command. quotes around `*` is required in shell but won't work in rf or snacks.picker. use pattern -- -g *.sh; `\s-- ` to search for ` -- `
-  : | fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --delimiter=: --prompt='ripgrep> ' --query="${init_query:-}" --freeze-left 1 \
+  # `fzf < /dev/null` disables default fzf command, `: | fzf` does the same but breaks tmux current pane path on mac
+  # quotes around `*` is required in shell but won't work in rf or snacks.picker. use pattern -- -g *.sh; `\s-- ` to search for ` -- `
+  fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --delimiter=: --prompt='ripgrep> ' --query="${init_query:-}" --freeze-left 1 \
     --bind="start,change:transform:{ read -r pat; read -r flags; } < <(awk -F' -- ' '{gsub(/\\*/, \"\\\\*\", \$2); print \$1; print \$2}' <<<{q}) && printf 'change-header(C-s: toggle fzf | C-o: close fzf and open in editor | $rg_prefix %s -- %q)+reload:$rg_prefix %s -- %q\n' \"\$flags\" \"\$pat\" \"\$flags\" \"\$pat\"" \
     --bind="ctrl-s:transform:[[ {fzf:prompt} = 'ripgrep> ' ]] && echo 'unbind(change)+change-prompt(fzf:{q}> )+enable-search+clear-query' || echo 'change-prompt(ripgrep> )+disable-search+clear-query+reload($rg_prefix -- {q} || true)+rebind(change)'" \
     --bind="enter:execute(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
     --bind="ctrl-o:become(if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +{2} -- {1}; else $EDITOR -c \"let @/='\$(awk -F ' -- ' '{print \$1}' <<<{q})'\" -c \"set hlsearch\" +cw -q {+f}; fi)" \
     --bind='tab:toggle+up,btab:toggle+down' \
     --preview='bat --color=always --highlight-line {2} -- {1}' \
-    --preview-window='up,+{2}+3/3,~3'
+    --preview-window='up,+{2}+3/3,~3' < /dev/null
 }
 
 rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripgrep-multi-line-chunks, do not do livegrep as sed/perl processing is slow
@@ -434,7 +435,7 @@ rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripg
 z() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
-    fzftemp=$(_z -l 2>&1 | sed -e 's/^[0-9 ]\+//' -e "\|^$PWD\$|d" | fzf --ansi --scheme=history --tac \
+    fzftemp=$(awk -F'|' -v now="$EPOCHSECONDS" -v cwd="$PWD" '$1!=cwd {dx=now-$3; printf "%.0f %s\n", 10000*$2*(3.75/((0.0001*dx+1)+0.25)), $1}' ~/.z | sort -nr | awk '{print $2}' | fzf --ansi --scheme=history \
       --header='`: show recent directories under cwd | C-a: show all directories' --bind='tab:down,btab:up' \
       --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD/\" '\$0~cwd {print \$1}')" \
       --bind='ctrl-a:reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)') && z "$fzftemp"

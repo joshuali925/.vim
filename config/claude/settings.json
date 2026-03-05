@@ -1,7 +1,7 @@
 {
   "env": {
     "MCP_TIMEOUT": "120000",
-    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-6-v1",
+    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-6-v1[1m]",
     "AWS_PROFILE": "bedrock-prod",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
@@ -14,17 +14,43 @@
     "commit": "",
     "pr": ""
   },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '\\a' > /dev/tty"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '\\a' > /dev/tty"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "ccstatusline",
     "padding": 0
   },
   "enabledPlugins": {
-    "frontend-design@claude-code-plugins": false,
-    "mind@memvid": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": true,
-    "superpowers@superpowers-marketplace": true
+    "ralph-loop@claude-plugins-official": false,
+    "frontend-design@claude-code-plugins": false,
+    "claude-mem@thedotmack": true,
+    "superpowers@superpowers-marketplace": false
   },
   "alwaysThinkingEnabled": true,
   "skipDangerousModePermissionPrompt": true

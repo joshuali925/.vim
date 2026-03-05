@@ -9,12 +9,11 @@ BACKUP_DIR=$HOME/config-backup
 BG_RED=$'\033[41m'
 CYAN=$'\033[0;36m'
 YELLOW=$'\033[0;33m'
-BLACK=$'\033[1;30m'
 NC=$'\033[0m'
 
 usage() {
   echo "usage: bash $0 [install <package> ...]" >&2
-  compgen -A function | awk '/^install_/ { sub(/^install_/, ""); if (length(output) == 0) output = $0; else output = output ", " $0 } END { print "  packages list: " output }' >&2
+  compgen -A function | awk '/^install-/ { sub(/^install-/, ""); if (length(output) == 0) output = $0; else output = output ", " $0 } END { print "  packages list: " output }' >&2
   exit 1
 }
 
@@ -30,10 +29,10 @@ install() {
   [[ $# -eq 0 ]] && usage
   init
   for package in "$@"; do
-    if declare -F "install_$package" > /dev/null; then
-      "install_$package"
-    elif declare -F "install_${package%%-*}" > /dev/null; then
-      "install_${package%%-*}" "${package##*-}"  # `$0 install swap-8` would install swap of 8G
+    if declare -F "install-$package" > /dev/null; then
+      "install-$package"
+    elif declare -F "install-${package%%-*}" > /dev/null; then
+      "install-${package%%-*}" "${package##*-}"  # `$0 install swap-8` would install swap of 8G
     else
       log "Unknown package \"$package\", skipping.."
     fi
@@ -89,7 +88,7 @@ backup() {
   done
 }
 
-link_file() {
+link-file() {
   local sourceFile="$1" destFile="$2"
   mkdir -p "${destFile%/*}"
   backup "$destFile"
@@ -98,7 +97,7 @@ link_file() {
   log "Linked $sourceFile to $destFile"
 }
 
-install_devtools() {
+install-devtools() {
   log '\nInstalling development tools..'
   if [[ $OSTYPE = linux-android ]]; then
     pkg upgrade -y -o DPkg::Options::='--force-confnew' && apt update && apt upgrade -y && pkg install -y proot zsh openssh wget git vim termux-exec diffutils fd ripgrep lazygit tmux bat git-delta neovim file  # yazi requires file
@@ -119,11 +118,11 @@ install_devtools() {
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils wget xz
     echo -e "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
-    brew install grep && link_file "$(which ggrep)" ~/.local/bin/grep
-    brew install gnu-sed && link_file "$(which gsed)" ~/.local/bin/sed
-    brew install findutils && link_file "$(which gxargs)" ~/.local/bin/xargs
-    brew install gawk && link_file "$(which gawk)" ~/.local/bin/awk
-    brew install gnu-tar && link_file "$(which gtar)" ~/.local/bin/tar
+    brew install grep && link-file "$(which ggrep)" ~/.local/bin/grep
+    brew install gnu-sed && link-file "$(which gsed)" ~/.local/bin/sed
+    brew install findutils && link-file "$(which gxargs)" ~/.local/bin/xargs
+    brew install gawk && link-file "$(which gawk)" ~/.local/bin/awk
+    brew install gnu-tar && link-file "$(which gtar)" ~/.local/bin/tar
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
     sed -i -e "1iFPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" ~/.zshrc
     log 'Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc'
@@ -143,7 +142,7 @@ install_devtools() {
   fi
 }
 
-install_dotfiles() {
+install-dotfiles() {
   log 'Cloning dotfiles..'
   if [[ ! -f ~/.vim/config/.bashrc ]]; then
     backup ~/.vim
@@ -160,16 +159,16 @@ install_dotfiles() {
   log "Appended 'skip_global_compinit=1' to ~/.zshenv"
   echo 'Include ~/.vim/config/ssh_config' >> ~/.ssh/config
   echo 'Include ~/.ssh/ec2hosts' >> ~/.ssh/config
-  link_file ~/.vim/config/.tmux.conf ~/.tmux.conf --relative
-  link_file ~/.vim/config/.gitconfig ~/.gitconfig --relative
-  link_file ~/.vim/config/.ideavimrc ~/.ideavimrc --relative
-  link_file ~/.vim/config/yazi ~/.config/yazi --relative
-  link_file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml --relative
+  link-file ~/.vim/config/.tmux.conf ~/.tmux.conf --relative
+  link-file ~/.vim/config/.gitconfig ~/.gitconfig --relative
+  link-file ~/.vim/config/.ideavimrc ~/.ideavimrc --relative
+  link-file ~/.vim/config/yazi ~/.config/yazi --relative
+  link-file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml --relative
   if [[ $PLATFORM = darwin ]]; then
     ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport
-    link_file ~/.vim/config/lazygit_config.yml ~/Library/ApplicationSupport/lazygit/config.yml
-    link_file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
-    link_file ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
+    link-file ~/.vim/config/lazygit_config.yml ~/Library/ApplicationSupport/lazygit/config.yml
+    link-file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
+    link-file ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
   elif [[ $OSTYPE = linux-android ]]; then
     cat >> ~/.zshrc <<'EOF'
 export SSH_CLIENT=1 TMUX_NO_TPM=1
@@ -186,7 +185,7 @@ EOF
   log 'Installed dotfiles'
 }
 
-install_docker() {
+install-docker() {
   log "Installing docker.."
   if [[ $PLATFORM:$PACKAGE_MANAGER = linux:yum ]]; then
     sudo yum install -y docker
@@ -205,7 +204,7 @@ install_docker() {
   log 'Installed docker'
 }
 
-install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
+install-java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
   log "Installing java $JDK_VERSION.."
   mise use -g "java@$JDK_VERSION"
   export JAVA_HOME="$(mise where java)"
@@ -213,7 +212,7 @@ install_java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEA
   log "Installed $JDK_VERSION, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
 }
 
-install_system-python() {  # environment for install from source: https://github.com/pyenv/pyenv/wiki#suggested-build-environment
+install-system-python() {  # environment for install from source: https://github.com/pyenv/pyenv/wiki#suggested-build-environment
   log "Installing python system-wide.."
   if [[ $PLATFORM:$PACKAGE_MANAGER = linux:yum ]]; then
     sudo yum install -y python3-devel
@@ -229,7 +228,7 @@ install_system-python() {  # environment for install from source: https://github
   log 'Installed python3, pip3'
 }
 
-install_node() {
+install-node() {
   log "Installing node $NODE_VERSION.."
   mise use -g "nodejs@$NODE_VERSION"
   mise x -- npm config set prefix ~/.local/lib/node-packages
@@ -240,7 +239,7 @@ install_node() {
   log 'Installed node, yarn'
 }
 
-install_tmux() {
+install-tmux() {
   log 'Installing tmux..'
   backup ~/.local/bin/tmux
   tmux -V
@@ -259,9 +258,9 @@ install_tmux() {
   log 'Installed tmux and plugins'
 }
 
-install_neovim() {
+install-neovim() {
   log "Installing neovim.."
-  link_file ~/.vim/config/nvim ~/.config/nvim --relative
+  link-file ~/.vim/config/nvim ~/.config/nvim --relative
   backup ~/.local/lib/nvim ~/.local/bin/nvim
   ~/.vim/bin/nvim --version
   timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
@@ -271,7 +270,7 @@ install_neovim() {
   log "\nInstalled neovim and plugins"
 }
 
-install_swap() {
+install-swap() {
   if [[ $PLATFORM != linux ]]; then
     log 'Unsupported platform..'
     return 1
@@ -290,7 +289,7 @@ install_swap() {
   free -h
 }
 
-install_pm2() {
+install-pm2() {
   if [[ $PLATFORM != linux ]]; then
     log 'Unsupported platform..'
     return 1
@@ -300,7 +299,7 @@ install_pm2() {
   sudo -E "$(mise which node)" "$(which pm2)" startup systemd -u "$USER" --hp "$HOME"
 }
 
-install_google-chrome() {
+install-google-chrome() {
   if builtin command -v google-chrome > /dev/null 2>&1; then
     log 'Google Chrome already installed, skipping..'
     return 0
@@ -319,7 +318,7 @@ install_google-chrome() {
   fi
 }
 
-install_claude-code() {
+install-claude-code() {
   if [[ -e ~/.claude.json ]]; then
     log 'Claude Code configuration already exists, skipping..'
     return 0
@@ -328,41 +327,48 @@ install_claude-code() {
   npm install -g ccstatusline@latest
   mkdir -p ~/.aws ~/.claude
   grep -qxF '/.claude/' ~/.gitignore 2>/dev/null || echo '/.claude/' >> ~/.gitignore
-  link_file ~/.vim/config/claude/agents ~/.claude/agents --relative
-  link_file ~/.vim/config/claude/skills ~/.claude/skills --relative
-  link_file ~/.vim/config/claude/commands ~/.claude/commands --relative
-  link_file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
-  link_file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
+  link-file ~/.vim/config/claude/agents ~/.claude/agents --relative
+  link-file ~/.vim/config/claude/skills ~/.claude/skills --relative
+  link-file ~/.vim/config/claude/commands ~/.claude/commands --relative
+  link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
+  link-file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
   printf '\n[bedrock-prod]\nrole_arn = arn:aws:iam::000000000000:role/Admin\ncredential_source = Ec2InstanceMetadata\n; source_profile = default\nregion = us-west-2\n' >> ~/.aws/credentials
   claude plugin marketplace add anthropics/claude-plugins-official
+  claude plugin install code-review@claude-plugins-official
+  claude plugin install code-simplifier@claude-plugins-official
   claude plugin install typescript-lsp@claude-plugins-official
-  claude plugin install ralph-loop@claude-plugins-official
+  claude plugin install ralph-loop@claude-plugins-official && claude plugin disable ralph-loop
   claude plugin marketplace add anthropics/claude-code
-  claude plugin install frontend-design@claude-code-plugins
-  claude plugin disable frontend-design
-  claude plugin marketplace add memvid/claude-brain
-  claude plugin install mind@memvid
+  claude plugin install frontend-design@claude-code-plugins && claude plugin disable frontend-design
+  claude plugin marketplace add thedotmack/claude-mem
+  claude plugin install claude-mem && node ~/.claude/plugins/marketplaces/thedotmack/plugin/scripts/smart-install.js || true  # workaround for SessionStart:startup hook error
   claude plugin marketplace add obra/superpowers-marketplace
-  claude plugin install superpowers@superpowers-marketplace
+  claude plugin install superpowers@superpowers-marketplace && claude plugin disable superpowers
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
-  install_google-chrome 2> /dev/null && npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics || true
+  if install-google-chrome 2> /dev/null; then
+    # npm install -g chrome-devtools-mcp@latest
+    # claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
+    npm install -g @playwright/cli@latest
+    cp -r "$(npm root -g)/@playwright/cli/node_modules/playwright/lib/skill" ~/.claude/skills/playwright-cli
+    grep -qxF '/.playwright-cli/' ~/.gitignore 2>/dev/null || echo '/.playwright-cli/' >> ~/.gitignore
+  fi
   log "\nInstalled Claude Code. Use ${YELLOW}claude --permission-mode=bypassPermissions${CYAN} to trust all"
   log "${BG_RED}TODO${CYAN}: update bedrock role in ${YELLOW}~/.aws/credentials"
 }
 
-install_k3s() {
+install-k3s() {
   curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode=644
   kubectl completion zsh > ~/.vim/config/zsh/completions/_kubectl
-  k9s completion zsh > ~/.vim/config/zsh/completions/_k9s
-  mise use -g helm stern
+  mise use -g k9s helm stern
+  mise x -- k9s completion zsh > ~/.vim/config/zsh/completions/_k9s  # alternative: https://github.com/Ramilito/kubectl.nvim
   mise x -- helm completion zsh > ~/.vim/config/zsh/completions/_helm
   mise x -- stern --completion zsh > ~/.vim/config/zsh/completions/_stern
   export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
   echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' | tee -a ~/.bashrc ~/.zshrc
-  log 'Installed k3s, helm, k9s, stern'
+  log 'Installed k3s, k9s, helm, stern'
 }
 
-install_ssh-key() {
+install-ssh-key() {
   if [[ -f ~/.ssh/id_ed25519 ]]; then  # shellcheck disable=2088
     log '~/.ssh/id_ed25519 already exists, skipping..'
     return 0
@@ -371,7 +377,7 @@ install_ssh-key() {
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
 }
 
-install_tls-key() {
+install-tls-key() {
   mkdir -p ~/.vim/tmp/tls
   openssl req -x509 -newkey rsa:4096 -keyout ~/.vim/tmp/tls/server.key -out ~/.vim/tmp/tls/server.crt -days 730 -nodes -subj '/C=US/ST=California/L=San Francisco/O=ORG/OU=UNIT/CN=localhost'
   log 'Saved to ~/.vim/tmp/tls/server.key and ~/.vim/tmp/tls/server.crt'

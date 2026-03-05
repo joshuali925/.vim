@@ -1,3 +1,7 @@
+---
+description: Write and run Jest unit tests
+---
+
 You will work on unit tests, try not to modify source code.
 
 - Run tests: `yarn test:jest [file]`

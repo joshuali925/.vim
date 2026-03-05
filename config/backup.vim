@@ -5877,3 +5877,10 @@ end
     scp /tmp/clipboard.jpg "$1:/tmp/clipboard.jpg" && printf /tmp/clipboard.jpg | pbcopy
     rm -f /tmp/clipboard.png /tmp/clipboard.jpg
   }
+" https://github.com/michel-kraemer/zsh-patina static syntax highlighting
+" set -g @plugin 'clanghans/tmux-frost' requires flock
+
+" =======================================================
+  npm install -g agent-browser
+  agent-browser install --with-deps
+  curl -sL https://github.com/vercel-labs/agent-browser/archive/refs/heads/main.tar.gz | tar xz --strip-components=2 -C ~/.claude/skills/ '*/skills/'

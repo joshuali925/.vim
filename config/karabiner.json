@@ -558,7 +558,7 @@
           },
           "to": [
             {
-              "shell_command": "ps -p $(pgrep 'Electron|idea|jetbrains_client' | head -1) -o comm= | grep -m1 -o '.*\\.app' | xargs -r -I@ open -a '@'"
+              "shell_command": "ps -p $(pgrep '^Code$|idea|jetbrains_client' | head -1) -o comm= | grep -m1 -o '.*\\.app' | xargs -r -I@ open -a '@'"
             }
           ]
         },
