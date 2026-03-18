@@ -186,8 +186,8 @@ nmap <leader><C-r> <Plug>(RepeatRedo)
 nnoremap Z[ <Cmd>call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
 nnoremap Z] <Cmd>call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
 nnoremap ZX <Cmd>call VSCodeNotify('workbench.action.closeOtherEditors')<CR>
-nnoremap [c <Cmd>call VSCodeNotify('workbench.action.editor.previousChange')<CR>
-nnoremap ]c <Cmd>call VSCodeNotify('workbench.action.editor.nextChange')<CR>
+nnoremap [g <Cmd>call VSCodeNotify('workbench.action.editor.previousChange')<CR>
+nnoremap ]g <Cmd>call VSCodeNotify('workbench.action.editor.nextChange')<CR>
 nnoremap [a <Cmd>call VSCodeNotify('editor.action.marker.prev')<CR>
 nnoremap ]a <Cmd>call VSCodeNotify('editor.action.marker.next')<CR>
 nmap [b gT

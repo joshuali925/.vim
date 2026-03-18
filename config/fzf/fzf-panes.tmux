@@ -34,12 +34,7 @@ do_action() {
         '- $FZF_PREVIEW_LINES ));' \
         '(( start>0 )) && echo $start || echo 0) -t {1}'
     local preview_cmd=$*
-    local preview_win
-    if fzf --version | awk '{match($1, /[0-9]+\.[0-9]+/, m);exit m[0]<0.27}'; then
-        preview_win='down:80%,border-top'
-    else
-        preview_win='down:80%'
-    fi
+    local preview_win='down:80%,border-top'
     selected=$(FZF_DEFAULT_COMMAND=$cmd SHELL=$(command -v bash) fzf \
         --list-border=none \
         --header 'C-p:preview   C-n:new window   C-r:reload   C-x:kill   C-v:join vert   C-s:join   C-t:swap' \
@@ -156,7 +151,7 @@ panes_src() {
     local cur_id="$1"
     printf "%-6s  %-9s  %6s  %8s  %4s  %4s  %4s  %-8s  %-7s  %s\n" \
         'PANEID' 'SESSION' 'PANE' 'PID' '%CPU' '%MEM' 'NLWP' 'TIME' 'TTY' 'CMD'
-    panes_info=$(tmux list-panes -aF \
+    panes_info=$(tmux list-panes -af '#{!=:#{pane_dead},1}' -F \
         '#D #{s| |_|:session_name} #I.#P #{?window_zoomed_flag,⬢,❄} #{pane_tty} #{pane_current_path} #T' |
         sed -E "/^$cur_id /d")
     ttys=$(awk '{printf("%s,", $5)}' <<<"$panes_info" | sed 's/,$//')

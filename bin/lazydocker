@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
+# alternative: https://github.com/emrearmagan/dockyard.nvim
 install-from-github lazydocker jesseduffield/lazydocker Linux_x86_64 Linux_arm64 Darwin_x86_64 Darwin_arm64 lazydocker "$@"

@@ -4,7 +4,7 @@
     "body": [
       "#!/usr/bin/env bash",
       "# shellcheck disable=",
-      "set -euo pipefail",
+      "set -eo pipefail",
       "",
       "$0"
     ]

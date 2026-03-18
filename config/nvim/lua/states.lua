@@ -9,7 +9,6 @@ vim.g.qs_filetype_blacklist = {
     "help",
     "man",
     "qf",
-    "netrw",
     "lazy",
     "mason",
     "neo-tree",

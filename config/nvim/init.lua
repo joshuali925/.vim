@@ -1,17 +1,15 @@
 -- options {{{1
 vim.loader.enable()
 require("states")
-vim.g.loaded_2html_plugin = 1
 vim.g.loaded_remote_plugins = 1
 vim.g.loaded_tutor_mode_plugin = 1
+vim.g.loaded_netrwPlugin = 1
+vim.g.loaded_node_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_ruby_provider = 0
 vim.g.mapleader = ";"
 vim.g.maplocalleader = "'"
-vim.g.netrw_dirhistmax = 0
-vim.g.netrw_banner = 0
-vim.g.netrw_browse_split = 4
-vim.g.netrw_preview = 1
-vim.g.netrw_alto = 0
-vim.g.netrw_liststyle = 3
 vim.g.markdown_fenced_languages = { "javascript", "js=javascript", "ts=typescript", "tsx=typescriptreact", "json=jsonc", "html", "python", "bash=sh" }
 vim.o.whichwrap = "<,>,[,]"
 vim.o.mouse = "a"
@@ -24,7 +22,7 @@ vim.o.showmatch = true
 vim.o.showmode = false
 vim.o.showcmdloc = "statusline"
 vim.o.cmdheight = 0
-vim.o.diffopt = vim.o.diffopt .. ",vertical,indent-heuristic,algorithm:histogram" -- TODO (0.12) add inline:word or inline:char
+vim.o.diffopt = vim.o.diffopt .. ",vertical,algorithm:histogram"
 vim.o.splitright = true
 vim.o.splitbelow = true
 vim.o.splitkeep = "topline"
@@ -63,7 +61,7 @@ vim.o.synmaxcol = 1000
 vim.o.writebackup = false
 vim.o.wildcharm = 26 -- <C-z>
 vim.o.cedit = "<C-x>"
-vim.filetype.add({ extension = { conf = "config" }, filename = { Caddyfile = "config" } })
+vim.filetype.add({ extension = { conf = "config", log = "log" }, filename = { Caddyfile = "config" } })
 
 -- mappings {{{1
 -- text objects {{{2
@@ -280,20 +278,6 @@ vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", command = "set
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "snacks_terminal", "sidekick_terminal" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
 vim.api.nvim_create_autocmd("FileType", {
     group = "AutoCommands",
-    pattern = "netrw", -- netrw is needed for gf on URL
-    callback = function()
-        vim.bo.bufhidden = "wipe"
-        vim.keymap.set("n", "h", "[[<CR>^", { remap = true, buffer = true })
-        vim.keymap.set("n", "l", "<CR>", { remap = true, buffer = true })
-        vim.keymap.set("n", "C", "gn:execute 'cd ' . b:netrw_curdir<CR>", { remap = true, buffer = true })
-        vim.keymap.set("n", "<C-l>", "<C-w>l", { buffer = true })
-        vim.keymap.set("n", "q", "<Cmd>call funcs#quit_netrw_and_dirs()<CR>", { buffer = true, nowait = true })
-        vim.keymap.set("n", "<leader>q", "q", { remap = true, buffer = true })
-        vim.keymap.set("n", "a", "%", { remap = true, buffer = true })
-    end,
-})
-vim.api.nvim_create_autocmd("FileType", {
-    group = "AutoCommands",
     pattern = "zsh",
     callback = function()
         if vim.api.nvim_buf_get_name(0):match(".*/tmp/zsh.*") then -- https://www.reddit.com/r/neovim/comments/1m9iyem/comment/n58cnee
@@ -336,7 +320,21 @@ end, { complete = "filetype", nargs = "*", range = true })
 
 -- overrides {{{1
 vim.defer_fn(function()
-    if vim.fn.has("win32") == 1 then vim.g.termshell = "nu" end
+    if vim.env.SSH_CLIENT ~= nil then
+        vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { title = 'Link copied' })<CR>")
+    elseif vim.fn.has("win32") == 1 then
+        vim.g.termshell = "nu"
+    elseif vim.fn.has("wsl") == 1 then
+        vim.g.clipboard = {
+            name = "WslClipboard",
+            copy = { ["+"] = "clip.exe", ["*"] = "clip.exe" },
+            paste = {
+                ["+"] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+                ["*"] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+            },
+            cache_enabled = 0,
+        }
+    end
     vim.paste = (function(overridden) -- break undo before pasting in insert mode, :h vim.paste()
         return function(lines, phase)
             if phase == -1 and vim.fn.mode() == "i" and not vim.o.paste then
@@ -345,24 +343,39 @@ vim.defer_fn(function()
             overridden(lines, phase)
         end
     end)(vim.paste)
-    if vim.env.SSH_CLIENT ~= nil then -- ssh session
-        vim.g.clipboard = {           -- in Windows Terminal -> ssh -> nvim, osc52 doesn't automatically enable
-            name = "osc52",
-            copy = { ["+"] = require("vim.ui.clipboard.osc52").copy("+"), ["*"] = require("vim.ui.clipboard.osc52").copy("*") },
-            paste = { ["+"] = require("vim.ui.clipboard.osc52").paste("+"), ["*"] = require("vim.ui.clipboard.osc52").paste("*") },
-        }
-        vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { title = 'Link copied' })<CR>")
-    elseif vim.fn.has("wsl") == 1 then
-        vim.g.clipboard = {
-            name = "WslClipboard",
-            copy = { ["+"] = "clip.exe", ["*"] = "clip.exe" },
-            paste = {
-                ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-                ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    require("vim._core.ui2").enable({ -- https://www.reddit.com/r/neovim/comments/1sa95g4/no_more_press_enter_with_ui2_with_example/
+        msg = {
+            targets = {
+                [""] = "msg",
+                empty = "cmd",
+                bufwrite = "msg",
+                confirm = "cmd",
+                emsg = "pager",
+                echo = "msg",
+                echomsg = "msg",
+                echoerr = "pager",
+                completion = "cmd",
+                list_cmd = "pager",
+                lua_error = "pager",
+                lua_print = "msg",
+                progress = "pager",
+                rpc_error = "pager",
+                quickfix = "msg",
+                search_cmd = "cmd",
+                search_count = "cmd",
+                shell_cmd = "pager",
+                shell_err = "pager",
+                shell_out = "pager",
+                shell_ret = "msg",
+                undo = "msg",
+                verbose = "pager",
+                wildlist = "cmd",
+                wmsg = "msg",
+                typed_cmd = "cmd",
             },
-            cache_enabled = 0,
-        }
-    end
+            msg = { height = 0.3, timeout = 3500 },
+        },
+    })
 end, 50)
 
 -- plugins {{{1

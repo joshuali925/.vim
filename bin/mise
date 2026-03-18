@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
 if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/mise ]]; then
-  BIN_INIT=1 mise completion zsh > ~/.vim/config/zsh/completions/_mise || true
+  BIN_INIT=1 mise completion zsh > ~/.vim/config/zsh/completions/_mise && del-comp || true
   BIN_INIT=1 mise use -g usage || true
+  BIN_INIT=1 mise upgrade usage || true
   BIN_INIT=1 mise settings add idiomatic_version_file_enable_tools node || true  # enable .nvmrc support, https://github.com/jdx/mise/discussions/4345
 fi
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
 if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/caddy ]]; then
-  BIN_INIT=1 caddy completion zsh > ~/.vim/config/zsh/completions/_caddy || true
+  BIN_INIT=1 caddy completion zsh > ~/.vim/config/zsh/completions/_caddy && del-comp || true
 fi
 
 install-from-github caddy caddyserver/caddy linux_amd64.tar.gz linux_arm64.tar.gz mac_amd64.tar.gz mac_arm64.tar.gz caddy "$@"

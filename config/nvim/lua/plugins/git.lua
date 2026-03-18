@@ -2,8 +2,8 @@ return {
     {
         "lewis6991/gitsigns.nvim",
         keys = {
-            { "[c", "<Cmd>lua if vim.wo.diff then vim.cmd.normal({'[c', bang=true}) else require('gitsigns').nav_hunk('prev', {target='all'}) end<CR>" },
-            { "]c", "<Cmd>lua if vim.wo.diff then vim.cmd.normal({']c', bang=true}) else require('gitsigns').nav_hunk('next', {target='all'}) end<CR>" },
+            { "[g", "<Cmd>lua require('gitsigns').nav_hunk('prev', {target='all'})<CR>" },
+            { "]g", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
             { "ig", "<Cmd>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
             { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
             { "<leader>gd", ":Gitsigns preview_hunk<CR>", mode = { "x" } }, -- range only works with `:` for gitsigns
@@ -23,20 +23,36 @@ return {
                 diffthis = { split = "botright" },
                 status_formatter = function(status) return status end,
             })
-            vim.api.nvim_create_user_command("Gread", "lua require('gitsigns').reset_buffer()", {})        -- git checkout -- %
+            vim.api.nvim_create_user_command("Gread", function(opts)
+                if opts.args == "" then return require("gitsigns").reset_buffer() end
+                local result = vim.system({ "git", "show", opts.args .. ":" .. vim.fn.expand("%:.") }, { text = true }):wait()
+                if result.code ~= 0 then return vim.notify("Gread: " .. result.stderr, vim.log.levels.ERROR) end
+                local lines = vim.split(result.stdout, "\n", { plain = true })
+                if lines[#lines] == "" then lines[#lines] = nil else vim.bo.eol = false end
+                vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+            end, {
+                nargs = "?",
+                complete = function(arglead)
+                    return vim.tbl_filter(function(x) return vim.startswith(x, arglead) end, vim.split(vim.system({ "git", "rev-parse", "--symbolic", "--branches", "--tags", "--remotes" }, { text = true }):wait().stdout, "\n", { plain = true, trimempty = true }))
+                end,
+            })                                                                                             -- git checkout -- %
             vim.api.nvim_create_user_command("Gwrite", "lua require('gitsigns').stage_buffer()", {})       -- git add -- %
             vim.api.nvim_create_user_command("Greset", "lua require('gitsigns').reset_buffer_index()", {}) -- git reset -- %
-            vim.api.nvim_create_user_command(
+            vim.api.nvim_create_user_command(                                                              -- git diff <ref> -- %
                 "Gdiffsplit",
                 "tab sbuffer | lua require('gitsigns').diffthis(<q-args>, {split = 'aboveleft'}, function() vim.wo[vim.fn.win_getid(vim.fn.winnr('#'))].winbar = '%f' end)",
                 { nargs = "*" }
-            ) -- git diff <ref> -- %
+            )
         end,
     },
     {
         "esmuellert/codediff.nvim",
         cmd = "CodeDiff",
-        opts = { explorer = { view_mode = "tree" }, keymaps = { view = { next_file = "\\", prev_file = "<BS>" }, explorer = { toggle_view_mode = "`" } } },
+        opts = {
+            diff = { compute_moves = true },
+            explorer = { view_mode = "tree" },
+            keymaps = { view = { next_hunk = "]g", prev_hunk = "[g", next_file = "\\", prev_file = "<BS>" }, explorer = { toggle_view_mode = "`" } },
+        },
     },
     {
         "madmaxieee/unclash.nvim",

@@ -2,7 +2,6 @@
   "env": {
     "MCP_TIMEOUT": "120000",
     "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-6-v1[1m]",
-    "AWS_PROFILE": "bedrock-prod",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_USE_BEDROCK": "1",
@@ -45,12 +44,37 @@
   },
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": false,
+    "ralph-loop@claude-plugins-official": true,
     "frontend-design@claude-code-plugins": false,
-    "claude-mem@thedotmack": true,
-    "superpowers@superpowers-marketplace": false
+    "planning-with-files@planning-with-files": true,
+    "claude-mem@thedotmack": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "claude-code-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-code"
+      }
+    },
+    "planning-with-files": {
+      "source": {
+        "source": "github",
+        "repo": "OthmanAdi/planning-with-files"
+      }
+    },
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    }
   },
   "alwaysThinkingEnabled": true,
   "skipDangerousModePermissionPrompt": true

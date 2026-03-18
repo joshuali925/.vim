@@ -6,6 +6,10 @@ detect-env() {
   source ~/.vim/install.sh detect-env
 }
 
+del-comp() {
+  rm -f "${ZDOTDIR:-$HOME}"/.zcompdump*
+}
+
 run-if-exists() {
   if [[ $# -lt 1 ]]; then
     echo "Usage: $0 <executable> [<args>]" >&2
