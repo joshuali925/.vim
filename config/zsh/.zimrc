@@ -7,7 +7,7 @@ zmodule completion
 
 zmodule agkozak/zsh-z
 zmodule zsh-users/zsh-autosuggestions
-zmodule zsh-users/zsh-syntax-highlighting
+zmodule zsh-users/zsh-syntax-highlighting  # alternative: https://github.com/michel-kraemer/zsh-patina
 # zmodule marlonrichert/zsh-autocomplete
 zmodule ~/.vim/config/zsh --source key-bindings.zsh  # ohmyzsh/ohmyzsh is too large
 zmodule Aloxaf/fzf-tab

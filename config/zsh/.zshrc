@@ -138,14 +138,24 @@ zle -N down-line-or-local-history
 run-file-manager() {
   local precmd tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp" < /dev/tty
-  if dir="$(cat -- "$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  if dir="$(<"$tmp")" && [[ -n "$dir" && "$dir" != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
   rm -f -- "$tmp"
   for precmd in $precmd_functions; do $precmd; done
   zle reset-prompt
 }
 zle -N run-file-manager
 
+run-snacks-pick() {
+  local tmp="$(mktemp -t "snacks-pick.XXXXXX")"
+  PICKER_OUTFILE="$tmp" nvim -u ~/.vim/config/nvim/picker.lua < /dev/tty
+  LBUFFER="${LBUFFER}$(<"$tmp")"
+  rm -f -- "$tmp"
+  zle reset-prompt
+}
+zle -N run-snacks-pick
+
 bindkey '^o' run-file-manager
+bindkey '^p' run-snacks-pick
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
 bindkey '^[[H' beginning-of-line              # after exiting vim started by zle,

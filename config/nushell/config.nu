@@ -45,7 +45,7 @@ alias gpf = git push --force-with-lease fork (git symbolic-ref --short HEAD)
 alias gs = git status
 
 def st [...args] {
-  ssh -t ...$args 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
+  ssh -t ...$args 'LANG=C.UTF-8 EDITOR=nvim PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
 def --env z [...args] {

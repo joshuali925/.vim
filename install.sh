@@ -327,33 +327,31 @@ install-claude-code() {
   npm install -g ccstatusline@latest
   mkdir -p ~/.aws ~/.claude
   grep -qxF '/.claude/' ~/.gitignore 2>/dev/null || echo '/.claude/' >> ~/.gitignore
-  link-file ~/.vim/config/claude/agents ~/.claude/agents --relative
   link-file ~/.vim/config/claude/skills ~/.claude/skills --relative
   link-file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link-file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
-  printf '\n[bedrock-prod]\nrole_arn = arn:aws:iam::000000000000:role/Admin\ncredential_source = Ec2InstanceMetadata\n; source_profile = default\nregion = us-west-2\n' >> ~/.aws/credentials
   claude plugin marketplace add anthropics/claude-plugins-official
   claude plugin install code-review@claude-plugins-official
-  claude plugin install code-simplifier@claude-plugins-official
   claude plugin install typescript-lsp@claude-plugins-official
-  claude plugin install ralph-loop@claude-plugins-official && claude plugin disable ralph-loop
+  claude plugin install ralph-loop@claude-plugins-official
   claude plugin marketplace add anthropics/claude-code
   claude plugin install frontend-design@claude-code-plugins && claude plugin disable frontend-design
+  claude plugin marketplace add OthmanAdi/planning-with-files
+  claude plugin install planning-with-files@planning-with-files
   claude plugin marketplace add thedotmack/claude-mem
   claude plugin install claude-mem && node ~/.claude/plugins/marketplaces/thedotmack/plugin/scripts/smart-install.js || true  # workaround for SessionStart:startup hook error
-  claude plugin marketplace add obra/superpowers-marketplace
-  claude plugin install superpowers@superpowers-marketplace && claude plugin disable superpowers
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
+  curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
   if install-google-chrome 2> /dev/null; then
-    # npm install -g chrome-devtools-mcp@latest
-    # claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
+    # npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
     npm install -g @playwright/cli@latest
     cp -r "$(npm root -g)/@playwright/cli/node_modules/playwright/lib/skill" ~/.claude/skills/playwright-cli
     grep -qxF '/.playwright-cli/' ~/.gitignore 2>/dev/null || echo '/.playwright-cli/' >> ~/.gitignore
   fi
-  log "\nInstalled Claude Code. Use ${YELLOW}claude --permission-mode=bypassPermissions${CYAN} to trust all"
-  log "${BG_RED}TODO${CYAN}: update bedrock role in ${YELLOW}~/.aws/credentials"
+  log '\nInstalled Claude Code'
+  echo 'export AWS_BEARER_TOKEN_BEDROCK=' >> ~/.zshenv
+  log "${BG_RED}TODO${CYAN}: update bedrock key in ${YELLOW}~/.zshenv"
 }
 
 install-k3s() {

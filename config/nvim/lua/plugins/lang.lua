@@ -1,5 +1,4 @@
 return {
-    { "MTDL9/vim-log-highlighting", ft = "log" },
     {
         "hat0uma/csvview.nvim",
         cmd = "CsvViewToggle",
@@ -174,7 +173,6 @@ return {
     {
         "neovim/nvim-lspconfig", -- only needs configs in rtp https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
         init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
-        cmd = { "LspInfo", "LspLog", "LspRestart" },
     },
     { "mfussenegger/nvim-jdtls" },
     {

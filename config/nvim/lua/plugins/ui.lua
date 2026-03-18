@@ -150,13 +150,14 @@ return {
                 { "--", "" },
                 { "Diff &original", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
                 { "&Diff next buffer", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
-                { "Diff directories", [[call feedkeys(":CodeDiff dir ", "n")]], "Run DirDiff to compare two directories" }, -- TODO (0.12) https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
+                { "Diff directories", [[call feedkeys(":CodeDiff dir ", "n")]], "Run DirDiff to compare two directories" }, -- alternative: https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },
                 { "&Refresh screen", [[execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
                 { "--", "" },
                 { "Open d&ashboard", [[lua require("snacks.dashboard")()]], "Open dashboard" },
+                { "Open undotree", [[packadd nvim.undotree | Undotree]], "Open nvim.undotree" },
                 { "&Save session", [[call feedkeys(":SessionSave", "n")]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
                 { "Load s&ession", [[call feedkeys(":SessionLoad", "n")]], "Load session from .cache/nvim/session_<name>.vim" },
                 { "--", "" },
@@ -165,7 +166,6 @@ return {
                 { "Open in &VSCode", [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]] },
             })
             vim.fn["quickui#menu#install"]("&Git", {
-                { "Git checko&ut ref", [[call feedkeys(":Git restore --source=@ -- %\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Show current file from ref" },
                 { "Git &blame", [[lua require("gitsigns").blame()]], "Git blame of current file" },
                 { "Git &change base", [[call feedkeys(":Gitsigns change_base @^ true\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Gitsigns show hunk based on ref" },
                 { "Git reset base", [[lua require("gitsigns").reset_base(true)]], "Gitsigns reset changed base" },
@@ -207,7 +207,9 @@ return {
                 { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
                 { "Remove folder from workspace", [[lua vim.lsp.buf.remove_workspace_folder()]], "Remove folder from workspace for LSP" },
                 { "--", "" },
-                { "Clear LSP logs", [[lua vim.fn.writefile({}, vim.lsp.get_log_path())]], "Empty lsp.log" },
+                { "Show LSP info", [[checkhealth vim.lsp]], "Check vim.lsp health" },
+                { "Open LSP l&og", [[lua vim.cmd.edit(vim.lsp.get_log_path())]], "Open lsp.log" },
+                { "Clear LSP log", [[lua vim.fn.writefile({}, vim.lsp.get_log_path())]], "Empty lsp.log" },
             })
             vim.fn["quickui#menu#install"]("&Packages", {
                 { "Lazy &packages", [[Lazy]], "Lazy packages" },

@@ -22,6 +22,28 @@
         "rawValue": true
       },
       {
+        "id": "b0c932f3-9c48-490f-a671-6c620dc48c92",
+        "type": "tokens-cached",
+        "backgroundColor": "bgBrightBlue",
+        "merge": "no-padding"
+      },
+      {
+        "id": "8b7de4f6-829e-4a24-b6e7-7d08ac73472f",
+        "type": "custom-text",
+        "backgroundColor": "bgBrightMagenta",
+        "rawValue": false,
+        "metadata": {
+          "display": "progress-short"
+        },
+        "customText": " │ ",
+        "merge": "no-padding"
+      },
+      {
+        "id": "db8190da-6814-4ea1-a8a3-27ec3b4b0cc3",
+        "type": "tokens-total",
+        "backgroundColor": "bgMagenta"
+      },
+      {
         "id": "f43da1ae-c56f-475f-9407-c25890fa9fa7",
         "type": "git-branch",
         "backgroundColor": "bgYellow"

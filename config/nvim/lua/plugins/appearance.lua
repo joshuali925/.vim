@@ -8,21 +8,6 @@ return {
     { "rebelot/kanagawa.nvim", priority = 1000, enabled = theme == "kanagawa" },
     { "Mofiqul/vscode.nvim", priority = 1000, enabled = theme == "vscode" },
     {
-        "folke/noice.nvim",
-        event = "VeryLazy", -- VeryLazy causes flicker on startup, synchronized loading causes flicker on opening a file, delay loading causes small flicker to both
-        opts = {
-            lsp = {
-                override = {
-                    ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-                    ["vim.lsp.util.stylize_markdown"] = true,
-                    ["cmp.entry.get_documentation"] = true,
-                },
-            },
-            presets = { bottom_search = true, command_palette = true, long_message_to_split = true, lsp_doc_border = true },
-            views = { mini = { timeout = 3500 } },
-        },
-    },
-    {
         "dstein64/nvim-scrollview",
         config = function()
             require("scrollview").setup({
@@ -147,9 +132,7 @@ return {
                         color = "Constant",
                     },
                     function()
-                        local clients = vim.tbl_filter(function(name) return not vim.tbl_contains({ "amazonq-completion" }, name) end, vim.tbl_map(function(client)
-                            return client.name == "amazonq" and " " or client.name == "typos_lsp" and "󰼭 " or client.name
-                        end, vim.lsp.get_clients({ bufnr = 0 })))
+                        local clients = vim.tbl_map(function(client) return client.name == "typos_lsp" and "󰼭 " or client.name end, vim.lsp.get_clients({ bufnr = 0 }))
                         return #clients > 0 and table.concat(clients, " ") or ""
                     end,
                 },

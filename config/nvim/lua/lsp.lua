@@ -94,10 +94,10 @@ function M.setup()
                 if vim.tbl_contains({ "vim", "help" }, vim.o.filetype) then return vim.cmd.normal({ args = { "K" }, bang = true }) end
                 if diagnostic_win_id and vim.api.nvim_win_is_valid(diagnostic_win_id) then
                     vim.api.nvim_win_close(diagnostic_win_id, true)
-                    vim.lsp.buf.hover()
+                    vim.lsp.buf.hover({ border = "single" })
                 else
                     _, diagnostic_win_id = vim.diagnostic.open_float({ border = "single" })
-                    if diagnostic_win_id == nil then vim.lsp.buf.hover() end
+                    if diagnostic_win_id == nil then vim.lsp.buf.hover({ border = "single" }) end
                 end
             end, opts)
             vim.keymap.set("x", "K", ":<C-u>help <C-r>=funcs#get_visual_selection()<CR><CR>", { buffer = e.buf, silent = true })
@@ -107,12 +107,37 @@ function M.setup()
             vim.keymap.set("n", "gr", "<Cmd>lua vim.lsp.buf.references()<CR>", { buffer = e.buf, nowait = true })
             vim.keymap.set({ "n", "x" }, "<leader>a", "<Cmd>lua vim.lsp.buf.code_action()<CR>", opts)
             vim.keymap.set("n", "<leader>R", "<Cmd>lua vim.lsp.buf.rename()<CR>", opts)
-            vim.keymap.set("n", "[a", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>", opts)
-            vim.keymap.set("n", "]a", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>", opts)
-            vim.keymap.set("n", "[A", "<Cmd>lua vim.diagnostic.goto_prev({ float = { border = 'single' } })<CR>", opts)
-            vim.keymap.set("n", "]A", "<Cmd>lua vim.diagnostic.goto_next({ float = { border = 'single' } })<CR>", opts)
+            vim.keymap.set("n", "[a", "<Cmd>lua vim.diagnostic.jump({ count = -1, float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>", opts)
+            vim.keymap.set("n", "]a", "<Cmd>lua vim.diagnostic.jump({ count = 1, float = { border = 'single' }, severity = { min = vim.diagnostic.severity[next(vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })) ~= nil and 'ERROR' or 'HINT'] } })<CR>", opts)
+            vim.keymap.set("n", "[A", "<Cmd>lua vim.diagnostic.jump({ count = -1, float = { border = 'single' } })<CR>", opts)
+            vim.keymap.set("n", "]A", "<Cmd>lua vim.diagnostic.jump({ count = 1, float = { border = 'single' } })<CR>", opts)
             vim.keymap.set("n", "g<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
             vim.keymap.set("i", "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
+        end,
+    })
+
+    local progress_pending = {}
+    local progress_timer = assert(vim.uv.new_timer())
+    vim.api.nvim_create_autocmd("LspProgress", {
+        callback = function(ev)
+            progress_pending["lsp." .. ev.data.client_id .. "." .. ev.data.params.token] = ev.data.params
+            if not progress_timer:is_active() then
+                progress_timer:start(0, 200, vim.schedule_wrap(function()
+                    for id, params in pairs(progress_pending) do
+                        local value = params.value
+                        vim.api.nvim_echo({ { value.message or value.title or "done" } }, false, {
+                            id = id,
+                            kind = "progress",
+                            source = "vim.lsp",
+                            title = value.title,
+                            status = value.kind ~= "end" and "running" or "success",
+                            percent = value.percentage,
+                        })
+                        if value.kind == "end" then progress_pending[id] = nil end
+                    end
+                    if not next(progress_pending) then progress_timer:stop() end
+                end))
+            end
         end,
     })
 end

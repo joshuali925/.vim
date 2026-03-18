@@ -9,9 +9,10 @@ description: OpenSearch Dashboards validation SOP
    - Skip when: Only changing application code
 
 2. **`os optimize`** - Build optimizer bundles
+   - `os` is a wrapper around `yarn` commands
    - Required when: Code changes made and server is not running
    - Avoid `--no-cache` unless absolutely necessary
-   - Skip when: Server is already running, unless user asks to run it
+   - Skip when: Server is already running, unless user asks to run optimizer
 
 3. **`os run -e`** - Start development server on localhost:5601
    - Use this (NOT `yarn start`) unless user specifies otherwise
@@ -22,9 +23,9 @@ description: OpenSearch Dashboards validation SOP
 
 4. **Build artifact errors:** `yarn build-platform --linux --skip-os-packages`
 5. **Runtime artifact errors:** `./build/opensearch-dashboards/bin/opensearch-dashboards` (after build)
-6. **Browser console errors:** Use `playwright-cli` skill to access `localhost:5601` with optionally provided path (after server starts)
-   - Store any generated images, logs, etc. in the `./.playwright-cli/` directory
-   - When spawning subagent or agent teams that need to interact with the browser, ensure they use the `playwright-cli` skill (NOT curl or WebFetch) for browser interactions
+6. **Browser console errors:** Use `playwright-cli` skill to access `localhost:5601[/path]` (after server starts)
+   - Store any generated images, temporary files, etc. in the `./.playwright-cli/` directory
+   - When spawning subagent or agent teams that need to interact with the browser, ensure they follow the same rules and use the `playwright-cli` skill (NOT curl/WebFetch/MCP) for browser interactions
 
 ## Validation Rules
 
@@ -33,14 +34,14 @@ After every fix:
 - Check if server is already running on :5601 port first (`curl -sL -o /dev/null -w "%{http_code}" http://localhost:5601`)
 - Run applicable steps based on changes
 - Verify each step completes with NO errors
-- If errors occur, including pre-existing ones, investigate and fix
+- If errors (including pre-existing ones) that block validation steps occur, investigate and fix
 - Always use `playwright-cli` skill to verify fixes if user has provided a URL path
 - Repeat until all validation passes
 
 If server is already running, you can check server output using:
 
 ```bash
-p=$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1; e=1} END {exit !e}') && tmux capture-pane -p -t "1.$p"
+p=$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1}') && [[ -n $p ]] && tmux capture-pane -p -t "1.$p" | tail
 ```
 
 The server will automatically compile typescript using file watcher. Ignore bundle errors above any "bundles compiled successfully" message, and if there's a recent "bundles compiled successfully" log, then the latest changes are compiled.

@@ -58,7 +58,7 @@ terminate() {
   if [[ -z $tag ]]; then echo "Usage: ${0##*/} terminate <tag>" >&2; return 1; fi
   instance_id=$(aws ec2 describe-instances --filter "Name=tag:Name,Values=$tag" "Name=instance-state-name,Values=pending,running,stopping,stopped" --query "Reservations[*].Instances[*].InstanceId" --output text)
   if [[ -z $instance_id ]]; then echo "No instance found with tag '$tag'" >&2; return 1; fi
-  ls && printf 'Terminate instance %s (%s)? [y/N] ' "$tag" "$instance_id" && read -r REPLY
+  aws ec2 describe-instances --instance-ids $instance_id --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[] | [0], to_string(NetworkInterfaces[0].Association.PublicDnsName || ''), State.Name, InstanceType, InstanceId]" --output table && printf 'Terminate instance %s (%s)? [y/N] ' "$tag" "$instance_id" && read -r REPLY
   if [[ $REPLY = [Yy] ]]; then aws ec2 terminate-instances --instance-ids $instance_id; fi
 }
 

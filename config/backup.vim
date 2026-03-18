@@ -5820,7 +5820,7 @@ install-from-github diffnav dlvhdr/diffnav Linux_x86_64 Linux_arm64 Darwin_x86_6
 
 " =======================================================
     { "pmizio/typescript-tools.nvim" },
-    "typescript-language-server", -- typescript-language-server is setup using typescript-tools. TODO remove when removing typescript-tools
+    "typescript-language-server",
         require("typescript-tools").setup({
             settings = {
                 tsserver_path = mason_path .. "/packages/typescript-language-server/node_modules/.bin/tsserver", -- manually specify path, otherwise mason needs to be loaded
@@ -5877,10 +5877,45 @@ end
     scp /tmp/clipboard.jpg "$1:/tmp/clipboard.jpg" && printf /tmp/clipboard.jpg | pbcopy
     rm -f /tmp/clipboard.png /tmp/clipboard.jpg
   }
-" https://github.com/michel-kraemer/zsh-patina static syntax highlighting
-" set -g @plugin 'clanghans/tmux-frost' requires flock
-
-" =======================================================
+" chrome sandbox problem
   npm install -g agent-browser
   agent-browser install --with-deps
   curl -sL https://github.com/vercel-labs/agent-browser/archive/refs/heads/main.tar.gz | tar xz --strip-components=2 -C ~/.claude/skills/ '*/skills/'
+" set -g @plugin 'clanghans/tmux-frost' requires flock
+
+" =======================================================
+    {
+        "folke/noice.nvim",
+        event = "VeryLazy", -- VeryLazy causes flicker on startup, synchronized loading causes flicker on opening a file, delay loading causes small flicker to both
+        opts = {
+            lsp = {
+                override = {
+                    ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+                    ["vim.lsp.util.stylize_markdown"] = true,
+                    ["cmp.entry.get_documentation"] = true,
+                },
+            },
+            presets = { bottom_search = true, command_palette = true, long_message_to_split = true, lsp_doc_border = true },
+            views = { mini = { timeout = 3500 } },
+        },
+    },
+vim.g.netrw_dirhistmax = 0
+vim.g.netrw_banner = 0
+vim.g.netrw_browse_split = 4
+vim.g.netrw_preview = 1
+vim.g.netrw_alto = 0
+vim.g.netrw_liststyle = 3
+vim.api.nvim_create_autocmd("FileType", {
+    group = "AutoCommands",
+    pattern = "netrw", -- netrw is needed for gf on URL
+    callback = function()
+        vim.bo.bufhidden = "wipe"
+        vim.keymap.set("n", "h", "[[<CR>^", { remap = true, buffer = true })
+        vim.keymap.set("n", "l", "<CR>", { remap = true, buffer = true })
+        vim.keymap.set("n", "C", "gn:execute 'cd ' . b:netrw_curdir<CR>", { remap = true, buffer = true })
+        vim.keymap.set("n", "<C-l>", "<C-w>l", { buffer = true })
+        vim.keymap.set("n", "q", "<Cmd>call funcs#quit_netrw_and_dirs()<CR>", { buffer = true, nowait = true })
+        vim.keymap.set("n", "<leader>q", "q", { remap = true, buffer = true })
+        vim.keymap.set("n", "a", "%", { remap = true, buffer = true })
+    end,
+})

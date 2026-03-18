@@ -61,11 +61,11 @@ alias k='kubectl'
 alias dc='docker compose'
 alias lg='lazygit'
 alias lzd='lazydocker'
-alias claude='claude --allow-dangerously-skip-permissions'
+alias claude='claude --allow-dangerously-skip-permissions'  # global.anthropic.claude-opus-4-6-v1[1m], global.anthropic.claude-sonnet-4-6
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
-alias 00='[[ -f ~/.vim/tmp/last_result ]] && cd "$(cat ~/.vim/tmp/last_result)"'
+alias 00='[[ -f ~/.vim/tmp/last_result ]] && cd "$(<~/.vim/tmp/last_result)"'
 # shellcheck disable=2154
 alias jsonflat="jq '[paths(scalars) as \$path | {\"key\": \$path | join(\".\"), \"value\": getpath(\$path)}] | from_entries'"
 # shellcheck disable=2154
@@ -77,6 +77,7 @@ alias xcp="rsync -avihP --no-owner --no-group --delete --filter=':- .gitignore'"
 alias http.server='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
+alias yarn-audit="yarn audit --json | jq -s '[.[] | select(.type == \"auditAdvisory\") | .data.advisory | {module: .module_name, severity: .severity, cves: (.cves | join(\",\")), url: .url, vulnerable_versions: .vulnerable_versions, patched_versions: .patched_versions, installed: (.findings | map(.version) | unique | join(\",\"))}] | unique_by(.cves) | sort_by((if .severity == \"critical\" then 0 elif .severity == \"high\" then 1 elif .severity == \"moderate\" then 2 elif .severity == \"low\" then 3 else 4 end), .module) | [\"MODULE\",\"SEVERITY\",\"CVE\",\"INSTALLED\",\"VULNERABLE\",\"PATCHED\",\"URL\"], (.[] | [.module, .severity, .cves, .installed, .vulnerable_versions, .patched_versions, .url]) | @tsv' -r | column -t -s $'\\t'"
 # shellcheck disable=2142
 alias command-frequency="fc -l 1 | awk '{CMD[\$2]++;count++;}END { for (a in CMD)print CMD[a] \" \" CMD[a]/count*100 \"% \" a;}' | column -c3 -s \" \" -t | sort -nr | head -n 30 | nl"
 # shellcheck disable=2142
@@ -195,7 +196,7 @@ termwrap() {
 }
 
 st() {  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display. Set basic PATH for commands invoked by tmux not through shell (e.g. new-window)
-  ssh -t "$@" 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
+  ssh -t "$@" 'LANG=C.UTF-8 EDITOR=nvim PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
 tarcopy() {
@@ -205,7 +206,7 @@ tarcopy() {
 yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yazi
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp"
-  if dir="$(cat -- "$tmp")" && [[ -n $dir && $dir != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  if dir="$(<"$tmp")" && [[ -n $dir && $dir != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
   rm -f -- "$tmp"
 }
 
@@ -223,7 +224,7 @@ size() {
 }
 
 d() {  # show directory stack or download from URL
-  if [[ $# -eq 0 ]]; then dirs -v | head -10; return $?; fi
+  if [[ $# -eq 0 ]]; then dirs -v | sed -n 2,11p; return $?; fi
   local wget_args=(--content-disposition) curl_args=(--remote-header-name)
   if [[ $1 = '-c' ]] || [[ $1 = '--continue' ]]; then shift && local wget_args=(--continue) curl_args=(-C -); fi
   if [[ $1 = -* ]]; then echo "Usage: $0 [[-c/--continue] <URL> [output-dir]]" >&2; return 1; fi
@@ -435,7 +436,7 @@ rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripg
 z() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
-    fzftemp=$(awk -F'|' -v now="$EPOCHSECONDS" -v cwd="$PWD" '$1!=cwd {dx=now-$3; printf "%.0f %s\n", 10000*$2*(3.75/((0.0001*dx+1)+0.25)), $1}' ~/.z | sort -nr | awk '{print $2}' | fzf --ansi --scheme=history \
+    fzftemp=$(awk -F'|' -v now="$EPOCHSECONDS" -v cwd="$PWD" '$1!=cwd {dx=now-$3; printf "%s\x01%.0f\n", $1, 10000*$2*(3.75/((0.0001*dx+1)+0.25))}' ~/.z | sort -nrk 2 -t $'\x01' | fzf --delimiter=$'\x01' --with-nth=1 --accept-nth=1 --ansi --scheme=history \
       --header='`: show recent directories under cwd | C-a: show all directories' --bind='tab:down,btab:up' \
       --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD/\" '\$0~cwd {print \$1}')" \
       --bind='ctrl-a:reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)') && z "$fzftemp"

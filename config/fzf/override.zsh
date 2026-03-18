@@ -32,8 +32,6 @@ fzf-cd-widget() {
   zle fzf-redraw-prompt  # customized: use fzf-redraw-prompt instead of reset-prompt so prompt would update
   return $ret
 }
-# customized: change to ctrl-p
-bindkey -M emacs '^P' fzf-file-widget
 
 # vim <tab>: files in current directory or args completion
 # vim <C-p>: all files in current and subdirectories, respects .gitignore

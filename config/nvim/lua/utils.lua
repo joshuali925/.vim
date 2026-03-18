@@ -50,8 +50,7 @@ function M.delete_comments(start_line, end_line) -- https://gist.github.com/kelv
     local bufnr = vim.api.nvim_get_current_buf()
     local ft = vim.bo[bufnr].filetype
     local lang = vim.treesitter.language.get_lang(ft) or ft
-    local ok, parser = pcall(vim.treesitter.get_parser, bufnr, lang)
-    if not ok then return vim.notify("No parser for " .. ft, vim.log.levels.WARN) end
+    local parser = vim.treesitter.get_parser(bufnr, lang)
     local tree = assert(parser):parse()[1]
     local root = tree:root()
     local query = vim.treesitter.query.parse(lang, "(comment) @comment")
@@ -93,18 +92,6 @@ function M.pick_filetypes(opts)
             if item then vim.o.filetype = item.text end
         end,
     }, opts))
-end
-
-function M.tmux_pick_files(prefix)
-    require("snacks.picker").smart({
-        layout = { layout = { width = 0, height = 0 } },
-        on_close = function() vim.cmd.quitall() end,
-        confirm = function(picker)
-            local paths = vim.tbl_map(function(s) return (prefix or "") .. vim.fn.fnamemodify(s.file, ":.") end, picker:selected({ fallback = true }))
-            vim.system({ "tmux", "send-keys", "-l", table.concat(paths, " ") .. " " }):wait()
-            picker:close()
-        end,
-    })
 end
 
 function M.file_manager()
