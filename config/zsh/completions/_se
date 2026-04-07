@@ -1,0 +1,11 @@
+#compdef se
+
+_se() {
+  if (( CURRENT == 2 )); then
+    compadd -- $(se 2>&1 | awk -F'[{}]' '{gsub(/\[[^]]*\]/, ""); gsub(/\|/, " "); print $2}')
+  elif [[ ${words[2]} == aws ]]; then
+    compadd -- $(se 2>&1 | grep -oE -- '-[-a-zA-Z]+')
+    compadd -- $({ awk -F'[][]' '/^\[/ {print $2}' ~/.aws/credentials 2>/dev/null; awk -F'[][]' '/^\[profile / {gsub(/^profile /, "", $2); print $2}' ~/.aws/config 2>/dev/null; } | sort -u)
+  fi
+}
+_se "$@"

@@ -10,7 +10,7 @@ $env.config = {
       mode: emacs
       event: {
         send: executehostcommand
-        cmd: "ls | each { |row| $row.name } | input list --fuzzy ' ' | if $in != null { if ($in | path type) == dir { cd $in } else { ^$env.EDITOR $in } }"
+        cmd: "let sel = (ls | each { |row| $row.name } | input list --fuzzy ' '); if $sel != null { if ($sel | path type) == dir { cd $sel } else { ^$env.EDITOR $sel } }"
       }
     }
     {
@@ -57,7 +57,8 @@ def --env z [...args] {
 }
 
 def vf [] {
-  rg --files | lines | input list --fuzzy ' ' | if $in != null { ^$env.EDITOR $in }
+  let sel = (rg --files | lines | input list --fuzzy ' ')
+  if $sel != null { ^$env.EDITOR $sel }
 }
 
 def untildone [command: string, --interval: duration = 1sec, --max-tries: int = 0] {

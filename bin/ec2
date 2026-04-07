@@ -50,7 +50,7 @@ create() {
   command ssh -o 'StrictHostKeyChecking no' "$tag" 'tail -f /var/log/cloud-init-output.log & pid=$!; while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done; kill $pid'
   command ssh "$tag" -O exit || true
   if [[ -n $no_init ]]; then exec command ssh "$tag"; fi
-  exec command ssh "$tag" -t 'LANG=C.UTF-8 PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
+  exec command ssh -t "$tag" 'LANG=C.UTF-8 EDITOR=nvim PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
 terminate() {

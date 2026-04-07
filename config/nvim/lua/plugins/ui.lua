@@ -1,39 +1,42 @@
 return {
     {
         "folke/sidekick.nvim",
-        enabled = vim.env.Q_SSO_URL ~= nil or vim.uv.fs_stat(vim.env.HOME .. "/.claude.json") ~= nil,
+        install = false,
         keys = {
-            { "<leader>c", "<Cmd>lua require('sidekick.cli').toggle({name = 'claude'})<CR>" },
-            { "<leader>c", "<Cmd>lua require('sidekick.cli').send({name = 'claude', msg = '{this}'})<CR>", mode = { "x" } },
-            { "<leader>h", "<Cmd>lua require('sidekick.cli').toggle({name = 'kiro'})<CR>" },
-            { "<leader>h", "<Cmd>lua require('sidekick.cli').send({name = 'kiro', msg = '{this}'})<CR>", mode = { "x" } },
+            { "n", "<leader>c", "<Cmd>lua require('sidekick.cli').toggle({name = 'claude'})<CR>" },
+            { "x", "<leader>c", "<Cmd>lua require('sidekick.cli').send({name = 'claude', msg = '{this}'})<CR>" },
+            { "n", "<leader>h", "<Cmd>lua require('sidekick.cli').toggle({name = 'kiro'})<CR>" },
+            { "x", "<leader>h", "<Cmd>lua require('sidekick.cli').send({name = 'kiro', msg = '{this}'})<CR>" },
         },
-        opts = {
-            cli = {
-                tools = {
-                    claude = {
-                        cmd = { "claude", "--allow-dangerously-skip-permissions" },
-                        format = function(text, str) -- sometimes sidekick sends @path :Ln
-                            return str:gsub("@([^@]-) :L(%d+)%-L(%d+)", "@%1#L%2-%3"):gsub("@([^@]-) :L(%d+):C%d+%-?C?%d*", "@%1#L%2"):gsub("@([^@]-) :L(%d+)", "@%1#L%2")
-                        end,
+        config = function()
+            require("sidekick").setup({
+                cli = {
+                    tools = {
+                        claude = {
+                            format = function(text, str) -- sometimes sidekick sends @path :Ln
+                                return str:gsub("@([^@]-) :L(%d+)%-L(%d+)", "@%1#L%2-%3"):gsub("@([^@]-) :L(%d+):C%d+%-?C?%d*", "@%1#L%2"):gsub("@([^@]-) :L(%d+)", "@%1#L%2")
+                            end,
+                        },
+                        kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" } },
                     },
-                    kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" } },
-                },
-                win = {
-                    split = { width = 0.4 },
-                    keys = {
-                        buffers = { "<C-p>", "buffers", mode = "nt", desc = "open buffer picker" },
-                        prompt = { "<C-b>", "prompt", mode = "t", desc = "insert prompt or context" },
+                    win = {
+                        split = { width = 0.4 },
+                        keys = {
+                            buffers = { "<C-p>", "buffers", mode = "nt", desc = "open buffer picker" },
+                            prompt = { "<C-b>", "prompt", mode = "t", desc = "insert prompt or context" },
+                        },
                     },
                 },
-            },
-        },
+            })
+        end,
     },
     {
         "nvim-neo-tree/neo-tree.nvim",
-        branch = "v3.x",
-        dependencies = "MunifTanjim/nui.nvim",
-        keys = { { "<leader>b", function()
+        install = false,
+        version = vim.version.range("3"),
+        dependencies = { "nui.nvim", "plenary.nvim" },
+        cmd = { "Neotree" },
+        keys = { { "n", "<leader>b", function()
             for _, winid in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                 local success, source_name = pcall(vim.api.nvim_buf_get_var, vim.api.nvim_win_get_buf(winid), "neo_tree_source")
                 if success then
@@ -42,7 +45,7 @@ return {
                 end
             end
             vim.cmd.Neotree("reveal_force_cwd")
-        end }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
+        end }, { "n", "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
         config = function()
             local function get_dir(state)
                 local node = state.tree:get_node()
@@ -121,8 +124,8 @@ return {
     {
         "skywind3000/vim-quickui",
         keys = {
-            { "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>" },
-            { "<CR>", "<Esc><Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('visual')<CR>", mode = "x" },
+            { "n", "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>" },
+            { "x", "<CR>", "<Esc><Cmd>lua require('pack').load({'vim-quickui'}); vim.fn['quickui#menu#open']('visual')<CR>" },
         },
         init = function()
             vim.g.quickui_show_tip = 1
@@ -134,7 +137,7 @@ return {
             vim.fn["quickui#menu#reset"]()
             vim.fn["quickui#menu#install"]("&Actions", {
                 { "Insert time", [[put=strftime('%x %X')]], "Insert MM/dd/yyyy hh:mm:ss tt" },
-                { "Insert line", [[execute "lua require('lazy').load({plugins = 'kommentary'})" | execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]], "Insert a dividing line" },
+                { "Insert line", [[execute "normal! o\<Space>\<BS>\<Esc>55a=" | normal gcc]], "Insert a dividing line" },
                 { "&Trim spaces", [[keeppatterns %s/\s\+$//e | silent! execute "normal! ``"]], "Remove trailing spaces" },
                 { "Squeeze blank lines", [[keeppatterns %s/\v(\n\n)\n+/\1/e | silent! execute "normal! ``"]], "Reduce consecutive blank lines" },
                 { "Ded&up lines", [[%!awk '\!x[$0]++']], "Remove duplicated lines and preserve order" },
@@ -154,18 +157,20 @@ return {
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },
-                { "&Refresh screen", [[execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
+                { "--", "" },
+                { "&Save session", [[call feedkeys(":SessionSave", "n")]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
+                { "Load s&ession", [[call feedkeys(":SessionLoad", "n")]], "Load session from .cache/nvim/session_<name>.vim" },
+                { "Refresh screen", [[execute "silent GuessIndent" | execute "ScrollViewRefresh | nohlsearch | syntax sync fromstart | diffupdate | let @/=\"QWQ\" | normal! \<C-l>"]], "Clear search, refresh screen, scrollbar and colorizer" },
+                { "&Restart", [[let s=fnameescape(stdpath('cache') . '/restart_session.vim') | execute 'mksession! ' . s | execute 'restart source ' . s]], "Restart Neovim" },
                 { "--", "" },
                 { "Open d&ashboard", [[lua require("snacks.dashboard")()]], "Open dashboard" },
                 { "Open undotree", [[packadd nvim.undotree | Undotree]], "Open nvim.undotree" },
-                { "&Save session", [[call feedkeys(":SessionSave", "n")]], "Save session to .cache/nvim/session_<name>.vim, will overwrite" },
-                { "Load s&ession", [[call feedkeys(":SessionLoad", "n")]], "Load session from .cache/nvim/session_<name>.vim" },
-                { "--", "" },
                 { "Edit Vimr&c", [[edit ~/.vim/config/nvim/init.lua]] },
                 { "GB18030 to utf-8", [[edit ++enc=GB18030 | set fileencoding=utf8]], "Edit as GB18030 (edit ++enc=GB18030) for Chinese characters and reset file format back to utf-8" },
                 { "Open in &VSCode", [[execute "silent !code --goto '" . expand("%") . ":" . line(".") . ":" . col(".") . "'" | redraw!]] },
             })
             vim.fn["quickui#menu#install"]("&Git", {
+                { "Git checko&ut", [[call feedkeys(":Gread @", "n")]], "Git checkout current file to ref" },
                 { "Git &blame", [[lua require("gitsigns").blame()]], "Git blame of current file" },
                 { "Git &change base", [[call feedkeys(":Gitsigns change_base @^ true\<Left>\<Left>\<Left>\<Left>\<Left>", "n")]], "Gitsigns show hunk based on ref" },
                 { "Git reset base", [[lua require("gitsigns").reset_base(true)]], "Gitsigns reset changed base" },
@@ -202,6 +207,7 @@ return {
                 { "Toggle virtual lines", [[lua vim.diagnostic.config({ virtual_lines = not vim.diagnostic.config().virtual_lines })]], "Toggle LSP diagnostic virtual lines" },
                 { "Toggle virtual text", [[lua vim.diagnostic.config({ virtual_text = { prefix = "●", current_line = not vim.diagnostic.config().virtual_text.current_line } })]], "Toggle LSP diagnostic virtual lines" },
                 { "Toggle &inlay hints", [[lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())]], "Toggle LSP inlay hints" },
+                { "Toggle &code lens", [[lua vim.lsp.codelens.enable(not vim.lsp.codelens.is_enabled())]], "Toggle LSP code lens" },
                 { "--", "" },
                 { "Show folders in workspace", [[lua vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))]], "Show folders in workspace for LSP" },
                 { "Add folder to workspace", [[lua vim.lsp.buf.add_workspace_folder()]], "Add folder to workspace for LSP" },
@@ -212,9 +218,10 @@ return {
                 { "Clear LSP log", [[lua vim.fn.writefile({}, vim.lsp.get_log_path())]], "Empty lsp.log" },
             })
             vim.fn["quickui#menu#install"]("&Packages", {
-                { "Lazy &packages", [[Lazy]], "Lazy packages" },
-                { "Lazy clean", [[Lazy clean]], "Lazy clean plugins" },
-                { "Lazy &update", [[Lazy update]], "Lazy update plugins" },
+                { "&Pack list", [[lua require('pack').list()]], "List plugins" },
+                { "Pack &update", [[lua vim.pack.update()]], "Update plugins" },
+                { "Pack restore", [[lua vim.pack.update(nil, { target = "lockfile" })]], "Restore plugins to lockfile versions" },
+                { "Pack &delete", [[call feedkeys(":PackDelete ", "n")]], "Delete a plugin" },
                 { "--", "" },
                 { "Ma&son packages", [[Mason]], "Mason packages" },
                 { "Mason &install", [[lua require('lsp').install_packages()]], "Install commonly used servers, linters, and formatters" },

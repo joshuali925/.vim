@@ -1,7 +1,8 @@
 return {
     {
         "hat0uma/csvview.nvim",
-        cmd = "CsvViewToggle",
+        install = false,
+        cmd = { "CsvViewToggle" },
         config = function()
             vim.opt_local.wrap = false
             require("csvview").setup({
@@ -17,6 +18,7 @@ return {
     },
     {
         "mistweaverco/kulala.nvim",
+        install = false,
         init = function()
             vim.api.nvim_create_augroup("KulalaAutoCommands", {})
             vim.api.nvim_create_autocmd("FileType", {
@@ -37,11 +39,12 @@ return {
             vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
         end,
     },
-    { "brianhuster/live-preview.nvim", cmd = "LivePreview", config = function() require("livepreview.config").set({ address = "0.0.0.0" }) end },
+    { "brianhuster/live-preview.nvim", install = false, cmd = { "LivePreview" }, config = function() require("livepreview.config").set({ address = "0.0.0.0" }) end },
     {
         "danymat/neogen",
-        keys = { { "<leader>ge", "<Cmd>lua require('neogen').generate()<CR>" } },
-        cmd = "Neogen",
+        install = false,
+        keys = { { "n", "<leader>ge", "<Cmd>lua require('neogen').generate()<CR>" } },
+        cmd = { "Neogen" },
         config = function()
             vim.keymap.set("i", "<Tab>", function()
                 if require("neogen").jumpable() then return require("neogen").jump_next() end
@@ -59,29 +62,9 @@ return {
         end,
     },
     {
-        "b3nj5m1n/kommentary",
-        dependencies = { "nvim-treesitter/nvim-treesitter", "JoosepAlviste/nvim-ts-context-commentstring" },
-        keys = {
-            { "gc", "<Plug>kommentary_motion_default" },
-            { "gcc", "<Plug>kommentary_line_default" },
-            { "gc", "<Plug>kommentary_visual_default<Esc>", mode = "x" },
-        },
-        init = function()
-            vim.g.kommentary_create_default_mappings = false
-            vim.g.skip_ts_context_commentstring_module = true -- skip backwards compatibility routines and speed up loading, https://github.com/JoosepAlviste/nvim-ts-context-commentstring/blob/5b02387b28a79c61b7d406c2a33d4db1d8454f53/README.md?plain=1#L40
-        end,
-        config = function()
-            require("ts_context_commentstring").setup({ enable_autocmd = false })
-            require("kommentary.config").configure_language("default", {
-                hook_function = function() require("ts_context_commentstring.internal").update_commentstring() end,
-            })
-            require("kommentary.config").configure_language("lua", { prefer_single_line_comments = true })
-            require("kommentary.config").configure_language("confini", { single_line_comment_string = "#" }) -- otherwise default # gets overridden by ts_context_commentstring
-        end,
-    },
-    {
         "stevearc/conform.nvim",
-        cmd = "Conform",
+        install = false,
+        cmd = { "Conform" },
         config = function()
             require("conform").setup({
                 formatters_by_ft = {
@@ -127,27 +110,31 @@ return {
     },
     {
         "nvim-treesitter/nvim-treesitter-context",
-        keys = { { "yoc", "<Cmd>TSContext toggle<CR>" } },
+        install = false,
+        keys = { { "n", "yoc", "<Cmd>TSContext toggle<CR>" } },
         init = function() vim.keymap.set("n", "yoC", "<Cmd>setlocal cursorline!<CR>") end,
-        opts = { enable = false, mode = "topline" },
+        config = function() require("treesitter-context").setup({ enable = false, mode = "topline" }) end,
     },
     {
         "nvim-treesitter/nvim-treesitter",
         build = function()
-            require("lazy").load({ plugins = { "mason.nvim", "nvim-treesitter" } })
+            require("pack").load({ "mason.nvim" })
             require("mason-registry").refresh()
-            if not require("mason-registry").is_installed("tree-sitter-cli") then require("mason-registry").get_package("tree-sitter-cli"):install() end
+            if not require("mason-registry").is_installed("tree-sitter-cli") then
+                local done = false
+                require("mason-registry").get_package("tree-sitter-cli"):install():once("closed", function() done = true end)
+                vim.wait(60000, function() return done end, 100)
+            end
+            require("pack").load({ "nvim-treesitter" })
             vim.cmd.TSUpdate()
         end,
         config = function()
-            local installed = require("nvim-treesitter").get_installed()
-            for _, lang in ipairs({ "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" }) do -- built-in parsers (~/.local/lib/nvim/lib/nvim/parser), no need to install again
-                if not vim.tbl_contains(installed, lang) then table.insert(installed, lang) end
-            end
-            local not_installed = vim.tbl_filter(function(lang) return not vim.tbl_contains(installed, lang) end, { "jsdoc" }) -- parsers that won't be installed on demand
-            if #not_installed > 0 then
-                vim.list_extend(installed, not_installed)
-                require("nvim-treesitter").install(not_installed)
+            vim.opt.runtimepath:prepend(vim.fn.stdpath("data") .. "/site/pack/core/opt/nvim-treesitter/runtime") -- add queries (indents, folds) for built-in parsers
+            local installed = vim.list.unique(vim.list_extend(require("nvim-treesitter").get_installed(), { "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" }))  -- built-in parsers (~/.local/lib/nvim/lib/nvim/parser), no need to install again
+            local to_install = vim.tbl_filter(function(lang) return not vim.tbl_contains(installed, lang) end, { "jsdoc" }) -- parsers that won't be installed on demand
+            if #to_install > 0 then
+                vim.list_extend(installed, to_install)
+                require("nvim-treesitter").install(to_install)
             end
             local available = { kulala_http = true }
             for _, lang in ipairs(require("nvim-treesitter").get_available()) do available[lang] = true end
@@ -169,15 +156,17 @@ return {
             })
         end,
     },
-    { "mason-org/mason.nvim", build = ":MasonUpdate", cmd = { "Mason", "MasonInstall" }, opts = { ui = { border = "rounded" } } },
     {
-        "neovim/nvim-lspconfig", -- only needs configs in rtp https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
-        init = function() vim.opt.runtimepath:prepend(require("lazy.core.config").options.root .. "/nvim-lspconfig") end,
+        "mason-org/mason.nvim",
+        build = function() require("pack").load({ "mason.nvim" }); vim.cmd.MasonUpdate() end,
+        cmd = { "Mason", "MasonInstall" },
+        config = function() require("mason").setup({ ui = { border = "rounded" } }) end,
     },
-    { "mfussenegger/nvim-jdtls" },
+    { "neovim/nvim-lspconfig" },
+    { "mfussenegger/nvim-jdtls", install = false },
     {
         "Bekaboo/dropbar.nvim",
-        keys = { { "<leader>e", "<Cmd>lua require('dropbar.api').pick()<CR>" } },
+        keys = { { "n", "<leader>e", "<Cmd>lua require('dropbar.api').pick()<CR>" } },
         init = function()
             vim.ui.select = (function(overridden)
                 return function(...)
@@ -187,34 +176,36 @@ return {
                 end
             end)(vim.ui.select)
         end,
-        opts = {
-            bar = {
-                enable = function(buf, win, _)
-                    return vim.fn.win_gettype(win) == "" and vim.bo[buf].buftype == "" and vim.bo[buf].filetype ~= "http" -- breaks visual selection in kulala http
-                end,
-            },
-            menu = {
-                win_configs = { border = "single" },
-                keymaps = {
-                    ["h"] = "<C-w>q",
-                    ["l"] = function()
-                        local utils = require("dropbar.utils")
-                        local menu = utils.menu.get_current()
-                        if not menu then return end
-                        local cursor = vim.api.nvim_win_get_cursor(menu.win)
-                        local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
-                        if component then menu:click_on(component, nil, 1, "l") end
-                    end,
-                    ["o"] = function()
-                        local utils = require("dropbar.utils")
-                        local menu = utils.menu.get_current()
-                        if not menu then return end
-                        local cursor = vim.api.nvim_win_get_cursor(menu.win)
-                        local component = menu.entries[cursor[1]]:next_clickable(cursor[2])
-                        if component then menu:click_on(component, nil, 1, "l") end
+        config = function()
+            require("dropbar").setup({
+                bar = {
+                    enable = function(buf, win, _)
+                        return vim.fn.win_gettype(win) == "" and vim.bo[buf].buftype == "" and vim.bo[buf].filetype ~= "http" -- breaks visual selection in kulala http
                     end,
                 },
-            },
-        },
+                menu = {
+                    win_configs = { border = "single" },
+                    keymaps = {
+                        ["h"] = "<C-w>q",
+                        ["l"] = function()
+                            local utils = require("dropbar.utils")
+                            local menu = utils.menu.get_current()
+                            if not menu then return end
+                            local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                            local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+                            if component then menu:click_on(component, nil, 1, "l") end
+                        end,
+                        ["o"] = function()
+                            local utils = require("dropbar.utils")
+                            local menu = utils.menu.get_current()
+                            if not menu then return end
+                            local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                            local component = menu.entries[cursor[1]]:next_clickable(cursor[2])
+                            if component then menu:click_on(component, nil, 1, "l") end
+                        end,
+                    },
+                },
+            })
+        end,
     },
 }

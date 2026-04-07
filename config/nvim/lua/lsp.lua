@@ -27,6 +27,7 @@ local required_servers = {
     "tsgo",
     "eslint",
     -- lsp servers not installed by mason
+    "nushell",
     "jsonls", -- use eslint-lsp package for json, html, css lsps
     "html",
     "cssls",
@@ -38,6 +39,7 @@ local extra_servers = {                                    -- packages need to b
 }
 
 function M.install_packages()
+    require("pack").load({ "mason.nvim" })
     local installed = require("mason-registry").get_installed_package_names()
     local not_installed = vim.tbl_filter(function(package) return not vim.tbl_contains(installed, package) end, required_packages)
     if #not_installed > 0 then
@@ -53,6 +55,7 @@ function M.install_packages()
 end
 
 function M.setup()
+    vim.opt.runtimepath:prepend(vim.fn.stdpath("data") .. "/site/pack/core/opt/nvim-lspconfig") -- https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
     vim.lsp.enable(required_servers)
     local mason_path = vim.fn.stdpath("data") .. "/mason"
     for executable, server in pairs(extra_servers) do
@@ -91,7 +94,7 @@ function M.setup()
             local opts = { buffer = e.buf }
             local diagnostic_win_id
             vim.keymap.set("n", "K", function()
-                if vim.tbl_contains({ "vim", "help" }, vim.o.filetype) then return vim.cmd.normal({ args = { "K" }, bang = true }) end
+                if vim.tbl_contains({ "vim", "help" }, vim.o.filetype) then return vim.cmd.normal({ "K", bang = true }) end
                 if diagnostic_win_id and vim.api.nvim_win_is_valid(diagnostic_win_id) then
                     vim.api.nvim_win_close(diagnostic_win_id, true)
                     vim.lsp.buf.hover({ border = "single" })
@@ -121,23 +124,24 @@ function M.setup()
     vim.api.nvim_create_autocmd("LspProgress", {
         callback = function(ev)
             progress_pending["lsp." .. ev.data.client_id .. "." .. ev.data.params.token] = ev.data.params
-            if not progress_timer:is_active() then
-                progress_timer:start(0, 200, vim.schedule_wrap(function()
-                    for id, params in pairs(progress_pending) do
-                        local value = params.value
-                        vim.api.nvim_echo({ { value.message or value.title or "done" } }, false, {
+            if progress_timer:is_active() then return end
+            progress_timer:start(0, 200, vim.schedule_wrap(function()
+                local cmd_mode = vim.fn.mode():sub(1, 2) ~= "c"
+                for id, params in pairs(progress_pending) do
+                    if cmd_mode then
+                        vim.api.nvim_echo({ { params.value.message or "done" } }, false, {
                             id = id,
                             kind = "progress",
                             source = "vim.lsp",
-                            title = value.title,
-                            status = value.kind ~= "end" and "running" or "success",
-                            percent = value.percentage,
+                            title = params.value.title,
+                            status = params.value.kind ~= "end" and "running" or "success",
+                            percent = params.value.percentage,
                         })
-                        if value.kind == "end" then progress_pending[id] = nil end
                     end
-                    if not next(progress_pending) then progress_timer:stop() end
-                end))
-            end
+                    if params.value.kind == "end" then progress_pending[id] = nil end
+                end
+                if not next(progress_pending) then progress_timer:stop() end
+            end))
         end,
     })
 end

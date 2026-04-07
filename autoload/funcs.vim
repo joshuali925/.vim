@@ -184,7 +184,7 @@ function! funcs#get_run_command() abort
     return 'lua require("utils").term_exec([[ docker exec caddy caddy reload --config /etc/caddy/Caddyfile]])'
   endif
   if file =~ 'docker-compose.yml$'
-    return 'lua require("utils").term_exec([[ dc -f "' . file . '" up -d --remove-orphans]])'
+    return 'lua require("utils").term_exec([[ dc -f "' . file . '" down --remove-orphans; dc -f "' . file . '" up -d]])'
   endif
   if file =~ '\.class$'
     call funcs#decompile_java_class()
@@ -216,7 +216,7 @@ function! funcs#get_run_command() abort
   endif
   let run_command['html'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'silent !open "$(VIM_FILEPATH)"'
-  let run_command['http'] = 'lua require("kulala").run()'
+  let run_command['http'] = 'lua require("pack").load({"kulala.nvim"}); require("kulala").run()'
   let run_command['csv'] = "lua require('utils').term_exec([[ csvq '" . file . "'\nselect * from t limit 1;]])"
   let run_command['markdown'] = $SSH_CLIENT == '' ? 'lua vim.cmd.LivePreview("close"); vim.cmd.LivePreview("start")' : 'lua vim.cmd.LivePreview("close"); vim.cmd.LivePreview("start"); vim.net.request("https://checkip.amazonaws.com", {}, function(err, res) if not err then vim.schedule(function() vim.fn.setreg("+", vim.trim(res.body) .. ":5500/" .. vim.fn.expand("%:.")); vim.notify("Copied markdown preview URL") end) end end)'
   return get(run_command, &filetype, '') . get(b:, 'args', '')

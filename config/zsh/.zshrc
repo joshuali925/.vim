@@ -32,6 +32,11 @@ if [[ ! $ZIM_HOME/init.zsh -nt $ZDOTDIR/.zimrc ]]; then
 fi
 source $ZIM_HOME/init.zsh
 
+ftb-tmux-popup() {  # remove height defined in FZF_DEFAULT_OPTS when opening in tmux-popup
+  local FZF_DEFAULT_OPTS=${FZF_DEFAULT_OPTS/--height[= ]#[^ ]#/}
+  source $ZIM_HOME/modules/fzf-tab/lib/ftb-tmux-popup "$@"
+}
+
 if [[ -f ~/.vim/config/fzf/shell.zsh ]]; then
   source ~/.vim/config/fzf/shell.zsh && source ~/.vim/config/fzf/override.zsh
 elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
@@ -48,7 +53,6 @@ elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
 fi
 
 source ~/.vim/config/common.sh
-[[ -x ~/.local/bin/mise ]] && eval "$(mise activate zsh)"
 
 # show timestamp of command in history, not fully accurate due to grep -F containing partial matches. another slower solution: https://github.com/junegunn/fzf/issues/1049#issuecomment-2241522977
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='{ tac ~/.zsh_history | grep -m 1 -F {2..} | awk -F: \"{print \\\$2}\" | xargs -I= date -u +%Y-%m-%dT%H:%M:%SZ -d @=; echo ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈; echo {2..}; } | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
@@ -107,7 +111,7 @@ compdef _command_names path
 compdef _git gds=git-diff
 compdef _git gc=git-commit
 compdef _git glx=git-log
-_git-wt() { _git-worktree; }
+compdef _git gwt=git-worktree
 _git-preview-merge-diff() { _git-diff; }
 _git-missing() { _git-log; }
 _git-forest() { _git-log; }
@@ -168,7 +172,7 @@ bindkey '^[[3;2~' backward-delete-char        # <S-Del>
 bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
 bindkey '^u' backward-kill-line
-bindkey '^x^y' copy-line
+bindkey '^[y' copy-line
 bindkey -s '^z' '%^m'
 bindkey '\el' forward-char                    # unbind <Esc>l = ls from oh-my-zsh key-bindings
 bindkey '^[[1;5C' emacs-forward-word          # <C-Right> to next word end. alternative: https://github.com/marlonrichert/zsh-edit

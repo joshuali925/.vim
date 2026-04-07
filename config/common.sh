@@ -61,7 +61,6 @@ alias k='kubectl'
 alias dc='docker compose'
 alias lg='lazygit'
 alias lzd='lazydocker'
-alias claude='claude --allow-dangerously-skip-permissions'  # global.anthropic.claude-opus-4-6-v1[1m], global.anthropic.claude-sonnet-4-6
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
@@ -155,6 +154,19 @@ gcb() {
     git show-ref --verify --quiet "refs/heads/${remote/\//-}" && git checkout "${remote/\//-}" || git checkout -b "${remote/\//-}" --track "$remote"
   else  # <branch> doesn't exist, create it
     [[ -n $remote ]] && git checkout --track "$remote" || git checkout "$branch"
+  fi
+}
+
+gwt() {
+  if [[ $# -eq 0 ]]; then
+    local worktree=$(git worktree list | fzf | awk '{print $1}') && [[ -d $worktree ]] && cd "$worktree"
+  elif [[ $1 != add ]]; then
+    git worktree "$@"
+  elif [[ $# -gt 2 ]]; then
+    git worktree add -f "$@"
+  else
+    local prefix=${PWD##*/} branch=$(git symbolic-ref --short HEAD)
+    git worktree add -f "../${prefix%-"$branch"}-$2" "$2"
   fi
 }
 
@@ -435,11 +447,11 @@ rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripg
 
 z() {
   if [[ $# -eq 0 ]]; then
-    local fzftemp
-    fzftemp=$(awk -F'|' -v now="$EPOCHSECONDS" -v cwd="$PWD" '$1!=cwd {dx=now-$3; printf "%s\x01%.0f\n", $1, 10000*$2*(3.75/((0.0001*dx+1)+0.25))}' ~/.z | sort -nrk 2 -t $'\x01' | fzf --delimiter=$'\x01' --with-nth=1 --accept-nth=1 --ansi --scheme=history \
+    local fzftemp rcwd=$(realpath "$PWD")
+    fzftemp=$(awk -F'|' -v now="$EPOCHSECONDS" -v cwd="$rcwd" '$1!=cwd {dx=now-$3; printf "%s\x01%.0f\n", $1, 10000*$2*(3.75/((0.0001*dx+1)+0.25))}' ~/.z | sort -nrk 2 -t $'\x01' | fzf --delimiter=$'\x01' --with-nth=1 --accept-nth=1 --ansi --scheme=history \
       --header='`: show recent directories under cwd | C-a: show all directories' --bind='tab:down,btab:up' \
-      --bind="\`:unbind(\`)+reload(sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"^$PWD/\" '\$0~cwd {print \$1}')" \
-      --bind='ctrl-a:reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)') && z "$fzftemp"
+      --bind="\`:change-prompt($rcwd/> )+reload:sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$rcwd/\" '\$0~(\"^\"cwd) {print substr(\$1, length(cwd)+1)}'" \
+      --bind="ctrl-a:change-prompt($rcwd/> )+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)") && z "$fzftemp"
   elif [[ -d $1 ]]; then cd -- "$1"
   elif [[ -f $1 ]]; then cd -- "$(dirname "$1")"
   else _z "$@"; fi
@@ -531,23 +543,33 @@ untildone() {
   done
 }
 
-set-env() {
-  if [[ $# -eq 0 ]]; then eval "$(mise hook-env)"; return $?; fi
+se() {
   local cmd reply
-  while [[ $# != 0 ]]; do
-    case $(tr '[:upper:]' '[:lower:]' <<< "$1") in
-      java_home|javahome) cmd="export JAVA_HOME=\"$(mise where java)\""; shift ;;
-      path) cmd="export PATH=\"$PWD:\$PATH\""; shift ;;
-      proxy)
-        local port=${2:-1080}
-        cmd="export all_proxy=socks5://127.0.0.1:$port ALL_PROXY=socks5://127.0.0.1:$port no_proxy=localhost,127.0.0.1 NO_PROXY=localhost,127.0.0.1"
-        if curl -s --connect-timeout 1 -x "http://127.0.0.1:$port" http://www.google.com > /dev/null 2>&1; then
-          cmd+=" http_proxy=http://127.0.0.1:$port https_proxy=http://127.0.0.1:$port HTTP_PROXY=http://127.0.0.1:$port HTTPS_PROXY=http://127.0.0.1:$port"
+  case $1 in
+    mise) eval "$(mise activate zsh)"; return $? ;;
+    JAVA_HOME|java_home|javahome) cmd="export JAVA_HOME=\"$(mise where java)\"" ;;
+    path) cmd="export PATH=\"$PWD:\$PATH\"" ;;
+    proxy)
+      local port=${2:-1080}
+      cmd="export all_proxy=socks5://127.0.0.1:$port ALL_PROXY=socks5://127.0.0.1:$port no_proxy=localhost,127.0.0.1 NO_PROXY=localhost,127.0.0.1"
+      if curl -s --connect-timeout 1 -x "http://127.0.0.1:$port" http://www.google.com > /dev/null 2>&1; then
+        cmd+=" http_proxy=http://127.0.0.1:$port https_proxy=http://127.0.0.1:$port HTTP_PROXY=http://127.0.0.1:$port HTTPS_PROXY=http://127.0.0.1:$port"
+      fi ;;
+    aws)
+      if [[ $2 = --region || $2 == -r ]]; then
+        [[ ! -e ~/.vim/tmp/aws-ec2-regions ]] && aws ec2 describe-regions --query 'Regions[].{Region:RegionName}' --output text | sort > ~/.vim/tmp/aws-ec2-regions
+        local region=$(< ~/.vim/tmp/aws-ec2-regions fzf)
+        if [[ -n $region ]]; then
+          sed -i "/^${region}$/d; 1i ${region}" ~/.vim/tmp/aws-ec2-regions
+          export AWS_REGION=$region && echo "export AWS_REGION=$AWS_REGION"
         fi
-        [[ -n $2 ]] && shift; shift ;;
-      *) echo "Usage: $0 {java_home|path|proxy}. Unsupported argument $1, exiting.." >&2; return 1 ;;
-    esac
-  done
+      else
+        if [[ -n $2 ]]; then local profile=$2; else local profile=$({ awk -F'[][]' '/^\[/ {print $2}' ~/.aws/credentials 2> /dev/null; awk -F'[][]' '/^\[profile / {gsub(/^profile /, "", $2); print $2}' ~/.aws/config 2> /dev/null; } | sort -u | fzf); fi  # faster than `aws configure list-profiles`
+        [[ -n $profile ]] && export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$AWS_PROFILE"
+      fi
+      return $? ;;
+    *) echo "Usage: $0 {mise|java_home|path|proxy [port]|aws [--region|-r|profile]}"; return 1 ;;
+  esac
   echo "$cmd"; eval "$cmd"
   printf 'Write to .bashrc and .zshrc (y/N)? '
   read -r reply
@@ -574,13 +596,12 @@ getip() {
   fi
 }
 
-bin-update() {
+bin() {
+  if [[ $# -eq 1 || $1 != update ]]; then command bin "$@"; return $?; fi
   local executable
-  for executable in "$@"; do
+  for executable in "${@:2}"; do
     local bin="$HOME/.local/bin/$executable" vim_bin="$HOME/.vim/bin/$executable"
-    if [[ ! -x $bin ]] || [[ ! -x $vim_bin ]]; then
-      echo "$executable not found, skipping.." >&2; continue
-    fi
+    if [[ ! -x $vim_bin ]]; then command bin update "$executable"; continue; fi
     "$bin" --version || "$bin" -version || "$bin" -V || "$bin" version
     mkdir -p ~/config-backup
     command mv -v "$bin" "$HOME/config-backup/$executable.backup_$(date +%s)"
@@ -598,7 +619,7 @@ docker-shell() {
     fi
     return $?
   fi
-  local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --query="${1:-}" --height=100% --list-border=none --preview-window=up,70%,border-bottom,follow --preview='docker logs --follow --tail=10000 {1}')
+  local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --query="${1:-}" --height=100% --list-border=none --header='C-/: wrap | CR: shell | C-o: logs' --preview-window=up,70%,border-bottom,follow --preview='docker logs --follow --tail=1000 {1}' --bind='ctrl-/:change-preview-window(wrap|nowrap)' --bind='ctrl-o:execute:docker logs --follow --tail=10000 {1}')
   if [[ -z $selected_id ]]; then return 1; fi
   printf "\n → %s\n" "$selected_id"
   selected_id=$(awk '{print $1}' <<< "$selected_id")
@@ -616,33 +637,21 @@ docker-shell() {
 
 kube-shell() {
   FZF_DEFAULT_COMMAND='kubectl get pods --all-namespaces 2>&1' fzf --height=100% --list-border=none --info=inline --header-lines=1 \
-    --prompt "$(kubectl config current-context | sed 's/-context$//')> " --header='Press C-o to open log in editor' \
-    --bind='enter:execute:kubectl exec -it --namespace {1} {2} -- bash' --bind="ctrl-o:execute:$EDITOR <(kubectl logs --all-containers --namespace {1} {2})" \
+    --prompt "$(kubectl config current-context | sed 's/-context$//')> " --header='C-/: wrap | CR: shell | C-o: open logs in editor' \
+    --bind='ctrl-/:change-preview-window(wrap|nowrap)' \
+    --bind='enter:execute:kubectl exec -it --namespace {1} {2} -- bash' \
+    --bind="ctrl-o:execute:$EDITOR <(kubectl logs --all-containers --namespace {1} {2})" \
     --preview-window=up,70%,border-bottom,follow --preview='kubectl logs --follow --all-containers --tail=10000 --namespace {1} {2}'
 }
 
 pm2() {
   if [[ $# -gt 0 || ! -t 1 ]]; then command pm2 "$@"; return $?; fi
   local get_state='local IFS=$'\''\n'\'' app_list=$(pm2 list -m) map=() names ids app_status && names=($(echo "$app_list" | awk '\''/^\+---/{sub("+--- ", ""); print}'\'')) && ids=($(echo "$app_list" | awk '\''/^pm2 id : /{sub("pm2 id : ", ""); print}'\'')) && app_status=($(echo "$app_list" | awk '\''/^status : /{sub("status : ", ""); print}'\'')) && for ((i=1; i<=${#ids[@]}; i++)); do if [[ ${app_status[i]} = online ]]; then map+=("${ids[i]} : \e[0;32m${names[i]}\e[0m"); else map+=("${ids[i]} : \e[0;31m${names[i]} [${app_status[i]}]\e[0m"); fi; done && printf "%b\n" "${map[@]}"'
-  FZF_DEFAULT_COMMAND=$get_state fzf --ansi --height=100% --list-border=none --header='CR: logs | C-e: start | C-t: stop | C-r: restart' \
+  FZF_DEFAULT_COMMAND=$get_state fzf --ansi --height=100% --list-border=none --header='C-/: wrap | CR: logs | C-e: start | C-t: stop | C-r: restart' \
+    --bind='ctrl-/:change-preview-window(wrap|nowrap)' \
     --bind="ctrl-e:execute(pm2 start {1} && sleep 1)+reload($get_state)" --bind="ctrl-t:execute(pm2 stop {1} && sleep 1)+reload($get_state)" \
     --bind="ctrl-r:execute(pm2 restart {1} && sleep 1)+reload($get_state)" --bind="enter:become(pm2 logs --raw --lines 60000 -- {1})" \
     --preview-window=up,70%,border-bottom,follow --preview='pm2 logs --raw --lines 10000 -- {1}'
-}
-
-awsctx() {
-  if [[ $1 = --region || $1 == -r ]]; then
-    [[ ! -e ~/.vim/tmp/aws-ec2-regions ]] && aws ec2 describe-regions --query 'Regions[].{Region:RegionName}' --output text | sort > ~/.vim/tmp/aws-ec2-regions
-    local region=$(< ~/.vim/tmp/aws-ec2-regions fzf)
-    if [[ -n $region ]]; then
-      sed -i "/^${region}$/d; 1i ${region}" ~/.vim/tmp/aws-ec2-regions
-      export AWS_REGION=$region && echo "export AWS_REGION=$AWS_REGION"
-      return $?
-    fi
-    return 1
-  fi
-  if [[ -n $1 ]]; then local profile=$1; else local profile=$({ awk -F'[][]' '/^\[/ {print $2}' ~/.aws/credentials 2> /dev/null; awk -F'[][]' '/^\[profile / {gsub(/^profile /, "", $2); print $2}' ~/.aws/config 2> /dev/null; } | sort -u | fzf); fi  # faster than `aws configure list-profiles`
-  [[ -n $profile ]] && export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$AWS_PROFILE"
 }
 
 theme() {  # locally toggles wezterm theme, remotely updates configs to match terminal theme

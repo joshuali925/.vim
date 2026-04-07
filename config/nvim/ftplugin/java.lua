@@ -25,6 +25,7 @@ local config = {
     },
     settings = { java = { sources = { organizeImports = { starThreshold = 9999, staticStarThreshold = 9999 } } } },
 }
+require("pack").load({ "nvim-jdtls" })
 require("jdtls").start_or_attach(config)
 
 vim.keymap.set("n", "<leader>D", "<Cmd>lua require('jdtls').super_implementation()<CR>", { buffer = true })

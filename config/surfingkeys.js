@@ -123,7 +123,7 @@ api.mapkey('<Ctrl-Alt-,>', 'Open ChromeOS Settings', function() { api.tabOpenLin
 api.mapkey(';Vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
 api.mapkey(';Vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
 api.mapkey(';Vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
-api.mapkey('<Ctrl-r>', 'Hard reload', function() { sessionStorage.clear(); window.location.reload(true); });
+api.mapkey('<Ctrl-r>', 'Remove OpenSearch-Dashboards hash and hard reload', function() { if (window.location.hash && window.location.pathname.includes('/app/')) history.replaceState(null, '', window.location.pathname + window.location.search); sessionStorage.clear(); window.location.reload(true); });
 api.unmap("'");
 api.mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
     api.Front.openOmnibar({type: 'VIMarks', tabbed: false});
@@ -190,8 +190,11 @@ api.mapkey('gP', 'Google first result', function() {
         });
     }
 });
-api.mapkey('y/', 'Copy URL path', function() {
-    api.Clipboard.write(window.location.pathname + window.location.search + window.location.hash);
+api.mapkey('y#', 'Copy URL port and pathname', function() {
+  api.Clipboard.write((window.location.port ? ":" + window.location.port + "/" : "") + window.location.pathname)
+});
+api.mapkey('y/', 'Copy URL port and full path', function() {
+  api.Clipboard.write((window.location.port ? ":" + window.location.port + "/" : "") + window.location.pathname + window.location.search + window.location.hash)
 });
 api.unmap('v');
 api.mapkey('v', 'Copy element text', function() {

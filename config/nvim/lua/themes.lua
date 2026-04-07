@@ -117,12 +117,9 @@ end
 function M.switch(index)
     local states_file = vim.fn.stdpath("config") .. "/lua/states.lua"
     vim.cmd.call(("writefile(['vim.g.theme_index = %s'] + readfile('%s')[1:], '%s')"):format(index, states_file, states_file))
-    vim.g.theme_index = index
-    theme_index = index
-    M.theme = M.theme_list[index]
-    pcall(M.setup) -- ignore errors because the select theme plugin might not be enabled
-    pcall(M.setup) -- some plugins like bufferline need a second config call
-    vim.notify("Restart to change theme to " .. M.theme .. ".", vim.log.levels.INFO, { title = "Theme" })
+    local session = vim.fn.fnameescape(vim.fn.stdpath("cache") .. "/restart_session.vim")
+    vim.cmd.mksession({ session, bang = true })
+    vim.cmd.restart("source " .. session)
 end
 
 return M

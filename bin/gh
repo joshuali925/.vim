@@ -8,4 +8,4 @@ fi
 
 detect-env
 [[ $PLATFORM = linux ]] && extract_flags='--strip-components=2 --wildcards gh_*/bin/gh' || extract_flags='gh_*/bin/gh'
-install-from-github gh cli/cli linux_amd64.tar.gz linux_arm64.tar.gz macOS_amd64.tar.gz macOS_arm64.zip "$extract_flags" "$@"
+install-from-github gh cli/cli linux_amd64.tar.gz linux_arm64.tar.gz macOS_amd64.zip macOS_arm64.zip "$extract_flags" "$@"

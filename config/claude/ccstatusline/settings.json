@@ -32,11 +32,11 @@
         "type": "custom-text",
         "backgroundColor": "bgBrightMagenta",
         "rawValue": false,
+        "customText": " │ ",
+        "merge": "no-padding",
         "metadata": {
           "display": "progress-short"
-        },
-        "customText": " │ ",
-        "merge": "no-padding"
+        }
       },
       {
         "id": "db8190da-6814-4ea1-a8a3-27ec3b4b0cc3",
@@ -47,6 +47,11 @@
         "id": "f43da1ae-c56f-475f-9407-c25890fa9fa7",
         "type": "git-branch",
         "backgroundColor": "bgYellow"
+      },
+      {
+        "id": "b55dfc41-6fc5-47b5-9bfb-b82efad0b049",
+        "type": "current-working-dir",
+        "backgroundColor": "bgBrightWhite"
       }
     ],
     [],
