@@ -1,39 +1,53 @@
 return {
     {
+        "emrearmagan/dockyard.nvim",
+        install = false,
+        dependencies = { "plenary.nvim" },
+        cmd = { "Dockyard" },
+        config = function()
+            vim.o.laststatus = 3
+            require("dockyard").setup({ display = { views = { "compose", "containers", "images", "networks", "volumes" } } })
+        end,
+    },
+    {
         "folke/sidekick.nvim",
-        enabled = vim.env.Q_SSO_URL ~= nil or vim.uv.fs_stat(vim.env.HOME .. "/.claude.json") ~= nil,
+        install = false,
         keys = {
-            { "<leader>c", "<Cmd>lua require('sidekick.cli').toggle({name = 'claude'})<CR>" },
-            { "<leader>c", "<Cmd>lua require('sidekick.cli').send({name = 'claude', msg = '{this}'})<CR>", mode = { "x" } },
-            { "<leader>h", "<Cmd>lua require('sidekick.cli').toggle({name = 'kiro'})<CR>" },
-            { "<leader>h", "<Cmd>lua require('sidekick.cli').send({name = 'kiro', msg = '{this}'})<CR>", mode = { "x" } },
+            { "n", "<leader>c", "<Cmd>lua require('sidekick.cli').toggle({name = 'claude'})<CR>" },
+            { "x", "<leader>c", "<Cmd>lua require('sidekick.cli').send({name = 'claude', msg = '{this}'})<CR>" },
+            { "n", "<leader>h", "<Cmd>lua require('sidekick.cli').toggle({name = 'kiro'})<CR>" },
+            { "x", "<leader>h", "<Cmd>lua require('sidekick.cli').send({name = 'kiro', msg = '{this}'})<CR>" },
         },
-        opts = {
-            cli = {
-                tools = {
-                    claude = {
-                        cmd = { "claude", "--allow-dangerously-skip-permissions" },
-                        format = function(text, str) -- sometimes sidekick sends @path :Ln
-                            return str:gsub("@([^@]-) :L(%d+)%-L(%d+)", "@%1#L%2-%3"):gsub("@([^@]-) :L(%d+):C%d+%-?C?%d*", "@%1#L%2"):gsub("@([^@]-) :L(%d+)", "@%1#L%2")
-                        end,
+        config = function()
+            require("sidekick").setup({
+                cli = {
+                    tools = {
+                        claude = {
+                            cmd = { "claude", "--allow-dangerously-skip-permissions" },
+                            format = function(text, str) -- sometimes sidekick sends @path :Ln
+                                return str:gsub("@([^@]-) :L(%d+)%-L(%d+)", "@%1#L%2-%3"):gsub("@([^@]-) :L(%d+):C%d+%-?C?%d*", "@%1#L%2"):gsub("@([^@]-) :L(%d+)", "@%1#L%2")
+                            end,
+                        },
+                        kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" } },
                     },
-                    kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" } },
-                },
-                win = {
-                    split = { width = 0.4 },
-                    keys = {
-                        buffers = { "<C-p>", "buffers", mode = "nt", desc = "open buffer picker" },
-                        prompt = { "<C-b>", "prompt", mode = "t", desc = "insert prompt or context" },
+                    win = {
+                        split = { width = 0.4 },
+                        keys = {
+                            buffers = { "<C-p>", "buffers", mode = "nt", desc = "open buffer picker" },
+                            prompt = { "<C-b>", "prompt", mode = "t", desc = "insert prompt or context" },
+                        },
                     },
                 },
-            },
-        },
+            })
+        end,
     },
     {
         "nvim-neo-tree/neo-tree.nvim",
-        branch = "v3.x",
-        dependencies = "MunifTanjim/nui.nvim",
-        keys = { { "<leader>b", function()
+        install = false,
+        version = vim.version.range("3"),
+        dependencies = { "nui.nvim", "plenary.nvim" },
+        cmd = { "Neotree" },
+        keys = { { "n", "<leader>b", function()
             for _, winid in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                 local success, source_name = pcall(vim.api.nvim_buf_get_var, vim.api.nvim_win_get_buf(winid), "neo_tree_source")
                 if success then
@@ -42,7 +56,7 @@ return {
                 end
             end
             vim.cmd.Neotree("reveal_force_cwd")
-        end }, { "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
+        end }, { "n", "gO", "<Cmd>Neotree source=document_symbols<CR>" } },
         config = function()
             local function get_dir(state)
                 local node = state.tree:get_node()
@@ -121,8 +135,8 @@ return {
     {
         "skywind3000/vim-quickui",
         keys = {
-            { "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>" },
-            { "<CR>", "<Esc><Cmd>Lazy load vim-quickui <bar> call quickui#menu#open('visual')<CR>", mode = "x" },
+            { "n", "<CR>", "<Cmd>call quickui#menu#open('normal')<CR>" },
+            { "x", "<CR>", "<Esc><Cmd>lua require('pack').load({'vim-quickui'}); vim.fn['quickui#menu#open']('visual')<CR>" },
         },
         init = function()
             vim.g.quickui_show_tip = 1
@@ -134,7 +148,7 @@ return {
             vim.fn["quickui#menu#reset"]()
             vim.fn["quickui#menu#install"]("&Actions", {
                 { "Insert time", [[put=strftime('%x %X')]], "Insert MM/dd/yyyy hh:mm:ss tt" },
-                { "Insert line", [[execute "lua require('lazy').load({plugins = 'kommentary'})" | execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]], "Insert a dividing line" },
+                { "Insert line", [[execute "lua require('pack').load({'kommentary'})" | execute "normal! o\<Space>\<BS>\<Esc>55a=" | execute "normal \<Plug>kommentary_line_default"]], "Insert a dividing line" },
                 { "&Trim spaces", [[keeppatterns %s/\s\+$//e | silent! execute "normal! ``"]], "Remove trailing spaces" },
                 { "Squeeze blank lines", [[keeppatterns %s/\v(\n\n)\n+/\1/e | silent! execute "normal! ``"]], "Reduce consecutive blank lines" },
                 { "Ded&up lines", [[%!awk '\!x[$0]++']], "Remove duplicated lines and preserve order" },
@@ -212,9 +226,10 @@ return {
                 { "Clear LSP log", [[lua vim.fn.writefile({}, vim.lsp.get_log_path())]], "Empty lsp.log" },
             })
             vim.fn["quickui#menu#install"]("&Packages", {
-                { "Lazy &packages", [[Lazy]], "Lazy packages" },
-                { "Lazy clean", [[Lazy clean]], "Lazy clean plugins" },
-                { "Lazy &update", [[Lazy update]], "Lazy update plugins" },
+                { "&Pack list", [[lua require('pack').list()]], "List plugins" },
+                { "Pack &update", [[lua vim.pack.update()]], "Update plugins" },
+                { "Pack restore", [[lua vim.pack.update(nil, { target = "lockfile" })]], "Restore plugins to lockfile versions" },
+                { "Pack &delete", [[call feedkeys(":PackDelete ", "n")]], "Delete a plugin" },
                 { "--", "" },
                 { "Ma&son packages", [[Mason]], "Mason packages" },
                 { "Mason &install", [[lua require('lsp').install_packages()]], "Install commonly used servers, linters, and formatters" },

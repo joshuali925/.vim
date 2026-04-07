@@ -5919,3 +5919,39 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.keymap.set("n", "a", "%", { remap = true, buffer = true })
     end,
 })
+
+" =======================================================
+function M.clean_lock()
+    local lock_path = vim.fs.joinpath(vim.fn.stdpath("config"), "nvim-pack-lock.json")
+    local lock = vim.json.decode(table.concat(vim.fn.readfile(lock_path), "\n"))
+    local modified = false
+    for name, spec in pairs(specs) do
+        if spec.install == false and lock.plugins[name] then
+            lock.plugins[name] = nil
+            modified = true
+        end
+    end
+    if modified then vim.fn.writefile(vim.split(vim.json.encode(lock, { indent = "  ", sort_keys = true }), "\n"), lock_path) end
+end
+    { "JoosepAlviste/nvim-ts-context-commentstring" },
+    {
+        "b3nj5m1n/kommentary",
+        dependencies = { "nvim-treesitter", "nvim-ts-context-commentstring" },
+        keys = {
+            { "n", "gc", "<Plug>kommentary_motion_default" },
+            { "n", "gcc", "<Plug>kommentary_line_default" },
+            { "x", "gc", "<Plug>kommentary_visual_default<Esc>" },
+        },
+        init = function()
+            vim.g.kommentary_create_default_mappings = false
+            vim.g.skip_ts_context_commentstring_module = true -- skip backwards compatibility routines and speed up loading, https://github.com/JoosepAlviste/nvim-ts-context-commentstring/blob/5b02387b28a79c61b7d406c2a33d4db1d8454f53/README.md?plain=1#L40
+        end,
+        config = function()
+            require("ts_context_commentstring").setup({ enable_autocmd = false })
+            require("kommentary.config").configure_language("default", {
+                hook_function = function() require("ts_context_commentstring.internal").update_commentstring() end,
+            })
+            require("kommentary.config").configure_language("lua", { prefer_single_line_comments = true })
+            require("kommentary.config").configure_language("confini", { single_line_comment_string = "#" }) -- otherwise default # gets overridden by ts_context_commentstring
+        end,
+    },

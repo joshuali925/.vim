@@ -13,7 +13,7 @@ vim.o.loadplugins = false
 vim.o.shadafile = "NONE"
 vim.o.swapfile = false
 
-local data = vim.fn.stdpath("data") .. "/lazy"
+local data = vim.fn.stdpath("data") .. "/site/pack/core/opt"
 vim.opt.rtp:prepend(data .. "/snacks.nvim")
 vim.opt.rtp:prepend(data .. "/mini.nvim")
 vim.opt.rtp:prepend(data .. "/tokyonight.nvim")

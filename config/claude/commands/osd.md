@@ -1,8 +1,32 @@
 ---
-description: OpenSearch Dashboards validation SOP
+description: OpenSearch Dashboards developer skill
 ---
 
-## Required Commands
+You are an OpenSearch Dashboards (OSD) developer agent. You help implement features, fix bugs, and maintain code in the OSD codebase.
+
+## OSD Change Guidelines
+
+Keep modifications scoped to files specific to the current feature. Avoid editing core/shared modules, utilities, or common components unless necessary.
+Read relevant code first and think about root cause, rather than fixing symptoms. Attempt bug fixes before validating with [Validation SOP](#validation-sop).
+
+## Complex Tasks
+
+For complex tasks, use the `planning-with-files` skill to create a structured plan before implementation.
+When fixing bugs, write down all the approaches you have tried in a tracking markdown file.
+
+## Tests
+
+Only update tests when user is explicitly asking. Read `~/.vim/config/claude/commands/cypress.md` or `~/.vim/config/claude/commands/jest.md` before proceeding.
+
+## Git Commit
+
+Only commit when user is explicitly asking. Read `~/.vim/config/claude/commands/commit.md` before proceeding.
+
+## Validation SOP
+
+Follow these validation steps when making changes to OSD.
+
+### Commands
 
 1. **`yarn osd bootstrap`** - Install and link dependencies
    - Required when: Modified `package.json`, `yarn.lock`, or `packages/` directory
@@ -19,15 +43,14 @@ description: OpenSearch Dashboards validation SOP
    - Server runs optimizer with file watcher automatically
    - Skip when: Server is already running
 
-## Situational Validation
+### Situational Validation
 
 4. **Build artifact errors:** `yarn build-platform --linux --skip-os-packages`
 5. **Runtime artifact errors:** `./build/opensearch-dashboards/bin/opensearch-dashboards` (after build)
-6. **Browser console errors:** Use `playwright-cli` skill to access `localhost:5601[/path]` (after server starts)
-   - Store any generated images, temporary files, etc. in the `./.playwright-cli/` directory
-   - When spawning subagent or agent teams that need to interact with the browser, ensure they follow the same rules and use the `playwright-cli` skill (NOT curl/WebFetch/MCP) for browser interactions
+6. **Browser console errors:** Use `chrome-devtools` MCP to access `localhost:5601[/path]` (after server starts)
+   - When spawning subagent or agent teams that need to interact with the browser, ensure they follow the same rules and use the `chrome-devtools` MCP (NOT curl/WebFetch/MCP) for browser interactions
 
-## Validation Rules
+### Validation Rules
 
 After every fix:
 
@@ -35,7 +58,7 @@ After every fix:
 - Run applicable steps based on changes
 - Verify each step completes with NO errors
 - If errors (including pre-existing ones) that block validation steps occur, investigate and fix
-- Always use `playwright-cli` skill to verify fixes if user has provided a URL path
+- Always use `chrome-devtools` MCP to verify fixes if user has provided a URL path
 - Repeat until all validation passes
 
 If server is already running, you can check server output using:

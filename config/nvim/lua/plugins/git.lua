@@ -2,16 +2,16 @@ return {
     {
         "lewis6991/gitsigns.nvim",
         keys = {
-            { "[g", "<Cmd>lua require('gitsigns').nav_hunk('prev', {target='all'})<CR>" },
-            { "]g", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
-            { "ig", "<Cmd>lua require('gitsigns.actions').select_hunk()<CR>", mode = { "o", "x" } },
-            { "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
-            { "<leader>gd", ":Gitsigns preview_hunk<CR>", mode = { "x" } }, -- range only works with `:` for gitsigns
-            { "<leader>ga", "<Cmd>lua require('gitsigns').stage_hunk()<CR>" },
-            { "<leader>ga", ":Gitsigns stage_hunk<CR>", mode = { "x" } },
-            { "<leader>gu", "<Cmd>lua require('gitsigns').reset_hunk()<CR>" },
-            { "<leader>gu", ":Gitsigns reset_hunk<CR>", mode = { "x" } },
-            { "<leader>gb", "<Cmd>lua require('gitsigns').blame_line({full = true, ignore_whitespace = true})<CR>" },
+            { "n", "[g", "<Cmd>lua require('gitsigns').nav_hunk('prev', {target='all'})<CR>" },
+            { "n", "]g", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
+            { { "o", "x" }, "ig", "<Cmd>lua require('gitsigns.actions').select_hunk()<CR>" },
+            { "n", "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
+            { "x", "<leader>gd", ":Gitsigns preview_hunk<CR>" }, -- range only works with `:` for gitsigns
+            { "n", "<leader>ga", "<Cmd>lua require('gitsigns').stage_hunk()<CR>" },
+            { "x", "<leader>ga", ":Gitsigns stage_hunk<CR>" },
+            { "n", "<leader>gu", "<Cmd>lua require('gitsigns').reset_hunk()<CR>" },
+            { "x", "<leader>gu", ":Gitsigns reset_hunk<CR>" },
+            { "n", "<leader>gb", "<Cmd>lua require('gitsigns').blame_line({full = true, ignore_whitespace = true})<CR>" },
         },
         config = function()
             require("gitsigns").setup({
@@ -47,19 +47,23 @@ return {
     },
     {
         "esmuellert/codediff.nvim",
-        cmd = "CodeDiff",
-        opts = {
-            diff = { compute_moves = true },
-            explorer = { view_mode = "tree" },
-            keymaps = { view = { next_hunk = "]g", prev_hunk = "[g", next_file = "\\", prev_file = "<BS>" }, explorer = { toggle_view_mode = "`" } },
-        },
+        install = false,
+        cmd = { "CodeDiff" },
+        config = function()
+            require("codediff").setup({
+                diff = { compute_moves = true, ignore_trim_whitespace = true },
+                explorer = { view_mode = "tree" },
+                keymaps = { view = { next_hunk = "]g", prev_hunk = "[g", next_file = "\\", prev_file = "<BS>" }, explorer = { toggle_view_mode = "`" } },
+            })
+        end,
     },
     {
         "madmaxieee/unclash.nvim",
         keys = {
-            { "[n", "<Cmd>lua require('unclash').prev_conflict()<CR>" },
-            { "]n", "<Cmd>lua require('unclash').next_conflict()<CR>" },
+            { "n", "[n", "<Cmd>lua require('unclash').prev_conflict()<CR>" },
+            { "n", "]n", "<Cmd>lua require('unclash').next_conflict()<CR>" },
             {
+                "n",
                 "<leader>gc",
                 function()
                     local actions = {

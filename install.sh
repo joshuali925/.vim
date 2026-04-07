@@ -135,7 +135,7 @@ install-devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly rectangle linearmouse maccy pixpin trex thaw@beta doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly rectangle linearmouse maccy pixpin trex thaw@beta doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion cardinal-search
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
     # to update one cask: brew upgrade --cask wezterm@nightly --greedy-latest
@@ -263,7 +263,7 @@ install-neovim() {
   link-file ~/.vim/config/nvim ~/.config/nvim --relative
   backup ~/.local/lib/nvim ~/.local/bin/nvim
   ~/.vim/bin/nvim --version
-  timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
+  timeout 120 ~/.local/bin/nvim --headless +quitall || true
   if [[ $PLATFORM = darwin ]]; then
     nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall
   fi
@@ -339,15 +339,17 @@ install-claude-code() {
   claude plugin install frontend-design@claude-code-plugins && claude plugin disable frontend-design
   claude plugin marketplace add OthmanAdi/planning-with-files
   claude plugin install planning-with-files@planning-with-files
+  claude plugin marketplace add JuliusBrussee/caveman
+  claude plugin install caveman@caveman
   claude plugin marketplace add thedotmack/claude-mem
   claude plugin install claude-mem && node ~/.claude/plugins/marketplaces/thedotmack/plugin/scripts/smart-install.js || true  # workaround for SessionStart:startup hook error
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
   if install-google-chrome 2> /dev/null; then
-    # npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
-    npm install -g @playwright/cli@latest
-    cp -r "$(npm root -g)/@playwright/cli/node_modules/playwright/lib/skill" ~/.claude/skills/playwright-cli
-    grep -qxF '/.playwright-cli/' ~/.gitignore 2>/dev/null || echo '/.playwright-cli/' >> ~/.gitignore
+    npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
+    # npm install -g @playwright/cli@latest
+    # cp -r "$(npm root -g)/@playwright/cli/node_modules/playwright/lib/skill" ~/.claude/skills/playwright-cli
+    # grep -qxF '/.playwright-cli/' ~/.gitignore 2>/dev/null || echo '/.playwright-cli/' >> ~/.gitignore
   fi
   log '\nInstalled Claude Code'
   echo 'export AWS_BEARER_TOKEN_BEDROCK=' >> ~/.zshenv

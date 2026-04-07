@@ -276,6 +276,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.api.nvim_create_autocmd("VimResized", { group = "AutoCommands", command = "wincmd =" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "snacks_terminal", "sidekick_terminal" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
+vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = "nvim-pack", command = "noremap <nowait> <buffer> <leader>q <Cmd>write<CR>" })
 vim.api.nvim_create_autocmd("FileType", {
     group = "AutoCommands",
     pattern = "zsh",
@@ -293,6 +294,7 @@ vim.api.nvim_create_autocmd("BufEnter", { group = "AutoCommands", pattern = "ter
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("S", [[execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <range> != 0 | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr() . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | else | execute "put =execute('" . <q-args> . "')" | endif | 1d]], { complete = "command", nargs = "*", range = true, bang = true })
 vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee % > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute "botright terminal sudo `which nvim` +'1,$d' +startinsert %" | startinsert | endif]], { bang = true })
+vim.api.nvim_create_user_command("Notifications", "normal! g<", {})
 vim.api.nvim_create_user_command("ProfileStart", "lua require('plenary.profile').start(vim.fn.stdpath('cache') .. '/profile.log')", {})
 vim.api.nvim_create_user_command("ProfileStop", [[execute "lua require('plenary.profile').stop()" | execute 'edit ' . stdpath('cache') . '/profile.log']], {})
 vim.api.nvim_create_user_command("SessionSave", "silent! ScrollViewDisable | execute 'mksession! ' . stdpath('data') . '/session_' . <q-args> . '.vim' | silent! ScrollViewEnable | lua vim.notify('Session saved to \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
@@ -379,26 +381,21 @@ vim.defer_fn(function()
 end, 50)
 
 -- plugins {{{1
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.uv.fs_stat(lazypath) then
-    vim.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath }, { text = true }):wait()
-end
-vim.opt.rtp:prepend(lazypath)
-require("lazy").setup("plugins", { defaults = { lazy = true }, ui = { border = "rounded" } })
+require("pack").setup()
 require("themes").setup()
 require("rooter").setup()
 if require("states").small_file then
     vim.defer_fn(function()
         require("lsp").setup()
-        require("lazy").load({ plugins = { "nvim-treesitter", "dropbar.nvim" } })
+        require("pack").load({ "lualine.nvim", "nvim-treesitter", "dropbar.nvim" })
     end, 30)
     vim.defer_fn(function()
         vim.o.foldmethod = "expr"
         -- vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- makes :g commands slow
         vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
         vim.o.foldtext = ""
-        require("lazy").load({ plugins = { "nvim-scrollview", "unclash.nvim", "gitsigns.nvim", "quick-scope" } })
-        vim.cmd.doautocmd("BufReadPost") -- lsp and unclash need this when delay loaded
+        require("pack").load({ "nvim-scrollview", "unclash.nvim", "gitsigns.nvim", "quick-scope" })
+        if vim.api.nvim_buf_get_name(0) ~= "" then vim.cmd.doautocmd("BufReadPost") end -- unclash need this when delay loaded
         require("bookmarks").setup()
         require("clips").setup()
     end, 100)

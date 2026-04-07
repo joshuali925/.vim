@@ -48,6 +48,7 @@
     "ralph-loop@claude-plugins-official": true,
     "frontend-design@claude-code-plugins": false,
     "planning-with-files@planning-with-files": true,
+    "caveman@caveman": true,
     "claude-mem@thedotmack": true
   },
   "extraKnownMarketplaces": {
@@ -69,6 +70,12 @@
         "repo": "OthmanAdi/planning-with-files"
       }
     },
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    },
     "thedotmack": {
       "source": {
         "source": "github",
@@ -77,5 +84,6 @@
     }
   },
   "alwaysThinkingEnabled": true,
+  "effortLevel": "medium",
   "skipDangerousModePermissionPrompt": true
 }
