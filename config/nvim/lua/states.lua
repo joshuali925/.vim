@@ -9,7 +9,6 @@ vim.g.qs_filetype_blacklist = {
     "help",
     "man",
     "qf",
-    "lazy",
     "mason",
     "neo-tree",
     "git", -- mini.git

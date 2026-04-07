@@ -20,6 +20,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
     once = true,
     callback = function()
         vim.cmd.startinsert()
-        vim.fn.termopen("yazi", { on_exit = function() vim.cmd.quit() end })
+        vim.fn.jobstart({ "yazi", "--cwd-file=" .. vim.env.HOME .. "/.vim/tmp/last_result" }, { term = true, on_exit = function() vim.cmd.quit() end })
     end,
 })

@@ -1,7 +1,8 @@
 {
   "env": {
     "MCP_TIMEOUT": "120000",
-    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-6-v1[1m]",
+    "CLAUDE_CODE_NO_FLICKER": "1",
+    "CLAUDE_CODE_ENABLE_AWAY_SUMMARY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_USE_BEDROCK": "1",
@@ -13,6 +14,10 @@
     "commit": "",
     "pr": ""
   },
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "model": "global.anthropic.claude-opus-4-7[1m]",
   "hooks": {
     "Notification": [
       {
@@ -44,11 +49,15 @@
   },
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": true,
-    "frontend-design@claude-code-plugins": false,
+    "frontend-design@claude-plugins-official": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+    "ralph-skills@ralph-marketplace": true,
     "planning-with-files@planning-with-files": true,
-    "claude-mem@thedotmack": true
+    "caveman@caveman": false,
+    "pua@pua-skills": false,
+    "mind@memvid": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -57,10 +66,10 @@
         "repo": "anthropics/claude-plugins-official"
       }
     },
-    "claude-code-plugins": {
+    "ralph-marketplace": {
       "source": {
         "source": "github",
-        "repo": "anthropics/claude-code"
+        "repo": "snarktank/ralph"
       }
     },
     "planning-with-files": {
@@ -69,13 +78,32 @@
         "repo": "OthmanAdi/planning-with-files"
       }
     },
-    "thedotmack": {
+    "ui-ux-pro-max-skill": {
       "source": {
         "source": "github",
-        "repo": "thedotmack/claude-mem"
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
+      }
+    },
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    },
+    "pua-skills": {
+      "source": {
+        "source": "github",
+        "repo": "tanweai/pua"
+      }
+    },
+    "memvid": {
+      "source": {
+        "source": "github",
+        "repo": "memvid/claude-brain"
       }
     }
   },
   "alwaysThinkingEnabled": true,
+  "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true
 }

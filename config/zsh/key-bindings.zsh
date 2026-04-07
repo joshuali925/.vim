@@ -1,5 +1,5 @@
 # https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/HEAD/lib/key-bindings.zsh
-# commit: 8f22370af8bd390ea3b8610da1ccf388826d909d
+# commit: e42ac8c57bc7eb473b689ffcbb98473ba45dbab8
 
 # http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html
 # http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html#Zle-Builtins
@@ -115,12 +115,12 @@ bindkey -M vicmd '^[[1;5D' backward-word
 
 
 bindkey '\ew' kill-region                             # [Esc-w] - Kill from the cursor to the mark
-bindkey -s '\el' 'ls\n'                               # [Esc-l] - run command: ls
+bindkey -s '\el' '^q ls\n'                            # [Esc-l] - run command: ls
 bindkey '^r' history-incremental-search-backward      # [Ctrl-r] - Search backward incrementally for a specified string. The string may begin with ^ to anchor the search to the beginning of the line.
 bindkey ' ' magic-space                               # [Space] - don't do history expansion
 
 
-# Edit the current command line in $EDITOR
+# Edit the current command line in $VISUAL (or $EDITOR / `vi` if not set)
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '\C-x\C-e' edit-command-line

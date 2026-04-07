@@ -65,4 +65,4 @@ git -C "$env:USERPROFILE\.vim" update-index --skip-worktree config/nvim/autoload
 Add-Content -Path "$env:USERPROFILE\.vim\.git\info\exclude" -Value "/config/nvim/autoload"
 Remove-Item "$env:LOCALAPPDATA\nvim" -Force -Recurse -ErrorAction SilentlyContinue
 New-Item -ItemType Junction -Path "$env:LOCALAPPDATA\nvim" -Target "$env:USERPROFILE\.vim\config\nvim"
-nvim --headless +"Lazy! restore" +quitall
+nvim --headless +quitall

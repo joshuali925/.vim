@@ -79,6 +79,10 @@ log() {
   echo -e "${CYAN}${*}${NC}" >&2
 }
 
+append-once() {
+  for file in "${@:2}"; do grep -qxF "$1" "$file" 2> /dev/null || echo "$1" >> "$file"; done
+}
+
 backup() {
   for arg in "$@"; do
     if [[ -e $arg ]] || [[ -L $arg ]]; then  # -L is needed for broken symlinks
@@ -92,8 +96,7 @@ link-file() {
   local sourceFile="$1" destFile="$2"
   mkdir -p "${destFile%/*}"
   backup "$destFile"
-  shift 2
-  ln -s "$@" "$sourceFile" "$destFile" || ln -s "$sourceFile" "$destFile"
+  ln -s "${@:3}" "$sourceFile" "$destFile" || ln -s "$sourceFile" "$destFile"
   log "Linked $sourceFile to $destFile"
 }
 
@@ -117,14 +120,15 @@ install-devtools() {
   elif [[ $PLATFORM = darwin ]]; then
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install coreutils wget xz
-    echo -e "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" | tee -a ~/.bashrc ~/.zshrc
+    append-once "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" ~/.bashrc ~/.zshrc
     brew install grep && link-file "$(which ggrep)" ~/.local/bin/grep
     brew install gnu-sed && link-file "$(which gsed)" ~/.local/bin/sed
     brew install findutils && link-file "$(which gxargs)" ~/.local/bin/xargs
     brew install gawk && link-file "$(which gawk)" ~/.local/bin/awk
     brew install gnu-tar && link-file "$(which gtar)" ~/.local/bin/tar
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
-    sed -i -e "1iFPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\"" ~/.zshrc
+    local fpath_line="FPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\""
+    grep -qxF "$fpath_line" ~/.zshrc 2> /dev/null || sed -i -e "1i$fpath_line" ~/.zshrc
     log 'Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc'
     defaults write -g com.apple.swipescrolldirection -bool false
     defaults write -g ApplePressAndHoldEnabled -bool false
@@ -135,7 +139,8 @@ install-devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly rectangle linearmouse maccy pixpin trex thaw@beta doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion
+    # TODO try https://github.com/Arthur-Ficial/apfel
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly rectangle linearmouse maccy pixpin trex thaw@beta doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion cardinal-search
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
     # to update one cask: brew upgrade --cask wezterm@nightly --greedy-latest
@@ -151,14 +156,14 @@ install-dotfiles() {
   log 'Creating directories..'
   mkdir -pv ~/.local/{bin,lib} ~/.ssh ~/projects
   log 'Linking configurations..'
-  echo 'source ~/.vim/config/.bashrc' >> ~/.bashrc
-  echo 'source ~/.vim/config/zsh/.zshrc' >> ~/.zshrc
-  echo 'skip_global_compinit=1' >> ~/.zshenv
-  log "Appended 'source ~/.vim/config/.bashrc' to ~/.bashrc"
-  log "Appended 'source ~/.vim/config/zsh/.zshrc' to ~/.zshrc"
-  log "Appended 'skip_global_compinit=1' to ~/.zshenv"
-  echo 'Include ~/.vim/config/ssh_config' >> ~/.ssh/config
-  echo 'Include ~/.ssh/ec2hosts' >> ~/.ssh/config
+  append-once 'source ~/.vim/config/.bashrc' ~/.bashrc
+  append-once 'source ~/.vim/config/zsh/.zshrc' ~/.zshrc
+  append-once 'skip_global_compinit=1' ~/.zshenv
+  log "Ensured 'source ~/.vim/config/.bashrc' in ~/.bashrc"
+  log "Ensured 'source ~/.vim/config/zsh/.zshrc' in ~/.zshrc"
+  log "Ensured 'skip_global_compinit=1' in ~/.zshenv"
+  append-once 'Include ~/.vim/config/ssh_config' ~/.ssh/config
+  append-once 'Include ~/.ssh/ec2hosts' ~/.ssh/config
   link-file ~/.vim/config/.tmux.conf ~/.tmux.conf --relative
   link-file ~/.vim/config/.gitconfig ~/.gitconfig --relative
   link-file ~/.vim/config/.ideavimrc ~/.ideavimrc --relative
@@ -170,17 +175,14 @@ install-dotfiles() {
     link-file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
     link-file ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
   elif [[ $OSTYPE = linux-android ]]; then
-    cat >> ~/.zshrc <<'EOF'
-export SSH_CLIENT=1 TMUX_NO_TPM=1
-export EDITOR=vim
-
-bindkey '\ej' down-line-or-beginning-search
-bindkey '\ek' up-line-or-beginning-search
-bindkey '\el' forward-char
-bindkey '\e;' beginning-of-line
-bindkey "\e'" end-of-line
-bindkey '\eu' undo
-EOF
+    append-once 'export SSH_CLIENT=1 TMUX_NO_TPM=1' ~/.zshrc
+    append-once 'export EDITOR=vim' ~/.zshrc
+    append-once "bindkey '\\ej' down-line-or-beginning-search" ~/.zshrc
+    append-once "bindkey '\\ek' up-line-or-beginning-search" ~/.zshrc
+    append-once "bindkey '\\el' forward-char" ~/.zshrc
+    append-once "bindkey '\\e;' beginning-of-line" ~/.zshrc
+    append-once "bindkey \"\\e'\" end-of-line" ~/.zshrc
+    append-once "bindkey '\\eu' undo" ~/.zshrc
   fi
   log 'Installed dotfiles'
 }
@@ -208,7 +210,7 @@ install-java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEA
   log "Installing java $JDK_VERSION.."
   mise use -g "java@$JDK_VERSION"
   export JAVA_HOME="$(mise where java)"
-  echo "export JAVA_HOME=\"$JAVA_HOME\"" | tee -a ~/.bashrc ~/.zshrc
+  append-once "export JAVA_HOME=\"$JAVA_HOME\"" ~/.bashrc ~/.zshrc
   log "Installed $JDK_VERSION, exported JAVA_HOME to ~/.bashrc and ~/.zshrc, restart your shell"
 }
 
@@ -263,7 +265,7 @@ install-neovim() {
   link-file ~/.vim/config/nvim ~/.config/nvim --relative
   backup ~/.local/lib/nvim ~/.local/bin/nvim
   ~/.vim/bin/nvim --version
-  timeout 120 ~/.local/bin/nvim --headless +'Lazy! restore' +quitall || true
+  timeout 120 ~/.local/bin/nvim --headless +quitall || true
   if [[ $PLATFORM = darwin ]]; then
     nvim -u ~/.vim/config/vscode-neovim/vscode.vim -i NONE +PlugInstall +quitall
   fi
@@ -277,6 +279,8 @@ install-swap() {
   fi
   local g="${1:-4}"
   log "Installing ${g}G swapfile.."
+  sudo swapoff /swapfile || true
+  sudo rm -f /swapfile
   sudo dd if=/dev/zero of=/swapfile count=$((g * 1024)) bs=1MiB &
   if [[ $PACKAGE_MANAGER = apt-get ]]; then
     log 'Installing earlyoom..'
@@ -284,8 +288,7 @@ install-swap() {
   fi
   wait
   sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
-  sudo sed -i '/^\/swapfile swap swap defaults 0 0$/d' /etc/fstab
-  echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+  grep -qxF '/swapfile swap swap defaults 0 0' /etc/fstab || echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
   free -h
 }
 
@@ -319,39 +322,39 @@ install-google-chrome() {
 }
 
 install-claude-code() {
-  if [[ -e ~/.claude.json ]]; then
-    log 'Claude Code configuration already exists, skipping..'
-    return 0
-  fi
-  curl -fsSL https://claude.ai/install.sh | bash
+  if builtin command -v claude > /dev/null 2>&1; then claude update; else curl -fsSL https://claude.ai/install.sh | bash; fi
   npm install -g ccstatusline@latest
   mkdir -p ~/.aws ~/.claude
-  grep -qxF '/.claude/' ~/.gitignore 2>/dev/null || echo '/.claude/' >> ~/.gitignore
+  append-once '/.claude/' ~/.gitignore
   link-file ~/.vim/config/claude/skills ~/.claude/skills --relative
   link-file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link-file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
   claude plugin marketplace add anthropics/claude-plugins-official
   claude plugin install code-review@claude-plugins-official
+  claude plugin install skill-creator@claude-plugins-official
   claude plugin install typescript-lsp@claude-plugins-official
-  claude plugin install ralph-loop@claude-plugins-official
-  claude plugin marketplace add anthropics/claude-code
-  claude plugin install frontend-design@claude-code-plugins && claude plugin disable frontend-design
-  claude plugin marketplace add OthmanAdi/planning-with-files
-  claude plugin install planning-with-files@planning-with-files
-  claude plugin marketplace add thedotmack/claude-mem
-  claude plugin install claude-mem && node ~/.claude/plugins/marketplaces/thedotmack/plugin/scripts/smart-install.js || true  # workaround for SessionStart:startup hook error
+  claude plugin install frontend-design@claude-plugins-official
+  claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill
+  claude plugin marketplace add snarktank/ralph && claude plugin install ralph-skills@ralph-marketplace
+  claude plugin marketplace add OthmanAdi/planning-with-files && claude plugin install planning-with-files@planning-with-files
+  claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman@caveman && claude plugin disable caveman
+  claude plugin marketplace add tanweai/pua && claude plugin install pua@pua-skills && claude plugin disable pua
+  claude plugin marketplace add memvid/claude-brain && claude plugin install mind@memvid
+  # curl -sL https://github.com/github/gh-stack/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skills/gh-stack/*'
+  # curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
-  curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
   if install-google-chrome 2> /dev/null; then
-    # npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
-    npm install -g @playwright/cli@latest
-    cp -r "$(npm root -g)/@playwright/cli/node_modules/playwright/lib/skill" ~/.claude/skills/playwright-cli
-    grep -qxF '/.playwright-cli/' ~/.gitignore 2>/dev/null || echo '/.playwright-cli/' >> ~/.gitignore
+    npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
+    # npm install -g @playwright/cli@latest
+    # cp -r "$(npm root -g)/@playwright/cli/node_modules/playwright/lib/skill" ~/.claude/skills/playwright-cli
+    # append-once '/.playwright-cli/' ~/.gitignore
   fi
   log '\nInstalled Claude Code'
-  echo 'export AWS_BEARER_TOKEN_BEDROCK=' >> ~/.zshenv
-  log "${BG_RED}TODO${CYAN}: update bedrock key in ${YELLOW}~/.zshenv"
+  if ! grep -q '^export AWS_BEARER_TOKEN_BEDROCK=' ~/.zshenv 2>/dev/null; then
+    echo 'export AWS_BEARER_TOKEN_BEDROCK=' >> ~/.zshenv
+    log "${BG_RED}TODO${CYAN}: update bedrock key in ${YELLOW}~/.zshenv"
+  fi
 }
 
 install-k3s() {
@@ -362,7 +365,7 @@ install-k3s() {
   mise x -- helm completion zsh > ~/.vim/config/zsh/completions/_helm
   mise x -- stern --completion zsh > ~/.vim/config/zsh/completions/_stern
   export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-  echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' | tee -a ~/.bashrc ~/.zshrc
+  append-once 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' ~/.bashrc ~/.zshrc
   log 'Installed k3s, k9s, helm, stern'
 }
 
@@ -373,12 +376,6 @@ install-ssh-key() {
   fi
   ssh-keygen -t ed25519 -C '' -N '' -f ~/.ssh/id_ed25519 && ssh-keygen -y -f ~/.ssh/id_ed25519
   log "Copy public key and add it in ${YELLOW}https://github.com/settings/keys"
-}
-
-install-tls-key() {
-  mkdir -p ~/.vim/tmp/tls
-  openssl req -x509 -newkey rsa:4096 -keyout ~/.vim/tmp/tls/server.key -out ~/.vim/tmp/tls/server.crt -days 730 -nodes -subj '/C=US/ST=California/L=San Francisco/O=ORG/OU=UNIT/CN=localhost'
-  log 'Saved to ~/.vim/tmp/tls/server.key and ~/.vim/tmp/tls/server.crt'
 }
 
 default-install() {
@@ -404,6 +401,7 @@ default-install() {
   install ssh-key
   sudo chsh -s "$(which zsh)" "$(whoami)" || true
   log '\nDefault shell will be zsh after re-login'
+  log "${YELLOW}SHELL=$(which zsh) exec zsh  ${BLACK}# run zsh now"
   log '\nFinished, exiting..'
 }
 

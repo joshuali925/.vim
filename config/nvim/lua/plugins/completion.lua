@@ -1,7 +1,7 @@
 return {
     {
         "windwp/nvim-autopairs", -- alt: m4xshen/autoclose.nvim, Saghen/blink.pairs
-        event = "InsertEnter",
+        event = { "InsertEnter" },
         config = function()
             local npairs = require("nvim-autopairs")
             npairs.setup({ disable_filetype = vim.g.qs_filetype_blacklist, ignored_next_char = [=[[%w%%%'%[%"%.%(%{%/]]=], fast_wrap = { map = "<C-l>" } })
@@ -40,87 +40,88 @@ return {
             end
         end,
     },
+    { "rafamadriz/friendly-snippets" },
+    {
+        "L3MON4D3/LuaSnip",
+        build = function() vim.system({ "make", "install_jsregexp" }):wait() end,
+        config = function() -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
+            require("luasnip.loaders.from_vscode").lazy_load()
+            require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.uv.os_homedir() .. "/.vim/config/snippets" } })
+        end,
+    },
     {
         "saghen/blink.cmp",
-        version = "*",
+        version = vim.version.range("^1"),
         event = { "InsertEnter", "CmdlineEnter" },
-        cond = require("states").small_file,
-        dependencies = {
-            "rafamadriz/friendly-snippets",
-            {
-                "L3MON4D3/LuaSnip",
-                build = "make install_jsregexp",
-                config = function() -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
-                    require("luasnip.loaders.from_vscode").lazy_load()
-                    require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.uv.os_homedir() .. "/.vim/config/snippets" } })
-                end,
-            },
-        },
-        opts = {
-            snippets = { preset = "luasnip" },
-            completion = {
-                documentation = { auto_show = true, auto_show_delay_ms = 150 },
-                menu = { draw = { treesitter = { "lsp" } } },
-            },
-            keymap = {
-                preset = "enter",
-                ["<C-Space>"] = { function(cmp) cmp.show({ providers = { "lsp" } }) end },
-                ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
-                ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
-                ["<C-k>"] = {
-                    function(cmp)
-                        if cmp.snippet_active() then return cmp.snippet_forward() end
-                        return cmp.show({ providers = { "snippets" } })
-                    end,
-                    "fallback",
-                },
-            },
-            cmdline = {
+        dependencies = { "friendly-snippets", "LuaSnip" },
+        config = function()
+            if not require("states").small_file then return end
+            require("blink.cmp").setup({
+                snippets = { preset = "luasnip" },
                 completion = {
-                    list = { selection = { preselect = function(ctx) return vim.fn.getcmdtype() ~= ":" end } },
-                    menu = { auto_show = function(ctx) return vim.fn.getcmdtype() == ":" or vim.fn.getcmdwintype() == ":" end },
+                    documentation = { auto_show = true, auto_show_delay_ms = 150 },
+                    menu = { draw = { treesitter = { "lsp" } } },
                 },
                 keymap = {
-                    ["<Down>"] = {},
-                    ["<Up>"] = {},
-                    ["<Left>"] = {},
-                    ["<Right>"] = {},
-                    ["<C-Space>"] = { "fallback_to_mappings" },
-                    ["<C-n>"] = { "show_and_insert", "select_next" },
-                    ["<Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_next() end end, "fallback" },
-                    ["<S-Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_prev() end end, "fallback" },
+                    preset = "enter",
+                    ["<C-Space>"] = { function(cmp) cmp.show({ providers = { "lsp" } }) end },
+                    ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+                    ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+                    ["<C-k>"] = {
+                        function(cmp)
+                            if cmp.snippet_active() then return cmp.snippet_forward() end
+                            return cmp.show({ providers = { "snippets" } })
+                        end,
+                        "fallback",
+                    },
                 },
-            },
-            sources = { providers = { path = { opts = { show_hidden_files_by_default = true } } } },
-            appearance = {
-                kind_icons = {
-                    Text = " ", -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
-                    Method = " ",
-                    Function = " ",
-                    Constructor = " ",
-                    Field = " ",
-                    Variable = " ",
-                    Class = " ",
-                    Interface = " ",
-                    Module = " ",
-                    Property = " ",
-                    Unit = " ",
-                    Value = " ",
-                    Enum = " ",
-                    Keyword = " ",
-                    Snippet = " ",
-                    Color = " ",
-                    File = " ",
-                    Reference = " ",
-                    Folder = " ",
-                    EnumMember = " ",
-                    Constant = " ",
-                    Struct = " ",
-                    Event = " ",
-                    Operator = " ",
-                    TypeParameter = " ",
+                cmdline = {
+                    completion = {
+                        list = { selection = { preselect = function(ctx) return vim.fn.getcmdtype() ~= ":" end } },
+                        menu = { auto_show = function(ctx) return vim.fn.getcmdtype() == ":" or vim.fn.getcmdwintype() == ":" end },
+                    },
+                    keymap = {
+                        ["<Down>"] = {},
+                        ["<Up>"] = {},
+                        ["<Left>"] = {},
+                        ["<Right>"] = {},
+                        ["<C-Space>"] = { "fallback_to_mappings" },
+                        ["<C-n>"] = { "show_and_insert", "select_next" },
+                        ["<Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_next() end end, "fallback" },
+                        ["<S-Tab>"] = { function(cmp) if vim.fn.getcmdtype() == ":" then return cmp.select_prev() end end, "fallback" },
+                    },
                 },
-            },
-        },
+                sources = { providers = { path = { opts = { show_hidden_files_by_default = true } } } },
+                appearance = {
+                    kind_icons = {
+                        Text = " ", -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-codicons-to-the-menu
+                        Method = " ",
+                        Function = " ",
+                        Constructor = " ",
+                        Field = " ",
+                        Variable = " ",
+                        Class = " ",
+                        Interface = " ",
+                        Module = " ",
+                        Property = " ",
+                        Unit = " ",
+                        Value = " ",
+                        Enum = " ",
+                        Keyword = " ",
+                        Snippet = " ",
+                        Color = " ",
+                        File = " ",
+                        Reference = " ",
+                        Folder = " ",
+                        EnumMember = " ",
+                        Constant = " ",
+                        Struct = " ",
+                        Event = " ",
+                        Operator = " ",
+                        TypeParameter = " ",
+                    },
+                },
+            })
+        end,
     },
 }

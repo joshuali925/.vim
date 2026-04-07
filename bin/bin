@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+source ~/.vim/bin/_install_from_github.sh
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/bin ]]; then
+  BIN_INIT=1 bin completion zsh > ~/.vim/config/zsh/completions/_bin && del-comp || true
+  if [[ ! -s ~/.config/bin/config.json ]]; then
+    mkdir -p ~/.config/bin
+    echo '{"default_path":"'"$HOME"'/.local/bin","bins":{}}' > ~/.config/bin/config.json
+  fi
+fi
+
+install-from-github bin marcosnils/bin linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 '' "$@"

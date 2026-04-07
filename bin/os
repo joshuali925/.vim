@@ -58,7 +58,7 @@ run() {
 
 optimize() {
   if [[ -f opensearch_dashboards.d.ts ]]; then
-    env OSD_OPTIMIZER_THEMES="${OSD_OPTIMIZER_THEMES:-v9light}" scripts/use_node scripts/build_opensearch_dashboards_platform_plugins "${@:---no-examples}"
+    env OSD_OPTIMIZER_THEMES="${OSD_OPTIMIZER_THEMES:-v9light,v9dark}" scripts/use_node scripts/build_opensearch_dashboards_platform_plugins "${@:---no-examples}"
   fi
 }
 

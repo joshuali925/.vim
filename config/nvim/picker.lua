@@ -13,7 +13,7 @@ vim.o.loadplugins = false
 vim.o.shadafile = "NONE"
 vim.o.swapfile = false
 
-local data = vim.fn.stdpath("data") .. "/lazy"
+local data = vim.fn.stdpath("data") .. "/site/pack/core/opt"
 vim.opt.rtp:prepend(data .. "/snacks.nvim")
 vim.opt.rtp:prepend(data .. "/mini.nvim")
 vim.opt.rtp:prepend(data .. "/tokyonight.nvim")
@@ -42,7 +42,7 @@ require("snacks.picker").smart({
     layout = { preview = false, layout = { width = 0, height = 0 } },
     on_close = function() vim.cmd.quitall({ bang = true }) end,
     confirm = function(picker)
-        local joined_paths = table.concat(vim.tbl_map(function(s) return (vim.env.PICKER_PREFIX or "") .. vim.fn.fnamemodify(s.file, ":.") end, picker:selected({ fallback = true })), " ") .. " "
+        local joined_paths = table.concat(vim.tbl_map(function(s) return (vim.env.PICKER_PREFIX or "") .. vim.fn.fnamemodify(s.file, ":."):gsub([[([%s!'"#$&;|*?<>%(%)%[%]{}\\`~^=%%])]], [[\%1]]) end, picker:selected({ fallback = true })), " ") .. " "
         if vim.env.PICKER_OUTFILE then
             local f = assert(io.open(vim.env.PICKER_OUTFILE, "w"))
             f:write(joined_paths)

@@ -180,11 +180,6 @@ end
 function M.setup()
     vim.keymap.set("n", "ma", M.annotate)
     vim.keymap.set("n", "mm", M.toggle)
-    vim.keymap.set("n", "ms", function()
-        vim.notify(vim.inspect(M.bookmarks))
-        vim.cmd.messages()
-        vim.schedule(function() vim.cmd("$") end)
-    end)
     vim.api.nvim_create_augroup("Bookmarks", {})
     vim.api.nvim_create_autocmd("VimLeavePre", { group = "Bookmarks", callback = dump_disk })
     vim.api.nvim_create_autocmd("BufUnload", { group = "Bookmarks", callback = function(e) dump_cache(e.buf, e.match) end }) -- BufLeave to immediately retire invalidated extmarks

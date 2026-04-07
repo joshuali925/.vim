@@ -76,7 +76,7 @@ install-archive-from-url() {
     return 0
   fi
 
-  local url=$1 executable=$2 extract_flags=$3 tar_cmd=tar extract_cmd
+  local url=$1 executable=$2 extract_flags=$3 tar_cmd=tar extract_cmd pipe=1
   shift 3
 
   detect-env
@@ -90,20 +90,23 @@ install-archive-from-url() {
 
   echo "Installing $executable from $url" >&2
   case $url in
-    # *.rar)                       extract_cmd="unrar x" ;;
-    *.tar)                       extract_cmd="$tar_cmd x -C $HOME/.local/bin"                ;;
-    *.tar.gz | *.tgz)            extract_cmd="$tar_cmd xz -C $HOME/.local/bin"               ;;
-    *.tar.xz | *.xz)             extract_cmd="$tar_cmd xJ -C $HOME/.local/bin"               ;;
-    *.tar.bz2 | *.tbz | *.tbz2)  extract_cmd="$tar_cmd xj -C $HOME/.local/bin"               ;;
-    *.bz2)                       extract_cmd="bunzip2 | tee $HOME/.local/bin/$executable"    ;;
-    *.gz)                        extract_cmd="gunzip | tee $HOME/.local/bin/$executable"     ;;
-    *.zip)                       extract_cmd="tee $HOME/.local/bin/${executable}.archive > /dev/null && unzip -j -o -d $HOME/.local/bin $HOME/.local/bin/${executable}.archive $extract_flags && rm $HOME/.local/bin/${executable}.archive; echo" ;;
-    *.7z)                        extract_cmd="tee $HOME/.local/bin/${executable}.archive > /dev/null && 7z e -o$HOME/.local/bin $HOME/.local/bin/${executable}.archive $extract_flags && rm $HOME/.local/bin/${executable}.archive; echo" ;;
-    *.Z)                         extract_cmd="uncompress | tee $HOME/.local/bin/$executable" ;;
-    *)                           extract_cmd="tee $HOME/.local/bin/$executable"              ;;
+    *.tar)                       extract_cmd="$tar_cmd x -C $HOME/.local/bin" ;;
+    *.tar.gz | *.tgz)            extract_cmd="$tar_cmd xz -C $HOME/.local/bin" ;;
+    *.tar.xz | *.xz)             extract_cmd="$tar_cmd xJ -C $HOME/.local/bin" ;;
+    *.tar.bz2 | *.tbz | *.tbz2)  extract_cmd="$tar_cmd xj -C $HOME/.local/bin" ;;
+    *.bz2)                       extract_cmd="bunzip2 > $HOME/.local/bin/$executable" ;;
+    *.gz)                        extract_cmd="gunzip > $HOME/.local/bin/$executable" ;;
+    *.zip)                       pipe=0; extract_cmd="unzip -j -o -d $HOME/.local/bin $HOME/.local/bin/${executable}.archive" ;;
+    *.7z)                        pipe=0; extract_cmd="7z e -o$HOME/.local/bin $HOME/.local/bin/${executable}.archive" ;;
+    *.Z)                         extract_cmd="uncompress > $HOME/.local/bin/$executable" ;;
+    *)                           pipe=0; extract_cmd="mv $HOME/.local/bin/${executable}.archive $HOME/.local/bin/$executable" ;;
   esac
 
-  curl -sL -o- "$url" | eval "$extract_cmd $extract_flags" > /dev/null
+  if [[ $pipe = 1 ]]; then
+    curl -sL -o- "$url" | eval "$extract_cmd $extract_flags" > /dev/null
+  else
+    curl -sL -o "$HOME/.local/bin/${executable}.archive" "$url" && eval "$extract_cmd $extract_flags" > /dev/null && rm -f "$HOME/.local/bin/${executable}.archive"
+  fi
   chmod +x "$HOME/.local/bin/$executable"
   run-if-exists "$executable" "$@"
 }
