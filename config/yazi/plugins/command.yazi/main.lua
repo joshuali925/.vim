@@ -17,9 +17,21 @@ end
 
 local get_hovered_file = ya.sync(function() return tostring(cx.active.current.hovered.url) end)
 
+local get_yanked = ya.sync(function()
+    local urls = {}
+    for _, u in pairs(cx.yanked) do urls[#urls + 1] = ya.quote(tostring(u)) end
+    return urls, cx.yanked.is_cut, ya.quote(tostring(cx.active.current.cwd))
+end)
+
 local function shell(command, pause)
     -- NOTE keep commands POSIX compliant, on ubuntu the shell is 'sh'. need to use bash to support `read` flags
     return ya.emit("shell", { command .. (pause and "; echo Press any key to continue; bash -ic 'read -n 1 -s _'" or ""), confirm = true, block = true })
+end
+
+local function cow_paste()
+    local urls, is_cut, cwd = get_yanked()
+    if is_cut or #urls == 0 then return end
+    shell("cp -dRiv --reflink=auto --sparse=always " .. table.concat(urls, " ") .. " " .. cwd)
 end
 
 local function chmod_stat()
@@ -123,9 +135,16 @@ return {
         if command:match("^chmod%?$") then return chmod_stat() end
         if command:match("^chown$") then return shell('sudo chown -R "$USER:$USER" %h') end
         if command:match("^chown%?$") then return chown_stat() end
+        if command:match("^cow%-paste$") then return cow_paste() end
         if command:match("^sudorm$") then return shell("sudo rm -r %s") end
         if command:match("^size$") then return calculate_sizes(job.args) end
-        if command:match("^audio$") then return shell([[ffmpeg -i %h 2>&1 | rg -o 'Stream \S+ Audio: (\w+)' -r '$1' | xargs -I@ ffmpeg -i %h -codec copy "${0%%.*}.@"]]) end
+        if command:match("^audio$") then
+            local file = get_hovered_file()
+            local output = Command("ffmpeg"):arg({ "-i", file }):stdout(Command.PIPED):stderr(Command.PIPED):output()
+            local codec = output and output.stderr:match("Audio: (%w+)")
+            if not codec then return ya.notify({ title = "Command failed", content = "No audio stream found", timeout = 5, level = "error" }) end
+            return shell(('ffmpeg -i %%h -codec copy "%s.%s"'):format(file:match("(.+)%.[^/\\]+$") or file, codec))
+        end
         if command:match("^convert ") then
             local ext = command:match("^convert (%S+)")
             return shell('ffmpeg -i %h -codec copy "${0%%.*}.' .. ext .. '" || ffmpeg -y -i %h "${0%%.*}.' .. ext .. '"')

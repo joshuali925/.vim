@@ -10,5 +10,5 @@ You will work on Cypress end-to-end tests, try not to modify source code, except
 - Use `chrome-devtools` MCP on `localhost:5601/[path]` to identify elements and go through the workflow before writing new tests, server is already running
 - Keep new tests simple and focused on essential workflows, not every possible interaction
 - Avoid arbitrary waits; use Cypress built-in retry/assertions/intercepts
-- Do not assert user facing text, create and use `data-test-subj` selectors
+- Do not assert user facing text. Instead, use `data-test-subj` selectors. If `data-test-subj` attribute does not already exist, create one with the appropriate prefix.
 - Verify all tests pass together when finished

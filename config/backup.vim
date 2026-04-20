@@ -5799,7 +5799,6 @@ customCommands:
     { "sindrets/diffview.nvim", cmd = { "DiffviewOpen", "DiffviewFileHistory" }, opts = { view = { merge_tool = { layout = "diff1_plain" } } } },
                 { "Diffview &file history", [[DiffviewFileHistory % --follow]], "Browse previously committed versions of current file with Diffview" },
                 { "Diffview &file history", [['<,'>DiffviewFileHistory --follow]], "Browse previously committed versions of selected range with Diffview" },
-" bookmarks: https://github.com/TheNoeTrevino/haunt.nvim, delays cursor after modification
 " tailwind: https://github.com/ruicsh/tailwind-hover.nvim
 
 " =======================================================
@@ -5958,3 +5957,4 @@ vim.api.nvim_create_autocmd("FileType", {
 
 " =======================================================
   claude plugin marketplace add Digital-Process-Tools/claude-marketplace && claude plugin install remember@dpt-plugins
+  claude plugin marketplace add zilliztech/memsearch && claude plugin install memsearch

@@ -62,7 +62,6 @@ api.map('<Ctrl-t>', 'on'); // new tab
 api.map('<Ctrl-w>', 'x'); // close tab
 api.map('H', 'S'); // back in history
 api.map('L', 'D'); // forward in history
-api.map(';fi', 'oi'); // open incognito
 api.map(';fm', 'ox'); // open from recently closed tab
 api.map(';fh', 'oh'); // open from history
 api.map('o', 't'); // open url
@@ -83,6 +82,7 @@ api.map('V', 'zv'); // visual select element
 api.map('ys', 'ya'); // select url to copy
 api.map('yP', 'yp'); // copy POST form data
 api.map('yp', 'yt'); // duplicate page
+api.map('yi', 'oi'); // open in incognito
 api.map('yt', 'yl'); // copy page title
 // yj to copy all settings as json, ;pj to restore from clipboard
 // yy to copy url of current tab, yY to copy url of all tabs
@@ -191,10 +191,10 @@ api.mapkey('gP', 'Google first result', function() {
     }
 });
 api.mapkey('y#', 'Copy URL port and pathname', function() {
-  api.Clipboard.write((window.location.port ? ":" + window.location.port + "/" : "") + window.location.pathname)
+  api.Clipboard.write((window.location.port ? ":" + window.location.port : "") + window.location.pathname)
 });
 api.mapkey('y/', 'Copy URL port and full path', function() {
-  api.Clipboard.write((window.location.port ? ":" + window.location.port + "/" : "") + window.location.pathname + window.location.search + window.location.hash)
+  api.Clipboard.write((window.location.port ? ":" + window.location.port : "") + window.location.pathname + window.location.search + window.location.hash)
 });
 api.unmap('v');
 api.mapkey('v', 'Copy element text', function() {

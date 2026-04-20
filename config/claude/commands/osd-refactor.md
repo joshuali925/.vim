@@ -1,5 +1,5 @@
 ---
-description: OpenSearch Dashboards refactor skill
+description: Refactor OpenSearch Dashboards
 ---
 
 Run tests after each phase. Do not add features or refactor beyond scope. Do not change behaviors.

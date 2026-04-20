@@ -3,7 +3,7 @@ source ~/.vim/bin/_install_from_github.sh
 run-if-exists "$0" "$@"
 detect-env
 
-VERSION=2407
+VERSION=2600
 case $PLATFORM in  # versions: https://www.7-zip.org/download.html
   linux) [[ $ARCHITECTURE = x86_64 ]] && DISTRO=linux-x64 || DISTRO=linux-arm64; executable=7zzs ;;
   darwin) DISTRO=mac; executable=7zz ;;

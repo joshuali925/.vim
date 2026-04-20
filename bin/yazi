@@ -6,4 +6,5 @@ if [[ ! -f $HOME/.config/yazi/yazi.toml ]]; then
 fi
 
 source ~/.vim/bin/_install_from_github.sh
+# alternative: https://github.com/elio-fm/elio
 install-from-github yazi sxyazi/yazi x86_64-unknown-linux-musl.zip aarch64-unknown-linux-musl.zip x86_64-apple-darwin aarch64-apple-darwin 'yazi-*/ya yazi-*/yazi' "$@"

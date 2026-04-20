@@ -6,47 +6,79 @@ cleanup() {
   exit $?
 }
 
-run() {
+init_security() {
+  local pw=$1 tmp_pw='myStrongPassword123_456' hash
   trap cleanup TERM INT EXIT
-  local rest=() skip_args=0 start_cmd=start
-  for arg in "$@"; do
-    if [[ $skip_args -eq 1 ]]; then rest+=("$arg"); continue; fi
-    case $arg in
-      --no-sec|--nosec) local nosec=1 ;;
+  OPENSEARCH_INITIAL_ADMIN_PASSWORD=$tmp_pw ./opensearch-tar-install.sh "${@:2}" &
+  pid=$!
+  while ! curl -fsS -k --max-time 2 "https://admin:$tmp_pw@localhost:9200"; do echo waiting for opensearch..; sleep 2; done
+  hash=$(JAVA_HOME="$(mise where java)" OPENSEARCH_JAVA_HOME=$PWD/jdk bash plugins/opensearch-security/tools/hash.sh -p "$pw" 2>/dev/null | tail -1)
+  awk -v h="$hash" '
+    /^[A-Za-z_][A-Za-z0-9_-]*:[[:space:]]*$/ {
+      key=$0; sub(/:.*/,"",key)
+      keep = (key=="_meta" || key=="admin" || key=="kibanaserver")
+      rotate = (key=="admin")
+    }
+    keep {
+      if (rotate && /^[[:space:]]+hash:/) sub(/hash:.*/, "hash: \"" h "\"")
+      print
+    }
+  ' config/opensearch-security/internal_users.yml > config/opensearch-security/internal_users.yml.tmp \
+    && mv config/opensearch-security/internal_users.yml.tmp config/opensearch-security/internal_users.yml
+  JAVA_HOME="$(mise where java)" OPENSEARCH_JAVA_HOME=$PWD/jdk bash plugins/opensearch-security/tools/securityadmin.sh \
+    -f config/opensearch-security/internal_users.yml -t internalusers -icl -nhnv \
+    -cacert config/root-ca.pem -cert config/kirk.pem -key config/kirk-key.pem
+  kill "$pid"; wait "$pid" 2>/dev/null || true
+  unset pid
+}
+
+run() {
+  local rest=() start_cmd=start password
+  if [[ $OS_DAEMON = 1 ]]; then
+    (setsid env OS_DAEMON=0 "$0" run "$@" > ./.daemon-log 2>&1 < /dev/null & echo $! > ./.daemon-pid)
+    echo "daemon started process in background, dir: $PWD, logs: ./.daemon-log, pid: ./.daemon-pid" >&2
+    return 0
+  fi
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -h|--help) echo "Usage: ${0##*/} run [-h|--help] [--debug] [--no-sec] [--init-password <password>] [-p|--port <port>] [-b|--bootstrap] [-e|--explore] [passthrough-args...] (OS_DAEMON=1 for background, logs in ./.daemon-log, pid in ./.daemon-pid)" >&2; return 0 ;;
       --debug) export OPENSEARCH_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 ;;
+      --no-sec|--nosec) local nosec=1 ;;
+      --init-password) password=$2; shift ;;
+      -p|--port) local port=$2; shift ;;
       -b|--bootstrap) local bootstrap=1 ;;
       -e|--explore) start_cmd=start:explore rest+=(--workspace.enabled=true) ;;
-      --) skip_args=1; rest+=("$arg") ;;
-      *) rest+=("$arg") ;;
+      --) shift; rest+=("$@"); break ;;
+      *) rest+=("$1") ;;
     esac
+    shift
   done
   set -- "${rest[@]}"
 
   if [[ -x bin/opensearch ]]; then
+    if [[ -n $port ]]; then set -- -Ehttp.port="$port" "$@"; fi
     if [[ -d plugins/opensearch-security ]] && ! grep -q '^plugins.security.disabled: true' config/opensearch.yml; then
       [[ -n $nosec ]] && exec ./bin/opensearch -Eplugins.security.disabled=true
       if [[ ! -f config/kirk.pem ]]; then
-        OPENSEARCH_INITIAL_ADMIN_PASSWORD=myStrongPassword123_456 ./opensearch-tar-install.sh "$@" &
-        pid=$!
-        while ! curl -fsSL https://localhost:9200 -k -u admin:myStrongPassword123_456; do echo waiting for opensearch..; sleep 2; done
-        # shellcheck disable=2016
-        command sed -i '/^admin:/,/^  hash:/ s/\(hash: \)".*"/\1"$2a$12$VcCDgh2NDk07JGN0rjGbM.Ad41qVR\/YFJcgHp0UGns5JDymv..TOG"/' config/opensearch-security/internal_users.yml  # admin:admin
-        JAVA_HOME="$(mise where java)" OPENSEARCH_JAVA_HOME=$PWD/jdk bash plugins/opensearch-security/tools/securityadmin.sh -f config/opensearch-security/internal_users.yml -t internalusers -icl -nhnv -cacert config/root-ca.pem -cert config/kirk.pem -key config/kirk-key.pem
-        kill $pid
+        init_security "${password:-admin}" "$@"
+      elif [[ -n $password ]]; then
+        echo 'Warning: security already initialized; ignoring password argument' >&2
       fi
     fi
     exec ./bin/opensearch "$@"
   fi
 
   local opts=(--host 0.0.0.0 --server.maxPayloadBytes=99999999 --opensearch.ignoreVersionMismatch=true --data_source.ssl.verificationMode=none)
+  if [[ -n $port ]]; then opts+=(--server.port "$port"); fi
   if [[ -f opensearch_dashboards.json ]]; then cd ../..; fi  # cd up from plugins directory
-  if [[ -d plugins/securityDashboards ]] || [[ -d plugins/security-dashboards-plugin ]]; then
-    if ! grep -q '^opensearch.hosts' config/opensearch_dashboards.yml; then
-      # https://github.com/opensearch-project/OpenSearch-Dashboards/blob/c2ac4c8ae102a76df4258e8e871375299b6ad008/src/dev/build/tasks/os_packages/docker_generator/resources/bin/opensearch-dashboards-docker
-      opts+=(--opensearch.hosts=https://localhost:9200 --opensearch.username=kibanaserver --opensearch.password=kibanaserver --opensearch.ssl.verificationMode=none --opensearch.requestHeadersWhitelist='["authorization", "securitytenant"]' --opensearch_security.multitenancy.enabled=true --opensearch_security.multitenancy.tenants.preferred='["Private", "Global"]' --opensearch_security.readonly_mode.roles='["kibana_read_only"]' --opensearch_security.cookie.secure=false)
-    fi
+  # https://github.com/opensearch-project/OpenSearch-Dashboards/blob/c2ac4c8ae102a76df4258e8e871375299b6ad008/src/dev/build/tasks/os_packages/docker_generator/resources/bin/opensearch-dashboards-docker
+  if [[ -d plugins/securityDashboards || -d plugins/security-dashboards-plugin ]] && ! grep -q '^opensearch.hosts' config/opensearch_dashboards.yml; then
+    opts+=(--opensearch.hosts=https://localhost:9200 --opensearch.username=kibanaserver --opensearch.password=kibanaserver --opensearch.ssl.verificationMode=none --opensearch.requestHeadersWhitelist='["authorization", "securitytenant"]' --opensearch_security.multitenancy.enabled=true --opensearch_security.multitenancy.tenants.preferred='["Private", "Global"]' --opensearch_security.readonly_mode.roles='["kibana_read_only"]' --opensearch_security.cookie.secure=false)
   fi
   if [[ -x bin/opensearch-dashboards ]]; then
+    if [[ $start_cmd = start:explore ]]; then
+      opts+=(--explore.enabled=true --explore.discoverTraces.enabled=true --explore.discoverMetrics.enabled=true --explore.agentTraces.enabled=true "--uiSettings.overrides['query:enhancements:enabled']=true" "--uiSettings.overrides['home:useNewHomePage']=true" --data_source.enabled=true --opensearchDashboards.branding.useExpandedHeader=false --opensearchDashboards.keyboardShortcuts.enabled=true --csp.warnLegacyBrowsers=false --datasetManagement.enabled=true)
+    fi
     exec ./bin/opensearch-dashboards "${opts[@]}" "$@"
   fi
   if [[ -f opensearch_dashboards.d.ts ]]; then
@@ -63,7 +95,7 @@ optimize() {
 }
 
 download() {
-  if [[ $# -eq 0 ]]; then echo "Usage: ${0##*/} download <3-digit-version> [filter] [-x|--extract]" >&2; return 1; fi
+  if [[ $# -eq 0 || $1 = -h || $1 = --help ]]; then echo "Usage: ${0##*/} download <version> [filter] [-x|--extract]" >&2; return 1; fi
   ver() { awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }' <<<"$*"; }
 
   local version filter='' extract arch=$([[ $(uname -m) =~ (x86_64|amd64) ]] && echo x64 || echo arm64) url selected
@@ -137,7 +169,7 @@ main() {
     sql*|ppl*) query "$@" ;;
     get|put|post|delete|GET|PUT|POST|DELETE) request "$@" ;;
     flog) "$@" ;;
-    *) echo "Usage: ${0##*/} run [--debug] [--no-sec] [-b|--bootstrap] [-e|--explore] | optimize | {d|download} <3-digit-version> [filter] [-x|--extract] | {sql|ppl}[/path] <query> | {get|put|post|delete} [path] [<body> [args...]] | flog" >&2; exit 1 ;;
+    *) echo "Usage: ${0##*/} {run|optimize|d|download|sql|ppl|get|put|post|delete|flog} [args]" >&2; exit 1 ;;
   esac
 }
 

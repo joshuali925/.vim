@@ -77,6 +77,7 @@ prepend_keymap = [
   { on = ["m", "g"], run = '''shell -- realpath --relative-to="$(git rev-parse --show-toplevel || echo ~)" %h | head -c -1 | y''', desc = "Copy the relative path to git root or home" },
   { on = ["m", "p"], run = "link --relative", desc = "Symlink the relative path of files" },
   { on = ["m", "P"], run = "link", desc = "Symlink the absolute path of files" },
+  { on = ["m", "w"], run = "plugin command -- cow-paste", desc = "Paste yanked files with copy-on-write" },
   { on = ["m", "d", "5"], run = 'shell --block -- md5sum %s; echo Press any key to continue; bash -c "read -n 1 -s _"', desc = "Show selected files md5sum" },
   { on = ["m", "1"], run = "shell --block btop", desc = "Open btop" },
   { on = ["m", "!"], run = 'shell --block -- XDG_CONFIG_HOME="$HOME/.config" sudo -E "$(which yazi)"', desc = "Open yazi with sudo" },

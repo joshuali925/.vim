@@ -122,7 +122,7 @@ bracketed-paste() {
 zle -N bracketed-paste  # remove trailing new line in bracketed paste
 
 copy-line() {
-  echo -n $BUFFER | y
+  print -rn -- $BUFFER | y
 }
 zle -N copy-line
 
@@ -159,7 +159,7 @@ run-snacks-pick() {
 zle -N run-snacks-pick
 
 bindkey '^o' run-file-manager
-bindkey '^p' run-snacks-pick
+bindkey '^t' run-snacks-pick
 bindkey '^[[1~' beginning-of-line
 bindkey '^[[4~' end-of-line
 bindkey '^[[H' beginning-of-line              # after exiting vim started by zle,

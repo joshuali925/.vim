@@ -49,12 +49,13 @@
   },
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": false,
+    "superpowers@claude-plugins-official": false,
     "typescript-lsp@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
-    "ralph-skills@ralph-marketplace": true,
-    "planning-with-files@planning-with-files": true,
+    "frontend-design@claude-plugins-official": false,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": false,
+    "ralph-skills@ralph-marketplace": false,
+    "planning-with-files@planning-with-files": false,
     "caveman@caveman": false,
     "pua@pua-skills": false,
     "mind@memvid": true
@@ -105,5 +106,6 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "xhigh",
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "verbose": true
 }

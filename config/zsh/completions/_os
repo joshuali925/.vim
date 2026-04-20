@@ -1,0 +1,10 @@
+#compdef os
+
+_os() {
+  if (( CURRENT == 2 )); then
+    compadd -- $(os 2>&1 | awk -F'[{}]' '{gsub(/\|/, " "); print $2}')
+  elif [[ ${words[2]} == run ]]; then
+    compadd -- $(os run --help 2>&1 | grep -oE -- '-[-a-zA-Z]+' | sort -u)
+  fi
+}
+_os "$@"

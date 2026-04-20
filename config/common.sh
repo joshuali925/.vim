@@ -4,11 +4,7 @@ source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
 export EDITOR=nvim
 export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file, -+F: always paginate
-export DELTA_PAGER=$PAGER  # delta doesn't respect PAGER but respects DELTA_PAGER and LESS
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
-export NEOVIDE_FRAME=none
-export RCLONE_PROGRESS=true
-export RCLONE_DELETE_EMPTY_SRC_DIRS=true
 export FZF_COMPLETION_TRIGGER=\\
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
@@ -16,7 +12,7 @@ export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:if [[ {fzf:prompt} = \"▌ \
 export FZF_ALT_C_COMMAND='ls -1Ap --color=always --group-directories-first 2> /dev/null'
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
-if [[ $LIGHT_THEME = 1 ]]; then  # https://github.com/jesseduffield/lazygit/issues/4550, delta auto detect also doesn't work in diffnav
+if [[ $LIGHT_THEME = 1 ]]; then  # https://github.com/jesseduffield/lazygit/issues/4550, specifying in .gitconfig cannot change theme dynamically
   export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
 else
   export BAT_THEME=OneHalfDark
@@ -38,9 +34,9 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias mv='mv -iv'
-alias cp='cp -riv'
+alias cp='cp -dRiv --reflink=auto --sparse=always'
 alias mkdir='mkdir -pv'
-alias ll='ls -AlhF --color=auto --group-directories-first'
+alias ll='\ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
 alias chmod\?='stat --printf "%a %n\n"'
@@ -54,15 +50,15 @@ alias v='$EDITOR'
 alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
-alias .env='findup .env >&2 && env $(sed "/^#/d;s/^export //" "$(findup .env)" | xargs) '
+alias .env='findup .env >&2 && \env $(sed "/^#/d;s/^export //" "$(findup .env)" | xargs) '
 alias venv='deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv=".venv"; }'  # without uv: py -m venv .venv
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias k='kubectl'
 alias dc='docker compose'
 alias lg='lazygit'
 alias lzd='lazydocker'
-alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'
+alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
 alias 00='[[ -f ~/.vim/tmp/last_result ]] && cd "$(<~/.vim/tmp/last_result)"'
 # shellcheck disable=2154
@@ -73,6 +69,8 @@ alias jsonl2csv='json2csv -s'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -avihP --no-owner --no-group --delete --filter=':- .gitignore'"
+alias rclone="env RCLONE_PROGRESS=true RCLONE_DELETE_EMPTY_SRC_DIRS=true rclone"
+alias markdowns='if [[ ! -x ~/.local/bin/mdview ]]; then uv tool install md-viewer-py; fi && printf %s "$(getip):8081" | y && eval mdview --host 0.0.0.0'  # eval to avoid red syntax if not installed
 alias http.server='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
@@ -120,18 +118,17 @@ alias grset='git remote set-url'
 alias grv='git remote -v'
 alias gs='git status'
 alias gst='git stash'
-alias gst-save='git stash; git stash apply'
 alias gshow='git show --patch-with-stat --pretty=fuller --remerge-diff'
 alias gcd='cd "$(git rev-parse --show-toplevel || echo ".")"'
 alias gvf='FZF_DEFAULT_COMMAND="git ls-files --modified --others --exclude-standard" fzf --multi --bind="enter:become($EDITOR -- {+})"'
 
 gc() {
-  [[ $# -eq 0 ]] && { git commit; return $?; }
+  if [[ $# -eq 0 ]]; then git commit; return $?; fi
   local args=() arg message
   for arg in "$@"; do
-    [[ $arg != -* ]] && message+="$arg " || args+=("$arg")
+    if [[ $arg != -* ]]; then message+="$arg "; else args+=("$arg"); fi
   done
-  [[ -n $message ]] && args+=(-m "$message")
+  if [[ -n $message ]]; then args+=(-m "$message"); fi
   git commit "${args[@]}"
 }
 
@@ -141,13 +138,11 @@ gcb() {
     return $?
   fi
   # shellcheck disable=2016
-  local branch fzftemp=$(git branch --color --sort=-committerdate --all |
-    awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
-    fzf --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` \
-    --header='Press ` to toggle sort' \
+  local branch fzftemp=$(git branch --color --sort=-committerdate --all | awk '/remotes\//{a[++c]=$0;next}1;END{for(i=1;i<=c;++i) print a[i]}' |
+    fzf --ansi --scheme=history --reverse --preview-window=60% --toggle-sort=\` --header='Press ` to toggle sort' \
     --preview="git log -n 50 --color --graph --pretty=simple \$(sed 's/.* //' <<< {})" | sed "s/.* //")
-  [[ -z $fzftemp ]] && return 1
-  [[ $fzftemp = remotes/* ]] && local remote="${fzftemp#remotes/}" && branch="${remote#[^\/]*/}" || branch="$fzftemp"  # remote: <remote>/<branch>; branch: <branch>
+  if [[ -z $fzftemp ]]; then return 1; fi
+  if [[ $fzftemp = remotes/* ]]; then local remote="${fzftemp#remotes/}" && branch="${remote#[^\/]*/}"; else branch="$fzftemp"; fi  # remote: <remote>/<branch>; branch: <branch>
   if git show-ref --verify --quiet "refs/heads/$branch"; then  # <branch> exists, switch if tracking <remote> or create as <remote>-<branch>
     local tracking="$(git rev-parse --abbrev-ref "$branch@{upstream}" 2> /dev/null)"  # current tracking <remote'>/<branch'> for <branch>
     if [[ -z $remote ]] || [[ -z $tracking ]] || [[ $tracking = "$remote" ]]; then git checkout --merge --ignore-other-worktrees "$branch" && return $?; fi  # create <remote>-<branch> if <remote'> and <remote> are different, otherwise switch directly
@@ -230,15 +225,15 @@ csvq() {
 }
 
 size() {
-  [[ $1 = '--on-disk' ]] && { du -ah --max-depth=1 "${@:2}" | sort -hr; return $?; }
-  [[ $1 = '--subdirs' ]] && local args=("${@:2}") || local args=(--max-depth=1 "$@")
+  if [[ $1 = '--on-disk' ]]; then du -ah --max-depth=1 "${@:2}" | sort -hr; return $?; fi
+  if [[ $1 = '--subdirs' ]]; then local args=("${@:2}"); else local args=(--max-depth=1 "$@"); fi
   du -ab "${args[@]}" | sort -nr | head -n 20 | awk 'function hr(bytes) { hum[1099511627776]="TiB"; hum[1073741824]="GiB"; hum[1048576]="MiB"; hum[1024]="kiB"; for (x = 1099511627776; x >= 1024; x /= 1024) { if (bytes >= x) { return sprintf("%8.3f %s", bytes/x, hum[x]); } } return sprintf("%4d     B", bytes); } { printf hr($1) "\t"; $1=""; print $0; }'
 }
 
 d() {  # show directory stack or download from URL
   if [[ $# -eq 0 ]]; then dirs -v | sed -n 2,11p; return $?; fi
   local wget_args=(--content-disposition) curl_args=(--remote-header-name)
-  if [[ $1 = '-c' ]] || [[ $1 = '--continue' ]]; then shift && local wget_args=(--continue) curl_args=(-C -); fi
+  if [[ $1 = '-c' || $1 = '--continue' ]]; then shift && local wget_args=(--continue) curl_args=(-C -); fi
   if [[ $1 = -* ]]; then echo "Usage: $0 [[-c/--continue] <URL> [output-dir]]" >&2; return 1; fi
   if builtin command -v wget > /dev/null 2>&1; then
     wget "${wget_args[@]}" --tries 3 --directory-prefix "${2:-.}" "$1"
@@ -250,7 +245,7 @@ d() {  # show directory stack or download from URL
 }
 
 pscpu() {
-  local ps_out pids pid pstree_flags pstree_out
+  local ps_out pids pid pstree_flags pstree_out cwd
   if [[ $OSTYPE = darwin* ]]; then
     ps_out=$(ps -rwwAo user,pid,ppid,pcpu,pmem,time,command)
     pstree_flags='-wp'
@@ -258,7 +253,7 @@ pscpu() {
     ps_out=$(ps auxww --sort=-pcpu)
     pstree_flags='-Glps'
   fi
-  { [[ $# -eq 0 ]] && echo "$ps_out" || grep -i "$@" <<<"$ps_out"; } | head -n 11
+  if [[ $# -eq 0 ]]; then echo "$ps_out"; else grep -i "$@" <<<"$ps_out"; fi | head -n 11
   if [[ ! -x $(command -v pstree) ]]; then echo 'pstree not found (yum install -y psmisc).' >&2; return 1; fi
   if [[ $# -eq 0 ]]; then
     pids=($(sed -n '2,4p' <<< "$ps_out" | awk '{print $2}'))
@@ -267,7 +262,10 @@ pscpu() {
   fi
   for pid in "${pids[@]}"; do
     pstree_out=$(pstree "$pstree_flags" "$pid")
-    [[ $pstree_out =~ $pid ]] && head -n 8 <<< "$pstree_out" | grep --color -E "^|$pid"
+    if [[ $pstree_out =~ $pid ]]; then
+      if [[ $OSTYPE = linux* && -r /proc/$pid ]]; then cwd=$(readlink "/proc/$pid/cwd" 2>/dev/null) && printf '(\e[1;31m%s\e[0m) %s\n' "$pid" "$cwd"; fi
+      head -n 8 <<< "$pstree_out" | grep --color -E "^|$pid"
+    fi
   done
 }
 
@@ -278,7 +276,7 @@ psmem() {
   else
     ps_out=$(ps axwwo pid,rss,args --sort -size)
   fi
-  [[ $# -gt 0 ]] && ps_out=$(grep -i "$@" <<< "$ps_out" | head -n 16)
+  if [[ $# -gt 0 ]]; then ps_out=$(grep -i "$@" <<< "$ps_out" | head -n 16); fi
   head -n 16 <<< "$ps_out" | awk '{ hr=$2/1024 ; printf("%7s %9.2f Mb\t",$1,hr) } { for ( x=3 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }'
 }
 
@@ -297,23 +295,20 @@ sudorun() {
 }
 
 print-ascii() {
-  echo 'Dec Hex    Dec Hex    Dec Hex    Dec Hex  Dec Hex  Dec Hex   Dec Hex   Dec Hex'
-  echo '  0 00 NUL  16 10 DLE  32 20 SPC  48 30 0  64 40 @  80 50 P   96 60 `  112 70 p'
-  echo '  1 01 SOH  17 11 DC1  33 21 !    49 31 1  65 41 A  81 51 Q   97 61 a  113 71 q'
-  echo '  2 02 STX  18 12 DC2  34 22 "    50 32 2  66 42 B  82 52 R   98 62 b  114 72 r'
-  echo '  3 03 ETX  19 13 DC3  35 23 #    51 33 3  67 43 C  83 53 S   99 63 c  115 73 s'
-  echo '  4 04 EOT  20 14 DC4  36 24 $    52 34 4  68 44 D  84 54 T  100 64 d  116 74 t'
-  echo '  5 05 ENQ  21 15 NAK  37 25 %    53 35 5  69 45 E  85 55 U  101 65 e  117 75 u'
-  echo '  6 06 ACK  22 16 SYN  38 26 &    54 36 6  70 46 F  86 56 V  102 66 f  118 76 v'
-  echo "  7 07 BEL  23 17 ETB  39 27 '    55 37 7  71 47 G  87 57 W  103 67 g  119 77 w"
-  echo '  8 08 BS   24 18 CAN  40 28 (    56 38 8  72 48 H  88 58 X  104 68 h  120 78 x'
-  echo '  9 09 TAB  25 19 EM   41 29 )    57 39 9  73 49 I  89 59 Y  105 69 i  121 79 y'
-  echo ' 10 0A LF   26 1A SUB  42 2A *    58 3A :  74 4A J  90 5A Z  106 6A j  122 7A z'
-  echo ' 11 0B VT   27 1B ESC  43 2B +    59 3B ;  75 4B K  91 5B [  107 6B k  123 7B {'
-  echo ' 12 0C FF   28 1C FS   44 2C ,    60 3C <  76 4C L  92 5C \  108 6C l  124 7C |'
-  echo ' 13 0D CR   29 1D GS   45 2D -    61 3D =  77 4D M  93 5D ]  109 6D m  125 7D }'
-  echo ' 14 0E SO   30 1E RS   46 2E .    62 3E >  78 4E N  94 5E ^  110 6E n  126 7E ~'
-  echo ' 15 0F SI   31 1F US   47 2F /    63 3F ?  79 4F O  95 5F _  111 6F o  127 7F DEL'
+  local names=(NUL SOH STX ETX EOT ENQ ACK BEL BS TAB LF VT FF CR SO SI DLE DC1 DC2 DC3 DC4 NAK SYN ETB CAN EM SUB ESC FS GS RS US) off=0 i c v label
+  if [[ -n $ZSH_VERSION ]]; then off=1; fi
+  echo 'Dec Hex     Dec Hex     Dec Hex     Dec Hex     Dec Hex     Dec Hex     Dec Hex     Dec Hex'
+  for i in {0..15}; do
+    for c in {0..7}; do
+      v=$((i + c*16))
+      if ((v < 32)); then label="${names[v+off]}"
+      elif ((v == 32)); then label=SPC
+      elif ((v == 127)); then label=DEL
+      else label=$(printf "\\$(printf '%o' $v)"); fi
+      printf '%3d %02x %-3s ' "$v" "$v" "$label"
+    done
+    echo
+  done
 }
 
 print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 https://github.com/jbranchaud/til/blob/b1994cfe2144193f46f8c61f20f9a583085ca0aa/unix/display-all-the-terminal-colors.md
@@ -410,7 +405,7 @@ vf() {  # find files: vf; open files from pipe: fd | vf
   else
     local fzftemp=($(FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND $*" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi))
     # shellcheck disable=2128
-    [[ -n $fzftemp ]] && $EDITOR -- "${fzftemp[@]}"
+    if [[ -n $fzftemp ]]; then $EDITOR -- "${fzftemp[@]}"; fi
   fi
 }
 
@@ -447,7 +442,7 @@ rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripg
 
 z() {
   if [[ $# -eq 0 ]]; then
-    local fzftemp rcwd=$(realpath "$PWD")
+    local fzftemp rcwd=$(realpath "$PWD" || echo "$PWD")
     fzftemp=$(awk -F'|' -v now="$EPOCHSECONDS" -v cwd="$rcwd" '$1!=cwd {dx=now-$3; printf "%s\x01%.0f\n", $1, 10000*$2*(3.75/((0.0001*dx+1)+0.25))}' ~/.z | sort -nrk 2 -t $'\x01' | fzf --delimiter=$'\x01' --with-nth=1 --accept-nth=1 --ansi --scheme=history \
       --header='`: show recent directories under cwd | C-a: show all directories' --bind='tab:down,btab:up' \
       --bind="\`:change-prompt($rcwd/> )+reload:sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$rcwd/\" '\$0~(\"^\"cwd) {print substr(\$1, length(cwd)+1)}'" \
@@ -557,7 +552,9 @@ se() {
       fi ;;
     aws)
       if [[ $2 = --region || $2 == -r ]]; then
-        [[ ! -e ~/.vim/tmp/aws-ec2-regions ]] && aws ec2 describe-regions --query 'Regions[].{Region:RegionName}' --output text | sort > ~/.vim/tmp/aws-ec2-regions
+        if [[ ! -e ~/.vim/tmp/aws-ec2-regions ]]; then
+          aws ec2 describe-regions --query 'Regions[].{Region:RegionName}' --output text | sort > ~/.vim/tmp/aws-ec2-regions
+        fi
         local region=$(< ~/.vim/tmp/aws-ec2-regions fzf)
         if [[ -n $region ]]; then
           sed -i "/^${region}$/d; 1i ${region}" ~/.vim/tmp/aws-ec2-regions
@@ -565,7 +562,7 @@ se() {
         fi
       else
         if [[ -n $2 ]]; then local profile=$2; else local profile=$({ awk -F'[][]' '/^\[/ {print $2}' ~/.aws/credentials 2> /dev/null; awk -F'[][]' '/^\[profile / {gsub(/^profile /, "", $2); print $2}' ~/.aws/config 2> /dev/null; } | sort -u | fzf); fi  # faster than `aws configure list-profiles`
-        [[ -n $profile ]] && export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$AWS_PROFILE"
+        if [[ -n $profile ]]; then export AWS_PROFILE=$profile && echo "export AWS_PROFILE=$AWS_PROFILE"; fi
       fi
       return $? ;;
     *) echo "Usage: $0 {mise|java_home|path|proxy [port]|aws [--region|-r|profile]}"; return 1 ;;
@@ -597,7 +594,20 @@ getip() {
 }
 
 bin() {
-  if [[ $# -eq 1 || $1 != update ]]; then command bin "$@"; return $?; fi
+  if [[ $1 != update ]]; then command bin "$@"; return $?; fi
+  if [[ $# -eq 1 ]]; then
+    TMUX_PLUGIN_MANAGER_PATH=$HOME/.tmux/plugins/ ~/.tmux/plugins/tpm/bin/update_plugins all
+    zsh -ic 'zimfw upgrade; zimfw update'
+    if [[ -x $HOME/.local/bin/bin ]]; then command bin update; fi
+    mise self-update && mise upgrade && mise prune -y && mise completion zsh > ~/.vim/config/zsh/completions/_mise && rm -f "${ZDOTDIR:-$HOME}"/.zcompdump*
+    if [[ $OSTYPE = linux* ]] && mise which pm2 > /dev/null 2>&1; then
+      npm install -g pm2
+      pm2 update
+      sudo -E "$(mise which node)" "$(mise which pm2)" unstartup systemd -u "$USER" --hp "$HOME"
+      sudo -E "$(mise which node)" "$(mise which pm2)" startup systemd -u "$USER" --hp "$HOME"
+    fi
+    return $?
+  fi
   local executable
   for executable in "${@:2}"; do
     local bin="$HOME/.local/bin/$executable" vim_bin="$HOME/.vim/bin/$executable"
@@ -691,7 +701,7 @@ if [[ $OSTYPE = darwin* ]]; then
     if [[ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]]; then
       fzfprompt='Chrome> '
       histfile="$HOME/Library/Application Support/Google/Chrome/Default/browser-history-fzf.db"
-      [[ ! -f $histfile ]] && command cp "$HOME/Library/Application Support/Google/Chrome/Default/History" "$histfile"
+      if [[ ! -f $histfile ]]; then command cp "$HOME/Library/Application Support/Google/Chrome/Default/History" "$histfile"; fi
       command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf.db
       sqlite3 "$histfile" 'attach "/tmp/browser-history-fzf.db" as toMerge; BEGIN;
       INSERT OR REPLACE INTO urls SELECT t.* FROM toMerge.urls t LEFT JOIN urls m ON t.id = m.id
