@@ -1,3 +1,5 @@
+-- alternative: https://github.com/TheNoeTrevino/haunt.nvim, https://github.com/retran/meow.review.nvim, https://github.com/LintaoAmons/bookmarks.nvim
+
 local M = {}
 
 M.bookmarks = {}

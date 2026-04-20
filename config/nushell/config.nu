@@ -36,19 +36,33 @@ alias lg = lazygit
 alias size = du | sort-by apparent | reverse
 
 alias g = git log --graph --pretty=simple --boundary --max-count 15
+alias gaa = git add --all
 alias gcl = git clone --filter=blob:none
 alias gco = git checkout
 alias gd = git diff
+alias gdst = git diff --staged
+alias gf = git fetch
 alias gl = git pull
 alias glo = git log --graph --pretty=simple
 alias gpf = git push --force-with-lease fork (git symbolic-ref --short HEAD)
+alias gr = git remote
+alias grv = git remote -v
 alias gs = git status
+alias gst = git stash
 
-def st [...args] {
+def gc [...message: string] {
+    git commit -m ($message | str join " ")
+}
+
+def --wrapped st [...args] {
   ssh -t ...$args 'LANG=C.UTF-8 EDITOR=nvim PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
-def --env z [...args] {
+def --wrapped rclone [...args] {
+  with-env { RCLONE_PROGRESS: "true", RCLONE_DELETE_EMPTY_SRC_DIRS: "true" } { ^rclone ...$args }
+}
+
+def --env --wrapped z [...args] {
   if ($args | is-empty) {
     cd $'(zoxide query --exclude $env.PWD --list | lines | input list --fuzzy " ")'
   } else {
@@ -78,7 +92,7 @@ def untildone [command: string, --interval: duration = 1sec, --max-tries: int = 
   }
 }
 
-def --env yy [...args] {
+def --env --wrapped yy [...args] {
   let tmp = (mktemp -t "yazi-cwd.XXXXXX")
   ^yazi ...$args --cwd-file $tmp
   let cwd = (open $tmp)

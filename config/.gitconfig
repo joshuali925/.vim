@@ -116,26 +116,25 @@
 	autoSquash = true
 	autoStash = true
 
+; [mergetool "nvimdiff"]
+; 	layout = "LOCAL,BASE,REMOTE / MERGED"
+; [mergetool "codediff"]
+; 	cmd = nvim \"$MERGED\" -c \"CodeDiff merge \\\"$MERGED\\\"\"
+; [difftool "codediff"]
+; 	cmd = nvim \"$LOCAL\" \"$REMOTE\" +\"CodeDiff file $LOCAL $REMOTE\"
+; [difftool "nvim_difftool"]
+; 	cmd = nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"
+
 [merge]
 	conflictstyle = zdiff3
-	; tool = nvimdiff  ; TODO (0.12) https://www.reddit.com/r/neovim/comments/1o4eo6s/new_difftool_command_added_to_neovim/
-	tool = codediff
-
-[mergetool "nvimdiff"]
-	layout = "LOCAL,BASE,REMOTE / MERGED"
-
-[mergetool "codediff"]
-	cmd = nvim \"$MERGED\" -c \"CodeDiff merge \\\"$MERGED\\\"\"
+	; tool = codediff
 
 [diff]
 	mnemonicPrefix = true
 	algorithm = histogram
-	tool = codediff
+	; tool = codediff
 	; colorMoved = default
 	; colorMovedWS = allow-indentation-change
-
-[difftool "codediff"]
-	cmd = nvim \"$LOCAL\" \"$REMOTE\" +\"CodeDiff file $LOCAL $REMOTE\"
 
 [blame]
 	coloring = highlightRecent
@@ -167,6 +166,7 @@
 [delta]
 	features = line-numbers
 	navigate = true
+	pager = less -RiM
 	hunk-header-style = line-number syntax bold
 	hunk-header-line-number-style = white
 	hunk-header-decoration-style = "#4b5263" box

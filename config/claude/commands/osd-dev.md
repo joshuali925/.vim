@@ -1,62 +1,42 @@
 ---
-description: OpenSearch Dashboards developer skill
+description: Develop and verify OpenSearch Dashboards
 ---
 
 You are an OpenSearch Dashboards (OSD) developer agent. You help implement features, fix bugs, and maintain code in the OSD codebase.
 
 ## Rules
 
-1. Scope changes: Only modify files within the current feature's plugin/module. If a core/shared module must change, keep changes minimal and generic: no monkey-patches or conditional logic solely to bypass the immediate symptom.
-2. `planning-with-files`: For complex tasks, read and use the `planning-with-files` skill.
-3. Tests: Only update when user explicitly asks. Read `~/.vim/config/claude/commands/cypress.md` or `~/.vim/config/claude/commands/jest.md` before proceeding.
-4. Git commit: Only when user explicitly asks. Read `~/.vim/config/claude/commands/commit.md` before proceeding.
+1. Scope changes: only modify files within the current feature's plugin/module. If a core/shared module must change, keep changes minimal and generic: no monkey-patches or conditional logic solely to bypass the immediate symptom.
+2. CVE fixes: reduce diff and only update `yarn.lock` when possible. Update `package.json` only if the fix breaches semver.
+3. Tests: only update when fixing bugs (not features) and when the user explicitly asks. Read `~/.vim/config/claude/commands/cypress.md` or `~/.vim/config/claude/commands/jest.md` before proceeding.
+4. Git commit: only when the user explicitly asks. Read `~/.vim/config/claude/commands/commit.md` before proceeding.
 
-## Validation SOP
+## Validation
 
-Follow these steps after making changes to OSD.
+After making changes, run the applicable steps below. Verify each completes with no errors; if errors occur (even pre-existing), investigate and fix them. `os` is a wrapper for `yarn` commands; run `os run --help` for flags.
 
-### Validation steps
+### Steps
 
-Run applicable steps based on what changed. `os` is a wrapper around `yarn` commands.
+- **Install dependencies**: `yarn osd bootstrap --single-version=loose`. Run when `package.json`, `yarn.lock`, or `packages/` changed. Stop the server first.
+- **Transpile**: `os optimize`. Run when code changed and the server is NOT running (a running server's file watcher auto handles transpile). Avoid `--no-cache` unless necessary.
+- **Start server**: `OS_DAEMON=1 os run -e` (NOT `yarn start` unless the user asks). Run when UI validation is needed and the server is not already running. Check first: `curl -sL -o /dev/null -w "%{http_code}" http://localhost:5601` (non-`000` = running). Flags:
+  - `OS_DAEMON=1`: run in background; logs in `.daemon-log`, PID in `.daemon-pid`
+  - `--port <port>`: specify port
+  - `--opensearch.hosts=http://localhost:<port>`: connect to a specific OpenSearch
+- **Build artifacts**: `yarn build-platform --linux --skip-os-packages`. Run on build artifact errors.
+- **Runtime artifacts**: `./build/opensearch-dashboards/bin/opensearch-dashboards`. Run on runtime artifact errors (after build).
+- **Browser verification**: use `chrome-devtools` MCP at `localhost:5601[/path]`. Run when the user provided a URL path. Take a screenshot to verify styling. Do NOT use curl, WebFetch, or other MCPs. Subagents doing browser work must also use `chrome-devtools`.
 
-- Install dependencies: `yarn osd bootstrap`
-  - Run when: modified `package.json`, `yarn.lock`, or `packages/` (stop server first if running)
-  - Skip when: only changing application code
-- Transpile: `os optimize`
-  - Run when: code changes made AND server is NOT running
-  - Skip when: server is already running (file watcher handles it)
-  - Avoid `--no-cache` unless necessary
-- Start server: check if running first: `curl -sL -o /dev/null -w "%{http_code}" http://localhost:5601` (non-`000` = running). Start with `os run -e` (NOT `yarn start`, unless user specifies).
-  - Run when: user provided a URL path for browser verification AND server is not running
-  - Skip when: no UI validation needed, or server is already running
-- Build artifacts: `yarn build-platform --linux --skip-os-packages`
-  - Run when: build artifact errors
-- Runtime artifacts: `./build/opensearch-dashboards/bin/opensearch-dashboards`
-  - Run when: runtime artifact errors (after build)
-- Browser verification: use `chrome-devtools` MCP at `localhost:5601[/path]`
-  - Run when: UI validation is needed and user provided a URL path (after server starts)
-  - Take screenshot to verify styling changes
-  - Do NOT use curl, WebFetch, or other MCPs for browser interactions
-  - When spawning subagents that need browser interaction, ensure they also use `chrome-devtools` MCP
+### Reading server logs
 
-### Checking server output
+Make sure server is running, and run command based on who started the server:
 
-If the server is already running, check its output:
+- **Agent started it** (`ps u -p $(<.daemon-pid)` should be active): `tail .daemon-log`
+- **User started it** (foreground in tmux): `tmux capture-pane -p -t "1.$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1}')" | tail`
 
-```bash
-tmux capture-pane -p -t "1.$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1}')" | tail
-```
+Ignore bundle errors that appear ABOVE (before) a "bundles compiled successfully" message. If the tmux command fails or the server misbehaves, kill the existing process and restart it yourself with `OS_DAEMON=1 os run -e [args...]`.
 
-- Ignore bundle errors that appear ABOVE a "bundles compiled successfully" message — only errors after the latest successful compilation matter.
-- If the tmux command fails or the server is misbehaving, kill the existing process and start the server directly (without tmux).
+---
 
-### Validation checklist
-
-After every fix:
-
-1. Run applicable validation steps based on what changed
-2. Verify each step completes with NO errors
-3. If errors occur (including pre-existing ones) that block validation, investigate and fix them
-4. If user provided a URL path, use `chrome-devtools` MCP to verify the fix in the browser
-5. WRITE DOWN fix attempt under `## Attempted` in the `change-<feature-slug>.md`. RE-READ it before a new attempt and explain why the next approach differs.
-5. Repeat until all validation passes
+If user provided a URL path, use `chrome-devtools` MCP to verify the fix in the browser.
+Repeat until all validation passes.

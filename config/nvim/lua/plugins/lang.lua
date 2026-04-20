@@ -130,7 +130,9 @@ return {
         end,
         config = function()
             vim.opt.runtimepath:prepend(vim.fn.stdpath("data") .. "/site/pack/core/opt/nvim-treesitter/runtime") -- add queries (indents, folds) for built-in parsers
-            local installed = vim.list.unique(vim.list_extend(require("nvim-treesitter").get_installed(), { "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" }))  -- built-in parsers (~/.local/lib/nvim/lib/nvim/parser), no need to install again
+            local installed = vim.list.unique(                                                                   -- built-in parsers (~/.local/lib/nvim/lib/nvim/parser), no need to install again
+                vim.list_extend(require("nvim-treesitter").get_installed(), { "c", "lua", "markdown", "markdown_inline", "query", "vim", "vimdoc" })
+            )
             local to_install = vim.tbl_filter(function(lang) return not vim.tbl_contains(installed, lang) end, { "jsdoc" }) -- parsers that won't be installed on demand
             if #to_install > 0 then
                 vim.list_extend(installed, to_install)
@@ -158,7 +160,10 @@ return {
     },
     {
         "mason-org/mason.nvim",
-        build = function() require("pack").load({ "mason.nvim" }); vim.cmd.MasonUpdate() end,
+        build = function()
+            require("pack").load({ "mason.nvim" })
+            vim.cmd.MasonUpdate()
+        end,
         cmd = { "Mason", "MasonInstall" },
         config = function() require("mason").setup({ ui = { border = "rounded" } }) end,
     },

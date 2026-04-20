@@ -6,9 +6,9 @@ YARN_VERSION=1.22.10
 JDK_VERSION=25
 BACKUP_DIR=$HOME/config-backup
 
-BG_RED=$'\033[41m'
 CYAN=$'\033[0;36m'
 YELLOW=$'\033[0;33m'
+BLACK=$'\033[1;30m'
 NC=$'\033[0m'
 
 usage() {
@@ -31,8 +31,8 @@ install() {
   for package in "$@"; do
     if declare -F "install-$package" > /dev/null; then
       "install-$package"
-    elif declare -F "install-${package%%-*}" > /dev/null; then
-      "install-${package%%-*}" "${package##*-}"  # `$0 install swap-8` would install swap of 8G
+    elif declare -F "install-${package%-*}" > /dev/null; then
+      "install-${package%-*}" "${package##*-}"  # `$0 install swap-8` would install swap of 8G
     else
       log "Unknown package \"$package\", skipping.."
     fi
@@ -139,8 +139,8 @@ install-devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # TODO try https://github.com/Arthur-Ficial/apfel
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly rectangle linearmouse maccy pixpin trex thaw@beta doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion cardinal-search
+    # TODO(macOS 26) try https://github.com/Arthur-Ficial/apfel, https://github.com/stonerl/Thaw
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly neovide rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion cardinal-search
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
     # to update one cask: brew upgrade --cask wezterm@nightly --greedy-latest
@@ -174,6 +174,7 @@ install-dotfiles() {
     link-file ~/.vim/config/lazygit_config.yml ~/Library/ApplicationSupport/lazygit/config.yml
     link-file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
     link-file ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
+    mkdir -p ~/.config/neovide && echo 'frame = "none"' > ~/.config/neovide/config.toml
   elif [[ $OSTYPE = linux-android ]]; then
     append-once 'export SSH_CLIENT=1 TMUX_NO_TPM=1' ~/.zshrc
     append-once 'export EDITOR=vim' ~/.zshrc
@@ -232,7 +233,7 @@ install-system-python() {  # environment for install from source: https://github
 
 install-node() {
   log "Installing node $NODE_VERSION.."
-  mise use -g "nodejs@$NODE_VERSION"
+  MISE_NODE_VERIFY=false mise use -g "nodejs@$NODE_VERSION"
   mise x -- npm config set prefix ~/.local/lib/node-packages
   log 'Installing node packages..'
   mise x -- npm install -g --cache ~/.local/lib/npm-temp-cache "yarn@$YARN_VERSION" || true
@@ -299,7 +300,7 @@ install-pm2() {
   fi
   npm install -g pm2
   pm2 set pm2:autodump true
-  sudo -E "$(mise which node)" "$(which pm2)" startup systemd -u "$USER" --hp "$HOME"
+  sudo -E "$(mise which node)" "$(mise which pm2)" startup systemd -u "$USER" --hp "$HOME"
 }
 
 install-google-chrome() {
@@ -324,31 +325,35 @@ install-google-chrome() {
 install-claude-code() {
   if builtin command -v claude > /dev/null 2>&1; then claude update; else curl -fsSL https://claude.ai/install.sh | bash; fi
   npm install -g ccstatusline@latest
+  if [[ ${1:-} = update ]]; then
+    claude plugin marketplace list --json | jq -r '.[].name' | xargs -n1 claude plugin marketplace update
+    claude plugin list --json | jq -r '.[].id' | xargs -n1 claude plugin update
+    return $?
+  fi
   mkdir -p ~/.aws ~/.claude
   append-once '/.claude/' ~/.gitignore
-  link-file ~/.vim/config/claude/skills ~/.claude/skills --relative
   link-file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link-file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
   claude plugin marketplace add anthropics/claude-plugins-official
   claude plugin install code-review@claude-plugins-official
-  claude plugin install skill-creator@claude-plugins-official
+  claude plugin install skill-creator@claude-plugins-official && claude plugin disable skill-creator
+  claude plugin install superpowers@claude-plugins-official && claude plugin disable superpowers
   claude plugin install typescript-lsp@claude-plugins-official
-  claude plugin install frontend-design@claude-plugins-official
-  claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill
-  claude plugin marketplace add snarktank/ralph && claude plugin install ralph-skills@ralph-marketplace
-  claude plugin marketplace add OthmanAdi/planning-with-files && claude plugin install planning-with-files@planning-with-files
+  claude plugin install frontend-design@claude-plugins-official && claude plugin disable frontend-design
+  claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
+  claude plugin marketplace add snarktank/ralph && claude plugin install ralph-skills@ralph-marketplace && claude plugin disable ralph-skills
+  claude plugin marketplace add OthmanAdi/planning-with-files && claude plugin install planning-with-files@planning-with-files && claude plugin disable planning-with-files
   claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman@caveman && claude plugin disable caveman
   claude plugin marketplace add tanweai/pua && claude plugin install pua@pua-skills && claude plugin disable pua
   claude plugin marketplace add memvid/claude-brain && claude plugin install mind@memvid
+  curl -sL https://github.com/KKKKhazix/khazix-skills/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=1 --wildcards '*/neat-freak/*'
   # curl -sL https://github.com/github/gh-stack/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skills/gh-stack/*'
   # curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
-    # npm install -g @playwright/cli@latest
-    # cp -r "$(npm root -g)/@playwright/cli/node_modules/playwright/lib/skill" ~/.claude/skills/playwright-cli
-    # append-once '/.playwright-cli/' ~/.gitignore
+    # npm install -g @playwright/cli@latest && cp -r "$(npm root -g)/@playwright/cli/skills" ~/.claude/skills && append-once '/.playwright-cli/' ~/.gitignore
   fi
   log '\nInstalled Claude Code'
   if ! grep -q '^export AWS_BEARER_TOKEN_BEDROCK=' ~/.zshenv 2>/dev/null; then

@@ -226,7 +226,7 @@ vim.keymap.set("n", "<leader>X", "<Cmd>call funcs#quit(1, 1)<CR>") -- force quit
 vim.keymap.set("n", "yov", "':setlocal virtualedit=' . (&virtualedit == 'block' ? 'all' : 'block') . '<CR>'", { expr = true })
 vim.keymap.set("n", "yog", "<Cmd>lua require('rooter').toggle()<CR>")
 vim.keymap.set("n", "yoR", "<Cmd>if get(g:, 'ReaderMode', 0) == 0 | nnoremap <nowait> d <C-d>| nnoremap u <C-u> | else | execute 'nunmap d' | execute 'nunmap u' | endif | let g:ReaderMode = 1 - get(g:, 'ReaderMode', 0) | lua vim.notify('Reader mode ' .. (vim.g.ReaderMode == 1 and 'on' or 'off'))<CR>")
-vim.keymap.set("t", "<C-u>", "<C-\\><C-n>")
+vim.keymap.set("t", "<C-u>", [[get(get(b:, 'sidekick_cli', {}), 'name', '') ==# 'claude' ? '<C-u>' : '<C-\><C-n>']], { expr = true })
 vim.keymap.set("t", "<C-\\><C-u>", "<C-u>")
 vim.keymap.set("c", "<C-Space>", [[':/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<BS>", [[':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
@@ -277,7 +277,7 @@ vim.api.nvim_create_autocmd("VimResized", { group = "AutoCommands", command = "w
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", command = "setlocal formatoptions=rjql" })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = "vim", command = [[setlocal commentstring=\"\ %s]] })
 vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = { "help", "man", "snacks_terminal", "sidekick_terminal" }, command = "noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>" })
-vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = "nvim-pack", command = "noremap <nowait> <buffer> <leader>q <Cmd>write<CR>" })
+vim.api.nvim_create_autocmd("FileType", { group = "AutoCommands", pattern = "nvim-pack", command = "noremap <buffer> <leader>q <Cmd>lua if vim.api.nvim_buf_get_lines(0, 0, 1, false)[1]:match('^# Update ') then local l = vim.fn.stdpath('config') .. '/nvim-pack-lock.json'; vim.uv.fs_copyfile(l, l .. '.bak') end<CR><Cmd>write<CR>" })
 vim.api.nvim_create_autocmd("FileType", {
     group = "AutoCommands",
     pattern = "zsh",

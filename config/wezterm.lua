@@ -3,6 +3,7 @@ local wezterm = require("wezterm")
 local light_theme = false -- sync with system theme: https://wezfurlong.org/wezterm/config/lua/window/get_appearance.html
 local mux = wezterm.mux
 local config = wezterm.config_builder()
+local uploading_host = nil
 
 -- config.animation_fps = 240
 -- config.max_fps = 240
@@ -89,24 +90,34 @@ config.keys = {
         action = wezterm.action_callback(function(window, pane)
             local info = pane:get_foreground_process_info()
             if not info or not info.executable:match("/ssh$") then return window:perform_action(wezterm.action.SendKey({ key = "v", mods = "CTRL" }), pane) end
-            local host = nil
+            uploading_host = nil
             local i = 2
-            while not host and i <= #info.argv do
+            while not uploading_host and i <= #info.argv do
                 if info.argv[i]:match("^%-[bcDEeFIiJLlmOopQRSWw]$") then
                     i = i + 2
                 elseif info.argv[i]:sub(1, 1) == "-" then
                     i = i + 1
                 else
-                    host = info.argv[i]
+                    uploading_host = info.argv[i]
                 end
             end
-            if not host then return end
-            local ok, _, _ = wezterm.run_child_process({
-                "sh", "-c",
-                ([[osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/tmp/clipboard.png" with write permission)' && scp /tmp/clipboard.png %s:/tmp/clipboard.png && rm -f /tmp/clipboard.png && ssh %s '.vim/bin/ffmpeg -y -i /tmp/clipboard.png -vf "scale='"'"'min(1568,iw)'"'"':'"'"'min(1568,ih)'"'"':force_original_aspect_ratio=decrease" -q:v 10 /tmp/clipboard.jpg && rm -f /tmp/clipboard.png']]):format(host, host),
-            })
-            if not ok then return end
-            pane:send_text("/tmp/clipboard.jpg")
+            if not uploading_host then return end
+            wezterm.emit("update-status", window, pane)
+            local ok_info, out_info, _ = wezterm.run_child_process({ "sh", "-c", "pbpaste | wc -c" }) -- unreliable but faster than osascript -e clipboard info
+            if not ok_info or tonumber(out_info) ~= 0 then
+                uploading_host = nil
+                return
+            end
+            pane:send_text("/tmp/clipboard.jpg ")
+            wezterm.time.call_after(0.05, function()
+                local ok, _, _ = wezterm.run_child_process({
+                    "sh", "-c",
+                    ([[osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/tmp/clipboard.png" with write permission)' && scp /tmp/clipboard.png %s:/tmp/clipboard.png && rm -f /tmp/clipboard.png && ssh %s '.vim/bin/ffmpeg -y -i /tmp/clipboard.png -vf "scale='"'"'min(1568,iw)'"'"':'"'"'min(1568,ih)'"'"':force_original_aspect_ratio=decrease" -q:v 10 /tmp/clipboard.jpg && rm -f /tmp/clipboard.png']]):format(uploading_host, uploading_host),
+                })
+                uploading_host = nil
+                wezterm.emit("update-status", window, pane)
+                if not ok then pane:send_text("Wait, upload failed!") end
+            end)
         end),
     },
 }
@@ -128,7 +139,10 @@ tabline.setup({
         tabline_c = {},
         tab_active = { "process" },
         tab_inactive = { "process" },
-        tabline_x = { "cpu" },
+        tabline_x = {
+            function() return uploading_host and ("󰘿 %s "):format(uploading_host) or "" end,
+            "cpu",
+        },
         tabline_y = { "battery" },
         tabline_z = { { "datetime", style = "%I:%M %p" } },
     },

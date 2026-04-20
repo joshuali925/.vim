@@ -76,6 +76,8 @@ return {
                         ["<BS>"] = "prev_source",
                         ["\\"] = "next_source",
                         ["P"] = { "toggle_preview", config = { use_float = true } },
+                        [","] = { "scroll_preview", config = { direction = -10 } },
+                        ["."] = { "scroll_preview", config = { direction = 10 } },
                         ["s"] = "open_split",
                         ["<C-v>"] = "open_vsplit",
                         ["zM"] = "close_all_nodes",
