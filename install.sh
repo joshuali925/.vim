@@ -63,7 +63,7 @@ detect-env() {
         echo 'package manager not supported' >&2
       fi ;;
     darwin*)
-      PLATFORM=darwin ;;
+      PLATFORM=darwin PACKAGE_MANAGER=brew ;;
     *)
       echo 'os not supported, exiting..' >&2
       exit 1 ;;
@@ -139,7 +139,7 @@ install-devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # TODO(macOS 26) try https://github.com/Arthur-Ficial/apfel, https://github.com/stonerl/Thaw
+    # TODO(macOS 26) try https://github.com/Arthur-Ficial/apfel, https://github.com/gety-ai/apple-on-device-openai, https://github.com/stonerl/Thaw
     # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly neovide rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion cardinal-search
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
@@ -304,11 +304,9 @@ install-pm2() {
 }
 
 install-google-chrome() {
-  if builtin command -v google-chrome > /dev/null 2>&1; then
+  if builtin command -v google-chrome > /dev/null 2>&1 || compgen -G "$HOME/.cache/ms-playwright/chromium-*/chrome-linux/chrome" > /dev/null; then
     log 'Google Chrome already installed, skipping..'
-    return 0
-  fi
-  if [[ $PLATFORM:$PACKAGE_MANAGER:$ARCHITECTURE = linux:yum:x86_64 ]]; then
+  elif [[ $PLATFORM:$PACKAGE_MANAGER:$ARCHITECTURE = linux:yum:x86_64 ]]; then
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
     sudo yum localinstall google-chrome-stable_current_x86_64.rpm
     rm -f google-chrome-stable_current_x86_64.rpm
@@ -316,9 +314,8 @@ install-google-chrome() {
     curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
     sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y google-chrome-stable
-  else
-    log 'Unsupported platform..'
-    return 1
+  elif [[ $PLATFORM = linux ]]; then
+    npx -y playwright install --with-deps chromium
   fi
 }
 
@@ -330,8 +327,9 @@ install-claude-code() {
     claude plugin list --json | jq -r '.[].id' | xargs -n1 claude plugin update
     return $?
   fi
-  mkdir -p ~/.aws ~/.claude
+  mkdir -p ~/.claude/skills
   append-once '/.claude/' ~/.gitignore
+  link-file ~/.vim/config/claude/agents ~/.claude/agents --relative
   link-file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link-file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
@@ -346,19 +344,25 @@ install-claude-code() {
   claude plugin marketplace add OthmanAdi/planning-with-files && claude plugin install planning-with-files@planning-with-files && claude plugin disable planning-with-files
   claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman@caveman && claude plugin disable caveman
   claude plugin marketplace add tanweai/pua && claude plugin install pua@pua-skills && claude plugin disable pua
-  claude plugin marketplace add memvid/claude-brain && claude plugin install mind@memvid
-  curl -sL https://github.com/KKKKhazix/khazix-skills/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=1 --wildcards '*/neat-freak/*'
-  # curl -sL https://github.com/github/gh-stack/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skills/gh-stack/*'
-  # curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
+  uv --version && mise use -g bun && claude plugin marketplace add thedotmack/claude-mem && claude plugin install claude-mem
+  curl -sL https://github.com/KKKKhazix/khazix-skills/archive/refs/heads/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=1 --wildcards '*/neat-freak/*'
+  # curl -sL https://github.com/github/gh-stack/archive/refs/heads/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skills/gh-stack/*'
+  # curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
     # npm install -g @playwright/cli@latest && cp -r "$(npm root -g)/@playwright/cli/skills" ~/.claude/skills && append-once '/.playwright-cli/' ~/.gitignore
   fi
   log '\nInstalled Claude Code'
-  if ! grep -q '^export AWS_BEARER_TOKEN_BEDROCK=' ~/.zshenv 2>/dev/null; then
-    echo 'export AWS_BEARER_TOKEN_BEDROCK=' >> ~/.zshenv
-    log "${BG_RED}TODO${CYAN}: update bedrock key in ${YELLOW}~/.zshenv"
+  if [[ $PLATFORM = darwin ]]; then
+    managed_settings='/Library/Application Support/ClaudeCode/managed-settings.json'
+  else
+    managed_settings='/etc/claude-code/managed-settings.json'
+  fi
+  if ! grep -q AWS_BEARER_TOKEN_BEDROCK "$managed_settings" 2>/dev/null; then
+    sudo mkdir -p "$(dirname "$managed_settings")"
+    echo '{"env":{"AWS_BEARER_TOKEN_BEDROCK":""}}' | sudo tee "$managed_settings"
+    log "${BG_RED}TODO${CYAN}: update bedrock key in ${YELLOW}$managed_settings"
   fi
 }
 

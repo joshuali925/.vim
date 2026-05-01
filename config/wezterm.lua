@@ -108,11 +108,11 @@ config.keys = {
                 uploading_host = nil
                 return
             end
-            pane:send_text("/tmp/clipboard.jpg ")
+            pane:send_text("/tmp/clipboard.png ")
             wezterm.time.call_after(0.05, function()
                 local ok, _, _ = wezterm.run_child_process({
                     "sh", "-c",
-                    ([[osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/tmp/clipboard.png" with write permission)' && scp /tmp/clipboard.png %s:/tmp/clipboard.png && rm -f /tmp/clipboard.png && ssh %s '.vim/bin/ffmpeg -y -i /tmp/clipboard.png -vf "scale='"'"'min(1568,iw)'"'"':'"'"'min(1568,ih)'"'"':force_original_aspect_ratio=decrease" -q:v 10 /tmp/clipboard.jpg && rm -f /tmp/clipboard.png']]):format(uploading_host, uploading_host),
+                    ([[osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/tmp/clipboard.png" with write permission)' && scp /tmp/clipboard.png %s:/tmp/clipboard.png && rm -f /tmp/clipboard.png]]):format(uploading_host),
                 })
                 uploading_host = nil
                 wezterm.emit("update-status", window, pane)

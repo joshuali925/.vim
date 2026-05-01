@@ -19,7 +19,7 @@ $env.config = {
       mode: emacs
       event: {
         send: executehostcommand
-        cmd: "rg --files | lines | input list --fuzzy ' ' | if $in != null { commandline edit --append $in; commandline set-cursor --end }"
+        cmd: "rg --files | lines | input list --fuzzy ' ' | if $in != null { commandline edit --insert $in }"
       }
     }
   ]
@@ -39,6 +39,7 @@ alias g = git log --graph --pretty=simple --boundary --max-count 15
 alias gaa = git add --all
 alias gcl = git clone --filter=blob:none
 alias gco = git checkout
+alias gcm = git checkout main
 alias gd = git diff
 alias gdst = git diff --staged
 alias gf = git fetch

@@ -3,12 +3,12 @@
 # resume: docker start -ai vim_container
 # delete: docker container rm $(docker ps -aq --filter ancestor=ubuntu_vim) && docker image rm ubuntu_vim
 
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 # add additional dependencies
 RUN apt-get update; DEBIAN_FRONTEND=noninteractive apt-get install -y curl sudo
 
-RUN useradd -s /bin/bash -d /home/docker -m -G sudo docker; passwd -d docker
+RUN useradd -s /bin/bash -d /home/docker -m -G sudo docker; passwd -d docker; echo 'docker ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/docker
 USER docker
 WORKDIR /home/docker
 ENV TERM=xterm-256color SSH_CLIENT=1 SHELL=/usr/bin/zsh USER=docker LANG=C.UTF-8

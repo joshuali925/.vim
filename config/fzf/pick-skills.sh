@@ -8,7 +8,7 @@ commands="$HOME/.vim/config/claude/commands"
 {
   fd SKILL.md "$user_skills"
   fd -e md . "$commands"
-  fd SKILL.md "$cache" --exec-batch stat -c '%Y %n'
+  fd --hidden --exclude=.git SKILL.md "$cache" --exec-batch stat -c '%Y %n'
 } | awk -v cache="$cache/" -v user="$user_skills/" '
     function parse(path,   d, fm, cont, ln, line, v) {
       d = ""; fm = 0; cont = 0; ln = 0

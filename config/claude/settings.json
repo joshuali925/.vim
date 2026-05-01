@@ -58,7 +58,7 @@
     "planning-with-files@planning-with-files": false,
     "caveman@caveman": false,
     "pua@pua-skills": false,
-    "mind@memvid": true
+    "claude-mem@thedotmack": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -97,15 +97,16 @@
         "repo": "tanweai/pua"
       }
     },
-    "memvid": {
+    "thedotmack": {
       "source": {
         "source": "github",
-        "repo": "memvid/claude-brain"
+        "repo": "thedotmack/claude-mem"
       }
     }
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true,
+  "theme": "auto",
   "verbose": true
 }

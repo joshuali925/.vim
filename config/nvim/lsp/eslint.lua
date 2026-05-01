@@ -1,5 +1,6 @@
 ---@type vim.lsp.Config
 return {
+    cmd = { "vscode-eslint-language-server", "--stdio" },
     on_attach = function(client, bufnr)
         vim.api.nvim_buf_create_user_command(0, "LspEslintFixAll", function()
             client:exec_cmd({

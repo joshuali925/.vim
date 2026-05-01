@@ -55,7 +55,8 @@ function M.install_packages()
 end
 
 function M.setup()
-    vim.opt.runtimepath:prepend(vim.fn.stdpath("data") .. "/site/pack/core/opt/nvim-lspconfig") -- https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
+    -- ~/.local/share/nvim/site/pack/core/opt/nvim-lspconfig/lsp, https://www.reddit.com/r/neovim/comments/1k8g6t9/comment/mpas33a/
+    vim.opt.runtimepath:prepend(vim.fn.stdpath("data") .. "/site/pack/core/opt/nvim-lspconfig")
     vim.lsp.enable(required_servers)
     local mason_path = vim.fn.stdpath("data") .. "/mason"
     for executable, server in pairs(extra_servers) do

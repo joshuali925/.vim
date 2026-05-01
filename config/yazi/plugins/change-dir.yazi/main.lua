@@ -27,11 +27,11 @@ local function flags_from_args(args)
     local flags = {}
     for k, v in pairs(args) do
         if type(k) == "string" then
-            k = k:gsub("_", "-")
+            local escaped = k:gsub("_", "-")
             if v == true then
-                flags[#flags + 1] = "--" .. k
+                flags[#flags + 1] = "--" .. escaped
             else
-                flags[#flags + 1] = "--" .. k .. "=" .. tostring(v)
+                flags[#flags + 1] = "--" .. escaped .. "=" .. tostring(v)
             end
         end
     end

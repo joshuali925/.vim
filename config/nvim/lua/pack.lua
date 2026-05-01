@@ -4,16 +4,24 @@ local function to_pack_spec(spec)
     return { src = spec[1]:match("^https?://") and spec[1] or ("https://github.com/" .. spec[1]), name = spec.name, version = spec.version }
 end
 
+local function get_deps(spec, to_install, to_load)
+    to_install, to_load = to_install or {}, to_load or {}
+    if loaded[spec.name] then return to_install, to_load end
+    loaded[spec.name] = true
+    for _, dep in ipairs(spec.dependencies or {}) do get_deps(specs[dep], to_install, to_load) end
+    if spec.install == false then table.insert(to_install, to_pack_spec(spec)) end
+    table.insert(to_load, spec)
+    return to_install, to_load
+end
+
 local function load_plugin(spec, defer)
     if loaded[spec.name] then return end
-    loaded[spec.name] = true
-    for _, dep in ipairs(spec.dependencies or {}) do load_plugin(specs[dep], defer) end
-    if spec.install == false then
-        vim.pack.add({ to_pack_spec(spec) }, { confirm = false })
-    else
-        vim.cmd.packadd({ spec.name, bang = defer })
+    local to_install, to_load = get_deps(spec)
+    if #to_install > 0 then vim.pack.add(to_install, { confirm = false }) end
+    for _, s in ipairs(to_load) do
+        if s.install ~= false then vim.cmd.packadd({ s.name, bang = defer }) end
+        if s.config then s.config() end
     end
-    if spec.config then spec.config() end
 end
 
 local function stub_events(queue)

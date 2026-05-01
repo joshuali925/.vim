@@ -51,7 +51,7 @@ alias vi='\vim'
 alias vii='\vim -u ~/.vim/config/mini.vim -i NONE'
 alias vim='$EDITOR'
 alias .env='findup .env >&2 && \env $(sed "/^#/d;s/^export //" "$(findup .env)" | xargs) '
-alias venv='deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv=".venv"; }'  # without uv: py -m venv .venv
+alias venv='eval deactivate 2> /dev/null; findup .venv >&2 && source "$(findup .venv)/bin/activate" || { uv venv && mise set _.python.venv=".venv"; }'  # without uv: py -m venv .venv
 alias py='env PYTHONSTARTUP=$HOME/.vim/config/pythonrc.py python3'
 alias k='kubectl'
 alias dc='docker compose'
@@ -664,16 +664,17 @@ pm2() {
     --preview-window=up,70%,border-bottom,follow --preview='pm2 logs --raw --lines 10000 -- {1}'
 }
 
-theme() {  # locally toggles wezterm theme, remotely updates configs to match terminal theme
+theme() {  # toggles terminal theme
   if [[ -n $WEZTERM_EXECUTABLE ]]; then
     grep -q 'local light_theme = false' ~/.vim/config/wezterm.lua && export LIGHT_THEME=1 || export LIGHT_THEME=0
     sed -i "s/\(local light_theme = \)\(true\|false\)/\1$([[ $LIGHT_THEME = 1 ]] && echo 'true' || echo 'false')/" ~/.vim/config/wezterm.lua
   else
-    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$(bash -c "[[ -n \$TMUX ]] && read -rs -d \\\\ -p \$'\\033Ptmux;\\033\\e]11;?\\e\\\\\\033\\\\' osc11 || read -rs -d \\\\ -p \$'\\e]11;?\\e\\\\' osc11 && printf %q \"\$osc11\" | awk '{match(\$0, /rgb:([0-9a-f]+)\\/([0-9a-f]+)\\/([0-9a-f]+)/, arr); if (strtonum(\"0x\"arr[1]) > 32639 && strtonum(\"0x\"arr[2]) > 32639 && strtonum(\"0x\"arr[3]) > 32639) print \"1\"; else print \"0\"}'")/" ~/.vim/config/colors.sh
+    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$([[ ${LIGHT_THEME:-0} = 1 ]] && echo 0 || echo 1)/" ~/.vim/config/colors.sh
     unset LIGHT_THEME
   fi
   source ~/.vim/config/common.sh
   if [[ -n $TMUX ]]; then tmux set-environment -ug LIGHT_THEME; fi
+  echo "theme set to $([[ ${LIGHT_THEME:-0} = 1 ]] && echo light || echo dark)"
 }
 
 .install() {  # declare as function for zsh completion

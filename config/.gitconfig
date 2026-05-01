@@ -10,6 +10,7 @@
 
 ; NOTE aliases are executed using sh, need to be POSIX compliant
 [alias]
+	ini = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; git init && git add -A && git commit -m init"
 	configs = config --list --show-scope --show-origin
 	authors = shortlog --summary --numbered --email
 	signoff = commit --signoff --amend --no-verify --allow-empty --no-edit
