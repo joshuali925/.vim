@@ -23,7 +23,7 @@ After making changes, run the applicable steps below. Verify each completes with
   - `OS_DAEMON=1`: run in background; logs in `.daemon-log`, PID in `.daemon-pid`
   - `--port <port>`: specify port
   - `--opensearch.hosts=http://localhost:<port>`: connect to a specific OpenSearch
-- **Build artifacts**: `yarn build-platform --linux --skip-os-packages`. Run on build artifact errors.
+- **Build artifacts**: `yarn build-platform --linux --skip-os-packages`. Run on build artifact errors. If it's a plugin under `./plugins/`, run `yarn build` instead.
 - **Runtime artifacts**: `./build/opensearch-dashboards/bin/opensearch-dashboards`. Run on runtime artifact errors (after build).
 - **Browser verification**: use `chrome-devtools` MCP at `localhost:5601[/path]`. Run when the user provided a URL path. Take a screenshot to verify styling. Do NOT use curl, WebFetch, or other MCPs. Subagents doing browser work must also use `chrome-devtools`.
 

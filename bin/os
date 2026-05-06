@@ -39,6 +39,7 @@ run() {
     echo "daemon started process in background, dir: $PWD, logs: ./.daemon-log, pid: ./.daemon-pid" >&2
     return 0
   fi
+  if [[ -f .env ]]; then set -a; . .env; set +a; fi
   while [[ $# -gt 0 ]]; do
     case $1 in
       -h|--help) echo "Usage: ${0##*/} run [-h|--help] [--debug] [--no-sec] [--init-password <password>] [-p|--port <port>] [-b|--bootstrap] [-e|--explore] [passthrough-args...] (OS_DAEMON=1 for background, logs in ./.daemon-log, pid in ./.daemon-pid)" >&2; return 0 ;;

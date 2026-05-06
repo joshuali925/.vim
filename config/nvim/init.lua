@@ -290,14 +290,17 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 vim.api.nvim_create_autocmd("CmdwinEnter", { group = "AutoCommands", callback = function() vim.keymap.set("n", "<CR>", "<CR>", { buffer = true }) end })
 vim.api.nvim_create_autocmd("BufEnter", { group = "AutoCommands", pattern = "term://*", command = [[if line('$') <= line('w$') && len(filter(getline(line('.') + 1, '$'), 'trim(v:val) != ""')) == 0 | startinsert | endif]] })
+vim.api.nvim_create_autocmd("BufDelete", { -- TODO remove after 0.12.3 https://github.com/neovim/neovim/pull/39070
+    group = "AutoCommands",
+    callback = function(ev) if vim.bo[ev.buf].buftype == "" and vim.api.nvim_buf_get_name(ev.buf) ~= "" then vim.cmd("wshada") end end,
+})
+
 
 -- commands {{{1
 vim.api.nvim_create_user_command("SetRunCommand", "if '<bang>' != '' | let b:RunCommand = <q-args> | else | let g:RunCommand = <q-args> | endif", { complete = "file", nargs = "*", bang = true })
 vim.api.nvim_create_user_command("S", [[execute 'botright new | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | let b:RunCommand = "write !python3 -i" | if <range> != 0 | setlocal filetype=' . &filetype . ' | put =getbufline(' . bufnr() . ', <line1>, <line2>) | resize ' . min([<line2>-<line1>+2, &lines * 2/5]) . '| else | resize ' . min([15, &lines * 2/5]) . '| endif' | if '<bang>' != '' | execute 'read !' . <q-args> | else | execute "put =execute('" . <q-args> . "')" | endif | 1d]], { complete = "command", nargs = "*", range = true, bang = true })
-vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee % > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute "botright terminal sudo `which nvim` +'1,$d' +startinsert %" | startinsert | endif]], { bang = true })
+vim.api.nvim_create_user_command("W", [[call mkdir(expand('%:p:h'), 'p') | if '<bang>' == '' | execute 'write !sudo tee "%" > /dev/null' | else | %yank | vnew | setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile | 0put='Enter password in terminal and press <lt>C-u>pa<lt>Esc>;w' | wincmd p | execute "botright terminal sudo `which nvim` --clean +'nnoremap ;w :w<CR>' +'nnoremap ;q :q<CR>' +'1,$d' +startinsert %" | startinsert | endif]], { bang = true })
 vim.api.nvim_create_user_command("Notifications", "normal! g<", {})
-vim.api.nvim_create_user_command("ProfileStart", "lua require('plenary.profile').start(vim.fn.stdpath('cache') .. '/profile.log')", {})
-vim.api.nvim_create_user_command("ProfileStop", [[execute "lua require('plenary.profile').stop()" | execute 'edit ' . stdpath('cache') . '/profile.log']], {})
 vim.api.nvim_create_user_command("SessionSave", "execute 'mksession! ' . stdpath('data') . '/session_' . <q-args> . '.vim' | lua vim.notify('Session saved to \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
 vim.api.nvim_create_user_command("SessionLoad", "execute 'source ' . stdpath('data') . '/session_' . <q-args> . '.vim' | lua vim.notify('Loaded session from \"' .. vim.fn.stdpath('data') .. '/session_' .. <q-args> .. '.vim\"', vim.log.levels.INFO, { title = 'Session' })", { nargs = "*", complete = "customlist,funcs#get_session_names" })
 vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { nargs = "+" })
@@ -308,6 +311,12 @@ vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <n
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
 vim.api.nvim_create_user_command("JSON", [[if <range> != 0 | execute "'<,'>Prettier json" | else | keeppatterns %s/\n\+\%$//e | set shiftwidth=2 filetype=json | execute 'Prettier json' | endif]], { range = true })
 vim.api.nvim_create_user_command("JoinWithChar", [[if <line1> < <line2> | keeppatterns <line1>,<line2>s/\s\+$//e | keeppatterns <line1>+1,<line2>s/^\s\+//e | if <q-args> != '' | silent keeppatterns <line1>,<line2>-1s/$/\=<q-args>/ | endif | <line1>,<line2>join! | endif]], { range = true, nargs = "?" })
+vim.api.nvim_create_user_command("DirDiff", function(opts)
+    if vim.tbl_count(opts.fargs) ~= 2 then return vim.notify("DirDiff requires exactly two directory arguments", vim.log.levels.ERROR) end
+    vim.cmd.tabnew()
+    vim.cmd.packadd("nvim.difftool")
+    require("difftool").open(opts.fargs[1], opts.fargs[2], { method = "auto", rename = { detect = false }, ignore = {} })
+end, { complete = "dir", nargs = "*" })
 vim.api.nvim_create_user_command("Prettier", function(args)
     local filetype_map = { jsonc = "json", javascript = "typescript", javascriptreact = "typescript", typescriptreact = "typescript", [""] = "json" }
     local parser = args.args ~= "" and args.args or vim.bo.filetype

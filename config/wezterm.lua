@@ -53,6 +53,7 @@ config.color_scheme = light_theme and "Catppuccin Latte" or "tokyonight"
 config.quick_select_patterns = {
     [[[\w\-.%/]*\.[\w\-.%/~]+]],
     -- TODO remove
+    [[ds-\w+]],
     [[i-\w+]],
     [[\d+:[\w-]+]],
 }

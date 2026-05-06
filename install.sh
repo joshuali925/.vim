@@ -6,6 +6,7 @@ YARN_VERSION=1.22.10
 JDK_VERSION=25
 BACKUP_DIR=$HOME/config-backup
 
+BG_RED=$'\033[41m'
 CYAN=$'\033[0;36m'
 YELLOW=$'\033[0;33m'
 BLACK=$'\033[1;30m'
@@ -300,7 +301,7 @@ install-pm2() {
   fi
   npm install -g pm2
   pm2 set pm2:autodump true
-  sudo -E "$(mise which node)" "$(mise which pm2)" startup systemd -u "$USER" --hp "$HOME"
+  sudo "$(mise which node)" "$(npm -g prefix)/bin/pm2" startup systemd -u "$USER" --hp "$HOME"
 }
 
 install-google-chrome() {
@@ -320,9 +321,10 @@ install-google-chrome() {
 }
 
 install-claude-code() {
-  if builtin command -v claude > /dev/null 2>&1; then claude update; else curl -fsSL https://claude.ai/install.sh | bash; fi
+  if ! builtin command -v claude > /dev/null 2>&1; then curl -fsSL https://claude.ai/install.sh | bash; fi
   npm install -g ccstatusline@latest
   if [[ ${1:-} = update ]]; then
+    claude update
     claude plugin marketplace list --json | jq -r '.[].name' | xargs -n1 claude plugin marketplace update
     claude plugin list --json | jq -r '.[].id' | xargs -n1 claude plugin update
     return $?
@@ -336,18 +338,15 @@ install-claude-code() {
   claude plugin marketplace add anthropics/claude-plugins-official
   claude plugin install code-review@claude-plugins-official
   claude plugin install skill-creator@claude-plugins-official && claude plugin disable skill-creator
-  claude plugin install superpowers@claude-plugins-official && claude plugin disable superpowers
   claude plugin install typescript-lsp@claude-plugins-official
   claude plugin install frontend-design@claude-plugins-official && claude plugin disable frontend-design
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
-  claude plugin marketplace add snarktank/ralph && claude plugin install ralph-skills@ralph-marketplace && claude plugin disable ralph-skills
+  claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
   claude plugin marketplace add OthmanAdi/planning-with-files && claude plugin install planning-with-files@planning-with-files && claude plugin disable planning-with-files
-  claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman@caveman && claude plugin disable caveman
-  claude plugin marketplace add tanweai/pua && claude plugin install pua@pua-skills && claude plugin disable pua
-  uv --version && mise use -g bun && claude plugin marketplace add thedotmack/claude-mem && claude plugin install claude-mem
+  claude plugin marketplace add Digital-Process-Tools/claude-marketplace && claude plugin install remember@dpt-plugins
   curl -sL https://github.com/KKKKhazix/khazix-skills/archive/refs/heads/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=1 --wildcards '*/neat-freak/*'
-  # curl -sL https://github.com/github/gh-stack/archive/refs/heads/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skills/gh-stack/*'
   # curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
+  # curl -sL https://github.com/shadcn-ui/ui/archive/refs/heads/main.tar.gz | tar xvz -C .claude/skills/ --strip-components=2 --wildcards '*/skills/shadcn/*'
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics

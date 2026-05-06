@@ -334,7 +334,7 @@ augroup AutoCommands
   silent! autocmd OptionSet shiftwidth let &listchars='tab:█ ,nbsp:␣,trail:•,leadmultispace:▏' . repeat(' ', &shiftwidth - 1)
 augroup END
 
-command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee % > /dev/null
+command! W call mkdir(expand('%:p:h'), 'p') | write !sudo tee '%' > /dev/null
 command! CountSearch %s///gn
 command! TrimTrailingSpaces keeppatterns %s/\s\+$//e | silent! execute 'normal! ``'
 command! -range JSON if <range> != 0 | execute "'<,'>!python -m json.tool --indent 2" | else | keeppatterns %s/\n\+\%$//e | set shiftwidth=2 filetype=json | execute '%!python -m json.tool --indent 2' | endif

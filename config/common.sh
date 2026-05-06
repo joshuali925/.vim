@@ -290,7 +290,7 @@ sudorun() {
   fi
   case $cmd in
     v|vi|vim) sudo TERM=xterm-256color "$(/usr/bin/which vim)" -u ~/.vim/config/mini.vim "$@" ;;
-    *) TERM=xterm-256color EDITOR=vim XDG_CONFIG_HOME="$HOME/.config" sudo -E env PATH="$PATH" "$cmd" "$@" ;;
+    *) sudo env PATH="$PATH" HOME="$HOME" TERM=xterm-256color EDITOR=vim "$cmd" "$@" ;;
   esac
 }
 
@@ -603,8 +603,8 @@ bin() {
     if [[ $OSTYPE = linux* ]] && mise which pm2 > /dev/null 2>&1; then
       npm install -g pm2
       pm2 update
-      sudo -E "$(mise which node)" "$(mise which pm2)" unstartup systemd -u "$USER" --hp "$HOME"
-      sudo -E "$(mise which node)" "$(mise which pm2)" startup systemd -u "$USER" --hp "$HOME"
+      sudo "$(mise which node)" "$(npm -g prefix)/bin/pm2" unstartup systemd -u "$USER" --hp "$HOME"
+      sudo "$(mise which node)" "$(npm -g prefix)/bin/pm2" startup systemd -u "$USER" --hp "$HOME"
     fi
     return $?
   fi
@@ -657,10 +657,12 @@ kube-shell() {
 pm2() {
   if [[ $# -gt 0 || ! -t 1 ]]; then command pm2 "$@"; return $?; fi
   local get_state='local IFS=$'\''\n'\'' app_list=$(pm2 list -m) map=() names ids app_status && names=($(echo "$app_list" | awk '\''/^\+---/{sub("+--- ", ""); print}'\'')) && ids=($(echo "$app_list" | awk '\''/^pm2 id : /{sub("pm2 id : ", ""); print}'\'')) && app_status=($(echo "$app_list" | awk '\''/^status : /{sub("status : ", ""); print}'\'')) && for ((i=1; i<=${#ids[@]}; i++)); do if [[ ${app_status[i]} = online ]]; then map+=("${ids[i]} : \e[0;32m${names[i]}\e[0m"); else map+=("${ids[i]} : \e[0;31m${names[i]} [${app_status[i]}]\e[0m"); fi; done && printf "%b\n" "${map[@]}"'
-  FZF_DEFAULT_COMMAND=$get_state fzf --ansi --height=100% --list-border=none --header='C-/: wrap | CR: logs | C-e: start | C-t: stop | C-r: restart' \
-    --bind='ctrl-/:change-preview-window(wrap|nowrap)' \
+  FZF_DEFAULT_COMMAND=$get_state fzf --ansi --height=100% --list-border=none --header='C-/: wrap | C-o: stdout | C-x: stderr | CR: tail logs | C-n: describe | C-e: start | C-t: stop | C-r: restart' \
+    --bind='ctrl-/:change-preview-window(wrap|nowrap)' --bind="ctrl-n:execute(pm2 describe {1} | less -RiMS)" \
     --bind="ctrl-e:execute(pm2 start {1} && sleep 1)+reload($get_state)" --bind="ctrl-t:execute(pm2 stop {1} && sleep 1)+reload($get_state)" \
     --bind="ctrl-r:execute(pm2 restart {1} && sleep 1)+reload($get_state)" --bind="enter:become(pm2 logs --raw --lines 60000 -- {1})" \
+    --bind="ctrl-o:execute(\$EDITOR \"\$(pm2 jlist | jq -r '.[] | select(.pm_id == ({1}|tonumber)) | .pm2_env.pm_out_log_path')\")" \
+    --bind="ctrl-x:execute(\$EDITOR \"\$(pm2 jlist | jq -r '.[] | select(.pm_id == ({1}|tonumber)) | .pm2_env.pm_err_log_path')\")" \
     --preview-window=up,70%,border-bottom,follow --preview='pm2 logs --raw --lines 10000 -- {1}'
 }
 

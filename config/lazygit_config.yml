@@ -32,6 +32,8 @@ gui:
       - magenta
     unstagedChangesColor:
       - red
+os:
+  copyToClipboardCmd: 'printf %s {{text}} | y'
 notARepository: quit
 disableStartupPopups: true
 promptToReturnFromSubprocess: false

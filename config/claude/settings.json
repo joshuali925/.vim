@@ -1,112 +1,100 @@
 {
+  "alwaysThinkingEnabled": true,
+  "availableModels": [
+    "opus",
+    "sonnet"
+  ],
+  "effortLevel": "xhigh",
+  "enabledPlugins": {
+    "code-review@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": false,
+    "frontend-slides@frontend-slides": false,
+    "planning-with-files@planning-with-files": false,
+    "remember@dpt-plugins": true,
+    "skill-creator@claude-plugins-official": false,
+    "typescript-lsp@claude-plugins-official": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": false
+  },
   "env": {
-    "MCP_TIMEOUT": "120000",
-    "CLAUDE_CODE_NO_FLICKER": "1",
+    "AWS_PROFILE": "claude-code-DO-NOT-DELETE",
+    "AWS_REGION": "us-west-2",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_ENABLE_AWAY_SUMMARY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_NO_FLICKER": "1",
     "CLAUDE_CODE_USE_BEDROCK": "1",
     "DISABLE_BUG_COMMAND": "1",
     "DISABLE_ERROR_REPORTING": "1",
-    "DISABLE_TELEMETRY": "1"
-  },
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
-  "permissions": {
-    "defaultMode": "bypassPermissions"
-  },
-  "model": "global.anthropic.claude-opus-4-7[1m]",
-  "hooks": {
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "printf '\\a' > /dev/tty"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "printf '\\a' > /dev/tty"
-          }
-        ]
-      }
-    ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "ccstatusline",
-    "padding": 0
-  },
-  "enabledPlugins": {
-    "code-review@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": false,
-    "superpowers@claude-plugins-official": false,
-    "typescript-lsp@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": false,
-    "ui-ux-pro-max@ui-ux-pro-max-skill": false,
-    "ralph-skills@ralph-marketplace": false,
-    "planning-with-files@planning-with-files": false,
-    "caveman@caveman": false,
-    "pua@pua-skills": false,
-    "claude-mem@thedotmack": true
+    "DISABLE_TELEMETRY": "1",
+    "MCP_TIMEOUT": "120000"
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
-        "source": "github",
-        "repo": "anthropics/claude-plugins-official"
+        "repo": "anthropics/claude-plugins-official",
+        "source": "github"
       }
     },
-    "ralph-marketplace": {
+    "dpt-plugins": {
       "source": {
-        "source": "github",
-        "repo": "snarktank/ralph"
+        "repo": "Digital-Process-Tools/claude-marketplace",
+        "source": "github"
+      }
+    },
+    "frontend-slides": {
+      "source": {
+        "repo": "zarazhangrui/frontend-slides",
+        "source": "github"
       }
     },
     "planning-with-files": {
       "source": {
-        "source": "github",
-        "repo": "OthmanAdi/planning-with-files"
+        "repo": "OthmanAdi/planning-with-files",
+        "source": "github"
       }
     },
     "ui-ux-pro-max-skill": {
       "source": {
-        "source": "github",
-        "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
-      }
-    },
-    "caveman": {
-      "source": {
-        "source": "github",
-        "repo": "JuliusBrussee/caveman"
-      }
-    },
-    "pua-skills": {
-      "source": {
-        "source": "github",
-        "repo": "tanweai/pua"
-      }
-    },
-    "thedotmack": {
-      "source": {
-        "source": "github",
-        "repo": "thedotmack/claude-mem"
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+        "source": "github"
       }
     }
   },
-  "alwaysThinkingEnabled": true,
-  "effortLevel": "xhigh",
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "command": "tmux display-message -t \"$TMUX_PANE\" '#S:#I.#W: claude finished' 2>/dev/null || true",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "tmux display-message -t \"$TMUX_PANE\" '#S:#I.#W: claude finished' 2>/dev/null || true",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ]
+  },
+  "includeCoAuthoredBy": false,
+  "model": "global.anthropic.claude-opus-4-7[1m]",
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
   "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "command": "ccstatusline",
+    "padding": 0,
+    "type": "command"
+  },
   "theme": "auto",
   "verbose": true
 }

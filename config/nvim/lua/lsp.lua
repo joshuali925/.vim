@@ -61,7 +61,7 @@ function M.setup()
     local mason_path = vim.fn.stdpath("data") .. "/mason"
     for executable, server in pairs(extra_servers) do
         vim.uv.fs_stat(mason_path .. "/bin/" .. executable, function(err, stat)
-            if not err and stat then vim.lsp.enable(server) end
+            if not err and stat then vim.schedule(function() vim.lsp.enable(server) end) end
         end)
     end
 

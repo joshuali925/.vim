@@ -139,6 +139,7 @@ return {
                 require("nvim-treesitter").install(to_install)
             end
             local available = { kulala_http = true }
+            local indent_exclude = { zsh = true, tmux = true }
             for _, lang in ipairs(require("nvim-treesitter").get_available()) do available[lang] = true end
             vim.api.nvim_create_autocmd("FileType", {
                 group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true }),
@@ -148,7 +149,7 @@ return {
                     local ts_toggle = function(enable)
                         if enable == nil then enable = not vim.treesitter.highlighter.active[event.buf] end
                         vim.treesitter[enable and "start" or "stop"](event.buf, enable and lang or nil)
-                        vim.bo[event.buf].indentexpr = enable and "v:lua.require('nvim-treesitter').indentexpr()" or ""
+                        vim.bo[event.buf].indentexpr = enable and not indent_exclude[lang] and "v:lua.require('nvim-treesitter').indentexpr()" or ""
                     end
                     vim.keymap.set("n", "yot", ts_toggle, { buffer = event.buf })
                     if vim.tbl_contains(installed, lang) then return ts_toggle(true) end

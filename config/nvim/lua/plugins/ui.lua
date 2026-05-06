@@ -155,7 +155,7 @@ return {
                 { "--", "" },
                 { "Diff &original", [[execute "diffthis | topleft vnew | setlocal buftype=nofile bufhidden=wipe filetype=" . &filetype . " | read ++edit # | 0d_ | diffthis"]], "Diff current buffer with file on disk (similar to DiffOrig command)" },
                 { "&Diff next buffer", [[execute &diff ? "windo diffoff" : len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) == 1 ? "vsplit | bnext | windo diffthis" : "windo diffthis"]], "Toggle diff in current tab, split next buffer if only one window" },
-                { "Diff directories", [[call feedkeys(":CodeDiff dir ", "n")]], "Run DirDiff to compare two directories" }, -- alternative: https://www.reddit.com/r/neovim/comments/1ov1gtr/difftool_wrapper/
+                { "Diff directories", [[call feedkeys(":CodeDiff dir ", "n")]], "Run DirDiff to compare two directories" },
                 { "--", "" },
                 { "Move tab left &-", [[-tabmove]] },
                 { "Move tab right &+", [[+tabmove]] },

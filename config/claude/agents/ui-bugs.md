@@ -1,5 +1,5 @@
 ---
-name: ui-bug-finder
+name: ui-bugs
 description: Explores a running web app like a normal user via chrome-devtools MCP and reports UI bugs.
 tools: mcp__chrome-devtools, Read, Bash, Glob, Grep
 ---
