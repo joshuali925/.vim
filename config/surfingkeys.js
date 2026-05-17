@@ -38,7 +38,7 @@ api.aceVimMap('<Up>', 'gk', 'normal');
 api.aceVimMap('<Up>', 'gk', 'visual');
 api.aceVimMap('<Down>', 'gj', 'normal');
 api.aceVimMap('<Down>', 'gj', 'visual');
-api.aceVimMap(';w', '<Esc>', 'insert');
+api.aceVimMap('jk', '<Esc>', 'insert');
 
 // default keys
 // https://github.com/brookhong/Surfingkeys/blob/7626d9515ce6fec36e14499e1e1a4e49a6d1b43a/src/content_scripts/common/api.js#L467
@@ -160,7 +160,7 @@ api.mapkey('P', 'Open url or search', function() {
         if (validURL(text)) {
             api.tabOpenLink(text);
         } else {
-            api.tabOpenLink(`https://www.google.com/search?q=${encodeURIComponent(text)}`);
+            api.tabOpenLink(`https://www.bing.com/search?q=${encodeURIComponent(text)}&PC=U316&FORM=CHROMN`);
         }
     }
     if (window.getSelection().toString()) {
@@ -260,7 +260,7 @@ api.mapkey('v', 'Copy element text', function() {
     document.addEventListener('contextmenu', handleRightClick, true);
 });
 api.unmap('r');
-api.mapkey('r', 'Toggle full screen', function() {
+api.mapkey('r', 'Toggle windowed full screen', function() {
     if (window.location.hostname === 'www.bilibili.com') {
         if (window.location.pathname === '/') {
             // 换一换, .roll-btn-wrap 旧版, .palette-button-wrap 新版, .feed-roll-btn 内测
@@ -276,6 +276,17 @@ api.mapkey('r', 'Toggle full screen', function() {
         setTimeout(() => document.getElementById('playerControlBtn').click(), 0);
     } else {
         document.getElementById('playerControlBtn').click(); // https://greasyfork.org/en/scripts/4870-maximize-video, escape also works
+    }
+});
+api.mapkey('R', 'Toggle full screen', function() {
+    if (window.location.hostname === 'www.bilibili.com') {
+        document.querySelectorAll('[class="bpx-player-ctrl-btn bpx-player-ctrl-full"]')[0].click();
+    } else if (window.location.hostname === 'www.youtube.com') {
+        document.querySelectorAll('[class="ytp-fullscreen-button ytp-button"]')[0].click();
+    } else if (document.fullscreenElement) {
+        document.exitFullscreen();
+    } else {
+        [...document.querySelectorAll('video')].sort((a, b) => b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight)[0]?.requestFullscreen();
     }
 });
 api.map('yop', ';s'); // toggle pdf viewer
@@ -418,67 +429,4 @@ api.Front.registerInlineQuery({
     }
 });
 
-settings.theme = `
-.sk_theme {
-    font-family: Input Sans Condensed, Charcoal, sans-serif;
-    font-size: 10pt;
-    background: #24272e;
-    color: #abb2bf;
-}
-.sk_theme tbody {
-    color: #fff;
-}
-.sk_theme input {
-    color: #d0d0d0;
-}
-.sk_theme .url {
-    color: #61afef;
-}
-.sk_theme .annotation {
-    color: #56b6c2;
-}
-.sk_theme .omnibar_highlight {
-    color: #528bff;
-}
-.sk_theme .omnibar_timestamp {
-    color: #e5c07b;
-}
-.sk_theme .omnibar_visitcount {
-    color: #98c379;
-}
-.sk_theme #sk_omnibarSearchResult ul li:nth-child(odd) {
-    background: #303030;
-}
-.sk_theme #sk_omnibarSearchResult ul li.focused {
-    background: #3e4452;
-}
-#sk_omnibar {
-    opacity: 0.9 !important;
-}
-#sk_status, #sk_find {
-    font-size: 12pt;
-}
-:root {
-    --theme-ace-bg:#edeeee;
-    --theme-ace-bg-accent:#e4e4e4;
-    --theme-ace-select:#b8c2c3;
-}
-#sk_editor {
-    height: 75% !important;
-    background: var(--theme-ace-bg) !important;
-    opacity: 0.9;
-}
-.ace_content {
-    background: var(--theme-ace-bg) !important;
-}
-.ace_dialog-bottom {
-    border-top: 1px solid var(--theme-ace-bg) !important;
-}
-.ace-chrome .ace_print-margin, .ace_gutter, .ace_gutter-cell, .ace_dialog {
-    background: var(--theme-ace-bg-accent) !important;
-}
-.ace_marker-layer .ace_selection {
-    background: var(--theme-ace-select) !important;
-}
-`;
-
+settings.theme = `:root{--bg:#f8f9fb;--bg-alt:#fff;--bg-hover:#f0f2f7;--text:#2c2f36;--text-muted:#5c6370;--accent:#4a86e8;--highlight:#e06c75;--green:#4caf8a;--yellow:#e4b45a;--cyan:#2aa3b8;--border:#d1d5e0}@media (prefers-color-scheme:dark){:root{--bg:#1f2228;--bg-alt:#252a32;--bg-hover:#2e333d;--text:#e6e9ef;--text-muted:#abb2bf;--accent:#61afef;--highlight:#e06c75;--green:#98c379;--yellow:#e5c07b;--cyan:#56b6c2;--border:#3b4049}}.sk_theme{font-family:"Segoe UI",system-ui,-apple-system,"Input Sans Condensed",sans-serif;font-size:11.5pt;background:var(--bg);color:var(--text);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.25)}.sk_theme input{color:var(--text);background:var(--bg-alt);border:1px solid var(--border);border-radius:6px}#sk_omnibarSearchResult ul li{padding:9px 14px;border-radius:8px;transition:all .12s ease}#sk_omnibarSearchResult ul li:nth-child(odd){background:var(--bg-alt)}#sk_omnibarSearchResult ul li:hover,#sk_omnibarSearchResult ul li.focused{background:var(--bg-hover);transform:translateX(4px)}.sk_theme .url{color:var(--accent)}.sk_theme .annotation{color:var(--cyan)}.sk_theme .omnibar_highlight{color:var(--highlight);font-weight:600}.sk_theme .omnibar_timestamp{color:var(--yellow)}.sk_theme .omnibar_visitcount{color:var(--green)}#sk_omnibar{opacity:.98;border:1px solid var(--border);border-radius:12px;box-shadow:0 15px 40px rgba(0,0,0,.3)}#sk_status,#sk_find{font-size:12.5pt;font-weight:500;padding:5px 10px;border-radius:6px;background:var(--bg-alt);border:1px solid var(--border)}:root{--ace-bg:#f8f9fb;--ace-bg-accent:#f0f2f7;--ace-text:#2c2f36;--ace-select:#c0d0ff}@media (prefers-color-scheme:dark){:root{--ace-bg:#1f2228;--ace-bg-accent:#282c34;--ace-text:#e6e9ef;--ace-select:#4f5a6b}}#sk_editor{height:78%!important;background:var(--ace-bg)!important;color:var(--ace-text)!important;border:1px solid var(--border);border-radius:8px;opacity:.97}.ace_content{background:var(--ace-bg)!important;color:var(--ace-text)!important}.ace_gutter,.ace_gutter-cell,.ace_dialog{background:var(--ace-bg-accent)!important;color:var(--text-muted)}.ace_marker-layer .ace_selection{background:var(--ace-select)!important}`;

@@ -44,14 +44,28 @@
         "backgroundColor": "bgMagenta"
       },
       {
-        "id": "f43da1ae-c56f-475f-9407-c25890fa9fa7",
-        "type": "git-branch",
-        "backgroundColor": "bgYellow"
+        "id": "e88d4ddf-4443-424d-9d30-9db01fde6202",
+        "type": "input-speed",
+        "backgroundColor": "bgCyan",
+        "rawValue": false,
+        "merge": "no-padding"
+      },
+      {
+        "id": "dd53f442-a037-4535-8760-192811f4a00f",
+        "type": "custom-text",
+        "backgroundColor": "bgYellow",
+        "customText": " │ ",
+        "merge": "no-padding"
       },
       {
         "id": "b55dfc41-6fc5-47b5-9bfb-b82efad0b049",
-        "type": "current-working-dir",
+        "type": "output-speed",
         "backgroundColor": "bgBrightWhite"
+      },
+      {
+        "id": "f43da1ae-c56f-475f-9407-c25890fa9fa7",
+        "type": "git-branch",
+        "backgroundColor": "bgYellow"
       }
     ],
     [],
@@ -63,6 +77,8 @@
   "defaultPadding": " ",
   "inheritSeparatorColors": false,
   "globalBold": false,
+  "gitCacheTtlSeconds": 5,
+  "minimalistMode": false,
   "powerline": {
     "enabled": true,
     "separators": [
@@ -77,7 +93,9 @@
     "endCaps": [
       ""
     ],
-    "theme": "catppuccin",
-    "autoAlign": false
-  }
+    "theme": "tokyonight",
+    "autoAlign": false,
+    "continueThemeAcrossLines": false
+  },
+  "overrideForegroundColor": "black"
 }

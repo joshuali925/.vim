@@ -90,11 +90,11 @@ config.keys = {
         mods = "CMD|SHIFT",
         action = wezterm.action_callback(function(window, pane)
             local info = pane:get_foreground_process_info()
-            if not info or not info.executable:match("/ssh$") then return window:perform_action(wezterm.action.SendKey({ key = "v", mods = "CTRL" }), pane) end
+            if not info or not info.executable:match("ssh$") then return window:perform_action(wezterm.action.SendKey({ key = "v", mods = "CTRL" }), pane) end
             uploading_host = nil
             local i = 2
             while not uploading_host and i <= #info.argv do
-                if info.argv[i]:match("^%-[bcDEeFIiJLlmOopQRSWw]$") then
+                if info.argv[i]:match("^%-[bcDEeFIiJLlmOopQRSWwM]$") then
                     i = i + 2
                 elseif info.argv[i]:sub(1, 1) == "-" then
                     i = i + 1

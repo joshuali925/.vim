@@ -71,7 +71,6 @@ alias rg!="rg '❗'"
 alias xcp="rsync -avihP --no-owner --no-group --delete --filter=':- .gitignore'"
 alias rclone="env RCLONE_PROGRESS=true RCLONE_DELETE_EMPTY_SRC_DIRS=true rclone"
 alias markdowns='if [[ ! -x ~/.local/bin/mdview ]]; then uv tool install md-viewer-py; fi && printf %s "$(getip):8081" | y && eval mdview --host 0.0.0.0'  # eval to avoid red syntax if not installed
-alias http.server='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
 alias yarn-audit="yarn audit --json | jq -s '[.[] | select(.type == \"auditAdvisory\") | .data.advisory | {module: .module_name, severity: .severity, cves: (.cves | join(\",\")), url: .url, vulnerable_versions: .vulnerable_versions, patched_versions: .patched_versions, installed: (.findings | map(.version) | unique | join(\",\"))}] | unique_by(.cves) | sort_by((if .severity == \"critical\" then 0 elif .severity == \"high\" then 1 elif .severity == \"moderate\" then 2 elif .severity == \"low\" then 3 else 4 end), .module) | [\"MODULE\",\"SEVERITY\",\"CVE\",\"INSTALLED\",\"VULNERABLE\",\"PATCHED\",\"URL\"], (.[] | [.module, .severity, .cves, .installed, .vulnerable_versions, .patched_versions, .url]) | @tsv' -r | column -t -s $'\\t'"
@@ -572,8 +571,6 @@ se() {
   read -r reply
   if [[ $reply = [Yy] ]]; then echo "$cmd" | tee -a ~/.bashrc ~/.zshrc && echo 'Appended to ~/.bashrc and ~/.zshrc'; fi
 }
-
-tldr() { curl "https://cheat.sh/${*// /+}"; }
 
 getip() {
   if [[ $# -gt 1 ]]; then

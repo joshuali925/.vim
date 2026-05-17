@@ -65,7 +65,7 @@
       {
         "hooks": [
           {
-            "command": "tmux display-message -t \"$TMUX_PANE\" '#S:#I.#W: claude finished' 2>/dev/null || true",
+            "command": "tmux display-message -t \"$TMUX_PANE\" '#S:#I.#W: claude needs input' 2>/dev/null || true",
             "type": "command"
           }
         ],

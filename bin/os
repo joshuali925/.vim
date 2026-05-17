@@ -44,7 +44,8 @@ run() {
     case $1 in
       -h|--help) echo "Usage: ${0##*/} run [-h|--help] [--debug] [--no-sec] [--init-password <password>] [-p|--port <port>] [-b|--bootstrap] [-e|--explore] [passthrough-args...] (OS_DAEMON=1 for background, logs in ./.daemon-log, pid in ./.daemon-pid)" >&2; return 0 ;;
       --debug) export OPENSEARCH_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 ;;
-      --no-sec|--nosec) local nosec=1 ;;
+      --sec) local sec=1 ;;
+      --no-sec|--nosec) local sec=0 ;;
       --init-password) password=$2; shift ;;
       -p|--port) local port=$2; shift ;;
       -b|--bootstrap) local bootstrap=1 ;;
@@ -59,7 +60,7 @@ run() {
   if [[ -x bin/opensearch ]]; then
     if [[ -n $port ]]; then set -- -Ehttp.port="$port" "$@"; fi
     if [[ -d plugins/opensearch-security ]] && ! grep -q '^plugins.security.disabled: true' config/opensearch.yml; then
-      [[ -n $nosec ]] && exec ./bin/opensearch -Eplugins.security.disabled=true
+      [[ $sec == 0 ]] && exec ./bin/opensearch -Eplugins.security.disabled=true
       if [[ ! -f config/kirk.pem ]]; then
         init_security "${password:-admin}" "$@"
       elif [[ -n $password ]]; then
@@ -75,6 +76,8 @@ run() {
   # https://github.com/opensearch-project/OpenSearch-Dashboards/blob/c2ac4c8ae102a76df4258e8e871375299b6ad008/src/dev/build/tasks/os_packages/docker_generator/resources/bin/opensearch-dashboards-docker
   if [[ -d plugins/securityDashboards || -d plugins/security-dashboards-plugin ]] && ! grep -q '^opensearch.hosts' config/opensearch_dashboards.yml; then
     opts+=(--opensearch.hosts=https://localhost:9200 --opensearch.username=kibanaserver --opensearch.password=kibanaserver --opensearch.ssl.verificationMode=none --opensearch.requestHeadersWhitelist='["authorization", "securitytenant"]' --opensearch_security.multitenancy.enabled=true --opensearch_security.multitenancy.tenants.preferred='["Private", "Global"]' --opensearch_security.readonly_mode.roles='["kibana_read_only"]' --opensearch_security.cookie.secure=false)
+  elif [[ $sec == 1 ]]; then
+    opts+=(--opensearch.hosts=https://localhost:9200 --opensearch.username=admin --opensearch.password='My_password_123!@#' --opensearch.ssl.verificationMode=none "--opensearch.customHeaders.authorization=Basic YWRtaW46TXlfcGFzc3dvcmRfMTIzIUAj")
   fi
   if [[ -x bin/opensearch-dashboards ]]; then
     if [[ $start_cmd = start:explore ]]; then

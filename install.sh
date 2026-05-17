@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=2155
 
-NODE_VERSION=22.22.0
+NODE_VERSION=22.22.3
 YARN_VERSION=1.22.10
 JDK_VERSION=25
 BACKUP_DIR=$HOME/config-backup
@@ -343,10 +343,13 @@ install-claude-code() {
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
   claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
   claude plugin marketplace add OthmanAdi/planning-with-files && claude plugin install planning-with-files@planning-with-files && claude plugin disable planning-with-files
+  git config --global url."https://github.com/Digital-Process-Tools/".insteadOf "git@github.com:Digital-Process-Tools/"
   claude plugin marketplace add Digital-Process-Tools/claude-marketplace && claude plugin install remember@dpt-plugins
-  curl -sL https://github.com/KKKKhazix/khazix-skills/archive/refs/heads/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=1 --wildcards '*/neat-freak/*'
-  # curl -sL https://github.com/jgraph/drawio-mcp/archive/refs/heads/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
-  # curl -sL https://github.com/shadcn-ui/ui/archive/refs/heads/main.tar.gz | tar xvz -C .claude/skills/ --strip-components=2 --wildcards '*/skills/shadcn/*'
+  git config --global --unset url."https://github.com/Digital-Process-Tools/".insteadOf
+  # curl -sL https://github.com/anthropics/skills/archive/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skills/webapp-testing/*'
+  # curl -sL https://github.com/KKKKhazix/khazix-skills/archive/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=1 --wildcards '*/neat-freak/*'
+  # curl -sL https://github.com/jgraph/drawio-mcp/archive/main.tar.gz | tar xvz -C ~/.claude/skills/ --strip-components=2 --wildcards '*/skill-cli/drawio/*'
+  # curl -sL https://github.com/shadcn-ui/ui/archive/main.tar.gz | tar xvz -C .claude/skills/ --strip-components=2 --wildcards '*/skills/shadcn/*'
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics

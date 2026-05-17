@@ -64,7 +64,11 @@ customCommands:
   - key: <c-y>
     context: commits
     description: Copy command to apply selected commits
-    command: printf " git -C '$(pwd)' format-patch --stdout {{.SelectedCommitRange.From}}^..{{.SelectedCommitRange.To}} | git am -3" | y
+    command: printf " git -C '$(pwd)' format-patch --stdout {{.SelectedCommitRange.From}}^..{{.SelectedCommitRange.To}} | git am --reject" | y
+  - key: <c-x>
+    context: commits
+    description: Copy command to apply selected commits across machines
+    command: printf " printf $(git format-patch --stdout --no-stat --no-signature {{.SelectedCommitRange.From}}^..{{.SelectedCommitRange.To}} | xz -9e | base64 | tr -d '\r\n') | base64 -d | xz -d | git am --reject" | y
   - key: <c-a>
     context: files
     description: Add all files to be tracked

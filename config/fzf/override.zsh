@@ -19,18 +19,23 @@ fzf-cd-widget() {
     return 0
   fi
   # =======================================================
-  # customized: to support editing files, and run cd command in zle
+  # customized: to support editing files, inserting at cursor, and run cd command in zle
   if [[ -d $dir ]]; then
     builtin cd -- "$dir"
+    printf "\n\n"
+    zle fzf-redraw-prompt
+  elif [[ -n $LBUFFER ]]; then
+    LBUFFER="${LBUFFER}${(q)dir} "
+    zle redisplay
   else
     $EDITOR -- "$dir" < /dev/tty
+    printf "\n\n"
+    zle fzf-redraw-prompt
   fi
-  printf "\n\n"
-  # =======================================================
   local ret=$?
   unset dir # ensure this doesn't end up appearing in prompt expansion
-  zle fzf-redraw-prompt  # customized: use fzf-redraw-prompt instead of reset-prompt so prompt would update
   return $ret
+  # =======================================================
 }
 # customized: change to ctrl-p
 bindkey -M emacs '^P' fzf-file-widget

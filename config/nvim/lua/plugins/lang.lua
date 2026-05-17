@@ -139,7 +139,7 @@ return {
                 require("nvim-treesitter").install(to_install)
             end
             local available = { kulala_http = true }
-            local indent_exclude = { zsh = true, tmux = true }
+            local indent_exclude = { zsh = true, tmux = true, gitconfig = true }
             for _, lang in ipairs(require("nvim-treesitter").get_available()) do available[lang] = true end
             vim.api.nvim_create_autocmd("FileType", {
                 group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true }),

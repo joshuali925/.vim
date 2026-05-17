@@ -128,6 +128,7 @@ return {
                             { icon = " ", key = "i", desc = "Insert", action = ":enew | startinsert", hidden = true },
                             { icon = "󰙅 ", key = "b", desc = "Open file tree", action = ":Neotree reveal_force_cwd" },
                             { icon = " ", key = "f", desc = "Find files", action = ":lua require('snacks.picker').files()" },
+                            { icon = "󰈞 ", key = "/", desc = "Live grep", action = ":lua require('snacks.picker').grep()" },
                             { icon = " ", key = "m", desc = "Find MRU (CWD only: 'M')", action = ":lua require('snacks.picker').recent()" },
                             { icon = " ", key = "M", desc = "Find MRU in CWD", action = ":lua require('snacks.picker').recent({filter = {cwd = true}})", hidden = true },
                             { icon = " ", key = "z", desc = "Find projects", action = ":lua require('snacks.picker').projects()" },
