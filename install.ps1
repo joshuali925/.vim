@@ -3,6 +3,7 @@ REG ADD HKCU\Software\Classes\ms-officeapp\Shell\Open\Command /f /t REG_SZ /d ru
 # use old context menu
 REG ADD "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
 # disable folder type detection
+New-Item -Path "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell" -Force | Out-Null
 Set-ItemProperty "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell" -Name FolderType -Value NotSpecified -Type String -Force
 # disable bing search
 Set-ItemProperty HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search -Name BingSearchEnabled -Value 0 -Type DWord -Force
@@ -56,7 +57,7 @@ Add-Content -Path "$env:USERPROFILE\.zshrc" -Value "export LANG=C.UTF-8", "sourc
 Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "export LANG=C.UTF-8", "source ~/.vim/config/.bashrc"
 
 # install neovim
-scoop install neovim extras/neovide gcc
+scoop install neovim extras/neovide gcc make
 [Environment]::SetEnvironmentVariable("CC", "gcc", "User")  # for treesitter
 reg import "$env:USERPROFILE\scoop\apps\neovide\current\install-context.reg"
 Remove-Item "$env:USERPROFILE\.vim\config\nvim\autoload" -Force -Recurse

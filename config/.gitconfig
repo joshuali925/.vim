@@ -23,6 +23,7 @@
 	autoremove = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all; git repack -a -d -f --depth=300 --window=300 --window-memory=1g; git prune-packed"  ; from https://github.com/GitAlias/gitalias/tree/7b27ef766a3557a5708086734559f6a14bb97744/doc/git-optimizer, claims better than git gc --prune=now --aggressive
 	difft = -c diff.external=difft diff
 	diffw = diff --word-diff=color --ignore-all-space
+	diffm = diff --color-moved --color-moved-ws=allow-indentation-change
 	preview-merge-diff = "!f() { git diff HEAD...\"$@\"; }; f"  ; diff between target and the common ancestor of HEAD and target
 	preview-merge-log = "!git log --graph --pretty=simple HEAD.."  ; commits in target but not in HEAD (will be merged with git merge target)
 	pulled = "!git log --pretty=simple --stat ORIG_HEAD...HEAD"  ; what was pulled

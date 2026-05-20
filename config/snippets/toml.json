@@ -1,0 +1,12 @@
+{
+  "mise task": {
+    "prefix": "mise-task",
+    "body": [
+      "[tasks.${1:name}]",
+      "env = {",
+      "\t${2:NODE_ENV = \"development\"},",
+      "}",
+      "run = \"${3:ls}\""
+    ]
+  }
+}

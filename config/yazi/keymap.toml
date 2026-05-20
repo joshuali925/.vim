@@ -25,6 +25,7 @@ prepend_keymap = [
   { on = "]", run = "tab_create --current", desc = "Create a new tab with CWD" },
   { on = "<Backspace>", run = "tab_switch -1 --relative", desc = "Switch to the previous tab" },
   { on = "\\", run = "tab_switch 1 --relative", desc = "Switch to the next tab" },
+  { on = "o", run = "open --interactive", desc = "Open selected files interactively" },
   { on = "e", run = 'shell --block -- "$EDITOR" %s', desc = "Edit files", for = "unix" },
   { on = "e", run = 'shell --block -- %%EDITOR%% %s', desc = "Edit files", for = "windows" },
   { on = "<C-o>", run = "shell --block lazygit", desc = "Open Lazygit" },
@@ -70,8 +71,6 @@ prepend_keymap = [
 
   { on = ["m", "r"], run = 'shell --block -- printf "%%s\n" %s | vidir -', desc = "vidir" },
   { on = ["m", "s"], run = "plugin command -- size --hovered", desc = "Show size" },
-  { on = ["m", "t"], run = 'shell --block -- less -RiM +F %h', desc = "Tail" },
-  { on = ["m", "c"], run = 'shell --block -- "$EDITOR" ~/.vim/config/yazi/keymap.toml', desc = "Edit config" },
   { on = ["m", "y"], run = "copy path", desc = "Copy the absolute path" },
   { on = ["m", "Y"], run = '''shell -- for file in %s; do name="${file##*/}"; [[ "$name" =~ [[:space:]*?\\[\{\`\$\\\%%\#\'\"\|\!\<] ]] && name="'$name'"; printf "%%s " "$name"; done | sed 's/ $//' | y''', desc = "Copy file names" },
   { on = ["m", "g"], run = '''shell -- realpath --relative-to="$(git rev-parse --show-toplevel || echo ~)" %h | head -c -1 | y''', desc = "Copy the relative path to git root or home" },
@@ -81,7 +80,6 @@ prepend_keymap = [
   { on = ["m", "d", "5"], run = 'shell --block -- md5sum %s; echo Press any key to continue; bash -c "read -n 1 -s _"', desc = "Show selected files md5sum" },
   { on = ["m", "1"], run = "shell --block btop", desc = "Open btop" },
   { on = ["m", "!"], run = 'shell --block -- sudo env PATH="$PATH" HOME="$HOME" yazi', desc = "Open yazi with sudo" },
-  { on = ["m", "e"], run = 'shell --block -- sudo vim -u ~/.vim/config/mini.vim %h', desc = "Sudo edit" },
 ]
 
 [input]

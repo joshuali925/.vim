@@ -307,10 +307,11 @@ vim.api.nvim_create_user_command("Fd", "call funcs#grep('fd', <q-args>)", { narg
 vim.api.nvim_create_user_command("Rg", "call funcs#grep('rg --vimgrep', <q-args>)", { nargs = "+" })
 vim.api.nvim_create_user_command("RgRegex", "lua require('snacks.picker').grep({regex = '<bang>' == '' and true or false, live = false, on_show = function() vim.cmd.stopinsert() end, search = <q-args>})", { nargs = "*", bang = true })
 vim.api.nvim_create_user_command("RgNoRegex", "lua require('snacks.picker').grep({regex = false, live = false, on_show = function() vim.cmd.stopinsert() end, search = <q-args>})", { nargs = "*" })
+vim.api.nvim_create_user_command("JoinWithChar", [[if <line1> < <line2> | keeppatterns <line1>,<line2>s/\s\+$//e | keeppatterns <line1>+1,<line2>s/^\s\+//e | if <q-args> != '' | silent keeppatterns <line1>,<line2>-1s/$/\=<q-args>/ | endif | <line1>,<line2>join! | endif]], { range = true, nargs = "?" })
 vim.api.nvim_create_user_command("Glow", "execute 'terminal glow %' | noremap <nowait> <buffer> d <C-d>| noremap <buffer> u <C-u>", {})
 vim.api.nvim_create_user_command("TSC", "compiler tsc | let &l:makeprg = stdpath('data') . '/mason/packages/typescript-language-server/node_modules/typescript/bin/tsc' | silent make --noEmit | copen", {})
 vim.api.nvim_create_user_command("JSON", [[if <range> != 0 | execute "'<,'>Prettier json" | else | keeppatterns %s/\n\+\%$//e | set shiftwidth=2 filetype=json | execute 'Prettier json' | endif]], { range = true })
-vim.api.nvim_create_user_command("JoinWithChar", [[if <line1> < <line2> | keeppatterns <line1>,<line2>s/\s\+$//e | keeppatterns <line1>+1,<line2>s/^\s\+//e | if <q-args> != '' | silent keeppatterns <line1>,<line2>-1s/$/\=<q-args>/ | endif | <line1>,<line2>join! | endif]], { range = true, nargs = "?" })
+vim.api.nvim_create_user_command("SSE", [[setlocal filetype=markdown | %!jq -Rrs 'split("\n")|map(select(startswith("data:"))|sub("^data: ?";"")|. as $r|(try fromjson catch null)|if type\!="object" or (.type|not) then $r+"\n" elif .delta then .delta else (.type|ascii_downcase) as $t|if $t|endswith("_start") then "\n[\(.type)\((.toolCallName//.role//.stepName//.name)|if . then ": \(.)" else "" end)]\n" elif $t|endswith("_end") then "\n" else "[\(.type)]\((.content//.message)|if (.//"")\!="" then " \(.)" else "" end)\n" end end)|add']], {})
 vim.api.nvim_create_user_command("DirDiff", function(opts)
     if vim.tbl_count(opts.fargs) ~= 2 then return vim.notify("DirDiff requires exactly two directory arguments", vim.log.levels.ERROR) end
     vim.cmd.tabnew()

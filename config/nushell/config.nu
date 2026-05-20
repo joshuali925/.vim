@@ -60,7 +60,7 @@ def --wrapped st [...args] {
 }
 
 def --wrapped rclone [...args] {
-  with-env { RCLONE_PROGRESS: "true", RCLONE_DELETE_EMPTY_SRC_DIRS: "true" } { ^rclone ...$args }
+  with-env { RCLONE_PROGRESS: "true", RCLONE_DELETE_EMPTY_SRC_DIRS: "true", RCLONE_DISABLE_HTTP2: "true", RCLONE_MULTI_THREAD_CUTOFF: "1Mi" } { ^rclone ...$args }
 }
 
 def --env --wrapped z [...args] {

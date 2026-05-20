@@ -69,7 +69,7 @@ alias jsonl2csv='json2csv -s'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -avihP --no-owner --no-group --delete --filter=':- .gitignore'"
-alias rclone="env RCLONE_PROGRESS=true RCLONE_DELETE_EMPTY_SRC_DIRS=true rclone"
+alias rclone="env RCLONE_PROGRESS=true RCLONE_DELETE_EMPTY_SRC_DIRS=true RCLONE_DISABLE_HTTP2=true RCLONE_MULTI_THREAD_CUTOFF=1Mi rclone"
 alias markdowns='if [[ ! -x ~/.local/bin/mdview ]]; then uv tool install md-viewer-py; fi && printf %s "$(getip):8081" | y && eval mdview --host 0.0.0.0'  # eval to avoid red syntax if not installed
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
@@ -502,7 +502,7 @@ man() {
 env() {
   if [[ $# -gt 0 || ! -t 1 ]]; then command env "$@"; return $?; fi
   # shellcheck disable=2016
-  printenv | cut -d= -f1 | fzf --multi --preview='printenv {}' | xargs -r -I{} sh -c 'echo "{}=$(printenv "{}")"'
+  printenv | cut -d= -f1 | fzf --multi --preview-window=wrap --preview='printenv {}' | xargs -r -I{} sh -c 'echo "{}=$(printenv "{}")"'
 }
 
 jo() {  # basic implementation of https://github.com/jpmens/jo
@@ -626,7 +626,7 @@ docker-shell() {
     fi
     return $?
   fi
-  local selected_id=$(docker ps | sed '1d' | awk '{printf "%s %-30s %s\n", $1, $2, $3}' | fzf --query="${1:-}" --height=100% --list-border=none --header='C-/: wrap | CR: shell | C-o: logs' --preview-window=up,70%,border-bottom,follow --preview='docker logs --follow --tail=1000 {1}' --bind='ctrl-/:change-preview-window(wrap|nowrap)' --bind='ctrl-o:execute:docker logs --follow --tail=10000 {1}')
+  local selected_id=$(docker ps --format '{{.ID}}|{{.Label "com.docker.compose.project"}}|{{.Names}}|{{.Status}}|{{.Image}}' | awk -F'|' '{ printf "%s %-35s %-30s %s\n", $1, ($2?"("$2") ":"") $3, $4, $5 }' | fzf --query="${1:-}" --height=100% --list-border=none --header='C-/: wrap | CR: shell | C-o: logs' --preview-window=up,70%,border-bottom,follow --preview='docker logs --follow --tail=1000 {1}' --bind='ctrl-/:change-preview-window(wrap|nowrap)' --bind='ctrl-o:execute:docker logs --follow --tail=10000 {1}')
   if [[ -z $selected_id ]]; then return 1; fi
   printf "\n → %s\n" "$selected_id"
   selected_id=$(awk '{print $1}' <<< "$selected_id")

@@ -21,6 +21,7 @@
       { "language": "python", "path": "./python.json" },
       { "language": ["sh", "bash", "zsh"], "path": "./sh.json" },
       { "language": "sshconfig", "path": "./sshconfig.json" },
+      { "language": "toml", "path": "./toml.json" },
       { "language": ["typescript", "typescriptreact"], "path": "./typescript.json" },
       { "language": "typescriptreact", "path": "./typescriptreact.json" },
       { "language": "vim", "path": "./vim.json" },

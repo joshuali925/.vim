@@ -24,7 +24,6 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "com\\.amazon\\.workspaces",
-                "com\\.microsoft\\.rdc\\.macos",
                 "com\\.moonlight-stream\\.Moonlight"
               ]
             }
@@ -48,7 +47,6 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "com\\.amazon\\.workspaces",
-                "com\\.microsoft\\.rdc\\.macos",
                 "com\\.moonlight-stream\\.Moonlight"
               ]
             }
@@ -73,7 +71,6 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "com\\.amazon\\.workspaces",
-                "com\\.microsoft\\.rdc\\.macos",
                 "com\\.moonlight-stream\\.Moonlight"
               ]
             }
@@ -98,7 +95,6 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "com\\.amazon\\.workspaces",
-                "com\\.microsoft\\.rdc\\.macos",
                 "com\\.moonlight-stream\\.Moonlight"
               ]
             }
@@ -123,7 +119,6 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "com\\.amazon\\.workspaces",
-                "com\\.microsoft\\.rdc\\.macos",
                 "com\\.moonlight-stream\\.Moonlight"
               ]
             }

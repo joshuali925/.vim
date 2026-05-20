@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+exec 2>/dev/null
+
+ESC=$'\033'; BEL=$'\007'
+msg="$(jq -r '.message // .hook_event_name // "Claude done"')"
+loc="$(tmux display-message -p -t "${TMUX_PANE:-}" '#S:#I.#W')"
+seq="${ESC}]9;claude [${loc:-?}] received event: ${msg:-Claude done}${BEL}"
+
+if [ -n "$TMUX" ]; then
+  seq="${ESC}Ptmux;${ESC}${seq//$ESC/$ESC$ESC}${ESC}\\"
+  tty="$(tmux display-message -p -t "${TMUX_PANE:-}" '#{pane_tty}')"
+fi
+printf '%s' "$seq" > "${tty:-/dev/tty}"
+
+exit 0

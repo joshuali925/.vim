@@ -1,4 +1,4 @@
-# https://raw.githubusercontent.com/sxyazi/yazi/HEAD/yazi-config/preset/yazi.toml
+# defaults: https://raw.githubusercontent.com/sxyazi/yazi/HEAD/yazi-config/preset/yazi-default.toml
 
 [mgr]
 ratio = [1, 2, 3]
@@ -12,8 +12,19 @@ tab_size = 4
 max_width = 1600
 max_height = 1900
 
+[opener]
+ffmpeg = [
+  { run = "ffmpeg -i %s1 2>&1 | less -RiM", desc = "Run ffmpeg info", block = true },
+]
+text_actions = [
+  { run = "less -RiM +F %s1", desc = "Tail", block = true },
+  { run = 'sudo vim -u ~/.vim/config/mini.vim %s1', desc = "Sudo edit", block = true },
+]
+
 [open]
 prepend_rules = [
   { url = "*/", use = ["open", "reveal"] },
-  { url = "{audio,video}/*", use = ["open", "reveal"] },
+  { mime = "text/*", use = ["edit", "reveal", "text_actions"] },
+  { mime = "image/*", use = ["open", "reveal", "ffmpeg"] },
+  { mime = "{audio,video}/*", use = ["play", "reveal", "ffmpeg"] },
 ]
