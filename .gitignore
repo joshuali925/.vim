@@ -9,3 +9,5 @@ plugged/
 # nvim vim.pack
 nvim-pack-lock.json
 nvim-pack-lock.json.bak
+
+config/hammerspoon/Spoons/

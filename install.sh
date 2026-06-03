@@ -141,7 +141,7 @@ install-devtools() {
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
     # TODO(macOS 26) try https://github.com/Arthur-Ficial/apfel, https://github.com/gety-ai/apple-on-device-openai, https://github.com/stonerl/Thaw
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly neovide rectangle linearmouse maccy pixpin trex jordanbaird-ice doll karabiner-elements alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion cardinal-search
+    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly neovide linearmouse maccy pixpin trex jordanbaird-ice doll hammerspoon alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion cardinal-search
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
     # to update one cask: brew upgrade --cask wezterm@nightly --greedy-latest
@@ -174,7 +174,7 @@ install-dotfiles() {
     ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport
     link-file ~/.vim/config/lazygit_config.yml ~/Library/ApplicationSupport/lazygit/config.yml
     link-file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
-    link-file ~/.vim/config/karabiner.json ~/.config/karabiner/assets/complex_modifications/karabiner.json
+    link-file ~/.vim/config/hammerspoon ~/.hammerspoon --relative
     mkdir -p ~/.config/neovide && echo 'frame = "none"' > ~/.config/neovide/config.toml
   elif [[ $OSTYPE = linux-android ]]; then
     append-once 'export SSH_CLIENT=1 TMUX_NO_TPM=1' ~/.zshrc
@@ -350,6 +350,7 @@ install-claude-code() {
   # npx -y skills add KKKKhazix/khazix-skills --skill neat-freak --agent claude-code --yes --global
   # npx -y skills add jgraph/drawio-mcp --agent claude-code --yes --global
   # npx -y skills add shadcn-ui/ui --agent claude-code --yes
+  # npx -y skills add hardikpandya/stop-slop --agent claude-code --yes --global
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics

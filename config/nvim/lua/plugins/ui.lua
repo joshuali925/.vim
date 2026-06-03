@@ -73,7 +73,7 @@ return {
                     mappings = {
                         ["l"] = "open",
                         ["h"] = "close_node",
-                        ["<BS>"] = "prev_source",
+                        ["<bs>"] = "prev_source", -- keep lowercase to override neo-tree default <bs>
                         ["\\"] = "next_source",
                         ["P"] = { "toggle_preview", config = { use_float = true } },
                         [","] = { "scroll_preview", config = { direction = -10 } },

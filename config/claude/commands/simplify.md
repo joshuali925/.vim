@@ -4,7 +4,7 @@ Review all changed files for reuse, quality, and efficiency. Fix any issues foun
 
 ## Phase 1: Identify Changes
 
-Run `git diff` (or `git diff HEAD` if there are staged changes) to see what changed. If there are no git changes, review the most recently modified files that the user mentioned or that you edited earlier in this conversation.
+Run `git diff` (or `git diff HEAD` if there are staged changes, or `git diff <ref>` if provided) to see what changed. If there are no git changes, review the most recently modified files that the user mentioned or that you edited earlier in this conversation.
 
 ## Phase 2: Launch Three Review Agents in Parallel
 
@@ -47,4 +47,4 @@ Review the same changes for efficiency:
 
 Wait for all three agents to complete. Aggregate their findings and fix each issue directly. If a finding is a false positive or not worth addressing, note it and move on — do not argue with the finding, just skip it.
 
-When done, briefly summarize what was fixed (or confirm the code was already clean).
+When done, briefly summarize what was fixed (or confirm the code was already clean) and make a commit.

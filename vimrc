@@ -227,8 +227,8 @@ nnoremap Q q
 xnoremap @q :normal! @q<CR>
 xnoremap @@ :normal! @@<CR>
 nnoremap c@ :call funcs#edit_register()<CR>
-nnoremap _ <C-o>
-nnoremap + <C-i>
+nnoremap ( <C-o>
+nnoremap ) <C-i>
 nnoremap Y y$
 nnoremap U :execute 'earlier ' . v:count1 . 'f'<CR>
 xnoremap . :normal .<CR>
@@ -240,8 +240,8 @@ xnoremap g/ <Esc>/\%><C-r>=line("'<") - 1<CR>l\%<<C-r>=line("'>") + 1<CR>l
 nnoremap gx :call netrw#BrowseX(expand('<cfile>'), netrw#CheckIfRemote())<CR>
 xnoremap gx :<C-u>call netrw#BrowseX(expand(funcs#get_visual_selection()), netrw#CheckIfRemote())<CR>
 nnoremap <expr> zn v:count > 0 ? ':set foldlevel=' . v:count . '<CR>' : ':%foldclose<CR>'
-nnoremap Z[ :1,.- bdelete<CR>
-nnoremap Z] :.+,$ bdelete<CR>
+nnoremap ZH :1,.- bdelete<CR>
+nnoremap ZL :.+,$ bdelete<CR>
 nnoremap ZX :%bdelete <bar> edit #<CR>
 nmap zh zhz
 nmap zl zlz

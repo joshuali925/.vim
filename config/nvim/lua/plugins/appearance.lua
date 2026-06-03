@@ -77,8 +77,8 @@ return {
             { "n", "\\", "<Cmd>keepjumps BufferLineCycleNext<CR>" },
             { "n", "<C-w><BS>", "<Cmd>execute 'BufferLineMovePrev' | redraw!<CR><C-w>", { remap = true } },
             { "n", "<C-w>\\", "<Cmd>execute 'BufferLineMoveNext' | redraw!<CR><C-w>", { remap = true } },
-            { "n", "Z[", "<Cmd>BufferLineCloseLeft<CR>" },
-            { "n", "Z]", "<Cmd>BufferLineCloseRight<CR>" },
+            { "n", "ZH", "<Cmd>BufferLineCloseLeft<CR>" },
+            { "n", "ZL", "<Cmd>BufferLineCloseRight<CR>" },
         },
         config = function()
             require("bufferline").setup({ highlights = { buffer_selected = { bold = true, italic = false } } })

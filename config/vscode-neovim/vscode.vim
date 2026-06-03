@@ -124,8 +124,8 @@ xnoremap - g_
 noremap g- g$
 map <Down> gj
 map <Up> gk
-nnoremap _ <Cmd>call VSCodeNotify('workbench.action.navigateBack')<CR>
-nnoremap + <Cmd>call VSCodeNotify('workbench.action.navigateForward')<CR>
+nnoremap ( <Cmd>call VSCodeNotify('workbench.action.navigateBack')<CR>
+nnoremap ) <Cmd>call VSCodeNotify('workbench.action.navigateForward')<CR>
 nnoremap Q q
 " yankstack needs nmap
 nmap Y y$
@@ -183,13 +183,13 @@ nmap <leader><C-r> <Plug>(RepeatRedo)
 " nnoremap u :call VSCodeNotify('undo')<CR>
 " nnoremap <C-r> :call VSCodeNotify('redo')<CR>
 
-nnoremap Z[ <Cmd>call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
-nnoremap Z] <Cmd>call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
+nnoremap ZH <Cmd>call VSCodeNotify('workbench.action.closeEditorsToTheLeft')<CR>
+nnoremap ZL <Cmd>call VSCodeNotify('workbench.action.closeEditorsToTheRight')<CR>
 nnoremap ZX <Cmd>call VSCodeNotify('workbench.action.closeOtherEditors')<CR>
 nnoremap [g <Cmd>call VSCodeNotify('workbench.action.editor.previousChange')<CR>
 nnoremap ]g <Cmd>call VSCodeNotify('workbench.action.editor.nextChange')<CR>
-nnoremap [a <Cmd>call VSCodeNotify('editor.action.marker.prev')<CR>
-nnoremap ]a <Cmd>call VSCodeNotify('editor.action.marker.next')<CR>
+nnoremap [d <Cmd>call VSCodeNotify('editor.action.marker.prev')<CR>
+nnoremap ]d <Cmd>call VSCodeNotify('editor.action.marker.next')<CR>
 nmap [b gT
 nmap ]b gt
 nnoremap [e <Cmd>call VSCodeNotify('editor.action.moveLinesUpAction')<CR>

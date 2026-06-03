@@ -38,7 +38,7 @@ alias cp='cp -dRiv --reflink=auto --sparse=always'
 alias mkdir='mkdir -pv'
 alias ll='\ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
-alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n'
+alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n || eval ss -lntp || eval netstat -lntp'  # eval to avoid red syntax if not installed
 alias chmod\?='stat --printf "%a %n\n"'
 alias bell='printf "\a"'
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>. to get epoch milliseconds: date +%s%3N
