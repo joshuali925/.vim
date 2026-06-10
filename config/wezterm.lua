@@ -27,7 +27,7 @@ local tokyonight = wezterm.color.get_builtin_schemes()["tokyonight_storm"]
 tokyonight.brights[1] = "#717993"
 
 config.use_ime = true
-config.font = wezterm.font_with_fallback({ { family = "JetBrainsMono Nerd Font", weight = "Medium" } })
+config.font = wezterm.font_with_fallback({ { family = "JetBrainsMono Nerd Font", weight = "Medium" }, "Hiragino Sans GB" })
 config.font_size = 14
 config.line_height = 1.1
 config.use_fancy_tab_bar = false
@@ -53,7 +53,7 @@ config.color_scheme = light_theme and "Catppuccin Latte" or "tokyonight"
 config.quick_select_patterns = {
     [[[\w\-.%/]*\.[\w\-.%/~]+]],
     -- TODO remove
-    [[ds-\w+]],
+    [[ds[-\w]+]],
     [[i-\w+]],
     [[\d+:[\w-]+]],
 }
@@ -64,15 +64,15 @@ config.keys = {
     { key = "d", mods = "CMD|SHIFT", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
     { key = "k", mods = "CMD", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
     { key = "f", mods = "CMD", action = wezterm.action.Search({ CaseInSensitiveString = "" }) },
-    { key = "[", mods = "CMD", action = wezterm.action.MoveTabRelative(-1) },
-    { key = "]", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
+    { key = "9", mods = "CMD", action = wezterm.action.MoveTabRelative(-1) },
+    { key = "0", mods = "CMD", action = wezterm.action.MoveTabRelative(1) },
     { key = "h", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Left") },
     { key = "j", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Down") },
     { key = "k", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Up") },
     { key = "l", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Right") },
     { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
     {
-        key = "'",
+        key = "/",
         mods = "META",
         action = wezterm.action.QuickSelectArgs({
             scope_lines = 0,

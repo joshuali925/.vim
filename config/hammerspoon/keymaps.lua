@@ -52,13 +52,13 @@ local FN_ROW = {
 local keycodeToName = {}
 for name, code in pairs(hs.keycodes.map) do if type(code) == "number" and keycodeToName[code] == nil then keycodeToName[code] = name end end
 
-local _cachedApp
+local _cachedBundle
 local function getFrontAppBundleId()
-    if _cachedApp == nil then
-        local application = hs.application.frontmostApplication()
-        _cachedApp = application and application:bundleID() or ""
+    if _cachedBundle == nil then
+        local front = hs.application.frontmostApplication()
+        _cachedBundle = front and front:bundleID() or ""
     end
-    return _cachedApp
+    return _cachedBundle
 end
 
 local function inApps(...)
@@ -77,16 +77,38 @@ local function flagsToMods(flags)
     return m
 end
 
+local nextVerticalWindowSnap = "up"
 local function hyper(key, flags)
     -- Navigation
     if key == "n" then return send("tab", { "ctrl", "shift" }) end
     if key == "m" then return send("tab", { "ctrl" }) end
     if key == "q" then return send("pagedown") end
     if key == "r" then return send(flags.cmd and "5" or "pageup", flags.cmd and { "cmd", "shift" }) end -- cmd: screenshot
-    if key == "h" then return send("left", flags.cmd and { "shift" }) end
-    if key == "j" then return send("down", flags.cmd and { "shift" }) end
-    if key == "k" then return send("up", flags.cmd and { "shift" }) end
-    if key == "l" then return send("right", flags.cmd and { "shift" }) end
+    if key == "h" then
+        if flags.alt then
+            if flags.cmd then return require("window").moveDisplay("previous") end
+            return require("window").snap("left")
+        end
+        return send("left", flags.cmd and { "shift" } or flagsToMods(flags))
+    end
+    if key == "j" then
+        if flags.alt then
+            nextVerticalWindowSnap = nextVerticalWindowSnap == "down" and "up" or "down"
+            return require("window").snap(nextVerticalWindowSnap)
+        end
+        return send("down", flags.cmd and { "shift" } or flagsToMods(flags))
+    end
+    if key == "k" then
+        if flags.alt then return require("window").maximize() end
+        return send("up", flags.cmd and { "shift" } or flagsToMods(flags))
+    end
+    if key == "l" then
+        if flags.alt then
+            if flags.cmd then return require("window").moveDisplay("next") end
+            return require("window").snap("right")
+        end
+        return send("right", flags.cmd and { "shift" } or flagsToMods(flags))
+    end
     if key == "e" then
         if inApps(TERM) then return send("right", { "ctrl" }) end
         return send("right", flags.cmd and { "alt", "shift" } or { "alt" })
@@ -131,7 +153,7 @@ local function hyper(key, flags)
         if flags.cmd then return sendList({ { "right", { "cmd" } }, { "down", { "shift" } }, { "left", { "cmd", "shift" } }, { "delete" } }) else return send("delete", { "alt" }) end
     end
     if key == "d" then
-        if inApps(TERM) then return sendList({ { "end" }, { "u", { "ctrl" } } }) end
+        if inApps(TERM) then return send("u", { "ctrl" }) end
         if flags.cmd then return sendList({ { "right", { "cmd" } }, { "left", { "cmd", "shift" } }, { "delete" } }) end
         return sendList({ { "right", { "cmd" } }, { "left", { "cmd", "shift" } }, { "left", { "cmd", "shift" } }, { "left", { "shift" } }, { "delete" }, { "right" }, { "right", { "cmd" } } })
     end
@@ -139,7 +161,7 @@ local function hyper(key, flags)
     if key == "delete" then return sendList({ { "right", { "alt" } }, { "delete", { "alt" } } }) end                                            -- delete word
 
     -- Editing
-    if key == "o" then if flags.cmd then return sendList({ { "left", { "cmd" } }, { "return" }, { "up" } }) else return sendList({ { "right", { "cmd" } }, { "return" } }) end end
+    if key == "o" then if flags.cmd then return sendList({ { "left", { "cmd" } }, { "return", { "shift" } }, { "up" } }) else return sendList({ { "right", { "cmd" } }, { "return", { "shift" } } }) end end
     if key == "9" then
         if flags.cmd then return sendList({ { "x", { "cmd" } }, { "'", { "shift" } }, { "v", { "cmd" } }, { "'", { "shift" } } }) end -- wrap ""
         return sendList({ { "x", { "cmd" } }, { "9", { "shift" } }, { "v", { "cmd" } }, { "0", { "shift" } } })                       -- wrap ()
@@ -156,7 +178,6 @@ local function hyper(key, flags)
     if key == "," then return hs.eventtap.otherClick(hs.mouse.absolutePosition(), nil, 3) end -- back
     if key == "." then return hs.eventtap.otherClick(hs.mouse.absolutePosition(), nil, 4) end -- forward
     if key == "c" then return send("`", flags.cmd and { "cmd", "shift" } or { "cmd" }) end    -- switch window
-    if key == "tab" and flags.ctrl then return send("tab", { "ctrl", "shift" }) end           -- use capslock as shift in ctrl-shift-tab for silakka54
 end
 
 local hyperActive, hyperUsed, hyperDownAt = false, false, 0
@@ -165,7 +186,7 @@ local upActive, upUsed, upDownAt = false, false, 0
 local function keyHandler(e)
     if e:getProperty(hs.eventtap.event.properties.eventSourceUserData) == CUSTOM_MARK then return false end
     if nizPlum.shouldSuppress(e) then return true end -- block built-in keyboard while Niz Plum 66 is connected
-    _cachedApp = nil
+    _cachedBundle = nil
     local type, code, flags = e:getType(), e:getKeyCode(), e:getFlags()
 
     if code == hs.keycodes.map.f18 then -- super capslock
@@ -220,8 +241,7 @@ local function keyHandler(e)
     local name = keycodeToName[code]
 
     -- Application Specific
-    if name == "tab" and flags.cmd and flags.ctrl and not flags.alt then return send("tab", { "cmd", "shift" }) end -- use capslock as shift in cmd-shift-tab for silakka54
-    if name and ((flags.cmd and not flags.alt) or (flags.alt and not flags.cmd)) and inApps(WS, MOONLIGHT) then     -- swap cmd and opt on windows
+    if name and ((flags.cmd and not flags.alt) or (flags.alt and not flags.cmd)) and inApps(WS, MOONLIGHT) then -- swap cmd and opt on windows
         return send(name, flagsToMods({ ctrl = flags.ctrl, shift = flags.shift, [flags.cmd and "alt" or "cmd"] = true }))
     end
     if flags.cmd and not flags.alt and not flags.ctrl and not flags.shift and inApps(EDGE, CHROME) then -- browser shortcuts
@@ -249,10 +269,9 @@ end
 hs.hotkey.bind({ "alt" }, "up", function() require("window").maximize() end)
 hs.hotkey.bind({ "alt" }, "left", function() require("window").snap("left") end)
 hs.hotkey.bind({ "alt" }, "right", function() require("window").snap("right") end)
-local vHalf = "up"
 hs.hotkey.bind({ "alt" }, "down", function()
-    vHalf = vHalf == "down" and "up" or "down"
-    require("window").snap(vHalf)
+    nextVerticalWindowSnap = nextVerticalWindowSnap == "down" and "up" or "down"
+    require("window").snap(nextVerticalWindowSnap)
 end)
 hs.hotkey.bind({ "cmd", "alt" }, "left", function() require("window").moveDisplay("previous") end)
 hs.hotkey.bind({ "cmd", "alt" }, "right", function() require("window").moveDisplay("next") end)
@@ -261,15 +280,28 @@ hs.hotkey.bind({ "cmd", "alt" }, "9", function() require("window").resizeBy(-10)
 hs.hotkey.bind({ "cmd", "alt" }, "0", function() require("window").resizeBy(10) end)
 
 -- Application Switcher
-local function sh(cmd) return function() hs.execute(cmd, true) end end
-hs.hotkey.bind({ "cmd" }, "`", sh([[pgrep 'Slack' && open -a 'Slack']]))
-hs.hotkey.bind({ "cmd", "alt" }, "`", sh([[(pgrep zoom.us && open -a zoom.us) || open -a WeChat]]))
-hs.hotkey.bind({ "cmd" }, "1", sh([[(pgrep Chrome && open -a 'Google Chrome') || (pgrep 'Microsoft Edge' && open -a 'Microsoft Edge') || (pgrep Orion && open -a 'Orion')]]))
-hs.hotkey.bind({ "cmd", "alt" }, "1", sh([[(pgrep Orion && open -a 'Orion') || (pgrep 'Microsoft Outlook' && open -a 'Microsoft Outlook')]]))
-hs.hotkey.bind({ "cmd" }, "2", sh([[ps -p $(pgrep '^Code$|idea|jetbrains_client' | head -1) -o comm= | grep -m1 -o '.*\.app' | xargs -r -I@ open -a '@']]))
-hs.hotkey.bind({ "cmd", "alt" }, "2", sh([[pgrep 'Microsoft Outlook' && open -a 'Microsoft Outlook']]))
-hs.hotkey.bind({ "cmd" }, "3", sh([[open -a 'WezTerm']]))
-hs.hotkey.bind({ "cmd" }, "4", sh([[open -a 'Notes']]))
+local t202020 = require("202020")
+local function focusIfRunning(bundle)
+    local app = hs.application.get(bundle)
+    return app and app:activate()
+end
+local function focusApps(...)
+    for i = 1, select("#", ...) do if focusIfRunning(select(i, ...)) then return end end
+    hs.application.launchOrFocusByBundleID(...)
+end
+hs.hotkey.bind({ "cmd" }, "`", function()
+    local front = hs.application.frontmostApplication()
+    local bundle = front and front:bundleID() or ""
+    local toZoom = bundle == "com.tinyspeck.slackmacgap" or (bundle ~= "us.zoom.xos" and t202020.inMeeting())
+    focusIfRunning(toZoom and "us.zoom.xos" or "com.tinyspeck.slackmacgap")
+end)
+hs.hotkey.bind({ "cmd" }, "1", function() focusApps("com.google.Chrome", "com.microsoft.edgemac", "com.kagi.kagimacOS") end)
+hs.hotkey.bind({ "cmd", "alt" }, "1", function() focusApps("com.kagi.kagimacOS", "com.microsoft.Outlook") end)
+-- hs.hotkey.bind({ "cmd" }, "2", function() focusApps("com.microsoft.VSCode", "com.jetbrains.intellij") end)
+-- hs.hotkey.bind({ "cmd", "alt" }, "2", function() focusIfRunning("com.microsoft.Outlook") end)
+hs.hotkey.bind({ "cmd" }, "2", function() focusIfRunning("com.microsoft.Outlook") end)
+hs.hotkey.bind({ "cmd" }, "3", function() focusApps("com.github.wez.wezterm") end)
+hs.hotkey.bind({ "cmd" }, "4", function() focusApps("com.apple.Notes") end)
 
 local function capsLockToF18() hs.execute([[hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x70000006D}]}']]) end
 capsLockToF18()

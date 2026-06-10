@@ -6,8 +6,7 @@ local COUNTDOWN_SECONDS = 10
 local SLEEP_GAP_THRESHOLD = 30 -- a tick gap larger than this implies system sleep
 
 local paused = 0               -- 0 = running, 1 = manually paused, 2 = auto-paused on screen sharing
-local deadline = hs.timer.secondsSinceEpoch() + WORK_SECONDS
-local bar = hs.menubar.new(true, "202020")
+local deadline, bar
 
 local pausedRemaining = WORK_SECONDS
 local function remaining()
@@ -73,7 +72,7 @@ local function release(resource, method) if resource then resource[method](resou
 
 local overlays, overlayTimer, overlayTap, breakActive = {}, nil, nil, false
 local function dismissBreak()
-    if not breakActive then return end
+    if not breakActive then return false end
     breakActive = false
     release(overlayTimer, "stop")
     release(overlayTap, "stop")
@@ -82,6 +81,7 @@ local function dismissBreak()
     overlays = {}
     deadline = hs.timer.secondsSinceEpoch() + WORK_SECONDS -- next work interval starts after break ends
     refreshIcon()
+    return true
 end
 
 local function showBreak()
@@ -100,7 +100,7 @@ local function showBreak()
     overlays[#overlays + 1] = canvas
     overlayTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(e)
         local code = e:getKeyCode()
-        if code == hs.keycodes.map.escape or code == hs.keycodes.map.space then dismissBreak() end
+        if code == hs.keycodes.map.escape or code == hs.keycodes.map.space then return dismissBreak() end
     end):start()
     overlayTimer = hs.timer.doEvery(1, function()
         left = left - 1
@@ -131,28 +131,37 @@ local function tick()
     end
 end
 
+local inMeeting = false
+function M.inMeeting() return inMeeting end
+
 local function checkScreenShare() -- check if macOS or Zoom recording is on
-    hs.task.new("/usr/bin/pgrep", function(rc) togglePause(rc == 0) end, { "-f", "screencaptureui|CptHost" }):start()
+    hs.task.new("/usr/bin/pgrep", function(rc)
+        inMeeting = (rc == 0)
+        togglePause(rc == 0)
+    end, { "-f", "screencaptureui|CptHost" }):start()
 end
 
-local tickTimer = hs.timer.doEvery(1, tick)
-local shareDetectTimer = hs.timer.doEvery(5, checkScreenShare)
-local wakeWatcher = hs.caffeinate.watcher.new(function(ev)
-    if ev == hs.caffeinate.watcher.systemDidWake then
-        resetTimer()
-    end
-end):start()
-local togglePausebind = hs.hotkey.bind({ "cmd", "alt" }, "c", togglePause)
+local tickTimer, shareDetectTimer, wakeWatcher, togglePausebind
 
-if bar then
-    bar:setMenu({
-        { title = paused ~= 0 and "Resume" or "Pause", fn = function() togglePause() end },
-        { title = "Break now", fn = showBreak },
-        { title = "Reset timer", fn = resetTimer },
-        { title = "-" },
-        { title = "Quit", fn = function() M.stop() end },
-    })
-    refreshIcon()
+function M.init()
+    deadline = hs.timer.secondsSinceEpoch() + WORK_SECONDS
+    bar = hs.menubar.new(true, "202020")
+    tickTimer = hs.timer.doEvery(1, tick)
+    shareDetectTimer = hs.timer.doEvery(5, checkScreenShare)
+    wakeWatcher = hs.caffeinate.watcher.new(function(ev)
+        if ev == hs.caffeinate.watcher.systemDidWake then resetTimer() end
+    end):start()
+    togglePausebind = hs.hotkey.bind({ "cmd", "alt" }, "c", togglePause)
+    if bar then
+        bar:setMenu({
+            { title = paused ~= 0 and "Resume" or "Pause", fn = function() togglePause() end },
+            { title = "Break now", fn = showBreak },
+            { title = "Reset timer", fn = resetTimer },
+            { title = "-" },
+            { title = "Quit", fn = function() M.stop() end },
+        })
+        refreshIcon()
+    end
 end
 
 function M.stop()

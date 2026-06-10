@@ -60,11 +60,8 @@ irm https://raw.githubusercontent.com/joshuali925/.vim/HEAD/install.ps1 | iex
 ```
 Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: command-option-t
                       -> Input Sources: only keep "Select next source" as option-space
-                      -> Mission Control: deselect "Move left a space" and "Move right a space"
+                      -> Mission Control: change "Move left a space" and "Move right a space" to control-option-command-left and control-option-command-right
                       -> Keyboard: Move focus to next window: command-option-tab
-         -> Text -> uncheck "Use smart quotes and dashes" and all automatic settings
-
-Desktop & Dock -> Hot Corners -> remove Quick Note
 
 Maccy -> Preferences -> Hotkey -> control-shift-v
                      -> Paste automatically (command-shift-enter pastes without formatting)

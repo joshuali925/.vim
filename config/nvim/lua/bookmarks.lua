@@ -166,7 +166,7 @@ local function dump_disk()
     if not modified then return end
     local filtered = {}
     for file, bookmarks in pairs(M.bookmarks) do
-        if #bookmarks > 0 and vim.fn.filereadable(file) == 1 then
+        if #bookmarks > 0 and vim.uv.fs_stat(file) then
             for _, bookmark in ipairs(bookmarks) do
                 bookmark.id = nil
             end

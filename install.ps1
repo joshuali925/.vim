@@ -23,7 +23,7 @@ scoop bucket add nerd-fonts
 scoop install yazi ripgrep fd fzf bat extras/lazygit delta mise nerd-fonts/Maple-Mono-NF-CN nu starship extras/carapace-bin zoxide
 Add-Content -Path "$env:USERPROFILE\.npmrc" -Value "prefix=$env:USERPROFILE\.local\lib\node-packages"
 
-# install gow and setup deduped path
+# install gow and setup deduped path. uutils is newer but larger: scoop install uutils-coreutils
 git clone --depth=1 https://github.com/joshuali925/gow -b main "$env:USERPROFILE\scoop\others\gow"
 $env:Path >> "$env:USERPROFILE\scoop\others\PATH.bak"
 [Environment]::SetEnvironmentVariable("Path", (([Environment]::GetEnvironmentVariable("Path", "User") + ";$env:USERPROFILE\.local\bin;$env:USERPROFILE\.local\lib\node-packages;$env:LOCALAPPDATA\mise\shims;$env:LOCALAPPDATA\nvim-data\mason\bin;$env:USERPROFILE\scoop\others\gow\bin" -split ";" | Select-Object -Unique) -join ";"), "User")

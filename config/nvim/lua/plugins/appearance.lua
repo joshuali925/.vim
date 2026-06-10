@@ -100,7 +100,7 @@ return {
                         { "filename", file_status = false, path = 1 },
                     },
                     lualine_c = {
-                        function() return " " .. vim.fn.fnamemodify(assert(vim.uv.cwd()), ":t") end,
+                        function() return " " .. assert(vim.uv.cwd()):match("[^/\\]+$") end,
                         function()
                             local flags = ""
                             if vim.o.readonly then

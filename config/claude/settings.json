@@ -18,28 +18,76 @@
   },
   "model": "global.anthropic.claude-opus-4-8[1m]",
   "availableModels": [
-    "opus",
-    "sonnet"
+    "claude-opus-4-6",
+    "claude-opus-4-7",
+    "claude-opus-4-8",
+    "claude-sonnet-4-6",
+    "claude-sonnet-5",
+    "sonnet",
+    "claude-haiku-4-5"
   ],
+  "enforceAvailableModels": true,
+  "modelOverrides": {
+    "claude-opus-4-6": "global.anthropic.claude-opus-4-6-v1[1m]",
+    "claude-opus-4-7": "global.anthropic.claude-opus-4-7[1m]",
+    "claude-opus-4-8": "global.anthropic.claude-opus-4-8[1m]",
+    "claude-sonnet-4-6": "global.anthropic.claude-sonnet-4-6[1m]",
+    "claude-sonnet-5": "global.anthropic.claude-sonnet-5",
+    "sonnet": "global.anthropic.claude-sonnet-5",
+    "claude-haiku-4-5": "global.anthropic.claude-haiku-4-5-20251001-v1:0"
+  },
   "hooks": {
-    "Notification": [
+    "Stop": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.vim/config/claude/osc9-notify"
+            "command": "~/.vim/config/claude/osc9-notify",
+            "async": true
           }
         ]
       }
     ],
-    "Stop": [
+    "StopFailure": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.vim/config/claude/osc9-notify"
+            "command": "~/.vim/config/claude/osc9-notify",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "idle_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.vim/config/claude/osc9-notify",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.vim/config/claude/osc9-notify",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/lijshu/.claude/hooks/context-mode-cache-heal.mjs\""
           }
         ]
       }
@@ -52,26 +100,21 @@
   },
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": true,
     "frontend-slides@frontend-slides": false,
     "planning-with-files@planning-with-files": false,
-    "remember@dpt-plugins": true,
-    "skill-creator@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "ui-ux-pro-max@ui-ux-pro-max-skill": false,
-    "interface-design@interface-design": false
+    "interface-design@interface-design": false,
+    "ponytail@ponytail": false,
+    "context-mode@context-mode": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
         "source": "github",
         "repo": "anthropics/claude-plugins-official"
-      }
-    },
-    "dpt-plugins": {
-      "source": {
-        "source": "github",
-        "repo": "Digital-Process-Tools/claude-marketplace"
       }
     },
     "frontend-slides": {
@@ -96,6 +139,18 @@
       "source": {
         "source": "github",
         "repo": "Dammyjay93/interface-design"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "context-mode": {
+      "source": {
+        "source": "github",
+        "repo": "mksglu/context-mode"
       }
     }
   },

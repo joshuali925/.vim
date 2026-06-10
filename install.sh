@@ -137,6 +137,8 @@ install-devtools() {
     defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
     defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
     defaults write -g NSAutomaticCapitalizationEnabled -bool false
+    defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false
+    defaults write com.apple.dock wvous-br-corner -int 1  # disable Quick Note on Hot Corners
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
@@ -309,7 +311,7 @@ install-google-chrome() {
     log 'Google Chrome already installed, skipping..'
   elif [[ $PLATFORM:$PACKAGE_MANAGER:$ARCHITECTURE = linux:yum:x86_64 ]]; then
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
-    sudo yum localinstall google-chrome-stable_current_x86_64.rpm
+    sudo yum localinstall -y google-chrome-stable_current_x86_64.rpm
     rm -f google-chrome-stable_current_x86_64.rpm
   elif [[ $PLATFORM:$PACKAGE_MANAGER:$ARCHITECTURE = linux:apt-get:x86_64 ]]; then
     curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
@@ -334,17 +336,21 @@ install-claude-code() {
   link-file ~/.vim/config/claude/agents ~/.claude/agents --relative
   link-file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
+  link-file ~/.vim/config/claude/keybindings.json ~/.claude/keybindings.json --relative
   link-file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
   claude plugin marketplace add anthropics/claude-plugins-official
   claude plugin install code-review@claude-plugins-official
-  claude plugin install skill-creator@claude-plugins-official && claude plugin disable skill-creator
+  claude plugin install skill-creator@claude-plugins-official
   claude plugin install typescript-lsp@claude-plugins-official
-  claude plugin install frontend-design@claude-plugins-official && claude plugin disable frontend-design
+  claude plugin install frontend-design@claude-plugins-official
   claude plugin marketplace add Dammyjay93/interface-design && claude plugin install interface-design@interface-design && claude plugin disable interface-design
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
   claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
   claude plugin marketplace add OthmanAdi/planning-with-files && claude plugin install planning-with-files@planning-with-files && claude plugin disable planning-with-files
-  claude plugin marketplace add Digital-Process-Tools/claude-marketplace && claude plugin install remember@dpt-plugins
+  claude plugin marketplace add DietrichGebert/ponytail && claude plugin install ponytail@ponytail && claude plugin disable ponytail
+  claude plugin marketplace add mksglu/context-mode && claude plugin install context-mode@context-mode
+  # uv tool install mempalace && mkdir -p ~/.vim/tmp/mempalace && yes n | mempalace init ~/.vim/tmp/mempalace --no-llm --yes && claude plugin marketplace add MemPalace/mempalace && claude plugin install --scope user mempalace
+  # https://github.com/phuryn/pm-skills
   # npx -y skills add Leonxlnx/taste-skill --agent claude-code --yes --global
   # npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent claude-code --yes --global
   # npx -y skills add KKKKhazix/khazix-skills --skill neat-freak --agent claude-code --yes --global
@@ -406,8 +412,8 @@ default-install() {
   else
     install node &
     install tmux &
-    install neovim || true
-    wait
+    install neovim &
+    for tool in yazi rg fd fzf bat lazygit delta; do ~/.vim/bin/$tool --version & done; wait
   fi
 
   install ssh-key

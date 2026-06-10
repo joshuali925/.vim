@@ -57,7 +57,6 @@ alias k='kubectl'
 alias dc='docker compose'
 alias lg='lazygit'
 alias lzd='lazydocker'
-alias ctop='docker run -e TERM=xterm-256color --rm -it --name ctop -v /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop'
 alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
 alias 00='[[ -f ~/.vim/tmp/last_result ]] && cd "$(<~/.vim/tmp/last_result)"'
@@ -69,7 +68,8 @@ alias jsonl2csv='json2csv -s'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -avihP --no-owner --no-group --delete --filter=':- .gitignore'"
-alias rclone="env RCLONE_PROGRESS=true RCLONE_DELETE_EMPTY_SRC_DIRS=true RCLONE_DISABLE_HTTP2=true RCLONE_MULTI_THREAD_CUTOFF=1Mi rclone"
+alias filebrowser='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
+alias rclone="env RCLONE_PROGRESS=true RCLONE_DELETE_EMPTY_SRC_DIRS=true RCLONE_TRANSFERS=7 RCLONE_DISABLE_HTTP2=true RCLONE_MULTI_THREAD_CUTOFF=1Mi rclone"
 alias markdowns='if [[ ! -x ~/.local/bin/mdview ]]; then uv tool install md-viewer-py; fi && printf %s "$(getip):8081" | y && eval mdview --host 0.0.0.0'  # eval to avoid red syntax if not installed
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
@@ -327,6 +327,7 @@ print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f729679
   for i in {0..255}; do printf '\e[38;5;%dm%3d ' "$i" "$i"; (((i+3) % 18)) || printf '\e[0m\n'; done
   printf '\n\nBackground 256 colors\n'
   for i in {0..255}; do printf '\e[48;5;%dm%3d ' "$i" "$i"; (((i+3) % 18)) || printf '\e[0m\n'; done
+  printf '\n'
   awk -v term_cols="$(tput cols || echo 80)" 'BEGIN{
     s="/\\";
     for (colnum = 0; colnum<term_cols; colnum++) {
@@ -701,9 +702,13 @@ if [[ $OSTYPE = darwin* ]]; then
     if [[ -f "$HOME/Library/Application Support/Google/Chrome/Default/History" ]]; then
       fzfprompt='Chrome> '
       histfile="$HOME/Library/Application Support/Google/Chrome/Default/browser-history-fzf.db"
-      if [[ ! -f $histfile ]]; then command cp "$HOME/Library/Application Support/Google/Chrome/Default/History" "$histfile"; fi
+      if [[ ! -f $histfile ]]; then
+        command cp "$HOME/Library/Application Support/Google/Chrome/Default/History" "$histfile"
+        sqlite3 "$histfile" 'DROP INDEX IF EXISTS urls_url_index; CREATE INDEX IF NOT EXISTS urls_lvt ON urls(last_visit_time DESC); VACUUM;'
+      fi
       command cp -f "$HOME/Library/Application Support/Google/Chrome/Default/History" /tmp/browser-history-fzf.db
-      sqlite3 "$histfile" 'attach "/tmp/browser-history-fzf.db" as toMerge; BEGIN;
+      sqlite3 "$histfile" 'CREATE INDEX IF NOT EXISTS urls_lvt ON urls(last_visit_time DESC);
+      attach "/tmp/browser-history-fzf.db" as toMerge; BEGIN;
       INSERT OR REPLACE INTO urls SELECT t.* FROM toMerge.urls t LEFT JOIN urls m ON t.id = m.id
       WHERE m.id IS NULL OR (m.id IS NOT NULL AND m.last_visit_time <> t.last_visit_time); COMMIT; detach toMerge;'
     elif [[ -f "$HOME/Library/Application Support/Microsoft Edge/Default/History" ]]; then

@@ -336,7 +336,7 @@ vim.defer_fn(function()
     if vim.env.SSH_CLIENT ~= nil then
         vim.g.clipboard = "osc52" -- termux force osc52
         vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { title = 'Link copied' })<CR>")
-    elseif vim.fn.has("win32") == 1 then
+    elseif jit.os == "Windows" then
         vim.g.termshell = "nu"
     elseif vim.fn.has("wsl") == 1 then
         vim.g.clipboard = {

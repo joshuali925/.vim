@@ -6,6 +6,9 @@ sort_by = "natural"
 linemode = "size"
 show_hidden = true
 
+[tasks]
+suppress_preload = true
+
 [preview]
 wrap = "yes"
 tab_size = 4
@@ -18,7 +21,6 @@ ffmpeg = [
 ]
 text_actions = [
   { run = "less -RiM +F %s1", desc = "Tail", block = true },
-  { run = 'sudo vim -u ~/.vim/config/mini.vim %s1', desc = "Sudo edit", block = true },
 ]
 
 [open]

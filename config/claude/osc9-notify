@@ -1,16 +1,29 @@
 #!/usr/bin/env bash
-
 exec 2>/dev/null
 
 ESC=$'\033'; BEL=$'\007'
-msg="$(jq -r '.message // .hook_event_name // "Claude done"')"
-loc="$(tmux display-message -p -t "${TMUX_PANE:-}" '#S:#I.#W')"
-seq="${ESC}]9;claude [${loc:-?}] received event: ${msg:-Claude done}${BEL}"
+IFS= read -r -d '' payload   # slurp stdin, no cat fork
+
+# One jq call: event tag (tab) project name (last path segment of .cwd).
+IFS=$'\t' read -r tag proj < <(jq -r '
+  ({Stop: "done", StopFailure: "failed",
+    PermissionRequest: "needs permission", Notification: "needs input"
+   }[.hook_event_name] // "done")
+  + "\t" + ((.cwd // "") | split("/") | last)' <<<"$payload")
 
 if [ -n "$TMUX" ]; then
+  IFS=$'\t' read -r loc tty < <(tmux display-message -p -t "${TMUX_PANE:-}" '#S:#I.#W	#{pane_tty}')
+  seq="${ESC}]9;Claude [${loc:-$proj}]: ${tag}${BEL}"
   seq="${ESC}Ptmux;${ESC}${seq//$ESC/$ESC$ESC}${ESC}\\"
-  tty="$(tmux display-message -p -t "${TMUX_PANE:-}" '#{pane_tty}')"
+else
+  pid=$PPID
+  for ((i = 0; i < 15; i++)); do
+    read -r ppid tt < <(ps -o ppid=,tty= -p "$pid")
+    case "$tt" in ttys*) tty="/dev/$tt"; break ;; esac
+    [ -n "$ppid" ] || break
+    pid=$ppid
+  done
+  seq="${ESC}]9;Claude [${proj:-?}]: ${tag}${BEL}"
 fi
-printf '%s' "$seq" > "${tty:-/dev/tty}"
 
-exit 0
+printf '%s' "$seq" > "${tty:-/dev/tty}"

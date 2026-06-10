@@ -3,8 +3,9 @@ if not hs.fs.attributes(hs.configdir .. "/Spoons/EmmyLua.spoon/init.lua") then
 end
 hs.loadSpoon("EmmyLua")
 
+require("hs.ipc")
 require("keymaps")
-require("202020")
+require("202020").init()
 
 HsConfigWatcher = hs.pathwatcher.new(hs.configdir, function(files) if hs.fnutils.some(files, function(f) return f:sub(-4) == ".lua" end) then hs.reload() end end):start()
 hs.alert.show("Hammerspoon config loaded")

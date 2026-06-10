@@ -80,6 +80,28 @@ function M.delete_comments(start_line, end_line) -- https://gist.github.com/kelv
     for _, line in ipairs(lines_to_delete) do vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, {}) end
 end
 
+function M.dedup_lines(start_line, end_line) -- or :%!awk '\!x[$0]++'
+    start_line = start_line or 1
+    end_line = end_line or vim.api.nvim_buf_line_count(0)
+    local seen = {}
+    local result = {}
+    for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, end_line, false)) do
+        if not seen[line] then
+            seen[line] = true
+            table.insert(result, line)
+        end
+    end
+    vim.api.nvim_buf_set_lines(0, start_line - 1, end_line, false, result)
+end
+
+function M.reverse_lines(start_line, end_line) -- faster than :g/^/move 0
+    start_line = start_line or 1
+    end_line = end_line or vim.api.nvim_buf_line_count(0)
+    local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+    for i = 1, math.floor(#lines / 2) do lines[i], lines[#lines - i + 1] = lines[#lines - i + 1], lines[i] end
+    vim.api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
+end
+
 function M.pick_filetypes(opts)
     opts = opts or {}
     require("snacks.picker")(vim.tbl_extend("force", {
