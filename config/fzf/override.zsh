@@ -20,13 +20,13 @@ fzf-cd-widget() {
   fi
   # =======================================================
   # customized: to support editing files, inserting at cursor, and run cd command in zle
-  if [[ -d $dir ]]; then
+  if [[ -n $BUFFER ]]; then
+    LBUFFER="${LBUFFER}${(q)dir} "
+    zle redisplay
+  elif [[ -d $dir ]]; then
     builtin cd -- "$dir"
     printf "\n\n"
     zle fzf-redraw-prompt
-  elif [[ -n $LBUFFER ]]; then
-    LBUFFER="${LBUFFER}${(q)dir} "
-    zle redisplay
   else
     $EDITOR -- "$dir" < /dev/tty
     printf "\n\n"

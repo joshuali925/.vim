@@ -18,7 +18,7 @@ Run tests after each phase. Do not add features or refactor beyond scope. Do not
 - Remove unused `export` keywords
 - Remove dead code
 - Remove `import React` if not used
-- Strip comments that restate code; keep license headers, "why" comments, TODOs
+- Remove comments that restate code, be very aggressive. We use code as the source of truth
 - Replace hard-coded colors with OUI color variables
 - Replace inline styles with EUI component props or className + SCSS
 - Wrap user-facing strings with `<FormattedMessage>` or `i18n.translate()`
@@ -29,3 +29,12 @@ Run tests after each phase. Do not add features or refactor beyond scope. Do not
 - Add tests for new files that do not have coverage
 - Run the tests using `yarn test:jest <path>`
 - Run the linter using `git add -A && node scripts/precommit_hook --fix`
+
+## Phase 4: Hacks and unnecessary changes
+
+Make a commit before phase 4. Then identify and address fixes and refactors that may change behavior, then make another commit. Examples:
+
+- Timing hacks like `setTimeout(0)` or `requestAnimationFrame` used to defer state updates
+- Unnecessary `useEffect`, or effects with missing/incorrect dependency arrays or missing cleanup
+- Changes made to a shared component, can they be limited to the files specific for the current feature, to reduce scope of the diff? The goal is to avoid changing shared files as much as possible
+- Output a list of identified issues and corresponding fixes you made to address them

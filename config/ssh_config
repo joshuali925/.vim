@@ -1,5 +1,5 @@
 Host *
-    ServerAliveInterval 13
+    ServerAliveInterval 43
     ServerAliveCountMax 2
     Compression yes
     ControlMaster auto

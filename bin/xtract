@@ -14,16 +14,28 @@ done
 
 for arg in "${archives[@]}"; do
   case $arg in
-    *.tar)                       tar xvf "$arg" "${paths[@]}"        ;;
-    *.tar.gz | *.tgz)            tar xvzf "$arg" "${paths[@]}"       ;;
-    *.tar.xz | *.xz)             tar xvJf "$arg" "${paths[@]}"       ;;
-    *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$arg" "${paths[@]}"       ;;
-    *.bz2)                       bunzip2 "$arg"                      ;;
-    *.gz)                        gunzip "$arg"                       ;;
-    *.zip)                       unzip "$arg" "${paths[@]}"          ;;
-    *.rar)                       unrar x "$arg" "${paths[@]}"        ;;
-    *.Z)                         uncompress "$arg"                   ;;
-    *.7z)                        7z x "$arg" "${paths[@]}"           ;;
-    *)                           echo "Unable to extract '$arg'" >&2 ;;
+    *.bz2)  bunzip2 "$arg"; continue ;;
+    *.gz)   gunzip "$arg";  continue ;;
+    *.Z)    uncompress "$arg"; continue ;;
   esac
+
+  dir=$(basename "${arg%.*}")
+  mkdir "$dir"
+
+  case $arg in
+    *.tar)                       tar xvf "$arg" -C "$dir" "${paths[@]}"  ;;
+    *.tar.gz | *.tgz)            tar xvzf "$arg" -C "$dir" "${paths[@]}" ;;
+    *.tar.xz | *.xz)             tar xvJf "$arg" -C "$dir" "${paths[@]}" ;;
+    *.tar.bz2 | *.tbz | *.tbz2)  tar xvjf "$arg" -C "$dir" "${paths[@]}" ;;
+    *.zip)                       unzip "$arg" "${paths[@]}" -d "$dir"    ;;
+    *.rar)                       unrar x "$arg" "${paths[@]}" "$dir"/    ;;
+    *.7z)                        7z x "$arg" -o"$dir" "${paths[@]}"      ;;
+    *)                           echo "Unable to extract '$arg'" >&2; rmdir "$dir"; continue ;;
+  esac
+
+  mapfile -t entries < <(find "$dir" -mindepth 1 -maxdepth 1)
+  if [[ ${#entries[@]} -eq 1 ]]; then
+    mv "${entries[0]}" .
+    rmdir "$dir"
+  fi
 done

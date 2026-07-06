@@ -63,13 +63,16 @@ Keyboard -> Shortcuts -> Services -> Searching -> Look Up in Dictionary: command
                       -> Mission Control: change "Move left a space" and "Move right a space" to control-option-command-left and control-option-command-right
                       -> Keyboard: Move focus to next window: command-option-tab
 
+Trackpad -> Point & Click -> Set "Tracking speed" to 8, "Click" to "Light", enable "Tap to click"
+         -> More Gestures -> Set "Swipe between full-screen applications", "Mission Control" to Off
+
+Spotlight -> Uncheck all except Calculator, Calendar, Dictionary, System Settings, Apps, Menu Items
+
 Maccy -> Preferences -> Hotkey -> control-shift-v
                      -> Paste automatically (command-shift-enter pastes without formatting)
                      -> History size 999
-                     -> Appearance -> Menu size 100
 
-Alt-tab -> Preferences -> Controls -> change to cmd + tab
-                       -> Appearance -> check Hide apps with no open window
+BetterTouchTool -> Settings -> Trackpad -> Swipes -> 3 & 4 Finger Swipes -> Set all sensitivity to 0.12
 
 Handy -> General -> Transcribe -> change to right cmd
 ```

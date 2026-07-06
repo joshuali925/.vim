@@ -51,7 +51,7 @@ end
 
 M.maximize = withWin(function(win) win:setFrame(win:screen():frame()) end)
 M.center = withWin(function(win) win:centerOnScreen(nil, true) end)
-M.moveDisplay = withWin(function(win, dir) win:moveToScreen(win:screen()[dir](win:screen()), false, true) end)
+M.moveDisplay = withWin(function(win, dir) win:moveToScreen(win:screen()[dir](win:screen()), true, true) end)
 M.resizeBy = withWin(function(win, delta)
     local f = win:frame()
     place(win, { x = f.x - delta / 2, y = f.y - delta / 2, w = f.w + delta, h = f.h + delta })

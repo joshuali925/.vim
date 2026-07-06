@@ -118,7 +118,7 @@ set noswapfile
 set nobackup
 set nowritebackup
 set wildcharm=<C-z>
-set cedit=<C-x>
+set cedit=<C-g>
 set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%{&fileencoding!=''&&&fileencoding!='utf-8'?'[fileencoding\:\ '.&fileencoding.']':''}%{&fileformat!='unix'?'[fileformat\:\ '.&fileformat.']':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
 set showtabline=2
 set tabline=%!BufferLine()

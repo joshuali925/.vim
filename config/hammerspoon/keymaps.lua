@@ -77,6 +77,7 @@ local function flagsToMods(flags)
     return m
 end
 
+local hyperActive, hyperUsed, hyperDownAt = false, false, 0
 local nextVerticalWindowSnap = "up"
 local function hyper(key, flags)
     -- Navigation
@@ -139,7 +140,7 @@ local function hyper(key, flags)
         if inApps(WS, RDC, MOONLIGHT) then return send(INSERT, { "shift" }) end
         if flags.cmd then return send("v", { "cmd", "shift", "alt" }) else return send("v", { "cmd" }) end
     end
-    if key == "v" then return send("c", { "cmd", "shift" }) end -- maccy
+    if key == "v" then return send("v", { "ctrl", "shift" }) end -- maccy
     if key == "u" then
         if inApps(TERM) then return send("/", { "ctrl" }) end
         if flags.cmd then return send("z", { "cmd", "shift" }) else return send("z", { "cmd" }) end
@@ -170,6 +171,10 @@ local function hyper(key, flags)
 
     -- Applications
     if key == "t" then return sendList({ { "t", { "cmd", "alt" } }, { "left", { "alt" } }, { "right", { "alt", "shift" } }, { "t", { "cmd", "alt" } } }) end -- dictionary
+    if key == "s" then
+        hyperActive = false                                                                                                                                  -- OCR steals focus, so F18's keyUp misses our tap; clear it now
+        return require("ocr").capture()
+    end
 
     -- Window Operations
     if key == "1" then return hs.eventtap.otherClick(hs.mouse.absolutePosition(), nil, 0) end -- left click
@@ -180,7 +185,6 @@ local function hyper(key, flags)
     if key == "c" then return send("`", flags.cmd and { "cmd", "shift" } or { "cmd" }) end    -- switch window
 end
 
-local hyperActive, hyperUsed, hyperDownAt = false, false, 0
 local upActive, upUsed, upDownAt = false, false, 0
 
 local function keyHandler(e)

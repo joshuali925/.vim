@@ -115,23 +115,27 @@ install-devtools() {
     sudo yum groupinstall -y 'Development Tools' && sudo yum install -y zsh git vim
     sudo yum install -y epel-release || true
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apt-get ]]; then
+    sudo locale-gen en_US.UTF-8 && sudo update-locale LANG=en_US.UTF-8
     sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential zsh git curl unzip file gawk  # yazi requires file, tmux-picker requires gawk
   elif [[ $PLATFORM:$PACKAGE_MANAGER = linux:apk ]]; then
     sudo apk add bash zsh git curl alpine-sdk
   elif [[ $PLATFORM = darwin ]]; then
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    brew install coreutils wget xz
+    export PATH="/opt/homebrew/bin:$PATH"
+    brew install -y coreutils wget xz
     append-once "export PATH=\"$(brew --prefix)/bin:$(brew --prefix)/sbin:$(brew --prefix)/opt/coreutils/libexec/gnubin:\$PATH\"" ~/.bashrc ~/.zshrc
-    brew install grep && link-file "$(which ggrep)" ~/.local/bin/grep
-    brew install gnu-sed && link-file "$(which gsed)" ~/.local/bin/sed
-    brew install findutils && link-file "$(which gxargs)" ~/.local/bin/xargs
-    brew install gawk && link-file "$(which gawk)" ~/.local/bin/awk
-    brew install gnu-tar && link-file "$(which gtar)" ~/.local/bin/tar
+    brew install -y grep && link-file "$(which ggrep)" ~/.local/bin/grep
+    brew install -y gnu-sed && link-file "$(which gsed)" ~/.local/bin/sed
+    brew install -y findutils && link-file "$(which gxargs)" ~/.local/bin/xargs
+    brew install -y gawk && link-file "$(which gawk)" ~/.local/bin/awk
+    brew install -y gnu-tar && link-file "$(which gtar)" ~/.local/bin/tar
     export PATH="$HOME/.local/bin:$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
     local fpath_line="FPATH=\"$(brew --prefix)/share/zsh/site-functions:\$FPATH\""
     grep -qxF "$fpath_line" ~/.zshrc 2> /dev/null || sed -i -e "1i$fpath_line" ~/.zshrc
     log 'Installed homebrew and packages, exported to ~/.zshrc and ~/.bashrc'
     defaults write -g com.apple.swipescrolldirection -bool false
+    defaults write -g InitialKeyRepeat -int 15
+    defaults write -g KeyRepeat -int 2
     defaults write -g ApplePressAndHoldEnabled -bool false
     defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
     defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
@@ -142,11 +146,13 @@ install-devtools() {
     log 'Updated mac settings'  # https://sxyz.blog/macos-setup/
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
-    # TODO(macOS 26) try https://github.com/Arthur-Ficial/apfel, https://github.com/gety-ai/apple-on-device-openai, https://github.com/stonerl/Thaw
-    # brew install --cask font-jetbrains-mono-nerd-font wezterm@nightly neovide linearmouse maccy pixpin trex jordanbaird-ice doll hammerspoon alt-tab squirrel-app darkmodebuddy coconutbattery handy visual-studio-code orion cardinal-search
+    # brew install -y apfel btop pstree blueutil  # blueutil used by niz-plum.lua in hammerspoon
+    # brew install -y --cask font-jetbrains-mono-nerd-font wezterm@nightly neovide linearmouse maccy pixpin thaw@beta doll hammerspoon squirrel-app darkmodebuddy coconutbattery handy orion orbstack cardinal-search
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
     # to update one cask: brew upgrade --cask wezterm@nightly --greedy-latest
+    # manually install https://recordly.dev/, https://github.com/Jarvis322/MacWake
+    # pixpin alternative: https://github.com/duongductrong/Snapzy, https://github.com/flameshot-org/flameshot
   fi
 }
 
@@ -333,6 +339,7 @@ install-claude-code() {
   fi
   mkdir -p ~/.claude/skills
   append-once '/.claude/' ~/.gitignore
+  link-file ~/.vim/config/claude/CLAUDE.md ~/.claude/CLAUDE.md --relative
   link-file ~/.vim/config/claude/agents ~/.claude/agents --relative
   link-file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
@@ -345,18 +352,16 @@ install-claude-code() {
   claude plugin install frontend-design@claude-plugins-official
   claude plugin marketplace add Dammyjay93/interface-design && claude plugin install interface-design@interface-design && claude plugin disable interface-design
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
+  claude plugin marketplace add pbakaus/impeccable && claude plugin install impeccable@impeccable && claude plugin disable impeccable  # /impeccable init
   claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
-  claude plugin marketplace add OthmanAdi/planning-with-files && claude plugin install planning-with-files@planning-with-files && claude plugin disable planning-with-files
-  claude plugin marketplace add DietrichGebert/ponytail && claude plugin install ponytail@ponytail && claude plugin disable ponytail
-  claude plugin marketplace add mksglu/context-mode && claude plugin install context-mode@context-mode
   # uv tool install mempalace && mkdir -p ~/.vim/tmp/mempalace && yes n | mempalace init ~/.vim/tmp/mempalace --no-llm --yes && claude plugin marketplace add MemPalace/mempalace && claude plugin install --scope user mempalace
   # https://github.com/phuryn/pm-skills
-  # npx -y skills add Leonxlnx/taste-skill --agent claude-code --yes --global
-  # npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent claude-code --yes --global
-  # npx -y skills add KKKKhazix/khazix-skills --skill neat-freak --agent claude-code --yes --global
-  # npx -y skills add jgraph/drawio-mcp --agent claude-code --yes --global
+  # npx -y skills add mattpocock/skills --agent claude-code --yes --global
+  # npx -y skills add Leonxlnx/taste-skill --agent claude-code --yes
+  # npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent claude-code --yes
   # npx -y skills add shadcn-ui/ui --agent claude-code --yes
-  # npx -y skills add hardikpandya/stop-slop --agent claude-code --yes --global
+  # npx -y skills add jgraph/drawio-mcp --agent claude-code --yes
+  # npx -y skills add hardikpandya/stop-slop --agent claude-code --yes
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
@@ -401,7 +406,11 @@ default-install() {
   install devtools dotfiles
 
   log 'Installing zsh plugins..'
-  zsh -ic 'exit' &
+
+  { # zsh -ic 'exit' &; conflicts when ~/.vim/bin/$tool calls exec
+    if [[ ! -e ~/.local/zim/zimfw.zsh ]]; then curl -fsSL --create-dirs -o ~/.local/zim/zimfw.zsh https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh; fi
+    ZDOTDIR=~/.vim/config/zsh ZIM_HOME=~/.local/zim zsh -c 'source ~/.local/zim/zimfw.zsh init'
+  } &
 
   if [[ $OSTYPE = linux-android ]]; then
     wait

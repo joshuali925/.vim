@@ -162,7 +162,6 @@ return {
         if command:match("^7zmax$") then return shell(compress_cmd("7z a -t7z -mx=9 -mfb=273 -ms -md=31 -myx=9 -mtm=- -mmt -mmtf -md=1536m -mmf=bt3 -mmc=10000 -mpb=0 -mlc=0 -m0=LZMA2:27", "7z")) end
         if command:match("^x$") then
             return shell([[
-                set -x
                 set -f
                 if [ "$#" -gt 1 ]; then
                     ]] .. compress_cmd("tar cvzf", "tar.gz") .. [[;

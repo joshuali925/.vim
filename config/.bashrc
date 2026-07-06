@@ -14,7 +14,7 @@ if [[ -n $PS1 ]]; then
   bind 'set enable-bracketed-paste on'
   bind 'TAB: menu-complete'
   bind '"\e[Z": menu-complete-backward'
-  bind '"\C-x\C-e": edit-and-execute-command'
+  bind '"\C-g": edit-and-execute-command'
   bind '"\C-xa": shell-expand-line'  # same as in zsh, 'C-x a' expands aliases
   bind '"\e[A": history-search-backward'
   bind '"\e[B": history-search-forward'

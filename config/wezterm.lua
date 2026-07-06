@@ -117,7 +117,7 @@ config.keys = {
                 })
                 uploading_host = nil
                 wezterm.emit("update-status", window, pane)
-                if not ok then pane:send_text("Wait, upload failed!") end
+                if not ok then pane:send_text("Upload_failed!!") end
             end)
         end),
     },

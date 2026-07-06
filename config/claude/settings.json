@@ -13,27 +13,38 @@
     "MCP_TIMEOUT": "120000"
   },
   "includeCoAuthoredBy": false,
+  "respondToBashCommands": false,
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "auto"
   },
   "model": "global.anthropic.claude-opus-4-8[1m]",
   "availableModels": [
+    "claude-opus-4-6[1m]",
     "claude-opus-4-6",
+    "claude-opus-4-7[1m]",
     "claude-opus-4-7",
+    "claude-opus-4-8[1m]",
     "claude-opus-4-8",
     "claude-sonnet-4-6",
+    "claude-sonnet-4-6[1m]",
     "claude-sonnet-5",
-    "sonnet",
+    "claude-fable-5",
+    "claude-fable-5[1m]",
     "claude-haiku-4-5"
   ],
   "enforceAvailableModels": true,
   "modelOverrides": {
-    "claude-opus-4-6": "global.anthropic.claude-opus-4-6-v1[1m]",
-    "claude-opus-4-7": "global.anthropic.claude-opus-4-7[1m]",
-    "claude-opus-4-8": "global.anthropic.claude-opus-4-8[1m]",
-    "claude-sonnet-4-6": "global.anthropic.claude-sonnet-4-6[1m]",
+    "claude-opus-4-6[1m]": "global.anthropic.claude-opus-4-6-v1[1m]",
+    "claude-opus-4-6": "global.anthropic.claude-opus-4-6-v1",
+    "claude-opus-4-7[1m]": "global.anthropic.claude-opus-4-7[1m]",
+    "claude-opus-4-7": "global.anthropic.claude-opus-4-7",
+    "claude-opus-4-8[1m]": "global.anthropic.claude-opus-4-8[1m]",
+    "claude-opus-4-8": "global.anthropic.claude-opus-4-8",
+    "claude-sonnet-4-6": "global.anthropic.claude-sonnet-4-6",
+    "claude-sonnet-4-6[1m]": "global.anthropic.claude-sonnet-4-6[1m]",
     "claude-sonnet-5": "global.anthropic.claude-sonnet-5",
-    "sonnet": "global.anthropic.claude-sonnet-5",
+    "claude-fable-5": "global.anthropic.claude-fable-5[1m]",
+    "claude-fable-5[1m]": "global.anthropic.claude-fable-5[1m]",
     "claude-haiku-4-5": "global.anthropic.claude-haiku-4-5-20251001-v1:0"
   },
   "hooks": {
@@ -81,16 +92,6 @@
           }
         ]
       }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/Users/lijshu/.claude/hooks/context-mode-cache-heal.mjs\""
-          }
-        ]
-      }
     ]
   },
   "statusLine": {
@@ -102,13 +103,11 @@
     "code-review@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "frontend-slides@frontend-slides": false,
-    "planning-with-files@planning-with-files": false,
     "skill-creator@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "ui-ux-pro-max@ui-ux-pro-max-skill": false,
     "interface-design@interface-design": false,
-    "ponytail@ponytail": false,
-    "context-mode@context-mode": true
+    "impeccable@impeccable": false
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -123,12 +122,6 @@
         "repo": "zarazhangrui/frontend-slides"
       }
     },
-    "planning-with-files": {
-      "source": {
-        "source": "github",
-        "repo": "OthmanAdi/planning-with-files"
-      }
-    },
     "ui-ux-pro-max-skill": {
       "source": {
         "source": "github",
@@ -141,16 +134,10 @@
         "repo": "Dammyjay93/interface-design"
       }
     },
-    "ponytail": {
+    "impeccable": {
       "source": {
         "source": "github",
-        "repo": "DietrichGebert/ponytail"
-      }
-    },
-    "context-mode": {
-      "source": {
-        "source": "github",
-        "repo": "mksglu/context-mode"
+        "repo": "pbakaus/impeccable"
       }
     }
   },

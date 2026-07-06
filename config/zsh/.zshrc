@@ -171,6 +171,7 @@ bindkey '^[[1;2B' down-line-or-local-history  # <S-Down>
 bindkey '^[[3;2~' backward-delete-char        # <S-Del>
 bindkey '^[q' push-line-or-edit
 bindkey '^q' push-line-or-edit
+bindkey '^g' edit-command-line
 bindkey '^u' backward-kill-line
 bindkey '^[y' copy-line
 bindkey -s '^z' '%^m'

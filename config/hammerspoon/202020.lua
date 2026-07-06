@@ -134,11 +134,13 @@ end
 local inMeeting = false
 function M.inMeeting() return inMeeting end
 
-local function checkScreenShare() -- check if macOS or Zoom recording is on
+local nizPlum = require("niz-plum")
+local function poll() -- single 5s poller: screen-share detection + NIZ Bluetooth check
     hs.task.new("/usr/bin/pgrep", function(rc)
         inMeeting = (rc == 0)
         togglePause(rc == 0)
     end, { "-f", "screencaptureui|CptHost" }):start()
+    nizPlum.poll()
 end
 
 local tickTimer, shareDetectTimer, wakeWatcher, togglePausebind
@@ -147,7 +149,8 @@ function M.init()
     deadline = hs.timer.secondsSinceEpoch() + WORK_SECONDS
     bar = hs.menubar.new(true, "202020")
     tickTimer = hs.timer.doEvery(1, tick)
-    shareDetectTimer = hs.timer.doEvery(5, checkScreenShare)
+    shareDetectTimer = hs.timer.doEvery(11, poll)
+    poll()
     wakeWatcher = hs.caffeinate.watcher.new(function(ev)
         if ev == hs.caffeinate.watcher.systemDidWake then resetTimer() end
     end):start()

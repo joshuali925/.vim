@@ -197,16 +197,16 @@ function = () {
   python -c "from math import *; __import__('pprint').pprint($*)"
 }
 
-termwrap() {
-  nvim --clean -c 'set cmdheight=0 laststatus=0 shadafile=NONE' -c 'highlight Normal guifg=NONE guibg=NONE' -c 'autocmd TermClose * quitall!' -c "terminal $*" -c startinsert
-}
-
-st() {  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display. Set basic PATH for commands invoked by tmux not through shell (e.g. new-window)
-  ssh -t "$@" 'LANG=C.UTF-8 EDITOR=nvim PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
+st() {  # start tmux from interactive shell to inherit environment variables
+  ssh -t "$@" 'zsh -ic "exec .vim/bin/tmux new -A -s 0"'
 }
 
 tarcopy() {
   printf " printf $(XZ_OPT=-9e tar czf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvz" | tee >(y) | wc -c | xargs echo Characters copied:
+}
+
+termwrap() {
+  nvim --clean -c 'set cmdheight=0 laststatus=0 shadafile=NONE' -c 'highlight Normal guifg=NONE guibg=NONE' -c 'autocmd TermClose * quitall!' -c "terminal $*" -c startinsert
 }
 
 yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yazi

@@ -16,6 +16,10 @@ gui:
   showBranchCommitHash: true
   showBottomLine: false
   useHunkModeInStagingView: true
+  sidePanels:
+    - [files, worktrees, submodules]
+    - [branches, remotes, tags]
+    - [commits, reflog, stash, status]
   theme:
     activeBorderColor:
       - cyan
@@ -51,10 +55,12 @@ keybinding:
     openRecentRepos: <disabled>
     scrollUpMain-alt2: .
     scrollDownMain-alt2: ","
-    nextScreenMode: _
-    prevScreenMode: =
+    prevScreenMode: _
+    nextScreenMode: =
     undo: u
     redo: <c-r>
+  files:
+    expandAll: <disabled>
   commits:
     viewResetOptions: <c-r>
     moveDownCommit: J

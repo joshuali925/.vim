@@ -10,7 +10,7 @@ $env.config = {
       mode: emacs
       event: {
         send: executehostcommand
-        cmd: "let sel = (ls | each { |row| $row.name } | input list --fuzzy ' '); if $sel != null { if (commandline | is-empty) { if ($sel | path type) == dir { cd $sel } else { ^$env.EDITOR $sel } } else { commandline edit --insert $'(($sel | to nuon)) ' } }"
+        cmd: "let sel = (ls -a | sort-by type name | each { |row| if $row.type == dir { $row.name + '/' } else { $row.name } } | input list --fuzzy ' '); if $sel != null { if (commandline | is-empty) { if ($sel | path type) == dir { cd $sel } else { ^$env.EDITOR $sel } } else { commandline edit --insert $'(($sel | to nuon)) ' } }"
       }
     }
     {
@@ -56,7 +56,7 @@ def gc [...message: string] {
 }
 
 def --wrapped st [...args] {
-  ssh -t ...$args 'LANG=C.UTF-8 EDITOR=nvim PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
+  ssh -t ...$args 'zsh -ic "exec .vim/bin/tmux new -A -s 0"'
 }
 
 def --wrapped rclone [...args] {

@@ -19,7 +19,7 @@ Ask questions one at a time. Do not proceed to Phase 2 until the user signals th
 
 ## Phase 2: Write the RFC
 
-Output path: ask the user where to save. Default to `./rfc-<kebab-title>.md` in the current working directory. Use `Write`.
+Output path: ask the user where to save. Default to `./rfc-<kebab-title>.md` in the current working directory. Use `Write`. Do not add hard line breaks, there is no line length limit.
 
 ### Structure
 

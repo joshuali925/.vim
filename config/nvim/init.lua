@@ -60,7 +60,7 @@ vim.o.ttimeoutlen = 40
 vim.o.synmaxcol = 1000
 vim.o.writebackup = false
 vim.o.wildcharm = 26 -- <C-z>
-vim.o.cedit = "<C-x>"
+vim.o.cedit = "<C-g>"
 vim.filetype.add({ extension = { conf = "config", log = "log" }, filename = { Caddyfile = "config" } })
 
 -- mappings {{{1
