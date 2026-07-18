@@ -44,7 +44,7 @@ return {
     {
         "L3MON4D3/LuaSnip",
         build = function() vim.system({ "make", "install_jsregexp" }):wait() end,
-        config = function() -- vscode snippets: $HOME/Library/ApplicationSupport/Code/User/snippets
+        config = function() -- vscode snippets: $HOME/Library/Application Support/Code/User/snippets
             require("luasnip.loaders.from_vscode").lazy_load()
             require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.uv.os_homedir() .. "/.vim/config/snippets" } })
             vim.api.nvim_create_autocmd("User", { pattern = "LuasnipPreExpand", command = "let &undolevels = &undolevels" })

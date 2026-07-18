@@ -54,8 +54,14 @@ fi
 
 source ~/.vim/config/common.sh
 
-# show timestamp of command in history, not fully accurate due to grep -F containing partial matches. another slower solution: https://github.com/junegunn/fzf/issues/1049#issuecomment-2241522977
-export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='{ tac ~/.zsh_history | grep -m 1 -F {2..} | awk -F: \"{print \\\$2}\" | xargs -I= date -u +%Y-%m-%dT%H:%M:%SZ -d @=; echo ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈; echo {2..}; } | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
+typeset -U path PATH
+WORDCHARS=${WORDCHARS/=\/}
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=1000000
+SAVEHIST=1000000
+
+# another slower solution: https://github.com/junegunn/fzf/issues/1049#issuecomment-2241522977
+export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='{ TZ=UTC zsh -dfc \"HISTSIZE=$HISTSIZE; fc -R ~/.zsh_history; fc -li -t %Y-%m-%dT%H:%M:%SZ \\\$1 \\\$1\" zsh {1} 2>/dev/null | awk \"NR == 1 { print \\\$2 }\"; echo ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈; echo {2..}; } | bat --language=bash --color=always --plain' --preview-window='wrap,40%'"
 
 # process substitution <(rg) won't work on mac: https://github.com/neovim/neovim/issues/21756
 vrg() {
@@ -63,12 +69,6 @@ vrg() {
   if [[ " $* " = *' --fixed-strings '* ]] || [[ " $* " = *' -F '* ]]; then local pattern="/\V$1"; else local pattern="/$1"; fi
   $EDITOR -q =(rg --vimgrep "$@") -c "$pattern"
 }
-
-typeset -U path PATH
-WORDCHARS=${WORDCHARS/=\/}
-HISTFILE="$HOME/.zsh_history"
-HISTSIZE=1000000
-SAVEHIST=1000000
 
 unsetopt flow_control  # man zshoptions; man zshbuiltins; man zshall
 unsetopt nomatch

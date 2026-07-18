@@ -2,8 +2,8 @@ return {
     {
         "lewis6991/gitsigns.nvim",
         keys = {
-            { "n", "[g", "<Cmd>lua require('gitsigns').nav_hunk('prev', {target='all'})<CR>" },
-            { "n", "]g", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
+            { "n", "mf", "<Cmd>lua require('gitsigns').nav_hunk('prev', {target='all'})<CR>" },
+            { "n", "mg", "<Cmd>lua require('gitsigns').nav_hunk('next', {target='all'})<CR>" },
             { { "o", "x" }, "ig", "<Cmd>lua require('gitsigns.actions').select_hunk()<CR>" },
             { "n", "<leader>gd", "<Cmd>lua require('gitsigns').preview_hunk()<CR>" },
             { "x", "<leader>gd", ":Gitsigns preview_hunk<CR>" }, -- range only works with `:` for gitsigns

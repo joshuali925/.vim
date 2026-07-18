@@ -85,7 +85,7 @@ function M.dedup_lines(start_line, end_line) -- or :%!awk '\!x[$0]++'
     end_line = end_line or vim.api.nvim_buf_line_count(0)
     local seen = {}
     local result = {}
-    for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, end_line, false)) do
+    for _, line in ipairs(vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)) do
         if not seen[line] then
             seen[line] = true
             table.insert(result, line)

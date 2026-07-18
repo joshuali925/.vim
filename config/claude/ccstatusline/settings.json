@@ -3,6 +3,11 @@
   "lines": [
     [
       {
+        "id": "6b5c335a-2975-48a4-8a15-6512f26d7126",
+        "type": "model",
+        "backgroundColor": "bgMagenta"
+      },
+      {
         "id": "3",
         "type": "context-length",
         "color": "brightBlack",
@@ -76,6 +81,7 @@
   "colorLevel": 3,
   "defaultPadding": " ",
   "inheritSeparatorColors": false,
+  "overrideForegroundColor": "black",
   "globalBold": false,
   "gitCacheTtlSeconds": 5,
   "minimalistMode": false,
@@ -96,6 +102,5 @@
     "theme": "tokyonight",
     "autoAlign": false,
     "continueThemeAcrossLines": false
-  },
-  "overrideForegroundColor": "black"
+  }
 }

@@ -78,7 +78,6 @@ local function flagsToMods(flags)
 end
 
 local hyperActive, hyperUsed, hyperDownAt = false, false, 0
-local nextVerticalWindowSnap = "up"
 local function hyper(key, flags)
     -- Navigation
     if key == "n" then return send("tab", { "ctrl", "shift" }) end
@@ -93,10 +92,7 @@ local function hyper(key, flags)
         return send("left", flags.cmd and { "shift" } or flagsToMods(flags))
     end
     if key == "j" then
-        if flags.alt then
-            nextVerticalWindowSnap = nextVerticalWindowSnap == "down" and "up" or "down"
-            return require("window").snap(nextVerticalWindowSnap)
-        end
+        if flags.alt then return require("window").restore() end
         return send("down", flags.cmd and { "shift" } or flagsToMods(flags))
     end
     if key == "k" then
@@ -138,7 +134,17 @@ local function hyper(key, flags)
     end
     if key == "p" then -- cmd-p: paste without formatting
         if inApps(WS, RDC, MOONLIGHT) then return send(INSERT, { "shift" }) end
-        if flags.cmd then return send("v", { "cmd", "shift", "alt" }) else return send("v", { "cmd" }) end
+        if flags.cmd then
+            local plain = hs.pasteboard.readString()
+            if plain then
+                local saved = hs.pasteboard.readAllData()
+                hs.pasteboard.setContents(plain)
+                send("v", { "cmd" })
+                hs.timer.doAfter(0.5, function() hs.pasteboard.writeAllData(saved) end)
+                return true
+            end
+        end
+        return send("v", { "cmd" })
     end
     if key == "v" then return send("v", { "ctrl", "shift" }) end -- maccy
     if key == "u" then
@@ -273,10 +279,7 @@ end
 hs.hotkey.bind({ "alt" }, "up", function() require("window").maximize() end)
 hs.hotkey.bind({ "alt" }, "left", function() require("window").snap("left") end)
 hs.hotkey.bind({ "alt" }, "right", function() require("window").snap("right") end)
-hs.hotkey.bind({ "alt" }, "down", function()
-    nextVerticalWindowSnap = nextVerticalWindowSnap == "down" and "up" or "down"
-    require("window").snap(nextVerticalWindowSnap)
-end)
+hs.hotkey.bind({ "alt" }, "down", function() require("window").restore() end)
 hs.hotkey.bind({ "cmd", "alt" }, "left", function() require("window").moveDisplay("previous") end)
 hs.hotkey.bind({ "cmd", "alt" }, "right", function() require("window").moveDisplay("next") end)
 hs.hotkey.bind({ "cmd", "alt" }, "m", function() require("window").center() end)

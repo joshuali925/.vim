@@ -118,7 +118,7 @@ set noswapfile
 set nobackup
 set nowritebackup
 set wildcharm=<C-z>
-set cedit=<C-g>
+set cedit=<C-x>
 set statusline=%<[%{mode()}](%{fnamemodify(getcwd(),':t')})\ %{expand('%:~:.')}\ %{&paste?'[paste]':''}%{&fileencoding!=''&&&fileencoding!='utf-8'?'[fileencoding\:\ '.&fileencoding.']':''}%{&fileformat!='unix'?'[fileformat\:\ '.&fileformat.']':''}%h%m%r%=%-14.(col\ %c%)%l/%L\ %P
 set showtabline=2
 set tabline=%!BufferLine()
@@ -485,14 +485,14 @@ nnoremap <expr> yod &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 nnoremap <expr> yop &paste ? ':setlocal nopaste<CR>' : ':setlocal paste<CR>o'
 nnoremap yoF :call <SID>ToggleTail()<CR>
 nnoremap <expr> yog g:RooterCmd == '' ? ':execute "Gcd" <bar> let g:RooterCmd = "Gcd" <bar> echo "Git rooter enabled"<CR>' : ':silent execute "cd " . (expand("%") == "" ? $PWD : expand("%:p:h")) <bar> let g:RooterCmd = "" <bar> echo "Git rooter disabled"<CR>'
-nnoremap <expr> [<Space> 'mx' . v:count1 . 'O<Esc>`x'
-nnoremap <expr> ]<Space> 'mx' . v:count1 . 'o<Esc>`x'
+nnoremap <expr> m<Space> 'mx' . v:count1 . 'O<Esc>`x'
+nnoremap <expr> m<CR> 'mx' . v:count1 . 'o<Esc>`x'
 nnoremap [p O<C-r>"<Esc>
 nnoremap ]p o<C-r>"<Esc>
-nnoremap [q :cprevious<CR>
-nnoremap ]q :cnext<CR>
-nnoremap [Q :cfirst<CR>
-nnoremap ]Q :clast<CR>
+nnoremap mq :cprevious<CR>
+nnoremap mw :cnext<CR>
+nnoremap mQ :cfirst<CR>
+nnoremap mW :clast<CR>
 nnoremap [<C-q> :cpfile<CR>
 nnoremap ]<C-q> :cnfile<CR>
 nnoremap [l :lprevious<CR>

@@ -7,7 +7,7 @@ You will work on Cypress end-to-end tests, try not to modify source code, except
 - Run tests: `yarn cypress:run-without-security --spec [file]`
 - Reduce cypress timeout for faster iterations
 - Redirect output to a log file and check periodically, interrupt early and use `.only` for focused debugging
-- Use `chrome-devtools` MCP on `localhost:5601/[path]` to identify elements and go through the workflow before writing new tests, server is already running. You can also use it for debugging failures.
+- Use the chrome MCP on `localhost:5601/[path]` to identify elements and go through the workflow before writing new tests, server is already running. You can also use it for debugging failures.
 
 ### New tests
 

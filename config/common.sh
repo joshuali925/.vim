@@ -638,7 +638,10 @@ docker-shell() {
         local tmp=$(mktemp -d); mkdir -p "$tmp" && chmod 755 "$tmp" && docker cp "$tmp" "$selected_id":/bin; rm -rf "$tmp"  # create /bin if not exists
         docker cp ~/.vim/bin/busybox "$selected_id":/bin/ls; docker cp ~/.vim/bin/busybox "$selected_id":/bin/cat
       }
-      docker exec -it "$selected_id" /busybox sh || echo 'Failed to start shell in container. Attaching volumes to alpine..' >&2 && docker run --rm -it --volumes-from "$selected_id" alpine:edge sh
+      docker exec -it "$selected_id" /busybox sh || {
+        echo 'Failed to start shell in container. Attaching volumes to alpine..' >&2
+        docker run --rm -it --volumes-from "$selected_id" alpine:edge sh
+      }
     fi
   }
 }

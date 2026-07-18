@@ -82,7 +82,7 @@ function M.create(annot)
     if file_name == "" then return end
     if not M.bookmarks[file_name] then M.bookmarks[file_name] = {} end
     local cursor = vim.api.nvim_win_get_cursor(0)
-    local row, col = cursor[1] - 1, cursor[2] - 1
+    local row, col = cursor[1] - 1, cursor[2]
     local id = buf_set_extmark({ row = row, col = col, annot = annot })
     table.insert(M.bookmarks[file_name], {
         id = id,

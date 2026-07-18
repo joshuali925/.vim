@@ -103,17 +103,19 @@ function! funcs#quit(buffer_mode, force) abort
   let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
-  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'gitsigns-blame', 'snacks_layout_box', 'snacks_terminal', 'sidekick_terminal', 'kulala_ui.text']
+  let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'gitsigns-blame', 'snacks_layout_box', 'snacks_picker_list', 'snacks_terminal', 'sidekick_terminal', 'kulala_ui.text']
+  let others_all_sidebars = win_len > 1 && len(filter(range(1, win_len), 'v:val != winnr() && index(sidebars, getbufvar(winbufnr(v:val), "&filetype")) >= 0')) == win_len - 1
+  let has_content = buf_len > 1 || bufname('%') != ''
   if has_nvim && nvim_win_get_config(0).relative != ''  " floating window focused
     quit
-  elseif (a:buffer_mode == 0 && a:force == 1)  " <leader>Q
+  elseif (a:buffer_mode == 0 && a:force == 1) || (others_all_sidebars && !has_content)  " <leader>Q, or nothing left to edit and only sidebars remain
     if tabpagenr('$') == 1
       quitall
     else
       tabclose
     endif
   " delete buffer if has multiple buffers open and one of the following: used <leader>x; last window; multiple windows but the other ones are sidebars
-  elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (win_len > 1 && len(filter(range(1, win_len), 'v:val != winnr() && index(sidebars, getbufvar(winbufnr(v:val), "&filetype")) >= 0')) == win_len - 1 && (buf_len > 1 || bufname('%') != ''))
+  elseif (buf_len > 1 && (a:buffer_mode == 1 || tabpagenr('$') == 1 && win_len == 1)) || (others_all_sidebars && has_content)
     if has_nvim
       execute 'lua require("mini.bufremove").delete(0, ' . (a:force ? 'true' : 'false') . ')'
     else

@@ -25,7 +25,7 @@ return {
             { "n", "[m", "<Cmd>lua require('snacks.words').jump(-vim.v.count1, true)<CR>" },
             { "n", "]m", "<Cmd>lua require('snacks.words').jump(vim.v.count1, true)<CR>" },
             { { "n", "x" }, "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>" },
-            { "n", "<leader>B", "<Cmd>lua require('snacks.explorer').reveal()<CR>" },
+            { "n", "<leader>b", "<Cmd>lua require('snacks.explorer').reveal()<CR>" },
             { "n", "q", "<Cmd>lua require('snacks.picker').buffers()<CR>" },
             {
                 "n",
@@ -126,7 +126,7 @@ return {
                         keys = {
                             { icon = " ", key = "e", desc = "New File", action = ":enew", hidden = true },
                             { icon = " ", key = "i", desc = "Insert", action = ":enew | startinsert", hidden = true },
-                            { icon = "󰙅 ", key = "b", desc = "Open file tree", action = ":Neotree reveal_force_cwd" },
+                            { icon = "󰙅 ", key = "b", desc = "Open file tree", action = ":lua require('snacks.explorer').reveal()" },
                             { icon = " ", key = "f", desc = "Find files", action = ":lua require('snacks.picker').smart()" },
                             { icon = "󰈞 ", key = "/", desc = "Live grep", action = ":lua require('snacks.picker').grep()" },
                             { icon = " ", key = "m", desc = "Find MRU (CWD only: 'M')", action = ":lua require('snacks.picker').recent()" },
@@ -158,6 +158,7 @@ return {
                 explorer = {},
                 picker = {
                     ui_select = false,
+                    layout = { cycle = false },
                     formatters = { file = { filename_first = true, truncate = 80 } },
                     preview = function(ctx)
                         if ctx.item.file and not ctx.item.preview_title then ctx.item.preview_title = ctx.item.file end
@@ -191,6 +192,10 @@ return {
                             hidden = true,
                             ignored = true,
                             follow_file = false,
+                            actions = {
+                                explorer_mode_prev = function(picker) require("explorer").cycle_mode(picker, -1) end,
+                                explorer_mode_next = function(picker) require("explorer").cycle_mode(picker, 1) end,
+                            },
                             win = {
                                 input = { keys = { ["<Esc>"] = { "toggle_focus", mode = { "i", "n" } }, ["jk"] = { "toggle_focus", mode = { "i", "n" } } } },
                                 list = {
@@ -198,6 +203,8 @@ return {
                                         ["/"] = false,
                                         ["<Esc>"] = false,
                                         ["<C-c>"] = false,
+                                        ["<BS>"] = "explorer_mode_prev",
+                                        ["\\"] = "explorer_mode_next",
                                         ["-"] = "explorer_up",
                                         ["x"] = "explorer_del",
                                         ["r"] = "explorer_update",

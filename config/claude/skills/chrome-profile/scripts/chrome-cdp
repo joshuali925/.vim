@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PORT=${CHROME_CDP_PORT:-9222}
+PROFILE=${CHROME_CDP_PROFILE:-Default}
+DATA_DIR=$HOME/.cache/chrome-cdp
+PROFILE_DIR=$DATA_DIR/profile
+LOG_FILE=$DATA_DIR/chrome.log
+STAMP_FILE=$DATA_DIR/last-sync
+MAX_SYNC_HOURS=${CHROME_CDP_MAX_SYNC_AGE_HOURS:-10}
+
+SRC_DIR=$HOME/Library/Application\ Support/Google/Chrome
+CHROME=/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
+
+EXCLUDES=(
+  '*Cache*' 'Safe Browsing*' 'optimization_guide*' 'blob_storage'
+  'Sessions' 'Session Storage' 'browser-history-fzf.db*'
+  'History*' 'Favicons*' 'Top Sites*' 'Visited Links' 'DIPS*'
+  'Network Action Predictor' 'Segmentation Platform' 'shared_proto_db'
+)
+
+usage() {
+  cat >&2 << EOF
+usage: chrome-cdp [start|sync|stop|status|url]
+
+  start   launch Chrome on $PROFILE_DIR with --remote-debugging-port=$PORT,
+          syncing first when the copy is missing or its last sync is older
+          than ${MAX_SYNC_HOURS}h (default command)
+  sync    mirror "$SRC_DIR/$PROFILE" into $PROFILE_DIR/$PROFILE
+  stop    quit that Chrome
+  status  print /json/version of the debugging endpoint
+  url     print the webSocketDebuggerUrl
+
+env: CHROME_CDP_PORT=$PORT CHROME_CDP_PROFILE=$PROFILE CHROME_CDP_ARGS
+     CHROME_CDP_MAX_SYNC_AGE_HOURS=$MAX_SYNC_HOURS
+EOF
+  exit 1
+}
+
+log() { echo -e "\033[0;36m${*}\033[0m" >&2; }
+die() { echo "$*" >&2; exit 1; }
+
+version() { curl -fs --max-time 2 "http://127.0.0.1:$PORT/json/version"; }
+listening() { version > /dev/null; }
+chrome_pid() { pgrep -of -- "^$CHROME .*--user-data-dir=$PROFILE_DIR"; }
+gone() { ! listening && ! chrome_pid > /dev/null; }
+
+wait_for() {
+  local deadline=$((SECONDS + $2))
+  while ((SECONDS < deadline)); do
+    "$1" && return 0
+    sleep 0.5
+  done
+  return 1
+}
+
+stale() {
+  local stamp=0
+  read -r stamp 2> /dev/null < "$STAMP_FILE" || stamp=0
+  [[ $stamp =~ ^[0-9]+$ ]] || stamp=0
+  (( ($(date +%s) - stamp) / 3600 >= MAX_SYNC_HOURS ))
+}
+
+sync() {
+  [[ -d $SRC_DIR/$PROFILE ]] || die "no such Chrome profile: $SRC_DIR/$PROFILE"
+  if chrome_pid > /dev/null; then die "chrome-cdp is running, run 'chrome-cdp stop' first"; fi
+  mkdir -p "$PROFILE_DIR"
+  local args=(-a --delete --delete-excluded)
+  for pattern in "${EXCLUDES[@]}"; do args+=(--exclude "$pattern"); done
+  rsync "${args[@]}" "$SRC_DIR/$PROFILE/" "$PROFILE_DIR/$PROFILE/"
+  rsync -a "$SRC_DIR/Local State" "$PROFILE_DIR/Local State"
+  date +%s > "$STAMP_FILE"
+  log "Synced profile $PROFILE to $PROFILE_DIR ($(du -sh "$PROFILE_DIR" | cut -f1))"
+}
+
+start() {
+  if listening; then
+    log "Already listening on port $PORT"
+    stale && log "Profile copy has not synced in ${MAX_SYNC_HOURS}h; run '$0 stop && $0 sync && $0 start' to refresh logins"
+    return 0
+  fi
+  [[ -x $CHROME ]] || die "Chrome not found at $CHROME"
+  if [[ ! -d $PROFILE_DIR/$PROFILE ]] || stale; then sync; fi
+  local extra
+  read -ra extra <<< "${CHROME_CDP_ARGS:-about:blank}"
+  nohup "$CHROME" \
+    --remote-debugging-port="$PORT" \
+    --user-data-dir="$PROFILE_DIR" \
+    --profile-directory="$PROFILE" \
+    --no-first-run \
+    --no-default-browser-check \
+    --hide-crash-restore-bubble \
+    "${extra[@]}" > "$LOG_FILE" 2>&1 < /dev/null &
+  wait_for listening 15 || die "Chrome did not open port $PORT, see $LOG_FILE"
+  log "Chrome listening on http://127.0.0.1:$PORT (logs: $LOG_FILE)"
+}
+
+stop() {
+  local pid
+  pid=$(chrome_pid) || { log 'chrome-cdp is not running'; return 0; }
+  kill "$pid" 2> /dev/null || true
+  wait_for gone 10 || die "chrome-cdp (pid $pid) did not exit, kill -9 it and check port $PORT"
+  log "Stopped chrome-cdp (pid $pid)"
+}
+
+case ${1:-start} in
+  start) start ;;
+  sync) sync ;;
+  stop) stop ;;
+  status) version || die "nothing listening on port $PORT" ;;
+  url) version | jq -er .webSocketDebuggerUrl || die "nothing listening on port $PORT" ;;
+  *) usage ;;
+esac

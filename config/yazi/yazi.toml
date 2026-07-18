@@ -9,6 +9,9 @@ show_hidden = true
 [tasks]
 suppress_preload = true
 
+[plugin]
+preloaders = []
+
 [preview]
 wrap = "yes"
 tab_size = 4

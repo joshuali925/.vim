@@ -25,7 +25,7 @@ After making changes, run the applicable steps below. Verify each completes with
   - `--opensearch.hosts=http://localhost:<port>`: connect to a specific OpenSearch
 - **Build artifacts**: `yarn build-platform --linux --skip-os-packages`. Run on build artifact errors. If it's a plugin under `./plugins/`, run `yarn build` instead.
 - **Runtime artifacts**: `./build/opensearch-dashboards/bin/opensearch-dashboards`. Run on runtime artifact errors (after build).
-- **Browser verification**: use `chrome-devtools` MCP at `localhost:5601[/path]`. Run when the user provided a URL path. Take a screenshot to verify styling. Do NOT use curl, WebFetch, or other MCPs. Subagents doing browser work must also use `chrome-devtools`.
+- **Browser verification**: use the chrome MCP at `localhost:5601[/path]`. Run when the user provided a URL path. Take a screenshot to verify styling. Do NOT use curl, WebFetch, or other MCPs. Subagents doing browser work must also use the chrome MCP.
 
 ### Reading server logs
 
@@ -38,5 +38,5 @@ Ignore bundle errors that appear ABOVE (before) a "bundles compiled successfully
 
 ---
 
-If user provided a URL path, use `chrome-devtools` MCP to verify the fix in the browser.
+If user provided a URL path, use the chrome MCP to verify the fix in the browser.
 Repeat until all validation passes.

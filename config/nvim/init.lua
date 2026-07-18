@@ -60,7 +60,7 @@ vim.o.ttimeoutlen = 40
 vim.o.synmaxcol = 1000
 vim.o.writebackup = false
 vim.o.wildcharm = 26 -- <C-z>
-vim.o.cedit = "<C-g>"
+vim.o.cedit = "<C-x>"
 vim.filetype.add({ extension = { conf = "config", log = "log" }, filename = { Caddyfile = "config" } })
 
 -- mappings {{{1
@@ -178,6 +178,12 @@ vim.keymap.set("n", "ZX", function()
         if vim.bo[bufnr].buflisted and bufnr ~= cur and vim.b[bufnr].bufpersist ~= 1 then require("mini.bufremove").delete(bufnr, false) end
     end
 end, { desc = "Close untouched buffers" })
+vim.keymap.set("n", "m<Space>", "[<Space>", { remap = true })
+vim.keymap.set("n", "m<CR>", "]<Space>", { remap = true })
+vim.keymap.set("n", "mq", "[q", { remap = true })
+vim.keymap.set("n", "mw", "]q", { remap = true })
+vim.keymap.set("n", "mQ", "[Q", { remap = true })
+vim.keymap.set("n", "mW", "]Q", { remap = true })
 vim.keymap.set("i", "jk", "<Esc>")
 vim.keymap.set("n", "<C-c>", "<C-c><Cmd>nohlsearch<CR>")
 vim.keymap.set("n", "<C-w><C-c>", "<Esc>")
@@ -230,7 +236,7 @@ vim.keymap.set("t", "<C-u>", [[get(get(b:, 'sidekick_cli', {}), 'name', '') ==# 
 vim.keymap.set("t", "<C-\\><C-u>", "<C-u>")
 vim.keymap.set("c", "<C-Space>", [[':/?' =~ getcmdtype() ? '.\{-}' : '<C-Space>']], { expr = true, replace_keycodes = false })
 vim.keymap.set("c", "<BS>", [[':/?' =~ getcmdtype() && '.\{-}' == getcmdline()[getcmdpos()-6:getcmdpos()-2] ? '<BS><BS><BS><BS><BS>' : '<BS>']], { expr = true, replace_keycodes = false })
-vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'
+vim.keymap.set("c", "<Tab>", "'/?' =~ getcmdtype() ? '<C-g>' : '<C-z>'", { expr = true }) -- <C-z> is 'wildcharm'. <C-g> cannot be 'cedit' for go to next pattern to work
 vim.keymap.set("c", "<S-Tab>", "'/?' =~ getcmdtype() ? '<C-t>' : '<S-Tab>'", { expr = true })
 vim.keymap.set("ca", "fd", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Fd' : 'fd')<CR>")
 vim.keymap.set("ca", "rg", "<C-r>=(getcmdtype() == ':' && getcmdpos() == 1 ? 'Rg' : 'rg')<CR>")

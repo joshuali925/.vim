@@ -117,9 +117,10 @@ api.unmap('gf');
 api.mapkey('gf', 'Go to flags', function() { api.tabOpenLink('chrome://flags'); });
 api.mapkey('<Ctrl-,>', 'Open Chrome Settings', function() { api.tabOpenLink('chrome://settings/'); });
 api.mapkey('<Ctrl-Alt-,>', 'Open ChromeOS Settings', function() { api.tabOpenLink('chrome://os-settings/'); });
-api.mapkey(';Vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
-api.mapkey(';Vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
-api.mapkey(';Vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
+api.unmap(';v');
+api.mapkey(';vs', 'split vertically', function() { document.write('<html><head></head><frameset cols=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); });
+api.mapkey(';vh', 'Split horizontally', function() { document.write('<html><head></head><frameset rows=\'50%,*\'><frame src=' + window.location.href + '><frame src=' + window.location.href + '></frameset></html>'); })
+api.mapkey(';vp', 'Pop window', function() { window.open(document.location.href, '', '_blank'); });
 api.mapkey('<Ctrl-r>', 'Remove OpenSearch-Dashboards hash and hard reload', function() { if (window.location.hash && window.location.pathname.includes('/app/')) history.replaceState(null, '', window.location.pathname + window.location.search); sessionStorage.clear(); window.location.reload(true); });
 api.unmap("'");
 api.mapkey("'", '#8Open URL from vim-like marks', function() { // from default om, <C-d> to delete
@@ -133,8 +134,7 @@ api.mapkey(';Q', 'Close all tabs', function() {
 	api.RUNTIME('tabOnly');
 	api.RUNTIME('closeTab');
 });
-api.unmap(';v');
-api.mapkey(';v', 'Edit with web vim', function() {
+api.mapkey(';E', 'Edit with web vim', function() {
 	api.Clipboard.read(function(response) {
 		api.Front.showEditor(response.data, function(data) {
 			api.Clipboard.write(data);

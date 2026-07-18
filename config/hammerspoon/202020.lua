@@ -4,8 +4,26 @@ local WORK_SECONDS = 20 * 60
 local BREAK_SECONDS = 20
 local COUNTDOWN_SECONDS = 10
 local SLEEP_GAP_THRESHOLD = 30 -- a tick gap larger than this implies system sleep
+local STARTUP_BAR_DELAY = 4.0
+local STARTUP_PROGRESS = {
+    { time = 0.0, value = 0.00 },
+    { time = STARTUP_BAR_DELAY, value = 0.00 },
+    { time = 5.2, value = 0.03 },
+    { time = 5.6, value = 0.14 },
+    { time = 7.0, value = 0.22 },
+    { time = 8.5, value = 0.32 },
+    { time = 10.0, value = 0.44 },
+    { time = 11.5, value = 0.53 },
+    { time = 13.0, value = 0.60 },
+    { time = 14.5, value = 0.69 },
+    { time = 16.0, value = 0.78 },
+    { time = 17.2, value = 0.85 },
+    { time = 18.0, value = 0.92 },
+    { time = 19.2, value = 0.98 },
+    { time = BREAK_SECONDS, value = 1.00 },
+}
 
-local paused = 0               -- 0 = running, 1 = manually paused, 2 = auto-paused on screen sharing
+local paused = 0 -- 0 = running, 1 = manually paused, 2 = auto-paused on screen sharing
 local deadline, bar
 
 local pausedRemaining = WORK_SECONDS
@@ -70,13 +88,26 @@ end
 
 local function release(resource, method) if resource then resource[method](resource) end end
 
-local overlays, overlayTimer, overlayTap, breakActive = {}, nil, nil, false
+local function startupProgressAt(elapsed)
+    for i = 2, #STARTUP_PROGRESS do
+        local previous = STARTUP_PROGRESS[i - 1]
+        local current = STARTUP_PROGRESS[i]
+        if elapsed <= current.time then
+            local position = (elapsed - previous.time) / (current.time - previous.time)
+            return previous.value + (current.value - previous.value) * position
+        end
+    end
+    return 1
+end
+
+local overlays, overlayTimer, breakTimer, overlayTap, breakActive = {}, nil, nil, nil, false
 local function dismissBreak()
     if not breakActive then return false end
     breakActive = false
     release(overlayTimer, "stop")
+    release(breakTimer, "stop")
     release(overlayTap, "stop")
-    overlayTimer, overlayTap = nil, nil
+    overlayTimer, breakTimer, overlayTap = nil, nil, nil
     for _, c in ipairs(overlays) do c:delete() end
     overlays = {}
     deadline = hs.timer.secondsSinceEpoch() + WORK_SECONDS -- next work interval starts after break ends
@@ -87,26 +118,45 @@ end
 local function showBreak()
     if breakActive then return end
     breakActive = true
-    local left = BREAK_SECONDS
     local screen = hs.screen.primaryScreen()
     local frame = screen:fullFrame()
     local canvas = assert(hs.canvas.new(frame))
+    local logoCenterY = frame.h * 0.5
+    local barX = (frame.w - 240) / 2
+    local barY = frame.h * 0.895
+    local logo = assert(hs.image.imageFromURL(
+        "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMSAyOSI+CiAgPGcgZmlsbD0iI2ZmZiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAyOSkgc2NhbGUoMSAtMSkiPgogICAgPHBhdGggZD0iTTE0LjA4MTg0IDI0LjU0ODI1QzE0LjkyNjYxIDI1LjYwNTMgMTUuNTAwNDEgMjcuMDI0ODUgMTUuMzQ4MjcgMjguNDc0ODVDMTQuMTEyMjcgMjguNDEzOTUgMTIuNjAzODYgMjcuNjU4NSAxMS43MzAxMiAyNi42MDE0NUMxMC45NDYyMSAyNS42OTUyIDEwLjI1MjE0IDI0LjIxNjIgMTAuNDMzMjYgMjIuODI3MUMxMS44MTk5NSAyMi43MDUzIDEzLjIwNjY1IDIzLjUyMTY1IDE0LjA4MTg0IDI0LjU0ODI1WiIvPgogICAgPHBhdGggZD0iTTE1LjMzMjc3IDIyLjU1NTIzQzEzLjMxNzIxIDIyLjY3NTU4IDExLjYwNDQ5IDIxLjQxMTE4IDEwLjY0MDkgMjEuNDExMThDOS42Nzg3NjggMjEuNDExMTggOC4yMDUxMzUgMjIuNDk0MzMgNi42MDk3ODYgMjIuNDY1MzNDNC41MzYyNjcgMjIuNDM0ODggMi42MTA1NDYgMjEuMjYxODMgMS41NTg1NzIgMTkuMzk0MjNDLTAuNjA3NjgzMyAxNS42NTkwMyAwLjk4NjIxNjcgMTAuMTE4NTggMy4wOTE2MTQgNy4wNzY0OEM0LjExNDYwOCA1LjU3MjgzIDUuMzQ3NzA3IDMuOTE1NDggNi45NzA1ODcgMy45NzQ5M0M4LjUwNjUyNyA0LjAzNTgzIDkuMTA3ODYyIDQuOTY5NjMgMTAuOTcyNzIgNC45Njk2M0MxMi44MzYxNCA0Ljk2OTYzIDEzLjM3ODA2IDMuOTc0OTMgMTUuMDAwOTQgNC4wMDUzOEMxNi42ODYxMyA0LjAzNTgzIDE3LjczOTU1IDUuNTEwNDggMTguNzYyNTUgNy4wMTcwM0MxOS45MzQ3OSA4LjczMjM4IDIwLjQxNTg2IDEwLjM4ODI4IDIwLjQ0NjI5IDEwLjQ3OTYzQzIwLjQxNTg2IDEwLjUxMDA4IDE3LjE5NzYzIDExLjc0NTQ4IDE3LjE2ODY1IDE1LjQ0ODc4QzE3LjEzODIyIDE4LjU1MDMzIDE5LjY5NDI2IDIwLjAyNDk4IDE5LjgxNDUyIDIwLjExNzc4QzE4LjM3MTMyIDIyLjI1MzYzIDE2LjExNTIzIDIyLjQ5NDMzIDE1LjMzMjc3IDIyLjU1NTIzWiIvPgogIDwvZz4KPC9zdmc+Cg=="))
+
     canvas:level(hs.canvas.windowLevels.screenSaver)
     canvas:behaviorAsLabels({ "canJoinAllSpaces", "stationary" })
     canvas[1] = { type = "rectangle", action = "fill", fillColor = color(0, 0, 0) }
-    canvas[2] = { type = "text", text = tostring(left), textColor = { white = 1 }, textSize = 180, textAlignment = "center", frame = { x = 0, y = frame.h / 2 - 120, w = frame.w, h = 220 } }
-    canvas[3] = { type = "text", text = "press Esc or Space to skip", textColor = color(85, 85, 85), textSize = 14, textAlignment = "center", frame = { x = 0, y = frame.h / 2 + 170, w = frame.w, h = 30 } }
+    canvas[2] = { type = "image", image = logo, imageAlpha = 0.9, imageScaling = "scaleProportionally", frame = { x = (frame.w - 84) / 2, y = logoCenterY - 58, w = 84, h = 116 } }
+    canvas[3] = { type = "rectangle", action = "skip", fillColor = { white = 0.24 }, roundedRectRadii = { xRadius = 3, yRadius = 3 }, frame = { x = barX, y = barY, w = 240, h = 6 } }
+    canvas[4] = { type = "rectangle", action = "skip", fillColor = { white = 0.78 }, roundedRectRadii = { xRadius = 3, yRadius = 3 }, frame = { x = barX, y = barY, w = 0, h = 6 } }
     canvas:show()
     overlays[#overlays + 1] = canvas
-    overlayTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(e)
+    local types = hs.eventtap.event.types
+    overlayTap = hs.eventtap.new({ types.keyDown, types.leftMouseDown, types.leftMouseUp, types.rightMouseDown, types.rightMouseUp, types.otherMouseDown, types.otherMouseUp, types.leftMouseDragged, types.rightMouseDragged, types.otherMouseDragged, types.scrollWheel }, function(e)
+        if e:getType() ~= types.keyDown then return true end
         local code = e:getKeyCode()
         if code == hs.keycodes.map.escape or code == hs.keycodes.map.space then return dismissBreak() end
     end):start()
-    overlayTimer = hs.timer.doEvery(1, function()
-        left = left - 1
-        if left <= 0 then return dismissBreak() end
-        for _, c in ipairs(overlays) do c:elementAttribute(2, "text", tostring(left)) end
+
+    local startedAt = hs.timer.secondsSinceEpoch()
+    local progressBarVisible = false
+    overlayTimer = hs.timer.doEvery(1 / 30, function()
+        local elapsed = hs.timer.secondsSinceEpoch() - startedAt
+        local progress = startupProgressAt(elapsed)
+        for _, c in ipairs(overlays) do
+            if not progressBarVisible and elapsed >= STARTUP_BAR_DELAY then
+                c:elementAttribute(3, "action", "fill")
+                c:elementAttribute(4, "action", "fill")
+            end
+            c:elementAttribute(4, "frame", { x = barX, y = barY, w = 240 * progress, h = 6 })
+        end
+        progressBarVisible = progressBarVisible or elapsed >= STARTUP_BAR_DELAY
     end)
+    breakTimer = hs.timer.doAfter(BREAK_SECONDS, dismissBreak)
 end
 
 local lastKey, lastTick = nil, hs.timer.secondsSinceEpoch()

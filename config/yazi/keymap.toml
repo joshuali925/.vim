@@ -8,7 +8,6 @@ prepend_keymap = [
   { on = "r", run = ["escape --find --filter --search"], desc = "Clear all filters" },
   { on = "R", run = "rename", desc = "Rename a file or directory" },
   { on = "d", run = "yank --cut", desc = "Cut the selected files" },
-  { on = "d", run = "yank --cut", desc = "Cut the selected files" },
   { on = "D", run = "unyank", desc = "Cancel the yank status of files" },
   { on = "x", run = "remove --permanently", desc = "Permanently delete the files" },
   { on = "X", run = "remove", desc = "Move the files to the trash" },
@@ -73,7 +72,7 @@ prepend_keymap = [
   { on = ["m", "s"], run = "plugin command -- size --hovered", desc = "Show size" },
   { on = ["m", "y"], run = '''shell -- for file in %s; do [ -n "$first" ] && printf "\n"; first=1; printf "%%s" "$file"; done | y''', desc = "Copy the absolute path", for = "unix" },  # built-in copy sometimes doesn't work in tmux floating panes
   { on = ["m", "y"], run = "copy path", desc = "Copy the absolute path", for = "windows" },
-  { on = ["m", "Y"], run = '''shell -- for file in %s; do name="${file##*/}"; [[ "$name" =~ [[:space:]*?\\[\{\`\$\\\%%\#\'\"\|\!\<] ]] && name="'$name'"; printf "%%s " "$name"; done | sed 's/ $//' | y''', desc = "Copy file names" },
+  { on = ["m", "n"], run = '''shell -- for file in %s; do name="${file##*/}"; [[ "$name" =~ [[:space:]*?\\[\{\`\$\\\%%\#\'\"\|\!\<] ]] && name="'$name'"; printf "%%s " "$name"; done | sed 's/ $//' | y''', desc = "Copy file names" },
   { on = ["m", "g"], run = '''shell -- realpath --relative-to="$(git rev-parse --show-toplevel || echo ~)" %h | head -c -1 | y''', desc = "Copy the relative path to git root or home" },
   { on = ["m", "p"], run = "link --relative", desc = "Symlink the relative path of files" },
   { on = ["m", "P"], run = "link", desc = "Symlink the absolute path of files" },
@@ -86,9 +85,13 @@ prepend_keymap = [
 
 [input]
 prepend_keymap = [
+  { on = "<Up>", run = ["escape", "plugin command -- history -1"], desc = "Search command history backward" },
+  { on = "<Down>", run = ["escape", "plugin command -- history 1"], desc = "Search command history forward" },
+  { on = "<Tab>", run = ["escape", "plugin command -- completion 1"], desc = "Select the next command completion" },
+  { on = "<BackTab>", run = ["escape", "plugin command -- completion -1"], desc = "Select the previous command completion" },
   { on = "q", run = "close", desc = "Cancel input" },
   { on = "<Esc>", run = "close", desc = "Cancel input" },
-  { on = "<C-u>", run = "escape", desc = "Go back the normal mode, or cancel input" },
+  { on = "<C-c>", run = "escape", desc = "Go back the normal mode, or cancel input" },
 ]
 
 [tasks]

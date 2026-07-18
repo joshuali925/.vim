@@ -4,12 +4,19 @@ set -euo pipefail
 cache="$HOME/.claude/plugins/cache"
 user_skills="$HOME/.claude/skills"
 commands="$HOME/.vim/config/claude/commands"
+agents="$HOME/.vim/config/claude/agents"
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+repo_skills="${repo_root:+$repo_root/.claude/skills}"
 
 {
-  fd SKILL.md "$user_skills"
+  fd -L SKILL.md "$user_skills"
+  if [[ -d "$repo_skills" ]]; then
+    fd -L SKILL.md "$repo_skills"
+  fi
   fd -e md . "$commands"
+  fd -e md . "$agents"
   fd --hidden --exclude=.git SKILL.md "$cache" --exec-batch stat -c '%Y %n'
-} | awk -v cache="$cache/" -v user="$user_skills/" '
+} | awk -v cache="$cache/" -v user="$user_skills/" -v repo="$repo_skills/" -v agents="$agents/" '
     function parse(path,   d, fm, cont, ln, line, v) {
       d = ""; fm = 0; cont = 0; ln = 0
       while ((getline line < path) > 0) {
@@ -42,9 +49,15 @@ commands="$HOME/.vim/config/claude/commands"
         rel = substr(path, length(cache) + 1)
         n = split(rel, p, "/")
         name = p[n-1]; key = p[2] ":" name; prio = 2
+      } else if (repo != "/" && index(path, repo) == 1) {
+        rel = substr(path, length(repo) + 1)
+        split(rel, p, "/"); name = p[1]; key = name; prio = -1
       } else if (index(path, user) == 1) {
         rel = substr(path, length(user) + 1)
         split(rel, p, "/"); name = p[1]; key = name; prio = 0
+      } else if (index(path, agents) == 1) {
+        n = split(path, p, "/"); name = p[n]; sub(/\.md$/, "", name)
+        name = "agent:" name; key = name; prio = 1
       } else {
         n = split(path, p, "/"); name = p[n]; sub(/\.md$/, "", name); key = name; prio = 1
       }

@@ -179,8 +179,7 @@ install-dotfiles() {
   link-file ~/.vim/config/yazi ~/.config/yazi --relative
   link-file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml --relative
   if [[ $PLATFORM = darwin ]]; then
-    ln -srf ~/Library/Application\ Support ~/Library/ApplicationSupport
-    link-file ~/.vim/config/lazygit_config.yml ~/Library/ApplicationSupport/lazygit/config.yml
+    link-file ~/.vim/config/lazygit_config.yml ~/Library/Application\ Support/lazygit/config.yml
     link-file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
     link-file ~/.vim/config/hammerspoon ~/.hammerspoon --relative
     mkdir -p ~/.config/neovide && echo 'frame = "none"' > ~/.config/neovide/config.toml
@@ -354,17 +353,24 @@ install-claude-code() {
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
   claude plugin marketplace add pbakaus/impeccable && claude plugin install impeccable@impeccable && claude plugin disable impeccable  # /impeccable init
   claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
+  # claude plugin marketplace add openai/codex-plugin-cc && claude plugin install codex@openai-codex
   # uv tool install mempalace && mkdir -p ~/.vim/tmp/mempalace && yes n | mempalace init ~/.vim/tmp/mempalace --no-llm --yes && claude plugin marketplace add MemPalace/mempalace && claude plugin install --scope user mempalace
   # https://github.com/phuryn/pm-skills
   # npx -y skills add mattpocock/skills --agent claude-code --yes --global
+  # npx -y skills add hardikpandya/stop-slop --agent claude-code --yes --global
   # npx -y skills add Leonxlnx/taste-skill --agent claude-code --yes
   # npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent claude-code --yes
   # npx -y skills add shadcn-ui/ui --agent claude-code --yes
   # npx -y skills add jgraph/drawio-mcp --agent claude-code --yes
-  # npx -y skills add hardikpandya/stop-slop --agent claude-code --yes
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
-    npm install -g chrome-devtools-mcp@latest && claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
+    npm install -g chrome-devtools-mcp@latest
+    if [[ $PLATFORM = darwin ]]; then
+      link-file ~/.vim/config/claude/skills/chrome-profile ~/.claude/skills/chrome-profile --relative
+      claude mcp add -s user chrome-profile -- chrome-devtools-mcp --browserUrl http://127.0.0.1:9222 --no-usage-statistics
+    else
+      claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
+    fi
     # npm install -g @playwright/cli@latest && cp -r "$(npm root -g)/@playwright/cli/skills" ~/.claude/skills && append-once '/.playwright-cli/' ~/.gitignore
   fi
   log '\nInstalled Claude Code'

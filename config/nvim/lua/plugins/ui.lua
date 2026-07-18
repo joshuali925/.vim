@@ -36,7 +36,7 @@ return {
         version = vim.version.range("3"),
         dependencies = { "nui.nvim", "plenary.nvim" },
         cmd = { "Neotree" },
-        keys = { { "n", "<leader>b", function()
+        keys = { { "n", "<leader>B", function()
             for _, winid in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                 local success, source_name = pcall(vim.api.nvim_buf_get_var, vim.api.nvim_win_get_buf(winid), "neo_tree_source")
                 if success then
