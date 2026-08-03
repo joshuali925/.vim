@@ -9,3 +9,7 @@ This rule overrides "match the surrounding code's comment density." A heavily-co
 Before writing any comment, state in your reasoning the specific wrong change a competent reader would make without it. If you can't name one, don't write the comment. Do this for every comment, including ones added to match surrounding code.
 
 No ephemeral context — actively remove outdated information that no longer helps in the future.
+
+# Code styles
+
+Prefer removing code over adding flags when modifying or deleting features.

@@ -4,9 +4,9 @@ git:
   autoFetch: true
   commit:
     signOff: true
-  pagers:
+  diffRenderers:
     - colorArg: always
-      pager: delta --paging=never --24-bit-color=always --features=no-line-numbers
+      command: delta --paging=never --24-bit-color=always --features=no-line-numbers
   branchLogCmd: git log --color --graph --pretty=simple {{branchName}} --
   allBranchesLogCmds:
     - git log --color --graph --format=simple-iso --all

@@ -48,8 +48,8 @@ create() {
   sed -i "/Host $tag$/,/^\s*\$/{d}" ~/.ssh/ec2hosts 2> /dev/null
   printf "Host $tag\n  HostName $host\n  User %s\n\n" ubuntu >> ~/.ssh/ec2hosts
   command ssh -o 'StrictHostKeyChecking no' -o 'ControlPath=none' "$tag" 'tail -f /var/log/cloud-init-output.log & pid=$!; while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done; kill $pid'
-  if [[ -n $no_init ]]; then exec command ssh "$tag"; fi
-  exec command ssh -t "$tag" 'LANG=C.UTF-8 EDITOR=nvim PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
+  if [[ -n $no_init ]]; then exec "$(type -P ssh)" "$tag"; fi
+  exec "$(type -P ssh)" -t "$tag" 'LANG=C.UTF-8 EDITOR=nvim PATH=$HOME/.local/bin:$PATH:$HOME/.vim/bin .vim/bin/tmux new -A -s 0'
 }
 
 terminate() {

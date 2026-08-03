@@ -1,9 +1,11 @@
--- icon: https://raw.githubusercontent.com/DinkDonk/kitty-icon/HEAD/kitty-dark.png
 local wezterm = require("wezterm")
 local light_theme = false -- sync with system theme: https://wezfurlong.org/wezterm/config/lua/window/get_appearance.html
 local mux = wezterm.mux
 local config = wezterm.config_builder()
 local uploading_host = nil
+
+local anki = dofile(wezterm.home_dir .. "/.vim/config/anki.lua")
+anki.setup()
 
 -- config.animation_fps = 240
 -- config.max_fps = 240
@@ -50,6 +52,7 @@ config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 config.window_content_alignment = { horizontal = "Center", vertical = "Center" }
 config.color_schemes = { tokyonight = tokyonight }
 config.color_scheme = light_theme and "Catppuccin Latte" or "tokyonight"
+config.set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" }
 config.quick_select_patterns = {
     [[[\w\-.%/]*\.[\w\-.%/~]+]],
     -- TODO remove
@@ -84,7 +87,7 @@ config.keys = {
             end),
         }),
     },
-    { key = "t", mods = "CMD|SHIFT", action = wezterm.action.SpawnCommandInNewTab({ args = { os.getenv("HOME") .. "/.local/bin/nu" }, domain = "CurrentPaneDomain" }) },
+    { key = "t", mods = "CMD|SHIFT", action = wezterm.action.SpawnCommandInNewTab({ args = { wezterm.home_dir .. "/.local/bin/nu" }, domain = "CurrentPaneDomain" }) },
     {
         key = "v",
         mods = "CMD|SHIFT",
@@ -122,8 +125,16 @@ config.keys = {
         end),
     },
 }
-config.key_tables = { search_mode = search_mode }
-config.set_environment_variables = { LIGHT_THEME = light_theme and "1" or "0" }
+local anki_keys = {
+    { key = "5", action = anki.binding("undo") },
+    { key = "6", action = anki.binding("reveal_or_grade", "again") },
+    { key = "7", action = anki.binding("reveal_or_grade", "hard") },
+    { key = "8", action = anki.binding("reveal_or_grade", "good") },
+    { key = "9", action = anki.binding("reveal_or_grade", "easy") },
+    { key = "0", action = anki.binding("reveal_or_mark_learned") },
+}
+for _, k in ipairs(anki_keys) do table.insert(config.keys, { key = k.key, mods = "CTRL", action = k.action }) end
+config.key_tables = { search_mode = search_mode, anki_grade = anki_keys }
 
 local tabline = wezterm.plugin.require("https://github.com/michaelbrusegard/tabline.wez") -- install path: wezterm.plugin.list()
 tabline.setup({
@@ -140,10 +151,7 @@ tabline.setup({
         tabline_c = {},
         tab_active = { "process" },
         tab_inactive = { "process" },
-        tabline_x = {
-            function() return uploading_host and ("󰘿 %s "):format(uploading_host) or "" end,
-            "cpu",
-        },
+        tabline_x = { function() return uploading_host and ("󰘿 %s "):format(uploading_host) or "" end, function() return anki.component() end, "cpu" },
         tabline_y = { "battery" },
         tabline_z = { { "datetime", style = "%I:%M %p" } },
     },

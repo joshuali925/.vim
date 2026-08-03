@@ -34,7 +34,7 @@ Make sure server is running, and run command based on who started the server:
 - **Agent started it** (`ps u -p $(<.daemon-pid)` should be active): `tail .daemon-log`
 - **User started it** (foreground in tmux): `tmux capture-pane -p -t "1.$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1}')" | tail`
 
-Ignore bundle errors that appear ABOVE (before) a "bundles compiled successfully" message. If the tmux command fails or the server misbehaves, kill the existing process and restart it yourself with `OS_DAEMON=1 os run -e [args...]`.
+Ignore bundle errors that appear ABOVE (before) a "bundles compiled successfully" message. Server will auto restart after server code changes. If the tmux command fails or the server misbehaves, kill the existing process and restart it yourself with `OS_DAEMON=1 os run -e [args...]`.
 
 ---
 

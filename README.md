@@ -74,6 +74,9 @@ Maccy -> Preferences -> Hotkey -> control-shift-v
 
 BetterTouchTool -> Settings -> Trackpad -> Swipes -> 3 & 4 Finger Swipes -> Set all sensitivity to 0.12
 
+DarkModeBuddy -> Go Dark When Ambient Light Falls Below: 3
+              -> Delay Time: 30s
+
 Handy -> General -> Transcribe -> change to right cmd
 ```
 

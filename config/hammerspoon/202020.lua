@@ -23,12 +23,13 @@ local STARTUP_PROGRESS = {
     { time = BREAK_SECONDS, value = 1.00 },
 }
 
-local paused = 0 -- 0 = running, 1 = manually paused, 2 = auto-paused on screen sharing
+local RUNNING, MANUAL, AUTO = 0, 1, 2
+local paused = RUNNING
 local deadline, bar
 
 local pausedRemaining = WORK_SECONDS
 local function remaining()
-    if paused ~= 0 then return math.max(0, math.floor(pausedRemaining + 0.5)) end
+    if paused ~= RUNNING then return math.max(0, math.floor(pausedRemaining + 0.5)) end
     return math.max(0, math.floor(deadline - hs.timer.secondsSinceEpoch() + 0.5))
 end
 
@@ -41,7 +42,7 @@ local function renderIcon(value, isPaused, counting)
     local fg = (counting and not isPaused) and color(255, 150, 40) or color(255, 255, 255)
     local canvas = assert(hs.canvas.new({ x = 0, y = 0, w = size, h = size }))
     canvas[1] = { type = "oval", action = "fill", fillColor = bg, frame = { x = 2, y = 2, w = size - 4, h = size - 4 } }
-    if isPaused then -- draw two vertical bars for precise alignment
+    if isPaused then
         local barW, barH, gap = 9, 28, 8
         local x0 = (size - (barW * 2 + gap)) / 2
         local y0 = (size - barH) / 2
@@ -60,21 +61,21 @@ end
 local function refreshIcon()
     if not bar then return end
     local rem = remaining()
-    if paused == 0 and rem > 0 and rem <= COUNTDOWN_SECONDS then
+    if paused == RUNNING and rem > 0 and rem <= COUNTDOWN_SECONDS then
         bar:setIcon(renderIcon(rem, false, true), false)
     else
-        bar:setIcon(renderIcon(minutesLeft(rem), paused ~= 0, false), false)
+        bar:setIcon(renderIcon(minutesLeft(rem), paused ~= RUNNING, false), false)
     end
 end
 
 local function togglePause(sharing)
-    if sharing ~= nil and paused ~= (sharing and 0 or 2) then return false end -- sharing only matters if not paused and sharing, or auto-paused and stopped sharing
-    if (sharing == nil and paused == 0) or sharing then
+    if sharing ~= nil and paused ~= (sharing and RUNNING or AUTO) then return false end
+    if (sharing == nil and paused == RUNNING) or sharing then
         pausedRemaining = math.max(0, deadline - hs.timer.secondsSinceEpoch())
-        paused = sharing and 2 or 1
+        paused = sharing and AUTO or MANUAL
     else
         deadline = hs.timer.secondsSinceEpoch() + pausedRemaining
-        paused = 0
+        paused = RUNNING
     end
     refreshIcon()
     return true
@@ -82,7 +83,7 @@ end
 
 local function resetTimer()
     deadline = hs.timer.secondsSinceEpoch() + WORK_SECONDS
-    if paused ~= 0 then pausedRemaining = WORK_SECONDS end
+    if paused ~= RUNNING then pausedRemaining = WORK_SECONDS end
     refreshIcon()
 end
 
@@ -122,8 +123,11 @@ local function showBreak()
     local frame = screen:fullFrame()
     local canvas = assert(hs.canvas.new(frame))
     local logoCenterY = frame.h * 0.5
-    local barX = (frame.w - 240) / 2
-    local barY = frame.h * 0.895
+    local barWidth, barHeight, barBorder = 236, 8, 1
+    local barX = (frame.w - barWidth) / 2
+    local barY = frame.h * 0.904 - barHeight / 2
+    local fillX, fillY = barX + barBorder, barY + barBorder
+    local fillWidth, fillHeight = barWidth - barBorder * 2, barHeight - barBorder * 2
     local logo = assert(hs.image.imageFromURL(
         "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMSAyOSI+CiAgPGcgZmlsbD0iI2ZmZiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAyOSkgc2NhbGUoMSAtMSkiPgogICAgPHBhdGggZD0iTTE0LjA4MTg0IDI0LjU0ODI1QzE0LjkyNjYxIDI1LjYwNTMgMTUuNTAwNDEgMjcuMDI0ODUgMTUuMzQ4MjcgMjguNDc0ODVDMTQuMTEyMjcgMjguNDEzOTUgMTIuNjAzODYgMjcuNjU4NSAxMS43MzAxMiAyNi42MDE0NUMxMC45NDYyMSAyNS42OTUyIDEwLjI1MjE0IDI0LjIxNjIgMTAuNDMzMjYgMjIuODI3MUMxMS44MTk5NSAyMi43MDUzIDEzLjIwNjY1IDIzLjUyMTY1IDE0LjA4MTg0IDI0LjU0ODI1WiIvPgogICAgPHBhdGggZD0iTTE1LjMzMjc3IDIyLjU1NTIzQzEzLjMxNzIxIDIyLjY3NTU4IDExLjYwNDQ5IDIxLjQxMTE4IDEwLjY0MDkgMjEuNDExMThDOS42Nzg3NjggMjEuNDExMTggOC4yMDUxMzUgMjIuNDk0MzMgNi42MDk3ODYgMjIuNDY1MzNDNC41MzYyNjcgMjIuNDM0ODggMi42MTA1NDYgMjEuMjYxODMgMS41NTg1NzIgMTkuMzk0MjNDLTAuNjA3NjgzMyAxNS42NTkwMyAwLjk4NjIxNjcgMTAuMTE4NTggMy4wOTE2MTQgNy4wNzY0OEM0LjExNDYwOCA1LjU3MjgzIDUuMzQ3NzA3IDMuOTE1NDggNi45NzA1ODcgMy45NzQ5M0M4LjUwNjUyNyA0LjAzNTgzIDkuMTA3ODYyIDQuOTY5NjMgMTAuOTcyNzIgNC45Njk2M0MxMi44MzYxNCA0Ljk2OTYzIDEzLjM3ODA2IDMuOTc0OTMgMTUuMDAwOTQgNC4wMDUzOEMxNi42ODYxMyA0LjAzNTgzIDE3LjczOTU1IDUuNTEwNDggMTguNzYyNTUgNy4wMTcwM0MxOS45MzQ3OSA4LjczMjM4IDIwLjQxNTg2IDEwLjM4ODI4IDIwLjQ0NjI5IDEwLjQ3OTYzQzIwLjQxNTg2IDEwLjUxMDA4IDE3LjE5NzYzIDExLjc0NTQ4IDE3LjE2ODY1IDE1LjQ0ODc4QzE3LjEzODIyIDE4LjU1MDMzIDE5LjY5NDI2IDIwLjAyNDk4IDE5LjgxNDUyIDIwLjExNzc4QzE4LjM3MTMyIDIyLjI1MzYzIDE2LjExNTIzIDIyLjQ5NDMzIDE1LjMzMjc3IDIyLjU1NTIzWiIvPgogIDwvZz4KPC9zdmc+Cg=="))
 
@@ -131,13 +135,12 @@ local function showBreak()
     canvas:behaviorAsLabels({ "canJoinAllSpaces", "stationary" })
     canvas[1] = { type = "rectangle", action = "fill", fillColor = color(0, 0, 0) }
     canvas[2] = { type = "image", image = logo, imageAlpha = 0.9, imageScaling = "scaleProportionally", frame = { x = (frame.w - 84) / 2, y = logoCenterY - 58, w = 84, h = 116 } }
-    canvas[3] = { type = "rectangle", action = "skip", fillColor = { white = 0.24 }, roundedRectRadii = { xRadius = 3, yRadius = 3 }, frame = { x = barX, y = barY, w = 240, h = 6 } }
-    canvas[4] = { type = "rectangle", action = "skip", fillColor = { white = 0.78 }, roundedRectRadii = { xRadius = 3, yRadius = 3 }, frame = { x = barX, y = barY, w = 0, h = 6 } }
+    canvas[3] = { type = "rectangle", action = "skip", fillColor = { white = 0.20 }, roundedRectRadii = { xRadius = 4, yRadius = 4 }, frame = { x = barX, y = barY, w = barWidth, h = barHeight } }
+    canvas[4] = { type = "rectangle", action = "skip", fillColor = { white = 0.13 }, roundedRectRadii = { xRadius = 3, yRadius = 3 }, frame = { x = fillX, y = fillY, w = fillWidth, h = fillHeight } }
+    canvas[5] = { type = "rectangle", action = "skip", fillColor = { white = 0.80 }, roundedRectRadii = { xRadius = 3, yRadius = 3 }, frame = { x = fillX, y = fillY, w = 0, h = fillHeight } }
     canvas:show()
     overlays[#overlays + 1] = canvas
-    local types = hs.eventtap.event.types
-    overlayTap = hs.eventtap.new({ types.keyDown, types.leftMouseDown, types.leftMouseUp, types.rightMouseDown, types.rightMouseUp, types.otherMouseDown, types.otherMouseUp, types.leftMouseDragged, types.rightMouseDragged, types.otherMouseDragged, types.scrollWheel }, function(e)
-        if e:getType() ~= types.keyDown then return true end
+    overlayTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(e)
         local code = e:getKeyCode()
         if code == hs.keycodes.map.escape or code == hs.keycodes.map.space then return dismissBreak() end
     end):start()
@@ -146,15 +149,17 @@ local function showBreak()
     local progressBarVisible = false
     overlayTimer = hs.timer.doEvery(1 / 30, function()
         local elapsed = hs.timer.secondsSinceEpoch() - startedAt
+        if elapsed < STARTUP_BAR_DELAY then return end
         local progress = startupProgressAt(elapsed)
         for _, c in ipairs(overlays) do
-            if not progressBarVisible and elapsed >= STARTUP_BAR_DELAY then
+            if not progressBarVisible then
                 c:elementAttribute(3, "action", "fill")
                 c:elementAttribute(4, "action", "fill")
+                c:elementAttribute(5, "action", "fill")
             end
-            c:elementAttribute(4, "frame", { x = barX, y = barY, w = 240 * progress, h = 6 })
+            c:elementAttribute(5, "frame", { x = fillX, y = fillY, w = fillWidth * progress, h = fillHeight })
         end
-        progressBarVisible = progressBarVisible or elapsed >= STARTUP_BAR_DELAY
+        progressBarVisible = true
     end)
     breakTimer = hs.timer.doAfter(BREAK_SECONDS, dismissBreak)
 end
@@ -168,13 +173,13 @@ local function tick()
         lastKey = nil
         return resetTimer()
     end
-    if paused == 0 and now >= deadline and not breakActive then
+    if paused == RUNNING and now >= deadline and not breakActive then
         lastKey = nil
         return showBreak()
     end
     local rem = remaining()
-    local inCountdown = paused == 0 and rem > 0 and rem <= COUNTDOWN_SECONDS
-    local key = inCountdown and ("c" .. rem) or ((paused ~= 0 and "p" or "n") .. minutesLeft(rem) .. (paused == 2 and "a" or ""))
+    local inCountdown = paused == RUNNING and rem > 0 and rem <= COUNTDOWN_SECONDS
+    local key = inCountdown and ("c" .. rem) or ((paused ~= RUNNING and "p" or "n") .. minutesLeft(rem) .. (paused == AUTO and "a" or ""))
     if key ~= lastKey then
         lastKey = key
         refreshIcon()
@@ -185,7 +190,7 @@ local inMeeting = false
 function M.inMeeting() return inMeeting end
 
 local nizPlum = require("niz-plum")
-local function poll() -- single 5s poller: screen-share detection + NIZ Bluetooth check
+local function poll()
     hs.task.new("/usr/bin/pgrep", function(rc)
         inMeeting = (rc == 0)
         togglePause(rc == 0)
@@ -207,7 +212,7 @@ function M.init()
     togglePausebind = hs.hotkey.bind({ "cmd", "alt" }, "c", togglePause)
     if bar then
         bar:setMenu({
-            { title = paused ~= 0 and "Resume" or "Pause", fn = function() togglePause() end },
+            { title = paused ~= RUNNING and "Resume" or "Pause", fn = function() togglePause() end },
             { title = "Break now", fn = showBreak },
             { title = "Reset timer", fn = resetTimer },
             { title = "-" },

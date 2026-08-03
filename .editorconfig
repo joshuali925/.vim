@@ -1,5 +1,6 @@
 root = true
 
+# https://raw.githubusercontent.com/CppCXY/EmmyLuaCodeStyle/HEAD/docs/format_config.md
 [*.lua]
 quote_style = double
 max_line_length = unset

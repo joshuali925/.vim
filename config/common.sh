@@ -69,7 +69,7 @@ alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -avihP --no-owner --no-group --delete --filter=':- .gitignore'"
 alias filebrowser='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
-alias rclone="env RCLONE_PROGRESS=true RCLONE_DELETE_EMPTY_SRC_DIRS=true RCLONE_TRANSFERS=7 RCLONE_DISABLE_HTTP2=true RCLONE_MULTI_THREAD_CUTOFF=1Mi rclone"
+alias rclone="env RCLONE_LOG_LEVEL=INFO RCLONE_PROGRESS=true RCLONE_DELETE_EMPTY_SRC_DIRS=true RCLONE_TRANSFERS=7 RCLONE_DISABLE_HTTP2=true RCLONE_MULTI_THREAD_CUTOFF=1Mi rclone"
 alias markdowns='if [[ ! -x ~/.local/bin/mdview ]]; then uv tool install md-viewer-py; fi && printf %s "$(getip):8081" | y && eval mdview --host 0.0.0.0'  # eval to avoid red syntax if not installed
 # shellcheck disable=2142
 alias gradle-deps="./gradlew -q projects | { rg -o -r '\$1:dependencies' -- \"(?<=--- Project ')(:[^']+)\" || echo dependencies } | xargs -I@ sh -c 'echo @ >&2; ./gradlew @'"
@@ -488,6 +488,17 @@ tmux-wait() {
   untildone "printf 'Waiting for command: ' && ! ps -o command= -p $(pgrep -P "$ppid") 2>/dev/null" && echo Command finished
 }
 
+tmux-wait-claude() {
+  if [[ $# -eq 0 ]]; then echo "Usage: $0 <prompt> [<prompt> ...]" >&2; return 1; fi
+  local prompt pane=$(tmux list-panes -F '#{pane_id} #{pane_active}' | awk '$2==0{print $1; exit}')
+  for prompt in "$@"; do
+    UNTILDONE_INTERVAL=5 untildone "tmux capture-pane -pt '$pane' | grep -qE '[0-9]+m?\s*[0-9]*s?\s*·\s*[↓↑]' && f=0 || f=\$((f+1)); ((f >= 5))" || return $?
+    tmux send-keys -t "$pane" -l "$prompt" && sleep 1 || return $?
+    tmux send-keys -t "$pane" Enter && sleep 10 || return $?
+    printf "[$0] sent at %s: %s\n" "$(date +'%Y-%m-%dT%H:%M:%S%z')" "$prompt" >&2
+  done
+}
+
 man() {
   if [[ $# -eq 0 ]]; then
     local fzftemp
@@ -521,20 +532,26 @@ untildone() {
   fi
   local i=1 max_tries=${UNTILDONE_MAX_TRIES:-0} interval=${UNTILDONE_INTERVAL:-2}
   local start_time=$SECONDS
-  tput sc
+  local prev_rows=0 output rc cols line
   while true; do
+    (( prev_rows )) && printf '\033[%dF\033[J' "$prev_rows" >&2
     local elapsed=$((SECONDS - start_time))
     local hours=$((elapsed / 3600)) mins=$(((elapsed % 3600) / 60)) secs=$((elapsed % 60))
     printf "\033[0;33mTry %d, elapsed %02d:%02d:%02d at %s.\033[0m\n" "$i" "$hours" "$mins" "$secs" "$(date +'%Y-%m-%dT%H:%M:%S%z')" >&2
-    eval "$*" && break
+    output=$(eval "$*" 2>&1); rc=$?
+    printf '%s\n' "$output"
+    (( rc == 0 )) && break
     ((i+=1))
     if [[ $max_tries -gt 0 && $i -gt $max_tries ]]; then
       echo "Max tries ($UNTILDONE_MAX_TRIES) reached. Exiting." >&2
       return 1
     fi
+    cols=$(tput cols 2>/dev/null); [[ $cols =~ ^[0-9]+$ ]] || cols=80
+    prev_rows=1
+    while IFS= read -r line; do
+      (( prev_rows += ${#line} == 0 ? 1 : (${#line} + cols - 1) / cols ))
+    done <<< "$output"
     sleep "$interval"
-    tput rc
-    tput ed
   done
 }
 
@@ -699,6 +716,7 @@ if [[ $OSTYPE = darwin* ]]; then
   alias ideace='open -na "IntelliJ IDEA CE.app" --args'
   alias refresh-icon-cache='rm /var/folders/*/*/*/com.apple.dock.iconcache; killall Dock'
   alias toggle-dark-theme="osascript -e 'tell application \"System Events\" to tell appearance preferences to set dark mode to not dark mode'"
+  alias doll-outlook="hs -c 'require(\"doll\").resetOutlook()'"
   alias last-sleeps='pmset -g log | grep "Clamshell Sleep" | tail'
   browser-history() {
     local cols=$((COLUMNS - 26)) sep='{::}' fzftemp fzfprompt histfile=/tmp/browser-history-fzf.db

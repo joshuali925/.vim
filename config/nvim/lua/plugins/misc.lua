@@ -158,7 +158,6 @@ return {
                 explorer = {},
                 picker = {
                     ui_select = false,
-                    layout = { cycle = false },
                     formatters = { file = { filename_first = true, truncate = 80 } },
                     preview = function(ctx)
                         if ctx.item.file and not ctx.item.preview_title then ctx.item.preview_title = ctx.item.file end

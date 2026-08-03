@@ -5,20 +5,16 @@ return {
         keys = {
             { "n", "<leader>c", "<Cmd>lua require('sidekick.cli').toggle({name = 'claude'})<CR>" },
             { "x", "<leader>c", "<Cmd>lua require('sidekick.cli').send({name = 'claude', msg = '{this}'})<CR>" },
-            { "n", "<leader>h", "<Cmd>lua require('sidekick.cli').toggle({name = 'kiro'})<CR>" },
-            { "x", "<leader>h", "<Cmd>lua require('sidekick.cli').send({name = 'kiro', msg = '{this}'})<CR>" },
+            { "n", "<leader>h", "<Cmd>lua require('sidekick.cli').toggle({name = 'codex'})<CR>" },
+            { "x", "<leader>h", "<Cmd>lua require('sidekick.cli').send({name = 'codex', msg = '{this}'})<CR>" },
         },
         config = function()
+            local format = function(text, str) -- sometimes sidekick sends @path :Ln
+                return str:gsub("@([^@]-) :L(%d+)%-L(%d+)", "@%1#L%2-%3"):gsub("@([^@]-) :L(%d+):C%d+%-?C?%d*", "@%1#L%2"):gsub("@([^@]-) :L(%d+)", "@%1#L%2")
+            end
             require("sidekick").setup({
                 cli = {
-                    tools = {
-                        claude = {
-                            format = function(text, str) -- sometimes sidekick sends @path :Ln
-                                return str:gsub("@([^@]-) :L(%d+)%-L(%d+)", "@%1#L%2-%3"):gsub("@([^@]-) :L(%d+):C%d+%-?C?%d*", "@%1#L%2"):gsub("@([^@]-) :L(%d+)", "@%1#L%2")
-                            end,
-                        },
-                        kiro = { cmd = { "kiro-cli", "chat", "--trust-all-tools" } },
-                    },
+                    tools = { claude = { format = format }, codex = { format = format } },
                     win = {
                         split = { width = 0.4 },
                         keys = {

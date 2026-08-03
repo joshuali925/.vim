@@ -147,7 +147,7 @@ install-devtools() {
     # git clone https://github.com/iDvel/rime-ice ~/Library/Rime --depth=1  # open rime from /Library/Input Methods/Squirrel.app
     # sed -i 's/\(Shift_[LR]: \)noop/\1commit_code/' ~/Library/Rime/default.yaml  # https://github.com/iDvel/rime-ice/pull/129
     # brew install -y apfel btop pstree blueutil  # blueutil used by niz-plum.lua in hammerspoon
-    # brew install -y --cask font-jetbrains-mono-nerd-font wezterm@nightly neovide linearmouse maccy pixpin thaw@beta doll hammerspoon squirrel-app darkmodebuddy coconutbattery handy orion orbstack cardinal-search
+    # brew install -y --cask font-jetbrains-mono-nerd-font wezterm@nightly neovide linearmouse maccy pixpin thaw@beta doll hammerspoon squirrel-app darkmodebuddy coconutbattery handy orion orbstack cardinal-search windows-app
     # tempfile=$(mktemp) && curl -o $tempfile https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo && tic -x -o ~/.terminfo $tempfile && rm $tempfile
     # to update casks: brew upgrade --cask --greedy
     # to update one cask: brew upgrade --cask wezterm@nightly --greedy-latest
@@ -353,7 +353,6 @@ install-claude-code() {
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
   claude plugin marketplace add pbakaus/impeccable && claude plugin install impeccable@impeccable && claude plugin disable impeccable  # /impeccable init
   claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
-  # claude plugin marketplace add openai/codex-plugin-cc && claude plugin install codex@openai-codex
   # uv tool install mempalace && mkdir -p ~/.vim/tmp/mempalace && yes n | mempalace init ~/.vim/tmp/mempalace --no-llm --yes && claude plugin marketplace add MemPalace/mempalace && claude plugin install --scope user mempalace
   # https://github.com/phuryn/pm-skills
   # npx -y skills add mattpocock/skills --agent claude-code --yes --global
