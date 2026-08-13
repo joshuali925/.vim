@@ -53,7 +53,7 @@ return {
             require("codediff").setup({
                 diff = { layout = "inline", compute_moves = true, ignore_trim_whitespace = true },
                 explorer = { view_mode = "tree" },
-                keymaps = { view = { next_hunk = "]g", prev_hunk = "[g", next_file = "\\", prev_file = "<BS>", toggle_stage = "=" }, explorer = { toggle_view_mode = "`" } },
+                keymaps = { view = { next_hunk = "mg", prev_hunk = "mf", next_file = "\\", prev_file = "<BS>", toggle_stage = "=" }, explorer = { toggle_view_mode = "`" } },
             })
         end,
     },

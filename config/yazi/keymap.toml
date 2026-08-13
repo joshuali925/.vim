@@ -22,6 +22,11 @@ prepend_keymap = [
   { on = "q", run = "close", desc = "Close the current tab, or quit if it is last tab" },
   { on = "[", run = "tab_create", desc = "Create a new tab" },
   { on = "]", run = "tab_create --current", desc = "Create a new tab with CWD" },
+  { on = "H", run = "arrow 0vp", desc = "High: Move cursor to visible viewport top" },
+  { on = "M", run = "arrow 50vp", desc = "Middle: Move cursor to visible viewport center" },
+  { on = "L", run = "arrow 100vp", desc = "Low: Move cursor to visible viewport bottom" },
+  { on = "(", run = "back", desc = "Back to previous directory" },
+  { on = ")", run = "forward", desc = "Forward to next directory" },
   { on = "<Backspace>", run = "tab_switch -1 --relative", desc = "Switch to the previous tab" },
   { on = "\\", run = "tab_switch 1 --relative", desc = "Switch to the next tab" },
   { on = "o", run = "open --interactive", desc = "Open selected files interactively" },
@@ -38,8 +43,6 @@ prepend_keymap = [
   { on = "z", run = "plugin change-dir -- z", desc = "Change directory with z.sh", for = "unix" },
   { on = "z", run = "plugin zoxide", desc = "Change directory with zoxide", for = "windows" },
   { on = "0", run = "plugin change-dir -- initial_cwd", desc = "Go to initial directory" },
-  { on = "(", run = "plugin change-dir -- navigate -1", desc = "Go back in history" },
-  { on = ")", run = "plugin change-dir -- navigate 1", desc = "Go forward in history" },
   { on = "J", run = "plugin change-dir-sync -- parent 1", desc = "Go down in parent dir" },
   { on = "K", run = "plugin change-dir-sync -- parent -1", desc = "Go up in parent dir" },
   { on = "f", run = "plugin jump-to-char", desc = "Jump to char" },
@@ -85,10 +88,6 @@ prepend_keymap = [
 
 [input]
 prepend_keymap = [
-  { on = "<Up>", run = ["escape", "plugin command -- history -1"], desc = "Search command history backward" },
-  { on = "<Down>", run = ["escape", "plugin command -- history 1"], desc = "Search command history forward" },
-  { on = "<Tab>", run = ["escape", "plugin command -- completion 1"], desc = "Select the next command completion" },
-  { on = "<BackTab>", run = ["escape", "plugin command -- completion -1"], desc = "Select the previous command completion" },
   { on = "q", run = "close", desc = "Cancel input" },
   { on = "<Esc>", run = "close", desc = "Cancel input" },
   { on = "<C-c>", run = "escape", desc = "Go back the normal mode, or cancel input" },

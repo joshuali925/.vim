@@ -45,7 +45,7 @@ local function git_root()
 end
 
 local function fzf(type, args) -- https://raw.githubusercontent.com/sxyazi/yazi/HEAD/yazi-plugin/preset/plugins/fzf.lua
-    ui.hide()
+    local permit = ui.hide()
     local cmd = os.getenv(("FZF_%s_COMMAND"):format(type))
     local child, err = Command("fzf")
         :env("FZF_DEFAULT_COMMAND", cmd and (cmd .. " " .. flags_from_args(args)) or "")
@@ -53,46 +53,38 @@ local function fzf(type, args) -- https://raw.githubusercontent.com/sxyazi/yazi/
         :stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
 
     local stdout = read_child_output(child, err)
+    permit:drop()
     if stdout ~= nil then ya.emit(stdout:match("[/\\]$") and "cd" or "reveal", { stdout }) end
 end
 
 local function z()
-    ui.hide()
+    local permit = ui.hide()
     local rcwd = read_stdout(Command("realpath"):arg(os.getenv("PWD")):output()) or os.getenv("PWD")
     local child, err = Command("fzf")
         :env("FZF_DEFAULT_COMMAND", "sort -nrk 3 -t '|' ~/.z | awk -F '|' '{print $1}'")
-        :env("FZF_DEFAULT_OPTS", os.getenv("FZF_DEFAULT_OPTS") .. [[ --scheme=history --bind='tab:down,btab:up' --bind="\`:change-prompt(]] .. rcwd .. [[/> )+reload:sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"]] .. rcwd .. [[/\" '\$0~(\"^\"cwd) {print substr(\$1, length(cwd)+1)}'" --height=100%]])
+        :env("FZF_DEFAULT_OPTS", (os.getenv("FZF_DEFAULT_OPTS") or "") .. [[ --scheme=history --bind='tab:down,btab:up' --bind="\`:change-prompt(]] .. rcwd .. [[/> )+reload:sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"]] .. rcwd .. [[/\" '\$0~(\"^\"cwd) {print substr(\$1, length(cwd)+1)}'" --height=100%]])
         :stdin(Command.INHERIT):stdout(Command.PIPED):stderr(Command.INHERIT):spawn()
 
     local stdout = read_child_output(child, err)
+    permit:drop()
     if stdout ~= nil then ya.emit("cd", { stdout }) end
 end
 
-local navigate = ya.sync(function(st, direction)
-    if not st.history or st.history_idx + direction < 1 or st.history_idx + direction > #st.history then return end
-    st.history_idx = st.history_idx + direction
-    ya.emit("cd", { st.history[st.history_idx] })
+local capture_initial_cwd = ya.sync(function(st)
+    st.initial_cwd = tostring(cx.active.current.cwd)
+    ps.unsub("cd")
+end)
+
+local go_to_initial_cwd = ya.sync(function(st)
+    if st.initial_cwd then ya.emit("cd", { st.initial_cwd }) end
 end)
 
 return {
-    setup = function()
-        ps.sub("cd", ya.sync(function(st)
-            local cwd = tostring(cx.active.current.cwd)
-            if not st.history then
-                st.history = { cwd }
-                st.history_idx = 1
-            elseif st.history[st.history_idx] ~= cwd then
-                for i = #st.history, st.history_idx + 1, -1 do st.history[i] = nil end
-                st.history[#st.history + 1] = cwd
-                st.history_idx = #st.history
-            end
-        end))
-    end,
+    setup = function() ps.sub("cd", capture_initial_cwd) end,
     entry = function(_, job)
         if job.args[1] == "git_root" then return git_root() end
         if job.args[1] == "fzf" then return fzf(job.args[2], job.args) end
         if job.args[1] == "z" then return z() end
-        if job.args[1] == "initial_cwd" then return ya.sync(function(st) if st.history then ya.emit("cd", { st.history[1] }) end end) end
-        if job.args[1] == "navigate" then return navigate(job.args[2]) end
+        if job.args[1] == "initial_cwd" then return go_to_initial_cwd() end
     end,
 }

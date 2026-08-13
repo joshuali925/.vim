@@ -8,7 +8,7 @@ local required_packages = {
     "yaml-language-server",
     "bash-language-server",
     "ty",
-    "tsgo",
+    "tsc",
     "eslint-lsp",
     -- packages don't need vim.lsp.enable
     "jdtls", -- jdtls is setup using ../ftplugin/java.lua
@@ -24,7 +24,7 @@ local required_servers = {
     "yamlls",
     "bashls",
     "ty",
-    "tsgo",
+    "tsc",
     "eslint",
     -- lsp servers not installed by mason
     "nushell",

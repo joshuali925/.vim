@@ -17,22 +17,14 @@ end
 
 local get_hovered_file = ya.sync(function() return tostring(cx.active.current.hovered.url) end)
 
-local get_yanked = ya.sync(function()
-    local urls = {}
-    for _, u in pairs(cx.yanked) do urls[#urls + 1] = ya.quote(tostring(u)) end
-    return urls, cx.yanked.is_cut, ya.quote(tostring(cx.active.current.cwd))
-end)
-
 local function shell(command, pause)
     -- NOTE keep commands POSIX compliant, on ubuntu the shell is 'sh'. need to use bash to support `read` flags
-    return ya.emit("shell", { command .. (pause and "; echo Press any key to continue; bash -ic 'read -n 1 -s _'" or ""), confirm = true, block = true })
+    return ya.emit("shell", { command .. (pause and "; echo Press any key to continue; bash -ic 'read -n 1 -s _'" or ""), block = true })
 end
 
-local function cow_paste()
-    local urls, is_cut, cwd = get_yanked()
-    if is_cut or #urls == 0 then return end
-    shell("cp -dRiv --reflink=auto --sparse=always " .. table.concat(urls, " ") .. " " .. cwd)
-end
+local cow_paste = ya.sync(function()
+    if #cx.yanked > 0 and not cx.yanked.is_cut then shell("cp -dRiv --reflink=auto --sparse=always %y .") end
+end)
 
 local function chmod_stat()
     local output, err = Command("stat"):arg({ "--printf", "%a %n\n", get_hovered_file() }):output()
@@ -118,15 +110,18 @@ local function calculate_sizes(args)
     ya.notify({ title = "Sizes", content = table.concat(lines, "\n"), timeout = 3 })
 end
 
+local RELATIVE_SELECTED_ARGS = [[
+    set -- %s
+    for file in "$@"; do
+        relative="$(realpath --relative-to="." -- "$file")"
+        case "$relative" in -*) relative="./$relative" ;; esac
+        set -- "$@" "$relative"
+        shift
+    done
+]]
+
 local function compress_cmd(cmd, ext)
-    return ('for file in "$@"; do set -- "$@" "$(realpath --relative-to="." "$file")"; shift; done; %s "${1}.%s" "$@"'):format(cmd, ext)
-end
-
-local SEVEN_ZIP_MAX_OPTIONS = "-t7z -mx=9 -mfb=273 -ms -md=31 -myx=9 -mmt -mmtf -md=1536m -mmf=bt3 -mmc=10000 -mpb=0 -mlc=0 -m0=LZMA2:27"
-
-local function seven_zip_max(extra)
-    local options = extra and extra .. " " .. SEVEN_ZIP_MAX_OPTIONS or SEVEN_ZIP_MAX_OPTIONS
-    return shell(compress_cmd("7z a " .. options, "7z"))
+    return ('%s\n%s "${1}.%s" "$@"'):format(RELATIVE_SELECTED_ARGS, cmd, ext)
 end
 
 local COMMANDS = {
@@ -134,7 +129,7 @@ local COMMANDS = {
     file = { run = function() return shell("file %h", true) end },
     chmod = { exact = false, accepts_args = true, run = function(args) return shell("chmod " .. args .. " %s") end },
     ["chmod?"] = { run = chmod_stat },
-    chown = { run = function() return shell('sudo chown -R "$USER:$USER" %h') end },
+    chown = { run = function() return shell('sudo chown -R "$(id -un):$(id -gn)" %h') end },
     ["chown?"] = { run = chown_stat },
     ["cow-paste"] = { run = cow_paste },
     sudorm = { run = function() return shell("sudo rm -r %s") end },
@@ -153,7 +148,7 @@ local COMMANDS = {
         accepts_args = true,
         run = function(args)
             local ext = args:match("^(%S+)")
-            return shell('ffmpeg -i %h -codec copy "${0%%.*}.' .. ext .. '" || ffmpeg -y -i %h "${0%%.*}.' .. ext .. '"')
+            return shell('file=%h; ffmpeg -i "$file" -codec copy "${file%%.*}.' .. ext .. '" || ffmpeg -y -i "$file" "${file%%.*}.' .. ext .. '"')
         end,
     },
     sftp = {
@@ -163,18 +158,19 @@ local COMMANDS = {
             return shell(('echo "put %%h" | sftp -r %s'):format(args), true)
         end,
     },
-    tarcopy = { run = function() return shell([[for file in %s; do set -- "$@" "$(realpath --relative-to=. "$file")"; shift; done; printf " printf $(XZ_OPT=-9e tar cJf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end },
+    tarcopy = { run = function() return shell(RELATIVE_SELECTED_ARGS .. [[printf " printf $(XZ_OPT=-9e tar cJf - -- "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end },
     zip = { run = function() return shell(compress_cmd("zip -r", "zip")) end },
     ["7z"] = { run = function() return shell(compress_cmd("7z a", "7z")) end },
     ["7zfast"] = { run = function() return shell(compress_cmd("7z a -t7z -mx=1", "7z")) end },
     ["7zultra"] = { run = function() return shell(compress_cmd("7z a -t7z -mx=9 -m0=lzma -mfb=64 -md=32m -ms=on", "7z")) end },
-    ["7zmax"] = { run = function() return seven_zip_max("-mtm=-") end },
-    ["7zmaxts"] = { run = function() return seven_zip_max() end },
-    ["7zmax4g"] = { run = function() return seven_zip_max("-v4g -mtm=-") end },
+    ["7zmax"] = { run = function() return shell(compress_cmd("7z a -mtm=- -t7z -mx=9 -mfb=273 -ms -md=31 -myx=9 -mmt -mmtf -md=1536m -mmf=bt3 -mmc=10000 -mpb=0 -mlc=0 -m0=LZMA2:27", "7z")) end },
+    ["7zmaxts"] = { run = function() return shell(compress_cmd("7z a -t7z -mx=9 -mfb=273 -ms -md=31 -myx=9 -mmt -mmtf -md=1536m -mmf=bt3 -mmc=10000 -mpb=0 -mlc=0 -m0=LZMA2:27", "7z")) end },
+    ["7zmax4g"] = { run = function() return shell(compress_cmd("7z a -v4g -mtm=- -t7z -mx=9 -mfb=273 -ms -md=31 -myx=9 -mmt -mmtf -md=1536m -mmf=bt3 -mmc=10000 -mpb=0 -mlc=0 -m0=LZMA2:27", "7z")) end },
     x = {
         run = function()
             return shell([[
                 set -f
+                set -- %s
                 if [ "$#" -gt 1 ]; then
                     ]] .. compress_cmd("tar cvzf", "tar.gz") .. [[;
                 else
@@ -311,23 +307,34 @@ end
 
 local function input_command()
     start_command_prompt(load_history())
+    local chords = {
+        km.input.rules:insert(1, { on = "<Up>", run = { "escape", "plugin command -- history -1" }, desc = "Search command history backward" }),
+        km.input.rules:insert(1, { on = "<Down>", run = { "escape", "plugin command -- history 1" }, desc = "Search command history forward" }),
+        km.input.rules:insert(1, { on = "<Tab>", run = { "escape", "plugin command -- completion 1" }, desc = "Select the next command completion" }),
+        km.input.rules:insert(1, { on = "<S-Tab>", run = { "escape", "plugin command -- completion -1" }, desc = "Select the previous command completion" }),
+    }
     local value = ""
+    local result
 
     while true do
         local command, event = ya.input({ title = "Command:", value = value, pos = { "top-center", y = 3, w = 60 } })
         if event == SUBMIT then
             local history = finish_command_prompt(command)
             if history then save_history(history) end
-            return command
+            result = command
+            break
         end
 
         local match = event == CANCEL and consume_prompt_request(command) or nil
         if match == nil then
             finish_command_prompt()
-            return
+            break
         end
         value = match
     end
+
+    for _, chord in ipairs(chords) do km.input.rules:remove({ id = chord.id }) end
+    return result
 end
 
 return {

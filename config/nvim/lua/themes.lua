@@ -29,13 +29,19 @@ local themes = {
             require("tokyonight").setup({
                 style = theme_index < 0 and "storm" or "day",
                 styles = { comments = { italic = false }, keywords = { italic = false } },
-                day_brightness = 0.2,
+                day_brightness = 0.1,
                 on_colors = function(c)
-                    c.comment = "#717993"
+                    c.comment = theme_index < 0 and "#717993" or "#535d78"
                 end,
                 on_highlights = function(hl, c)
                     hl.LineNr = { fg = c.git.ignore }
                     hl.DiagnosticUnnecessary = { fg = c.comment }
+                    if theme_index >= 0 then
+                        hl.CursorLine = { bg = "#d8dae2" }
+                        hl.LspReferenceText = { bg = c.bg_dark }
+                        hl.LspReferenceRead = { bg = c.bg_dark }
+                        hl.LspReferenceWrite = { bg = c.bg_dark }
+                    end
                 end,
             })
             vim.cmd.colorscheme("tokyonight")

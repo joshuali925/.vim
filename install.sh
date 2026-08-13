@@ -349,10 +349,12 @@ install-claude-code() {
   claude plugin install skill-creator@claude-plugins-official
   claude plugin install typescript-lsp@claude-plugins-official
   claude plugin install frontend-design@claude-plugins-official
+  claude plugin marketplace add ayghri/i-have-adhd && claude plugin install i-have-adhd@i-have-adhd && claude plugin disable i-have-adhd
   claude plugin marketplace add Dammyjay93/interface-design && claude plugin install interface-design@interface-design && claude plugin disable interface-design
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
   claude plugin marketplace add pbakaus/impeccable && claude plugin install impeccable@impeccable && claude plugin disable impeccable  # /impeccable init
   claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
+  # claude plugin marketplace add openai/codex-plugin-cc && claude plugin install codex@openai-codex
   # uv tool install mempalace && mkdir -p ~/.vim/tmp/mempalace && yes n | mempalace init ~/.vim/tmp/mempalace --no-llm --yes && claude plugin marketplace add MemPalace/mempalace && claude plugin install --scope user mempalace
   # https://github.com/phuryn/pm-skills
   # npx -y skills add mattpocock/skills --agent claude-code --yes --global
@@ -392,8 +394,8 @@ install-k3s() {
   mise x -- k9s completion zsh > ~/.vim/config/zsh/completions/_k9s  # alternative: https://github.com/Ramilito/kubectl.nvim
   mise x -- helm completion zsh > ~/.vim/config/zsh/completions/_helm
   mise x -- stern --completion zsh > ~/.vim/config/zsh/completions/_stern
-  export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-  append-once 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' ~/.bashrc ~/.zshrc
+  mkdir -p ~/.kube && cp /etc/rancher/k3s/k3s.yaml ~/.kube/config && chmod 600 ~/.kube/config
+  export KUBECONFIG="$HOME/.kube/config" && append-once 'export KUBECONFIG="$HOME/.kube/config"' ~/.bashrc ~/.zshrc
   log 'Installed k3s, k9s, helm, stern'
 }
 

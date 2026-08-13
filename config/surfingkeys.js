@@ -194,8 +194,9 @@ api.mapkey('y/', 'Copy URL port and full path', function() {
   api.Clipboard.write((window.location.port ? ":" + window.location.port : "") + window.location.pathname + window.location.search + window.location.hash)
 });
 api.unmap('v');
-api.mapkey('v', 'Copy element text', function() {
+api.mapkey('v', 'Copy element text (Enter: copy HTML)', function() {
 	let overlay = null;
+	let hoveredElement = null;
 	function createOverlay() {
 		overlay = document.createElement('div');
 		overlay.style.cssText = 'position:absolute;top:0;left:0;width:0;height:0;border:2px solid red;background:rgba(255,0,0,0.1);z-index:2147483647;pointer-events:none;box-sizing:border-box;';
@@ -203,6 +204,7 @@ api.mapkey('v', 'Copy element text', function() {
 	}
 	function highlightElement(element) {
 		if (!element || !overlay) return;
+		hoveredElement = element;
 		const rect = element.getBoundingClientRect();
 		overlay.style.top = `${rect.top + window.scrollY}px`;
 		overlay.style.left = `${rect.left + window.scrollX}px`;
@@ -256,11 +258,18 @@ api.mapkey('v', 'Copy element text', function() {
 		cleanup();
 	}
 	function handleKey(e) {
-		if (e.key === 'Escape') {
-			e.preventDefault();
-			e.stopPropagation();
-			e.stopImmediatePropagation();
-			cleanup();
+		if (e.key !== 'Escape' && e.key !== 'Enter') return;
+		e.preventDefault();
+		e.stopPropagation();
+		e.stopImmediatePropagation();
+		const element = hoveredElement;
+		cleanup();
+		if (e.key === 'Enter' && element) {
+			let html = element.outerHTML || '';
+			if (html.length > 10000) html = html.slice(0, 10000) + '\n<!-- truncated -->';
+			const content = `URL: ${window.location.port ? ':' + window.location.port : ''}${window.location.pathname}${window.location.search}${window.location.hash}\n\nHTML:\n${html}`;
+			api.Clipboard.write(content);
+			if (api.Front && api.Front.showBanner) api.Front.showBanner(`Copied ${content.length} chars`);
 		}
 	}
 	createOverlay();

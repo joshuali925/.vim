@@ -19,7 +19,7 @@ After making changes, run the applicable steps below. Verify each completes with
 
 - **Install dependencies**: `yarn osd bootstrap --single-version=loose`. Run when `package.json`, `yarn.lock`, or `packages/` changed. Stop the server first.
 - **Transpile**: `os optimize`. Run when code changed and the server is NOT running (a running server's file watcher auto handles transpile). Avoid `--no-cache` unless necessary.
-- **Start server**: `OS_DAEMON=1 os run -e` (NOT `yarn start` unless the user asks). Run when UI validation is needed and the server is not already running. Check first: `curl -sL -o /dev/null -w "%{http_code}" http://localhost:5601` (non-`000` = running). Flags:
+- **Start server**: Always use `OS_DAEMON=1 os run -e`. Append any additional server flags to this command, for example: `OS_DAEMON=1 os run -e --opensearch.hosts=http://localhost:9201`. Never invoke `yarn start` directly, unless the user explicitly asks. Run when UI validation is needed and the server is not already running. Check first: `curl -sL -o /dev/null -w "%{http_code}" http://localhost:5601` (non-`000` = running). If server is running but not in a desired state, kill it and run it yourself. Flags:
   - `OS_DAEMON=1`: run in background; logs in `.daemon-log`, PID in `.daemon-pid`
   - `--port <port>`: specify port
   - `--opensearch.hosts=http://localhost:<port>`: connect to a specific OpenSearch
@@ -34,7 +34,7 @@ Make sure server is running, and run command based on who started the server:
 - **Agent started it** (`ps u -p $(<.daemon-pid)` should be active): `tail .daemon-log`
 - **User started it** (foreground in tmux): `tmux capture-pane -p -t "1.$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1}')" | tail`
 
-Ignore bundle errors that appear ABOVE (before) a "bundles compiled successfully" message. Server will auto restart after server code changes. If the tmux command fails or the server misbehaves, kill the existing process and restart it yourself with `OS_DAEMON=1 os run -e [args...]`.
+Ignore bundle errors that appear ABOVE (before) a "bundles compiled successfully" message. Server will auto restart after server code changes. If the tmux command fails or the server misbehaves, kill the existing process and restart it yourself with `OS_DAEMON=1 os run -e`, appending any required flags.
 
 ---
 

@@ -24,7 +24,7 @@ return {
         keys = {
             { "n", "[m", "<Cmd>lua require('snacks.words').jump(-vim.v.count1, true)<CR>" },
             { "n", "]m", "<Cmd>lua require('snacks.words').jump(vim.v.count1, true)<CR>" },
-            { { "n", "x" }, "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.fn.setreg('+', url) end or nil })<CR>" },
+            { { "n", "x" }, "<leader>gr", "<Cmd>lua require('snacks.gitbrowse').open({ open = vim.env.SSH_CLIENT ~= nil and function(url) vim.schedule(function() vim.fn.setreg('+', url) end) end or nil })<CR>" },
             { "n", "<leader>b", "<Cmd>lua require('snacks.explorer').reveal()<CR>" },
             { "n", "q", "<Cmd>lua require('snacks.picker').buffers()<CR>" },
             {

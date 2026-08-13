@@ -126,6 +126,7 @@ config.keys = {
     },
 }
 local anki_keys = {
+    { key = "4", action = anki.copy_binding() },
     { key = "5", action = anki.binding("undo") },
     { key = "6", action = anki.binding("reveal_or_grade", "again") },
     { key = "7", action = anki.binding("reveal_or_grade", "hard") },
