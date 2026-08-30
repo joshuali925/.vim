@@ -1,0 +1,154 @@
+onboarding = false
+
+[ui]
+pane_outer_borders = false
+pane_gaps = false
+tab_bar_position = "bottom"
+agent_panel_sort = "spaces"
+prompt_new_tab_name = false
+show_agent_labels_on_pane_borders = true
+toast.delivery = "herdr"
+tab_bar_right = [
+  { type = "command", command = 'bash "$HOME/.vim/config/herdr/system-status.sh"', interval_seconds = 5, timeout_seconds = 3 },
+]
+
+[experimental]
+pane_history = true
+
+[keys]
+prefix = "ctrl+s"
+goto = "prefix+s"
+settings = "prefix+shift+s"
+zoom = "alt+z"
+copy_mode = "prefix+ctrl+c"
+edit_scrollback = "prefix+ctrl+e"
+reload_config = "prefix+ctrl+r"
+detach = "prefix+d"
+
+rename_tab = "prefix+r"
+next_tab = ["alt+m", "shift+right"]
+previous_tab = ["alt+n", "shift+left"]
+move_tab_previous = "prefix+9"
+move_tab_next = "prefix+0"
+focus_agent = "alt+1..9"
+new_workspace = "prefix+shift+c"
+rename_workspace = "prefix+$"
+next_workspace = "prefix+ctrl+j"
+previous_workspace = "prefix+ctrl+k"
+split_vertical = "prefix+v"
+split_horizontal = "prefix+h"
+close_pane = "prefix+k"
+
+[[keys.command]]
+key = "prefix+c"
+command = '''
+created=$("$HERDR_BIN_PATH" tab create --workspace "$HERDR_ACTIVE_WORKSPACE_ID" --cwd "${HERDR_ACTIVE_PANE_CWD:-$PWD}" --focus) || exit
+tab_id=$(printf '%s\n' "$created" | jq -er '.result.tab.tab_id') || exit
+tabs=$("$HERDR_BIN_PATH" tab list --workspace "$HERDR_ACTIVE_WORKSPACE_ID") || exit
+insert_index=$(printf '%s\n' "$tabs" | jq -er --arg tab_id "$HERDR_ACTIVE_TAB_ID" '.result.tabs | map(.tab_id) | index($tab_id) + 1') || exit
+jq -nc --arg tab_id "$tab_id" --argjson insert_index "$insert_index" '{id:"key:new-tab-after-current",method:"tab.move",params:{tab_id:$tab_id,insert_index:$insert_index}}' | nc -U "$HERDR_SOCKET_PATH" >/dev/null || exit
+'''
+description = "new tab after current"
+
+[[keys.command]]
+key = "prefix+!"
+command = '''
+"$HERDR_BIN_PATH" pane move "$HERDR_ACTIVE_PANE_ID" --new-tab --workspace "$HERDR_ACTIVE_WORKSPACE_ID" --focus >/dev/null
+'''
+description = "move pane to new tab"
+
+[[keys.command]]
+key = "prefix+m"
+command = 'bash "$HOME/.vim/config/herdr/pane-mark.sh"'
+description = "mark pane; swap or move it here"
+
+[[keys.command]]
+key = "ctrl+h"
+command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" focus h'
+description = "focus pane left"
+
+[[keys.command]]
+key = "ctrl+j"
+command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" focus j'
+description = "focus pane down"
+
+[[keys.command]]
+key = "ctrl+k"
+command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" focus k'
+description = "focus pane up"
+
+[[keys.command]]
+key = "ctrl+l"
+command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" focus l'
+description = "focus pane right"
+
+[[keys.command]]
+key = "alt+h"
+command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" resize h'
+description = "resize pane left"
+
+[[keys.command]]
+key = "alt+j"
+command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" resize j'
+description = "resize pane down"
+
+[[keys.command]]
+key = "alt+k"
+command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" resize k'
+description = "resize pane up"
+
+[[keys.command]]
+key = "alt+l"
+command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" resize l'
+description = "resize pane right"
+
+[[keys.command]]
+key = "prefix+ctrl+o"
+command = 'yazi'
+type = "popup"
+description = "open yazi"
+width = "94%"
+height = "92%"
+
+[[keys.command]]
+key = "prefix+ctrl+t"
+command = 'LANG=C.utf8 btop'
+type = "popup"
+description = "open btop"
+width = "94%"
+height = "92%"
+
+[[keys.command]]
+key = "prefix+comma"
+command = '''
+PICKER_PIPE_COMMAND='herdr pane send-text "$HERDR_ACTIVE_PANE_ID" "$(cat)" >/dev/null' bash "$HOME/.vim/config/fzf/pick-skills.sh"
+'''
+type = "popup"
+description = "pick skills"
+width = "50%"
+height = "40%"
+
+[[keys.command]]
+key = "prefix+f"
+command = '''
+PICKER_PIPE_COMMAND='herdr pane send-text "$HERDR_ACTIVE_PANE_ID" "$(cat)" >/dev/null' FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind='enter:become(printf "%q " {+} | sh -c "$PICKER_PIPE_COMMAND")'
+'''
+type = "popup"
+description = "pick files with fzf"
+width = "50%"
+height = "40%"
+
+[[keys.command]]
+key = "prefix+ctrl+p"
+command = '''
+info=$(herdr pane process-info --pane "$HERDR_ACTIVE_PANE_ID" 2>/dev/null || true)
+unset PICKER_PREFIX
+case "$info" in
+  *'"name":"claude"'*|*'"name":"kiro-cli"'*) export PICKER_PREFIX=@ ;;
+esac
+PICKER_PIPE_COMMAND='herdr pane send-text "$HERDR_ACTIVE_PANE_ID" "$(cat)" >/dev/null' nvim -u "$HOME/.vim/config/nvim/picker.lua"
+'''
+type = "popup"
+description = "pick files"
+width = "50%"
+height = "40%"

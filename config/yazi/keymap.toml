@@ -46,7 +46,7 @@ prepend_keymap = [
   { on = "J", run = "plugin change-dir-sync -- parent 1", desc = "Go down in parent dir" },
   { on = "K", run = "plugin change-dir-sync -- parent -1", desc = "Go up in parent dir" },
   { on = "f", run = "plugin jump-to-char", desc = "Jump to char" },
-  { on = "F", run = "search fd", desc = "Search files by name using fd" },  # 'S' to search rg
+  { on = "F", run = "search --via=fd", desc = "Search files by name via fd" },  # 'S' to search rg
   { on = "/", run = "filter --smart", desc = "Filter files" },
   { on = ":", run = "plugin command", desc = "Run a command" },
   { on = ";", run = "shell --block --interactive", desc = "Run a shell command (block until finishes)" },

@@ -54,9 +54,8 @@ end
 local get_items = ya.sync(function(_, hovered)
     local items = {}
     if #cx.active.selected > 0 then
-        for _, url in pairs(cx.active.selected) do
-            local path = tostring(url)
-            table.insert(items, { url = path, name = path:match("([^/\\]+)[/\\]?$") or path })
+        for _, file in pairs(cx.active.selected) do
+            table.insert(items, { url = tostring(file.url), name = tostring(file.name) })
         end
     elseif hovered then
         local file = cx.active.current.hovered

@@ -43,7 +43,9 @@ require("snacks.picker").smart({
     on_close = function() vim.cmd.quitall({ bang = true }) end,
     confirm = function(picker)
         local joined_paths = table.concat(vim.tbl_map(function(s) return (vim.env.PICKER_PREFIX or "") .. vim.fn.fnamemodify(s.file, ":."):gsub([[([%s!'"#$&;|*?<>%(%)%[%]{}\\`~^=%%])]], [[\%1]]) end, picker:selected({ fallback = true })), " ") .. " "
-        if vim.env.PICKER_OUTFILE then
+        if vim.env.PICKER_PIPE_COMMAND and vim.env.PICKER_PIPE_COMMAND ~= "" then
+            vim.system({ "sh", "-c", vim.env.PICKER_PIPE_COMMAND }, { stdin = joined_paths }):wait()
+        elseif vim.env.PICKER_OUTFILE then
             local f = assert(io.open(vim.env.PICKER_OUTFILE, "w"))
             f:write(joined_paths)
             f:close()

@@ -1,5 +1,6 @@
 ---
 description: Refactor OpenSearch Dashboards
+disable-model-invocation: true
 ---
 
 Run tests after each phase. Do not add features or refactor beyond scope. Do not change behaviors.

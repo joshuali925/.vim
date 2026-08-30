@@ -1,5 +1,6 @@
 ---
 description: Use this skill to see recently modified files in the project
+disable-model-invocation: true
 ---
 
 # Recently Modified Files

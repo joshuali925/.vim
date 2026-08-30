@@ -56,7 +56,7 @@ def gc [...message: string] {
 }
 
 def --wrapped st [...args] {
-  ssh -t ...$args 'zsh -ic "exec .vim/bin/tmux new -A -s 0"'
+  ssh -t ...$args 'LANG=C.UTF-8 exec .vim/bin/tmux new -A -s 0'
 }
 
 def --wrapped rclone [...args] {

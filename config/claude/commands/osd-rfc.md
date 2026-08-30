@@ -1,5 +1,6 @@
 ---
 description: Create an OpenSearch Dashboards RFC markdown file.
+disable-model-invocation: true
 ---
 
 You are drafting an RFC for OpenSearch Dashboards. Do not write the RFC yet. First interview the user until you have enough material to produce a high-quality document, then write it.

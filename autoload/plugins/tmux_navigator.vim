@@ -54,6 +54,117 @@ function! s:VimHasNeighbour(direction)
   endwhile
 endfunction
 
+function! s:VimLayout()
+  let layout = []
+  let win_nr = winnr('$')
+  while win_nr > 0
+    call add(layout, [win_screenpos(win_nr), winwidth(win_nr), winheight(win_nr)])
+    let win_nr = win_nr - 1
+  endwhile
+  return layout
+endfunction
+
+function! s:SystemCommand(cmd)
+  let shellcmdflag = &shellcmdflag
+  try
+    let &shellcmdflag = '-c'
+    return system(a:cmd)
+  finally
+    let &shellcmdflag = shellcmdflag
+  endtry
+endfunction
+
+if empty($TMUX) && !empty($HERDR_ENV)
+  let s:herdr_directions = {'h': 'left', 'j': 'down', 'k': 'up', 'l': 'right'}
+
+  function! s:HerdrDirection(direction)
+    return get(s:herdr_directions, a:direction, '')
+  endfunction
+
+  function! s:HerdrCommand(args)
+    if empty($HERDR_BIN_PATH)
+      return ''
+    endif
+    return s:SystemCommand(shellescape($HERDR_BIN_PATH) . ' ' . a:args)
+  endfunction
+
+  function! s:HerdrFocus(direction)
+    let direction = s:HerdrDirection(a:direction)
+    if empty($HERDR_BIN_PATH) || empty(direction)
+      return
+    endif
+    if exists('*jobstart')
+      call jobstart([$HERDR_BIN_PATH, 'pane', 'focus', '--direction', direction, '--current'], {'detach': v:true})
+      return
+    endif
+    silent call s:HerdrCommand('pane focus --direction ' . direction . ' --current')
+  endfunction
+
+  function! s:HerdrHasNeighbour(direction)
+    let direction = s:HerdrDirection(a:direction)
+    if empty(direction)
+      return 0
+    endif
+    let result = s:HerdrCommand('pane neighbor --direction ' . direction . ' --current')
+    return result =~# '"neighbor_pane_id"\s*:\s*"[^"]\+"'
+  endfunction
+
+  function! s:HerdrResize(direction)
+    let direction = s:HerdrDirection(a:direction)
+    if empty($HERDR_BIN_PATH) || empty(direction)
+      return
+    endif
+    if exists('*jobstart')
+      call jobstart([$HERDR_BIN_PATH, 'pane', 'resize', '--direction', direction, '--current'], {'detach': v:true})
+      return
+    endif
+    silent call s:HerdrCommand('pane resize --direction ' . direction . ' --current')
+  endfunction
+
+  function! s:HerdrAwareNavigate(direction)
+    let window = winnr()
+    call s:VimNavigate(a:direction)
+    if window == winnr()
+      call s:HerdrFocus(a:direction)
+    endif
+  endfunction
+
+  function! s:ShouldForwardResizeBackToHerdr(direction)
+    if tabpagewinnr(tabpagenr(), '$') == 1
+      return 1
+    endif
+    let separator_direction = tr(a:direction, 'hjkl', 'ljjl')
+    if s:VimHasNeighbour(separator_direction)
+      return 0
+    endif
+    if s:HerdrHasNeighbour(separator_direction)
+      return 1
+    endif
+    let reverse_direction = tr(separator_direction, 'jl', 'kh')
+    return !s:VimHasNeighbour(reverse_direction)
+  endfunction
+
+  function! s:HerdrAwareResize(direction)
+    if s:ShouldForwardResizeBackToHerdr(a:direction)
+      call s:HerdrResize(a:direction)
+      return
+    endif
+    let layout_before = s:VimLayout()
+    call s:VimResize(a:direction)
+    if layout_before == s:VimLayout()
+      call s:HerdrResize(a:direction)
+    endif
+  endfunction
+
+  function! plugins#tmux_navigator#navigate(direction)
+    call s:HerdrAwareNavigate(a:direction)
+  endfunction
+  function! plugins#tmux_navigator#resize(direction)
+    call s:HerdrAwareResize(a:direction)
+  endfunction
+  finish
+endif
+
 if empty($TMUX)
   function! plugins#tmux_navigator#navigate(direction)
     call s:VimNavigate(a:direction)
@@ -98,11 +209,7 @@ endfunction
 
 function! s:TmuxCommand(args)
   let cmd = s:TmuxOrTmateExecutable() . ' -S ' . s:TmuxSocket() . ' ' . a:args
-  let l:x=&shellcmdflag
-  let &shellcmdflag='-c'
-  let retval=system(cmd)
-  let &shellcmdflag=l:x
-  return retval
+  return s:SystemCommand(cmd)
 endfunction
 
 function! s:TmuxNavigatorProcessList()
@@ -187,17 +294,6 @@ function! s:ShouldForwardResizeBackToTmux(direction)
     return !s:VimHasNeighbour(xy_axis_reverse)
   endif
   return 0
-endfunction
-
-" Returns an array with all windows' win_screenpos
-function! s:VimLayout()
-  let layout = []
-  let win_nr = winnr('$')
-  while win_nr > 0
-    call add(layout, win_screenpos(win_nr))
-    let win_nr = win_nr - 1
-  endwhile
-  return layout
 endfunction
 
 function! s:TmuxAwareResize(direction)

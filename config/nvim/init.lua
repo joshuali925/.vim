@@ -258,7 +258,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
         vim.b.cursor_restored = true
         pcall(vim.api.nvim_win_set_cursor, 0, vim.api.nvim_buf_get_mark(args.buf, '"'))
         vim.opt_local.winbar = "%f"
-        vim.api.nvim_create_autocmd({ "InsertEnter", "BufModifiedSet" }, { once = true, buffer = args.buf, command = "let b:bufpersist = 1" })
+        vim.api.nvim_create_autocmd({ "InsertEnter", "TextChanged" }, { once = true, buffer = args.buf, command = "let b:bufpersist = 1" })
     end,
 })
 local pre_yank_view

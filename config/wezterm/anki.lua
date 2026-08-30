@@ -1063,7 +1063,7 @@ local function load_deck()
         optimizer = function(dir)
             wezterm.background_child_process({
                 os.getenv("SHELL") or "/bin/sh", "-lc", 'exec nvim -l "$0" optimize "$1"',
-                wezterm.home_dir .. "/.vim/config/anki.lua", dir,
+                wezterm.home_dir .. "/.vim/config/wezterm/anki.lua", dir,
             })
         end,
     })

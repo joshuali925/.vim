@@ -12,7 +12,10 @@
     "DISABLE_TELEMETRY": "1",
     "MCP_TIMEOUT": "120000"
   },
+  "cleanupPeriodDays": 99999,
   "includeCoAuthoredBy": false,
+  "enableArtifact": false,
+  "disableClaudeAiConnectors": true,
   "permissions": {
     "defaultMode": "auto"
   },
@@ -51,53 +54,6 @@
     "claude-sonnet-4-6[1m]": "global.anthropic.claude-sonnet-4-6[1m]",
     "claude-sonnet-5": "global.anthropic.claude-sonnet-5",
     "claude-fable-5": "global.anthropic.claude-fable-5[1m]"
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.vim/config/claude/osc9-notify",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "StopFailure": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.vim/config/claude/osc9-notify",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "elicitation_dialog",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.vim/config/claude/osc9-notify",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.vim/config/claude/osc9-notify",
-            "async": true
-          }
-        ]
-      }
-    ]
   },
   "respondToBashCommands": false,
   "statusLine": {
@@ -154,6 +110,7 @@
       }
     }
   },
+  "outputStyle": "Concise",
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,

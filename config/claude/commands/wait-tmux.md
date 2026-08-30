@@ -1,5 +1,6 @@
 ---
 description: Triggers by user to wait and trigger commands on claude code running in adjacent tmux pane
+disable-model-invocation: true
 ---
 
 A claude code session is running on the adjacent tmux pane. Use the command to wait for it to finish.

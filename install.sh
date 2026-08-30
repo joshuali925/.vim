@@ -167,9 +167,11 @@ install-dotfiles() {
   log 'Linking configurations..'
   append-once 'source ~/.vim/config/.bashrc' ~/.bashrc
   append-once 'source ~/.vim/config/zsh/.zshrc' ~/.zshrc
+  append-once 'source ~/.vim/config/env.sh' ~/.zshenv
   append-once 'skip_global_compinit=1' ~/.zshenv
   log "Ensured 'source ~/.vim/config/.bashrc' in ~/.bashrc"
   log "Ensured 'source ~/.vim/config/zsh/.zshrc' in ~/.zshrc"
+  log "Ensured 'source ~/.vim/config/env.sh' in ~/.zshenv"
   log "Ensured 'skip_global_compinit=1' in ~/.zshenv"
   append-once 'Include ~/.vim/config/ssh_config' ~/.ssh/config
   append-once 'Include ~/.ssh/ec2hosts' ~/.ssh/config
@@ -180,7 +182,7 @@ install-dotfiles() {
   link-file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml --relative
   if [[ $PLATFORM = darwin ]]; then
     link-file ~/.vim/config/lazygit_config.yml ~/Library/Application\ Support/lazygit/config.yml
-    link-file ~/.vim/config/wezterm.lua ~/.config/wezterm/wezterm.lua
+    link-file ~/.vim/config/wezterm/wezterm.lua ~/.config/wezterm/wezterm.lua
     link-file ~/.vim/config/hammerspoon ~/.hammerspoon --relative
     mkdir -p ~/.config/neovide && echo 'frame = "none"' > ~/.config/neovide/config.toml
   elif [[ $OSTYPE = linux-android ]]; then
@@ -334,6 +336,8 @@ install-claude-code() {
     claude update
     claude plugin marketplace list --json | jq -r '.[].name' | xargs -n1 claude plugin marketplace update
     claude plugin list --json | jq -r '.[].id' | xargs -n1 claude plugin update
+    npx -y skills update --global --yes
+    npx -y skills update --project --yes
     return $?
   fi
   mkdir -p ~/.claude/skills
@@ -357,12 +361,14 @@ install-claude-code() {
   # claude plugin marketplace add openai/codex-plugin-cc && claude plugin install codex@openai-codex
   # uv tool install mempalace && mkdir -p ~/.vim/tmp/mempalace && yes n | mempalace init ~/.vim/tmp/mempalace --no-llm --yes && claude plugin marketplace add MemPalace/mempalace && claude plugin install --scope user mempalace
   # https://github.com/phuryn/pm-skills
+  # To remove: npx -y skills ls --agent claude-code --json --global | jq -r '.[] | select(.source == "mattpocock/skills") | .name' | xargs -r npx -y skills rm --agent claude-code --yes --global
   # npx -y skills add mattpocock/skills --agent claude-code --yes --global
-  # npx -y skills add hardikpandya/stop-slop --agent claude-code --yes --global
+  # npx -y skills add blader/humanizer --agent claude-code --yes --global
   # npx -y skills add Leonxlnx/taste-skill --agent claude-code --yes
   # npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent claude-code --yes
   # npx -y skills add shadcn-ui/ui --agent claude-code --yes
   # npx -y skills add jgraph/drawio-mcp --agent claude-code --yes
+  # bin install https://github.com/wdhwg001/csift && npx -y skills add wdhwg001/csift --agent claude-code --yes --global
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest
@@ -372,7 +378,7 @@ install-claude-code() {
     else
       claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics
     fi
-    # npm install -g @playwright/cli@latest && cp -r "$(npm root -g)/@playwright/cli/skills" ~/.claude/skills && append-once '/.playwright-cli/' ~/.gitignore
+    # npm install -g @playwright/cli@latest && npx -y skills add https://github.com/microsoft/playwright-cli --skill playwright-cli --agent claude-code --yes --global && append-once '/.playwright-cli/' ~/.gitignore
   fi
   log '\nInstalled Claude Code'
   if [[ $PLATFORM = darwin ]]; then

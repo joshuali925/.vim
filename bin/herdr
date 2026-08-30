@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+if [[ $(readlink -f "$HOME/.config/herdr/config.toml") != $(readlink -f "$HOME/.vim/config/herdr/config.toml") ]]; then
+  mkdir -p ~/.config/herdr
+  ln -sfv ~/.vim/config/herdr/config.toml ~/.config/herdr/config.toml
+fi
+
+source ~/.vim/bin/_install_from_github.sh
+install-from-github herdr herdrdev/herdr linux-x86_64 linux-aarch64 macos-x86_64 macos-aarch64 '' "$@"

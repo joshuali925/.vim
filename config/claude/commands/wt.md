@@ -1,5 +1,6 @@
 ---
 description: Triggers by user to enforce using worktrees
+disable-model-invocation: true
 ---
 
 Make all changes through a separate worktree:

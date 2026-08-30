@@ -8,6 +8,12 @@ agents="$HOME/.vim/config/claude/agents"
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 repo_skills="${repo_root:+$repo_root/.claude/skills}"
 
+if [[ -n "${PICKER_PIPE_COMMAND:-}" ]]; then
+  enter_binding='enter:become(printf "@%s " {+3} | sh -c "$PICKER_PIPE_COMMAND")'
+else
+  enter_binding='enter:become(printf "@%s " {+3} | xargs -I@ tmux send-keys -l @)'
+fi
+
 {
   fd -L SKILL.md "$user_skills"
   if [[ -d "$repo_skills" ]]; then
@@ -83,4 +89,4 @@ repo_skills="${repo_root:+$repo_root/.claude/skills}"
         --preview='cat {3}' \
         --preview-window='bottom:99%,hidden' \
         --bind='ctrl-p:toggle-preview,,:preview-down,.:preview-up' \
-        --bind='enter:become(printf "@%s " {+3} | xargs -I@ tmux send-keys -l @)'
+        --bind="$enter_binding"

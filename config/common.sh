@@ -1,22 +1,5 @@
-# shellcheck disable=1090,2015,2059,2148,2155,2164,2207
-source ~/.vim/config/colors.sh  # LIGHT_THEME, LS_COLORS
-
-export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
-export EDITOR=nvim
-export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file, -+F: always paginate
-export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
-export FZF_COMPLETION_TRIGGER=\\
-export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
-export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
-export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:if [[ {fzf:prompt} = \"▌ \" ]]; then if [[ -e .git ]] || git rev-parse --git-dir &>/dev/null; then echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --follow --no-ignore || true)\"; else echo \"change-prompt(ls> )+reload(ls -1Ap --color=always --group-directories-first)\"; fi; elif [[ {fzf:prompt} = \"no-ignore> \" ]]; then echo \"change-prompt(git> )+reload({ git diff --name-only HEAD; git ls-files --others --exclude-standard; })\"; elif [[ {fzf:prompt} = \"git> \" ]]; then echo \"change-prompt(ls> )+reload(ls -1Ap --color=always --group-directories-first)\"; else echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\"; fi' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"
-export FZF_ALT_C_COMMAND='ls -1Ap --color=always --group-directories-first 2> /dev/null'
-export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
-export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
-if [[ $LIGHT_THEME = 1 ]]; then  # https://github.com/jesseduffield/lazygit/issues/4550, specifying in .gitconfig cannot change theme dynamically
-  export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
-else
-  export BAT_THEME=OneHalfDark
-fi
+# shellcheck disable=1090,2015,2059,2155,2164,2207
+[[ -z $RIPGREP_CONFIG_PATH ]] && source ~/.vim/config/env.sh
 
 alias -- -='cd -'
 alias 1='cd -1'
@@ -40,7 +23,7 @@ alias ll='\ls -AlhF --color=auto --group-directories-first'
 alias ls='ls -F --color=auto'
 alias ls-ports='lsof -iTCP -sTCP:LISTEN -P -n || eval ss -lntp || eval netstat -lntp'  # eval to avoid red syntax if not installed
 alias chmod\?='stat --printf "%a %n\n"'
-alias bell='printf "\a"'
+alias bell='printf "\033]9;bell: %s\007"'
 alias dateiso='date -u +"%Y-%m-%dT%H:%M:%SZ"'  # dateiso -d @<epoch-seconds>. to get epoch milliseconds: date +%s%3N
 alias sudo='sudo '  # alias commands with space allows alias after command
 alias xargs='xargs '
@@ -197,12 +180,12 @@ function = () {
   python -c "from math import *; __import__('pprint').pprint($*)"
 }
 
-st() {  # start tmux from interactive shell to inherit environment variables
-  ssh -t "$@" 'zsh -ic "exec .vim/bin/tmux new -A -s 0"'
+st() {  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display
+  ssh -t "$@" 'LANG=en_US.UTF-8 exec .vim/bin/tmux new -A -s 0'
 }
 
 tarcopy() {
-  printf " printf $(XZ_OPT=-9e tar czf - "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvz" | tee >(y) | wc -c | xargs echo Characters copied:
+  printf " printf $(tar cf - "$@" | gzip -9 -n | base64 | tr -d '\r\n') | base64 -d | tar xvz" | tee >(y) | wc -c | xargs echo Characters copied:
 }
 
 termwrap() {
@@ -294,7 +277,7 @@ sudorun() {
 }
 
 print-ascii() {
-  local names=(NUL SOH STX ETX EOT ENQ ACK BEL BS TAB LF VT FF CR SO SI DLE DC1 DC2 DC3 DC4 NAK SYN ETB CAN EM SUB ESC FS GS RS US) off=0 i c v label
+  local names=(NUL SOH STX ETX EOT ENQ ACK BEL BS TAB LF VT FF CR SO SI DLE DC1 DC2 DC3 DC4 NAK SYN ETB CAN EM SUB ESC FS GS RS US) off=0 i c v label octal
   if [[ -n $ZSH_VERSION ]]; then off=1; fi
   echo 'Dec Hex     Dec Hex     Dec Hex     Dec Hex     Dec Hex     Dec Hex     Dec Hex     Dec Hex'
   for i in {0..15}; do
@@ -303,7 +286,10 @@ print-ascii() {
       if ((v < 32)); then label="${names[v+off]}"
       elif ((v == 32)); then label=SPC
       elif ((v == 127)); then label=DEL
-      else label=$(printf "\\$(printf '%o' $v)"); fi
+      else
+        printf -v octal '%o' "$v"
+        printf -v label '%b' "\\0$octal"
+      fi
       printf '%3d %02x %-3s ' "$v" "$v" "$label"
     done
     echo
@@ -416,12 +402,13 @@ vrg() {
 }
 
 rf() {  # livegrep https://github.com/junegunn/fzf/blob/HEAD/ADVANCED.md#ripgrep-integration, usage: rf [pattern] [flags], fzf-query: [pattern] -- [flags]
-  local rest=() arg
+  local rest=() arg rg_prefix
   for arg in "$@"; do
     if [[ -n $skip_args ]]; then rest+=("$arg"); continue; fi
     case $arg in -*) rest+=("$arg") ;; *) local init_query="$arg"; local skip_args=1 ;; esac
   done
-  local rg_prefix="rg --column --line-number --no-heading --color=always$([[ $# -gt 0 ]] && printf " %q" "${rest[@]}")"
+  if [[ $# -gt 0 ]]; then printf -v rg_prefix ' %q' "${rest[@]}"; fi
+  rg_prefix="rg --column --line-number --no-heading --color=always$rg_prefix"
   # `fzf < /dev/null` disables default fzf command, `: | fzf` does the same but breaks tmux current pane path on mac
   # quotes around `*` is required in shell but won't work in rf or snacks.picker. use pattern -- -g *.sh; `\s-- ` to search for ` -- `
   fzf --ansi --multi --layout=default --height=100% --list-border=none --disabled --delimiter=: --prompt='ripgrep> ' --query="${init_query:-}" --freeze-left 1 \
@@ -530,28 +517,21 @@ untildone() {
     echo -e "Usage: UNTILDONE_MAX_TRIES=<n> UNTILDONE_INTERVAL=<sec> $0 <command>\n\t$0 wget -c <url>  # wget until complete\n\t$0 'git pull; sleep 3599; false'  # git pull every hour\n\t$0 ! ps <pid>; ./run  # run after pid exits" >&2
     return 1
   fi
-  local i=1 max_tries=${UNTILDONE_MAX_TRIES:-0} interval=${UNTILDONE_INTERVAL:-2}
-  local start_time=$SECONDS
-  local prev_rows=0 output rc cols line
+  local i=1 max_tries=${UNTILDONE_MAX_TRIES:-0} interval=${UNTILDONE_INTERVAL:-2} start_time=$SECONDS
+  tput sc >&2
   while true; do
-    (( prev_rows )) && printf '\033[%dF\033[J' "$prev_rows" >&2
     local elapsed=$((SECONDS - start_time))
     local hours=$((elapsed / 3600)) mins=$(((elapsed % 3600) / 60)) secs=$((elapsed % 60))
     printf "\033[0;33mTry %d, elapsed %02d:%02d:%02d at %s.\033[0m\n" "$i" "$hours" "$mins" "$secs" "$(date +'%Y-%m-%dT%H:%M:%S%z')" >&2
-    output=$(eval "$*" 2>&1); rc=$?
-    printf '%s\n' "$output"
-    (( rc == 0 )) && break
+    eval "$*" && break
     ((i+=1))
     if [[ $max_tries -gt 0 && $i -gt $max_tries ]]; then
       echo "Max tries ($UNTILDONE_MAX_TRIES) reached. Exiting." >&2
       return 1
     fi
-    cols=$(tput cols 2>/dev/null); [[ $cols =~ ^[0-9]+$ ]] || cols=80
-    prev_rows=1
-    while IFS= read -r line; do
-      (( prev_rows += ${#line} == 0 ? 1 : (${#line} + cols - 1) / cols ))
-    done <<< "$output"
     sleep "$interval"
+    tput rc >&2
+    tput ed >&2
   done
 }
 
@@ -686,13 +666,13 @@ pm2() {
 
 theme() {  # toggles terminal theme
   if [[ -n $WEZTERM_EXECUTABLE ]]; then
-    grep -q 'local light_theme = false' ~/.vim/config/wezterm.lua && export LIGHT_THEME=1 || export LIGHT_THEME=0
-    sed -i "s/\(local light_theme = \)\(true\|false\)/\1$([[ $LIGHT_THEME = 1 ]] && echo 'true' || echo 'false')/" ~/.vim/config/wezterm.lua
+    grep -q 'local light_theme = false' ~/.vim/config/wezterm/wezterm.lua && export LIGHT_THEME=1 || export LIGHT_THEME=0
+    sed -i "s/\(local light_theme = \)\(true\|false\)/\1$([[ $LIGHT_THEME = 1 ]] && echo 'true' || echo 'false')/" ~/.vim/config/wezterm/wezterm.lua
   else
-    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$([[ ${LIGHT_THEME:-0} = 1 ]] && echo 0 || echo 1)/" ~/.vim/config/colors.sh
+    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$([[ ${LIGHT_THEME:-0} = 1 ]] && echo 0 || echo 1)/" ~/.vim/config/env.sh
     unset LIGHT_THEME
   fi
-  source ~/.vim/config/common.sh
+  source ~/.vim/config/env.sh
   if [[ -n $TMUX ]]; then tmux set-environment -ug LIGHT_THEME; fi
   echo "theme set to $([[ ${LIGHT_THEME:-0} = 1 ]] && echo light || echo dark)"
 }
@@ -739,7 +719,7 @@ if [[ $OSTYPE = darwin* ]]; then
       echo "Chrome and Edge histories not found, exiting.."
       return 1
     fi
-    sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), datetime((last_visit_time/1000000) - 11644473600, 'unixepoch', 'localtime'), substr(url, 1, 200) from urls order by last_visit_time desc" | awk -F $sep '{printf "%-'$cols's \x1b[32m%s\n\x1b[36m%s\x1b[m\0", $1, $2, $3}' |
+    sqlite3 -separator $sep "$histfile" "select substr(title, 1, $cols), datetime((last_visit_time/1000000) - 11644473600, 'unixepoch', 'localtime'), substr(url, 1, 200) from urls order by last_visit_time desc" | awk -F $sep '{printf "%-'$cols's \x1b[32m%s\n\x1b[36m%s\x1b[m%c", $1, $2, $3, 0}' |
       fzf --ansi --read0 --multi --height=100% --list-border=none --tiebreak=index --scheme=history --prompt="$fzfprompt" \
       --header='`: to toggle sort | C-o: open | C-r: toggle raw' \
       --bind=\`:toggle-sort \

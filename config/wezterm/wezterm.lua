@@ -4,8 +4,10 @@ local mux = wezterm.mux
 local config = wezterm.config_builder()
 local uploading_host = nil
 
-local anki = dofile(wezterm.home_dir .. "/.vim/config/anki.lua")
+local anki = dofile(wezterm.home_dir .. "/.vim/config/wezterm/anki.lua")
 anki.setup()
+local xfer = dofile(wezterm.home_dir .. "/.vim/config/wezterm/xfer.lua")
+xfer.setup()
 
 -- config.animation_fps = 240
 -- config.max_fps = 240
@@ -88,6 +90,7 @@ config.keys = {
         }),
     },
     { key = "t", mods = "CMD|SHIFT", action = wezterm.action.SpawnCommandInNewTab({ args = { wezterm.home_dir .. "/.local/bin/nu" }, domain = "CurrentPaneDomain" }) },
+    { key = "g", mods = "CMD|SHIFT", action = xfer.inject_sender_action() },
     {
         key = "v",
         mods = "CMD|SHIFT",

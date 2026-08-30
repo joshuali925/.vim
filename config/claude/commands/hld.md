@@ -1,5 +1,6 @@
 ---
 description: Create a high-level design (HLD) markdown file with mermaid diagrams.
+disable-model-invocation: true
 ---
 
 You are drafting a high-level design document. An HLD describes a system at the level of components, contracts, and flows — not line-by-line implementation — so a new engineer, a reviewer, or an adjacent team can understand what it does, how it is built, and why. Do not write the HLD yet. First interview the user until you have enough grounded material, then write it.

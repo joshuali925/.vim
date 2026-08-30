@@ -228,6 +228,27 @@ api.mapkey('v', 'Copy element text (Enter: copy HTML)', function() {
 		if (out.length) return out.join('\n');
 		return (element.innerText || element.textContent || '').trim();
 	}
+	const showCopyBanner = message => api.Front?.showBanner?.(message);
+	async function copyText(content) {  // api.Clipboard.write(content) is not reliable with focus traps
+		let copied = false;
+		const handleCopy = e => {
+			if (!e.clipboardData) return;
+			e.clipboardData.setData('text/plain', content);
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			copied = true;
+		};
+		window.addEventListener('copy', handleCopy, true);
+		let commandSucceeded = false;
+		try { commandSucceeded = document.execCommand('copy'); } catch (_) {}
+		window.removeEventListener('copy', handleCopy, true);
+		copied = copied && commandSucceeded;
+		try {
+			if (!copied) await navigator.clipboard.writeText(content);
+			copied = true;
+		} catch (_) {}
+		showCopyBanner(copied ? `Copied ${content.length} chars` : 'Copy failed');
+	}
 	function cleanup() {
 		if (overlay) { overlay.remove(); overlay = null; }
 		window.removeEventListener('click', handleClick, true);
@@ -242,10 +263,9 @@ api.mapkey('v', 'Copy element text (Enter: copy HTML)', function() {
 		const content = getElementText(e.target);
 		cleanup();
 		if (content) {
-			api.Clipboard.write(content);
-			if (api.Front && api.Front.showBanner) api.Front.showBanner(`Copied ${content.length} chars`);
-		} else if (api.Front && api.Front.showBanner) {
-			api.Front.showBanner('No text to copy');
+			copyText(content);
+		} else {
+			showCopyBanner('No text to copy');
 		}
 	}
 	function handleMouseOver(e) {
@@ -268,8 +288,7 @@ api.mapkey('v', 'Copy element text (Enter: copy HTML)', function() {
 			let html = element.outerHTML || '';
 			if (html.length > 10000) html = html.slice(0, 10000) + '\n<!-- truncated -->';
 			const content = `URL: ${window.location.port ? ':' + window.location.port : ''}${window.location.pathname}${window.location.search}${window.location.hash}\n\nHTML:\n${html}`;
-			api.Clipboard.write(content);
-			if (api.Front && api.Front.showBanner) api.Front.showBanner(`Copied ${content.length} chars`);
+			copyText(content);
 		}
 	}
 	createOverlay();

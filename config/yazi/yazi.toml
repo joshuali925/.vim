@@ -10,6 +10,9 @@ show_hidden = true
 suppress_preload = true
 
 [plugin]
+prepend_spotters = [
+  { mime = "video/*", run = "video-duration" },
+]
 preloaders = []
 
 [preview]
