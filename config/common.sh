@@ -1,5 +1,5 @@
 # shellcheck disable=1090,2015,2059,2155,2164,2207
-[[ -z $RIPGREP_CONFIG_PATH ]] && source ~/.vim/config/env.sh
+source ~/.vim/config/env.sh
 
 alias -- -='cd -'
 alias 1='cd -1'
@@ -180,8 +180,8 @@ function = () {
   python -c "from math import *; __import__('pprint').pprint($*)"
 }
 
-st() {  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display
-  ssh -t "$@" 'LANG=en_US.UTF-8 exec .vim/bin/tmux new -A -s 0'
+st() {
+  ssh -t "$@" 'exec .vim/bin/tmux new -A -s 0'
 }
 
 tarcopy() {

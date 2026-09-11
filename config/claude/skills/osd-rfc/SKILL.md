@@ -1,4 +1,5 @@
 ---
+name: osd-rfc
 description: Create an OpenSearch Dashboards RFC markdown file.
 disable-model-invocation: true
 ---
@@ -7,7 +8,7 @@ You are drafting an RFC for OpenSearch Dashboards. Do not write the RFC yet. Fir
 
 ## Phase 1: Interview the user
 
-Read @~/.vim/config/claude/commands/grill-me.md and follow it.
+Read @~/.vim/config/claude/skills/grill-me/SKILL.md and follow it.
 
 Minimum coverage, in roughly this order:
 

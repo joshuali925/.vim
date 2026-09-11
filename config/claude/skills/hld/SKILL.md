@@ -1,4 +1,5 @@
 ---
+name: hld
 description: Create a high-level design (HLD) markdown file with mermaid diagrams.
 disable-model-invocation: true
 ---
@@ -7,7 +8,7 @@ You are drafting a high-level design document. An HLD describes a system at the 
 
 ## Phase 1: Interview the user
 
-Read @~/.vim/config/claude/commands/grill-me.md and follow it.
+Read @~/.vim/config/claude/skills/grill-me/SKILL.md and follow it.
 
 The value of an HLD comes from accuracy and from the reasoning behind the design, neither of which you can invent. If the code is available locally, offer to explore it first (entry points, routes, configs) so you arrive already grounded rather than asking the user what the code answers.
 

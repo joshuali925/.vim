@@ -3,6 +3,10 @@ if [[ $(readlink -f "$HOME/.config/herdr/config.toml") != $(readlink -f "$HOME/.
   mkdir -p ~/.config/herdr
   ln -sfv ~/.vim/config/herdr/config.toml ~/.config/herdr/config.toml
 fi
+if [[ -z $BIN_INIT ]] && [[ ! -x $HOME/.local/bin/herdr ]]; then
+  mkdir -p ~/.claude/skills/herdr
+  BIN_INIT=1 herdr --skill > ~/.claude/skills/herdr/SKILL.md
+fi
 
 source ~/.vim/bin/_install_from_github.sh
 install-from-github herdr herdrdev/herdr linux-x86_64 linux-aarch64 macos-x86_64 macos-aarch64 '' "$@"

@@ -340,11 +340,9 @@ install-claude-code() {
     npx -y skills update --project --yes
     return $?
   fi
-  mkdir -p ~/.claude/skills
   append-once '/.claude/' ~/.gitignore
   link-file ~/.vim/config/claude/CLAUDE.md ~/.claude/CLAUDE.md --relative
   link-file ~/.vim/config/claude/agents ~/.claude/agents --relative
-  link-file ~/.vim/config/claude/commands ~/.claude/commands --relative
   link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link-file ~/.vim/config/claude/keybindings.json ~/.claude/keybindings.json --relative
   link-file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
@@ -373,7 +371,7 @@ install-claude-code() {
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest
     if [[ $PLATFORM = darwin ]]; then
-      link-file ~/.vim/config/claude/skills/chrome-profile ~/.claude/skills/chrome-profile --relative
+      link-file ~/.vim/config/claude/optional-skills/chrome-profile ~/.claude/skills/chrome-profile --relative
       claude mcp add -s user chrome-profile -- chrome-devtools-mcp --browserUrl http://127.0.0.1:9222 --no-usage-statistics
     else
       claude mcp add -s user chrome-devtools -- chrome-devtools-mcp --headless --isolated --no-sandbox --no-usage-statistics

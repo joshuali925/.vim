@@ -16,29 +16,6 @@ return {
             })
         end,
     },
-    {
-        "mistweaverco/kulala.nvim",
-        install = false,
-        init = function()
-            vim.api.nvim_create_augroup("KulalaAutoCommands", {})
-            vim.api.nvim_create_autocmd("FileType", {
-                pattern = "http",
-                group = "KulalaAutoCommands",
-                callback = function(e)
-                    vim.keymap.set("n", "{", "<Cmd>lua require('kulala').jump_prev()<CR>", { buffer = e.buf })
-                    vim.keymap.set("n", "}", "<Cmd>lua require('kulala').jump_next()<CR>", { buffer = e.buf })
-                end,
-            })
-        end,
-        config = function()
-            require("kulala").setup({
-                default_view = "headers_body",
-                additional_curl_options = { "--insecure" },
-                ui = { max_response_size = require("states").size_threshold * 5 },
-            })
-            vim.api.nvim_create_user_command("KulalaCopyCurl", "lua require('kulala').copy()", {})
-        end,
-    },
     { "brianhuster/live-preview.nvim", install = false, cmd = { "LivePreview" }, config = function() require("livepreview.config").set({ address = "0.0.0.0" }) end },
     {
         "danymat/neogen",
@@ -138,7 +115,7 @@ return {
                 vim.list_extend(installed, to_install)
                 require("nvim-treesitter").install(to_install)
             end
-            local available = { kulala_http = true }
+            local available = {}
             local indent_exclude = { zsh = true, gitconfig = true }
             for _, lang in ipairs(require("nvim-treesitter").get_available()) do available[lang] = true end
             vim.api.nvim_create_autocmd("FileType", {
@@ -184,11 +161,7 @@ return {
         end,
         config = function()
             require("dropbar").setup({
-                bar = {
-                    enable = function(buf, win, _)
-                        return vim.fn.win_gettype(win) == "" and vim.bo[buf].buftype == "" and vim.bo[buf].filetype ~= "http" -- breaks visual selection in kulala http
-                    end,
-                },
+                bar = { enable = function(buf, win, _) return vim.fn.win_gettype(win) == "" and vim.bo[buf].buftype == "" end },
                 menu = {
                     win_configs = { border = "single" },
                     keymaps = {

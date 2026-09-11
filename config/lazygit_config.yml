@@ -5,6 +5,7 @@ git:
   commit:
     signOff: true
   diffRenderers:
+    # TODO https://github.com/jesseduffield/lazygit/pull/6063
     - colorArg: always
       command: delta --paging=never --24-bit-color=always --features=no-line-numbers
   branchLogCmd: git log --color --graph --pretty=simple {{branchName}} --

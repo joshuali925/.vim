@@ -1,5 +1,6 @@
 ---
-description: Refactor OpenSearch Dashboards
+name: osd-refactor
+description: Refactor OpenSearch Dashboards code in phases without changing behavior.
 disable-model-invocation: true
 ---
 

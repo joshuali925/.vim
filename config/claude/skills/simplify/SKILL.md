@@ -1,4 +1,6 @@
 ---
+name: simplify
+description: Review changed code for reuse, quality, and efficiency with three parallel agents, fix the findings, and commit.
 disable-model-invocation: true
 ---
 

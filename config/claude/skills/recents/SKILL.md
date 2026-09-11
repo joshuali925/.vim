@@ -1,5 +1,6 @@
 ---
-description: Use this skill to see recently modified files in the project
+name: recents
+description: Orient on the in-progress task from the project's recently modified files.
 disable-model-invocation: true
 ---
 

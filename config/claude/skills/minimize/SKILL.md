@@ -1,5 +1,6 @@
 ---
-description: Triggers by user to minimize code
+name: minimize
+description: Minimize a file, path, or diff to maximum information density.
 disable-model-invocation: true
 ---
 

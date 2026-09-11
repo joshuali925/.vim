@@ -1,7 +1,8 @@
 #!/bin/sh
 
 _xfer_cleanup() {
-  trap - 0 HUP INT TERM
+  _xfer_stop_wait_watchdog
+  trap - 0 HUP INT TERM ALRM
   _xfer_finish_progress
   if [ -n "${tty_state:-}" ] && [ "${tty_open:-0}" -eq 1 ]; then
     stty "$tty_state" <&3 2>/dev/null ||
@@ -13,15 +14,28 @@ _xfer_cleanup() {
   fi
   [ -z "${archive:-}" ] || rm -f "$archive"
   [ -z "${encoded_archive:-}" ] || rm -f "$encoded_archive"
-  [ -z "${remaining_archive:-}" ] || rm -f "$remaining_archive"
+  [ -z "${tar_status_path:-}" ] || rm -f "$tar_status_path"
 }
 
 _xfer_interrupted() {
   trap - HUP INT TERM
   if [ -n "${id:-}" ] && [ "${tty_open:-0}" -eq 1 ]; then
+    _xfer_resync || :
     _xfer_emit "X|$id|remote_interrupted" || :
   fi
   exit 130
+}
+
+_xfer_stop_wait_watchdog() {
+  [ -n "${wait_watchdog_pid:-}" ] || return 0
+  kill "$wait_watchdog_pid" 2>/dev/null || :
+  wait "$wait_watchdog_pid" 2>/dev/null || :
+  wait_watchdog_pid=
+}
+
+_xfer_disarm_wait_timeout() {
+  _xfer_stop_wait_watchdog
+  if [ "${read_timeout_supported:-0}" -ne 1 ]; then trap - ALRM; fi
 }
 
 _xfer_is_sha256() {
@@ -113,35 +127,20 @@ _xfer_report_progress() {
   _xfer_rp_elapsed=$((_xfer_rp_now - _xfer_rp_start))
   _xfer_rp_delta_time=$((_xfer_rp_now - progress_time))
   _xfer_rp_delta_bytes=$((_xfer_rp_current - progress_bytes))
+  if [ "$_xfer_rp_elapsed" -gt 0 ]; then _xfer_rp_average_speed=$((_xfer_rp_current / _xfer_rp_elapsed)); else _xfer_rp_average_speed=0; fi
   if [ "$_xfer_rp_delta_time" -gt 0 ] && [ "$_xfer_rp_delta_bytes" -gt 0 ]; then
     _xfer_rp_speed=$((_xfer_rp_delta_bytes / _xfer_rp_delta_time))
-  elif [ "$_xfer_rp_elapsed" -gt 0 ]; then
-    _xfer_rp_speed=$((_xfer_rp_current / _xfer_rp_elapsed))
   else
-    _xfer_rp_speed=0
+    _xfer_rp_speed=$_xfer_rp_average_speed
   fi
-  _xfer_rp_session_bytes=$((_xfer_rp_current - progress_origin))
-  if [ "$_xfer_rp_elapsed" -gt 0 ] && [ "$_xfer_rp_session_bytes" -gt 0 ]; then
-    _xfer_rp_average_speed=$((_xfer_rp_session_bytes / _xfer_rp_elapsed))
-  else
-    _xfer_rp_average_speed=0
-  fi
-  if [ "$_xfer_rp_total" -gt "$_xfer_rp_current" ]; then
-    _xfer_rp_remaining=$((_xfer_rp_total - _xfer_rp_current))
-  else
-    _xfer_rp_remaining=0
-  fi
+  if [ "$_xfer_rp_total" -gt "$_xfer_rp_current" ]; then _xfer_rp_remaining=$((_xfer_rp_total - _xfer_rp_current)); else _xfer_rp_remaining=0; fi
   if [ "$_xfer_rp_average_speed" -gt 0 ]; then
     _xfer_format_duration "$((_xfer_rp_remaining / _xfer_rp_average_speed))"
     _xfer_rp_eta=$_xfer_format_result
   else
     _xfer_rp_eta=--:--:--
   fi
-  if [ "$_xfer_rp_total" -gt 0 ]; then
-    _xfer_rp_percent=$((_xfer_rp_current * 1000 / _xfer_rp_total))
-  else
-    _xfer_rp_percent=0
-  fi
+  if [ "$_xfer_rp_total" -gt 0 ]; then _xfer_rp_percent=$((_xfer_rp_current * 1000 / _xfer_rp_total)); else _xfer_rp_percent=0; fi
   [ "$_xfer_rp_percent" -le 1000 ] || _xfer_rp_percent=1000
 
   _xfer_format_bytes "$_xfer_rp_current"
@@ -172,43 +171,103 @@ _xfer_finish_progress() {
   progress_active=0
 }
 
-_xfer_decoded_length() {
-  _xfer_decoded_result=$((${#1} * 3 / 4))
-  case $1 in
-    *==) _xfer_decoded_result=$((_xfer_decoded_result - 2)) ;;
-    *=) _xfer_decoded_result=$((_xfer_decoded_result - 1)) ;;
-  esac
+_xfer_osc() {
+  if [ "${force_tmux:-0}" -eq 1 ] || [ -n "${TMUX:-}" ]; then
+    printf '\033Ptmux;\033\033]1337;SetUserVar=wezterm_transfer=%s\007\033\134' "$1" >&3
+  else
+    printf '\033]1337;SetUserVar=wezterm_transfer=%s\007' "$1" >&3
+  fi
 }
 
 _xfer_emit() {
   _xfer_emit_encoded=$(printf '%s' "$1" | base64) || return
   _xfer_emit_encoded=$(printf '%s' "$_xfer_emit_encoded" | tr -d '\r\n') || return
   [ -n "$_xfer_emit_encoded" ] || return 1
-  if [ "${force_tmux:-0}" -eq 1 ] || [ -n "${TMUX:-}" ]; then
-    printf '\033Ptmux;\033\033]1337;SetUserVar=wezterm_transfer=%s\007\033\134' \
-      "$_xfer_emit_encoded" >&3
-  else
-    printf '\033]1337;SetUserVar=wezterm_transfer=%s\007' "$_xfer_emit_encoded" >&3
+  _xfer_osc "$_xfer_emit_encoded"
+}
+
+_xfer_resync() {
+  [ "${tty_open:-0}" -eq 1 ] || return 1
+  printf '\030' >&3 || return
+  _xfer_osc ''
+}
+
+_xfer_prepare_tmux() {
+  [ -n "${TMUX:-}" ] || return 0
+  command -v tmux >/dev/null 2>&1 || return 0
+  tmux set-option -g allow-passthrough all >/dev/null 2>&1 || :
+}
+
+_xfer_cleanup_stale_remote_uploads() {
+  _xfer_stale_now=$(_xfer_now) || return
+  for _xfer_stale_lease in ./.wezterm-xfer-*.lease; do
+    [ -f "$_xfer_stale_lease" ] || continue
+    IFS= read -r _xfer_stale_deadline <"$_xfer_stale_lease" || _xfer_stale_deadline=
+    if ! _xfer_is_uint "$_xfer_stale_deadline" ||
+      [ "$_xfer_stale_now" -ge "$_xfer_stale_deadline" ]; then
+      _xfer_stale_prefix=${_xfer_stale_lease%.lease}
+      rm -f "$_xfer_stale_prefix.tar.gz.part" \
+        "$_xfer_stale_prefix.lease" "$_xfer_stale_prefix.lease.tmp"
+      rm -rf "$_xfer_stale_prefix.extract.part"
+    fi
+  done
+}
+
+_xfer_has_timed_read() (
+  exec 2>/dev/null
+  # shellcheck disable=SC3045
+  IFS= read -r -t 0 _xfer_read_probe </dev/null
+  case $? in 0 | 1) exit 0 ;; *) exit 1 ;; esac
+)
+
+_xfer_read_wait_line() {
+  if [ "${read_timeout_supported:-0}" -eq 1 ]; then
+    _xfer_read_now=$(_xfer_now) || return 1
+    _xfer_read_remaining=$((_xfer_wait_deadline - _xfer_read_now))
+    [ "$_xfer_read_remaining" -gt 0 ] || return 124
+    # shellcheck disable=SC3045
+    if IFS= read -r -t "$_xfer_read_remaining" _xfer_wait_line <&3; then return 0; fi
+    _xfer_read_now=$(_xfer_now) || return 1
+    [ "$_xfer_read_now" -lt "$_xfer_wait_deadline" ] || return 124
+    return 1
   fi
+
+  IFS= read -r _xfer_wait_line <&3
+  _xfer_read_status=$?
+  [ "${_xfer_wait_timed_out:-0}" -eq 0 ] || return 124
+  return "$_xfer_read_status"
 }
 
 _xfer_wait() {
   _xfer_wait_expected=$1
-  _xfer_wait_metadata=${2:-0}
+  _xfer_wait_timeout=${2:-30}
   _xfer_wait_ack="#WTX1|A|$id|$_xfer_wait_expected|"
   _xfer_wait_cancel="#WTX1|C|$id|"
-  while IFS= read -r _xfer_wait_line <&3; do
+  _xfer_wait_timed_out=0
+  _xfer_wait_deadline=$(_xfer_now) || return 1
+  _xfer_wait_deadline=$((_xfer_wait_deadline + _xfer_wait_timeout))
+  if [ "${read_timeout_supported:-0}" -ne 1 ]; then
+    trap '_xfer_wait_timed_out=1' ALRM
+    (
+      trap - 0 HUP INT TERM ALRM
+      sleep "$_xfer_wait_timeout"
+      kill -s ALRM "$$" 2>/dev/null
+    ) &
+    wait_watchdog_pid=$!
+  fi
+  while :; do
+    _xfer_read_wait_line
+    case $? in
+      0) ;;
+      124) _xfer_wait_timed_out=1; break ;;
+      *) break ;;
+    esac
     case $_xfer_wait_line in
       " #WTX1|"*) _xfer_wait_line=${_xfer_wait_line# } ;;
     esac
     case $_xfer_wait_line in
       "$_xfer_wait_ack"*)
-        if [ "$_xfer_wait_metadata" -eq 1 ]; then
-          _xfer_wait_tail=${_xfer_wait_line#"$_xfer_wait_ack"}
-          resume_bytes=${_xfer_wait_tail%%|*}
-          _xfer_wait_tail=${_xfer_wait_tail#*|}
-          resume_sha256=${_xfer_wait_tail%%|*}
-        fi
+        _xfer_disarm_wait_timeout
         return 0
         ;;
       "$_xfer_wait_cancel"*)
@@ -217,10 +276,18 @@ _xfer_wait() {
         [ -n "$_xfer_wait_reason" ] || _xfer_wait_reason=cancelled
         printf 'Transfer declined or cancelled by WezTerm: %s\n' \
           "$_xfer_wait_reason" >&2
+        _xfer_disarm_wait_timeout
         return 2
         ;;
     esac
   done
+  _xfer_disarm_wait_timeout
+  if [ "$_xfer_wait_timed_out" -eq 1 ]; then
+    _xfer_resync || :
+    _xfer_emit "X|$id|ack_timeout" || :
+    printf 'Timed out after %s seconds waiting for WezTerm\n' "$_xfer_wait_timeout" >&2
+    return 124
+  fi
   _xfer_emit "X|$id|terminal_closed" || :
   printf '%s\n' 'Terminal input closed while waiting for WezTerm' >&2
   return 1
@@ -236,28 +303,36 @@ _xfer_tty_available() (
   : 3<>/dev/tty
 )
 
-xfer_main() (
+xfer_main() {
   archive=
   encoded_archive=
-  remaining_archive=
+  tar_status_path=
   tty_state=
   tty_open=0
+  wait_watchdog_pid=
+  read_timeout_supported=0
   id=
   hasher=
   seq=0
   force_tmux=0
-  chunk_size=65536
+  chunk_size=8192
+  accept_timeout=${XFER_ACCEPT_TIMEOUT:-120}
+  ack_timeout=${XFER_ACK_TIMEOUT:-30}
   progress_active=0
   progress_bytes=0
   progress_time=0
-  progress_origin=0
-  transferred_bytes=0
-  resume_bytes=0
-  resume_sha256=
   upload_request=0
 
   trap '_xfer_cleanup' 0
   trap '_xfer_interrupted' HUP INT TERM
+
+  if _xfer_has_timed_read; then read_timeout_supported=1; fi
+
+  if ! _xfer_is_uint "$accept_timeout" || [ "$accept_timeout" -eq 0 ] ||
+    ! _xfer_is_uint "$ack_timeout" || [ "$ack_timeout" -eq 0 ]; then
+    printf '%s\n' 'XFER_ACCEPT_TIMEOUT and XFER_ACK_TIMEOUT must be positive integers' >&2
+    return 2
+  fi
 
   while [ "$#" -gt 0 ]; do
     case $1 in
@@ -270,29 +345,28 @@ xfer_main() (
   done
   if [ "$#" -eq 0 ]; then upload_request=1; fi
 
-  required_commands='base64 date tr'
-  if [ "$upload_request" -eq 0 ]; then
-    required_commands="$required_commands fold gzip mktemp rm stty tar wc"
-  fi
+  _xfer_prepare_tmux
+
+  required_commands='base64 date gzip mkdir mv rm sleep tar tr'
+  if [ "$upload_request" -ne 1 ]; then required_commands="$required_commands fold mktemp stty wc"; fi
   for required in $required_commands; do
     command -v "$required" >/dev/null 2>&1 || {
       printf "xfer requires '%s' on the remote host\n" "$required" >&2
       return 127
     }
   done
-  if [ "$upload_request" -eq 0 ]; then
-    for required in sha256sum shasum openssl; do
-      if command -v "$required" >/dev/null 2>&1; then
-        hasher=$required
-        break
-      fi
-    done
-    if [ -z "$hasher" ]; then
-      printf '%s\n' \
-        "xfer requires 'sha256sum', 'shasum', or 'openssl' on the remote host" >&2
-      return 127
+  for required in sha256sum shasum openssl; do
+    if command -v "$required" >/dev/null 2>&1; then
+      hasher=$required
+      break
     fi
+  done
+  if [ -z "$hasher" ]; then
+    printf '%s\n' \
+      "xfer requires 'sha256sum', 'shasum', or 'openssl' on the remote host" >&2
+    return 127
   fi
+  _xfer_cleanup_stale_remote_uploads
 
   id_time=$(_xfer_now) || {
     printf '%s\n' 'Could not read the current time' >&2
@@ -315,6 +389,10 @@ xfer_main() (
     passthrough=0
     if [ "$force_tmux" -eq 1 ] || [ -n "${TMUX:-}" ]; then passthrough=1; fi
     printf '%s\n' 'Choose a host path in WezTerm to upload here...'
+    _xfer_resync || {
+      printf '%s\n' 'Could not reset the terminal transfer state' >&2
+      return 1
+    }
     _xfer_emit "U|$id|$passthrough|$label" || {
       printf '%s\n' 'Could not contact WezTerm' >&2
       return 1
@@ -337,13 +415,22 @@ xfer_main() (
 
   archive=$(_xfer_mktemp) || return 1
   encoded_archive=$(_xfer_mktemp) || return 1
+  tar_status_path=$(_xfer_mktemp) || return 1
 
   printf '%s\n' 'Preparing archive...'
   if ! gzip -n -c </dev/null >/dev/null 2>&1; then
     printf '%s\n' "xfer requires gzip with deterministic '-n' support" >&2
     return 127
   fi
-  if ! tar -cf - -- "$@" | gzip -n -c >"$archive"; then
+  {
+    tar -cf - -- "$@"
+    printf '%s\n' "$?" >"$tar_status_path"
+  } | gzip -n -c >"$archive"
+  gzip_status=$?
+  tar_status=
+  IFS= read -r tar_status <"$tar_status_path" || tar_status=
+  if ! _xfer_is_uint "$tar_status" || [ "$tar_status" -ne 0 ] ||
+    [ "$gzip_status" -ne 0 ]; then
     printf '%s\n' 'Could not create archive' >&2
     return 1
   fi
@@ -353,12 +440,10 @@ xfer_main() (
   }
   total_bytes=$(wc -c <"$archive") || total_bytes=
   total_bytes=$(printf '%s' "$total_bytes" | tr -d '[:space:]')
-  case $total_bytes in
-    '' | *[!0-9]*)
-      printf '%s\n' 'Could not calculate archive size' >&2
-      return 1
-      ;;
-  esac
+  _xfer_is_uint "$total_bytes" || {
+    printf '%s\n' 'Could not calculate archive size' >&2
+    return 1
+  }
   if ! _xfer_tty_available 2>/dev/null; then
     printf '%s\n' 'Could not open terminal /dev/tty' >&2
     return 1
@@ -375,49 +460,16 @@ xfer_main() (
   }
 
   printf '%s\n' 'Waiting for WezTerm to accept (Ctrl-C to cancel)...'
+  _xfer_resync || {
+    printf '%s\n' 'Could not reset the terminal transfer state' >&2
+    return 1
+  }
   _xfer_emit "B|$id|$name|$total_bytes|$archive_sha256|$label" || {
     printf '%s\n' 'Could not contact WezTerm' >&2
     return 1
   }
-  _xfer_wait 0 1 || return
-  if ! _xfer_is_uint "$resume_bytes" ||
-    { [ "$resume_bytes" -gt 0 ] && ! _xfer_is_sha256 "$resume_sha256"; }; then
-    _xfer_emit "X|$id|invalid_resume_metadata" || :
-    printf '%s\n' 'WezTerm returned invalid resume metadata' >&2
-    return 1
-  fi
-  if [ "$resume_bytes" -gt "$total_bytes" ]; then
-    _xfer_emit "X|$id|partial_file_too_large" || :
-    printf 'Existing %s.part is larger than the current archive\n' "$name" >&2
-    return 1
-  fi
-  if [ "$resume_bytes" -gt 0 ]; then
-    for required in head tail; do
-      command -v "$required" >/dev/null 2>&1 || {
-        _xfer_emit "X|$id|missing_resume_command" || :
-        printf "xfer requires '%s' to resume a transfer\n" "$required" >&2
-        return 127
-      }
-    done
-    prefix_sha256=$(head -c "$resume_bytes" "$archive" | _xfer_sha256) || prefix_sha256=
-    resume_sha256=$(printf '%s' "$resume_sha256" | tr 'A-F' 'a-f')
-    if [ "$prefix_sha256" != "$resume_sha256" ]; then
-      _xfer_emit "X|$id|partial_file_mismatch" || :
-      printf 'Existing %s.part does not match this archive; remove it and retry\n' "$name" >&2
-      return 1
-    fi
-    remaining_archive=$(_xfer_mktemp) || return 1
-    if ! tail -c "+$((resume_bytes + 1))" "$archive" >"$remaining_archive"; then
-      _xfer_emit "X|$id|resume_read_failed" || :
-      printf '%s\n' 'Could not read the remaining archive bytes' >&2
-      return 1
-    fi
-    transfer_source=$remaining_archive
-    printf 'Resuming %s at byte %s of %s\n' "$name" "$resume_bytes" "$total_bytes"
-  else
-    transfer_source=$archive
-  fi
-  if ! base64 <"$transfer_source" | tr -d '\r\n' | fold -w "$chunk_size" >"$encoded_archive"; then
+  _xfer_wait 0 "$accept_timeout" || return
+  if ! base64 <"$archive" | tr -d '\r\n' | fold -w "$chunk_size" >"$encoded_archive"; then
     _xfer_emit "X|$id|encode_failed" || :
     printf '%s\n' 'Could not encode archive' >&2
     return 1
@@ -426,9 +478,8 @@ xfer_main() (
   printf 'Sending %s (%s bytes)...\n' "$name" "$total_bytes"
   transfer_start=$(_xfer_now) || transfer_start=$id_time
   progress_time=$transfer_start
-  progress_origin=$resume_bytes
   progress_active=1
-  transferred_bytes=$resume_bytes
+  transferred_bytes=0
   _xfer_report_progress "$transferred_bytes" "$total_bytes" "$transfer_start" "$transfer_start"
   while IFS= read -r chunk || [ -n "$chunk" ]; do
     seq=$((seq + 1))
@@ -436,8 +487,12 @@ xfer_main() (
       printf '%s\n' 'Could not write transfer data to the terminal' >&2
       return 1
     }
-    _xfer_wait "$seq" || return
-    _xfer_decoded_length "$chunk"
+    _xfer_wait "$seq" "$ack_timeout" || return
+    _xfer_decoded_result=$((${#chunk} * 3 / 4))
+    case $chunk in
+      *==) _xfer_decoded_result=$((_xfer_decoded_result - 2)) ;;
+      *=) _xfer_decoded_result=$((_xfer_decoded_result - 1)) ;;
+    esac
     transferred_bytes=$((transferred_bytes + _xfer_decoded_result))
     progress_now=$(_xfer_now) || progress_now=$progress_time
     if [ "$((progress_now - progress_time))" -ge 1 ]; then
@@ -449,11 +504,11 @@ xfer_main() (
     printf '%s\n' 'Could not finish transfer' >&2
     return 1
   }
-  _xfer_wait E || return
+  _xfer_wait E "$ack_timeout" || return
   progress_now=$(_xfer_now) || progress_now=$progress_time
   _xfer_report_progress "$total_bytes" "$total_bytes" "$transfer_start" "$progress_now"
   _xfer_finish_progress
   printf 'Transferred %s as %s (SHA-256 verified)\n' "$*" "$name"
-)
+}
 
 xfer_main "$@"

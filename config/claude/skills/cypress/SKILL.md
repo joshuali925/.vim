@@ -1,4 +1,5 @@
 ---
+name: cypress
 description: Write and run Cypress end-to-end tests
 ---
 

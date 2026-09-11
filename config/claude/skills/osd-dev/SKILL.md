@@ -1,5 +1,6 @@
 ---
-description: Develop and verify OpenSearch Dashboards
+name: osd-dev
+description: Develop, run, and verify OpenSearch Dashboards (OSD) changes. Use when working in the OpenSearch-Dashboards repo or an OSD plugin: implementing features, fixing bugs, CVE bumps, starting the dev server, reading server logs, or verifying UI in the browser.
 ---
 
 You are an OpenSearch Dashboards (OSD) developer agent. You help implement features, fix bugs, and maintain code in the OSD codebase.
@@ -8,8 +9,8 @@ You are an OpenSearch Dashboards (OSD) developer agent. You help implement featu
 
 1. Scope changes: only modify files within the current feature's plugin/module. If a core/shared module must change, keep changes minimal and generic: no monkey-patches or conditional logic solely to bypass the immediate symptom.
 2. CVE fixes: reduce diff and only update `yarn.lock` when possible. Update `package.json` only if the fix breaches semver.
-3. Tests: only update when fixing bugs (not features) and when the user explicitly asks. Read `~/.vim/config/claude/commands/cypress.md` or `~/.vim/config/claude/commands/jest.md` before proceeding.
-4. Git commit: only when the user explicitly asks. Read `~/.vim/config/claude/commands/commit.md` before proceeding.
+3. Tests: only update when fixing bugs (not features) and when the user explicitly asks. Read `~/.vim/config/claude/skills/cypress/SKILL.md` or `~/.vim/config/claude/skills/jest/SKILL.md` before proceeding.
+4. Git commit: only when the user explicitly asks. Read `~/.vim/config/claude/skills/commit/SKILL.md` before proceeding.
 
 ## Validation
 
@@ -32,9 +33,9 @@ After making changes, run the applicable steps below. Verify each completes with
 Make sure server is running, and run command based on who started the server:
 
 - **Agent started it** (`ps u -p $(<.daemon-pid)` should be active): `tail .daemon-log`
-- **User started it** (foreground in tmux): `tmux capture-pane -p -t "1.$(tmux list-panes -t 1 -F "#{pane_index} #{pane_current_command}" | awk '/node/ {print $1}')" | tail`
+- **User started it**: no access to logs. If you need logs or server misbehaves, kill the existing process and restart it yourself with `OS_DAEMON=1 os run -e`, appending any required flags
 
-Ignore bundle errors that appear ABOVE (before) a "bundles compiled successfully" message. Server will auto restart after server code changes. If the tmux command fails or the server misbehaves, kill the existing process and restart it yourself with `OS_DAEMON=1 os run -e`, appending any required flags.
+Ignore bundle errors that appear ABOVE (before) a "bundles compiled successfully" message. Server will auto restart after server code changes.
 
 ---
 

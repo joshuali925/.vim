@@ -1,119 +1,108 @@
 {
-  "env": {
-    "AWS_REGION": "us-west-2",
-    "CLAUDE_CODE_ENABLE_AUTO_MODE": "1",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "CLAUDE_CODE_ENABLE_AWAY_SUMMARY": "0",
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_NO_FLICKER": "1",
-    "CLAUDE_CODE_USE_BEDROCK": "1",
-    "DISABLE_BUG_COMMAND": "1",
-    "DISABLE_ERROR_REPORTING": "1",
-    "DISABLE_TELEMETRY": "1",
-    "MCP_TIMEOUT": "120000"
+  "env" : {
+    "AWS_REGION" : "us-west-2",
+    "CLAUDE_CODE_ENABLE_AUTO_MODE" : "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" : "1",
+    "CLAUDE_CODE_ENABLE_AWAY_SUMMARY" : "0",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS" : "1",
+    "CLAUDE_CODE_NO_FLICKER" : "1",
+    "CLAUDE_CODE_USE_BEDROCK" : "1",
+    "DISABLE_BUG_COMMAND" : "1",
+    "DISABLE_ERROR_REPORTING" : "1",
+    "DISABLE_TELEMETRY" : "1",
+    "MCP_TIMEOUT" : "120000"
   },
-  "cleanupPeriodDays": 99999,
-  "includeCoAuthoredBy": false,
-  "enableArtifact": false,
-  "disableClaudeAiConnectors": true,
-  "permissions": {
-    "defaultMode": "auto"
+  "cleanupPeriodDays" : 99999,
+  "includeCoAuthoredBy" : false,
+  "enableArtifact" : false,
+  "disableClaudeAiConnectors" : true,
+  "permissions" : {
+    "defaultMode" : "auto"
   },
-  "model": "global.anthropic.claude-opus-4-8[1m]",
-  "fallbackModel": [
-    "global.anthropic.claude-opus-4-8[1m]",
-    "global.anthropic.claude-opus-4-7[1m]"
-  ],
-  "availableModels": [
-    "claude-opus-4-6[1m]",
-    "claude-opus-4-6",
-    "claude-opus-4-7[1m]",
-    "claude-opus-4-7",
-    "claude-opus-4-8[1m]",
-    "claude-opus-4-8",
-    "claude-opus-5[1m]",
-    "claude-opus-5",
-    "claude-sonnet-4-6",
-    "claude-sonnet-4-6[1m]",
-    "claude-sonnet-5",
-    "claude-fable-5",
-    "claude-fable-5[1m]",
-    "claude-haiku-4-5"
-  ],
-  "enforceAvailableModels": true,
-  "modelOverrides": {
-    "claude-fable-5[1m]": "global.anthropic.claude-fable-5[1m]",
-    "claude-haiku-4-5": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "claude-opus-4-7[1m]": "global.anthropic.claude-opus-4-7[1m]",
-    "claude-opus-4-7": "global.anthropic.claude-opus-4-7",
-    "claude-opus-4-8[1m]": "global.anthropic.claude-opus-4-8[1m]",
-    "claude-opus-4-8": "global.anthropic.claude-opus-4-8",
-    "claude-opus-5[1m]": "global.anthropic.claude-opus-5[1m]",
-    "claude-opus-5": "global.anthropic.claude-opus-5",
-    "claude-sonnet-4-6": "global.anthropic.claude-sonnet-4-6",
-    "claude-sonnet-4-6[1m]": "global.anthropic.claude-sonnet-4-6[1m]",
-    "claude-sonnet-5": "global.anthropic.claude-sonnet-5",
-    "claude-fable-5": "global.anthropic.claude-fable-5[1m]"
+  "model" : "global.anthropic.claude-opus-5-5[1m]",
+  "fallbackModel" : [ "global.anthropic.claude-opus-5[1m]", "global.anthropic.claude-opus-4-8[1m]", "global.anthropic.claude-opus-4-7[1m]" ],
+  "availableModels" : [ "claude-opus-4-6[1m]", "claude-opus-4-6", "claude-opus-4-7[1m]", "claude-opus-4-7", "claude-opus-4-8[1m]", "claude-opus-4-8", "claude-opus-5[1m]", "claude-opus-5", "claude-sonnet-4-6", "claude-sonnet-4-6[1m]", "claude-sonnet-5", "claude-fable-5", "claude-fable-5[1m]", "claude-haiku-4-5" ],
+  "enforceAvailableModels" : true,
+  "modelOverrides" : {
+    "claude-fable-5[1m]" : "global.anthropic.claude-fable-5[1m]",
+    "claude-haiku-4-5" : "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "claude-opus-4-7[1m]" : "global.anthropic.claude-opus-4-7[1m]",
+    "claude-opus-4-7" : "global.anthropic.claude-opus-4-7",
+    "claude-opus-4-8[1m]" : "global.anthropic.claude-opus-4-8[1m]",
+    "claude-opus-4-8" : "global.anthropic.claude-opus-4-8",
+    "claude-opus-5[1m]" : "global.anthropic.claude-opus-5[1m]",
+    "claude-opus-5" : "global.anthropic.claude-opus-5",
+    "claude-sonnet-4-6" : "global.anthropic.claude-sonnet-4-6",
+    "claude-sonnet-4-6[1m]" : "global.anthropic.claude-sonnet-4-6[1m]",
+    "claude-sonnet-5" : "global.anthropic.claude-sonnet-5",
+    "claude-fable-5" : "global.anthropic.claude-fable-5[1m]",
+    "claude-opus-5-5[1m]" : "global.anthropic.claude-opus-5-5[1m]",
+    "claude-opus-5-5" : "global.anthropic.claude-opus-5-5",
+    "claude-sonnet-5-5[1m]" : "global.anthropic.claude-sonnet-5-5[1m]",
+    "claude-sonnet-5-5" : "global.anthropic.claude-sonnet-5-5"
   },
-  "respondToBashCommands": false,
-  "statusLine": {
-    "type": "command",
-    "command": "ccstatusline",
-    "padding": 0
+  "hooks" : {
+    "SessionStart" : [ { "hooks" : [ { "type" : "command", "command" : "~/.vim/config/claude/link-skills.sh" } ] } ]
   },
-  "enabledPlugins": {
-    "code-review@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "frontend-slides@frontend-slides": false,
-    "skill-creator@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "ui-ux-pro-max@ui-ux-pro-max-skill": false,
-    "interface-design@interface-design": false,
-    "impeccable@impeccable": false,
-    "i-have-adhd@i-have-adhd": false
+  "respondToBashCommands" : false,
+  "statusLine" : {
+    "type" : "command",
+    "command" : "ccstatusline",
+    "padding" : 0
   },
-  "extraKnownMarketplaces": {
-    "claude-plugins-official": {
-      "source": {
-        "source": "github",
-        "repo": "anthropics/claude-plugins-official"
+  "enabledPlugins" : {
+    "code-review@claude-plugins-official" : true,
+    "frontend-design@claude-plugins-official" : true,
+    "frontend-slides@frontend-slides" : false,
+    "skill-creator@claude-plugins-official" : true,
+    "typescript-lsp@claude-plugins-official" : true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill" : false,
+    "interface-design@interface-design" : false,
+    "impeccable@impeccable" : false,
+    "i-have-adhd@i-have-adhd" : false
+  },
+  "extraKnownMarketplaces" : {
+    "claude-plugins-official" : {
+      "source" : {
+        "source" : "github",
+        "repo" : "anthropics/claude-plugins-official"
       }
     },
-    "frontend-slides": {
-      "source": {
-        "source": "github",
-        "repo": "zarazhangrui/frontend-slides"
+    "frontend-slides" : {
+      "source" : {
+        "source" : "github",
+        "repo" : "zarazhangrui/frontend-slides"
       }
     },
-    "ui-ux-pro-max-skill": {
-      "source": {
-        "source": "github",
-        "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
+    "ui-ux-pro-max-skill" : {
+      "source" : {
+        "source" : "github",
+        "repo" : "nextlevelbuilder/ui-ux-pro-max-skill"
       }
     },
-    "interface-design": {
-      "source": {
-        "source": "github",
-        "repo": "Dammyjay93/interface-design"
+    "interface-design" : {
+      "source" : {
+        "source" : "github",
+        "repo" : "Dammyjay93/interface-design"
       }
     },
-    "impeccable": {
-      "source": {
-        "source": "github",
-        "repo": "pbakaus/impeccable"
+    "impeccable" : {
+      "source" : {
+        "source" : "github",
+        "repo" : "pbakaus/impeccable"
       }
     },
-    "i-have-adhd": {
-      "source": {
-        "source": "github",
-        "repo": "ayghri/i-have-adhd"
+    "i-have-adhd" : {
+      "source" : {
+        "source" : "github",
+        "repo" : "ayghri/i-have-adhd"
       }
     }
   },
-  "outputStyle": "Concise",
-  "alwaysThinkingEnabled": true,
-  "effortLevel": "high",
-  "skipDangerousModePermissionPrompt": true,
-  "theme": "auto",
-  "verbose": true
+  "alwaysThinkingEnabled" : true,
+  "effortLevel" : "high",
+  "outputStyle" : "Concise",
+  "skipDangerousModePermissionPrompt" : true,
+  "theme" : "auto",
+  "verbose" : true
 }

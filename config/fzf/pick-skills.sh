@@ -3,7 +3,6 @@ set -euo pipefail
 
 cache="$HOME/.claude/plugins/cache"
 user_skills="$HOME/.claude/skills"
-commands="$HOME/.vim/config/claude/commands"
 agents="$HOME/.vim/config/claude/agents"
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 repo_skills="${repo_root:+$repo_root/.claude/skills}"
@@ -19,7 +18,6 @@ fi
   if [[ -d "$repo_skills" ]]; then
     fd -L SKILL.md "$repo_skills"
   fi
-  fd -e md . "$commands"
   fd -e md . "$agents"
   fd --hidden --exclude=.git SKILL.md "$cache" --exec-batch stat -c '%Y %n'
 } | awk -v cache="$cache/" -v user="$user_skills/" -v repo="$repo_skills/" -v agents="$agents/" '
@@ -64,8 +62,6 @@ fi
       } else if (index(path, agents) == 1) {
         n = split(path, p, "/"); name = p[n]; sub(/\.md$/, "", name)
         name = "agent:" name; key = name; prio = 1
-      } else {
-        n = split(path, p, "/"); name = p[n]; sub(/\.md$/, "", name); key = name; prio = 1
       }
 
       # Skip localized skill variants except en, zh, zhs

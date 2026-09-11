@@ -1,4 +1,5 @@
 ---
+name: jest
 description: Write and run Jest unit tests
 ---
 

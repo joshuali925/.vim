@@ -5,4 +5,5 @@ if [[ $(readlink -f "$HOME/.tmux.conf") != $(readlink -f "$HOME/.vim/config/.tmu
   ln -sv ~/.vim/config/.tmux.conf ~/.tmux.conf
 fi
 
+export LANG=en_US.UTF-8  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display when called using st()
 install-from-github tmux tmux/tmux-builds linux-x86_64 linux-arm64 macos-x86_64 macos-arm64 tmux "$@"
