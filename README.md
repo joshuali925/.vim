@@ -78,6 +78,9 @@ DarkModeBuddy -> Go Dark When Ambient Light Falls Below: 3
               -> Delay Time: 30s
 
 Handy -> General -> Transcribe -> change to right cmd
+
+Karabiner Cygnus rules: ln -s ~/.vim/config/hammerspoon/cygnus-karabiner.json ~/.config/karabiner/assets/complex_modifications/
+Karabiner-Elements -> Complex Modifications -> Add predefined rule -> Enable All
 ```
 
 - Surfingkeys settings: https://raw.githubusercontent.com/joshuali925/.vim/HEAD/config/surfingkeys.js

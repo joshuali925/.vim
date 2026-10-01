@@ -7,7 +7,7 @@ tab_bar_position = "bottom"
 agent_panel_sort = "spaces"
 prompt_new_tab_name = false
 show_agent_labels_on_pane_borders = true
-toast.delivery = "herdr"
+toast.delivery = "system"
 tab_bar_right = [
   { type = "command", command = 'bash "$HOME/.vim/config/herdr/system-status.sh"', interval_seconds = 5, timeout_seconds = 3 },
 ]
@@ -30,6 +30,8 @@ next_tab = ["alt+m", "shift+right"]
 previous_tab = ["alt+n", "shift+left"]
 move_tab_previous = "prefix+9"
 move_tab_next = "prefix+0"
+previous_agent = "alt+period"
+next_agent = "alt+comma"
 focus_agent = "alt+1..9"
 new_workspace = "prefix+shift+c"
 rename_workspace = "prefix+$"
@@ -38,6 +40,12 @@ previous_workspace = "prefix+ctrl+k"
 split_vertical = "prefix+v"
 split_horizontal = "prefix+h"
 close_pane = "prefix+k"
+
+# for codex answer agent shortcut. needs same toml on server then: herdr server reload-config
+[[keys.command]]
+key = "prefix+shift+left"
+command = '"$HERDR_BIN_PATH" pane send-keys "$HERDR_ACTIVE_PANE_ID" shift+left >/dev/null'
+description = "send shift+left"
 
 [[keys.command]]
 key = "prefix+c"
@@ -61,6 +69,11 @@ description = "move pane to new tab"
 key = "prefix+m"
 command = 'bash "$HOME/.vim/config/herdr/pane-mark.sh"'
 description = "mark pane; swap or move it here"
+
+[[keys.command]]
+key = "prefix+="
+command = 'bash "$HOME/.vim/config/herdr/pane-even.sh"'
+description = "spread panes evenly"
 
 [[keys.command]]
 key = "ctrl+h"

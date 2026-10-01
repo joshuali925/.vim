@@ -39,7 +39,7 @@
 	wip = "!git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m '--wip--'"
 	unwip = "!git log -n 1 | grep -q -c -- '--wip--' && git reset HEAD~1"
 	save = "!git add --all && git stash push --include-untracked --message 'auto backup'"  ; stash everything except ignored files
-	clear = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git restore --staged --worktree --source=HEAD -- \"${@:-.}\" && git clean -fd -- \"${@:-.}\" || return $?; for p in \"${@:-.}\"; do [ -d \"$p\" ] || p=.; find \"$p\" -mindepth 1 -depth -type d -empty ! -path '*/.git/*' -exec sh -c 'git check-ignore -q \"$1\" || rmdir \"$1\"' _ {} ';'; done; true; }; f"  ; clean given dir except ignored files
+	clear = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git restore --staged --worktree --source=HEAD -- \"${@:-.}\" && git clean -fd -- \"${@:-.}\"; }; f"  ; clean given dir except ignored files
 	nuke = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git restore --staged --worktree --source=HEAD -- \"${@:-.}\" && git clean -fdx -- \"${@:-.}\" || return $?; for p in \"${@:-.}\"; do [ -d \"$p\" ] || p=.; find \"$p\" -mindepth 1 -depth -type d -empty ! -path '*/.git/*' -exec rmdir {} ';'; done; true; }; f"  ; clean given dir including ignored files
 	revert-to = "!git read-tree -u --reset"  ; revert worktree to a commit
 	reset-to-remote = "!git abort; git clear && git reset --hard @{upstream}"

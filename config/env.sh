@@ -11,10 +11,10 @@ export FZF_ALT_C_COMMAND='ls -1Ap --color=always --group-directories-first 2> /d
 export FZF_ALT_C_OPTS="--ansi --bind='tab:down,btab:up' --bind='\`:unbind(\`)+reload($FZF_CTRL_T_COMMAND || true)' --height=~40% --scheme=default"
 export FZF_CTRL_R_OPTS="--bind='\`:toggle-sort,ctrl-r:toggle-raw,ctrl-y:execute-silent(echo -n {2..} | y)+abort' --header='\`: toggle sort | C-r: toggle raw | C-y: copy' --preview='bat --language=bash --color=always --plain <<< {2..}' --preview-window='wrap,40%'"
 export LIGHT_THEME="${LIGHT_THEME:-0}"
-if [ "$LIGHT_THEME" = 1 ]; then  # https://github.com/jesseduffield/lazygit/issues/4550, specifying in .gitconfig cannot change theme dynamically
-  export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
-else
-  export BAT_THEME=OneHalfDark
+if [ "$LIGHT_THEME" = 1 ]; then
+    export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
+else  # bat theme detection does not work inside fzf preview
+    export BAT_THEME=OneHalfDark
 fi
 
 export USER_LS_COLORS=1  # RHEL has /etc/profile.d/colorls.sh that would override LS_COLORS if not set

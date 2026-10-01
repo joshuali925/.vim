@@ -5,7 +5,7 @@ SYSTEM_STATUS_MEM='?'
 SYSTEM_STATUS_DISK='?'
 
 system_status_human_bytes() {
-  local bytes=$1 divisor=1 unit='' next scaled decimal
+  local bytes=$1 divisor=1 unit='' next scaled decimal rounding
 
   for next in K M G T P E; do
     ((bytes < divisor * 1024)) && break
@@ -13,12 +13,15 @@ system_status_human_bytes() {
     unit=$next
   done
 
+  rounding=$((divisor / 2))
+  [[ ${2:-} == --round-up ]] && rounding=$((divisor - 1))
+
   if ((bytes < divisor * 10)); then
-    scaled=$(((bytes * 10 + divisor / 2) / divisor))
+    scaled=$(((bytes * 10 + rounding) / divisor))
     decimal=$((scaled - scaled / 10 * 10))
     SYSTEM_STATUS_HUMAN="$((scaled / 10)).${decimal}${unit}"
   else
-    SYSTEM_STATUS_HUMAN="$(((bytes + divisor / 2) / divisor))${unit}"
+    SYSTEM_STATUS_HUMAN="$(((bytes + rounding) / divisor))${unit}"
   fi
 }
 
@@ -142,15 +145,26 @@ system_status_collect_mem_linux() {
 }
 
 system_status_collect_disk() {
-  local output disk_total disk_used
+  local output disk_total disk_used disk_available used
 
-  output=$(df -Ph /) || return
+  output=$(df -Pk /) || return
   {
     read -r
-    read -r _ disk_total disk_used _ || return
+    read -r _ disk_total disk_used disk_available _ || return
   } <<< "$output"
-  [[ -n $disk_total && -n $disk_used ]] || return
-  SYSTEM_STATUS_DISK="$disk_used/$disk_total"
+  [[ $disk_total =~ ^[0-9]+$ && $disk_used =~ ^[0-9]+$ ]] || return
+
+  if [[ ${OSTYPE:-} == darwin* ]]; then
+    # APFS shares available space across volumes; Used may count only /.
+    [[ $disk_available =~ ^[0-9]+$ ]] || return
+    disk_used=$((disk_total - disk_available))
+  fi
+  ((disk_total > 0 && disk_used >= 0)) || return
+
+  system_status_human_bytes "$((disk_used * 1024))" --round-up
+  used=$SYSTEM_STATUS_HUMAN
+  system_status_human_bytes "$((disk_total * 1024))" --round-up
+  SYSTEM_STATUS_DISK="$used/$SYSTEM_STATUS_HUMAN"
 }
 
 system_status_collect() {

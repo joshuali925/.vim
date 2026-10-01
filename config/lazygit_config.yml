@@ -5,9 +5,10 @@ git:
   commit:
     signOff: true
   diffRenderers:
-    # TODO https://github.com/jesseduffield/lazygit/pull/6063
     - colorArg: always
-      command: delta --paging=never --24-bit-color=always --features=no-line-numbers
+      command: >-
+        delta --{{colorScheme}} --paging=never --24-bit-color=always --features=no-line-numbers
+        --syntax-theme={{if eq .colorScheme "dark"}}OneHalfDark{{else}}GitHub{{end}}
   branchLogCmd: git log --color --graph --pretty=simple {{branchName}} --
   allBranchesLogCmds:
     - git log --color --graph --format=simple-iso --all
@@ -16,7 +17,7 @@ gui:
   showFileTree: false # ` to toggle
   showBranchCommitHash: true
   showBottomLine: false
-  useHunkModeInStagingView: true
+  useHunkModeInDiffView: true
   sidePanels:
     - [files, worktrees, submodules]
     - [branches, remotes, tags]

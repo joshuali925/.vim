@@ -2,6 +2,7 @@
 name: recents
 description: Orient on the in-progress task from the project's recently modified files.
 disable-model-invocation: true
+allowed-tools: Bash(git recents), Bash(head -25)
 ---
 
 # Recently Modified Files

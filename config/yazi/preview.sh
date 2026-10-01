@@ -23,6 +23,6 @@ case "$1" in
   *.zip) zipinfo -1 "$1" | less -RiM ;;
   *.rar) unrar l "$1" | less -RiM ;;
   *.7z) 7z l -p "$1" | less -RiM ;;
-  # *.pdf) pdftotext "$1" -;;
+  # *.pdf) pdftotext "$1" -;;  # alternative https://github.com/bugzmanov/bookokrat
   *) pager "$1" ;;
 esac

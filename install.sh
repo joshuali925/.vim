@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=2155
 
-NODE_VERSION=22.22.3
+NODE_VERSION=22.23.4
 YARN_VERSION=1.22.10
 JDK_VERSION=25
 BACKUP_DIR=$HOME/config-backup
@@ -346,6 +346,7 @@ install-claude-code() {
   link-file ~/.vim/config/claude/settings.json ~/.claude/settings.json --relative
   link-file ~/.vim/config/claude/keybindings.json ~/.claude/keybindings.json --relative
   link-file ~/.vim/config/claude/ccstatusline ~/.config/ccstatusline --relative
+  link-file ~/.claude/skills ~/.agents/skills --relative  # for codex
   claude plugin marketplace add anthropics/claude-plugins-official
   claude plugin install code-review@claude-plugins-official
   claude plugin install skill-creator@claude-plugins-official
@@ -356,16 +357,16 @@ install-claude-code() {
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
   claude plugin marketplace add pbakaus/impeccable && claude plugin install impeccable@impeccable && claude plugin disable impeccable  # /impeccable init
   claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
-  # claude plugin marketplace add openai/codex-plugin-cc && claude plugin install codex@openai-codex
   # uv tool install mempalace && mkdir -p ~/.vim/tmp/mempalace && yes n | mempalace init ~/.vim/tmp/mempalace --no-llm --yes && claude plugin marketplace add MemPalace/mempalace && claude plugin install --scope user mempalace
   # https://github.com/phuryn/pm-skills
-  # To remove: npx -y skills ls --agent claude-code --json --global | jq -r '.[] | select(.source == "mattpocock/skills") | .name' | xargs -r npx -y skills rm --agent claude-code --yes --global
   # npx -y skills add mattpocock/skills --agent claude-code --yes --global
   # npx -y skills add blader/humanizer --agent claude-code --yes --global
+  # npx -y skills add danyuchn/asd-ste100-skill --agent claude-code --yes
   # npx -y skills add Leonxlnx/taste-skill --agent claude-code --yes
+  # npx -y skills add tt-a1i/archify --agent claude-code --yes
+  # npx -y skills add heygen-com/hyperframes --agent claude-code --yes
   # npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent claude-code --yes
   # npx -y skills add shadcn-ui/ui --agent claude-code --yes
-  # npx -y skills add jgraph/drawio-mcp --agent claude-code --yes
   # bin install https://github.com/wdhwg001/csift && npx -y skills add wdhwg001/csift --agent claude-code --yes --global
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
@@ -395,7 +396,7 @@ install-k3s() {
   curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode=644
   kubectl completion zsh > ~/.vim/config/zsh/completions/_kubectl
   mise use -g k9s helm stern
-  mise x -- k9s completion zsh > ~/.vim/config/zsh/completions/_k9s  # alternative: https://github.com/Ramilito/kubectl.nvim
+  mise x -- k9s completion zsh > ~/.vim/config/zsh/completions/_k9s  # alternative: https://github.com/Ramilito/kubectl.nvim, https://github.com/p10node/k10s
   mise x -- helm completion zsh > ~/.vim/config/zsh/completions/_helm
   mise x -- stern --completion zsh > ~/.vim/config/zsh/completions/_stern
   mkdir -p ~/.kube && cp /etc/rancher/k3s/k3s.yaml ~/.kube/config && chmod 600 ~/.kube/config

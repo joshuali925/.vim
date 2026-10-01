@@ -1,8 +1,8 @@
 # shellcheck disable=1090,2059
 # [[ -t 1 ]] && exec zsh
 
-# interactive settings. it's better to check with [[ $- = *i* ]], but [[ -t 1 ]] or [[ -n $PS1 ]] is somewhat faster
-if [[ -n $PS1 ]]; then
+# interactive settings. [[ -t 1 ]] or [[ -n $PS1 ]] is somewhat faster, but niubash leaves PS1 unset in interactive mode
+if [[ $- = *i* ]]; then
   if [[ -f /usr/share/bash-completion/bash_completion ]]; then
      # shellcheck disable=1091
      # TODO change to -z BASH_COMPLETION_VERSINFO when it is always set by bash_completion to determine if it's already loaded
@@ -13,23 +13,38 @@ if [[ -n $PS1 ]]; then
   bind 'set completion-ignore-case on'
   bind 'set enable-bracketed-paste on'
   bind 'TAB: menu-complete'
-  bind '"\e[Z": menu-complete-backward'
-  bind '"\C-g": edit-and-execute-command'
-  bind '"\C-xa": shell-expand-line'  # same as in zsh, 'C-x a' expands aliases
   bind '"\e[A": history-search-backward'
   bind '"\e[B": history-search-forward'
   bind '"\eOA": history-search-backward'
   bind '"\eOB": history-search-forward'
-  bind '"\e[1;5D": backward-word'
-  bind '"\e[1;5C": forward-word'
-  bind '"\e[3;2~": backward-delete-char'
   # shellcheck disable=2016
   bind -x '"\C-o": "_old_pwd=$PWD; yy; [[ $_old_pwd != $PWD ]] && pwd"'  # somehow bind C-o will not trigger on mac. need pwd because using bind -x the prompt will not update. __fzf_cd__ style won't allow opening vim in yazi
-  stty -ixon  # disable Ctrl-S freeze
-  stty werase undef  # unbind werase to C-w
-  bind '"\C-w": unix-filename-rubout'
-  # Set bash prompt (\w for whole path, \W for current directory)
-  PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
+  if [[ -n ${NIU_PROMPT_SYMBOL+x} ]]; then
+    : "${HOSTNAME:=$(uname -n)}"  # niubash leaves HOSTNAME unset, which blanks \h in PS1
+    bind() {  # fzf's vendored key-bindings use readline functions niubash cannot mirror
+      case "$*" in
+        *redraw-current-line* | *editing-mode*) return 0 ;;
+      esac
+      builtin bind "$@"
+    }
+    env stty -ixon  # env: niubash intercepts a bare `stty`
+    env stty werase undef
+    _set_prompt() { PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w'"$(_get_prompt_tail '\n')"; }
+    PROMPT_COMMAND=_set_prompt  # niubash escapes control bytes that PS1 expansions produce, so build PS1 before it is displayed
+    shopt -u promptvars  # PS1 embeds the branch name, which must not be expanded
+  else  # niubash's line editor rejects these sequences/functions
+    bind '"\e[Z": menu-complete-backward'
+    bind '"\C-g": edit-and-execute-command'
+    bind '"\C-xa": shell-expand-line'  # same as in zsh, 'C-x a' expands aliases
+    bind '"\e[1;5D": backward-word'
+    bind '"\e[1;5C": forward-word'
+    bind '"\e[3;2~": backward-delete-char'
+    stty -ixon  # disable Ctrl-S freeze
+    stty werase undef  # unbind werase to C-w
+    bind '"\C-w": unix-filename-rubout'
+    # Set bash prompt (\w for whole path, \W for current directory)
+    PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
+  fi
   shopt -s autocd
   shopt -s cdspell
   shopt -s checkwinsize
@@ -37,6 +52,10 @@ if [[ -n $PS1 ]]; then
 
   if [[ -f ~/.vim/config/fzf/shell.bash ]]; then
     source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash
+    if [[ -n ${NIU_PROMPT_SYMBOL+x} ]]; then
+      __niu_fzf_cd() { local cmd; cmd=$(__fzf_cd__) && eval "$cmd"; }
+      bind -x '"\ec": __niu_fzf_cd'  # fzf's Alt-C is a readline macro, which niubash inserts as literal text
+    fi
   elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
     _load_fzf() { ~/.vim/bin/fzf --version >/dev/null && source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash; }
     bind -x '"\ec": _load_fzf'
@@ -87,6 +106,7 @@ if [[ -n $PS1 ]]; then
   .vim-disable-prompt-command() {
     PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([[ \$? != 0 ]] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")❯ \[\e[0m\]"
     PROMPT_COMMAND=
+    shopt -s promptvars
   }
   source ~/.vim/config/z.sh
 fi

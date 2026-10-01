@@ -67,11 +67,11 @@
                 "name": "Command Prompt"
             },
             {
-                "commandline": "%USERPROFILE%/scoop/shims/nu.exe",
+                "commandline": "%LOCALAPPDATA%\\Programs\\Niubash\\niu.exe",
                 "cursorShape": "filledBox",
                 "guid": "{3a949d14-75d8-4637-86cf-ad5c78cd2cb3}",
                 "hidden": false,
-                "name": "Nushell",
+                "name": "Niubash",
                 "startingDirectory": "%USERPROFILE%"
             },
             {

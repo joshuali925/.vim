@@ -192,6 +192,31 @@ termwrap() {
   nvim --clean -c 'set cmdheight=0 laststatus=0 shadafile=NONE' -c 'highlight Normal guifg=NONE guibg=NONE' -c 'autocmd TermClose * quitall!' -c "terminal $*" -c startinsert
 }
 
+sftp-get() {
+  if [[ $# -ne 2 ]]; then echo "Usage: $0 <host> <remote-path>" >&2; return 1; fi
+  until sftp "$1" <<< "reget -rp \"$2\""; do sleep 1; done
+}
+
+sftp-put() {
+  if [[ $# -ne 2 ]]; then echo "Usage: $0 <host> <local-path>" >&2; return 1; fi
+  local src=$(realpath -- "$2") sizes batch r lsize rsize cmd
+  local files=$(cd -- "${src%/*}/" > /dev/null && find "${src##*/}" -type f)
+  if [[ -z $files ]]; then return 1; fi
+  while true; do
+    if sizes=$(ssh -o StrictHostKeyChecking=accept-new "$1" 'while IFS= read -r p; do d=${p%/*}; [ "$d" != "$p" ] && mkdir -p "$d"; stat -c %s "$p" 2>/dev/null || echo -1; done' <<< "$files"); then
+      batch=progress
+      while IFS= read -r r && IFS= read -r rsize <&3; do
+        lsize=$(wc -c < "${src%/*}/$r")
+        if (( rsize == lsize )); then continue; elif (( rsize > 0 && rsize < lsize )); then cmd='put -a'; else cmd=put; fi
+        batch+=$'\n'"$cmd \"${src%/*}/$r\" \"$r\""
+      done <<< "$files" 3<<< "$sizes"
+      if [[ $batch = progress ]]; then return 0; fi
+      sftp -b - -o StrictHostKeyChecking=accept-new "$1" <<< "$batch"
+    fi
+    sleep 1
+  done
+}
+
 yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yazi
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp"
@@ -440,6 +465,7 @@ z() {
 }
 
 t() {  # create, restore, or switch tmux session
+  if [[ $# -eq 0 && $HERDR_ENV = 1 ]]; then herdr-wait -; return $?; fi
   local change current fzftemp
   if [[ -n $TMUX ]]; then
     if [[ $# -eq 0 ]]; then tmux-wait -; return $?; fi
@@ -475,15 +501,15 @@ tmux-wait() {
   untildone "printf 'Waiting for command: ' && ! ps -o command= -p $(pgrep -P "$ppid") 2>/dev/null" && echo Command finished
 }
 
-tmux-wait-claude() {
-  if [[ $# -eq 0 ]]; then echo "Usage: $0 <prompt> [<prompt> ...]" >&2; return 1; fi
-  local prompt pane=$(tmux list-panes -F '#{pane_id} #{pane_active}' | awk '$2==0{print $1; exit}')
-  for prompt in "$@"; do
-    UNTILDONE_INTERVAL=5 untildone "tmux capture-pane -pt '$pane' | grep -qE '[0-9]+m?\s*[0-9]*s?\s*·\s*[↓↑]' && f=0 || f=\$((f+1)); ((f >= 5))" || return $?
-    tmux send-keys -t "$pane" -l "$prompt" && sleep 1 || return $?
-    tmux send-keys -t "$pane" Enter && sleep 10 || return $?
-    printf "[$0] sent at %s: %s\n" "$(date +'%Y-%m-%dT%H:%M:%S%z')" "$prompt" >&2
-  done
+herdr-wait() {
+  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <pane-id>|-|+\n\tBlocks until the pane's shell has no child processes\n\tUse herdr pane list to find panes" >&2; return 1; fi
+  local pane_id=$1 ppid
+  if [[ $pane_id = [+-] ]]; then
+    ppid=$(herdr pane current --current) || return $?
+    pane_id=$(herdr pane layout --current | jq -er --argjson current "$ppid" --arg direction "$1" '[.result.layout.panes[].pane_id] | index($current.result.pane.pane_id) as $i | select($i != null) | .[($i + if $direction == "-" then -1 else 1 end) % length]') || return $?
+  fi
+  ppid=$(herdr pane process-info --pane "$pane_id" | jq -er '.result.process_info.shell_pid') || return $?
+  untildone "printf 'Waiting for command: ' && ! ps -o command= -p $(pgrep -P "$ppid") 2>/dev/null" && echo Command finished
 }
 
 man() {
@@ -669,10 +695,14 @@ theme() {  # toggles terminal theme
     grep -q 'local light_theme = false' ~/.vim/config/wezterm/wezterm.lua && export LIGHT_THEME=1 || export LIGHT_THEME=0
     sed -i "s/\(local light_theme = \)\(true\|false\)/\1$([[ $LIGHT_THEME = 1 ]] && echo 'true' || echo 'false')/" ~/.vim/config/wezterm/wezterm.lua
   else
-    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$([[ ${LIGHT_THEME:-0} = 1 ]] && echo 0 || echo 1)/" ~/.vim/config/env.sh
-    unset LIGHT_THEME
+    export LIGHT_THEME="$([[ ${LIGHT_THEME:-0} = 1 ]] && echo 0 || echo 1)"
+    sed -i "s/LIGHT_THEME:-[0-9]/LIGHT_THEME:-$LIGHT_THEME/" ~/.vim/config/env.sh
   fi
-  source ~/.vim/config/env.sh
+  if [ "$LIGHT_THEME" = 1 ]; then
+    export BAT_THEME=GitHub FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=light,query:238,fg:238,bg+:252,gutter:251,border:248"
+  else
+    export BAT_THEME=OneHalfDark FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS// --color=light,query:238,fg:238,bg+:252,gutter:251,border:248/}"
+  fi
   if [[ -n $TMUX ]]; then tmux set-environment -ug LIGHT_THEME; fi
   echo "theme set to $([[ ${LIGHT_THEME:-0} = 1 ]] && echo light || echo dark)"
 }

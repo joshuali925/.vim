@@ -343,7 +343,7 @@ vim.defer_fn(function()
         vim.g.clipboard = "osc52" -- termux force osc52
         vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { title = 'Link copied' })<CR>")
     elseif jit.os == "Windows" then
-        vim.g.termshell = "nu"
+        vim.g.termshell = "niu"
     elseif vim.fn.has("wsl") == 1 then
         vim.g.clipboard = {
             name = "WslClipboard",

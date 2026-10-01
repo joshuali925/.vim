@@ -11,34 +11,25 @@ Set-ItemProperty HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search -Name Bi
 New-Item -ItemType Directory -Path ([System.IO.Path]::GetDirectoryName($Profile)) -Force
 Add-Content -Path $Profile -Value "Set-PSReadLineKeyHandler -Key 'Ctrl+d' -Function DeleteCharOrExit"
 
+winget install --id Unixwin.Niubash --source winget
+$winuxBin = "$env:LOCALAPPDATA\Programs\Niubash\winuxcmd\usr\bin"  # alternative: scoop install uutils-coreutils
+$env:Path = (("$winuxBin;" + $env:Path -split ";" | Select-Object -Unique) -join ";")
+
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
 } else {
     irm get.scoop.sh | iex
 }
-scoop install git
-scoop bucket add extras  # buckets rely on git
+scoop bucket add extras  # buckets rely on git, git is provided by niubash
 scoop bucket add nerd-fonts
-scoop install yazi ripgrep fd fzf bat extras/lazygit delta mise nerd-fonts/Maple-Mono-NF-CN nu starship extras/carapace-bin zoxide
+scoop install yazi ripgrep fd fzf bat extras/lazygit delta mise nerd-fonts/Maple-Mono-NF-CN
 Add-Content -Path "$env:USERPROFILE\.npmrc" -Value "prefix=$env:USERPROFILE\.local\lib\node-packages"
 
-# install gow and setup deduped path. uutils is newer but larger: scoop install uutils-coreutils
+# install gow and setup deduped path
 git clone --depth=1 https://github.com/joshuali925/gow -b main "$env:USERPROFILE\scoop\others\gow"
 $env:Path >> "$env:USERPROFILE\scoop\others\PATH.bak"
-[Environment]::SetEnvironmentVariable("Path", (([Environment]::GetEnvironmentVariable("Path", "User") + ";$env:USERPROFILE\.local\bin;$env:USERPROFILE\.local\lib\node-packages;$env:LOCALAPPDATA\mise\shims;$env:LOCALAPPDATA\nvim-data\mason\bin;$env:USERPROFILE\scoop\others\gow\bin" -split ";" | Select-Object -Unique) -join ";"), "User")
-
-# add zsh from msys2
-Invoke-WebRequest -Uri https://github.com/joshuali925/gow/releases/download/binaries/zsh-5.9-win64.zip -OutFile "$env:USERPROFILE\zsh.zip"
-Expand-Archive -Path "$env:USERPROFILE\zsh.zip" -DestinationPath "$env:USERPROFILE\scoop\apps\git\current\usr" -Force
-Remove-Item "$env:USERPROFILE\zsh.zip"
-
-# install clink
-scoop install clink clink-flex-prompt
-clink autorun install
-Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\flexprompt_autoconfig.lua" "$env:USERPROFILE\scoop\apps\clink-flex-prompt\current\flexprompt_autoconfig.lua"
-Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\z.cmd" "$env:USERPROFILE\scoop\apps\clink\current\z.cmd"
-Copy-Item "$env:USERPROFILE\scoop\others\gow\clink_related\z.lua" "$env:USERPROFILE\scoop\apps\clink\current\z.lua"
+[Environment]::SetEnvironmentVariable("Path", (("$winuxBin;" + [Environment]::GetEnvironmentVariable("Path", "User") + ";$env:USERPROFILE\.local\bin;$env:USERPROFILE\.local\lib\node-packages;$env:LOCALAPPDATA\mise\shims;$env:LOCALAPPDATA\nvim-data\mason\bin;$env:USERPROFILE\scoop\others\gow\bin" -split ";" | Select-Object -Unique) -join ";"), "User")
 
 # add dot files
 git clone --filter=blob:none https://github.com/joshuali925/.vim "$env:USERPROFILE\.vim"
@@ -51,10 +42,7 @@ New-Item -ItemType Junction -Path "$env:APPDATA\yazi\config" -Target "$env:USERP
 New-Item -ItemType Directory -Path "$env:LOCALAPPDATA\lazygit"
 New-Item -ItemType HardLink -Path "$env:LOCALAPPDATA\lazygit\config.yml" -Target "$env:USERPROFILE\.vim\config\lazygit_config.yml"
 Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-New-Item -ItemType Junction -Path "$env:APPDATA\nushell" -Target "$env:USERPROFILE\.vim\config\nushell"
-nu "$env:USERPROFILE\.vim\config\nushell\bootstrap.nu"
-Add-Content -Path "$env:USERPROFILE\.zshrc" -Value "export LANG=C.UTF-8", "source ~/.vim/config/zsh/.zshrc"
-Add-Content -Path "$env:USERPROFILE\.bashrc" -Value "export LANG=C.UTF-8", "source ~/.vim/config/.bashrc"
+Add-Content -Path "$env:USERPROFILE\.niubashrc" -Value "source ~/.vim/config/.bashrc"
 
 # install neovim
 scoop install neovim extras/neovide gcc make

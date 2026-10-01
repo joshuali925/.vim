@@ -118,7 +118,7 @@ local function hyper(key, flags)
         if inApps(TERM, RDC) then return send("home") end
         return send("left", flags.cmd and { "cmd", "shift" } or { "cmd" })
     end
-    if key == "'" or key == "return" then -- enter as end for silakka54
+    if key == "'" or key == "return" then -- enter as end for split keyboards
         if inApps(TERM, RDC) then return send("end") end
         return send("right", flags.cmd and { "cmd", "shift" } or { "cmd" })
     end
@@ -193,11 +193,21 @@ end
 
 local upActive, upUsed, upDownAt = false, false, 0
 
+local tapHold
+
+local function withShift(mods) return hs.fnutils.concat(mods, { "shift" }) end
+
+local function holdShift()
+    tapHold.held = true
+    for _, k in ipairs(tapHold.buffer) do send(k[1], withShift(k[2])) end
+end
+
 local function keyHandler(e)
     if e:getProperty(hs.eventtap.event.properties.eventSourceUserData) == CUSTOM_MARK then return false end
     if nizPlum.shouldSuppress(e) then return true end -- block built-in keyboard while Niz Plum 66 is connected
     _cachedBundle = nil
     local type, code, flags = e:getType(), e:getKeyCode(), e:getFlags()
+    local name = keycodeToName[code]
 
     if code == hs.keycodes.map.f18 then -- super capslock
         if type == hs.eventtap.event.types.keyDown then
@@ -212,9 +222,36 @@ local function keyHandler(e)
     if hyperActive then
         if type == hs.eventtap.event.types.keyDown then
             hyperUsed = true
-            local name = keycodeToName[code]
             if name then hyper(name, flags) end
         end
+        return true
+    end
+
+    if tapHold then
+        if name == tapHold.name then
+            if type == hs.eventtap.event.types.keyUp then
+                if not tapHold.held then
+                    send(name, tapHold.mods)
+                    for _, k in ipairs(tapHold.buffer) do send(k[1], k[2]) end
+                end
+                tapHold = nil
+            end
+            return true
+        end
+        if name and type == hs.eventtap.event.types.keyDown then
+            if tapHold.held or hs.timer.secondsSinceEpoch() - tapHold.downAt >= 0.15 then
+                if not tapHold.held then holdShift() end
+                return send(name, withShift(flagsToMods(flags)))
+            end
+            if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) ~= 1 then table.insert(tapHold.buffer, { name, flagsToMods(flags) }) end
+            return true
+        end
+        if not tapHold.held and hs.fnutils.some(tapHold.buffer, function(k) return k[1] == name end) then
+            holdShift()
+            return true
+        end
+    elseif (name == "v" or name == "m") and type == hs.eventtap.event.types.keyDown and not flags.cmd and not flags.alt and not flags.ctrl then
+        tapHold = { name = name, mods = flagsToMods(flags), downAt = hs.timer.secondsSinceEpoch(), buffer = {} }
         return true
     end
 
@@ -241,14 +278,12 @@ local function keyHandler(e)
             return true
         elseif upActive and type == hs.eventtap.event.types.keyDown then
             upUsed = true
-            local name = keycodeToName[code]
-            if name then send(name, hs.fnutils.concat(flagsToMods(flags), { "shift" })) end
+            if name then send(name, withShift(flagsToMods(flags))) end
             return name ~= nil
         end
     end
 
     if type ~= hs.eventtap.event.types.keyDown then return false end
-    local name = keycodeToName[code]
 
     -- Application Specific
     if name and ((flags.cmd and not flags.alt) or (flags.alt and not flags.cmd)) and inApps(WS, MOONLIGHT) then -- swap cmd and opt on windows
@@ -272,6 +307,15 @@ local function flagsHandler(e)
     if e:getProperty(hs.eventtap.event.properties.eventSourceUserData) == CUSTOM_MARK then return false end
     if nizPlum.shouldSuppress(e) then return true end -- block built-in keyboard while Niz Plum 66 is connected
     if hyperActive then hyperUsed = true end          -- any modifier interrupts capslock tap
+    return false
+end
+
+local function mouseHandler(e)
+    if not tapHold then return false end
+    if not tapHold.held then holdShift() end
+    local flags = e:getFlags()
+    flags.shift = true
+    e:setFlags(flags)
     return false
 end
 
@@ -316,3 +360,4 @@ HsUsbWatcher = hs.usb.watcher.new(capsLockToF18):start() -- garbage collected va
 HsWakeWatcher = hs.caffeinate.watcher.new(function(ev) if ev == hs.caffeinate.watcher.systemDidWake then capsLockToF18() end end):start()
 HsKeyTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown, hs.eventtap.event.types.keyUp }, keyHandler):start()
 HsFlagsTap = hs.eventtap.new({ hs.eventtap.event.types.flagsChanged }, flagsHandler):start()
+HsMouseTap = hs.eventtap.new({ hs.eventtap.event.types.leftMouseDown, hs.eventtap.event.types.leftMouseUp, hs.eventtap.event.types.leftMouseDragged, hs.eventtap.event.types.rightMouseDown, hs.eventtap.event.types.rightMouseUp, hs.eventtap.event.types.otherMouseDown, hs.eventtap.event.types.otherMouseUp, hs.eventtap.event.types.scrollWheel }, mouseHandler):start()

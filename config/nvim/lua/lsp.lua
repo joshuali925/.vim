@@ -27,7 +27,6 @@ local required_servers = {
     "tsc",
     "eslint",
     -- lsp servers not installed by mason
-    "nushell",
     "jsonls", -- use eslint-lsp package for json, html, css lsps
     "html",
     "cssls",
