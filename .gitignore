@@ -11,3 +11,5 @@ nvim-pack-lock.json
 nvim-pack-lock.json.bak
 
 config/hammerspoon/Spoons/
+
+*.zwc

@@ -46,7 +46,7 @@ return {
         end,
     },
     {
-        "esmuellert/codediff.nvim",
+        "esmuellert/codediff.nvim", -- alternative: https://github.com/CoreyKaylor/diffbandit.nvim
         install = false,
         cmd = { "CodeDiff" },
         config = function()

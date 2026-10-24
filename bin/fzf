@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
 if [[ -z $BIN_INIT && ( ! -s ~/.vim/config/fzf/shell.bash || ! -x ~/.local/bin/fzf ) ]]; then
-  BIN_INIT=1 fzf --bash > ~/.vim/config/fzf/shell.bash || true
+  BIN_INIT=1 fzf --bash | sed 's/^### completion.bash ###$/[[ -z $BASH_COMPLETION_LOADED ]] \&\& return/' > ~/.vim/config/fzf/shell.bash || true
   BIN_INIT=1 fzf --zsh > ~/.vim/config/fzf/shell.zsh || true
 fi
 

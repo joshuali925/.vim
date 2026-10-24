@@ -12,8 +12,6 @@
 bind '"\e[0n": redraw-current-line'
 bind 'set completion-ignore-case on'
 
-export FZF_DEFAULT_OPTS="--bind=tab:down,btab:up --cycle"
-
 # ------------------------------------
 # Command completion
 # ------------------------------------
@@ -130,13 +128,12 @@ _fzf_colorize_compreply() {
 # ------------------------------------
 _fzf_init_ls_colors() {
     declare -gA FZF_LS_COLORS
-    local k v
-    while IFS='=' read -r k v; do
-        [[ -n "$k" && -n "$v" ]] && FZF_LS_COLORS["$k"]="$v"
-    done < <(dircolors -b 2>/dev/null | tr ':' '\n')
+    local entry entries
+    IFS=: read -ra entries <<< "$LS_COLORS"
+    for entry in "${entries[@]}"; do
+        [[ $entry = *=* ]] && FZF_LS_COLORS["${entry%%=*}"]="${entry#*=}"
+    done
 }
-_fzf_init_ls_colors
-unset -f _fzf_init_ls_colors
 
 # ------------------------------------
 # Bash default completions
@@ -149,8 +146,12 @@ _fzf_init_default_completions() {
         [[ -n "$cmd" ]] && FZF_BASH_DEFAULT_COMPS["$cmd"]="$line"
     done < <(complete -p 2>/dev/null)
 }
-_fzf_init_default_completions
-unset -f _fzf_init_default_completions
+# customized: both are only used by _fzf_argument_completion
+if [[ -n $BASH_COMPLETION_LOADED ]]; then
+    _fzf_init_ls_colors
+    _fzf_init_default_completions
+fi
+unset -f _fzf_init_ls_colors _fzf_init_default_completions
 
 # ------------------------------------
 # Register completions

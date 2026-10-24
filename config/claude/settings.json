@@ -61,7 +61,16 @@
   },
   "disableClaudeAiConnectors": true,
   "hooks": {
-    "SessionStart": [ { "hooks": [ { "type": "command", "command": "~/.vim/config/claude/link-skills.sh" } ] } ]
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.vim/config/claude/link-skills.sh"
+          }
+        ]
+      }
+    ]
   },
   "enableArtifact": false,
   "respondToBashCommands": false,
@@ -71,6 +80,7 @@
     "padding": 0
   },
   "enabledPlugins": {
+    "cc-plugin-you-should-know@builtin": true,
     "code-review@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "frontend-slides@frontend-slides": false,

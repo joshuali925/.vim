@@ -1,7 +1,6 @@
 ---
 name: wt
 description: Make all changes in a separate git worktree, then cherry-pick them into the main checkout.
-disable-model-invocation: true
 ---
 
 Make all changes through a separate worktree:

@@ -22,6 +22,7 @@ settings = "prefix+shift+s"
 zoom = "alt+z"
 copy_mode = "prefix+ctrl+c"
 edit_scrollback = "prefix+ctrl+e"
+clear_pane = "prefix+ctrl+l"
 reload_config = "prefix+ctrl+r"
 detach = "prefix+d"
 
@@ -114,6 +115,24 @@ description = "resize pane up"
 key = "alt+l"
 command = 'bash "$HOME/.vim/config/herdr/pane-nav.sh" resize l'
 description = "resize pane right"
+
+[[keys.command]]
+key = "prefix+a"
+command = '''
+jq_fmt='.[] | [.id, ((if .enabled then "\u001b[32m" + .label else "\u001b[31m" + .label + " [disabled]" end) + "\u001b[0m"), .target, .session] | join("\t")'
+get_state="herdr machine list --json | jq -r '$jq_fmt' | column -t -s \$'\t'"
+FZF_DEFAULT_COMMAND=$get_state fzf --ansi --delimiter=' {2,}' --with-nth=2.. \
+  --header='CR: enable | C-t: disable | C-r: reload | C-e: reconnect | C-x: delete | C-n: add' \
+  --bind="enter:execute(herdr machine enable {1})+reload:$get_state" \
+  --bind="ctrl-t:execute(herdr machine disable {1})+reload:$get_state" \
+  --bind="ctrl-e:execute(herdr machine reconnect {1})+reload:$get_state" \
+  --bind="ctrl-x:execute(herdr machine remove {1})+reload:$get_state" \
+  --bind='ctrl-n:execute(printf "SSH target: "; if IFS= read -r target && [[ -n $target ]]; then herdr machine add "$target" --label "$target" --remote-session default; fi)+reload:'"$get_state" --bind="ctrl-r:reload:$get_state"
+'''
+type = "popup"
+description = "manage machines"
+width = "65%"
+height = "40%"
 
 [[keys.command]]
 key = "prefix+ctrl+o"

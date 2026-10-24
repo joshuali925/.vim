@@ -343,7 +343,10 @@ vim.defer_fn(function()
         vim.g.clipboard = "osc52" -- termux force osc52
         vim.keymap.set("n", "gx", "<Cmd>let @+=expand('<cfile>') <bar> lua vim.notify(vim.fn.expand('<cfile>'), vim.log.levels.INFO, { title = 'Link copied' })<CR>")
     elseif jit.os == "Windows" then
-        vim.g.termshell = "niu"
+        vim.o.shell = "niu"
+        vim.o.shellcmdflag = "-c"
+        vim.o.shellquote = ""
+        vim.o.shellxquote = ""
     elseif vim.fn.has("wsl") == 1 then
         vim.g.clipboard = {
             name = "WslClipboard",
@@ -403,19 +406,31 @@ require("pack").setup()
 require("themes").setup()
 require("rooter").setup()
 if require("states").small_file then
-    vim.defer_fn(function()
-        require("lsp").setup()
-        require("pack").load({ "lualine.nvim", "nvim-treesitter", "dropbar.nvim" })
-    end, 30)
-    vim.defer_fn(function()
-        vim.o.foldmethod = "expr"
-        -- vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- makes :g commands slow
-        vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
-        vim.o.foldtext = ""
-        require("pack").load({ "gitsigns.nvim", "unclash.nvim", "nvim-scrollview", "quick-scope" })
-        if vim.api.nvim_buf_get_name(0) ~= "" then vim.cmd.doautocmd("BufReadPost") end -- unclash need this when delay loaded
-        require("bookmarks").setup()
-        require("clips").setup()
-    end, 100)
+    local function run_steps(delay, steps)
+        vim.defer_fn(function()
+            table.remove(steps, 1)()
+            if steps[1] then run_steps(0, steps) end
+        end, delay)
+    end
+    run_steps(30, {
+        function() require("lsp").setup() end,
+        function() require("pack").load({ "lualine.nvim" }) end,
+        function() require("pack").load({ "nvim-treesitter", "dropbar.nvim" }) end,
+    })
+    run_steps(100, {
+        function()
+            vim.o.foldmethod = "expr"
+            -- vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- makes :g commands slow
+            vim.o.foldexpr = "max([indent(v:lnum),indent(v:lnum+1)])/&shiftwidth"
+            vim.o.foldtext = ""
+            require("pack").load({ "gitsigns.nvim" })
+        end,
+        function() require("pack").load({ "unclash.nvim", "nvim-scrollview", "quick-scope" }) end,
+        function() if vim.api.nvim_buf_get_name(0) ~= "" then vim.cmd.doautocmd("BufReadPost") end end, -- unclash need this when delay loaded
+        function()
+            require("bookmarks").setup()
+            require("clips").setup()
+        end,
+    })
 end
 -- vim:foldmethod=marker

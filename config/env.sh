@@ -1,9 +1,9 @@
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
 export EDITOR=nvim
-[[ -n $RIPGREP_CONFIG_PATH ]] && return 0  # file is sourced early by zshenv. below ones are unlikely to be overridden by system, no need to run again in zshrc
-export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
-export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file, -+F: always paginate
+[[ -n $FZF_COMPLETION_TRIGGER ]] && return 0  # file is sourced early by zshenv. below ones are unlikely to be overridden by system, no need to run again in zshrc
 export FZF_COMPLETION_TRIGGER=\\
+export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file, -+F: always paginate
+export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"
 export FZF_DEFAULT_OPTS='--layout=reverse --cycle --height=50% --min-height=20 --bind=change:first --walker-skip=.git --info=inline-right --marker=▏ --pointer=▌ --prompt="▌ " --scrollbar="▌▐" --list-border --highlight-line --color=fg:#f8f8f2,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4,list-border:#bd93f9,preview-border:#50fa7b'
 export FZF_CTRL_T_COMMAND='fd --type=f --strip-cwd-prefix --color=always --hidden --exclude=.git'
 export FZF_CTRL_T_OPTS="--ansi --bind='\`:transform:if [[ {fzf:prompt} = \"▌ \" ]]; then if [[ -e .git ]] || git rev-parse --git-dir &>/dev/null; then echo \"change-prompt(no-ignore> )+reload(\$FZF_CTRL_T_COMMAND --follow --no-ignore || true)\"; else echo \"change-prompt(ls> )+reload(ls -1Ap --color=always --group-directories-first)\"; fi; elif [[ {fzf:prompt} = \"no-ignore> \" ]]; then echo \"change-prompt(git> )+reload({ git diff --name-only HEAD; git ls-files --others --exclude-standard; })\"; elif [[ {fzf:prompt} = \"git> \" ]]; then echo \"change-prompt(ls> )+reload(ls -1Ap --color=always --group-directories-first)\"; else echo \"change-prompt(▌ )+reload(\$FZF_CTRL_T_COMMAND)\"; fi' --bind='ctrl-p:transform:[[ \$FZF_PREVIEW_LABEL =~ cat ]] && echo \"change-preview(git log --color --graph --pretty=simple -- \{})+change-preview-label( log )\" || echo \"change-preview(bat --color=always --style=numbers -- \{})+change-preview-label( cat )\"'"

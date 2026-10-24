@@ -4,9 +4,20 @@ ZSHRC_INIT=1
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r ${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+# p10k invalidates its cache when $TERM_PROGRAM changes, so keep one cache per terminal
+(( ${+XDG_CACHE_HOME} )) && _xdg_cache_home=$XDG_CACHE_HOME
+: ${GITSTATUS_CACHE_DIR:=${XDG_CACHE_HOME:-$HOME/.cache}/p10k-term/gitstatus}
+XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}/p10k-term/${TERM_PROGRAM:-none}
+if [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-${(%):-%n}.zsh ]]; then
+  source "$XDG_CACHE_HOME/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
+
+() {
+  local f
+  for f in ~/.vim/config/{env.sh,common.sh,fzf/{shell,override}.zsh,zsh/{.zshrc,.p10k.zsh}}(N); do
+    [[ $f.zwc -nt $f ]] || zcompile -- $f
+  done
+}
 
 fpath=(~/.vim/config/zsh/completions $fpath)
 zstyle ':zim:zmodule' use 'degit'
@@ -31,12 +42,14 @@ if [[ ! $ZIM_HOME/init.zsh -nt $ZDOTDIR/.zimrc ]]; then
   fi
 fi
 source $ZIM_HOME/init.zsh
+if (( ${+_xdg_cache_home} )); then XDG_CACHE_HOME=$_xdg_cache_home && unset _xdg_cache_home; else unset XDG_CACHE_HOME; fi
 
 ftb-tmux-popup() {  # remove height defined in FZF_DEFAULT_OPTS when opening in tmux-popup
   local FZF_DEFAULT_OPTS=${FZF_DEFAULT_OPTS/--height[= ]#[^ ]#/}
   source $ZIM_HOME/modules/fzf-tab/lib/ftb-tmux-popup "$@"
 }
 
+fzf_default_completion=fzf-tab-complete
 if [[ -f ~/.vim/config/fzf/shell.zsh ]]; then
   source ~/.vim/config/fzf/shell.zsh && source ~/.vim/config/fzf/override.zsh
 elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
@@ -180,7 +193,7 @@ bindkey '^[[1;5C' emacs-forward-word          # <C-Right> to next word end. alte
 
 alias history='history -f 0'
 alias get-completion='compdef _gnu_generic'
-chpwd() { emulate -L zsh; [[ -t 1 ]] && [[ $(command ls | wc -l) -lt 200 ]] && ls -AF --color=auto; }
+chpwd() { if [[ -t 1 ]]; then emulate -L zsh; local files=(*(NY200)); (( $#files < 200 )) && ls -AF --color=auto; fi; }
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/zsh/.p10k.zsh.
 source ~/.vim/config/zsh/.p10k.zsh

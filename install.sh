@@ -365,6 +365,7 @@ install-claude-code() {
   # npx -y skills add Leonxlnx/taste-skill --agent claude-code --yes
   # npx -y skills add tt-a1i/archify --agent claude-code --yes
   # npx -y skills add heygen-com/hyperframes --agent claude-code --yes
+  # npx -y skills add alchaincyf/huashu-design --agent claude-code --yes
   # npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent claude-code --yes
   # npx -y skills add shadcn-ui/ui --agent claude-code --yes
   # bin install https://github.com/wdhwg001/csift && npx -y skills add wdhwg001/csift --agent claude-code --yes --global

@@ -17,21 +17,21 @@ if [[ $- = *i* ]]; then
   bind '"\e[B": history-search-forward'
   bind '"\eOA": history-search-backward'
   bind '"\eOB": history-search-forward'
-  # shellcheck disable=2016
-  bind -x '"\C-o": "_old_pwd=$PWD; yy; [[ $_old_pwd != $PWD ]] && pwd"'  # somehow bind C-o will not trigger on mac. need pwd because using bind -x the prompt will not update. __fzf_cd__ style won't allow opening vim in yazi
-  if [[ -n ${NIU_PROMPT_SYMBOL+x} ]]; then
-    : "${HOSTNAME:=$(uname -n)}"  # niubash leaves HOSTNAME unset, which blanks \h in PS1
+  PROMPT_COMMAND=_set_prompt
+  shopt -u promptvars  # PS1 embeds the branch name, which must not be expanded
+  if [[ -n $NIU_PROMPT_SYMBOL ]]; then
+    : "${HOSTNAME:=$COMPUTERNAME}"  # for niubash PS1 \h
     bind() {  # fzf's vendored key-bindings use readline functions niubash cannot mirror
-      case "$*" in
-        *redraw-current-line* | *editing-mode*) return 0 ;;
-      esac
+      case "$*" in *redraw-current-line* | *editing-mode*) return 0 ;; esac
       builtin bind "$@"
     }
-    env stty -ixon  # env: niubash intercepts a bare `stty`
-    env stty werase undef
-    _set_prompt() { PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w'"$(_get_prompt_tail '\n')"; }
-    PROMPT_COMMAND=_set_prompt  # niubash escapes control bytes that PS1 expansions produce, so build PS1 before it is displayed
-    shopt -u promptvars  # PS1 embeds the branch name, which must not be expanded
+    _niu_yy_widget() { NIU_WIDGET_RESULT=yy; NIU_WIDGET_ACCEPT=1; }; NIU_BINDKEYS="Ctrl+O:_niu_yy_widget"  # bind -x hangs the prompt on windows
+    _niu_report_cwd() {  # windows terminal's duplicate tab
+      local p=$PWD
+      case $p in /[A-Za-z]) p="${p:1:1}:/" ;; /[A-Za-z]/*) p="${p:1:1}:${p:2}" ;; esac
+      printf '\e]9;9;%s\e\\' "${p//\//\\}"
+    }
+    PROMPT_COMMAND+='; _niu_report_cwd'
   else  # niubash's line editor rejects these sequences/functions
     bind '"\e[Z": menu-complete-backward'
     bind '"\C-g": edit-and-execute-command'
@@ -39,11 +39,10 @@ if [[ $- = *i* ]]; then
     bind '"\e[1;5D": backward-word'
     bind '"\e[1;5C": forward-word'
     bind '"\e[3;2~": backward-delete-char'
-    stty -ixon  # disable Ctrl-S freeze
-    stty werase undef  # unbind werase to C-w
+    stty -ixon werase undef  # disable Ctrl-S freeze, unbind werase to C-w
     bind '"\C-w": unix-filename-rubout'
-    # Set bash prompt (\w for whole path, \W for current directory)
-    PS1='\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w$(_get_prompt_tail "\n")'
+    # shellcheck disable=2016
+    bind -x '"\C-o": "_old_pwd=$PWD; yy; [[ $_old_pwd != $PWD ]] && pwd"'  # somehow bind C-o will not trigger on mac. need pwd because using bind -x the prompt will not update. __fzf_cd__ style won't allow opening vim in yazi
   fi
   shopt -s autocd
   shopt -s cdspell
@@ -51,10 +50,18 @@ if [[ $- = *i* ]]; then
   shopt -s dotglob
 
   if [[ -f ~/.vim/config/fzf/shell.bash ]]; then
+    [[ -n $NIU_PROMPT_SYMBOL ]] && perl() { :; }  # niubash's fzf history does not use perl
     source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash
-    if [[ -n ${NIU_PROMPT_SYMBOL+x} ]]; then
+    if [[ -n $NIU_PROMPT_SYMBOL ]]; then
+      unset -f perl
       __niu_fzf_cd() { local cmd; cmd=$(__fzf_cd__) && eval "$cmd"; }
       bind -x '"\ec": __niu_fzf_cd'  # fzf's Alt-C is a readline macro, which niubash inserts as literal text
+      __niu_fzf_history() {
+        local sel; sel=$(awk '{a[NR]=$0} END {for (i = NR; i > 0; i--) if (!seen[a[i]]++) print a[i]}' "$HOME/.niubash_history" | fzf --scheme=history --query "$READLINE_LINE") || return
+        READLINE_LINE=$sel
+        READLINE_POINT=${#READLINE_LINE}
+      }
+      bind -x '"\C-r": __niu_fzf_history'
     fi
   elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
     _load_fzf() { ~/.vim/bin/fzf --version >/dev/null && source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash; }
@@ -63,11 +70,9 @@ if [[ $- = *i* ]]; then
     bind -x '"\C-r": _load_fzf'
   fi
 
-  # git branch with prompt sign colored by exit code. ref: https://gist.github.com/bingzhangdai/dd4e283a14290c079a76c4ba17f19d69
-  # takes optional arguments as separators between branch and prompt sign
-  _get_prompt_tail() {
-    local _head_file _head _dir=$PWD _tail _exit=$?
-    (( _exit )) && _tail="${*:- }"$'\001\e[38;5;9m\002❯\001\e[0m\002 ' || _tail="${*:- }"$'\001\e[38;5;141m\002❯\001\e[0m\002 '
+  # ref: https://gist.github.com/bingzhangdai/dd4e283a14290c079a76c4ba17f19d69
+  _set_prompt() {
+    local _exit=$? _dir=$PWD _head_file _head _git _status _char_color=32
     while [[ -n $_dir ]]; do
       if [[ -f $_dir/.git/HEAD ]]; then
         _head_file=$_dir/.git/HEAD
@@ -81,12 +86,13 @@ if [[ $- = *i* ]]; then
     done
     if [[ -f $_head_file ]] && read -r _head < "$_head_file"; then
       case "$_head" in
-        ref:*) printf '\001\e[38;5;130m\002 (%s)%s' "${_head#ref: refs/heads/}" "$_tail" ;;
-        *) printf '\001\e[38;5;130m\002 (%.9s)%s' "$_head" "$_tail" ;;  # HEAD detached
+        ref:*) _git=${_head#ref: refs/heads/} ;;
+        *) _git=${_head:0:9} ;;  # HEAD detached
       esac
-    else
-      printf '%s' "$_tail"
+      _git=" \[\e[32m\] $_git"
     fi
+    (( _exit )) && _status=" \[\e[31m\]✘ $_exit" _char_color=31
+    PS1='\n\[\e[90m\]\u@\h \[\e[1;34m\]\w\[\e[22m\]'"$_git$_status"'\n\[\e['$_char_color'm\]❯\[\e[0m\] '
   }
 
   cd() {
@@ -99,17 +105,25 @@ if [[ $- = *i* ]]; then
     else
       pushd "$@" > /dev/null || return
     fi
-    if [[ $(command ls | wc -l) -lt 200 ]]; then ls -AF --color=auto; fi
+    if [[ -n $NIU_PROMPT_SYMBOL ]]; then local _oldpwd=$OLDPWD; builtin cd -- "$PWD"; OLDPWD=$_oldpwd; fi  # niubash bug
+    local _entries=(*); if [[ ${#_entries[@]} -lt 200 ]]; then ls -AF --color=auto; fi
   }
   complete -d cd
 
   .vim-disable-prompt-command() {
-    PS1="\n\[\e[38;5;178m\][\u@\h] \[\e[38;5;208m\]\w\n\$([[ \$? != 0 ]] && printf \"\[\e[38;5;9m\]\" || printf \"\[\e[38;5;141m\]\")❯ \[\e[0m\]"
+    PS1="\n\[\e[90m\]\u@\h \[\e[1;34m\]\w\[\e[0m\]\n\$([[ \$? != 0 ]] && printf \"\[\e[31m\]\" || printf \"\[\e[32m\]\")❯ \[\e[0m\]"
     PROMPT_COMMAND=
     shopt -s promptvars
   }
   source ~/.vim/config/z.sh
 fi
 
-source ~/.vim/config/common.sh
+shopt -u expand_aliases
+if [[ -n $NIU_PROMPT_SYMBOL ]]; then
+  eval "$(< ~/.vim/config/common.sh)"  # niubash runs eval faster
+  vf() { local fzftemp=($(FZF_DEFAULT_COMMAND= fzf --walker=file,follow,hidden  --walker-skip=.git,node_modules,.venv --multi)); if [[ -n $fzftemp ]]; then $EDITOR -- "${fzftemp[@]}"; fi; }
+else
+  source ~/.vim/config/common.sh
+fi
+shopt -s expand_aliases
 HISTCONTROL=ignoreboth:erasedups:ignorespace

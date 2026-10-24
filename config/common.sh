@@ -11,7 +11,7 @@ alias 6='cd -6'
 alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
-alias ~='cd ~'
+alias '~=cd ~'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
@@ -51,7 +51,6 @@ alias jsonl2csv='json2csv -s'
 alias rga='rg --text --no-ignore --search-zip --follow'
 alias rg!="rg '❗'"
 alias xcp="rsync -avihP --no-owner --no-group --delete --filter=':- .gitignore'"
-alias filebrowser='filebrowser --database ~/.vim/tmp/filebrowser.db --disable-exec --noauth --address 0.0.0.0 --port 8000'
 alias rclone="env RCLONE_LOG_LEVEL=INFO RCLONE_PROGRESS=true RCLONE_HUMAN_READABLE=true RCLONE_DELETE_EMPTY_SRC_DIRS=true RCLONE_TRANSFERS=7 RCLONE_DISABLE_HTTP2=true RCLONE_MULTI_THREAD_CUTOFF=1Mi rclone"
 alias markdowns='if [[ ! -x ~/.local/bin/mdview ]]; then uv tool install md-viewer-py; fi && printf %s "$(getip):8081" | y && eval mdview --host 0.0.0.0'  # eval to avoid red syntax if not installed
 # shellcheck disable=2142
@@ -188,39 +187,38 @@ tarcopy() {
   printf " printf $(tar cf - "$@" | gzip -9 -n | base64 | tr -d '\r\n') | base64 -d | tar xvz" | tee >(y) | wc -c | xargs echo Characters copied:
 }
 
-termwrap() {
-  nvim --clean -c 'set cmdheight=0 laststatus=0 shadafile=NONE' -c 'highlight Normal guifg=NONE guibg=NONE' -c 'autocmd TermClose * quitall!' -c "terminal $*" -c startinsert
-}
-
 sftp-get() {
   if [[ $# -ne 2 ]]; then echo "Usage: $0 <host> <remote-path>" >&2; return 1; fi
   until sftp "$1" <<< "reget -rp \"$2\""; do sleep 1; done
 }
 
-sftp-put() {
+sftp-put() (
   if [[ $# -ne 2 ]]; then echo "Usage: $0 <host> <local-path>" >&2; return 1; fi
-  local src=$(realpath -- "$2") sizes batch r lsize rsize cmd
-  local files=$(cd -- "${src%/*}/" > /dev/null && find "${src##*/}" -type f)
+  local src=${2%/} files sizes batch r lsize rsize cmd
+  if [[ -d $src ]]; then src=$(builtin cd -- "$src" && pwd -P) || return 1; fi
+  if [[ $src = */* ]]; then builtin cd -- "${src%/*}/" > /dev/null || return 1; fi
+  files=$(find -H "${src##*/}" -type f)
   if [[ -z $files ]]; then return 1; fi
   while true; do
     if sizes=$(ssh -o StrictHostKeyChecking=accept-new "$1" 'while IFS= read -r p; do d=${p%/*}; [ "$d" != "$p" ] && mkdir -p "$d"; stat -c %s "$p" 2>/dev/null || echo -1; done' <<< "$files"); then
       batch=progress
+      exec 3<<< "$sizes"
       while IFS= read -r r && IFS= read -r rsize <&3; do
-        lsize=$(wc -c < "${src%/*}/$r")
+        lsize=$(wc -c < "$r")
         if (( rsize == lsize )); then continue; elif (( rsize > 0 && rsize < lsize )); then cmd='put -a'; else cmd=put; fi
-        batch+=$'\n'"$cmd \"${src%/*}/$r\" \"$r\""
-      done <<< "$files" 3<<< "$sizes"
+        batch+=$'\n'"$cmd \"$r\" \"$r\""
+      done <<< "$files"
       if [[ $batch = progress ]]; then return 0; fi
       sftp -b - -o StrictHostKeyChecking=accept-new "$1" <<< "$batch"
     fi
     sleep 1
   done
-}
+)
 
 yy() {  # yazi supports --cwd-file=/dev/stdout, but it breaks opening vim in yazi
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" dir
   yazi "$@" --cwd-file="$tmp"
-  if dir="$(<"$tmp")" && [[ -n $dir && $dir != "$PWD" ]]; then cd -- "$dir" > /dev/null; fi
+  if dir="$(<"$tmp")" && [[ -n $dir && ! $dir -ef $PWD ]]; then cd -- "$dir" > /dev/null; fi
   rm -f -- "$tmp"
 }
 
@@ -339,30 +337,12 @@ print-colors() {  # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f729679
   printf '\n\nBackground 256 colors\n'
   for i in {0..255}; do printf '\e[48;5;%dm%3d ' "$i" "$i"; (((i+3) % 18)) || printf '\e[0m\n'; done
   printf '\n'
-  awk -v term_cols="$(tput cols || echo 80)" 'BEGIN{
-    s="/\\";
-    for (colnum = 0; colnum<term_cols; colnum++) {
-      r = 255-(colnum*255/term_cols);
-      g = (colnum*510/term_cols);
-      b = (colnum*255/term_cols);
-      if (g>255) g = 510-g;
-      printf "\033[48;2;%d;%d;%dm", r,g,b;
-      printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
-      printf "%s\033[0m", substr(s,colnum%2+1,1);
-    }
-    printf "\n";
-  }'
+  awk -v term_cols="$(tput cols || echo 80)" 'BEGIN{ s="/\\"; for (colnum = 0; colnum<term_cols; colnum++) { r = 255-(colnum*255/term_cols); g = (colnum*510/term_cols); b = (colnum*255/term_cols); if (g>255) g = 510-g; printf "\033[48;2;%d;%d;%dm", r,g,b; printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b; printf "%s\033[0m", substr(s,colnum%2+1,1); } printf "\n"; }'
 }
 
 x() {
   local arg
-  for arg in "$@"; do
-    if [[ -f $arg ]]; then
-      xtract "$arg"
-    else
-      tar czvf "${arg%%/}.tar.gz" "$arg"
-    fi
-  done
+  for arg in "$@"; do if [[ -f $arg ]]; then xtract "$arg"; else tar czvf "${arg%%/}.tar.gz" "$arg"; fi; done
 }
 
 X() {  # extract to a directory / compress without top directory
@@ -403,14 +383,9 @@ findup() {
   echo "$rel$1"
 }
 
-vx() {
-  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <vim-commands>\nRun vim commands in pipe: echo foo | $0 '%s/foo/bar' 'put=execute(\\\"echo &tabstop\\\")'" >&2; return 1; fi
-  ex -sn "${@/#/+}" +'%write! /dev/stdout | quit!' /dev/stdin
-}
-
 vf() {  # find files: vf; open files from pipe: fd | vf
-  local IFS=$'\n'
   if [[ ! -t 0 ]] ; then
+    local IFS=$'\n'
     # shellcheck disable=2046
     $EDITOR "$@" -- $(cat)
   else
@@ -454,7 +429,7 @@ rgi() {  # https://junegunn.github.io/fzf/tips/processing-multi-line-items/#ripg
 
 z() {
   if [[ $# -eq 0 ]]; then
-    local fzftemp rcwd=$(realpath "$PWD" || echo "$PWD")
+    local fzftemp rcwd=$(pwd -P)
     fzftemp=$(awk -F'|' -v now="$EPOCHSECONDS" -v cwd="$rcwd" '$1!=cwd {dx=now-$3; printf "%s\x01%.0f\n", $1, 10000*$2*(3.75/((0.0001*dx+1)+0.25))}' ~/.z | sort -nrk 2 -t $'\x01' | fzf --delimiter=$'\x01' --with-nth=1 --accept-nth=1 --ansi --scheme=history \
       --header='`: show recent directories under cwd | C-a: show all directories' --bind='tab:down,btab:up' \
       --bind="\`:change-prompt($rcwd/> )+reload:sort -nrk 3 -t '|' ~/.z | awk -F '|' -v cwd=\"$rcwd/\" '\$0~(\"^\"cwd) {print substr(\$1, length(cwd)+1)}'" \

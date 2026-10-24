@@ -20,14 +20,14 @@
 	update-skip = update-index --skip-worktree
 	update-unskip = update-index --no-skip-worktree
 	update-skipped = "!git ls-files -v | grep '^S'"
-	autoremove = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all; git repack -a -d -f --depth=300 --window=300 --window-memory=1g; git prune-packed"  ; from https://github.com/GitAlias/gitalias/tree/7b27ef766a3557a5708086734559f6a14bb97744/doc/git-optimizer, claims better than git gc --prune=now --aggressive
+	autoremove = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all; git repack -a -d -f --depth=300 --window=300 --window-memory=1g"  ; from https://github.com/GitAlias/gitalias/tree/7b27ef766a3557a5708086734559f6a14bb97744/doc/git-optimizer, claims better than git gc --prune=now --aggressive
 	difft = -c diff.external=difft diff
 	diffw = diff --word-diff=color --ignore-all-space
 	diffm = diff --color-moved --color-moved-ws=allow-indentation-change
 	preview-merge-diff = "!f() { git diff HEAD...\"$@\"; }; f"  ; diff between target and the common ancestor of HEAD and target
 	preview-merge-log = "!git log --graph --pretty=simple HEAD.."  ; commits in target but not in HEAD (will be merged with git merge target)
 	pulled = "!git log --pretty=simple --stat ORIG_HEAD...HEAD"  ; what was pulled
-	topush = "!git log --pretty=simple --stat --stat @{upstream}..HEAD"  ; what will be pushed
+	topush = "!git log --pretty=simple --stat @{upstream}..HEAD"  ; what will be pushed
 	missing = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git log --graph --pretty=simple --cherry-pick --right-only HEAD...\"$@\"; }; f"  ; commits in target but not in HEAD and not cherry-picked to HEAD, similar to git cherry -v HEAD <target>
 	forest = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git foresta --style=10 \"$@\" | less -RiMXF -p $(git show -s --format=%h); }; f"
 	ignore = "!f() { echo \"$@\" >> .gitignore; }; f"
@@ -36,11 +36,11 @@
 	abort = "!git merge --abort 2>/dev/null || git cherry-pick --abort 2>/dev/null || git rebase --abort 2>/dev/null || git revert --abort 2>/dev/null || git am --abort 2>/dev/null"
 	continue = "!git merge --continue 2>/dev/null || git cherry-pick --continue 2>/dev/null || git rebase --continue 2>/dev/null || git revert --continue 2>/dev/null || git am --continue 2>/dev/null"
 	rerere-forget = "!rm -rf \"$(git rev-parse --git-common-dir)/rr-cache\""
-	wip = "!git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit --signoff --no-verify -m '--wip--'"
-	unwip = "!git log -n 1 | grep -q -c -- '--wip--' && git reset HEAD~1"
+	wip = "!git add -A; git commit --signoff --no-verify -m '--wip--'"
+	unwip = "!git log -n 1 | grep -q -- '--wip--' && git reset HEAD~1"
 	save = "!git add --all && git stash push --include-untracked --message 'auto backup'"  ; stash everything except ignored files
-	clear = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git restore --staged --worktree --source=HEAD -- \"${@:-.}\" && git clean -fd -- \"${@:-.}\"; }; f"  ; clean given dir except ignored files
-	nuke = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git restore --staged --worktree --source=HEAD -- \"${@:-.}\" && git clean -fdx -- \"${@:-.}\" || return $?; for p in \"${@:-.}\"; do [ -d \"$p\" ] || p=.; find \"$p\" -mindepth 1 -depth -type d -empty ! -path '*/.git/*' -exec rmdir {} ';'; done; true; }; f"  ; clean given dir including ignored files
+	clear = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git restore --staged --worktree -- \"${@:-.}\" && git clean -fd -- \"${@:-.}\"; }; f"  ; clean given dir except ignored files
+	nuke = "!unset GIT_DIR GIT_WORK_TREE; cd -- \"${GIT_PREFIX:-.}\"; f() { git restore --staged --worktree -- \"${@:-.}\" && git clean -fdx -- \"${@:-.}\" || return $?; for p in \"${@:-.}\"; do [ -d \"$p\" ] || p=.; find \"$p\" -mindepth 1 -depth -type d -empty ! -path '*/.git/*' -exec rmdir {} ';'; done; true; }; f"  ; clean given dir including ignored files
 	revert-to = "!git read-tree -u --reset"  ; revert worktree to a commit
 	reset-to-remote = "!git abort; git clear && git reset --hard @{upstream}"
 	reset-to-merge-base = "!f() { local ref=${1:-HEAD} remote=${2:-origin}; echo \"Resetting base against $remote/$ref\" >&2; git fetch \"$remote\" && git reset \"$(git merge-base HEAD \"$remote/$ref\")\"; }; f"
@@ -149,9 +149,6 @@
 [rerere]
 	enabled = true
 	autoupdate = true
-
-[color]
-	ui = true
 
 [color "diff"]
 	meta = 11

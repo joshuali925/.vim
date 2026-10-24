@@ -71,6 +71,7 @@
                 "cursorShape": "filledBox",
                 "guid": "{3a949d14-75d8-4637-86cf-ad5c78cd2cb3}",
                 "hidden": false,
+                "icon": "%LOCALAPPDATA%\\Programs\\Niubash\\assets\\niubash-icon-256.png",
                 "name": "Niubash",
                 "startingDirectory": "%USERPROFILE%"
             },
@@ -78,7 +79,7 @@
                 "commandline": "%USERPROFILE%/scoop/apps/git/current/usr/bin/bash.exe -i -l",
                 "cursorShape": "filledBox",
                 "guid": "{00000000-0000-0000-ba54-000000000002}",
-                "hidden": false,
+                "hidden": true,
                 "icon": "%USERPROFILE%/scoop/apps/git/current/mingw64/share/git/git-for-windows.ico",
                 "name": "Git Bash",
                 "startingDirectory": "%USERPROFILE%"

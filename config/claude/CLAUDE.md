@@ -17,3 +17,7 @@ No ephemeral context. Remove outdated information that no longer helps.
 Prefer removing code over adding flags when modifying or deleting features.
 
 Describe only the final state. Don't reference what was removed, replaced, or what the code no longer does.
+
+# Commits
+
+When a task changes files and its checks pass, commit before ending your turn.

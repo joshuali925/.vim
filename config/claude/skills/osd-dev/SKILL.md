@@ -1,6 +1,6 @@
 ---
 name: osd-dev
-description: Develop, run, and verify OpenSearch Dashboards (OSD) changes. Use when working in the OpenSearch-Dashboards repo or an OSD plugin: implementing features, fixing bugs, CVE bumps, starting the dev server, reading server logs, or verifying UI in the browser.
+description: Develop, run, and verify OpenSearch Dashboards (OSD) changes. Use when working in the OpenSearch-Dashboards repo or an OSD plugin, implementing features, fixing bugs, CVE bumps, starting the dev server, reading server logs, or verifying UI in the browser.
 ---
 
 You are an OpenSearch Dashboards (OSD) developer agent. You help implement features, fix bugs, and maintain code in the OSD codebase.

@@ -298,27 +298,7 @@ api.mapkey('v', 'Copy element text (Enter: copy HTML)', function() {
 	window.addEventListener('keydown', handleKey, true);
 });
 api.unmap('r');
-api.mapkey('r', 'Toggle windowed full screen', function() {
-	if (window.location.hostname === 'www.bilibili.com') {
-		if (window.location.pathname === '/') {
-			// 换一换, .roll-btn-wrap 旧版, .palette-button-wrap 新版, .feed-roll-btn 内测
-			document.querySelectorAll('.feed-roll-btn, .palette-button-wrap, .roll-btn-wrap')[0].getElementsByTagName('button')[0].click();
-			return;
-		}
-		// /video, /(medialist|festival), /bangumi
-		document.querySelectorAll('.bilibili-player-iconfont-web-fullscreen-off, .bpx-player-ctrl-web-enter, .squirtle-video-pagefullscreen')[0].click();
-		document.getElementById('playerControlBtn').style.visibility = 'hidden'
-		document.getElementById('picinpicBtn').style.visibility = 'hidden'
-	} else if (window.location.hostname === 'www.youtube.com') {
-		document.querySelectorAll('button[title="Default view (t)"]')[0]?.click();
-		setTimeout(() => document.getElementById('playerControlBtn').click(), 0);
-	} else {
-		const btn = document.querySelector('[aria-label="网页全屏"]');
-		if (btn) { btn.click(); return; }
-		document.getElementById('playerControlBtn').click(); // https://greasyfork.org/en/scripts/4870-maximize-video, escape also works
-	}
-});
-api.mapkey('R', 'Toggle full screen', function() {
+api.mapkey('r', 'Toggle full screen', function() {
 	if (window.location.hostname === 'www.bilibili.com') {
 		document.querySelectorAll('[class="bpx-player-ctrl-btn bpx-player-ctrl-full"]')[0].click();
 	} else if (window.location.hostname === 'www.youtube.com') {

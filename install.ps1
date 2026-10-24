@@ -23,7 +23,7 @@ if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]:
 }
 scoop bucket add extras  # buckets rely on git, git is provided by niubash
 scoop bucket add nerd-fonts
-scoop install yazi ripgrep fd fzf bat extras/lazygit delta mise nerd-fonts/Maple-Mono-NF-CN
+scoop install yazi fzf bat extras/lazygit delta mise nerd-fonts/Maple-Mono-NF-CN
 Add-Content -Path "$env:USERPROFILE\.npmrc" -Value "prefix=$env:USERPROFILE\.local\lib\node-packages"
 
 # install gow and setup deduped path
@@ -34,7 +34,7 @@ $env:Path >> "$env:USERPROFILE\scoop\others\PATH.bak"
 # add dot files
 git clone --filter=blob:none https://github.com/joshuali925/.vim "$env:USERPROFILE\.vim"
 [Environment]::SetEnvironmentVariable("RIPGREP_CONFIG_PATH", "$env:USERPROFILE\.vim\config\.ripgreprc", "User")
-[Environment]::SetEnvironmentVariable("YAZI_FILE_ONE", "$env:USERPROFILE\scoop\apps\git\current\usr\bin\file.exe", "User")
+[Environment]::SetEnvironmentVariable("YAZI_FILE_ONE", "$env:USERPROFILE\scoop\others\gow\usr\bin\file.exe", "User")
 New-Item -ItemType Junction -Path "$env:USERPROFILE\vimfiles" -Target "$env:USERPROFILE\.vim"
 New-Item -ItemType HardLink -Path "$env:USERPROFILE\.gitconfig" -Target "$env:USERPROFILE\.vim\config\.gitconfig"
 New-Item -ItemType HardLink -Path "$env:USERPROFILE\.tmux.conf" -Target "$env:USERPROFILE\.vim\config\.tmux.conf"
@@ -42,7 +42,7 @@ New-Item -ItemType Junction -Path "$env:APPDATA\yazi\config" -Target "$env:USERP
 New-Item -ItemType Directory -Path "$env:LOCALAPPDATA\lazygit"
 New-Item -ItemType HardLink -Path "$env:LOCALAPPDATA\lazygit\config.yml" -Target "$env:USERPROFILE\.vim\config\lazygit_config.yml"
 Copy-Item "$env:USERPROFILE\.vim\config\windows-terminal.json" "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-Add-Content -Path "$env:USERPROFILE\.niubashrc" -Value "source ~/.vim/config/.bashrc"
+Add-Content -Path "$env:USERPROFILE\.niubashrc" -Value "source ~/.vim/config/.bashrc`n" -NoNewline
 
 # install neovim
 scoop install neovim extras/neovide gcc make

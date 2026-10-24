@@ -17,14 +17,24 @@ end
 
 local get_hovered_file = ya.sync(function() return tostring(cx.active.current.hovered.url) end)
 
-local function shell(command, pause)
-    -- NOTE keep commands POSIX compliant, on ubuntu the shell is 'sh'. need to use bash to support `read` flags
-    return ya.emit("shell", { command .. (pause and "; echo Press any key to continue; bash -ic 'read -n 1 -s _'" or ""), block = true })
+local shell_targets = ya.sync(function(_, yanked)
+    local hovered, files = cx.active.current.hovered, {}
+    for _, file in pairs(yanked and cx.yanked or cx.active.selected) do files[#files + 1] = tostring(file.url) end
+    if #files == 0 and hovered and not yanked then files[1] = tostring(hovered.url) end
+    return { h = hovered and tostring(hovered.url) or "", files = files }
+end)
+
+-- scripts get the hovered file as $h and the selected (or yanked) files as "$@"
+local function shell(command, pause, yanked)
+    local targets = shell_targets(yanked)
+    if pause then command = command .. "; echo Press any key to continue; read -n 1 -s _" end
+    local permit = ui.hide()
+    local status, err = Command("bash"):env("h", targets.h):arg({ "-c", command, "bash", table.unpack(targets.files) }):stdin(Command.INHERIT):stdout(Command.INHERIT):stderr(Command.INHERIT):status()
+    permit:drop()
+    if not status then ya.notify({ title = "Command failed", content = tostring(err), timeout = 5, level = "error" }) end
 end
 
-local cow_paste = ya.sync(function()
-    if #cx.yanked > 0 and not cx.yanked.is_cut then shell("cp -dRiv --reflink=auto --sparse=always %y .") end
-end)
+local can_cow_paste = ya.sync(function() return #cx.yanked > 0 and not cx.yanked.is_cut end)
 
 local function chmod_stat()
     local output, err = Command("stat"):arg({ "--printf", "%a %n\n", get_hovered_file() }):output()
@@ -110,7 +120,6 @@ local function calculate_sizes(args)
 end
 
 local RELATIVE_SELECTED_ARGS = [[
-    set -- %s
     for file in "$@"; do
         relative="$(realpath --relative-to="." -- "$file")"
         case "$relative" in -*) relative="./$relative" ;; esac
@@ -124,22 +133,21 @@ local function compress_cmd(cmd, ext)
 end
 
 local COMMANDS = {
-    open = { run = function() return shell("open %h") end },
-    file = { run = function() return shell("file %h", true) end },
-    chmod = { exact = false, accepts_args = true, run = function(args) return shell("chmod " .. args .. " %s") end },
+    open = { run = function() return shell('open "$h"') end },
+    file = { run = function() return shell('file "$h"', true) end },
+    chmod = { exact = false, accepts_args = true, run = function(args) return shell("chmod " .. args .. ' "$@"') end },
     ["chmod?"] = { run = chmod_stat },
-    chown = { run = function() return shell('sudo chown -R "$(id -un):$(id -gn)" %h') end },
+    chown = { run = function() return shell('sudo chown -R "$(id -un):$(id -gn)" "$h"') end },
     ["chown?"] = { run = chown_stat },
-    ["cow-paste"] = { run = cow_paste },
-    sudorm = { run = function() return shell("sudo rm -r %s") end },
+    ["cow-paste"] = { run = function() if can_cow_paste() then return shell('cp -dRiv --reflink=auto --sparse=always "$@" .', false, true) end end },
+    sudorm = { run = function() return shell('sudo rm -r "$@"') end },
     size = { run = function(_, job) return calculate_sizes(job.args) end },
     audio = {
         run = function()
-            local file = get_hovered_file()
-            local output = Command("ffmpeg"):arg({ "-i", file }):stdout(Command.PIPED):stderr(Command.PIPED):output()
+            local output = Command("ffmpeg"):arg({ "-i", get_hovered_file() }):stdout(Command.PIPED):stderr(Command.PIPED):output()
             local codec = output and output.stderr:match("Audio: (%w+)")
             if not codec then return ya.notify({ title = "Command failed", content = "No audio stream found", timeout = 5, level = "error" }) end
-            return shell(('ffmpeg -i %%h -codec copy "%s.%s"'):format(file:match("(.+)%.[^/\\]+$") or file, codec))
+            return shell('ffmpeg -i "$h" -codec copy "${h%.*}.' .. codec .. '"')
         end,
     },
     convert = {
@@ -147,14 +155,14 @@ local COMMANDS = {
         accepts_args = true,
         run = function(args)
             local ext = args:match("^(%S+)")
-            return shell('file=%h; ffmpeg -i "$file" -codec copy "${file%%.*}.' .. ext .. '" || ffmpeg -y -i "$file" "${file%%.*}.' .. ext .. '"')
+            return shell('ffmpeg -i "$h" -codec copy "${h%.*}.' .. ext .. '" || ffmpeg -y -i "$h" "${h%.*}.' .. ext .. '"')
         end,
     },
     sftp = {
         accepts_args = true,
         run = function(args)
-            if args == "" then return shell([[printf " echo \"get %h\" | sftp -r " | y]]) end
-            return shell(('echo "put %%h" | sftp -r %s'):format(args), true)
+            if args == "" then return shell([[printf " echo \"get '%s'\" | sftp -r " "$h" | y]]) end
+            return shell([[echo "put '$h'" | sftp -r ]] .. args, true)
         end,
     },
     tarcopy = { run = function() return shell(RELATIVE_SELECTED_ARGS .. [[printf " printf $(XZ_OPT=-9e tar cJf - -- "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end },
@@ -168,18 +176,16 @@ local COMMANDS = {
     x = {
         run = function()
             return shell([[
-                set -f
-                set -- %s
                 if [ "$#" -gt 1 ]; then
                     ]] .. compress_cmd("tar cvzf", "tar.gz") .. [[;
                 else
-                    selected="$(basename %h)"
-                    if [ -d %h ]; then
+                    selected="$(basename "$h")"
+                    if [ -d "$h" ]; then
                         tar czvf "$selected.tar.gz" "$selected"
                     elif file -Lb --mime-type -- "$selected" | grep -q "^video/"; then
-                        ffmpeg -i "$selected" -vcodec libx264 -crf 28 "${selected%%.*}.small.mp4"
+                        ffmpeg -i "$selected" -vcodec libx264 -crf 28 "${selected%.*}.small.mp4"
                     elif file -Lb --mime-type -- "$selected" | grep -q "^image/"; then
-                        ffmpeg -i "$selected" -q:v 10 "${selected%%.*}.small.${selected##*.}"
+                        ffmpeg -i "$selected" -q:v 10 "${selected%.*}.small.${selected##*.}"
                     else
                         xtract "$selected"
                     fi
@@ -190,10 +196,9 @@ local COMMANDS = {
     X = {
         run = function()
             return shell([[
-                set -f
-                selected="$(basename %h)"
+                selected="$(basename "$h")"
                 if [ -f "$selected" ]; then
-                    dir="${selected%%.*}"
+                    dir="${selected%.*}"
                     filename="$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)_$selected"
                     command mkdir -pv "$dir"
                     command mv -i "$selected" "$dir/$filename"
@@ -207,7 +212,7 @@ local COMMANDS = {
             ]])
         end,
     },
-    copy = { run = function() return shell('osascript -e "on run args" -e "set the clipboard to POSIX file (first item of args)" -e end %h') end },
+    copy = { run = function() return shell('osascript -e "on run args" -e "set the clipboard to POSIX file (first item of args)" -e end "$h"') end },
 }
 
 local COMMAND_COMPLETIONS = {}
