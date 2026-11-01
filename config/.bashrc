@@ -1,8 +1,8 @@
 # shellcheck disable=1090,2059
 # [[ -t 1 ]] && exec zsh
 
-# interactive settings. [[ -t 1 ]] or [[ -n $PS1 ]] is somewhat faster, but niubash leaves PS1 unset in interactive mode
-if [[ $- = *i* ]]; then
+# interactive settings. it's better to check with [[ $- = *i* ]], but [[ -t 1 ]] or [[ -n $PS1 ]] is somewhat faster
+if [[ -n $PS1 ]]; then
   if [[ -f /usr/share/bash-completion/bash_completion ]]; then
      # shellcheck disable=1091
      # TODO change to -z BASH_COMPLETION_VERSINFO when it is always set by bash_completion to determine if it's already loaded
@@ -20,48 +20,37 @@ if [[ $- = *i* ]]; then
   PROMPT_COMMAND=_set_prompt
   shopt -u promptvars  # PS1 embeds the branch name, which must not be expanded
   if [[ -n $NIU_PROMPT_SYMBOL ]]; then
-    : "${HOSTNAME:=$COMPUTERNAME}"  # for niubash PS1 \h
-    bind() {  # fzf's vendored key-bindings use readline functions niubash cannot mirror
-      case "$*" in *redraw-current-line* | *editing-mode*) return 0 ;; esac
-      builtin bind "$@"
-    }
-    _niu_yy_widget() { NIU_WIDGET_RESULT=yy; NIU_WIDGET_ACCEPT=1; }; NIU_BINDKEYS="Ctrl+O:_niu_yy_widget"  # bind -x hangs the prompt on windows
+    bind() { [[ $* = *'\e[0n'* ]] || builtin bind "$@"; }  # niubash warns at startup about binding this terminal response, used by fzf-simple-completion
+    _niu_yy_widget() { NIU_WIDGET_RESULT=yy; NIU_WIDGET_ACCEPT=1; }
+    NIU_BINDKEYS=$'Ctrl+O:_niu_yy_widget\nCtrl+/:undo\n\\e[1;5C:autosuggest-partial-accept'  # C-o with bind -x hangs the prompt on windows
     _niu_report_cwd() {  # windows terminal's duplicate tab
       local p=$PWD
       case $p in /[A-Za-z]) p="${p:1:1}:/" ;; /[A-Za-z]/*) p="${p:1:1}:${p:2}" ;; esac
       printf '\e]9;9;%s\e\\' "${p//\//\\}"
     }
     PROMPT_COMMAND+='; _niu_report_cwd'
-  else  # niubash's line editor rejects these sequences/functions
-    bind '"\e[Z": menu-complete-backward'
+  else  # niubash rejects these
     bind '"\C-g": edit-and-execute-command'
-    bind '"\C-xa": shell-expand-line'  # same as in zsh, 'C-x a' expands aliases
-    bind '"\e[1;5D": backward-word'
-    bind '"\e[1;5C": forward-word'
-    bind '"\e[3;2~": backward-delete-char'
     stty -ixon werase undef  # disable Ctrl-S freeze, unbind werase to C-w
-    bind '"\C-w": unix-filename-rubout'
     # shellcheck disable=2016
     bind -x '"\C-o": "_old_pwd=$PWD; yy; [[ $_old_pwd != $PWD ]] && pwd"'  # somehow bind C-o will not trigger on mac. need pwd because using bind -x the prompt will not update. __fzf_cd__ style won't allow opening vim in yazi
   fi
+  bind '"\e[Z": menu-complete-backward'
+  bind '"\C-xa": shell-expand-line'  # same as in zsh, 'C-x a' expands aliases
+  bind '"\e[1;5D": backward-word'
+  bind '"\e[1;5C": forward-word'
+  bind '"\e[3;2~": backward-delete-char'
+  bind '"\C-w": unix-filename-rubout'
   shopt -s autocd
   shopt -s cdspell
   shopt -s checkwinsize
   shopt -s dotglob
 
   if [[ -f ~/.vim/config/fzf/shell.bash ]]; then
-    [[ -n $NIU_PROMPT_SYMBOL ]] && perl() { :; }  # niubash's fzf history does not use perl
     source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash
     if [[ -n $NIU_PROMPT_SYMBOL ]]; then
-      unset -f perl
-      __niu_fzf_cd() { local cmd; cmd=$(__fzf_cd__) && eval "$cmd"; }
-      bind -x '"\ec": __niu_fzf_cd'  # fzf's Alt-C is a readline macro, which niubash inserts as literal text
-      __niu_fzf_history() {
-        local sel; sel=$(awk '{a[NR]=$0} END {for (i = NR; i > 0; i--) if (!seen[a[i]]++) print a[i]}' "$HOME/.niubash_history" | fzf --scheme=history --query "$READLINE_LINE") || return
-        READLINE_LINE=$sel
-        READLINE_POINT=${#READLINE_LINE}
-      }
-      bind -x '"\C-r": __niu_fzf_history'
+      __niu_fzf_history() { __fzf_history__; READLINE_POINT=${#READLINE_LINE}; }  # niubash cannot parse fzf's READLINE_POINT=0x7fffffff
+      bind -m emacs-standard -x '"\C-r": __niu_fzf_history'
     fi
   elif [[ -z $DOT_VIM_LOCAL_BIN ]]; then
     _load_fzf() { ~/.vim/bin/fzf --version >/dev/null && source ~/.vim/config/fzf/shell.bash && source ~/.vim/config/fzf/override.bash; }
@@ -105,7 +94,6 @@ if [[ $- = *i* ]]; then
     else
       pushd "$@" > /dev/null || return
     fi
-    if [[ -n $NIU_PROMPT_SYMBOL ]]; then local _oldpwd=$OLDPWD; builtin cd -- "$PWD"; OLDPWD=$_oldpwd; fi  # niubash bug
     local _entries=(*); if [[ ${#_entries[@]} -lt 200 ]]; then ls -AF --color=auto; fi
   }
   complete -d cd
@@ -121,9 +109,16 @@ fi
 shopt -u expand_aliases
 if [[ -n $NIU_PROMPT_SYMBOL ]]; then
   eval "$(< ~/.vim/config/common.sh)"  # niubash runs eval faster
-  vf() { local fzftemp=($(FZF_DEFAULT_COMMAND= fzf --walker=file,follow,hidden  --walker-skip=.git,node_modules,.venv --multi)); if [[ -n $fzftemp ]]; then $EDITOR -- "${fzftemp[@]}"; fi; }
+  env() {  # niubash env is builtin, not executable binary
+    if [[ $# -gt 0 || ! -t 1 ]]; then builtin env "$@"; return $?; fi
+    printenv | cut -d= -f1 | fzf --multi --preview-window=wrap --preview='printenv {}' | xargs -r -I{} sh -c 'echo "{}=$(printenv "{}")"'
+  }
+  vf() {
+    local fzftemp=($(FZF_DEFAULT_COMMAND= fzf --walker=file,follow,hidden  --walker-skip=.git,node_modules,.venv --multi))
+    if [[ -n $fzftemp ]]; then $EDITOR -- "${fzftemp[@]}"; fi
+  }
 else
   source ~/.vim/config/common.sh
 fi
 shopt -s expand_aliases
-HISTCONTROL=ignoreboth:erasedups:ignorespace
+HISTCONTROL=ignoreboth

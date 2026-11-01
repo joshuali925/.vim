@@ -27,20 +27,25 @@ reload_config = "prefix+ctrl+r"
 detach = "prefix+d"
 
 rename_tab = "prefix+r"
-next_tab = ["alt+m", "shift+right"]
 previous_tab = ["alt+n", "shift+left"]
+next_tab = ["alt+m", "shift+right"]
 move_tab_previous = "prefix+9"
 move_tab_next = "prefix+0"
+previous_workspace = "prefix+ctrl+k"
+next_workspace = "prefix+ctrl+j"
 previous_agent = "alt+period"
 next_agent = "alt+comma"
 focus_agent = "alt+1..9"
 new_workspace = "prefix+shift+c"
 rename_workspace = "prefix+$"
-next_workspace = "prefix+ctrl+j"
-previous_workspace = "prefix+ctrl+k"
 split_vertical = "prefix+v"
 split_horizontal = "prefix+h"
 close_pane = "prefix+k"
+
+[[keys.command]]
+key = "prefix+y"
+command = 'curl -s "https://checkip.amazonaws.com" | "$HOME/.vim/bin/y"'
+description = "copy public IP"
 
 # for codex answer agent shortcut. needs same toml on server then: herdr server reload-config
 [[keys.command]]
@@ -51,6 +56,7 @@ description = "send shift+left"
 [[keys.command]]
 key = "prefix+c"
 command = '''
+. "$HOME/.vim/config/env.sh"
 created=$("$HERDR_BIN_PATH" tab create --workspace "$HERDR_ACTIVE_WORKSPACE_ID" --cwd "${HERDR_ACTIVE_PANE_CWD:-$PWD}" --focus) || exit
 tab_id=$(printf '%s\n' "$created" | jq -er '.result.tab.tab_id') || exit
 tabs=$("$HERDR_BIN_PATH" tab list --workspace "$HERDR_ACTIVE_WORKSPACE_ID") || exit
@@ -119,6 +125,7 @@ description = "resize pane right"
 [[keys.command]]
 key = "prefix+a"
 command = '''
+. "$HOME/.vim/config/env.sh"
 jq_fmt='.[] | [.id, ((if .enabled then "\u001b[32m" + .label else "\u001b[31m" + .label + " [disabled]" end) + "\u001b[0m"), .target, .session] | join("\t")'
 get_state="herdr machine list --json | jq -r '$jq_fmt' | column -t -s \$'\t'"
 FZF_DEFAULT_COMMAND=$get_state fzf --ansi --delimiter=' {2,}' --with-nth=2.. \
@@ -136,7 +143,7 @@ height = "40%"
 
 [[keys.command]]
 key = "prefix+ctrl+o"
-command = 'yazi'
+command = '. "$HOME/.vim/config/env.sh"; exec yazi'
 type = "popup"
 description = "open yazi"
 width = "94%"
@@ -144,7 +151,7 @@ height = "92%"
 
 [[keys.command]]
 key = "prefix+ctrl+t"
-command = 'LANG=C.utf8 btop'
+command = '. "$HOME/.vim/config/env.sh"; LANG=C.utf8 exec btop'
 type = "popup"
 description = "open btop"
 width = "94%"
@@ -153,6 +160,7 @@ height = "92%"
 [[keys.command]]
 key = "prefix+comma"
 command = '''
+. "$HOME/.vim/config/env.sh"
 PICKER_PIPE_COMMAND='herdr pane send-text "$HERDR_ACTIVE_PANE_ID" "$(cat)" >/dev/null' bash "$HOME/.vim/config/fzf/pick-skills.sh"
 '''
 type = "popup"
@@ -163,6 +171,7 @@ height = "40%"
 [[keys.command]]
 key = "prefix+f"
 command = '''
+. "$HOME/.vim/config/env.sh"
 PICKER_PIPE_COMMAND='herdr pane send-text "$HERDR_ACTIVE_PANE_ID" "$(cat)" >/dev/null' FZF_DEFAULT_COMMAND="$FZF_CTRL_T_COMMAND" FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" fzf --multi --bind='enter:become(printf "%q " {+} | sh -c "$PICKER_PIPE_COMMAND")'
 '''
 type = "popup"
@@ -173,6 +182,7 @@ height = "40%"
 [[keys.command]]
 key = "prefix+ctrl+p"
 command = '''
+. "$HOME/.vim/config/env.sh"
 info=$(herdr pane process-info --pane "$HERDR_ACTIVE_PANE_ID" 2>/dev/null || true)
 unset PICKER_PREFIX
 case "$info" in

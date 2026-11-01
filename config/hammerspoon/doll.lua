@@ -4,7 +4,6 @@ local bundleID = "com.xiaogd.Doll"
 local outlookNames = { "Microsoft Outlook", "Outlook" }
 local pollInterval = 0.2
 local stepTimeout = 8
-local addDelay = 5
 
 local function stopTimer()
     if not M.timer then return end
@@ -157,7 +156,7 @@ local function removeOutlook()
         return findByText({ "Stop monitoring" })
     end, function(stopButton)
         if not press(stopButton) then return fail("could not stop Outlook monitoring") end
-        M.timer = hs.timer.doAfter(addDelay, function()
+        M.timer = hs.timer.doAfter(2, function()
             M.timer = nil
             openAddView()
         end)
@@ -166,7 +165,6 @@ end
 
 function M.resetOutlook()
     stopTimer()
-
     local app = hs.application.get(bundleID)
     if not app then return fail("Doll is not running (it was not restarted)") end
 

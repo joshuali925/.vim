@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 source ~/.vim/bin/_install_from_github.sh
-if [[ $(readlink -f "$HOME/.tmux.conf") != $(readlink -f "$HOME/.vim/config/.tmux.conf") ]]; then
-  [[ -f $HOME/.tmux.conf ]] && echo '~/.tmux.conf exists, renaming to ~/.tmux.conf.bak' >&2 && mv -iv ~/.tmux.conf ~/.tmux.conf.bak
-  ln -sv ~/.vim/config/.tmux.conf ~/.tmux.conf
+if [[ ! ~/.config/tmux/tmux.conf -ef ~/.vim/config/.tmux.conf ]]; then
+  [[ -f $HOME/.config/tmux/tmux.conf ]] && echo '~/.config/tmux/tmux.conf exists, renaming to ~/.config/tmux/tmux.conf.bak' >&2 && mv -iv ~/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf.bak
+  mkdir -p ~/.config/tmux && ln -sv ~/.vim/config/.tmux.conf ~/.config/tmux/tmux.conf
 fi
 
 export LANG=en_US.UTF-8  # LANG is empty on some (RedHat) distros, set it to allow unicode/nerdfont display when called using st()

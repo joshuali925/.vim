@@ -1,6 +1,6 @@
 export PATH="$HOME/.local/bin:$HOME/.local/lib/node-packages/bin:$HOME/.local/share/mise/shims:$PATH:$HOME/.local/share/nvim/mason/bin:$HOME/.vim/bin"
 export EDITOR=nvim
-[[ -n $FZF_COMPLETION_TRIGGER ]] && return 0  # file is sourced early by zshenv. below ones are unlikely to be overridden by system, no need to run again in zshrc
+if [ -n "$FZF_COMPLETION_TRIGGER" ]; then return 0; fi  # file is sourced early by zshenv. below ones are unlikely to be overridden by system, no need to run again in zshrc
 export FZF_COMPLETION_TRIGGER=\\
 export PAGER='less -RiM'  # less -RiM: --RAW-CONTROL-CHARS --ignore-case --LONG-PROMPT, -XF: exit if one screen, -S: nowrap, +F: tail file, -+F: always paginate
 export RIPGREP_CONFIG_PATH="$HOME/.vim/config/.ripgreprc"

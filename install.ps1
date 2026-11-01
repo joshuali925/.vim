@@ -7,6 +7,9 @@ New-Item -Path "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows
 Set-ItemProperty "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell" -Name FolderType -Value NotSpecified -Type String -Force
 # disable bing search
 Set-ItemProperty HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search -Name BingSearchEnabled -Value 0 -Type DWord -Force
+# disable background services
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters" -Name EnablePrefetcher -Value 0 -Type DWord -Force
+Get-Service DiagTrack, SysMain, WSearch, WSAIFabricSvc, whesvc -ErrorAction SilentlyContinue | Set-Service -StartupType Disabled -PassThru | Stop-Service -Force
 # ctr-d exit powershell
 New-Item -ItemType Directory -Path ([System.IO.Path]::GetDirectoryName($Profile)) -Force
 Add-Content -Path $Profile -Value "Set-PSReadLineKeyHandler -Key 'Ctrl+d' -Function DeleteCharOrExit"
@@ -37,7 +40,6 @@ git clone --filter=blob:none https://github.com/joshuali925/.vim "$env:USERPROFI
 [Environment]::SetEnvironmentVariable("YAZI_FILE_ONE", "$env:USERPROFILE\scoop\others\gow\usr\bin\file.exe", "User")
 New-Item -ItemType Junction -Path "$env:USERPROFILE\vimfiles" -Target "$env:USERPROFILE\.vim"
 New-Item -ItemType HardLink -Path "$env:USERPROFILE\.gitconfig" -Target "$env:USERPROFILE\.vim\config\.gitconfig"
-New-Item -ItemType HardLink -Path "$env:USERPROFILE\.tmux.conf" -Target "$env:USERPROFILE\.vim\config\.tmux.conf"
 New-Item -ItemType Junction -Path "$env:APPDATA\yazi\config" -Target "$env:USERPROFILE\.vim\config\yazi"
 New-Item -ItemType Directory -Path "$env:LOCALAPPDATA\lazygit"
 New-Item -ItemType HardLink -Path "$env:LOCALAPPDATA\lazygit\config.yml" -Target "$env:USERPROFILE\.vim\config\lazygit_config.yml"

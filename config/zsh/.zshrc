@@ -8,6 +8,7 @@ ZSHRC_INIT=1
 (( ${+XDG_CACHE_HOME} )) && _xdg_cache_home=$XDG_CACHE_HOME
 : ${GITSTATUS_CACHE_DIR:=${XDG_CACHE_HOME:-$HOME/.cache}/p10k-term/gitstatus}
 XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}/p10k-term/${TERM_PROGRAM:-none}
+[[ -d $XDG_CACHE_HOME/p10k-${(%):-%n} ]] || command mkdir -p -- "$XDG_CACHE_HOME/p10k-${(%):-%n}"  # avoid p10k's mkdir calling my alias with -v
 if [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-${(%):-%n}.zsh ]]; then
   source "$XDG_CACHE_HOME/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -123,11 +124,11 @@ compdef _dirs d
 compdef _command_names path
 compdef _git gds=git-diff
 compdef _git gc=git-commit
-compdef _git glx=git-log
-compdef _git gwt=git-worktree
 _git-preview-merge-diff() { _git-diff; }
 _git-missing() { _git-log; }
 _git-forest() { _git-log; }
+_git-lx() { _git-log; }
+_git-wt() { _git-worktree; }
 
 bracketed-paste() {
   zle .$WIDGET && LBUFFER=${LBUFFER%$'\n'}

@@ -40,7 +40,7 @@ alias k='kubectl'
 alias dc='docker compose'
 alias lg='lazygit'
 alias lzd='lazydocker'
-alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
+alias tmux-save='~/.config/tmux/plugins/tmux-resurrect/scripts/save.sh'
 alias title='printf "$([[ -n $TMUX ]] && printf "\033Ptmux;\033")\e]0;%s\e\\$([[ -n $TMUX ]] && printf "\033\\")"'
 alias 00='[[ -f ~/.vim/tmp/last_result ]] && cd "$(<~/.vim/tmp/last_result)"'
 # shellcheck disable=2154
@@ -86,7 +86,6 @@ alias glg='git log --stat --graph --pretty=fuller'
 alias glga='git log --graph --pretty=fuller --all'
 alias glo='git log --graph --pretty=simple'
 alias gloa='git log --color --graph --pretty=simple-iso --all | less -RiMXF -p $(git show -s --format=%h)'
-glx() { git log --graph --decorate=short --date-order --color --pretty=format:'%C(bold blue)%h%C(reset)§%C(dim normal)(%cr)%C(reset)§%C(auto)%d%C(reset)§§%n§§§       %C(normal)%an%C(reset)%C(dim normal): %s%C(reset)' "${1:-$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo --all)}" HEAD | awk '{ split($0,arr,"§"); match(arr[2], /(\([0-9a-z ,]+\))/, rawtime); padlen=24+length(arr[2])-length(rawtime[1]); printf("%*s    %s %s %s\n", padlen, arr[2], arr[1], arr[3], arr[4]); }' | less -RiMXF -p "$([[ -n $1 ]] && git rev-parse --short "$(git merge-base HEAD "$1")" || git show -s --format=%h)"; }
 alias gr='git remote'
 alias gref='git symbolic-ref --short HEAD'
 alias grref='git rev-parse --abbrev-ref --symbolic-full-name @{upstream}'  # remote ref
@@ -130,19 +129,6 @@ gcb() {
     git show-ref --verify --quiet "refs/heads/${remote/\//-}" && git checkout "${remote/\//-}" || git checkout -b "${remote/\//-}" --track "$remote"
   else  # <branch> doesn't exist, create it
     [[ -n $remote ]] && git checkout --track "$remote" || git checkout "$branch"
-  fi
-}
-
-gwt() {
-  if [[ $# -eq 0 ]]; then
-    local worktree=$(git worktree list | fzf | awk '{print $1}') && [[ -d $worktree ]] && cd "$worktree"
-  elif [[ $1 != add ]]; then
-    git worktree "$@"
-  elif [[ $# -gt 2 ]]; then
-    git worktree add -f "$@"
-  else
-    local prefix=${PWD##*/} branch=$(git symbolic-ref --short HEAD)
-    git worktree add -f "../${prefix%-"$branch"}-$2" "$2"
   fi
 }
 
@@ -456,17 +442,7 @@ t() {  # create, restore, or switch tmux session
   if [[ -n $fzftemp ]]; then tmux $change -t "$fzftemp"; return $?; fi
   fzftemp=$(FZF_DEFAULT_COMMAND='find ~/.local/share/tmux/resurrect -name "tmux_resurrect_*.txt" | sort -r' fzf --prompt='restore> ' --header='Press C-d to delete a session' --preview='cat {}' --bind='ctrl-d:execute(mv {} {}.bak)+reload(find ~/.local/share/tmux/resurrect -name "tmux_resurrect_*.txt")' --bind='tab:down,btab:up' --exit-0)
   if [[ -z $fzftemp ]]; then tmux; return $?; fi
-  ln -sf "$fzftemp" ~/.local/share/tmux/resurrect/last && tmux new-session -d " tmux run-shell $HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" && tmux attach-session
-}
-
-tmux-rerun() {
-  if [[ $# -eq 0 ]]; then echo "Usage: $0 <command>" >&2; return 1; fi
-  local pane
-  for pane in $(tmux list-panes -a -f "#{==:#{pane_current_command},$1}" -F '#D'); do  # for index-based ref use #S:#I.#P (session:window.pane, <prefix>q to display pane numbers)
-    tmux send-keys -t "${pane}" -X cancel 2>/dev/null
-    tmux send-keys -t "${pane}" c-c
-    tmux send-keys -t "${pane}" s-up enter
-  done
+  ln -sf "$fzftemp" ~/.local/share/tmux/resurrect/last && tmux new-session -d " tmux run-shell $HOME/.config/tmux/plugins/tmux-resurrect/scripts/restore.sh" && tmux attach-session
 }
 
 tmux-wait() {
@@ -477,14 +453,31 @@ tmux-wait() {
 }
 
 herdr-wait() {
-  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 <pane-id>|-|+\n\tBlocks until the pane's shell has no child processes\n\tUse herdr pane list to find panes" >&2; return 1; fi
-  local pane_id=$1 ppid
+  if [[ $# -eq 0 ]]; then echo -e "Usage: $0 [<pane-id>|-|+] [<prompt> ...]\n\tBlocks until the pane's agent stops, or its shell has no child processes when the pane has no agent\n\tPrompts are then submitted to the agent\n\tUse herdr pane list to find panes" >&2; return 1; fi
+  local pane_id=- ppid agent_status stopped=0 started=$SECONDS
+  if [[ $1 = [+-] || $1 =~ ^w[[:alnum:]]+:p[[:alnum:]]+$ ]]; then pane_id=$1; shift; fi
   if [[ $pane_id = [+-] ]]; then
-    ppid=$(herdr pane current --current) || return $?
-    pane_id=$(herdr pane layout --current | jq -er --argjson current "$ppid" --arg direction "$1" '[.result.layout.panes[].pane_id] | index($current.result.pane.pane_id) as $i | select($i != null) | .[($i + if $direction == "-" then -1 else 1 end) % length]') || return $?
+    pane_id=$(herdr pane layout --current | jq -er --arg current "$HERDR_PANE_ID" --arg direction "$pane_id" '[.result.layout.panes[].pane_id] | select(length > 1) | index($current) as $i | select($i != null) | .[($i + if $direction == "-" then -1 else 1 end) % length]') || return $?
   fi
-  ppid=$(herdr pane process-info --pane "$pane_id" | jq -er '.result.process_info.shell_pid') || return $?
-  untildone "printf 'Waiting for command: ' && ! ps -o command= -p $(pgrep -P "$ppid") 2>/dev/null" && echo Command finished
+  if ! herdr agent get "$pane_id" &> /dev/null; then
+    if (( $# )); then echo "Pane $pane_id is not an agent" >&2; return 1; fi
+    ppid=$(herdr pane process-info --pane "$pane_id" | jq -er '.result.process_info.shell_pid') || return $?
+    untildone "printf 'Waiting for command: ' && ! ps -o command= -p $(pgrep -P "$ppid") 2>/dev/null" && echo Command finished
+  else
+    printf '[%s] Waiting for agent %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$pane_id"
+    while (( stopped < 5 )); do
+      agent_status=$(herdr agent get "$pane_id" | jq -er '.result.agent.agent_status') || return $?
+      if [[ $agent_status =~ ^(idle|done)$ ]]; then ((stopped += 1)); else stopped=0; fi
+      if (( stopped < 5 )); then sleep 5 || return $?; fi
+    done
+    local elapsed=$((SECONDS - started))
+    printf '[%s] Agent stopped after %02d:%02d:%02d\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$((elapsed / 3600))" "$((elapsed / 60 % 60))" "$((elapsed % 60))"
+    while (( $# )); do
+      herdr agent prompt "$pane_id" "$1" > /dev/null || return $?
+      shift
+      if (( $# )); then sleep 1 || return $?; fi
+    done
+  fi
 }
 
 man() {
@@ -503,14 +496,6 @@ env() {
   if [[ $# -gt 0 || ! -t 1 ]]; then command env "$@"; return $?; fi
   # shellcheck disable=2016
   printenv | cut -d= -f1 | fzf --multi --preview-window=wrap --preview='printenv {}' | xargs -r -I{} sh -c 'echo "{}=$(printenv "{}")"'
-}
-
-jo() {  # basic implementation of https://github.com/jpmens/jo
-  local args=() arg
-  for arg in "$@"; do
-    args+=(--arg "$(cut -d= -f1 <<< "$arg")" "$(cut -d= -f2- <<< "$arg")")
-  done
-  jq -n "${args[@]}" '$ARGS.named'
 }
 
 untildone() {
@@ -592,10 +577,12 @@ getip() {
 bin() {
   if [[ $1 != update ]]; then command bin "$@"; return $?; fi
   if [[ $# -eq 1 ]]; then
-    TMUX_PLUGIN_MANAGER_PATH=$HOME/.tmux/plugins/ ~/.tmux/plugins/tpm/bin/update_plugins all
+    TMUX_PLUGIN_MANAGER_PATH=$HOME/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/bin/update_plugins all
     zsh -ic 'zimfw upgrade; zimfw update'
     if [[ -x $HOME/.local/bin/bin ]]; then command bin update; fi
-    mise self-update && mise upgrade && mise prune -y && mise completion zsh > ~/.vim/config/zsh/completions/_mise && rm -f "${ZDOTDIR:-$HOME}"/.zcompdump*
+    if [[ -x $HOME/.local/bin/mise ]]; then
+      mise self-update && mise upgrade && mise prune -y && mise completion zsh > ~/.vim/config/zsh/completions/_mise && rm -f "${ZDOTDIR:-$HOME}"/.zcompdump*
+    fi
     if [[ $OSTYPE = linux* ]] && mise which pm2 > /dev/null 2>&1; then
       npm install -g pm2
       pm2 update

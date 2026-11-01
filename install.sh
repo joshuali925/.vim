@@ -175,9 +175,9 @@ install-dotfiles() {
   log "Ensured 'skip_global_compinit=1' in ~/.zshenv"
   append-once 'Include ~/.vim/config/ssh_config' ~/.ssh/config
   append-once 'Include ~/.ssh/ec2hosts' ~/.ssh/config
-  link-file ~/.vim/config/.tmux.conf ~/.tmux.conf --relative
+  link-file ~/.vim/config/.tmux.conf ~/.config/tmux/tmux.conf --relative
   link-file ~/.vim/config/.gitconfig ~/.gitconfig --relative
-  link-file ~/.vim/config/.ideavimrc ~/.ideavimrc --relative
+  link-file ~/.vim/config/.ideavimrc ~/.config/ideavim/ideavimrc --relative
   link-file ~/.vim/config/yazi ~/.config/yazi --relative
   link-file ~/.vim/config/lazygit_config.yml ~/.config/lazygit/config.yml --relative
   if [[ $PLATFORM = darwin ]]; then
@@ -257,12 +257,12 @@ install-tmux() {
   backup ~/.local/bin/tmux
   tmux -V
   log 'Installing tmux plugins..'
-  if [[ ! -d ~/.tmux ]]; then
-    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm --depth=1
+  if [[ ! -d ~/.config/tmux/plugins/tpm ]]; then
+    git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm --depth=1
   else
-    TMUX_PLUGIN_MANAGER_PATH=$HOME/.tmux/plugins/ ~/.tmux/plugins/tpm/bin/update_plugins all || true
+    TMUX_PLUGIN_MANAGER_PATH=$HOME/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/bin/update_plugins all || true
   fi
-  TMUX_PLUGIN_MANAGER_PATH=$HOME/.tmux/plugins/ ~/.tmux/plugins/tpm/bin/install_plugins || true
+  TMUX_PLUGIN_MANAGER_PATH=$HOME/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/bin/install_plugins || true
   if [[ ! -d ~/.terminfo ]]; then
     curl -LO https://invisible-island.net/datafiles/current/terminfo.src.gz && gunzip terminfo.src.gz
     tic -xe tmux-256color terminfo.src && rm terminfo.src
@@ -301,6 +301,36 @@ install-swap() {
   sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
   grep -qxF '/swapfile swap swap defaults 0 0' /etc/fstab || echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
   free -h
+}
+
+install-ramdisk() {
+  if [[ $PLATFORM != darwin ]]; then
+    log 'Unsupported platform..'
+    return 1
+  fi
+  local g="${1:-4}" label=local.tmpfs.tmp plist
+  plist=/Library/LaunchDaemons/$label.plist
+  log "Installing ${g}G ramdisk on /private/tmp.."
+  sudo tee "$plist" > /dev/null << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>$label</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string><string>-c</string>
+    <string>/sbin/mount | /usr/bin/grep -q 'on /private/tmp (tmpfs' || { /sbin/mount_tmpfs -o nobrowse -s ${g}g /private/tmp &amp;&amp; /bin/chmod 1777 /private/tmp; }; /usr/bin/install -d -o $USER -m 700 /private/tmp/msedge /private/tmp/ramdisk</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+</dict>
+</plist>
+EOF
+  sudo chown root:wheel "$plist" && sudo chmod 644 "$plist"
+  sudo launchctl bootout "system/$label" 2> /dev/null || true
+  sudo launchctl bootstrap system "$plist"
+  rm -rf ~/Library/Caches/Microsoft\ Edge && link-file /tmp/msedge ~/Library/Caches/Microsoft\ Edge
+  log "Installed ramdisk on /private/tmp"
 }
 
 install-pm2() {
@@ -351,24 +381,21 @@ install-claude-code() {
   claude plugin install code-review@claude-plugins-official
   claude plugin install skill-creator@claude-plugins-official
   claude plugin install typescript-lsp@claude-plugins-official
-  claude plugin install frontend-design@claude-plugins-official
   claude plugin marketplace add ayghri/i-have-adhd && claude plugin install i-have-adhd@i-have-adhd && claude plugin disable i-have-adhd
-  claude plugin marketplace add Dammyjay93/interface-design && claude plugin install interface-design@interface-design && claude plugin disable interface-design
   claude plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill && claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill && claude plugin disable ui-ux-pro-max
-  claude plugin marketplace add pbakaus/impeccable && claude plugin install impeccable@impeccable && claude plugin disable impeccable  # /impeccable init
-  claude plugin marketplace add zarazhangrui/frontend-slides && claude plugin install frontend-slides@frontend-slides && claude plugin disable frontend-slides
-  # uv tool install mempalace && mkdir -p ~/.vim/tmp/mempalace && yes n | mempalace init ~/.vim/tmp/mempalace --no-llm --yes && claude plugin marketplace add MemPalace/mempalace && claude plugin install --scope user mempalace
   # https://github.com/phuryn/pm-skills
   # npx -y skills add mattpocock/skills --agent claude-code --yes --global
   # npx -y skills add blader/humanizer --agent claude-code --yes --global
-  # npx -y skills add danyuchn/asd-ste100-skill --agent claude-code --yes
+  # npx -y skills add danyuchn/asd-ste100-skill --agent claude-code --yes --global
+  # npx -y skills add GoogleChrome/modern-web-guidance --agent claude-code --yes
   # npx -y skills add Leonxlnx/taste-skill --agent claude-code --yes
-  # npx -y skills add tt-a1i/archify --agent claude-code --yes
-  # npx -y skills add heygen-com/hyperframes --agent claude-code --yes
-  # npx -y skills add alchaincyf/huashu-design --agent claude-code --yes
+  # npx -y skills add tt-a1i/archify --agent claude-code --yes  # alternative: https://github.com/yizhiyanhua-ai/fireworks-tech-graph
+  # npx -y skills add heygen-com/hyperframes --agent claude-code --yes  # alternative?: alchaincyf/huashu-design, https://github.com/aaitor/skill-video-studio
   # npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent claude-code --yes
   # npx -y skills add shadcn-ui/ui --agent claude-code --yes
-  # bin install https://github.com/wdhwg001/csift && npx -y skills add wdhwg001/csift --agent claude-code --yes --global
+  # bin install https://github.com/wdhwg001/csift && npx -y skills add wdhwg001/csift --agent claude-code --yes --global  # alternative: https://github.com/emberian/cv
+  log "\nInstalled Claude Code, to resume sessions on herdr restart, run: ${YELLOW}herdr integration install claude"
+  log "Installing MCPs and bedrock key.."
   claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
   if install-google-chrome 2> /dev/null; then
     npm install -g chrome-devtools-mcp@latest
@@ -380,7 +407,6 @@ install-claude-code() {
     fi
     # npm install -g @playwright/cli@latest && npx -y skills add https://github.com/microsoft/playwright-cli --skill playwright-cli --agent claude-code --yes --global && append-once '/.playwright-cli/' ~/.gitignore
   fi
-  log '\nInstalled Claude Code'
   if [[ $PLATFORM = darwin ]]; then
     managed_settings='/Library/Application Support/ClaudeCode/managed-settings.json'
   else

@@ -82,13 +82,9 @@
   "enabledPlugins": {
     "cc-plugin-you-should-know@builtin": true,
     "code-review@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "frontend-slides@frontend-slides": false,
     "skill-creator@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "ui-ux-pro-max@ui-ux-pro-max-skill": false,
-    "interface-design@interface-design": false,
-    "impeccable@impeccable": false,
     "i-have-adhd@i-have-adhd": false
   },
   "extraKnownMarketplaces": {
@@ -98,28 +94,10 @@
         "repo": "anthropics/claude-plugins-official"
       }
     },
-    "frontend-slides": {
-      "source": {
-        "source": "github",
-        "repo": "zarazhangrui/frontend-slides"
-      }
-    },
     "ui-ux-pro-max-skill": {
       "source": {
         "source": "github",
         "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
-      }
-    },
-    "interface-design": {
-      "source": {
-        "source": "github",
-        "repo": "Dammyjay93/interface-design"
-      }
-    },
-    "impeccable": {
-      "source": {
-        "source": "github",
-        "repo": "pbakaus/impeccable"
       }
     },
     "i-have-adhd": {
@@ -132,12 +110,12 @@
   "outputStyle": "Concise",
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
-  "skipDangerousModePermissionPrompt": true,
-  "theme": "auto",
-  "verbose": true,
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "high"
     }
-  }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "auto",
+  "verbose": true
 }
