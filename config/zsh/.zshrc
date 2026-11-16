@@ -6,7 +6,7 @@ ZSHRC_INIT=1
 # confirmations, etc.) must go above this block; everything else may go below.
 # p10k invalidates its cache when $TERM_PROGRAM changes, so keep one cache per terminal
 (( ${+XDG_CACHE_HOME} )) && _xdg_cache_home=$XDG_CACHE_HOME
-: ${GITSTATUS_CACHE_DIR:=${XDG_CACHE_HOME:-$HOME/.cache}/p10k-term/gitstatus}
+GITSTATUS_CACHE_DIR=${XDG_CACHE_HOME:-$HOME/.cache}/p10k-term/gitstatus
 XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}/p10k-term/${TERM_PROGRAM:-none}
 [[ -d $XDG_CACHE_HOME/p10k-${(%):-%n} ]] || command mkdir -p -- "$XDG_CACHE_HOME/p10k-${(%):-%n}"  # avoid p10k's mkdir calling my alias with -v
 if [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-${(%):-%n}.zsh ]]; then
@@ -194,7 +194,7 @@ bindkey '^[[1;5C' emacs-forward-word          # <C-Right> to next word end. alte
 
 alias history='history -f 0'
 alias get-completion='compdef _gnu_generic'
-chpwd() { if [[ -t 1 ]]; then emulate -L zsh; local files=(*(NY200)); (( $#files < 200 )) && ls -AF --color=auto; fi; }
+chpwd() { if [[ -t 1 ]]; then emulate -L zsh; local files=(*(NY200)); (( $#files < 200 )) && command ls -AF --color=auto; fi; }
 
 # To customize prompt, run `p10k configure` or edit ~/.vim/config/zsh/.p10k.zsh.
 source ~/.vim/config/zsh/.p10k.zsh

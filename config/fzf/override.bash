@@ -15,7 +15,7 @@ __fzf_cd_widget() {
 }
 # customized: change fzf bindings to CTRL-P
 bind -m emacs-standard -x '"\C-p": fzf-file-widget'
-if [[ -n $NIU_PROMPT_SYMBOL ]]; then
+if [[ -n $NIU_SHELL ]]; then
   bind -m emacs-standard -x '"\ec": __fzf_cd_widget'
 else
   __fzf_cd_readline() { if __fzf_cd_widget; then bind '"\C-x\C-a": accept-line'; else bind '"\C-x\C-a": redraw-current-line'; fi; }

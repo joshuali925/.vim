@@ -11,7 +11,7 @@ function! funcs#complete_word(findstart, base)
   endif
   let lines = getline(1, '$')
   let words = split(join(lines, "\n"))
-  let matched_words = len(a:base) ? exists('*matchfuzzy') ? matchfuzzy(words, a:base) : filter(words, 'match(v:val, "\\V" . a:base) != -1') : words
+  let matched_words = len(a:base) ? matchfuzzy(words, a:base) : words
   let matched_suffixes = map(lines, 's:f(v:val, a:base)')
   return map(matched_words + matched_suffixes, '{"word": v:val, "kind": "[WORD]"}')
 endfunction
@@ -65,24 +65,10 @@ function! funcs#get_session_names(arg_lead, cmd_line, cursor_pos)
 endfunction
 
 function! funcs#grep(prg, pattern)
-  let saved_errorformat = &errorformat
-  set errorformat=%f:%l:%c:%m,%f:%l:%m,%f
-  if a:prg == 'glob'
-    let command = a:pattern[0] == '*' ? '{**/.' . a:pattern . ',**/' . a:pattern . '}' : '**/' . a:pattern
-    if a:pattern[0] == '*'  " hidden file needs **/.*pat, {**/.*pat,**/*pat} in `command` is faster but depends on &shell and doesn't work on windows and some bash
-      cgetexpr filter(glob('**/.' . a:pattern, 0, 1), '!isdirectory(v:val)')
-      caddexpr filter(glob('**/' . a:pattern, 0, 1), '!isdirectory(v:val)')
-    else
-      cgetexpr filter(glob(command, 0, 1), '!isdirectory(v:val)')
-    endif
-  else
-    let command = a:prg . ' ' . a:pattern
-    cgetexpr systemlist(command)
-  endif
-  let &errorformat = saved_errorformat
-  let len = len(getqflist())
-  silent! call setqflist([], 'a', {'title': '(' . len . ') ' . command })  " setqflist() does not support 'title' in 7.4
-  if len > 1
+  let command = a:prg . ' ' . a:pattern
+  let lines = systemlist(command)
+  call setqflist([], ' ', {'lines': lines, 'efm': '%f:%l:%c:%m,%f:%l:%m,%f', 'title': '(' . len(lines) . ') ' . command})
+  if len(lines) > 1
     copen
   else
     cfirst
@@ -100,7 +86,7 @@ function! funcs#edit_register() abort
 endfunction
 
 function! funcs#quit(buffer_mode, force) abort
-  let buf_len = len(filter(range(1, bufnr('$')), 'buflisted(v:val)'))  " old method for compatibility
+  let buf_len = len(getbufinfo({'buflisted': 1}))
   let has_nvim = has('nvim')
   let win_len = has_nvim ? len(filter(nvim_list_wins(), 'nvim_win_get_config(v:val).relative == ""')) : winnr('$')  " exclude nvim floating windows
   let sidebars = ['help', 'netrw', 'man', 'qf', 'neo-tree', 'gitsigns-blame', 'snacks_layout_box', 'snacks_picker_list', 'snacks_terminal', 'sidekick_terminal', 'kulala_ui.text']
@@ -213,8 +199,8 @@ function! funcs#get_run_command() abort
     let run_command['typescript'] = 'lua require("utils").term_exec([[ npx ts-node --esm "' . file . '"]])'
     let run_command['java'] = 'lua require("utils").term_exec([[ javac "' . file . '" && java -classpath "' . expand('%:p:h') . '" "' . expand('%:t:r') . '"]])'
   else
-    let run_command['python'] = '!clear; python3 %'
-    let run_command['javascript'] = '!clear; node %'
+    let run_command['python'] = 'terminal python3 %'
+    let run_command['javascript'] = 'terminal node %'
   endif
   let run_command['html'] = 'silent !open "$(VIM_FILEPATH)"'
   let run_command['xhtml'] = 'silent !open "$(VIM_FILEPATH)"'
@@ -224,78 +210,27 @@ function! funcs#get_run_command() abort
 endfunction
 
 function! funcs#get_visual_selection()
-  if has('nvim')
-    return join(getregion(getpos("'<"), getpos("'>"), { 'type': visualmode() }), "\n")
-  endif
-  let [line_start, column_start] = getpos("'<")[1:2]
-  let [line_end, column_end] = getpos("'>")[1:2]
-  if column_end > getcharpos("'>")[2]
-    let column_end = min([column_end + 2, v:maxcol])
-  endif
-  let lines = getline(line_start, line_end)
-  if len(lines) == 0
-    return ''
-  endif
-  let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
-  let lines[0] = lines[0][column_start - 1:]
-  return join(lines, "\n")
+  return join(getregion(getpos("'<"), getpos("'>"), { 'type': visualmode() }), "\n")
 endfunction
 
-function! s:DoAction(algorithm, type)  " https://vim.fandom.com/wiki/Act_on_text_objects_with_custom_functions
-  let sel_save = &selection
-  let cb_save = &clipboard
-  set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
-  let reg_save = @x
+function! funcs#send_to_terminal(type) abort
+  let terminal = get(term_list(), 0, 0)  " sends to most recently opened terminal
+  if terminal == 0
+    return
+  endif
   if a:type =~ '^\d\+$'
-    silent execute 'normal! V' . a:type . '$"xy'
+    let [start, end, mode] = [[0, line('.'), 1, 0], [0, min([line('$'), line('.') + a:type - 1]), 1, 0], 'V']
   elseif a:type =~ '^.$'
-    silent execute "normal! `<" . a:type . '`>"xy'
-  elseif a:type == 'line'
-    silent execute "normal! '[V']\"xy"
-  elseif a:type == 'block'
-    silent execute "normal! `[\<C-v>`]\"xy"
+    let [start, end, mode] = [getpos("'<"), getpos("'>"), a:type]
   else
-    silent execute 'normal! `[v`]"xy'
+    let [start, end, mode] = [getpos("'["), getpos("']"), get({'line': 'V', 'block': "\<C-v>"}, a:type, 'v')]
   endif
-  let repl = s:{a:algorithm}(@x)
-  if type(repl) == 1
-    call setreg('x', repl, getregtype('x'))
-    normal! gvp
-  endif
-  let @x = reg_save
-  let &selection = sel_save
-  let &clipboard = cb_save
-endfunction
-function! s:ActionOpfunc(type)
-  return s:DoAction(s:encode_algorithm, a:type)
-endfunction
-function! s:ActionSetup(algorithm)
-  let s:encode_algorithm = a:algorithm
-  let &operatorfunc = matchstr(expand('<sfile>'), '<SNR>\d\+_') . 'ActionOpfunc'
-endfunction
-function! s:MapAction(algorithm, key)
-  execute 'nnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>ActionSetup("' . a:algorithm . '")<CR>g@'
-  execute 'xnoremap <silent> <Plug>actions'    .a:algorithm.' :<C-U>call <SID>DoAction("' . a:algorithm . '", visualmode())<CR>'
-  execute 'nnoremap <silent> <Plug>actionsLine'.a:algorithm.' :<C-U>call <SID>DoAction("' . a:algorithm . '", v:count1)<CR>'
-  execute 'nmap ' . a:key . '  <Plug>actions' . a:algorithm
-  execute 'xmap ' . a:key . '  <Plug>actions' . a:algorithm
-  execute 'nmap ' . a:key.a:key[strlen(a:key)-1] . ' <Plug>actionsLine' . a:algorithm
-endfunction
-
-function! funcs#map_vim_send_terminal()
-  function! s:SendToTerminal(str)
-    let buff_n = term_list()
-    if len(buff_n) > 0
-      let buff_n = buff_n[0]  " sends to most recently opened terminal
-      let lines = getline(getpos("'<")[1], getpos("'>")[1])
-      let indent = match(lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
-      for line in lines
-        call term_sendkeys(buff_n, (match(line, '[^ \t]') ? line[indent:] : line) . "\<CR>")
-        sleep 10m
-      endfor
-    endif
-  endfunction
-  call <SID>MapAction('SendToTerminal', '<leader>te')
+  let lines = getregion(start, end, {'type': mode, 'exclusive': 0})
+  let indent = match(lines[0], '[^ \t]')  " remove unnecessary indentation if first line is indented
+  for line in lines
+    call term_sendkeys(terminal, (match(line, '[^ \t]') ? line[indent:] : line) . "\<CR>")
+    sleep 10m
+  endfor
 endfunction
 
 function! funcs#decompile_java_class() abort
@@ -307,7 +242,7 @@ function! funcs#decompile_java_class() abort
   else
     write! ~/.vim/tmp/cfr-temp.class
     silent %!java -jar ~/.local/lib/cfr.jar ~/.vim/tmp/cfr-temp.class
-    call system('rm -f ~/.vim/tmp/cfr-temp.class')
+    call delete(expand('~/.vim/tmp/cfr-temp.class'))
   endif
   set nomodified readonly filetype=java
 endfunction
@@ -321,23 +256,12 @@ function! funcs#ctags() abort
   endtry
 endfunction
 
+function! funcs#ctags_language(filetype) abort
+  return get({'aspperl': 'asp', 'aspvbs': 'asp', 'cpp': 'c++', 'cs': 'c#', 'delphi': 'pascal', 'expect': 'tcl', 'mf': 'metapost', 'mp': 'metapost', 'rmd': 'rmarkdown', 'csh': 'sh', 'zsh': 'sh', 'tex': 'latex', 'typescriptreact': 'typescript'}, a:filetype, a:filetype)
+endfunction
+
 function! funcs#ctags_create_and_jump() abort
-  let types = {
-        \ 'aspperl':             'asp',
-        \ 'aspvbs':              'asp',
-        \ 'cpp':                 'c++',
-        \ 'cs':                  'c#',
-        \ 'delphi':              'pascal',
-        \ 'expect':              'tcl',
-        \ 'mf':                  'metapost',
-        \ 'mp':                  'metapost',
-        \ 'rmd':                 'rmarkdown',
-        \ 'csh':                 'sh',
-        \ 'zsh':                 'sh',
-        \ 'tex':                 'latex',
-        \ 'typescriptreact':     'typescript',
-        \ }
-  let answer = input('Generate ctags for language ("all" for all supported, empty to cancel): ', get(types, &filetype, &filetype), 'filetype')  " language list: ctags --list-languages
+  let answer = input('Generate ctags for language ("all" for all supported, empty to cancel): ', funcs#ctags_language(&filetype), 'filetype')  " language list: ctags --list-languages
   if answer != ''
     let args = answer == 'all' ? '' : '--languages=' . answer
     execute '!ctags --exclude=.git --exclude=node_modules --exclude=.venv --langmap=TypeScript:.ts.tsx -R ' . args

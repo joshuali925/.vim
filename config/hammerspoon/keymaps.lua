@@ -193,6 +193,8 @@ end
 
 local upActive, upUsed, upDownAt = false, false, 0
 
+-- Karabiner sends these only for Cygnus V/M outside layer 1 without Cmd/Alt/Ctrl.
+local CYGNUS_SHIFT_KEYS = { [hs.keycodes.map.f19] = "v", [hs.keycodes.map.f20] = "m" }
 local tapHold
 
 local function withShift(mods) return hs.fnutils.concat(mods, { "shift" }) end
@@ -200,6 +202,7 @@ local function withShift(mods) return hs.fnutils.concat(mods, { "shift" }) end
 local function holdShift()
     tapHold.held = true
     for _, k in ipairs(tapHold.buffer) do send(k[1], withShift(k[2])) end
+    tapHold.buffer = {}
 end
 
 local function keyHandler(e)
@@ -208,6 +211,19 @@ local function keyHandler(e)
     _cachedBundle = nil
     local type, code, flags = e:getType(), e:getKeyCode(), e:getFlags()
     local name = keycodeToName[code]
+    local cygnusKey = CYGNUS_SHIFT_KEYS[code]
+    if cygnusKey then name = cygnusKey end
+
+    if tapHold and code == tapHold.code then
+        if type == hs.eventtap.event.types.keyUp then
+            if not tapHold.held then
+                send(tapHold.name, tapHold.mods)
+                for _, k in ipairs(tapHold.buffer) do send(k[1], k[2]) end
+            end
+            tapHold = nil
+        end
+        return true
+    end
 
     if code == hs.keycodes.map.f18 then -- super capslock
         if type == hs.eventtap.event.types.keyDown then
@@ -228,30 +244,24 @@ local function keyHandler(e)
     end
 
     if tapHold then
-        if name == tapHold.name then
-            if type == hs.eventtap.event.types.keyUp then
-                if not tapHold.held then
-                    send(name, tapHold.mods)
-                    for _, k in ipairs(tapHold.buffer) do send(k[1], k[2]) end
-                end
-                tapHold = nil
-            end
-            return true
-        end
         if name and type == hs.eventtap.event.types.keyDown then
             if tapHold.held or hs.timer.secondsSinceEpoch() - tapHold.downAt >= 0.15 then
                 if not tapHold.held then holdShift() end
                 return send(name, withShift(flagsToMods(flags)))
             end
-            if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) ~= 1 then table.insert(tapHold.buffer, { name, flagsToMods(flags) }) end
+            if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) ~= 1 then
+                table.insert(tapHold.buffer, { name, flagsToMods(flags) })
+            end
             return true
         end
-        if not tapHold.held and hs.fnutils.some(tapHold.buffer, function(k) return k[1] == name end) then
+        -- A second key released before V/M confirms a chord, even within 150 ms.
+        if type == hs.eventtap.event.types.keyUp and not tapHold.held
+            and hs.fnutils.some(tapHold.buffer, function(k) return k[1] == name end) then
             holdShift()
             return true
         end
-    elseif (name == "v" or name == "m") and type == hs.eventtap.event.types.keyDown and not flags.cmd and not flags.alt and not flags.ctrl then
-        tapHold = { name = name, mods = flagsToMods(flags), downAt = hs.timer.secondsSinceEpoch(), buffer = {} }
+    elseif cygnusKey and type == hs.eventtap.event.types.keyDown and not flags.cmd and not flags.alt and not flags.ctrl then
+        tapHold = { code = code, name = name, mods = flagsToMods(flags), downAt = hs.timer.secondsSinceEpoch(), buffer = {} }
         return true
     end
 
@@ -283,7 +293,7 @@ local function keyHandler(e)
         end
     end
 
-    if type ~= hs.eventtap.event.types.keyDown then return false end
+    if type ~= hs.eventtap.event.types.keyDown then return cygnusKey ~= nil end
 
     -- Application Specific
     if name and ((flags.cmd and not flags.alt) or (flags.alt and not flags.cmd)) and inApps(WS, MOONLIGHT) then -- swap cmd and opt on windows
@@ -300,6 +310,8 @@ local function keyHandler(e)
         if (name == "left" or name == "right") and not inApps(TERM, RDC) then return sendRightOpt(name, flags.shift) end
     end
 
+    -- Handle modifiers pressed after Karabiner has already mapped the key.
+    if cygnusKey then return send(name, flagsToMods(flags)) end
     return false
 end
 

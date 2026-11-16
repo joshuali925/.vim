@@ -14,19 +14,19 @@ Get-Service DiagTrack, SysMain, WSearch, WSAIFabricSvc, whesvc -ErrorAction Sile
 New-Item -ItemType Directory -Path ([System.IO.Path]::GetDirectoryName($Profile)) -Force
 Add-Content -Path $Profile -Value "Set-PSReadLineKeyHandler -Key 'Ctrl+d' -Function DeleteCharOrExit"
 
-winget install --id Unixwin.Niubash --source winget
-$winuxBin = "$env:LOCALAPPDATA\Programs\Niubash\winuxcmd\usr\bin"  # alternative: scoop install uutils-coreutils
-$env:Path = (("$winuxBin;" + $env:Path -split ";" | Select-Object -Unique) -join ";")
-
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
 } else {
     irm get.scoop.sh | iex
 }
+if (Test-Path "Z:\TEMP" -PathType Container) { scoop config cache_path "Z:\TEMP\scoop" }
 scoop bucket add extras  # buckets rely on git, git is provided by niubash
 scoop bucket add nerd-fonts
 scoop install yazi fzf bat extras/lazygit delta mise nerd-fonts/Maple-Mono-NF-CN
+scoop install https://raw.githubusercontent.com/unixwin/niubash/master/installer/scoop/niubash.json  # TODO https://github.com/ScoopInstaller/Extras/pull/19334
+$winuxBin = "$env:USERPROFILE\scoop\apps\niubash\current\winuxcmd\usr\bin"  # alternative: scoop install uutils-coreutils
+$env:Path = (("$winuxBin;" + $env:Path -split ";" | Select-Object -Unique) -join ";")
 Add-Content -Path "$env:USERPROFILE\.npmrc" -Value "prefix=$env:USERPROFILE\.local\lib\node-packages"
 
 # install gow and setup deduped path

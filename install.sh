@@ -175,6 +175,7 @@ install-dotfiles() {
   log "Ensured 'skip_global_compinit=1' in ~/.zshenv"
   append-once 'Include ~/.vim/config/ssh_config' ~/.ssh/config
   append-once 'Include ~/.ssh/ec2hosts' ~/.ssh/config
+  link-file ~/.vim/config/nvim ~/.config/nvim --relative
   link-file ~/.vim/config/.tmux.conf ~/.config/tmux/tmux.conf --relative
   link-file ~/.vim/config/.gitconfig ~/.gitconfig --relative
   link-file ~/.vim/config/.ideavimrc ~/.config/ideavim/ideavimrc --relative
@@ -199,22 +200,60 @@ install-dotfiles() {
 }
 
 install-docker() {
-  log "Installing docker.."
-  if [[ $PLATFORM:$PACKAGE_MANAGER = linux:yum ]]; then
-    sudo yum install -y docker
-  elif [[ $PLATFORM = linux ]]; then
-    curl -fsSL https://get.docker.com/ | sh
-  else
+  if [[ $PLATFORM != linux ]]; then
     log 'Unsupported platform..'
     return 1
   fi
-  log 'Adding user to docker group..'
-  sudo groupadd docker || true
-  sudo usermod -aG docker "$USER"
-  sudo systemctl restart docker
-  sudo chmod 666 /var/run/docker.sock  # groupadd will take effect after shell re-login and newgrp only changes group for the current shell session. enable read write access for other groups now to work immediately
+  local runtime="${1:-docker}"
+  log "Installing $runtime.."
+  if [[ $runtime = kiri ]]; then
+    curl -fsSL https://runkiri.com/install.sh | bash
+  elif [[ $PACKAGE_MANAGER = yum ]]; then
+    sudo yum install -y docker
+  else
+    curl -fsSL https://get.docker.com/ | sh
+  fi
+  log "Adding user to $runtime group.."
+  sudo groupadd "$runtime" || true
+  sudo usermod -aG "$runtime" "$USER"
+  if [[ $runtime = docker ]]; then sudo systemctl restart docker; fi
+  sudo chmod 666 "${2:-/var/run/docker.sock}"  # groupadd will take effect after shell re-login and newgrp only changes group for the current shell session. enable read write access for other groups now to work immediately
   docker completion zsh > ~/.vim/config/zsh/completions/_docker
-  log 'Installed docker'
+  log "Installed $runtime"
+}
+
+install-kiri() {
+  install-docker kiri /run/kiri/docker.sock
+}
+
+install-user() {
+  local name="${1:-}" path entry
+  local -a links=("$HOME"/.local/bin/* "$HOME"/{.local/lib/nvim,.local/share/nvim/site,.local/share/nvim/mason,.config/tmux/plugins,.terminfo}) copies=(.local/zim .cache/p10k-term/gitstatus) readable
+  log "Creating user $name.."
+  sudo useradd -m -d "${HOME%/*}/$name" -s "$(command -v zsh)" "$name"
+  for entry in "$(id -gn)" docker kiri; do if getent group "$entry" > /dev/null; then sudo usermod -aG "$entry" "$name"; fi; done
+  log "Setting up environment.."
+  for path in "${links[@]}"; do if [[ -e $path && ! -L $path ]]; then readable+=("$path"); fi; done
+  for entry in "${links[@]}"; do
+    if [[ ! -L $entry ]] || ! entry=$(readlink -e "$entry"); then continue; fi
+    for path in "${readable[@]}"; do if [[ $entry/ = "$path"/* ]]; then continue 2; fi; done
+    if [[ $entry =~ ^"$HOME"(/[^/]+){1,3} ]]; then readable+=("${BASH_REMATCH[0]}"); fi
+  done
+  for path in "${readable[@]}"; do while [[ $path != "$HOME" ]]; do path=${path%/*}; chmod g+x "$path"; done; done
+  chmod -R g+rX "${readable[@]}"
+  sudo mkdir -m 700 "${HOME%/*}/$name/.vim" "${HOME%/*}/$name/.ssh"
+  if [[ -f ~/.ssh/authorized_keys ]]; then sudo cp ~/.ssh/authorized_keys "${HOME%/*}/$name/.ssh/"; fi
+  (cd ~/.vim && { printf '.git\0'; git ls-files -z | while IFS= read -r -d '' path; do if [[ -e $path || -L $path ]]; then printf '%s\0' "$path"; fi; done; } | sudo xargs -0 cp -a --reflink=auto --parents -t "${HOME%/*}/$name/.vim")
+  (cd ~ && for path in "${copies[@]}"; do if [[ -e $path ]]; then sudo cp -a --reflink=auto --parents "$path" "${HOME%/*}/$name"; fi; done)
+  sudo chown -R "$name:$(id -gn "$name")" "${HOME%/*}/$name"
+  sudo -u "$name" -H bash "${HOME%/*}/$name/.vim/install.sh" install dotfiles
+  for path in "${links[@]}"; do
+    if [[ ! -e $path ]]; then continue; fi
+    sudo -u "$name" mkdir -p "$(dirname "${path/#"$HOME"/${HOME%/*}/$name}")"
+    sudo -u "$name" ln -sT "$path" "${path/#"$HOME"/${HOME%/*}/$name}"
+  done
+  log "Created user $name, log in with ${YELLOW}ssh $name@localhost${CYAN} or ${YELLOW}sudo su - $name"
+  log "Grant sudo with ${YELLOW}sudo usermod -aG $(if getent group sudo > /dev/null; then echo sudo; else echo wheel; fi) $name${CYAN}, delete with ${YELLOW}sudo pkill -u $name; pidwait -u $name; sudo userdel -r $name"
 }
 
 install-java() {  # JDK list: https://raw.githubusercontent.com/shyiko/jabba/HEAD/index.json
@@ -273,7 +312,6 @@ install-tmux() {
 
 install-neovim() {
   log "Installing neovim.."
-  link-file ~/.vim/config/nvim ~/.config/nvim --relative
   backup ~/.local/lib/nvim ~/.local/bin/nvim
   ~/.vim/bin/nvim --version
   timeout 120 ~/.local/bin/nvim --headless +quitall || true
@@ -448,7 +486,7 @@ default-install() {
 
   { # zsh -ic 'exit' &; conflicts when ~/.vim/bin/$tool calls exec
     if [[ ! -e ~/.local/zim/zimfw.zsh ]]; then curl -fsSL --create-dirs -o ~/.local/zim/zimfw.zsh https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh; fi
-    ZDOTDIR=~/.vim/config/zsh ZIM_HOME=~/.local/zim zsh -c 'source ~/.local/zim/zimfw.zsh init'
+    GITSTATUS_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/p10k-term/gitstatus" ZDOTDIR=~/.vim/config/zsh ZIM_HOME=~/.local/zim zsh -c 'source ~/.local/zim/zimfw.zsh init'
   } &
 
   if [[ $OSTYPE = linux-android ]]; then

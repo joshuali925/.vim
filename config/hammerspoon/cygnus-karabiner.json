@@ -2,8 +2,68 @@
   "title": "Cygnus split layer 1",
   "rules": [
     {
-      "description": "Cygnus keys: F13 Backspace/LGui (tap-hold repeats Backspace), F14 Space/LAlt, F15 Space/RCtrl, F16 Tab/layer 1",
+      "description": "Cygnus keys: F13 Backspace/LGui (tap-hold repeats Backspace), F14 Space/LAlt, F15 Space/RCtrl, F16 Tab/layer 1, V/M Shift via Hammerspoon",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "v",
+            "modifiers": {
+              "optional": ["shift", "caps_lock", "fn"]
+            }
+          },
+          "to": [
+            {
+              "key_code": "f19"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "variable_unless",
+              "name": "cygnus_layer1",
+              "value": 1
+            },
+            {
+              "type": "device_if",
+              "identifiers": [
+                {
+                  "vendor_id": 39572,
+                  "product_id": 257
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "m",
+            "modifiers": {
+              "optional": ["shift", "caps_lock", "fn"]
+            }
+          },
+          "to": [
+            {
+              "key_code": "f20"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "variable_unless",
+              "name": "cygnus_layer1",
+              "value": 1
+            },
+            {
+              "type": "device_if",
+              "identifiers": [
+                {
+                  "vendor_id": 39572,
+                  "product_id": 257
+                }
+              ]
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {

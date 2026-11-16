@@ -67,11 +67,11 @@
                 "name": "Command Prompt"
             },
             {
-                "commandline": "%LOCALAPPDATA%\\Programs\\Niubash\\niu.exe",
+                "commandline": "%USERPROFILE%/scoop/apps/niubash/current/niu.exe",
                 "cursorShape": "filledBox",
                 "guid": "{3a949d14-75d8-4637-86cf-ad5c78cd2cb3}",
                 "hidden": false,
-                "icon": "%LOCALAPPDATA%\\Programs\\Niubash\\assets\\niubash-icon-256.png",
+                "icon": "%USERPROFILE%/scoop/apps/niubash/current/assets/niubash-icon-256.png",
                 "name": "Niubash",
                 "startingDirectory": "%USERPROFILE%"
             },

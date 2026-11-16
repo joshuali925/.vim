@@ -44,7 +44,10 @@ close_pane = "prefix+k"
 
 [[keys.command]]
 key = "prefix+y"
-command = 'curl -s "https://checkip.amazonaws.com" | "$HOME/.vim/bin/y"'
+command = '''
+shell_pid=$("$HERDR_BIN_PATH" pane process-info --pane "$HERDR_ACTIVE_PANE_ID" | jq -er '.result.process_info.shell_pid') || exit
+curl -s "https://checkip.amazonaws.com" | otty="/dev/$(ps -o tty= -p "$shell_pid" | tr -d ' ')" "$HOME/.vim/bin/y"
+'''
 description = "copy public IP"
 
 # for codex answer agent shortcut. needs same toml on server then: herdr server reload-config

@@ -165,6 +165,7 @@ local COMMANDS = {
             return shell([[echo "put '$h'" | sftp -r ]] .. args, true)
         end,
     },
+    croc = { run = function() return shell([[code="$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | head -c 16)"; printf " CROC_SECRET='%s' croc --yes" "$code" | y; CROC_SECRET="$code" croc --disable-clipboard send "$@"]], true) end },
     tarcopy = { run = function() return shell(RELATIVE_SELECTED_ARGS .. [[printf " printf $(XZ_OPT=-9e tar cJf - -- "$@" | base64 | tr -d '\r\n') | base64 -d | tar xvJ" | y]]) end },
     zip = { run = function() return shell(compress_cmd("zip -r", "zip")) end },
     ["7z"] = { run = function() return shell(compress_cmd("7z a", "7z")) end },

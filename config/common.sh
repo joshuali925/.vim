@@ -162,7 +162,7 @@ tre() {
 }
 
 function = () {
-  python -c "from math import *; __import__('pprint').pprint($*)"
+  python3 -c "from math import *; __import__('pprint').pprint($*)"
 }
 
 st() {
@@ -422,6 +422,7 @@ z() {
       --bind="ctrl-a:change-prompt($rcwd/> )+reload(fd --strip-cwd-prefix --color=always --hidden --exclude=.git)") && z "$fzftemp"
   elif [[ -d $1 ]]; then cd -- "$1"
   elif [[ -f $1 ]]; then cd -- "$(dirname "$1")"
+  elif [[ -n $ZSH_VERSION ]]; then zshz "$@" 2>&1  # _z alias is unavailable when common.sh is zcompiled
   else _z "$@"; fi
 }
 
